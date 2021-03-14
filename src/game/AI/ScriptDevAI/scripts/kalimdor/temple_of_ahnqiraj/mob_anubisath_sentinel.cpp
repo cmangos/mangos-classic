@@ -23,6 +23,7 @@ EndScriptData
 
 */
 
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 
 enum
@@ -46,24 +47,31 @@ enum
     MAX_BUDDY                       = 4
 };
 
-struct npc_anubisath_sentinelAI : public ScriptedAI
+enum AnubSentinelActions
 {
-    npc_anubisath_sentinelAI(Creature* creature) : ScriptedAI(creature)
+    ANUBSENTINEL_BERSERK_HP_CHECK,
+    ANUBSENTINEL_ACTION_MAX,
+};
+
+struct npc_anubisath_sentinelAI : public CombatAI
+{
+    npc_anubisath_sentinelAI(Creature* creature) : CombatAI(creature, ANUBSENTINEL_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
+        AddTimerlessCombatAction(ANUBSENTINEL_BERSERK_HP_CHECK, true);         // Soft enrage à 30% HP
         m_assistList.clear();
-        Reset();
     }
 
+    ScriptedInstance* m_instance;
+
     uint32 m_myAbility;
-    bool m_isEnraged;
     std::vector<uint32> m_abilities;
 
     GuidList m_assistList;
 
     void Reset() override
     {
+        CombatAI::Reset();
         m_myAbility = 0;
-        m_isEnraged = false;
         m_abilities = { SPELL_PERIODIC_MANA_BURN, SPELL_MENDING, SPELL_PERIODIC_SHADOW_STORM, SPELL_PERIODIC_THUNDERCLAP, SPELL_MORTAL_STRIKE, SPELL_FIRE_ARCANE_REFLECT, SPELL_SHADOW_FROST_REFLECT, SPELL_PERIODIC_KNOCK_AWAY, SPELL_THORNS };
     }
 
@@ -77,14 +85,18 @@ struct npc_anubisath_sentinelAI : public ScriptedAI
             reader.PSendSysMessage("Anubisath Sentinel - not correct number of mobs for group found. Number found %u, should be %u", uint32(m_assistList.size()), MAX_BUDDY);
     }
 
-    void JustReachedHome() override
+    void EnterEvadeMode() override
     {
-        for (GuidList::const_iterator itr = m_assistList.begin(); itr != m_assistList.end(); ++itr)
+        CombatAI::EnterEvadeMode();
+
+        for (auto guid : m_assistList)
         {
-            if (*itr == m_creature->GetObjectGuid())
+            // Skip self as we are obviously alive and in world
+            if (guid == m_creature->GetObjectGuid())
                 continue;
 
-            if (Creature* buddy = m_creature->GetMap()->GetCreature(*itr))
+            // Respawn fallen Anubisath Sentinel
+            if (Creature* buddy = m_creature->GetMap()->GetCreature(guid))
             {
                 if (buddy->IsDead())
                     buddy->Respawn();
@@ -94,13 +106,6 @@ struct npc_anubisath_sentinelAI : public ScriptedAI
 
     void Aggro(Unit* who) override
     {
-        if (!m_myAbility)
-        {
-            std::shuffle(m_abilities.begin(), m_abilities.end(), *GetRandomGenerator()); // shuffle the abilities, they will be set to the current creature and its siblings
-            SetAbility();
-            InitSentinelsNear(who);
-        }
-        
         // Find all buddies
         if (m_assistList.empty())
         {
@@ -112,6 +117,13 @@ struct npc_anubisath_sentinelAI : public ScriptedAI
 
             if (m_assistList.size() != MAX_BUDDY)
                 script_error_log("npc_anubisath_sentinel for %s found too few/too many buddies, expected %u.", m_creature->GetGuidStr().c_str(), MAX_BUDDY);
+        }
+
+        if (!m_myAbility)
+        {
+            std::shuffle(m_abilities.begin(), m_abilities.end(), *GetRandomGenerator()); // shuffle the abilities, they will be set to the current creature and its siblings
+            SetAbility();
+            InitSentinelsNear(who);
         }
     }
 
@@ -145,13 +157,15 @@ struct npc_anubisath_sentinelAI : public ScriptedAI
     void DoTransferAbility()
     {
         bool hasDoneEmote = false;
-        for (GuidList::const_iterator itr = m_assistList.begin(); itr != m_assistList.end(); ++itr)
+        for (auto guid : m_assistList)
         {
-            if (Creature* buddy = m_creature->GetMap()->GetCreature(*itr))
+            if (Creature* buddy = m_creature->GetMap()->GetCreature(guid))
             {
-                if (*itr == m_creature->GetObjectGuid() || !buddy->IsAlive())
+                // Don't transfer ability to dead buddies
+                if (guid == m_creature->GetObjectGuid() || !buddy->IsAlive())
                     continue;
 
+                // Only emote on the first ability transfert
                 if (!hasDoneEmote)
                 {
                     DoScriptText(EMOTE_SHARE_POWERS, m_creature);
@@ -168,12 +182,13 @@ struct npc_anubisath_sentinelAI : public ScriptedAI
         if (!m_assistList.empty())
         {
             int8 buddyCount = 1;
-            for (GuidList::const_iterator itr = m_assistList.begin(); itr != m_assistList.end(); ++itr)
+            for (auto guid : m_assistList)
             {
-                if (*itr == m_creature->GetObjectGuid())
+                // Don't init ourselves
+                if (guid == m_creature->GetObjectGuid())
                     continue;
 
-                if (Creature* buddy = m_creature->GetMap()->GetCreature(*itr))
+                if (Creature* buddy = m_creature->GetMap()->GetCreature(guid))
                 {
                     if (buddy->IsAlive())
                     {
@@ -181,40 +196,32 @@ struct npc_anubisath_sentinelAI : public ScriptedAI
                         buddyAI->SetAbility(true, m_abilities[buddyCount]);
                         ++buddyCount;
                         buddy->AI()->AttackStart(target);
-                        
                     }
                 }
             }
         }
     }
 
-    void UpdateAI(const uint32 /*uiDiff*/) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (!m_isEnraged && m_creature->GetHealthPercent() < 30.0f)
+        if (action == ANUBSENTINEL_BERSERK_HP_CHECK)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+            if (m_creature->GetHealthPercent() < 30.0f)
             {
-                DoScriptText(EMOTE_GENERIC_FRENZY, m_creature);
-                m_isEnraged = true;
+                if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_GENERIC_FRENZY, m_creature);
+                    DisableCombatAction(action);
+                }
             }
         }
-
-        DoMeleeAttackIfReady();
     }
 };
-
-UnitAI* GetAI_npc_anubisath_sentinel(Creature* creature)
-{
-    return new npc_anubisath_sentinelAI(creature);
-}
 
 void AddSC_mob_anubisath_sentinel()
 {
     Script* newScript = new Script;
     newScript->Name = "mob_anubisath_sentinel";
-    newScript->GetAI = &GetAI_npc_anubisath_sentinel;
+    newScript->GetAI = &GetNewAIInstance<npc_anubisath_sentinelAI>;
     newScript->RegisterSelf();
 }
