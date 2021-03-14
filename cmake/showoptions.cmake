@@ -55,6 +55,12 @@ else()
   message(STATUS "Build AHBot           : No  (default)")
 endif()
 
+if(BUILD_METRICS)
+  message(STATUS "Build METRICS         : Yes")
+else()
+  message(STATUS "Build METRICs         : No  (default)")
+endif()
+
 if(BUILD_PLAYERBOT)
   message(STATUS "Build Playerbot       : Yes")
 else()

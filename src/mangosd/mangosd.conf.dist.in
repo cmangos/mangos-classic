@@ -1670,11 +1670,11 @@ CharDelete.MinLevel = 0
 CharDelete.KeepDays = 30
 
 ###################################################################################################################
-# METRICS CONFIGURATION
+# METRICS CONFIGURATION -> Require core builded with BUILD_METRICS option
 #
 #    Metric.Enable
 #        Enable or disable metric logging
-#        Default: 0  - Disabled
+#        Default: 0  - Disabled(default)
 #                 1  - Enable
 #
 #    Metric.Address

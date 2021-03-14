@@ -22,13 +22,15 @@
 #include "PathFinder.h"
 #include "Log.h"
 #include "World/World.h"
-#include "Metric/Metric.h"
 #include "Entities/Transports.h"
-
 #include <Detour/Include/DetourCommon.h>
 #include <Detour/Include/DetourMath.h>
-#include <limits>
 
+#ifdef BUILD_METRICS
+ #include "Metric/Metric.h"
+#endif
+
+#include <limits>
 ////////////////// PathFinder //////////////////
 PathFinder::PathFinder(const Unit* owner) :
     m_polyLength(0), m_type(PATHFIND_BLANK),
@@ -89,6 +91,7 @@ bool PathFinder::calculate(Vector3 const& start, Vector3 const& dest, bool force
     if (!MaNGOS::IsValidMapCoord(start.x, start.y, start.z))
         return false;
 
+#ifdef BUILD_METRICS
     metric::duration<std::chrono::microseconds> meas("pathfinder.calculate", {
         { "entry", std::to_string(m_sourceUnit->GetEntry()) },
         { "guid", std::to_string(m_sourceUnit->GetGUIDLow()) },
@@ -96,6 +99,7 @@ bool PathFinder::calculate(Vector3 const& start, Vector3 const& dest, bool force
         { "map_id", std::to_string(m_sourceUnit->GetMapId()) },
         { "instance_id", std::to_string(m_sourceUnit->GetInstanceId()) }
     }, 1000);
+#endif
 
     //if (GenericTransport* transport = m_sourceUnit->GetTransport())
     //    transport->CalculatePassengerOffset(dest.x, dest.y, dest.z, nullptr);

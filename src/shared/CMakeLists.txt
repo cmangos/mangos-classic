@@ -81,12 +81,14 @@ set(SRC_GRP_MT
     Multithreading/Messager.cpp
 )
 
-set(SRC_GRP_METRIC
-    Metric/Measurement.cpp
-    Metric/Measurement.h
-    Metric/Metric.cpp
-    Metric/Metric.h
-)
+if(BUILD_METRICS)
+    set(SRC_GRP_METRIC
+        Metric/Measurement.cpp
+        Metric/Measurement.h
+        Metric/Metric.cpp
+        Metric/Metric.h
+    )
+endif()
 
 set(SRC_GRP_NETWORK
     Network/PacketBuffer.cpp
@@ -164,10 +166,12 @@ source_group("Log"
     ${SRC_GRP_LOG}
 )
 
-source_group("Metric"
-  FILES
-    ${SRC_GRP_METRIC}
-)
+if(BUILD_METRICS)
+    source_group("Metric"
+    FILES
+        ${SRC_GRP_METRIC}
+    )
+endif()
 
 source_group("Util"
   FILES
