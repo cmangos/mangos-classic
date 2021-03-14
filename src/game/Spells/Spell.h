@@ -977,25 +977,33 @@ namespace MaNGOS
                 switch (i_push_type)
                 {
                     case PUSH_CONE:
+                    {
+                        float heightDifference = std::abs(itr->getSource()->GetPositionZ() - i_centerZ);
+                        float maxHeight = i_radius / 2;
+                        float distance = std::min(sqrt(itr->getSource()->GetDistance2d(i_centerX, i_centerY, DIST_CALC_NONE)), i_radius);
+                        float ratio = distance / i_radius;
+                        float conalMaxHeight = maxHeight * ratio;
                         if (i_cone >= 0.f)
                         {
-                            if (i_castingObject->isInFront((Unit*)(itr->getSource()), i_radius, i_cone))
+                            if (i_castingObject->isInFront(itr->getSource(), i_radius, i_cone) &&
+                                std::abs(itr->getSource()->GetPositionZ() - i_centerZ) - itr->getSource()->GetCombatReach() <= conalMaxHeight)
                                 i_data.push_back(itr->getSource());
                         }
                         else
                         {
-                            if (i_castingObject->isInBack((Unit*)(itr->getSource()), i_radius, -i_cone))
+                            if (i_castingObject->isInBack(itr->getSource(), i_radius, -i_cone) &&
+                                std::abs(itr->getSource()->GetPositionZ() - i_centerZ) - itr->getSource()->GetCombatReach() <= conalMaxHeight)
                                 i_data.push_back(itr->getSource());
                         }
                         break;
+                    }
                     case PUSH_SELF_CENTER:
-                        if (itr->getSource()->GetDistance2d(i_centerX, i_centerY, DIST_CALC_COMBAT_REACH) <= i_radius)
-                            i_data.push_back(itr->getSource());
-                        break;
                     case PUSH_SRC_CENTER:
                     case PUSH_DEST_CENTER:
                     case PUSH_TARGET_CENTER:
-                        if (itr->getSource()->GetDistance(i_centerX, i_centerY, i_centerZ, DIST_CALC_COMBAT_REACH) <= i_radius)
+                        // AOE is a cylinder with radius height up and below
+                        if (itr->getSource()->GetDistance2d(i_centerX, i_centerY, DIST_CALC_COMBAT_REACH) <= i_radius &&
+                            std::abs(itr->getSource()->GetPositionZ() - i_centerZ) - itr->getSource()->GetCombatReach() <= i_radius)
                             i_data.push_back(itr->getSource());
                         break;
                 }
