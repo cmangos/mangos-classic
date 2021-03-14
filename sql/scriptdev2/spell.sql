@@ -13,6 +13,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (794,'spell_initialize_images'),
 (802,'spell_mutate_bug'),
 (1121,'spell_entangle_fankriss'),
+(2400,'spell_anubisath_share_powers'),
 (3730,'spell_initialize_image'),
 (7054,'spell_forsaken_skill'),
 (12639,'spell_summon_hakkar'),

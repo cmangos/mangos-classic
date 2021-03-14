@@ -41,6 +41,7 @@ enum
     SPELL_PERIODIC_KNOCK_AWAY       = 21737,
     SPELL_THORNS                    = 25777,
     SPELL_TRANSFER_POWER            = 2400,
+    SPELL_HEAL_BRETHEN              = 26565,
 
     SPELL_ENRAGE                    = 8599,
 
@@ -63,7 +64,7 @@ struct npc_anubisath_sentinelAI : public CombatAI
 
     ScriptedInstance* m_instance;
 
-    uint32 m_myAbility;
+    int32 m_myAbility;
     std::vector<uint32> m_abilities;
 
     GuidList m_assistList;
@@ -171,8 +172,7 @@ struct npc_anubisath_sentinelAI : public CombatAI
                     DoScriptText(EMOTE_SHARE_POWERS, m_creature);
                     hasDoneEmote = true;
                 }
-                m_creature->CastSpell(buddy, SPELL_TRANSFER_POWER, TRIGGERED_OLD_TRIGGERED);
-                DoCastSpellIfCan(buddy, m_myAbility, CAST_TRIGGERED);
+                m_creature->CastCustomSpell(buddy, SPELL_TRANSFER_POWER, &m_myAbility, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr);
             }
         }
     }
@@ -218,10 +218,31 @@ struct npc_anubisath_sentinelAI : public CombatAI
     }
 };
 
+struct SharePowers : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (Unit* caster = spell->GetCaster())
+            {
+                uint32 spellId = spell->m_currentBasePoints[EFFECT_INDEX_0];
+                if (Unit* unitTarget = spell->GetUnitTarget())
+                {
+                    caster->CastSpell(unitTarget, spellId, TRIGGERED_OLD_TRIGGERED);              // Cast own ability on target
+                    caster->CastSpell(unitTarget, SPELL_HEAL_BRETHEN, TRIGGERED_OLD_TRIGGERED);   // Heal Brethren
+                }
+            }
+        }
+    }
+};
+
 void AddSC_mob_anubisath_sentinel()
 {
     Script* newScript = new Script;
     newScript->Name = "mob_anubisath_sentinel";
     newScript->GetAI = &GetNewAIInstance<npc_anubisath_sentinelAI>;
     newScript->RegisterSelf();
+
+    RegisterSpellScript<SharePowers>("spell_anubisath_share_powers");
 }
