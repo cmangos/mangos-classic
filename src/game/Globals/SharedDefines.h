@@ -136,7 +136,7 @@ enum Stats
 
 #define MAX_STATS                        5
 
-enum Powers
+enum Powers : uint32
 {
     POWER_MANA                          = 0,            // UNIT_FIELD_POWER1
     POWER_RAGE                          = 1,            // UNIT_FIELD_POWER2
