@@ -473,7 +473,7 @@ class ObjectMgr
 
         typedef std::unordered_map<uint32, PetCreateSpellEntry> PetCreateSpellMap;
 
-        std::unordered_map<uint32, std::vector<uint32>> const& GetCreatureSpawnEntry() const { return mCreatureSpawnEntryMap; }
+        std::unordered_map<uint32, std::vector<uint32>> const& GetCreatureSpawnEntry() const { return m_creatureSpawnEntryMap; }
 
         std::vector<uint32> LoadGameobjectInfo();
 
@@ -557,24 +557,26 @@ class ObjectMgr
             return nullptr;
         }
 
-        uint32 GetRandomEntry(uint32 guidLow) const
+        std::vector<uint32> const* GetAllRandomEntries(std::unordered_map<uint32, std::vector<uint32>> const& map, uint32 dbguid) const
         {
-            auto itr = mCreatureSpawnEntryMap.find(guidLow);
-            if (itr != mCreatureSpawnEntryMap.end())
-            {
-                auto& spawnList = (*itr).second;
-                return spawnList[irand(0, spawnList.size() - 1)];
-            }
-            return 0;
-        }
-
-        std::vector<uint32> const* GetAllRandomEntries(uint32 guidLow) const
-        {
-            auto itr = mCreatureSpawnEntryMap.find(guidLow);
-            if (itr != mCreatureSpawnEntryMap.end())
+            auto itr = map.find(dbguid);
+            if (itr != map.end())
                 return &(*itr).second;
             return nullptr;
         }
+
+        uint32 GetRandomEntry(std::unordered_map<uint32, std::vector<uint32>> const& map, uint32 dbguid) const
+        {
+            if (auto spawnList = GetAllRandomEntries(map, dbguid))
+                return (*spawnList)[irand(0, spawnList->size() - 1)];
+            return 0;
+        }
+
+        uint32 GetRandomGameObjectEntry(uint32 dbguid) const { return GetRandomEntry(m_gameobjectSpawnEntryMap, dbguid); }
+        std::vector<uint32> const* GetAllRandomGameObjectEntries(uint32 dbguid) const { return GetAllRandomEntries(m_gameobjectSpawnEntryMap, dbguid); }
+
+        uint32 GetRandomCreatureEntry(uint32 dbguid) const { return GetRandomEntry(m_creatureSpawnEntryMap, dbguid); }
+        std::vector<uint32> const* GetAllRandomCreatureEntries(uint32 dbguid) const { return GetAllRandomEntries(m_creatureSpawnEntryMap, dbguid); }
 
         AreaTrigger const* GetGoBackTrigger(uint32 map_id) const;
         AreaTrigger const* GetMapEntranceTrigger(uint32 Map) const;
@@ -666,6 +668,7 @@ class ObjectMgr
         void LoadEquipmentTemplates();
         void LoadGameObjectLocales();
         void LoadGameObjects();
+        void LoadGameObjectSpawnEntry();
         void LoadItemPrototypes();
         void LoadItemRequiredTarget();
         void LoadItemLocales();
@@ -1191,7 +1194,8 @@ class ObjectMgr
         GossipMenusMap      m_mGossipMenusMap;
         GossipMenuItemsMap  m_mGossipMenuItemsMap;
 
-        std::unordered_map<uint32, std::vector<uint32>> mCreatureSpawnEntryMap;
+        std::unordered_map<uint32, std::vector<uint32>> m_creatureSpawnEntryMap;
+        std::unordered_map<uint32, std::vector<uint32>> m_gameobjectSpawnEntryMap;
 		
         PointOfInterestMap  mPointsOfInterest;
 

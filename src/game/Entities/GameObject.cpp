@@ -829,6 +829,9 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid)
 
     m_dbGuid = dbGuid;
 
+    if (uint32 randomEntry = sObjectMgr.GetRandomGameObjectEntry(GetDbGuid()))
+        entry = randomEntry;
+
     if (!Create(newGuid, entry, map, x, y, z, ang, rotation0, rotation1, rotation2, rotation3, animprogress, go_state))
         return false;
 

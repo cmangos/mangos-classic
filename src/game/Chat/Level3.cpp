@@ -3291,7 +3291,7 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     PSendSysMessage("Combat Script: %s", target->AI()->GetCombatScriptStatus() ? "true" : "false");
     PSendSysMessage("Movementflags: %u", target->m_movementInfo.moveFlags);
 
-    if (auto vector = sObjectMgr.GetAllRandomEntries(target->GetGUIDLow()))
+    if (auto vector = sObjectMgr.GetAllRandomCreatureEntries(target->GetGUIDLow()))
     {
         std::string output;
         for (uint32 entry : *vector)

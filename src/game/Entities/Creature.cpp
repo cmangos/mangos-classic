@@ -554,7 +554,7 @@ void Creature::ResetEntry(bool respawn)
 
     if (respawn)
     {
-        uint32 newEntry = isPet ? 0 : sObjectMgr.GetRandomEntry(m_dbGuid);
+        uint32 newEntry = isPet ? 0 : sObjectMgr.GetRandomCreatureEntry(m_dbGuid);
         if (newEntry)
         {
             UpdateEntry(newEntry, data, eventData, false);
@@ -1463,7 +1463,7 @@ bool Creature::CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, const 
 
     Object::_Create(guidlow, newEntry, cinfo->GetHighGuid());
 
-    if (uint32 entry = sObjectMgr.GetRandomEntry(m_dbGuid))
+    if (uint32 entry = sObjectMgr.GetRandomCreatureEntry(m_dbGuid))
         newEntry = entry;
 
     return UpdateEntry(newEntry, data, eventData, false);
