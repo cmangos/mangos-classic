@@ -38,6 +38,7 @@ enum
     EMOTE_GENERIC_ENRAGED       = -1000003,
 
     SPELL_HATEFULSTRIKE_PRIMER  = 28307,
+    SPELL_HATEFULSTRIKE         = 28308,
     SPELL_ENRAGE                = 28131,
     SPELL_BERSERK               = 26662,
     SPELL_SLIMEBOLT             = 32309
@@ -140,10 +141,28 @@ struct boss_patchwerkAI : public CombatAI
     }
 };
 
+struct HatefulStrikePrimer : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (Unit* caster = spell->GetCaster())
+            {
+                // Target is filtered in Spell::FilterTargetMap
+                if (Unit* unitTarget = spell->GetUnitTarget())
+                    caster->CastSpell(unitTarget, SPELL_HATEFULSTRIKE, TRIGGERED_NONE);
+            }
+        }
+    }
+};
+
 void AddSC_boss_patchwerk()
 {
     Script* newScript = new Script;
     newScript->Name = "boss_patchwerk";
     newScript->GetAI = &GetNewAIInstance<boss_patchwerkAI>;
     newScript->RegisterSelf();
+
+    RegisterSpellScript<HatefulStrikePrimer>("spell_patchwerk_hatefulstrike");
 }
