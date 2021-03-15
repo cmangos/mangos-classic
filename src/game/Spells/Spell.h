@@ -980,7 +980,7 @@ namespace MaNGOS
                     {
                         float heightDifference = std::abs(itr->getSource()->GetPositionZ() - i_centerZ);
                         float maxHeight = i_radius / 2;
-                        float distance = std::min(sqrt(itr->getSource()->GetDistance2d(i_centerX, i_centerY, DIST_CALC_NONE)), i_radius);
+                        float distance = std::min(sqrtf(itr->getSource()->GetDistance2d(i_centerX, i_centerY, DIST_CALC_NONE)), i_radius);
                         float ratio = distance / i_radius;
                         float conalMaxHeight = maxHeight * ratio;
                         if (i_cone >= 0.f)
