@@ -52,6 +52,8 @@ class SpawnManager
         void RespawnCreature(uint32 dbguid);
         void RespawnGameObject(uint32 dbguid);
 
+        void RespawnAll();
+
         void Update();
 
         std::string GetRespawnList();

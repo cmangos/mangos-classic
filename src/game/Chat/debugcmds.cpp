@@ -1619,7 +1619,8 @@ bool ChatHandler::HandleDebugRespawnDynguid(char* args)
     Creature* target = getSelectedCreature();
     if (!target)
     {
-        SendSysMessage(LANG_SELECT_CREATURE);
+        Player* player = GetSession()->GetPlayer();
+        player->GetMap()->GetSpawnManager().RespawnAll();
         return true;
     }
 

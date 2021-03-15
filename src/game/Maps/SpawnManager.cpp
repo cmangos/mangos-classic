@@ -82,6 +82,22 @@ void SpawnManager::RespawnGameObject(uint32 dbguid)
     }
 }
 
+void SpawnManager::RespawnAll()
+{
+    for (auto itr = m_spawns.begin(); itr != m_spawns.end();)
+    {
+        auto& spawnInfo = *itr;
+        if (spawnInfo.GetHighGuid() == HIGHGUID_GAMEOBJECT)
+            m_map.GetPersistentState()->SaveGORespawnTime(spawnInfo.GetDbGuid(), 0);
+        if (spawnInfo.GetHighGuid() == HIGHGUID_UNIT)
+            m_map.GetPersistentState()->SaveCreatureRespawnTime(spawnInfo.GetDbGuid(), 0);
+        if (spawnInfo.ConstructForMap(m_map))
+            itr = m_spawns.erase(itr);
+        else
+            break;
+    }
+}
+
 void SpawnManager::Update()
 {
     auto now = m_map.GetCurrentClockTime();
