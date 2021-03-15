@@ -7079,7 +7079,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, boo
     }
 
     // AOE leeway - 2f when caster is moving
-    if (m_caster->IsMoving() && !m_caster->IsWalking())
+    if (radius != 50000.f && m_caster->IsMoving() && !m_caster->IsWalking())
         radius += AOE_LEEWAY;
 
     // custom radius cases
