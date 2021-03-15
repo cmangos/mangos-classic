@@ -513,7 +513,7 @@ void MotionMaster::MoveCharge(Unit& target, float speed, uint32 id/* = EVENT_CHA
     Mutate(new EffectMovementGenerator(init, id, false));
 }
 
-void MotionMaster::MoveFall()
+bool MotionMaster::MoveFall()
 {
     const float x = m_owner->GetPositionX(), y = m_owner->GetPositionY(), z = m_owner->GetPositionZ();
 
@@ -523,17 +523,18 @@ void MotionMaster::MoveFall()
     if (tz <= INVALID_HEIGHT)
     {
         DEBUG_LOG("MotionMaster::MoveFall: unable retrive a proper height at map %u (x: %f, y: %f, z: %f).", m_owner->GetMap()->GetId(), x, y, z);
-        return;
+        return false;
     }
 
     // Abort too if the ground is very near
-    if (fabs(z - tz) < 0.1f)
-        return;
+    if (fabs(z - tz) < MOVE_FALL_MIN_FALL_DISTANCE)
+        return false;
 
     Movement::MoveSplineInit init(*m_owner);
     init.MoveTo(x, y, tz);
     init.SetFall();
     Mutate(new EffectMovementGenerator(init, EVENT_JUMP));
+    return true;
 }
 
 void MotionMaster::Mutate(MovementGenerator* m)
