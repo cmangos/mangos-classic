@@ -381,7 +381,7 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
                 LoadEquipment(data->spawnTemplate->equipmentId);
         }
         else if (data->equipmentId != -1)
-            LoadEquipment(data->equipmentId);        
+            LoadEquipment(data->equipmentId);
     }
 
     SetName(normalInfo->Name);                              // at normal entry always
@@ -1683,9 +1683,6 @@ void Creature::SetDeathState(DeathState s)
     {
         SetTargetGuid(ObjectGuid());                        // remove target selection in any cases (can be set at aura remove in Unit::SetDeathState)
         SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
-
-        if (CanFly())
-            i_motionMaster.MoveFall();
 
         Unit::SetDeathState(CORPSE);
     }

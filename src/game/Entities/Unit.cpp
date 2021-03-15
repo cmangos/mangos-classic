@@ -8104,7 +8104,8 @@ void Unit::SetDeathState(DeathState s)
 
         StopMoving(true);
         i_motionMaster.Clear(false, true);
-        i_motionMaster.MoveIdle();
+        if (!CanFly() || !i_motionMaster.MoveFall())
+            i_motionMaster.MoveIdle();
 
         GetCombatManager().StopEvade();
 
