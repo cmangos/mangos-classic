@@ -1515,7 +1515,8 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, GenericTransp
     m_respawnradius = data->spawndist;
 
     m_respawnDelay = data->GetRandomRespawnTime();
-    m_corpseDelay = std::min(m_respawnDelay * 9 / 10, m_corpseDelay); // set corpse delay to 90% of the respawn delay
+    if (!IsUsingNewSpawningSystem())
+        m_corpseDelay = std::min(m_respawnDelay * 9 / 10, m_corpseDelay); // set corpse delay to 90% of the respawn delay
     m_isDeadByDefault = data->is_dead;
     m_deathState = m_isDeadByDefault ? DEAD : ALIVE;
 
