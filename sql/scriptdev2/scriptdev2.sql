@@ -585,6 +585,7 @@ UPDATE creature_template SET ScriptName='npc_ouro_scarab' WHERE entry=15718;
 UPDATE creature_template SET ScriptName='boss_eye_of_cthun' WHERE entry=15589;
 UPDATE creature_template SET ScriptName='mob_giant_claw_tentacle' WHERE entry=15728;
 UPDATE creature_template SET ScriptName='mob_anubisath_sentinel' WHERE entry=15264;
+UPDATE creature_template SET ScriptName='mob_anubisath_defender' WHERE entry=15277;
 INSERT INTO scripted_areatrigger VALUES
 (4033,'at_stomach_cthun'),
 (4034,'at_stomach_cthun'),
