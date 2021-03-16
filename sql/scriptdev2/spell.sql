@@ -125,6 +125,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Druid
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(5215,'spell_stealth'),
+(6783,'spell_stealth'),
+(9913,'spell_stealth'),
 (8936,'spell_regrowth'),
 (8938,'spell_regrowth'),
 (8939,'spell_regrowth'),
@@ -137,6 +140,10 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Rogue
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(1784,'spell_stealth'),
+(1785,'spell_stealth'),
+(1786,'spell_stealth'),
+(1787,'spell_stealth'),
 (14185,'spell_preparation');
 
 -- Battleground and Outdoor PvP

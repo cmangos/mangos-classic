@@ -31,7 +31,32 @@ struct spell_preparation : public SpellScript
     }
 };
 
+enum
+{
+    SPELL_DISTRACT      = 1725,
+    SPELL_EARTHBIND     = 3600,
+};
+
+// Warning: Also currently used by Prowl
+struct Stealth : public AuraScript
+{
+    bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& data) const override // per 1.12.0 patch notes - no other indication of how it works
+    {
+        if (data.spell)
+        {
+            switch (data.spell->m_spellInfo->Id)
+            {
+                case SPELL_DISTRACT:
+                case SPELL_EARTHBIND:
+                    return false;
+            }
+        }
+        return true;
+    }
+};
+
 void LoadRogueScripts()
 {
     RegisterSpellScript<spell_preparation>("spell_preparation");
+    RegisterAuraScript<Stealth>("spell_stealth");
 }
