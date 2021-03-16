@@ -173,7 +173,17 @@ BattleGround::BattleGround(): m_buffChange(false), m_startDelayTime(0), m_startM
     m_status            = STATUS_NONE;
     m_clientInstanceId  = 0;
     m_endTime           = 0;
+    m_bracketId         = BG_BRACKET_ID_TEMPLATE;
+    m_invitedAlliance   = 0;
+    m_invitedHorde      = 0;
     m_winner            = WINNER_NONE;
+    m_startTime         = 0;
+    m_validStartPositionTimer = 0;
+    m_events            = 0;
+    m_name              = "";
+    m_levelMin          = 0;
+    m_levelMax          = 0;
+    m_hasBgFreeSlotQueue = false;
 
     m_maxPlayersPerTeam = 0;
     m_maxPlayers        = 0;
