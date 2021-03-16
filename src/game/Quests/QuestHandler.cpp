@@ -84,7 +84,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recv_data)
     }
 
     // inform client about status of quest
-    _player->PlayerTalkClass->SendQuestGiverStatus(dialogStatus, guid);
+    _player->GetPlayerMenu()->SendQuestGiverStatus(dialogStatus, guid);
 }
 
 void WorldSession::HandleQuestgiverHelloOpcode(WorldPacket& recv_data)
@@ -130,7 +130,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recv_data)
             || (pObject->GetTypeId() == TYPEID_PLAYER && !((Player*)pObject)->CanShareQuest(quest))
        )
     {
-        _player->PlayerTalkClass->CloseGossip();
+        _player->GetPlayerMenu()->CloseGossip();
         _player->ClearDividerGuid();
         return;
     }
@@ -141,7 +141,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recv_data)
         // prevent cheating
         if (!GetPlayer()->CanTakeQuest(qInfo, true))
         {
-            _player->PlayerTalkClass->CloseGossip();
+            _player->GetPlayerMenu()->CloseGossip();
             _player->ClearDividerGuid();
             return;
         }
@@ -172,7 +172,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recv_data)
                             pPlayer->SetDividerGuid(_player->GetObjectGuid());
 
                             // need confirmation that any gossip window will close
-                            pPlayer->PlayerTalkClass->CloseGossip();
+                            pPlayer->GetPlayerMenu()->CloseGossip();
 
                             _player->SendQuestConfirmAccept(qInfo, pPlayer);
                         }
@@ -183,7 +183,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recv_data)
             if (_player->CanCompleteQuest(quest))
                 _player->CompleteQuest(quest);
 
-            _player->PlayerTalkClass->CloseGossip();
+            _player->GetPlayerMenu()->CloseGossip();
 
             if (qInfo->GetSrcSpell() > 0)
                 _player->CastSpell(_player, qInfo->GetSrcSpell(), TRIGGERED_OLD_TRIGGERED);
@@ -192,7 +192,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recv_data)
         }
     }
 
-    _player->PlayerTalkClass->CloseGossip();
+    _player->GetPlayerMenu()->CloseGossip();
 }
 
 void WorldSession::HandleQuestgiverQueryQuestOpcode(WorldPacket& recv_data)
@@ -207,12 +207,12 @@ void WorldSession::HandleQuestgiverQueryQuestOpcode(WorldPacket& recv_data)
     Object* pObject = _player->GetObjectByTypeMask(guid, TYPEMASK_CREATURE_GAMEOBJECT_OR_ITEM);
     if (!pObject || (!pObject->HasQuest(quest) && !pObject->HasInvolvedQuest(quest)))
     {
-        _player->PlayerTalkClass->CloseGossip();
+        _player->GetPlayerMenu()->CloseGossip();
         return;
     }
 
     if (Quest const* pQuest = sObjectMgr.GetQuestTemplate(quest))
-        _player->PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, pObject->GetObjectGuid(), true);
+        _player->GetPlayerMenu()->SendQuestGiverQuestDetails(pQuest, pObject->GetObjectGuid(), true);
 }
 
 void WorldSession::HandleQuestQueryOpcode(WorldPacket& recv_data)
@@ -374,10 +374,10 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recv_data)
 
             // Send next quest
             if (Quest const* nextquest = _player->GetNextQuest(guid, pQuest))
-                _player->PlayerTalkClass->SendQuestGiverQuestDetails(nextquest, guid, true);
+                _player->GetPlayerMenu()->SendQuestGiverQuestDetails(nextquest, guid, true);
         }
         else
-            _player->PlayerTalkClass->SendQuestGiverOfferReward(pQuest, guid, true);
+            _player->GetPlayerMenu()->SendQuestGiverOfferReward(pQuest, guid, true);
     }
 }
 
@@ -403,14 +403,14 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode(WorldPacket& recv_data)
         return;
 
     if (Quest const* pQuest = sObjectMgr.GetQuestTemplate(quest))
-        _player->PlayerTalkClass->SendQuestGiverOfferReward(pQuest, guid, true);
+        _player->GetPlayerMenu()->SendQuestGiverOfferReward(pQuest, guid, true);
 }
 
 void WorldSession::HandleQuestgiverCancel(WorldPacket& /*recv_data*/)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_QUESTGIVER_CANCEL");
 
-    _player->PlayerTalkClass->CloseGossip();
+    _player->GetPlayerMenu()->CloseGossip();
 }
 
 void WorldSession::HandleQuestLogSwapQuest(WorldPacket& recv_data)
@@ -505,12 +505,12 @@ void WorldSession::HandleQuestgiverCompleteQuest(WorldPacket& recv_data)
         if (_player->GetQuestStatus(quest) != QUEST_STATUS_COMPLETE)
         {
             if (pQuest->IsRepeatable())
-                _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, _player->CanCompleteRepeatableQuest(pQuest), false);
+                _player->GetPlayerMenu()->SendQuestGiverRequestItems(pQuest, guid, _player->CanCompleteRepeatableQuest(pQuest), false);
             else
-                _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, _player->CanRewardQuest(pQuest, false), false);
+                _player->GetPlayerMenu()->SendQuestGiverRequestItems(pQuest, guid, _player->CanRewardQuest(pQuest, false), false);
         }
         else
-            _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, _player->CanRewardQuest(pQuest, false), false);
+            _player->GetPlayerMenu()->SendQuestGiverRequestItems(pQuest, guid, _player->CanRewardQuest(pQuest, false), false);
     }
 }
 
@@ -582,7 +582,7 @@ void WorldSession::HandlePushQuestToParty(WorldPacket& recvPacket)
                 }
 
 #ifndef BUILD_PLAYERBOT
-                pPlayer->PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, _player->GetObjectGuid(), true);
+                pPlayer->GetPlayerMenu()->SendQuestGiverQuestDetails(pQuest, _player->GetObjectGuid(), true);
 #endif
                 pPlayer->SetDividerGuid(_player->GetObjectGuid());
 
@@ -591,7 +591,7 @@ void WorldSession::HandlePushQuestToParty(WorldPacket& recvPacket)
                     pPlayer->GetPlayerbotAI()->AcceptQuest(pQuest, _player);
                 else
                 {
-                    pPlayer->PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, _player->GetObjectGuid(), true);
+                    pPlayer->GetPlayerMenu()->SendQuestGiverQuestDetails(pQuest, _player->GetObjectGuid(), true);
                     pPlayer->SetDividerGuid(_player->GetObjectGuid());
                 }
 #endif

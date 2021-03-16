@@ -347,14 +347,14 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recv_data)
 
     recv_data >> guid >> gossipListId;
 
-    if (_player->PlayerTalkClass->GossipOptionCoded(gossipListId))
+    if (_player->GetPlayerMenu()->GossipOptionCoded(gossipListId))
     {
         recv_data >> code;
         DEBUG_LOG("Gossip code: %s", code.c_str());
     }
 
-    uint32 sender = _player->PlayerTalkClass->GossipOptionSender(gossipListId);
-    uint32 action = _player->PlayerTalkClass->GossipOptionAction(gossipListId);
+    uint32 sender = _player->GetPlayerMenu()->GossipOptionSender(gossipListId);
+    uint32 action = _player->GetPlayerMenu()->GossipOptionAction(gossipListId);
 
     if (guid.IsAnyTypeCreature())
     {
@@ -473,7 +473,7 @@ void WorldSession::SendBindPoint(Creature* npc) const
     data << uint32(3286);                                   // Bind
     SendPacket(data);
 
-    _player->PlayerTalkClass->CloseGossip();
+    _player->GetPlayerMenu()->CloseGossip();
 }
 
 void WorldSession::HandleListStabledPetsOpcode(WorldPacket& recv_data)

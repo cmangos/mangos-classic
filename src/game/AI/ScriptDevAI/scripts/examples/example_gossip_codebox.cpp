@@ -46,7 +46,7 @@ bool GossipHello_example_gossip_codebox(Player* pPlayer, Creature* pCreature)
     pPlayer->ADD_GOSSIP_ITEM_EXTENDED(0, GOSSIP_ITEM_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1, "", 0, true);
     pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
 
-    pPlayer->PlayerTalkClass->SendGossipMenu(907, pCreature->GetObjectGuid());
+    pPlayer->GetPlayerMenu()->SendGossipMenu(907, pCreature->GetObjectGuid());
 
     return true;
 }

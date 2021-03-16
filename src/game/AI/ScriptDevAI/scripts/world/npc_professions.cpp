@@ -637,7 +637,7 @@ bool GossipSelect_npc_prof_leather(Player* pPlayer, Creature* pCreature, uint32 
 
 /*bool GOUse_go_soothsaying_for_dummies(Player* pPlayer, GameObject* pGo)
 {
-pPlayer->PlayerTalkClass->GetGossipMenu()->AddMenuItem(0,GOSSIP_LEARN_DRAGON, GOSSIP_SENDER_INFO, GOSSIP_ACTION_INFO_DEF, "", 0);
+pPlayer->GetPlayerMenu()->GetGossipMenu()->AddMenuItem(0,GOSSIP_LEARN_DRAGON, GOSSIP_SENDER_INFO, GOSSIP_ACTION_INFO_DEF, "", 0);
 
 pPlayer->SEND_GOSSIP_MENU(5584, pGo->GetObjectGuid());
 

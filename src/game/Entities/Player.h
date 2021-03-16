@@ -1885,7 +1885,7 @@ class Player : public Unit
         void SendUpdateWorldState(uint32 Field, uint32 Value) const;
         void SendDirectMessage(WorldPacket const& data) const;
 
-        PlayerMenu* PlayerTalkClass;
+        PlayerMenu* GetPlayerMenu() const { return m_playerMenu.get(); }
         std::vector<ItemSetEffect*> ItemSetEff;
 
         /*********************************************************/
@@ -2471,6 +2471,7 @@ class Player : public Unit
 
         GridReference<Player> m_gridRef;
         MapReference m_mapRef;
+        std::unique_ptr<PlayerMenu> m_playerMenu;
 
 #ifdef BUILD_PLAYERBOT
         PlayerbotAI* m_playerbotAI;
