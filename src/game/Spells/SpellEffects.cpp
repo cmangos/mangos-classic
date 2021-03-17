@@ -3989,6 +3989,10 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         case 19633:
                         case 25778:
                             pct = -25;
+                            break;
+                        case 10101:
+                            pct = -100;
+                            break;
                     }
                     m_caster->getThreatManager().modifyThreatPercent(unitTarget, pct);
                     return;
