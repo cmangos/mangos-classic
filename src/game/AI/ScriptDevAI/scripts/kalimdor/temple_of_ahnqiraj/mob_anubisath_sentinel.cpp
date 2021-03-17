@@ -386,6 +386,7 @@ void AddSC_mob_anubisath_sentinel()
     newScript->GetAI = &GetNewAIInstance<npc_anubisath_sentinelAI>;
     newScript->RegisterSelf();
 
+    newScript = new Script;
     newScript->Name = "mob_anubisath_defender";
     newScript->GetAI = &GetNewAIInstance<npc_anubisath_defenderAI>;
     newScript->RegisterSelf();
