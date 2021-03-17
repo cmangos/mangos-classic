@@ -129,6 +129,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Warlock
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(603,'spell_curse_of_doom'),
+(18662,'spell_curse_of_doom_effect'),
 (980,'spell_curse_of_agony'),
 (1014,'spell_curse_of_agony'),
 (6217,'spell_curse_of_agony'),

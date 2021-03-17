@@ -7391,12 +7391,16 @@ SpellCastResult Spell::OnCheckCast(bool strict)
 {
     switch (m_spellInfo->Id)
     {
-        case 603: // Curse of Doom
+        case 11730: // Health Stone
+        case 11729:
+        case 6202:
+        case 6201:
+        case 5699:
         {
-            // not allow cast at player
-            Unit* target = m_targets.getUnitTarget();
-            if (!target || target->GetTypeId() == TYPEID_PLAYER)
-                return SPELL_FAILED_BAD_TARGETS;
+            // check if we already have a healthstone
+            uint32 itemType = GetUsableHealthStoneItemType(m_caster);
+            if (itemType && m_caster->IsPlayer() && ((Player*)m_caster)->GetItemCount(itemType) > 0)
+                return SPELL_FAILED_TOO_MANY_OF_ITEM;
             break;
         }
         case 4131: // Banish Cresting Exile
@@ -7424,19 +7428,6 @@ SpellCastResult Spell::OnCheckCast(bool strict)
                 static_cast<Creature*>(target)->RegisterHitBySpell(m_spellInfo->Id);
                 return SPELL_CAST_OK;
             }
-            break;
-        }
-        case 27230: // Health Stone
-        case 11730:
-        case 11729:
-        case 6202:
-        case 6201:
-        case 5699:
-        {
-            // check if we already have a healthstone
-            uint32 itemType = GetUsableHealthStoneItemType(m_caster);
-            if (itemType && m_caster->IsPlayer() && ((Player*)m_caster)->GetItemCount(itemType) > 0)
-                return SPELL_FAILED_TOO_MANY_OF_ITEM;
             break;
         }
         default:
