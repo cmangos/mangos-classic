@@ -1505,9 +1505,6 @@ void Loot::SetGroupLootRight(Player* player)
         return;
     }
 
-    if (m_lootType == LOOT_FISHINGHOLE)
-        sLog.outString("hihi");
-
     m_ownerSet.clear();
     Group* grp = player->GetGroup();
     if (grp && (!m_isChest || static_cast<GameObject*>(m_lootTarget)->GetGOInfo()->chest.groupLootRules))
