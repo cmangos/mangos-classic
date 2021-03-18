@@ -282,13 +282,13 @@ void Item::UpdateDuration(Player* owner, uint32 diff)
 
 void Item::SaveToDB()
 {
-    static char* UPDATE_ITEM = "UPDATE item_instance SET owner_guid = ?, itemEntry = ?, creatorGuid = ?, giftCreatorGuid = ?, count = ?, duration = ?, charges = ?, flags = ?, enchantments = ?, randomPropertyId = ?, durability = ?, itemTextId = ? WHERE guid = ?";
-    static char* INSERT_ITEM = "REPLACE INTO item_instance (owner_guid, itemEntry, creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, durability, itemTextId, guid) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
-    static char* UPDATE_GIFT = "UPDATE character_gifts SET guid = ? WHERE item_guid = ?";
-    static char* DELETE_TEXT = "DELETE FROM item_text WHERE id = ?";
-    static char* DELETE_ITEM = "DELETE FROM item_instance WHERE guid = ?";
-    static char* DELETE_GIFT = "DELETE FROM character_gifts WHERE item_guid = ?";
-    static char* DELETE_LOOT = "DELETE FROM item_loot WHERE guid = ?";
+    static const char* UPDATE_ITEM = "UPDATE item_instance SET owner_guid = ?, itemEntry = ?, creatorGuid = ?, giftCreatorGuid = ?, count = ?, duration = ?, charges = ?, flags = ?, enchantments = ?, randomPropertyId = ?, durability = ?, itemTextId = ? WHERE guid = ?";
+    static const char* INSERT_ITEM = "REPLACE INTO item_instance (owner_guid, itemEntry, creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, durability, itemTextId, guid) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    static const char* UPDATE_GIFT = "UPDATE character_gifts SET guid = ? WHERE item_guid = ?";
+    static const char* DELETE_TEXT = "DELETE FROM item_text WHERE id = ?";
+    static const char* DELETE_ITEM = "DELETE FROM item_instance WHERE guid = ?";
+    static const char* DELETE_GIFT = "DELETE FROM character_gifts WHERE item_guid = ?";
+    static const char* DELETE_LOOT = "DELETE FROM item_loot WHERE guid = ?";
 
     uint32 guid = GetGUIDLow();
     switch (uState)
