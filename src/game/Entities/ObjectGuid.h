@@ -21,6 +21,7 @@
 
 #include "Common.h"
 #include "ByteBuffer.h"
+#include <atomic>
 
 enum TypeID
 {
@@ -231,7 +232,7 @@ class ObjectGuidGenerator
         uint32 GetNextAfterMaxUsed() const { return m_nextGuid; }
 
     private:                                                // fields
-        uint32 m_nextGuid;
+        std::atomic<uint32> m_nextGuid;
 };
 
 ByteBuffer& operator<< (ByteBuffer& buf, ObjectGuid const& guid);
