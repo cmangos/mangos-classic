@@ -282,31 +282,51 @@ void Item::UpdateDuration(Player* owner, uint32 diff)
 
 void Item::SaveToDB()
 {
+    static char* UPDATE_ITEM = "UPDATE item_instance SET owner_guid = ?, itemEntry = ?, creatorGuid = ?, giftCreatorGuid = ?, count = ?, duration = ?, charges = ?, flags = ?, enchantments = ?, randomPropertyId = ?, durability = ?, itemTextId = ? WHERE guid = ?";
+    static char* INSERT_ITEM = "REPLACE INTO item_instance (owner_guid, itemEntry, creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, durability, itemTextId, guid) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    static char* UPDATE_GIFT = "UPDATE character_gifts SET guid = ? WHERE item_guid = ?";
+    static char* DELETE_TEXT = "DELETE FROM item_text WHERE id = ?";
+    static char* DELETE_ITEM = "DELETE FROM item_instance WHERE guid = ?";
+    static char* DELETE_GIFT = "DELETE FROM character_gifts WHERE item_guid = ?";
+    static char* DELETE_LOOT = "DELETE FROM item_loot WHERE guid = ?";
+
     uint32 guid = GetGUIDLow();
     switch (uState)
     {
         case ITEM_NEW:
         case ITEM_CHANGED:
         {
-            static SqlStatementID insItem;
-            SqlStatement stmt = CharacterDatabase.CreateStatement(insItem, uState == ITEM_NEW ?
-                "REPLACE INTO item_instance (owner_guid, itemEntry, creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, durability, itemTextId, guid) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)" :
-                "UPDATE item_instance SET owner_guid = ?, itemEntry = ?, creatorGuid = ?, giftCreatorGuid = ?, count = ?, duration = ?, charges = ?, flags = ?, enchantments = ?, randomPropertyId = ?, durability = ?, itemTextId = ? WHERE guid = ?"
-            );
+            static SqlStatementID insItem, updItem;
+            std::unique_ptr<SqlStatement> stmt;
 
-            stmt.addUInt32(GetOwnerGuid().GetCounter());
-            stmt.addUInt32(GetEntry());
-            stmt.addUInt32(GetGuidValue(ITEM_FIELD_CREATOR).GetCounter());
-            stmt.addUInt32(GetGuidValue(ITEM_FIELD_GIFTCREATOR).GetCounter());
-            stmt.addUInt32(GetCount());
-            stmt.addUInt32(GetUInt32Value(ITEM_FIELD_DURATION));
+            //get thread id
+            //std::hash<std::thread::id> myHashObject{};
+            //uint32 threadID = myHashObject(std::this_thread::get_id());
+
+            if (uState == ITEM_NEW)
+            {
+                stmt.reset(new SqlStatement(CharacterDatabase.CreateStatement(insItem, INSERT_ITEM)));
+                //printf("> Saving new item(%s) for guid[%u]. Thread is [%u]\n", GetProto()->Name1, GetOwnerGuid().GetCounter(), threadID);
+            }
+            else
+            {
+                stmt.reset(new SqlStatement(CharacterDatabase.CreateStatement(updItem, UPDATE_ITEM)));
+                //printf("> Updating item(%s) for guid[%u]. Thread is [%u]\n", GetProto()->Name1, GetOwnerGuid().GetCounter(), threadID);
+            }
+
+            stmt->addUInt32(GetOwnerGuid().GetCounter());
+            stmt->addUInt32(GetEntry());
+            stmt->addUInt32(GetGuidValue(ITEM_FIELD_CREATOR).GetCounter());
+            stmt->addUInt32(GetGuidValue(ITEM_FIELD_GIFTCREATOR).GetCounter());
+            stmt->addUInt32(GetCount());
+            stmt->addUInt32(GetUInt32Value(ITEM_FIELD_DURATION));
 
             std::ostringstream ssSpells;
             for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
                 ssSpells << GetSpellCharges(i) << ' ';
-            stmt.addString(ssSpells.str());
+            stmt->addString(ssSpells.str());
 
-            stmt.addUInt32(GetUInt32Value(ITEM_FIELD_FLAGS));
+            stmt->addUInt32(GetUInt32Value(ITEM_FIELD_FLAGS));
 
             std::ostringstream ssEnchants;
             for (uint8 i = 0; i < MAX_ENCHANTMENT_SLOT; ++i)
@@ -315,20 +335,20 @@ void Item::SaveToDB()
                 ssEnchants << GetEnchantmentDuration(EnchantmentSlot(i)) << ' ';
                 ssEnchants << GetEnchantmentCharges(EnchantmentSlot(i)) << ' ';
             }
-            stmt.addString(ssEnchants.str());
+            stmt->addString(ssEnchants.str());
 
-            stmt.addInt16(GetItemRandomPropertyId());
-            stmt.addUInt16(GetUInt32Value(ITEM_FIELD_DURABILITY));
-            stmt.addUInt32(GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID));
-            stmt.addUInt32(guid);
+            stmt->addInt16(GetItemRandomPropertyId());
+            stmt->addUInt16(GetUInt32Value(ITEM_FIELD_DURABILITY));
+            stmt->addUInt32(GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID));
+            stmt->addUInt32(guid);
 
-            stmt.Execute();
+            stmt->Execute();
 
             if (uState == ITEM_CHANGED && HasFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_WRAPPED))
             {
                 static SqlStatementID updGifts;
-                stmt = CharacterDatabase.CreateStatement(updGifts, "UPDATE character_gifts SET guid = ? WHERE item_guid = ?");
-                stmt.PExecute(GetOwnerGuid().GetCounter(), GetGUIDLow());
+                stmt.reset(new SqlStatement(CharacterDatabase.CreateStatement(updGifts, UPDATE_GIFT)));
+                stmt->PExecute(GetOwnerGuid().GetCounter(), GetGUIDLow());
             }
 
             break;
@@ -342,22 +362,22 @@ void Item::SaveToDB()
 
             if (uint32 item_text_id = GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID))
             {
-                SqlStatement stmt = CharacterDatabase.CreateStatement(delItemText, "DELETE FROM item_text WHERE id = ?");
+                SqlStatement stmt = CharacterDatabase.CreateStatement(delItemText, DELETE_TEXT);
                 stmt.PExecute(item_text_id);
             }
 
-            SqlStatement stmt = CharacterDatabase.CreateStatement(delInst, "DELETE FROM item_instance WHERE guid = ?");
+            SqlStatement stmt = CharacterDatabase.CreateStatement(delInst, DELETE_ITEM);
             stmt.PExecute(guid);
 
             if (HasFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_WRAPPED))
             {
-                stmt = CharacterDatabase.CreateStatement(delGifts, "DELETE FROM character_gifts WHERE item_guid = ?");
+                stmt = CharacterDatabase.CreateStatement(delGifts, DELETE_GIFT);
                 stmt.PExecute(GetGUIDLow());
             }
 
             if (HasSavedLoot())
             {
-                stmt = CharacterDatabase.CreateStatement(delLoot, "DELETE FROM item_loot WHERE guid = ?");
+                stmt = CharacterDatabase.CreateStatement(delLoot, DELETE_LOOT);
                 stmt.PExecute(GetGUIDLow());
             }
 
