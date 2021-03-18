@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
+/* ContentData
 npc_shadowfang_prisoner
 mob_arugal_voidwalker
 npc_arugal
@@ -31,8 +31,9 @@ boss_arugal
 npc_deathstalker_vincent
 EndContentData */
 
-
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "shadowfang_keep.h"
 #include "Spells/Scripts/SpellScript.h"
 
@@ -168,209 +169,149 @@ bool GossipSelect_npc_shadowfang_prisoner(Player* pPlayer, Creature* pCreature, 
 ## mob_arugal_voidwalker
 ######*/
 
-// Cordinates for voidwalker spawns
-static const Waypoint VWWaypoints[] =
-{
-    { -146.06f,  2172.84f, 127.953f},                       // This is the initial location, in the middle of the room
-    { -159.547f, 2178.11f, 128.944f},                       // When they come back up, they hit this point then walk back down
-    { -171.113f, 2182.69f, 129.255f},
-    { -177.613f, 2175.59f, 128.161f},
-    { -185.396f, 2178.35f, 126.413f},
-    { -184.004f, 2188.31f, 124.122f},
-    { -172.781f, 2188.71f, 121.611f},
-    { -173.245f, 2176.93f, 119.085f},
-    { -183.145f, 2176.04f, 116.995f},
-    { -185.551f, 2185.77f, 114.784f},
-    { -177.502f, 2190.75f, 112.681f},
-    { -171.218f, 2182.61f, 110.314f},
-    { -173.857f, 2175.1f,  109.255f}
-};
-
 enum
 {
-    LAST_WAYPOINT       = 12,
-
     NPC_VOIDWALKER      = 4627,
-
-    SPELL_DARK_OFFERING = 7154
+    SPELL_DARK_OFFERING = 7154,
+    MAX_VOID_WALKERS    = 4,
 };
 
-struct mob_arugal_voidwalkerAI : public ScriptedAI
+enum ArugalVoidWalker
 {
-    mob_arugal_voidwalkerAI(Creature* pCreature) : ScriptedAI(pCreature), m_uiResetTimer(0), m_uiDarkOffering(0), m_uiPosition(0), m_bWPDone(false)
+    VOIDWALKER_DARKOFFERING,
+    VOIDWALKER_CHECK_GROUP,
+    VOIDWALKER_ACTIONS_MAX
+};
+
+// Coordinates for Voidwalker home
+static const Waypoint voidwalkerHome = { -146.06f,  2172.84f, 127.953f};  // This is the initial location, in the middle of the room
+
+struct mob_arugal_voidwalkerAI : public CombatAI
+{
+    mob_arugal_voidwalkerAI(Creature* creature) : CombatAI(creature, VOIDWALKER_ACTIONS_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsLeader = false;
-        m_uiCurrentPoint = 0;
-        m_bReverse = false;
+        AddCombatAction(VOIDWALKER_DARKOFFERING, 4400, 12500);
+        AddCustomAction(VOIDWALKER_CHECK_GROUP, 1000u, [&]() { CheckGroupStatus(); });
+        m_position = -1;
+        m_leaderGuid = ObjectGuid();
     }
 
-    uint32 m_uiResetTimer, m_uiDarkOffering;
-    uint8 m_uiCurrentPoint, m_uiPosition;                   // 0 - leader, 1 - behind-right, 2 - behind, 3 - behind-left
+    ScriptedInstance* m_instance;
+
+    int8 m_position;           // 0 - leader, 1 - behind-right, 2 - behind, 3 - behind-left
     ObjectGuid m_leaderGuid;
-    ScriptedInstance* m_pInstance;
-    bool m_bIsLeader, m_bReverse, m_bWPDone;
 
-    void Reset() override
+    void GetAIInformation(ChatHandler& reader) override
     {
-        m_creature->SetWalk(true);
-        m_uiDarkOffering = urand(4400, 12500);
-        m_bWPDone = true;
-
-        Creature* pLeader = m_creature->GetMap()->GetCreature(m_leaderGuid);
-        if (pLeader && pLeader->IsAlive())
-        {
-            m_creature->GetMotionMaster()->MoveFollow(pLeader, 1.0f, M_PI / 2 * m_uiPosition);
-        }
+        if (!m_leaderGuid)
+            reader.PSendSysMessage("Arugal's Voidwalker - no group leader found");
+        if (IsLeader())
+            reader.PSendSysMessage("Arugal's Voidwalker - is group leader");
         else
         {
-            CreatureList lVoidwalkerList;
-            Creature* pNewLeader = nullptr;
-            uint8 uiHighestPosition = 0;
-            GetCreatureListWithEntryInGrid(lVoidwalkerList, m_creature, NPC_VOIDWALKER, 50.0f);
-            for (auto& itr : lVoidwalkerList)
-            {
-                if (itr->IsAlive())
-                {
-                    if (mob_arugal_voidwalkerAI* pVoidwalkerAI = dynamic_cast<mob_arugal_voidwalkerAI*>(itr->AI()))
-                    {
-                        uint8 uiPosition = pVoidwalkerAI->GetPosition();
-                        if (uiPosition > uiHighestPosition)
-                        {
-                            pNewLeader = itr;
-                            uiHighestPosition = uiPosition;
-                        }
-                    }
-                }
-            }
-
-            if (pNewLeader)
-            {
-                m_leaderGuid = pNewLeader->GetObjectGuid();
-                if (pNewLeader == m_creature)
-                {
-                    m_bIsLeader = true;
-                    m_bWPDone = true;
-                }
-                else
-                    m_creature->GetMotionMaster()->MoveFollow(pNewLeader, 1.0f, M_PI / 2 * m_uiPosition);
-            }
+            if (m_position)
+                reader.PSendSysMessage("Arugal's Voidwalker - is follower with position %u", m_position);
             else
+                reader.PSendSysMessage("Arugal's Voidwalker - is neither leader nor follower");
+        }
+    }
+
+    bool IsLeader()
+    {
+        return m_position == 0;
+    }
+
+    void CheckGroupStatus()
+    {
+        ResetTimer(VOIDWALKER_CHECK_GROUP, 1 * IN_MILLISECONDS);
+
+        // Do not care about group while fighting
+        if (m_creature->IsInCombat())
+            return;
+
+        // If a group leader already exists and is alive, do nothing
+        if (m_leaderGuid && !IsLeader())
+        {
+            if (Creature* leader = m_creature->GetMap()->GetCreature(m_leaderGuid))
             {
-                pNewLeader = m_creature;
-                m_bIsLeader = true;
-                m_bWPDone = true;
+                // Leader is alive and we are following it, do nothing
+                if (leader->IsAlive() && m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
+                    return;
+            }
+        }
+
+        // If we are leader and already following path, do nothing
+        if (IsLeader())
+        {
+            if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+                return;
+        }
+
+        // For whatever other reason, re-initialise the group
+        InitVoidWalkersGroup();
+    }
+
+    void InitVoidWalkersGroup()
+    {
+        SetLeader();
+
+        // Inform other Voidwalkers
+        CreatureList walkersList;
+        GetCreatureListWithEntryInGrid(walkersList, m_creature, m_creature->GetEntry(), 50.0f);
+
+        uint8 position = 0;
+        for (auto& walker : walkersList)
+        {
+            if (walker->IsAlive() && walker->GetObjectGuid() != m_leaderGuid)
+            {
+                mob_arugal_voidwalkerAI* walkerAI = static_cast<mob_arugal_voidwalkerAI*>(walker->AI());
+                walkerAI->SetFollower(m_creature->GetObjectGuid(), ++position);
+            }
+        }
+
+        if (position + 1 > MAX_VOID_WALKERS)
+            script_error_log("mob_arugal_voidwalker for %s: has more buddies than expected (%u expected, found: %u).", m_creature->GetGuidStr().c_str(), MAX_VOID_WALKERS, position);
+    }
+
+    void SetLeader()
+    {
+        // No leader found or already dead: set ourselves and start following the waypoints
+        m_leaderGuid = m_creature->GetObjectGuid();
+        m_position = 0;
+        m_creature->GetMotionMaster()->Clear();
+        m_creature->GetMotionMaster()->MoveWaypoint(0);
+    }
+
+    void SetFollower(ObjectGuid leaderGuid, uint8 position)
+    {
+        m_leaderGuid = leaderGuid;
+        m_position = position;
+
+        // Start following the leader
+        if (Creature* leader = m_creature->GetMap()->GetCreature(m_leaderGuid))
+            m_creature->GetMotionMaster()->MoveFollow(leader, 1.0f, M_PI / 2 * m_position);
+        else
+            script_error_log("mob_arugal_voidwalker for %s: tried to follow master but master not found in map.", m_creature->GetGuidStr().c_str());
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        if (action == VOIDWALKER_DARKOFFERING)
+        {
+            if (Unit* dearestFriend = DoSelectLowestHpFriendly(10.0f, 290))
+            {
+                if (DoCastSpellIfCan(dearestFriend, SPELL_DARK_OFFERING) == CAST_OK)
+                    ResetCombatAction(action, urand(4, 12) * IN_MILLISECONDS);
             }
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void JustDied(Unit* /*killer*/) override
     {
-        if (m_bIsLeader && m_bWPDone)
-        {
-            m_creature->GetMotionMaster()->MovePoint(m_uiCurrentPoint, VWWaypoints[m_uiCurrentPoint].fX,
-                    VWWaypoints[m_uiCurrentPoint].fY, VWWaypoints[m_uiCurrentPoint].fZ);
-            m_bWPDone = false;
-        }
-
-        if (!m_creature->IsInCombat())
-            return;
-
-        if (m_uiDarkOffering < uiDiff)
-        {
-            m_uiDarkOffering = urand(4400, 12500);
-
-            if (Unit* pUnit = DoSelectLowestHpFriendly(10.0f, 290))
-                DoCastSpellIfCan(pUnit, SPELL_DARK_OFFERING);
-        }
-        else
-            m_uiDarkOffering -= uiDiff;
-
-        // Check if we have a current target
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        DoMeleeAttackIfReady();
-    }
-
-    void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
-    {
-        if (uiMoveType != POINT_MOTION_TYPE || !m_bIsLeader)
-            return;
-
-        switch (uiPointId)
-        {
-            case 1:
-                if (m_bReverse)
-                    m_bReverse = false;
-                break;
-            case LAST_WAYPOINT:
-                if (!m_bReverse)
-                    m_bReverse = true;
-                break;
-        }
-
-        if (m_bReverse)
-            --m_uiCurrentPoint;
-        else
-            ++m_uiCurrentPoint;
-
-        m_bWPDone = true;
-
-        SendWaypoint();
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_VOIDWALKER, DONE);
-    }
-
-    void SetPosition(uint8 uiPosition, Creature* pLeader)
-    {
-        m_uiPosition = uiPosition;
-
-        if (!uiPosition)
-            m_bIsLeader = true;
-        else
-        {
-            if (pLeader)
-                m_leaderGuid = pLeader->GetObjectGuid();
-            else
-                m_leaderGuid.Clear();
-        }
-
-        Reset();
-    }
-
-    uint8 GetPosition() const
-    {
-        return m_uiPosition;
-    }
-
-    void SendWaypoint()
-    {
-        CreatureList lVoidwalkerList;
-        GetCreatureListWithEntryInGrid(lVoidwalkerList, m_creature, NPC_VOIDWALKER, 50.0f);
-        for (auto& itr : lVoidwalkerList)
-        {
-            if (itr->IsAlive())
-                if (mob_arugal_voidwalkerAI* pVoidwalkerAI = dynamic_cast<mob_arugal_voidwalkerAI*>(itr->AI()))
-                    pVoidwalkerAI->ReceiveWaypoint(m_uiCurrentPoint, m_bReverse);
-        }
-    }
-
-    void ReceiveWaypoint(uint32 uiNewPoint, bool bReverse)
-    {
-        m_uiCurrentPoint = uiNewPoint;
-        m_bReverse = bReverse;
+        if (m_instance)
+            m_instance->SetData(TYPE_VOIDWALKER, DONE);
     }
 };
-
-UnitAI* GetAI_mob_arugal_voidwalker(Creature* pCreature)
-{
-    return new mob_arugal_voidwalkerAI(pCreature);
-}
 
 /*######
 ## boss_arugal
@@ -497,24 +438,28 @@ struct boss_arugalAI : public ScriptedAI
                         break;
                     case 5:
                     {
-                        Creature* pVoidwalker = nullptr;
-                        Creature* pLeader = nullptr;
+                        ObjectGuid leaderGuid;
 
                         for (uint8 i = 0; i < 4; ++i)
                         {
-                            pVoidwalker = m_creature->SummonCreature(NPC_VOIDWALKER, VWSpawns[i].fX,
-                                          VWSpawns[i].fY, VWSpawns[i].fZ, VWSpawns[i].fO, TEMPSPAWN_DEAD_DESPAWN, 1);
+                            // No suitable spell was found for this in DBC files, so summoning the hard way
+                            if (Creature* voidwalker = m_creature->SummonCreature(NPC_VOIDWALKER, VWSpawns[i].fX, VWSpawns[i].fY, VWSpawns[i].fZ, VWSpawns[i].fO, TEMPSPAWN_DEAD_DESPAWN, 1))
+                            {
+                                // Set Voidwalker's home to the middle of the room to avoid evade in an unreachable place
+                                voidwalker->SetRespawnCoord(voidwalkerHome.fX, voidwalkerHome.fY, voidwalkerHome.fZ, voidwalker->GetOrientation());
 
-                            if (!pVoidwalker)
-                                continue;
-
-                            if (!i)
-                                pLeader = pVoidwalker;
-
-                            if (mob_arugal_voidwalkerAI* pVoidwalkerAI = dynamic_cast<mob_arugal_voidwalkerAI*>(pVoidwalker->AI()))
-                                pVoidwalkerAI->SetPosition(i, pLeader);
-
-                            pVoidwalker = nullptr;
+                                if (!i)
+                                {
+                                    leaderGuid = voidwalker->GetObjectGuid();
+                                    if (mob_arugal_voidwalkerAI* voidwalkerAI = dynamic_cast<mob_arugal_voidwalkerAI*>(voidwalker->AI()))
+                                        voidwalkerAI->SetLeader();
+                                }
+                                else
+                                {
+                                    if (mob_arugal_voidwalkerAI* voidwalkerAI = dynamic_cast<mob_arugal_voidwalkerAI*>(voidwalker->AI()))
+                                        voidwalkerAI->SetFollower(leaderGuid, i);
+                                }
+                            }
                         }
                         m_uiSpeechStep = 0;
                         return;
@@ -906,7 +851,7 @@ void AddSC_shadowfang_keep()
 
     pNewScript = new Script;
     pNewScript->Name = "mob_arugal_voidwalker";
-    pNewScript->GetAI = &GetAI_mob_arugal_voidwalker;
+    pNewScript->GetAI = &GetNewAIInstance<mob_arugal_voidwalkerAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
