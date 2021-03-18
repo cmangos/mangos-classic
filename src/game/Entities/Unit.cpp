@@ -2553,7 +2553,7 @@ void Unit::SendMeleeAttackStart(Unit* pVictim) const
     data << pVictim->GetObjectGuid();
 
     SendMessageToSet(data, true);
-    DEBUG_LOG("WORLD: Sent SMSG_ATTACKSTART");
+    DETAIL_FILTER_LOG(LOG_FILTER_COMBAT, "WORLD: Sent SMSG_ATTACKSTART");
 }
 
 void Unit::SendMeleeAttackStop(Unit* victim) const
