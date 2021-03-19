@@ -1,0 +1,51 @@
+name: MacOs build
+
+on: [push]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+  REPO_DIR : ${{github.workspace}}
+  BUILD_DIR: ${{github.workspace}}/bin/builddir
+
+jobs:
+  build:
+    runs-on: macos-10.15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: ${{env.REPO_DIR}}
+
+      - name: Install dependencies
+        run: |
+          brew install boost mysql-client
+          echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl)" >> $GITHUB_ENV
+
+      - name: Configure
+        run: cmake -DBoost_ARCHITECTURE=-x64 -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
+
+      - name: Build
+        env:
+          MAKEFLAGS: "-j8"
+        run: cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}}
+
+  notify:
+    name: Discord Notification
+    runs-on: ubuntu-latest
+    needs: # make sure the notification is sent AFTER the jobs you want included have completed
+      - build
+    if: failure()
+
+    steps:
+      - name: Notify
+        uses: rjstone/discord-webhook-notify@v1.0.4
+        with:
+          severity: error
+          description: MacOS build failed
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+          avatarUrl: https://github.githubassets.com/images/modules/logos_page/Octocat.png
+
+
+

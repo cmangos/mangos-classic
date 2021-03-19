@@ -1,0 +1,93 @@
+  
+name: Windows build
+
+on: [push]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+  REPO_DIR : ${{github.workspace}}
+  BUILD_DIR: ${{github.workspace}}/bin/builddir
+  BOOST_TOOLSET: "msvc14.2"
+  BOOST_VERSION: "1.73.0"
+  BOOST_INSTALL_DIR: "${{github.workspace}}/bin"
+
+jobs:
+  build:
+  
+    runs-on: windows-2019
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: ${{env.REPO_DIR}}
+
+      - name: Create Build Environment
+        run: |
+          echo "BOOST_ROOT=${{env.BOOST_INSTALL_DIR}}/boost/boost-${{env.BOOST_VERSION}}-win32-${{env.BOOST_TOOLSET}}-x86_64" >> $env:GITHUB_ENV
+          echo "GITHUB_SHORT_REV=$(git rev-parse --short HEAD)" >> $env:GITHUB_ENV
+          echo "ARCHIVE_FILENAME=${{ github.event.repository.name }}-$(git rev-parse --short HEAD).zip" >> $env:GITHUB_ENV
+          cmake -E make_directory ${{ env.BUILD_DIR }}
+
+      # install dependencies
+      - name: Cache Windows boost
+        uses: actions/cache@v2
+        id: cache-boost
+        with:
+          path: "${{env.BOOST_INSTALL_DIR}}/boost"
+          key: ${{ runner.os }}-${{ hashFiles('.github/workflows/windows.yml') }}
+
+      - if: steps.cache-boost.outputs.cache-hit != 'true'
+        name: Install boost
+        uses: MarkusJx/install-boost@v1.0.1
+        id: install-boost
+        with:
+          # REQUIRED: Specify the required boost version
+          # A list of supported versions can be found here: 
+          # https://github.com/actions/boost-versions/blob/main/versions-manifest.json
+          boost_version: ${{env.BOOST_VERSION}}
+          # OPTIONAL: Specify a toolset on windows
+          toolset: ${{env.BOOST_TOOLSET}}
+          # OPTIONAL: Specify a custon install location
+          boost_install_dir: ${{env.BOOST_INSTALL_DIR}}
+          # NOTE: If a boost version matching all requirements cannot be found,
+          # this build step will fail
+
+      - name: Configure
+        run: cmake -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
+
+      - name: Build
+        env:
+          MAKEFLAGS: "-j8"
+        run: cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}}
+
+      - name: Archive files
+        run: |
+          cd bin
+          7z a -tzip ${{env.ARCHIVE_FILENAME}} x64_Release
+
+      - name: Archive this artefact
+        uses: actions/upload-artifact@v2
+        with:
+          name: snapshot
+          path: "bin/${{env.ARCHIVE_FILENAME}}"
+
+  notify:
+    name: Discord Notification
+    runs-on: ubuntu-latest
+    needs: # make sure the notification is sent AFTER the jobs you want included have completed
+      - build
+    if: failure()
+
+    steps:
+      - name: Notify
+        uses: rjstone/discord-webhook-notify@v1.0.4
+        with:
+          severity: error
+          description: Windows build failed
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+          avatarUrl: https://github.githubassets.com/images/modules/logos_page/Octocat.png
+
+
+
