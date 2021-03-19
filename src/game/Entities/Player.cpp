@@ -18989,7 +18989,7 @@ void Player::UpdateTerainEnvironmentFlags(Map* m, float x, float y, float z)
         SetEnvironmentFlags(ENVIRONMENT_FLAG_UNDERWATER, (res & LIQUID_MAP_UNDER_WATER));
 
     // In water: on or under surface level
-    if (liquid_status.type_flags & MAP_LIQUID_TYPE_WATER)
+    if (liquid_status.type_flags & (MAP_LIQUID_TYPE_WATER | MAP_LIQUID_TYPE_OCEAN))
         SetEnvironmentFlags(ENVIRONMENT_FLAG_IN_WATER, (res & (LIQUID_MAP_UNDER_WATER | LIQUID_MAP_IN_WATER)));
 
     // In magma: on, under, or slightly above surface level
