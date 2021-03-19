@@ -533,6 +533,7 @@ enum AtLoginFlags
     // AT_LOGIN_RESET_PET_TALENTS = 0x10, -- used in post-3.x
     AT_LOGIN_FIRST                = 0x20,
     AT_LOGIN_RESET_TAXINODES      = 0x40,
+    AT_LOGIN_ADD_BG_DESERTER      = 0x80
 };
 
 typedef std::map<uint32, QuestStatusData> QuestStatusMap;

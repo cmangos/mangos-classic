@@ -2130,7 +2130,7 @@ void Player::ProcessDelayedOperations()
         SaveToDB();
 
     if (m_DelayedOperations & DELAYED_SPELL_CAST_DESERTER)
-        CastSpell(this, 26013, TRIGGERED_OLD_TRIGGERED);               // Deserter
+        CastSpell(this, SPELL_ID_BATTLEGROUND_DESERTER, TRIGGERED_OLD_TRIGGERED);               // Deserter
 
     // we have executed ALL delayed ops, so clear the flag
     m_DelayedOperations = 0;
@@ -17636,7 +17636,7 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
                     return;
                 }
 
-                CastSpell(this, 26013, TRIGGERED_OLD_TRIGGERED);               // Deserter
+                CastSpell(this, SPELL_ID_BATTLEGROUND_DESERTER, TRIGGERED_OLD_TRIGGERED);               // Deserter
             }
         }
     }
@@ -17645,7 +17645,7 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
 bool Player::CanJoinToBattleground() const
 {
     // check Deserter debuff
-    if (GetDummyAura(26013))
+    if (GetDummyAura(SPELL_ID_BATTLEGROUND_DESERTER))
         return false;
 
     return true;
