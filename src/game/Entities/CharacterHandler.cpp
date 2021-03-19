@@ -740,6 +740,13 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         SendNotification(LANG_RESET_TALENTS);               // we can use SMSG_TALENTS_INVOLUNTARILY_RESET here
     }
 
+    // handle deserter flag for those who dared to leave their team in fight
+    if (pCurrChar->HasAtLoginFlag(AT_LOGIN_ADD_BG_DESERTER))
+    {
+        pCurrChar->CastSpell(pCurrChar, SPELL_ID_BATTLEGROUND_DESERTER, TRIGGERED_OLD_TRIGGERED);
+        pCurrChar->RemoveAtLoginFlag(AT_LOGIN_ADD_BG_DESERTER, true);
+    }
+
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_RESET_TAXINODES))
     {
         pCurrChar->InitTaxiNodes();
