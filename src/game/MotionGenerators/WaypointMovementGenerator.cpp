@@ -235,7 +235,7 @@ uint32 WaypointMovementGenerator<Creature>::BuildIntPath(PointsArray& path, Crea
     auto speedType = MovementInfo::GetSpeedType(creature.m_movementInfo.GetMovementFlags());
     float creatureSpeed = creature.GetSpeed(speedType);
 
-    PathFinder pathfinder(&creature);
+    PathFinder pathfinder(&creature, true);
     pathfinder.calculate(startPos, endPos, true);
     auto genPath = pathfinder.getPath();
 

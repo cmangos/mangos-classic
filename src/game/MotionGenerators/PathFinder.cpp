@@ -32,10 +32,10 @@
 
 #include <limits>
 ////////////////// PathFinder //////////////////
-PathFinder::PathFinder(const Unit* owner) :
+PathFinder::PathFinder(const Unit* owner, bool ignoreNormalization) :
     m_polyLength(0), m_type(PATHFIND_BLANK),
     m_useStraightPath(false), m_forceDestination(false), m_straightLine(false), m_pointPathLimit(MAX_POINT_PATH_LENGTH), // TODO: Fix legitimate long paths
-    m_sourceUnit(owner), m_navMesh(nullptr), m_navMeshQuery(nullptr), m_cachedPoints(m_pointPathLimit * VERTEX_SIZE), m_pathPolyRefs(m_pointPathLimit), m_smoothPathPolyRefs(m_pointPathLimit), m_defaultMapId(m_sourceUnit->GetMapId())
+    m_sourceUnit(owner), m_navMesh(nullptr), m_navMeshQuery(nullptr), m_cachedPoints(m_pointPathLimit * VERTEX_SIZE), m_pathPolyRefs(m_pointPathLimit), m_smoothPathPolyRefs(m_pointPathLimit), m_defaultMapId(m_sourceUnit->GetMapId()), m_ignoreNormalization(ignoreNormalization)
 {
     DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ PathFinder::PathInfo for %u \n", m_sourceUnit->GetGUIDLow());
 
@@ -694,7 +694,7 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
 
 void PathFinder::NormalizePath()
 {
-    if (!sWorld.getConfig(CONFIG_BOOL_PATH_FIND_NORMALIZE_Z))
+    if (!sWorld.getConfig(CONFIG_BOOL_PATH_FIND_NORMALIZE_Z) || m_ignoreNormalization)
         return;
 
     GenericTransport* transport = m_sourceUnit->GetTransport();

@@ -61,7 +61,7 @@ enum PathType
 class PathFinder
 {
     public:
-        PathFinder(Unit const* owner);
+        PathFinder(Unit const* owner, bool ignoreNormalization = false);
         ~PathFinder();
 
         // Calculate the path from owner to given destination
@@ -82,8 +82,6 @@ class PathFinder
         PathType getPathType() const { return m_type; }
 
     private:
-
-
 
         PointsArray    m_pathPoints;       // our actual (x,y,z) path to the target
         PathType       m_type;             // tells what kind of path this is
@@ -108,6 +106,8 @@ class PathFinder
 
         const dtNavMeshQuery*   m_defaultNavMeshQuery;     // the nav mesh query used to find the path
         uint32                  m_defaultMapId;
+
+        bool                    m_ignoreNormalization;
 
         dtQueryFilter m_filter;                     // use single filter for all movements, update it when needed
 
