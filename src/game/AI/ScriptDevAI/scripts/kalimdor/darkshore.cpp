@@ -93,6 +93,11 @@ struct npc_kerlonianAI : public FollowerAI
             DoCastSpellIfCan(m_creature, SPELL_BEAR_FORM);
     }
 
+    void Aggro(Unit* attacker) override
+    {
+        m_creature->PlayDistanceSound(6701);
+    }
+
     void MoveInLineOfSight(Unit* pWho) override
     {
         FollowerAI::MoveInLineOfSight(pWho);

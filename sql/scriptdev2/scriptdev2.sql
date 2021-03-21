@@ -1124,7 +1124,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1000432','Ringo? Wake up! Don''t worry, I''ll take care of you.','0','0','0','0','5406','ringo SAY_SPR_END_7'),
 ('-1000433','%s fades away after a long pause.','0','2','0','0','0','ringo EMOTE_RIN_END_8'),
 
-('-1000434','Liladris has been waiting for me at Maestra''s Post, so we should make haste, $N.','0','0','0','0','6540','kerlonian SAY_KER_START'),
+('-1000434','Liladris has been waiting for me at Maestra''s Post, so we should make haste, $N.','6209','0','0','0','6540','kerlonian SAY_KER_START'),
 ('-1000435','%s looks very sleepy...','0','2','0','0','6811','kerlonian EMOTE_KER_SLEEP_1'),
 ('-1000436','%s suddenly falls asleep','0','2','0','0','0','kerlonian EMOTE_KER_SLEEP_2'),
 ('-1000437','%s begins to drift off...','0','2','0','0','6541','kerlonian EMOTE_KER_SLEEP_3'),
@@ -1135,7 +1135,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1000442','Be on the alert! The Blackwood furbolgs are numerous in the area...','0','0','0','0','0','kerlonian SAY_KER_ALERT_1'),
 ('-1000443','It''s quiet... Too quiet...','0','0','0','0','6868','kerlonian SAY_KER_ALERT_2'),
 ('-1000444','Oh, I can see Liladris from here... Tell her I''m here, won''t you?','0','0','0','0','6643','kerlonian SAY_KER_END'),
-('-1000445','%s wakes up!','0','2','0','0','6612','kerlonian EMOTE_KER_AWAKEN'),
+('-1000445','%s wakes up!','6700','2','0','0','6612','kerlonian EMOTE_KER_AWAKEN'),
 
 ('-1000446','A-Me good. Good, A-Me. Follow... follow A-Me. Home. A-Me go home.','0','0','0','0','5062','ame01 SAY_AME_START'),
 ('-1000447','Good... good, A-Me. A-Me good. Home. Find home.','0','0','0','0','5063','ame01 SAY_AME_PROGRESS'),
