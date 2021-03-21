@@ -643,6 +643,7 @@ enum
     SAY_STINKY_THIRD_STOP_3             = -1001144,
     SAY_STINKY_PLANT_GATHERED           = -1001145,
     SAY_STINKY_END                      = -1000962,
+    SAY_STINKY_END_EMOTE                = -1010032,
     SAY_STINKY_AGGRO_1                  = -1000960,
     SAY_STINKY_AGGRO_2                  = -1000961,
     SAY_STINKY_AGGRO_3                  = -1001146,
@@ -722,6 +723,9 @@ struct npc_stinky_ignatzAI : public npc_escortAI
                     pPlayer->RewardPlayerAndGroupAtEventExplored(pPlayer->GetTeam() == ALLIANCE ? QUEST_ID_STINKYS_ESCAPE_ALLIANCE : QUEST_ID_STINKYS_ESCAPE_HORDE, m_creature);
                     DoScriptText(SAY_STINKY_END, m_creature, pPlayer);
                 }
+                break;
+            case 41:
+                DoScriptText(SAY_STINKY_END_EMOTE, m_creature);
                 break;
         }
     }

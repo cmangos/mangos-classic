@@ -1764,7 +1764,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1010029','Help! We''re being attacked! Dark Irons!','0','1','0','0','494','SAY_MIRAN_AMBUSH'),
 
 ('-1010030','Bye!  Better luck next time!','0','1','0','0','7553','Hornizz to Melizza 1'),
-('-1010031','Always on the go, that girl.','0','1','0','0','7554','Hornizz to Melizza 2');
+('-1010031','Always on the go, that girl.','0','1','0','0','7554','Hornizz to Melizza 2'),
+('-1010032','%s disappears back into the swamp.','0','2','0','0','1619','Stinky end emote');
 
 -- -1 015 000 TBC texts
 
