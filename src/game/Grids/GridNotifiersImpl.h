@@ -251,8 +251,9 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
         return;
 
     // Check target immune to spell or aura
-    if (target->IsImmuneToSpell(spellInfo, false, (1 << eff_index)) || target->IsImmuneToSpellEffect(spellInfo, eff_index, false))
-        return;
+    if (!spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)) // confirmed 40657 - Ancient Flames goes through immunity
+        if (target->IsImmuneToSpell(spellInfo, false, (1 << eff_index)) || target->IsImmuneToSpellEffect(spellInfo, eff_index, false))
+            return;
 
     if (!spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !i_dynobject.IsWithinLOSInMap(target))
         return;
