@@ -140,10 +140,41 @@ struct boss_loathebAI : public CombatAI
     }
 };
 
+struct CorruptedMind : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (Unit* target = spell->GetUnitTarget())
+            {
+                // This spell only works on players as it triggers spells that override spell class scripts
+                if (target->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                // Determine which sub-spell to trigger for each healing class
+                uint32 spellId = 0;
+                switch (target->getClass())
+                {
+                    case CLASS_PALADIN: spellId = 29196; break;
+                    case CLASS_PRIEST: spellId = 29185; break;
+                    case CLASS_SHAMAN: spellId = 29198; break;
+                    case CLASS_DRUID: spellId = 29194; break;
+                    default: break;
+                }
+                if (spellId != 0)
+                    spell->GetCaster()->CastSpell(target, spellId, TRIGGERED_OLD_TRIGGERED, nullptr);
+            }
+        }
+    }
+};
+
 void AddSC_boss_loatheb()
 {
     Script* newScript = new Script;
     newScript->Name = "boss_loatheb";
     newScript->GetAI = &GetNewAIInstance<boss_loathebAI>;
     newScript->RegisterSelf();
+
+    RegisterSpellScript<CorruptedMind>("spell_loatheb_corrupted_mind");
 }
