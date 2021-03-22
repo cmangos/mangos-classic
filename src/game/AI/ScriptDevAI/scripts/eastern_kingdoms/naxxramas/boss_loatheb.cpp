@@ -23,6 +23,7 @@ EndScriptData
 
 */
 
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "naxxramas.h"
 
@@ -37,30 +38,35 @@ enum
     NPC_SPORE               = 16286
 };
 
-struct boss_loathebAI : public ScriptedAI
+enum LoathebActions
 {
-    boss_loathebAI(Creature* creature) : ScriptedAI(creature)
+    LOATHEB_POISON_AURA,
+    LOATHEB_CORRUPTED_MIND,
+    LOATHEB_INEVITABLE_DOOM,
+    LOATHEB_REMOVE_CURSE,
+    LOATHEB_SUMMON,
+    LOATHEB_ACTION_MAX,
+};
+
+struct boss_loathebAI : public CombatAI
+{
+    boss_loathebAI(Creature* creature) : CombatAI(creature, LOATHEB_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_instance = (instance_naxxramas*)creature->GetInstanceData();
-        Reset();
+        AddCombatAction(LOATHEB_POISON_AURA, 5000u);
+        AddCombatAction(LOATHEB_CORRUPTED_MIND, 4000u);
+        AddCombatAction(LOATHEB_REMOVE_CURSE, 2000u);
+        AddCombatAction(LOATHEB_INEVITABLE_DOOM, 120000u);
+        AddCombatAction(LOATHEB_SUMMON, 12000u);
     }
 
-    instance_naxxramas* m_instance;
+    ScriptedInstance* m_instance;
 
-    uint32 m_poisonAuraTimer;
-    uint32 m_corruptedMindTimer;
-    uint32 m_inevitableDoomTimer;
-    uint32 m_removeCurseTimer;
-    uint32 m_summonTimer;
     uint8 m_corruptedMindCount;
 
     void Reset() override
     {
-        m_poisonAuraTimer = 5 * IN_MILLISECONDS;
-        m_corruptedMindTimer = 4 * IN_MILLISECONDS;
-        m_removeCurseTimer = 2 * IN_MILLISECONDS;
-        m_inevitableDoomTimer = 2 * MINUTE * IN_MILLISECONDS;
-        m_summonTimer = 12 * IN_MILLISECONDS;
+        CombatAI::Reset();
+
         m_corruptedMindCount = 0;
     }
 
@@ -76,8 +82,10 @@ struct boss_loathebAI : public ScriptedAI
             m_instance->SetData(TYPE_LOATHEB, DONE);
     }
 
-    void JustReachedHome() override
+    void EnterEvadeMode() override
     {
+        CombatAI::EnterEvadeMode();
+
         if (m_instance)
             m_instance->SetData(TYPE_LOATHEB, NOT_STARTED);
     }
@@ -88,74 +96,54 @@ struct boss_loathebAI : public ScriptedAI
             summoned->SetInCombatWithZone();
     }
 
-    void UpdateAI(const uint32 diff) override
+    void ExecuteAction(uint32 action) override
     {
-        // Do nothing if no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // Inevitable Doom
-        if (m_inevitableDoomTimer < diff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_INEVITABLE_DOOM, CAST_TRIGGERED) == CAST_OK)
-                m_inevitableDoomTimer = ((m_corruptedMindCount <= 5) ? 30 : 15) * IN_MILLISECONDS;
-        }
-        else
-            m_inevitableDoomTimer -= diff;
-
-        // Corrupted Mind
-        if (m_corruptedMindTimer < diff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_CORRUPTED_MIND, CAST_TRIGGERED) == CAST_OK)
+            case LOATHEB_INEVITABLE_DOOM:
             {
-                ++m_corruptedMindCount;
-                m_corruptedMindTimer = 60 * IN_MILLISECONDS;
+                if (DoCastSpellIfCan(m_creature, SPELL_INEVITABLE_DOOM, CAST_TRIGGERED) == CAST_OK)
+                    ResetCombatAction(action, ((m_corruptedMindCount <= 5) ? 30 : 15) * IN_MILLISECONDS);
+                break;
             }
+            case LOATHEB_CORRUPTED_MIND:
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_CORRUPTED_MIND, CAST_TRIGGERED) == CAST_OK)
+                {
+                    ++m_corruptedMindCount;
+                    ResetCombatAction(action, 60 * IN_MILLISECONDS);
+                }
+                break;
+            }
+            case LOATHEB_SUMMON:
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPORE, CAST_TRIGGERED) == CAST_OK)
+                    ResetCombatAction(action, 12 * IN_MILLISECONDS);
+                break;
+            }
+            case LOATHEB_POISON_AURA:
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_POISON_AURA) == CAST_OK)
+                    ResetCombatAction(action, 12 * IN_MILLISECONDS);
+                break;
+            }
+            case LOATHEB_REMOVE_CURSE:
+            {
+                SpellCastResult decurseResult = m_creature->CastSpell(m_creature, SPELL_REMOVE_CURSE, TRIGGERED_OLD_TRIGGERED);
+                if (decurseResult == SPELL_CAST_OK || decurseResult == SPELL_FAILED_NOTHING_TO_DISPEL)  // Don't throw an error if there is nothing to dispel
+                    ResetCombatAction(action, 30 * IN_MILLISECONDS);
+                break;
+            }
+            default:
+                break;
         }
-        else
-            m_corruptedMindTimer -= diff;
-
-        // Summon
-        if (m_summonTimer < diff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPORE, CAST_TRIGGERED) == CAST_OK)
-                m_summonTimer = 12 * IN_MILLISECONDS;
-        }
-        else
-            m_summonTimer -= diff;
-
-        // Poison Aura
-        if (m_poisonAuraTimer < diff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_POISON_AURA) == CAST_OK)
-                m_poisonAuraTimer = 12 * IN_MILLISECONDS;
-        }
-        else
-            m_poisonAuraTimer -= diff;
-
-        // Remove Curse
-        if (m_removeCurseTimer < diff)
-        {
-            SpellCastResult decurseResult = m_creature->CastSpell(m_creature, SPELL_REMOVE_CURSE, TRIGGERED_OLD_TRIGGERED);
-            if (decurseResult == SPELL_CAST_OK || decurseResult == SPELL_FAILED_NOTHING_TO_DISPEL)  // Don't throw an error if there is nothing to dispel
-                m_removeCurseTimer = 30 * IN_MILLISECONDS;
-        }
-        else
-            m_removeCurseTimer -= diff;
-
-        DoMeleeAttackIfReady();
     }
 };
-
-UnitAI* GetAI_boss_loatheb(Creature* creature)
-{
-    return new boss_loathebAI(creature);
-}
 
 void AddSC_boss_loatheb()
 {
     Script* newScript = new Script;
     newScript->Name = "boss_loatheb";
-    newScript->GetAI = &GetAI_boss_loatheb;
+    newScript->GetAI = &GetNewAIInstance<boss_loathebAI>;
     newScript->RegisterSelf();
 }
