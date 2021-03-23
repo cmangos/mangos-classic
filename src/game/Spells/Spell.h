@@ -659,6 +659,9 @@ class Spell
         void SetFakeCaster(Unit* caster) { m_caster = caster; }
         WorldObject* GetTrueCaster() const { return m_trueCaster; }
         Unit* GetAffectiveCasterOrOwner() const;
+
+        // speed override
+        void SetOverridenSpeed(float newSpeed);
     protected:
         void SendLoot(ObjectGuid guid, LootType loottype, LockType lockType);
         bool IgnoreItemRequirements() const;                // some item use spells have unexpected reagent data
@@ -828,6 +831,10 @@ class Spell
         // spell cast results
         uint32 m_param1;
         uint32 m_param2;
+
+        // speed override from parent spell
+        bool m_overrideSpeed;
+        float m_overridenSpeed;
 
         // GO casting preparations
         WorldObject* m_trueCaster;

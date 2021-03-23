@@ -420,6 +420,8 @@ Spell::Spell(WorldObject* caster, SpellEntry const* info, uint32 triggeredFlags,
 
     m_targetlessMask = 0;
 
+    m_overrideSpeed = false;
+
     OnInit();
 }
 
@@ -3066,14 +3068,13 @@ void Spell::_handle_immediate_phase()
         }
     }
 
+    ProcSpellAuraTriggers();
+
     // start channeling if applicable (after _handle_immediate_phase for get persistent effect dynamic object for channel target
     if (IsChanneledSpell(m_spellInfo) && m_duration)
     {
         m_spellState = SPELL_STATE_CHANNELING;
         SendChannelStart(m_duration);
-
-        // Proc spell aura triggers on start of channeled spell
-        ProcSpellAuraTriggers();
     }
 }
 
@@ -3327,10 +3328,6 @@ void Spell::finish(bool ok)
     // other code related only to successfully finished spells
     if (!ok)
         return;
-
-    // Normal spells proc on finish, channeled spells proc on start when they have duration, thats when channeledChannel is true
-    if (!IsChanneledSpell(m_spellInfo) && !channeledChannel)
-        ProcSpellAuraTriggers();
 
     // Heal caster for all health leech from all targets
     if (m_healthLeech)
@@ -6948,6 +6945,9 @@ float Spell::GetSpellSpeed() const
     if (IsChanneledSpell(m_spellInfo))
         return 0.f;
 
+    if (m_overrideSpeed)
+        return m_overridenSpeed;
+    
     return m_spellInfo->speed;
 }
 
@@ -6992,7 +6992,13 @@ void Spell::ProcSpellAuraTriggers()
                 // Calculate chance at that moment (can be depend for example from combo points)
                 int32 chance = m_caster->CalculateSpellEffectValue(target, auraSpellInfo, auraSpellIdx, &auraBasePoints);
                 if (roll_chance_i(chance))
-                    m_caster->CastSpell(target, procid, TRIGGERED_OLD_TRIGGERED, nullptr, targetTrigger);
+                {
+                    Spell* spell = new Spell(m_caster, sSpellTemplate.LookupEntry<SpellEntry>(procid), TRIGGERED_OLD_TRIGGERED, ObjectGuid(), nullptr);
+                    SpellCastTargets targets;
+                    targets.setUnitTarget(target);
+                    spell->SetOverridenSpeed(GetSpellSpeed());
+                    spell->SpellStart(&targets, targetTrigger);
+                }
             }
         }
     }
@@ -7348,6 +7354,12 @@ void Spell::StopCast(SpellCastResult castResult)
     finish(false);
     m_caster->DecreaseCastCounter();
     SetExecutedCurrently(false);
+}
+
+void Spell::SetOverridenSpeed(float newSpeed)
+{
+    m_overrideSpeed = true;
+    m_overridenSpeed = newSpeed;
 }
 
 void Spell::OnInit()
