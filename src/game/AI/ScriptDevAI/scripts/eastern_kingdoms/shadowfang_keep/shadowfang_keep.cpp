@@ -33,6 +33,7 @@ EndContentData */
 
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "shadowfang_keep.h"
 #include "Spells/Scripts/SpellScript.h"
@@ -59,108 +60,144 @@ enum
     GOSSIP_ITEM_DOOR        = -3033000
 };
 
-struct npc_shadowfang_prisonerAI : public npc_escortAI
+struct npc_shadowfang_prisonerAI : public npc_escortAI, public TimerManager
 {
-    npc_shadowfang_prisonerAI(Creature* pCreature) : npc_escortAI(pCreature)
+    npc_shadowfang_prisonerAI(Creature* creature) : npc_escortAI(creature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_uiNpcEntry = pCreature->GetEntry();
+        m_instance = (ScriptedInstance*)creature->GetInstanceData();
+        m_npcEntry = creature->GetEntry();
+        m_speechStep = 1;
+        AddCustomAction(1, true, [&]() { HandleSpeech(); });
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
-    uint32 m_uiNpcEntry;
+    ScriptedInstance* m_instance;
+    uint32 m_npcEntry;
+    uint8 m_speechStep;
 
-    void WaypointReached(uint32 uiPoint) override
+    void HandleSpeech()
     {
-        switch (uiPoint)
+        uint32 timer = 0;
+        switch (m_speechStep)
         {
             case 1:
-                if (m_uiNpcEntry == NPC_ASH)
-                    DoScriptText(SAY_FREE_AS, m_creature);
-                else
-                    DoScriptText(SAY_FREE_AD, m_creature);
-                break;
-            case 11:
-                if (m_uiNpcEntry == NPC_ASH)
-                    DoScriptText(SAY_OPEN_DOOR_AS, m_creature);
-                else
-                    DoScriptText(SAY_OPEN_DOOR_AD, m_creature);
-                break;
-            case 12:
-                if (m_uiNpcEntry == NPC_ASH)
-                    DoCastSpellIfCan(m_creature, SPELL_UNLOCK);
-                else
-                    DoScriptText(EMOTE_UNLOCK_DOOR_AD, m_creature);
-                break;
-//            case 12:
-//                if (m_uiNpcEntry != NPC_ASH)
-//                    m_creature->HandleEmote(EMOTE_ONESHOT_USESTANDING);
-//                break;
-            case 14:
-                if (m_uiNpcEntry == NPC_ASH)
-                    DoScriptText(SAY_POST_DOOR_AS, m_creature);
-                else
+            {
+                if (m_npcEntry == NPC_ADA)
                     DoScriptText(SAY_POST1_DOOR_AD, m_creature);
+                else
+                    DoScriptText(SAY_POST_DOOR_AS, m_creature);
+                timer = 2 * IN_MILLISECONDS;
 
-                if (m_pInstance)
-                    m_pInstance->SetData(TYPE_FREE_NPC, DONE);
+                if (m_instance)
+                    m_instance->SetData(TYPE_FREE_NPC, DONE);
                 break;
-            case 15:
-                if (m_uiNpcEntry == NPC_ASH)
+            }
+            case 2:
+            {
+                if (m_npcEntry == NPC_ASH)
+                {
                     DoCastSpellIfCan(m_creature, SPELL_FIRE);
+                    timer = 2500;
+                }
                 else
                 {
-                    DoScriptText(SAY_POST2_DOOR_AD, m_creature);
                     SetRun();
+                    SetEscortPaused(false);
+                    DoScriptText(SAY_POST2_DOOR_AD, m_creature);
+                    DisableTimer(1);
                 }
                 break;
-            case 16:
-                if (m_uiNpcEntry == NPC_ASH)
+            }
+            case 3:
+            {
+                if (m_npcEntry == NPC_ASH)
+                {
                     DoScriptText(EMOTE_VANISH_AS, m_creature);
+                    m_creature->ForcedDespawn();
+                }
+                break;
+            }
+        }
+        ++m_speechStep;
+        ResetTimer(1, timer);
+    }
+
+    void Start() override
+    {
+        if (m_npcEntry == NPC_ASH)
+            DoScriptText(SAY_FREE_AS, m_creature);
+        else
+            DoScriptText(SAY_FREE_AD, m_creature);
+
+        npc_escortAI::Start();
+    }
+
+    void WaypointReached(uint32 point) override
+    {
+        switch (point)
+        {
+            case 11:
+                if (m_npcEntry == NPC_ASH)
+                    DoScriptText(SAY_OPEN_DOOR_AS, m_creature);
+                break;
+            case 12:
+            {
+                SetEscortPaused(true);
+                GameObject* door = m_instance->GetSingleGameObjectFromStorage(GO_COURTYARD_DOOR);
+                m_creature->SetFacingToObject(door);
+                if (m_npcEntry == NPC_ASH)
+                {
+                    DoCastSpellIfCan(m_creature, SPELL_UNLOCK);
+                    ResetTimer(1, 5 * IN_MILLISECONDS);
+                }
+                else
+                {
+                    DoScriptText(SAY_OPEN_DOOR_AD, m_creature);
+                    DoScriptText(EMOTE_UNLOCK_DOOR_AD, m_creature);
+                    ResetTimer(1, 6 * IN_MILLISECONDS);
+                }
+                break;
+            }
+            case 31:
+            {
+                if (m_npcEntry == NPC_ADA)
+                    m_creature->ForcedDespawn();
+                break;
+            }
+            default:
                 break;
         }
     }
 
-    void Reset() override {}
+    void Reset() {} override
 
-    // Let's prevent Adamant from charging into Ashcrombe's cell
-    // And beating the crap out of him and vice versa XD
-    void AttackStart(Unit* pWho) override
+    void UpdateAI(const uint32 diff) override
     {
-        if (pWho)
-        {
-            if (pWho->GetEntry() == NPC_ASH || pWho->GetEntry() == NPC_ADA)
-                return;
-            ScriptedAI::AttackStart(pWho);
-        }
+        UpdateTimers(diff);
+        npc_escortAI::UpdateAI(diff);
     }
 };
 
-UnitAI* GetAI_npc_shadowfang_prisoner(Creature* pCreature)
+bool GossipHello_npc_shadowfang_prisoner(Player* player, Creature* creature)
 {
-    return new npc_shadowfang_prisonerAI(pCreature);
-}
+    ScriptedInstance* instance = (ScriptedInstance*)creature->GetInstanceData();
 
-bool GossipHello_npc_shadowfang_prisoner(Player* pPlayer, Creature* pCreature)
-{
-    ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+    if (instance && instance->GetData(TYPE_FREE_NPC) != DONE)
+        player->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_DOOR, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
-    if (pInstance && pInstance->GetData(TYPE_FREE_NPC) != DONE && pInstance->GetData(TYPE_RETHILGORE) == DONE)
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_DOOR, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-
-    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
+    uint32 textId = creature->GetEntry() == NPC_ADA ? GOSSIP_ADA : GOSSIP_ASH;
+    player->SEND_GOSSIP_MENU(textId, creature->GetObjectGuid());
     return true;
 }
 
-bool GossipSelect_npc_shadowfang_prisoner(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+bool GossipSelect_npc_shadowfang_prisoner(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
 {
-    if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+    if (action == GOSSIP_ACTION_INFO_DEF + 1)
     {
-        pPlayer->CLOSE_GOSSIP_MENU();
+        player->CLOSE_GOSSIP_MENU();
 
-        if (npc_shadowfang_prisonerAI* pEscortAI = dynamic_cast<npc_shadowfang_prisonerAI*>(pCreature->AI()))
-            pEscortAI->Start();
+        if (npc_shadowfang_prisonerAI* escortAI = dynamic_cast<npc_shadowfang_prisonerAI*>(creature->AI()))
+            escortAI->Start();
     }
     return true;
 }
@@ -846,7 +883,7 @@ void AddSC_shadowfang_keep()
     pNewScript->Name = "npc_shadowfang_prisoner";
     pNewScript->pGossipHello =  &GossipHello_npc_shadowfang_prisoner;
     pNewScript->pGossipSelect = &GossipSelect_npc_shadowfang_prisoner;
-    pNewScript->GetAI = &GetAI_npc_shadowfang_prisoner;
+    pNewScript->GetAI = &GetNewAIInstance<npc_shadowfang_prisonerAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

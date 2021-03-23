@@ -22,6 +22,9 @@ enum
 
     NPC_ASH                 = 3850,
     NPC_ADA                 = 3849,
+    GOSSIP_ASH              = 798,
+    GOSSIP_ADA              = 799,
+
     //  NPC_ARUGAL              = 10000,                    //"Arugal" says intro text, not used
     NPC_ARCHMAGE_ARUGAL     = 4275,                         //"Archmage Arugal" does Fenrus event
     NPC_FENRUS              = 4274,                         // used to summon Arugal in Fenrus event
