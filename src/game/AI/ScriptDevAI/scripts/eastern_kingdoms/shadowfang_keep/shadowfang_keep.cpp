@@ -122,16 +122,6 @@ struct npc_shadowfang_prisonerAI : public npc_escortAI, public TimerManager
         ResetTimer(1, timer);
     }
 
-    void Start() override
-    {
-        if (m_npcEntry == NPC_ASH)
-            DoScriptText(SAY_FREE_AS, m_creature);
-        else
-            DoScriptText(SAY_FREE_AD, m_creature);
-
-        npc_escortAI::Start();
-    }
-
     void WaypointReached(uint32 point) override
     {
         switch (point)
@@ -169,7 +159,7 @@ struct npc_shadowfang_prisonerAI : public npc_escortAI, public TimerManager
         }
     }
 
-    void Reset() {} override
+    void Reset() override {}
 
     void UpdateAI(const uint32 diff) override
     {
@@ -197,7 +187,14 @@ bool GossipSelect_npc_shadowfang_prisoner(Player* player, Creature* creature, ui
         player->CLOSE_GOSSIP_MENU();
 
         if (npc_shadowfang_prisonerAI* escortAI = dynamic_cast<npc_shadowfang_prisonerAI*>(creature->AI()))
+        {
+            if (creature->GetEntry() == NPC_ASH)
+                DoScriptText(SAY_FREE_AS, creature);
+            else
+                DoScriptText(SAY_FREE_AD, creature);
+
             escortAI->Start();
+        }
     }
     return true;
 }
