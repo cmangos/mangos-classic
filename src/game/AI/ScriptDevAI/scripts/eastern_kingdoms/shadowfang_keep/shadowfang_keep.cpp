@@ -159,7 +159,7 @@ struct npc_shadowfang_prisonerAI : public npc_escortAI, public TimerManager
         }
     }
 
-    void Reset() {} override
+    void Reset() override {}
 
     void UpdateAI(const uint32 diff) override
     {
