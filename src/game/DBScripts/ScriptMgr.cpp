@@ -911,6 +911,15 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 }
                 break;
             }
+            case SCRIPT_COMMAND_MEETINGSTONE:               // 55
+            {
+                if (!GetAreaEntryByAreaID(tmp.meetingstone.areaId))
+                {
+                    sLog.outErrorDb("Table `%s` has datalong = %u in  SCRIPT_COMMAND_MEETINGSTONE for script id %u, but there is no area with this Id.", tablename, tmp.meetingstone.areaId, tmp.id);
+                    continue;
+                }
+                break;
+            }
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -3057,6 +3066,29 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 break;
 
             static_cast<Unit*>(pSource)->SetSheath(SheathState(m_script->setSheathe.sheatheState));
+            break;
+        }
+        case SCRIPT_COMMAND_MEETINGSTONE:                   // 55
+        {
+            if (LogIfNotPlayer(pTarget))
+                return false;
+
+            Player* pPlayer = nullptr;
+
+            if (pTarget && pTarget->IsPlayer())
+                pPlayer = static_cast<Player*>(pTarget);
+            else if (pSource && pSource->IsPlayer())
+                pPlayer = static_cast<Player*>(pSource);
+
+            // only Player
+            if (!pPlayer)
+            {
+                sLog.outError("SCRIPT_COMMAND_MEETINGSTONE (script id %u) call for non-player, skipping.", m_script->id);
+                break;
+            }
+
+            if (!sLFGMgr.IsPlayerInQueue(pPlayer->GetObjectGuid()))
+                sLFGMgr.AddToQueue(pPlayer, m_script->meetingstone.areaId);
             break;
         }
         default:

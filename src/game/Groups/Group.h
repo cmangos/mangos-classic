@@ -26,6 +26,8 @@
 #include "BattleGround/BattleGround.h"
 #include "Server/DBCEnums.h"
 #include "Globals/SharedDefines.h"
+#include "LFG/LFGHandler.h"
+#include "LFG/LFGMgr.h"
 
 class WorldSession;
 class Map;
@@ -93,6 +95,18 @@ enum GroupUpdateFlags
 // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13,14,15,16,17,18,19
 static const uint8 GroupUpdateLength[GROUP_UPDATE_FLAGS_COUNT] = { 1, 2, 2, 1, 2, 2, 2, 2, 4, 4, 2, 8, 1, 2, 2, 2, 1, 2, 2, 4, 2 };
 
+enum RemoveMethod
+{
+    GROUP_LEAVE = 0,
+    GROUP_KICK = 1
+};
+
+enum InviteMethod
+{
+    GROUP_JOIN = 0,
+    GROUP_LFG = 1
+};
+
 struct InstanceGroupBind
 {
     DungeonPersistentState* state;
@@ -135,7 +149,7 @@ class Group
         uint32 RemoveInvite(Player* player);
         void   RemoveAllInvites();
         bool   AddLeaderInvite(Player* player);
-        bool   AddMember(ObjectGuid guid, const char* name);
+        bool   AddMember(ObjectGuid guid, const char* name, uint8 joinMethod = GROUP_JOIN);
         uint32 RemoveMember(ObjectGuid guid, uint8 method); // method: 0=just remove, 1=kick
         void   ChangeLeader(ObjectGuid guid);
         void   Disband(bool hideDestroy = false);
@@ -267,6 +281,14 @@ class Group
         InstanceGroupBind* GetBoundInstance(uint32 mapid);
         BoundInstancesMap& GetBoundInstances() { return m_boundInstances; }
 
+        // LFG
+        void SetLFGAreaId(uint32 areaId) { m_LFGAreaId = areaId; }
+        uint32 GetLFGAreaId() { return m_LFGAreaId; }
+        bool IsInLFG() { return m_LFGAreaId > 0; }
+
+        void CalculateLFGRoles(LFGGroupQueueInfo& data);
+        bool FillPremadeLFG(ObjectGuid const& plrGuid, Classes playerClass, LfgRoles requiredRole, uint32& InitRoles, uint32& DpsCount, std::list<ObjectGuid>& processed);
+
     protected:
         bool _addMember(ObjectGuid guid, const char* name, bool isAssistant = false);
         bool _addMember(ObjectGuid guid, const char* name, bool isAssistant, uint8 group);
@@ -343,5 +365,6 @@ class Group
         ObjectGuid          m_currentLooterGuid;
         BoundInstancesMap   m_boundInstances;
         uint8*              m_subGroupsCounts;
+        uint32              m_LFGAreaId;
 };
 #endif

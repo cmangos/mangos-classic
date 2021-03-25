@@ -303,32 +303,6 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
     obj->Use(_player);
 }
 
-void WorldSession::HandleMeetingStoneJoinOpcode(WorldPacket& recv_data)
-{
-    ObjectGuid guid;
-
-    recv_data >> guid;
-
-    DEBUG_LOG("WORLD: Recvd CMSG_MEETINGSTONE_JOIN Message guid: %s", guid.GetString().c_str());
-
-    // ignore for remote control state
-    if (!_player->IsSelfMover())
-        return;
-
-    GameObject* obj = GetPlayer()->GetMap()->GetGameObject(guid);
-    if (!obj)
-        return;
-
-    // Never expect this opcode for some type GO's
-    if (obj->GetGoType() != GAMEOBJECT_TYPE_MEETINGSTONE)
-    {
-        sLog.outError("HandleMeetingStoneJoinOpcode: CMSG_MEETINGSTONE_JOIN for not allowed GameObject type %u (Entry %u), didn't expect this to happen.", obj->GetGoType(), obj->GetEntry());
-        return;
-    }
-
-    obj->Use(_player);
-}
-
 void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 {
     uint32 spellId;

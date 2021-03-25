@@ -511,6 +511,7 @@ class ObjectMgr
         int32 GetPlayerMapIdByGUID(ObjectGuid const& guid) const;
         bool GetPlayerNameByGUID(ObjectGuid guid, std::string& name) const;
         Team GetPlayerTeamByGUID(ObjectGuid guid) const;
+        uint8 GetPlayerClassByGUID(ObjectGuid guid) const;
         uint32 GetPlayerAccountIdByGUID(ObjectGuid guid) const;
         uint32 GetPlayerAccountIdByPlayerName(const std::string& name) const;
 

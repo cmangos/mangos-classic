@@ -2122,6 +2122,26 @@ Team ObjectMgr::GetPlayerTeamByGUID(ObjectGuid guid) const
     return TEAM_NONE;
 }
 
+uint8 ObjectMgr::GetPlayerClassByGUID(ObjectGuid guid) const
+{
+    // prevent DB access for online player
+    if (Player* player = GetPlayer(guid))
+        return player->getClass();
+
+    uint32 lowguid = guid.GetCounter();
+
+    QueryResult* result = CharacterDatabase.PQuery("SELECT class FROM characters WHERE guid = '%u'", lowguid);
+
+    if (result)
+    {
+        uint8 pClass = (*result)[0].GetUInt8();
+        delete result;
+        return pClass;
+    }
+
+    return 0;
+}
+
 uint32 ObjectMgr::GetPlayerAccountIdByGUID(ObjectGuid guid) const
 {
     if (!guid.IsPlayer())
