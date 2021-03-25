@@ -1575,6 +1575,24 @@ OutdoorPvp.SIEnabled = 1
 OutdoorPvp.EPEnabled = 1
 
 ###################################################################################################################
+# MEETING STONE LFG CONFIG
+#
+#    LFG.Matchmaking
+#        Check talents of players in queue when making a group
+#        Default: 0 (disable - disregard talents, use class priorities, e.g. warrior - tank, paladin - healer)
+#                 1 (enable - set role based on talent tree that has more talent points)
+#
+#    LFG.MatchmakingTimer
+#        The time (in seconds) before player in LFG queue stops using matchmaking to find group faster
+#        Only works if matchmaking is enabled
+#        Default: 600 (5 minutes)
+#
+###################################################################################################################
+
+LFG.Matchmaking = 0
+LFG.MatchmakingTimer = 600
+
+###################################################################################################################
 # NETWORK CONFIG
 #
 #    Network.Threads
