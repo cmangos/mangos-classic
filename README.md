@@ -55,7 +55,6 @@ To be able to accomplish these goals, we support and promote:
   * [GitHub repositories](https://github.com/cmangos/)
   * [Issue tracker](https://github.com/cmangos/issues/issues)
   * [Pull Requests](https://github.com/cmangos/mangos-classic/pulls)
-  * [Current build status on Travis CI](https://travis-ci.org/cmangos/mangos-classic/)
   * [Wiki](https://github.com/cmangos/issues/wiki) with additional information on installation
   * [Contributing Guidelines](CONTRIBUTING.md)
   * Documentation can be found in the doc/ subdirectory and on the GitHub wiki
