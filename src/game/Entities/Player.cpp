@@ -5245,10 +5245,6 @@ void Player::UpdateCombatSkills(Unit* pVictim, WeaponAttackType attType, bool de
     if (room <= 0)
         return;
 
-    // Target is less proficient than player (i.e. trivial): nothing to gain
-    if (defence && pVictim->GetSkillMaxForLevel(this) <= skill)
-        return;
-
     // The farther player is from the cap, the easier it gets to level up the skill
     float chance = ((float(std::max(1, (room / 5))) / (cap / 5)) * 100);
 
