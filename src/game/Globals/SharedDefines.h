@@ -2335,7 +2335,8 @@ enum TradeStatus
 enum EncounterCreditType
 {
     ENCOUNTER_CREDIT_KILL_CREATURE = 0,
-    ENCOUNTER_CREDIT_CAST_SPELL = 1
+    ENCOUNTER_CREDIT_CAST_SPELL = 1,
+    ENCOUNTER_CREDIT_SCRIPT = 2,
 };
 
 enum WorldStateType
