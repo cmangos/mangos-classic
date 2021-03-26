@@ -458,6 +458,8 @@ struct boss_arugalAI : public ScriptedAI
                        if (mob_arugal_voidwalkerAI* voidwalkerAI = dynamic_cast<mob_arugal_voidwalkerAI*>(voidwalker->AI()))
                            voidwalkerAI->SetFollower(leaderGuid, i);
                    }
+
+                   voidwalker->SetInCombatWithZone();
                }
             }
         }
