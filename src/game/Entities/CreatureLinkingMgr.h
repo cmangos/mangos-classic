@@ -171,7 +171,7 @@ class CreatureLinkingHolder
         {
             uint16 linkingFlag: 16;
             uint16 searchRange: 16;
-            GuidList linkedGuids;
+            std::list<std::pair<uint32, ObjectGuid>> linkedGuids;
             bool inUse = false;
         };
         // Structure associated to a master (guid case)
@@ -187,7 +187,7 @@ class CreatureLinkingHolder
         typedef std::pair<BossGuidMap::const_iterator, BossGuidMap::const_iterator> BossGuidMapBounds;
 
         // Helper function, to process a slave list
-        void ProcessSlaveGuidList(CreatureLinkingEvent eventType, Creature* pSource, uint32 flag, uint16 searchRange, GuidList& slaveGuidList, Unit* pEnemy);
+        void ProcessSlaveGuidList(CreatureLinkingEvent eventType, Creature* pSource, uint32 flag, uint16 searchRange, std::list<std::pair<uint32, ObjectGuid>>& slaveGuidList, Unit* pEnemy);
         // Helper function, to process a single slave
         void ProcessSlave(CreatureLinkingEvent eventType, Creature* pSource, uint32 flag, Creature* pSlave, Unit* pEnemy);
         // Helper function to set following

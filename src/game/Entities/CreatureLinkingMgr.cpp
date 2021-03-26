@@ -344,7 +344,7 @@ void CreatureLinkingHolder::AddSlaveToHolder(Creature* pCreature)
         {
             if (itr->second.linkingFlag == pInfo->linkingFlag)
             {
-                itr->second.linkedGuids.push_back(pCreature->GetObjectGuid());
+                itr->second.linkedGuids.push_back(std::make_pair(pCreature->GetDbGuid(), pCreature->GetObjectGuid()));
                 pCreature = nullptr;                           // Store that is was handled
                 break;
             }
@@ -354,7 +354,7 @@ void CreatureLinkingHolder::AddSlaveToHolder(Creature* pCreature)
         if (pCreature)
         {
             InfoAndGuids tmp;
-            tmp.linkedGuids.push_back(pCreature->GetObjectGuid());
+            tmp.linkedGuids.push_back(std::make_pair(pCreature->GetDbGuid(), pCreature->GetObjectGuid()));
             tmp.linkingFlag = pInfo->linkingFlag;
             tmp.searchRange = 0;
             m_holderGuidMap.insert(HolderMap::value_type(pInfo->masterId, tmp));
@@ -368,7 +368,7 @@ void CreatureLinkingHolder::AddSlaveToHolder(Creature* pCreature)
     {
         if (itr->second.linkingFlag == pInfo->linkingFlag && itr->second.searchRange == pInfo->searchRange)
         {
-            itr->second.linkedGuids.push_back(pCreature->GetObjectGuid());
+            itr->second.linkedGuids.push_back(std::make_pair(pCreature->GetDbGuid(), pCreature->GetObjectGuid()));
             pCreature = nullptr;                               // Store that is was handled
             break;
         }
@@ -378,7 +378,7 @@ void CreatureLinkingHolder::AddSlaveToHolder(Creature* pCreature)
     if (pCreature)
     {
         InfoAndGuids tmp;
-        tmp.linkedGuids.push_back(pCreature->GetObjectGuid());
+        tmp.linkedGuids.push_back(std::make_pair(pCreature->GetDbGuid(), pCreature->GetObjectGuid()));
         tmp.linkingFlag = pInfo->linkingFlag;
         tmp.searchRange = pInfo->searchRange;
         m_holderMap.insert(HolderMap::value_type(pInfo->masterId, tmp));
@@ -480,7 +480,9 @@ void CreatureLinkingHolder::DoCreatureLinkingEvent(CreatureLinkingEvent eventTyp
                 pMaster = pSource->GetMap()->GetCreature(pInfo->masterDBGuid);
             }
 
-            if (pMaster)
+            if (eventType == LINKING_EVENT_EVADE && pSource->IsUsingNewSpawningSystem())
+                pSource->GetMap()->GetSpawnManager().RespawnCreature(pInfo->masterDBGuid);
+            else if (pMaster)
             {
                 switch (eventType)
                 {
@@ -494,7 +496,7 @@ void CreatureLinkingHolder::DoCreatureLinkingEvent(CreatureLinkingEvent eventTyp
                             pEnemy->AddThreat(pMaster);
                             pEnemy->SetInCombatWith(pMaster);
                             pEnemy->GetCombatManager().TriggerCombatTimer(pMaster);
-                        }                            
+                        }
                         else
                             pMaster->AI()->AttackStart(pEnemy);
                         break;
@@ -516,14 +518,24 @@ void CreatureLinkingHolder::DoCreatureLinkingEvent(CreatureLinkingEvent eventTyp
 }
 
 // Helper function, to process a slave list
-void CreatureLinkingHolder::ProcessSlaveGuidList(CreatureLinkingEvent eventType, Creature* pSource, uint32 flag, uint16 searchRange, GuidList& slaveGuidList, Unit* pEnemy)
+void CreatureLinkingHolder::ProcessSlaveGuidList(CreatureLinkingEvent eventType, Creature* pSource, uint32 flag, uint16 searchRange, std::list<std::pair<uint32, ObjectGuid>>& slaveGuidList, Unit* pEnemy)
 {
     if (!flag)
         return;
 
-    for (GuidList::iterator slave_itr = slaveGuidList.begin(); slave_itr != slaveGuidList.end();)
+    uint32 preprocessFlag = 0;
+    uint32 postprocessFlag = flag;
+    if (pSource->IsUsingNewSpawningSystem())
     {
-        Creature* pSlave = pSource->GetMap()->GetCreature(*slave_itr);
+        preprocessFlag = (postprocessFlag & (FLAG_RESPAWN_ON_EVADE | FLAG_RESPAWN_ON_DEATH | FLAG_RESPAWN_ON_RESPAWN));
+        postprocessFlag = (postprocessFlag & ~(FLAG_RESPAWN_ON_EVADE | FLAG_RESPAWN_ON_DEATH | FLAG_RESPAWN_ON_RESPAWN));
+    }
+
+    for (auto slave_itr = slaveGuidList.begin(); slave_itr != slaveGuidList.end();)
+    {
+        Creature* pSlave = pSource->GetMap()->GetCreature((*slave_itr).second);
+        if (preprocessFlag) // dynguid respawning
+            pSource->GetMap()->GetSpawnManager().RespawnCreature((*slave_itr).first);
         if (!pSlave)
         {
             // Remove old guid first
@@ -539,7 +551,7 @@ void CreatureLinkingHolder::ProcessSlaveGuidList(CreatureLinkingEvent eventType,
 
         // Handle single slave
         if (IsSlaveInRangeOfMaster(pSlave, pSource, searchRange))
-            ProcessSlave(eventType, pSource, flag, pSlave, pEnemy);
+            ProcessSlave(eventType, pSource, postprocessFlag, pSlave, pEnemy);
     }
 }
 
