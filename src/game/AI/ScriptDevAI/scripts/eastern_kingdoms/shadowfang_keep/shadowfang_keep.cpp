@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Shadowfang_Keep
-SD%Complete: 75
-SDComment: npc_shadowfang_prisoner using escortAI for movement to door.
+SD%Complete: 90
+SDComment: Scourge Invasion boss is missing
 SDCategory: Shadowfang Keep
 EndScriptData
 
@@ -26,7 +26,6 @@ EndScriptData
 /* ContentData
 npc_shadowfang_prisoner
 mob_arugal_voidwalker
-npc_arugal
 boss_arugal
 npc_deathstalker_vincent
 EndContentData */
@@ -388,46 +387,46 @@ const float HEIGHT_FENRUS_ROOM      = 140.0f;
 
 struct boss_arugalAI : public ScriptedAI
 {
-    boss_arugalAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_arugalAI(Creature* creature) : ScriptedAI(creature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_instance = (ScriptedInstance*)creature->GetInstanceData();
 
-        if (pCreature->GetPositionZ() < HEIGHT_FENRUS_ROOM)
+        if (creature->GetPositionZ() < HEIGHT_FENRUS_ROOM)
         {
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             m_creature->SetVisibility(VISIBILITY_OFF);
-            m_bEventMode = true;
+            m_eventMode = true;
         }
         else
-            m_bEventMode = false;
+            m_eventMode = false;
 
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
     ArugalPosition m_posPosition;
-    uint32 m_uiTeleportTimer, m_uiCurseTimer, m_uiVoidboltTimer, m_uiThundershockTimer, m_uiYellTimer;
-    bool m_bAttacking, m_bEventMode;
+    uint32 m_teleportTimer, m_curseTimer, m_voidboltTimer, m_thundershockTimer, m_yellTimer;
+    bool m_attacking, m_eventMode;
 
     void Reset() override
     {
-        m_uiTeleportTimer = urand(22000, 26000);
-        m_uiCurseTimer = urand(20000, 30000);
-        m_uiVoidboltTimer = m_uiThundershockTimer = 0;
-        m_uiYellTimer = urand(32000, 46000);
-        m_bAttacking = true;
+        m_teleportTimer = urand(22, 26) * IN_MILLISECONDS;
+        m_curseTimer = urand(20, 30) * IN_MILLISECONDS;
+        m_voidboltTimer = m_thundershockTimer = 0;
+        m_yellTimer = urand(32, 46) * IN_MILLISECONDS;
+        m_attacking = true;
         m_posPosition = POSITION_SPAWN_LEDGE;
     }
 
-    void Aggro(Unit* pWho) override
+    void Aggro(Unit* who) override
     {
         DoScriptText(YELL_AGGRO, m_creature);
-        DoCastSpellIfCan(pWho, SPELL_VOID_BOLT);
+        DoCastSpellIfCan(who, SPELL_VOID_BOLT);
     }
 
-    void KilledUnit(Unit* pVictim) override
+    void KilledUnit(Unit* victim) override
     {
-        if (pVictim->GetTypeId() == TYPEID_PLAYER)
+        if (victim->GetTypeId() == TYPEID_PLAYER)
             DoScriptText(YELL_KILLED_PLAYER, m_creature);
     }
 
@@ -464,71 +463,71 @@ struct boss_arugalAI : public ScriptedAI
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 diff) override
     {
-        if (m_bEventMode)
+        if (m_eventMode)
             return;
 
         // Check if we have a current target
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
-        if (GetManaPercent() < 6.0f && !m_bAttacking)
+        if (GetManaPercent() < 6.0f && !m_attacking)
         {
             if (m_posPosition != POSITION_UPPER_LEDGE)
                 StartAttacking();
-            else if (m_uiTeleportTimer > 2000)
-                m_uiTeleportTimer = 2000;
+            else if (m_teleportTimer > 2000)
+                m_teleportTimer = 2 * IN_MILLISECONDS;
 
-            m_bAttacking = true;
+            m_attacking = true;
         }
-        else if (GetManaPercent() > 12.0f && m_bAttacking)
+        else if (GetManaPercent() > 12.0f && m_attacking)
         {
             StopAttacking();
-            m_bAttacking = false;
+            m_attacking = false;
         }
 
-        if (m_uiYellTimer < uiDiff)
+        if (m_yellTimer < diff)
         {
             DoScriptText(YELL_COMBAT, m_creature);
-            m_uiYellTimer = urand(34000, 68000);
+            m_yellTimer = urand(34, 68) * IN_MILLISECONDS;
         }
         else
-            m_uiYellTimer -= uiDiff;
+            m_yellTimer -= diff;
 
-        if (m_uiCurseTimer < uiDiff)
+        if (m_curseTimer < diff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
-                DoCastSpellIfCan(pTarget, SPELL_ARUGALS_CURSE);
+            if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+                DoCastSpellIfCan(target, SPELL_ARUGALS_CURSE);
 
-            m_uiCurseTimer = urand(20000, 35000);
+            m_curseTimer = urand(20, 35) * IN_MILLISECONDS;
         }
         else
-            m_uiCurseTimer -= uiDiff;
+            m_curseTimer -= diff;
 
-        if (m_uiThundershockTimer < uiDiff)
+        if (m_thundershockTimer < diff)
         {
             if (GetVictimDistance() < 5.0f)
             {
                 DoCastSpellIfCan(m_creature->GetVictim(), SPELL_THUNDERSHOCK);
-                m_uiThundershockTimer = urand(30200, 38500);
+                m_thundershockTimer = urand(30, 38) * IN_MILLISECONDS;
             }
         }
         else
-            m_uiThundershockTimer -= uiDiff;
+            m_thundershockTimer -= diff;
 
-        if (m_uiVoidboltTimer < uiDiff)
+        if (m_voidboltTimer < diff)
         {
-            if (!m_bAttacking)
+            if (!m_attacking)
             {
                 DoCastSpellIfCan(m_creature->GetVictim(), SPELL_VOID_BOLT);
-                m_uiVoidboltTimer = urand(2900, 4800);
+                m_voidboltTimer = urand(2900, 4800);
             }
         }
         else
-            m_uiVoidboltTimer -= uiDiff;
+            m_voidboltTimer -= diff;
 
-        if (m_uiTeleportTimer < uiDiff)
+        if (m_teleportTimer < diff)
         {
             ArugalPosition posNewPosition;
 
@@ -563,30 +562,30 @@ struct boss_arugalAI : public ScriptedAI
                 if (posNewPosition == POSITION_UPPER_LEDGE)
                 {
                     StopAttacking();
-                    m_uiTeleportTimer = urand(2000, 2200);
+                    m_teleportTimer = urand(2000, 2200);
                 }
                 else
                 {
                     StartAttacking();
-                    m_uiTeleportTimer = urand(48000, 55000);
+                    m_teleportTimer = urand(48, 55) * IN_MILLISECONDS;
                 }
             }
             else
-                m_uiTeleportTimer = urand(48000, 55000);
+                m_teleportTimer = urand(48, 55) * IN_MILLISECONDS;
 
             m_posPosition = posNewPosition;
         }
         else
-            m_uiTeleportTimer -= uiDiff;
+            m_teleportTimer -= diff;
 
-        if (m_bAttacking)
+        if (m_attacking)
             DoMeleeAttackIfReady();
     }
 
-    void AttackStart(Unit* pWho) override
+    void AttackStart(Unit* who) override
     {
-        if (!m_bEventMode)
-            ScriptedAI::AttackStart(pWho);
+        if (!m_eventMode)
+            ScriptedAI::AttackStart(who);
     }
 
     // Make the code nice and pleasing to the eye
@@ -626,11 +625,6 @@ struct boss_arugalAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_arugal(Creature* pCreature)
-{
-    return new boss_arugalAI(pCreature);
-}
-
 /*######
 ## npc_deathstalker_vincent
 ######*/
@@ -644,19 +638,21 @@ enum
 
 struct npc_deathstalker_vincentAI : public ScriptedAI
 {
-    npc_deathstalker_vincentAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_deathstalker_vincentAI(Creature* creature) : ScriptedAI(creature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_instance = (ScriptedInstance*)creature->GetInstanceData();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
 
     void Reset() override
     {
-        if (m_pInstance && m_pInstance->GetData(TYPE_INTRO) == DONE && !m_creature->GetByteValue(UNIT_FIELD_BYTES_1, 0))
+        // Set the proper stand state (standing or dead) depending on the intro event having been played or not
+        if (m_instance && m_instance->GetData(TYPE_INTRO) == DONE && !m_creature->GetByteValue(UNIT_FIELD_BYTES_1, 0))
             m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
-        if (m_pInstance && (m_pInstance->GetData(TYPE_INTRO) == NOT_STARTED || m_pInstance->GetData(TYPE_INTRO) == IN_PROGRESS))
+
+        if (m_instance && (m_instance->GetData(TYPE_INTRO) == NOT_STARTED || m_instance->GetData(TYPE_INTRO) == IN_PROGRESS))
             m_creature->SetStandState(UNIT_STAND_STATE_STAND);
     }
 
@@ -674,19 +670,14 @@ struct npc_deathstalker_vincentAI : public ScriptedAI
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 diff) override
     {
         if (m_creature->IsInCombat() && m_creature->getFaction() == FACTION_FRIENDLY)
             EnterEvadeMode();
 
-        ScriptedAI::UpdateAI(uiDiff);
+        ScriptedAI::UpdateAI(diff);
     }
 };
-
-UnitAI* GetAI_npc_deathstalker_vincent(Creature* pCreature)
-{
-    return new npc_deathstalker_vincentAI(pCreature);
-}
 
 struct ForsakenSkill : public AuraScript
 {
@@ -716,27 +707,27 @@ struct ForsakenSkill : public AuraScript
 
 void AddSC_shadowfang_keep()
 {
-    Script* pNewScript = new Script;
-    pNewScript->Name = "npc_shadowfang_prisoner";
-    pNewScript->pGossipHello =  &GossipHello_npc_shadowfang_prisoner;
-    pNewScript->pGossipSelect = &GossipSelect_npc_shadowfang_prisoner;
-    pNewScript->GetAI = &GetNewAIInstance<npc_shadowfang_prisonerAI>;
-    pNewScript->RegisterSelf();
+    Script* newScript = new Script;
+    newScript->Name = "npc_shadowfang_prisoner";
+    newScript->pGossipHello =  &GossipHello_npc_shadowfang_prisoner;
+    newScript->pGossipSelect = &GossipSelect_npc_shadowfang_prisoner;
+    newScript->GetAI = &GetNewAIInstance<npc_shadowfang_prisonerAI>;
+    newScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "mob_arugal_voidwalker";
-    pNewScript->GetAI = &GetNewAIInstance<mob_arugal_voidwalkerAI>;
-    pNewScript->RegisterSelf();
+    newScript = new Script;
+    newScript->Name = "mob_arugal_voidwalker";
+    newScript->GetAI = &GetNewAIInstance<mob_arugal_voidwalkerAI>;
+    newScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_arugal";
-    pNewScript->GetAI = &GetAI_boss_arugal;
-    pNewScript->RegisterSelf();
+    newScript = new Script;
+    newScript->Name = "boss_arugal";
+    newScript->GetAI = &GetNewAIInstance<boss_arugalAI>;
+    newScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_deathstalker_vincent";
-    pNewScript->GetAI = &GetAI_npc_deathstalker_vincent;
-    pNewScript->RegisterSelf();
+    newScript = new Script;
+    newScript->Name = "npc_deathstalker_vincent";
+    newScript->GetAI = &GetNewAIInstance<npc_deathstalker_vincentAI>;
+    newScript->RegisterSelf();
 
     RegisterAuraScript<ForsakenSkill>("spell_forsaken_skill");
 }

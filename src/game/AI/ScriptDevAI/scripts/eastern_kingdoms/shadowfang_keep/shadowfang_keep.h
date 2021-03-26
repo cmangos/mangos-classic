@@ -29,7 +29,7 @@ enum
     YELL_KILLED_PLAYER      = -1033018,
     YELL_COMBAT             = -1033019,
 
-    SPELL_SPAWN             = 7741,
+    SPELL_SPAWN             = 10418,
     SPELL_FIRE              = 6422,
 
     NPC_ASH                 = 3850,
@@ -80,18 +80,18 @@ static const Waypoint nandosMovement = {-170.6f, 2182.45f, 151.91f};
 class instance_shadowfang_keep : public ScriptedInstance, public DialogueHelper
 {
     public:
-        instance_shadowfang_keep(Map* pMap);
+        instance_shadowfang_keep(Map* map);
 
         void Initialize() override;
 
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnCreatureDeath(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
+        void OnCreatureCreate(Creature* creature) override;
+        void OnCreatureDeath(Creature* creature) override;
+        void OnObjectCreate(GameObject* go) override;
         void DoSpeech();
-        void JustDidDialogueStep(int32 iEntry) override;
+        void JustDidDialogueStep(int32 entry) override;
 
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
+        void SetData(uint32 type, uint32 data) override;
+        uint32 GetData(uint32 type) const override;
 
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
