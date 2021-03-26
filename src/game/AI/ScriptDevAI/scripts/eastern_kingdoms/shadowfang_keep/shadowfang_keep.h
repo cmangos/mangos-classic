@@ -27,7 +27,7 @@ enum
     YELL_FENRUS             = -1033013,
     YELL_AGGRO              = -1033017,
     YELL_KILLED_PLAYER      = -1033018,
-    YELL_COMBAT             = -1033019,
+    YELL_WORGEN_CURSE       = -1033019,
 
     SPELL_SPAWN             = 10418,
     SPELL_FIRE              = 6422,

@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Shadowfang_Keep
 SD%Complete: 90
-SDComment: Scourge Invasion boss is missing
+SDComment: Scourge Invasion boss is missing, Archmage Arugal timers have to be checked
 SDCategory: Shadowfang Keep
 EndScriptData
 
@@ -385,37 +385,45 @@ static const SpawnPoint VWSpawns[] =
 // Used to tell how he should behave
 const float HEIGHT_FENRUS_ROOM      = 140.0f;
 
-struct boss_arugalAI : public ScriptedAI
+enum ArugalActions
 {
-    boss_arugalAI(Creature* creature) : ScriptedAI(creature)
-    {
-        m_instance = (ScriptedInstance*)creature->GetInstanceData();
+    ARUGAL_TELEPORT,
+    ARUGAL_CURSE,
+    ARUGAL_VOID_BOLT,
+    ARUGAL_THUNDERSHOCK,
+    ARUGAL_ACTIONS_MAX,
+};
 
+struct boss_arugalAI : public RangedCombatAI
+{
+    boss_arugalAI(Creature* creature) : RangedCombatAI(creature, ARUGAL_ACTIONS_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    {
+        AddCombatAction(ARUGAL_TELEPORT, 22000, 26000);
+        AddCombatAction(ARUGAL_CURSE, 20000, 30000);
+        AddCombatAction(ARUGAL_VOID_BOLT, 1000u);
+        AddCombatAction(ARUGAL_THUNDERSHOCK, 1000u);
+        SetRangedMode(true, 50.f, TYPE_FULL_CASTER);
+        AddMainSpell(SPELL_VOID_BOLT);
+        AddMainSpell(SPELL_THUNDERSHOCK);
+
+        // This is only for the instance of Arugal spawned in Fenrus room for little event
         if (creature->GetPositionZ() < HEIGHT_FENRUS_ROOM)
         {
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            m_creature->SetImmuneToPlayer(true);
+            m_creature->SetImmuneToNPC(true);
             m_creature->SetVisibility(VISIBILITY_OFF);
-            m_eventMode = true;
         }
-        else
-            m_eventMode = false;
-
-        Reset();
     }
 
     ScriptedInstance* m_instance;
-    ArugalPosition m_posPosition;
-    uint32 m_teleportTimer, m_curseTimer, m_voidboltTimer, m_thundershockTimer, m_yellTimer;
+
+    ArugalPosition m_position;
     bool m_attacking, m_eventMode;
 
     void Reset() override
     {
-        m_teleportTimer = urand(22, 26) * IN_MILLISECONDS;
-        m_curseTimer = urand(20, 30) * IN_MILLISECONDS;
-        m_voidboltTimer = m_thundershockTimer = 0;
-        m_yellTimer = urand(32, 46) * IN_MILLISECONDS;
         m_attacking = true;
-        m_posPosition = POSITION_SPAWN_LEDGE;
+        m_position = POSITION_SPAWN_LEDGE;
     }
 
     void Aggro(Unit* who) override
@@ -450,179 +458,109 @@ struct boss_arugalAI : public ScriptedAI
                    if (!i)
                    {
                        leaderGuid = voidwalker->GetObjectGuid();
-                       if (mob_arugal_voidwalkerAI* voidwalkerAI = dynamic_cast<mob_arugal_voidwalkerAI*>(voidwalker->AI()))
+                       if (auto* voidwalkerAI = dynamic_cast<mob_arugal_voidwalkerAI*>(voidwalker->AI()))
                            voidwalkerAI->SetLeader();
                    }
                    else
                    {
-                       if (mob_arugal_voidwalkerAI* voidwalkerAI = dynamic_cast<mob_arugal_voidwalkerAI*>(voidwalker->AI()))
+                       if (auto* voidwalkerAI = dynamic_cast<mob_arugal_voidwalkerAI*>(voidwalker->AI()))
                            voidwalkerAI->SetFollower(leaderGuid, i);
                    }
-
-                   voidwalker->SetInCombatWithZone();
                }
             }
         }
     }
 
-    void UpdateAI(const uint32 diff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (m_eventMode)
-            return;
-
-        // Check if we have a current target
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (GetManaPercent() < 6.0f && !m_attacking)
+        switch (action)
         {
-            if (m_posPosition != POSITION_UPPER_LEDGE)
-                StartAttacking();
-            else if (m_teleportTimer > 2000)
-                m_teleportTimer = 2 * IN_MILLISECONDS;
-
-            m_attacking = true;
-        }
-        else if (GetManaPercent() > 12.0f && m_attacking)
-        {
-            StopAttacking();
-            m_attacking = false;
-        }
-
-        if (m_yellTimer < diff)
-        {
-            DoScriptText(YELL_COMBAT, m_creature);
-            m_yellTimer = urand(34, 68) * IN_MILLISECONDS;
-        }
-        else
-            m_yellTimer -= diff;
-
-        if (m_curseTimer < diff)
-        {
-            if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
-                DoCastSpellIfCan(target, SPELL_ARUGALS_CURSE);
-
-            m_curseTimer = urand(20, 35) * IN_MILLISECONDS;
-        }
-        else
-            m_curseTimer -= diff;
-
-        if (m_thundershockTimer < diff)
-        {
-            if (GetVictimDistance() < 5.0f)
+            case ARUGAL_VOID_BOLT:
             {
-                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_THUNDERSHOCK);
-                m_thundershockTimer = urand(30, 38) * IN_MILLISECONDS;
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_VOID_BOLT) == CAST_OK)
+                    ResetCombatAction(action, urand(2900, 4800));
+                break;
             }
-        }
-        else
-            m_thundershockTimer -= diff;
-
-        if (m_voidboltTimer < diff)
-        {
-            if (!m_attacking)
+            case ARUGAL_THUNDERSHOCK:
             {
-                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_VOID_BOLT);
-                m_voidboltTimer = urand(2900, 4800);
-            }
-        }
-        else
-            m_voidboltTimer -= diff;
-
-        if (m_teleportTimer < diff)
-        {
-            ArugalPosition posNewPosition;
-
-            if (m_posPosition == POSITION_SPAWN_LEDGE)
-                posNewPosition = (ArugalPosition)urand(1, 2);
-            else
-            {
-                posNewPosition = (ArugalPosition)urand(0, 1);
-
-                if (m_posPosition == posNewPosition)
-                    posNewPosition = POSITION_STAIRS;
-            }
-
-            if (m_creature->IsNonMeleeSpellCasted(false))
-                m_creature->InterruptNonMeleeSpells(false);
-
-            switch (posNewPosition)
-            {
-                case POSITION_SPAWN_LEDGE:
-                    DoCastSpellIfCan(m_creature, SPELL_SHADOW_PORT_SPAWN_LEDGE, true);
-                    break;
-                case POSITION_UPPER_LEDGE:
-                    DoCastSpellIfCan(m_creature, SPELL_SHADOW_PORT_UPPER_LEDGE, true);
-                    break;
-                case POSITION_STAIRS:
-                    DoCastSpellIfCan(m_creature, SPELL_SHADOW_PORT_STAIRS, true);
-                    break;
-            }
-
-            if (GetManaPercent() < 6.0f)
-            {
-                if (posNewPosition == POSITION_UPPER_LEDGE)
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, uint32(0), SELECT_FLAG_IN_MELEE_RANGE))
                 {
-                    StopAttacking();
-                    m_teleportTimer = urand(2000, 2200);
+                        if (DoCastSpellIfCan(nullptr, SPELL_THUNDERSHOCK) == CAST_OK)
+                            ResetCombatAction(action, urand(30, 38) * IN_MILLISECONDS);
                 }
-                else
-                {
-                    StartAttacking();
-                    m_teleportTimer = urand(48, 55) * IN_MILLISECONDS;
-                }
+                break;
             }
-            else
-                m_teleportTimer = urand(48, 55) * IN_MILLISECONDS;
+            case ARUGAL_CURSE:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+                {
+                    DoScriptText(YELL_WORGEN_CURSE, m_creature);
+                    if (DoCastSpellIfCan(target, SPELL_ARUGALS_CURSE) == CAST_OK)
+                        ResetCombatAction(action, urand(20, 35) * IN_MILLISECONDS);
+                }
+                break;
+            }
+            case ARUGAL_TELEPORT:
+            {
+                uint8 newPosition = urand(0, 2);
 
-            m_posPosition = posNewPosition;
-        }
-        else
-            m_teleportTimer -= diff;
+                // Do nothing if we would teleport to our actual place, unless we are on the upper ledge (to prevent tank from breaking aggro if away for too long)
+                if (newPosition == m_position && m_position != POSITION_UPPER_LEDGE)
+                {
+                    ResetCombatAction(action, urand(10, 15) * IN_MILLISECONDS);
+                    break;
+                }
 
-        if (m_attacking)
-            DoMeleeAttackIfReady();
-    }
+                uint32 teleportSpellId;
+                switch (newPosition)
+                {
+                    case POSITION_SPAWN_LEDGE:
+                    {
+                        teleportSpellId = SPELL_SHADOW_PORT_SPAWN_LEDGE;
+                        break;
+                    }
+                    case POSITION_UPPER_LEDGE:
+                    {
+                        teleportSpellId = SPELL_SHADOW_PORT_UPPER_LEDGE;
+                        break;
+                    }
+                    case POSITION_STAIRS:
+                    {
+                        teleportSpellId = SPELL_SHADOW_PORT_STAIRS;
+                        break;
+                    }
+                    default:
+                        return;
+                }
 
-    void AttackStart(Unit* who) override
-    {
-        if (!m_eventMode)
-            ScriptedAI::AttackStart(who);
-    }
+                if (m_creature->IsNonMeleeSpellCasted(false))
+                    m_creature->InterruptNonMeleeSpells(false);
 
-    // Make the code nice and pleasing to the eye
-    inline float GetManaPercent() const
-    {
-        return (((float)m_creature->GetPower(POWER_MANA) / (float)m_creature->GetMaxPower(POWER_MANA)) * 100);
-    }
+                CanCastResult castResult = DoCastSpellIfCan(m_creature, teleportSpellId);
+                // Force the cast to be triggered if we are OOM and on the upper ledge (else encounter is stuck)
+                if (castResult == CAST_FAIL_POWER && m_position == POSITION_UPPER_LEDGE)
+                    castResult = DoCastSpellIfCan(m_creature, teleportSpellId, CAST_TRIGGERED);
 
-    inline float GetVictimDistance() const
-    {
-        return (m_creature->GetVictim() ? m_creature->GetDistance(m_creature->GetVictim(), false) : 999.9f);
-    }
+                if (castResult == CAST_OK)
+                {
+                    if (newPosition == POSITION_UPPER_LEDGE)
+                    {
+                        // Prevent melee whatever and don't stay there for too long
+                        SetRangedMode(true, 100.0f, TYPE_NO_MELEE_MODE);
+                        ResetCombatAction(action, urand(2000, 2200));
+                    }
+                    else
+                    {
+                        SetRangedMode(true, 100.0f, TYPE_FULL_CASTER);
+                        ResetCombatAction(action, urand(48, 55) * IN_MILLISECONDS);
+                    }
+                    m_position = (ArugalPosition)newPosition;
+                }
 
-    void StopAttacking()
-    {
-        if (Unit* victim = m_creature->GetVictim())
-            m_creature->SendMeleeAttackStop(victim);
-
-        if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
-        {
-            m_creature->GetMotionMaster()->Clear(false);
-            m_creature->GetMotionMaster()->MoveIdle();
-            m_creature->StopMoving();
-        }
-    }
-
-    void StartAttacking()
-    {
-        if (Unit* victim = m_creature->GetVictim())
-            m_creature->SendMeleeAttackStart(victim);
-
-        if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE)
-        {
-            m_creature->GetMotionMaster()->Clear(false);
-            m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim(), 0.0f, 0.0f);
+                break;
+            }
+            default:
+                break;
         }
     }
 };

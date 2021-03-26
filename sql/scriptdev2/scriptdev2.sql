@@ -1781,7 +1781,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1033016','Arrrgh!','0','0','0','0','0','deathstalker vincent SAY_VINCENT_DIE'),
 ('-1033017','You, too, shall serve!','5793','1','0','0','0','boss_arugal YELL_AGGRO'),
 ('-1033018','Another Falls!','5795','1','0','0','0','boss_arugal YELL_KILLED_PLAYER'),
-('-1033019','Release your rage!','5797','1','0','0','0','boss_arugal YELL_COMBAT'),
+('-1033019','Release your rage!','5797','1','0','0','0','boss_arugal YELL_WORGEN_CURSE'),
 ('-1033020','I can''t believe it! You''ve destroyed my pack... Now face my wrath!','0','1','0','0','0','wolf master nandos YELL_PACK_DEAD');
 
 -- -1 034 000 STOCKADES
