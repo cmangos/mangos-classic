@@ -637,7 +637,7 @@ bool Unit::CanInteractNow(const Unit* unit) const
     {
         if (SpellShapeshiftFormEntry const* formEntry = sSpellShapeshiftFormStore.LookupEntry(GetShapeshiftForm()))
         {
-            if (!(formEntry->flags1 & SHAPESHIFT_FORM_FLAG_ALLOW_NPC_INTERACT))
+            if (!(formEntry->flags1 & SHAPESHIFT_FLAG_CAN_NPC_INTERACT))
                 return false;
         }
     }
