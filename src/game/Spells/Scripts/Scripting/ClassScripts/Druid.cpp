@@ -34,7 +34,29 @@ struct Regrowth : public AuraScript
     }
 };
 
+struct FormScalingAttackPowerAuras : public AuraScript
+{
+    int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const override
+    {
+        if (data.spellProto->EffectApplyAuraName[data.effIdx] == SPELL_AURA_MOD_ATTACK_POWER)
+        {
+            // Predatory Strikes
+            Aura* predatoryStrikes = nullptr;
+            if (Aura* aura = data.target->GetAura(16975, EFFECT_INDEX_0)) // rank 3
+                predatoryStrikes = aura;
+            else if (Aura* aura = data.target->GetAura(16974, EFFECT_INDEX_0)) // rank 2
+                predatoryStrikes = aura;
+            else if (Aura* aura = data.target->GetAura(16972, EFFECT_INDEX_0)) // rank 1
+                predatoryStrikes = aura;
+            if (predatoryStrikes)
+                value += data.target->getLevel() * predatoryStrikes->GetAmount() / 100;
+        }
+        return value;
+    }
+};
+
 void LoadDruidScripts()
 {
     RegisterAuraScript<Regrowth>("spell_regrowth");
+    RegisterAuraScript<FormScalingAttackPowerAuras>("spell_druid_form_scaling_ap_auras");
 }
