@@ -1008,9 +1008,7 @@ namespace MaNGOS
                     case PUSH_SRC_CENTER:
                     case PUSH_DEST_CENTER:
                     case PUSH_TARGET_CENTER:
-                        // AOE is a cylinder with radius height up and below
-                        if (itr->getSource()->GetDistance2d(i_centerX, i_centerY, DIST_CALC_COMBAT_REACH) <= i_radius &&
-                            std::abs(itr->getSource()->GetPositionZ() - i_centerZ) - itr->getSource()->GetCombatReach() <= i_radius)
+                        if (itr->getSource()->GetDistance(i_centerX, i_centerY, i_centerZ, DIST_CALC_COMBAT_REACH) <= i_radius)
                             i_data.push_back(itr->getSource());
                         break;
                 }
