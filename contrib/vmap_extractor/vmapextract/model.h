@@ -28,6 +28,7 @@
 
 class WMOInstance;
 class MPQFile;
+namespace ADT { struct MDDF; struct MODF; }
 
 Vec3D fixCoordSystem(Vec3D v);
 
@@ -72,5 +73,10 @@ class ModelInstance
         ModelInstance(MPQFile& f, const char* ModelInstName, uint32 mapID, uint32 tileX, uint32 tileY, FILE* pDirfile);
 
 };
+
+namespace Doodad
+{
+    void ExtractSet(WMODoodadData const& doodadData, ADT::MODF const& wmo, uint32 mapID, uint32 tileX, uint32 tileY, FILE* pDirfile);
+}
 
 #endif

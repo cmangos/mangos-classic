@@ -39,12 +39,11 @@
 //#pragma comment(lib, "Winmm.lib")
 
 #include <map>
+#include <unordered_map>
 
 //From Extractor
-#include "adtfile.h"
 #include "wdtfile.h"
 #include "dbcfile.h"
-#include "wmo.h"
 #include "mpq_libmpq04.h"
 
 #include "vmapexport.h"
@@ -71,12 +70,20 @@ char output_path[128] = ".";
 char input_path[1024] = ".";
 bool hasInputPathParam = false;
 bool preciseVectorData = false;
+std::unordered_map<std::string, WMODoodadData> WmoDoodads;
 
 // Constants
 
 //static const char * szWorkDirMaps = ".\\Maps";
 const char* szWorkDirWmo = "./Buildings";
 const char* szRawVMAPMagic = "VMAP005";
+
+std::map<std::pair<uint32, uint16>, uint32> uniqueObjectIds;
+
+uint32 GenerateUniqueObjectId(uint32 clientId, uint16 clientDoodadId)
+{
+    return uniqueObjectIds.emplace(std::make_pair(clientId, clientDoodadId), uniqueObjectIds.size() + 1).first->second;
+}
 
 // Local testing functions
 
@@ -150,9 +157,10 @@ bool ExtractSingleWmo(std::string& fname)
     // Copy files from archive
 
     char szLocalFile[1024];
-    const char* plain_name = GetPlainName(fname.c_str());
+    char* plain_name = GetPlainName(&fname[0]);
+    fixnamen(plain_name, strlen(plain_name));
+    fixname2(plain_name, strlen(plain_name));
     sprintf(szLocalFile, "%s/%s", szWorkDirWmo, plain_name);
-    fixnamen(szLocalFile, strlen(szLocalFile));
 
     if (FileExists(szLocalFile))
         return true;
@@ -190,6 +198,8 @@ bool ExtractSingleWmo(std::string& fname)
         return false;
     }
     froot.ConvertToVMAPRootWmo(output);
+    WMODoodadData& doodads = WmoDoodads[plain_name];
+    std::swap(doodads, froot.DoodadData);
     int Wmo_nVertices = 0;
     //printf("root has %d groups\n", froot->nGroups);
     if (froot.nGroups != 0)
@@ -213,6 +223,17 @@ bool ExtractSingleWmo(std::string& fname)
             }
 
             Wmo_nVertices += fgroup.ConvertToVMAPGroupWmo(output, &froot, preciseVectorData);
+            for (uint16 groupReference : fgroup.DoodadReferences)
+            {
+                if (groupReference >= doodads.Spawns.size())
+                    continue;
+
+                uint32 doodadNameIndex = doodads.Spawns[groupReference].NameIndex;
+                if (froot.ValidDoodadNames.find(doodadNameIndex) == froot.ValidDoodadNames.end())
+                    continue;
+
+                doodads.References.insert(groupReference);
+            }
         }
     }
 

@@ -301,21 +301,44 @@ namespace VMAP
 #ifdef VMAP_DEBUG
             DEBUG_LOG("Map isTiled: %u", static_cast<uint32>(iIsTiled));
 #endif
-            if (!iIsTiled && ModelSpawn::readFromFile(rf, spawn))
+            if (!iIsTiled)
             {
-                WorldModel* model = vm->acquireModelInstance(iBasePath, spawn.name);
-                DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "StaticMapTree::InitMap(): loading %s", spawn.name.c_str());
-                if (model)
+                // read model spawns
+                ModelSpawn spawn;
+                while (ModelSpawn::readFromFile(rf, spawn))
                 {
-                    model->setModelFlags(spawn.flags);
-                    // assume that global model always is the first and only tree value (could be improved...)
-                    iTreeValues[0] = ModelInstance(spawn, model);
-                    iLoadedSpawns[0] = 1;
-                }
-                else
-                {
-                    success = false;
-                    ERROR_LOG("StaticMapTree::InitMap() could not acquire WorldModel pointer for '%s'!", spawn.name.c_str());
+                    // acquire model instance
+                    WorldModel* model = vm->acquireModelInstance(iBasePath, spawn.name);
+                    if (model)
+                        model->setModelFlags(spawn.flags);
+                    else
+                        ERROR_LOG("StaticMapTree::LoadMapTile() could not acquire WorldModel pointer for '%s'!", spawn.name.c_str());
+
+                    // update tree
+                    uint32 referencedVal;
+
+                    fread(&referencedVal, sizeof(uint32), 1, rf);
+                    if (!iLoadedSpawns.count(referencedVal))
+                    {
+                        if (referencedVal > iNTreeValues)
+                        {
+                            ERROR_LOG("invalid tree element! (%u/%u)", referencedVal, iNTreeValues);
+                            continue;
+                        }
+
+                        iTreeValues[referencedVal] = ModelInstance(spawn, model);
+                        iLoadedSpawns[referencedVal] = 1;
+                    }
+                    else
+                    {
+                        ++iLoadedSpawns[referencedVal];
+#ifdef VMAP_DEBUG
+                        if (iTreeValues[referencedVal].ID != spawn.ID)
+                            DEBUG_LOG("Error: trying to load wrong spawn in node!");
+                        else if (iTreeValues[referencedVal].name != spawn.name)
+                            DEBUG_LOG("Error: name mismatch on GUID=%u", spawn.ID);
+#endif
+                    }
                 }
             }
 

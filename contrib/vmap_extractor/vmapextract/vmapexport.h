@@ -19,8 +19,13 @@
 #ifndef VMAPEXPORT_H
 #define VMAPEXPORT_H
 
+#define __STDC_LIMIT_MACROS
+
+#include <cstdint>
 #include <string>
 #include <set>
+#include <unordered_map>
+#include "loadlib/loadlib.h"
 
 typedef std::set<std::string> StringSet;
 
@@ -31,8 +36,13 @@ enum ModelFlags
     MOD_HAS_BOUND = 1 << 2
 };
 
+struct WMODoodadData;
+
 extern const char* szWorkDirWmo;
 extern const char* szRawVMAPMagic;                          // vmap magic string for extracted raw vmap data
+extern std::unordered_map<std::string, WMODoodadData> WmoDoodads;
+
+uint32 GenerateUniqueObjectId(uint32 clientId, uint16 clientDoodadId);
 
 bool FileExists(const char* file);
 void strToLower(char* str);
@@ -43,7 +53,7 @@ bool ExtractSingleWmo(std::string& fname);
  * @param fixedName = will store the translated name (if changed)
  * @param failedPaths = Set to collect errors
  */
-bool ExtractSingleModel(std::string& origPath, std::string& fixedName, StringSet& failedPaths);
+bool ExtractSingleModel(std::string& origPath, StringSet& failedPaths);
 
 void ExtractGameobjectModels();
 

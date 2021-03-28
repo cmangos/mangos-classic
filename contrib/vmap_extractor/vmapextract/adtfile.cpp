@@ -18,6 +18,7 @@
 
 #include "vmapexport.h"
 #include "adtfile.h"
+#include "wmo.h"
 
 #include <algorithm>
 #include <cstdio>
@@ -46,6 +47,9 @@ char* GetPlainName(char* FileName)
 
 void fixnamen(char* name, size_t len)
 {
+    if (len < 3)
+        return;
+
     for (size_t i = 0; i < len - 3; i++)
     {
         if (i > 0 && name[i] >= 'A' && name[i] <= 'Z' && isalpha(name[i - 1]))
@@ -64,6 +68,9 @@ void fixnamen(char* name, size_t len)
 
 void fixname2(char* name, size_t len)
 {
+    if (len < 3)
+        return;
+
     for (size_t i = 0; i < len - 3; i++)
     {
         if (name[i] == ' ')
@@ -145,8 +152,7 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
                     fixname2(s, strlen(s));
                     string path(p);                         // Store copy after name fixed
 
-                    std::string fixedName;
-                    ExtractSingleModel(path, fixedName, failedPaths);
+                    ExtractSingleModel(path, failedPaths);
                     ModelInstanceNames.emplace_back(s);
 
                     p = p + strlen(p) + 1;
@@ -197,6 +203,7 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
                     uint32 id;
                     ADT.read(&id, 4);
                     WMOInstance inst(ADT, WmoInstanceNames[id].c_str(), map_num, tileX, tileY, dirfile);
+                    Doodad::ExtractSet(WmoDoodads[WmoInstanceNames[id]], inst.m_wmo, map_num, tileX, tileY, dirfile);
                 }
             }
         }
