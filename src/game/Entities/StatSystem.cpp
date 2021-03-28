@@ -310,7 +310,7 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, fl
     float weapon_mindamage = GetBaseWeaponDamage(attType, MINDAMAGE, index);
     float weapon_maxdamage = GetBaseWeaponDamage(attType, MAXDAMAGE, index);
 
-    if (IsInFeralForm())                                    // check if player is druid and in cat or bear forms, non main hand attacks not allowed for this mode so not check attack type
+    if (IsNoWeaponShapeShift())                             // check if player is in shapeshift which doesnt use weapon
     {
         uint32 lvl = getLevel();
         if (lvl > 60)
