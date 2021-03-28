@@ -79,7 +79,7 @@ if (MSVC)
 endif()
 
 if (BUILD_EXTRACTORS)
-  add_executable(${EXECUTABLE_NAME} ./src/generator.cpp)
+  add_executable(${EXECUTABLE_NAME} ./src/generator.cpp ./src/IntermediateValues.h ./src/IntermediateValues.cpp ./src/MapBuilder.h ./src/MapBuilder.cpp ./src/MMapCommon.h ./src/TerrainBuilder.cpp ./src/TerrainBuilder.h ./src/VMapExtensions.cpp )
 
   target_link_libraries(${EXECUTABLE_NAME}
     vmaplib
