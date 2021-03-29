@@ -6,36 +6,33 @@
 #include <algorithm>
 #include <stdio.h>
 
-bool ExtractSingleModel(std::string& fname, StringSet& failedPaths)
+bool ExtractSingleModel(std::string& origPath, std::string& fixedName, StringSet& failedPaths)
 {
-    char const* ext = GetExtension(GetPlainName(fname.c_str()));
-
-    // < 3.1.0 ADT MMDX section store filename.mdx filenames for corresponded .m2 file
-    if (fname.length() < 4)
+    if (origPath.length() < 4)
         return false;
 
-    std::string extension = fname.substr(fname.length() - 4, 4);
+    std::string extension = GetExtension(GetPlainName(origPath.c_str()));
+
+    // < 3.1.0 ADT MMDX section store filename.mdx filenames for corresponded .m2 file
     if (extension == ".mdx" || extension == ".MDX" || extension == ".mdl" || extension == ".MDL")
     {
         // replace .mdx -> .m2
-        fname.erase(fname.length() - 2, 2);
-        fname.append("2");
+        origPath.erase(origPath.length() - 2, 2);
+        origPath.append("2");
     }
     // >= 3.1.0 ADT MMDX section store filename.m2 filenames for corresponded .m2 file
     // nothing do
 
-    char* name = GetPlainName((char*)fname.c_str());
-    fixnamen(name, strlen(name));
-    fixname2(name, strlen(name));
+    fixedName = GetPlainName(origPath.c_str());
 
     std::string output(szWorkDirWmo);                       // Stores output filename (possible changed)
     output += "/";
-    output += name;
+    output += fixedName;
 
     if (FileExists(output.c_str()))
         return true;
 
-    Model mdl(fname);                                    // Possible changed fname
+    Model mdl(origPath);                                    // Possible changed fname
     if (!mdl.open(failedPaths))
         return false;
 
@@ -89,7 +86,8 @@ void ExtractGameobjectModels()
         }
         else //if (!strcmp(ch_ext, ".mdx") || !strcmp(ch_ext, ".m2"))
         {
-            result = ExtractSingleModel(path, failedPaths);
+            std::string fixedName;
+            result = ExtractSingleModel(path, fixedName, failedPaths);
         }
 
         if (result)

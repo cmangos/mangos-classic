@@ -53,7 +53,7 @@ bool ExtractSingleWmo(std::string& fname);
  * @param fixedName = will store the translated name (if changed)
  * @param failedPaths = Set to collect errors
  */
-bool ExtractSingleModel(std::string& origPath, StringSet& failedPaths);
+bool ExtractSingleModel(std::string& origPath, std::string& fixedName, StringSet& failedPaths);
 
 void ExtractGameobjectModels();
 

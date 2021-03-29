@@ -99,7 +99,8 @@ bool WMORoot::open()
                 uint32 doodadNameIndex = ptr - f.getPointer();
                 ptr += path.length() + 1;
 
-                if (ExtractSingleModel(path, failedPaths))
+                std::string fixedName;
+                if (ExtractSingleModel(path, fixedName, failedPaths))
                     ValidDoodadNames.insert(doodadNameIndex);
             }
         }

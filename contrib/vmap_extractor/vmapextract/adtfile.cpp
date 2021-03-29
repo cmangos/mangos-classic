@@ -152,8 +152,9 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
                     fixname2(s, strlen(s));
                     string path(p);                         // Store copy after name fixed
 
-                    ExtractSingleModel(path, failedPaths);
-                    ModelInstanceNames.emplace_back(s);
+                    std::string fixedName;
+                    ExtractSingleModel(path, fixedName, failedPaths);
+                    ModelInstanceNames.emplace_back(fixedName);
 
                     p = p + strlen(p) + 1;
                 }
