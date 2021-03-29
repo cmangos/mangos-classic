@@ -19,7 +19,7 @@ set(EXECUTABLE_NAME "vmap_extractor")
 project (${EXECUTABLE_NAME})
 
 add_executable(${EXECUTABLE_NAME} adtfile.cpp dbcfile.cpp gameobject_extract.cpp model.cpp mpq_libmpq.cpp vmapexport.cpp wdtfile.cpp wmo.cpp
-    adtfile.h dbcfile.h modelheaders.h model.h mpq_libmpq04.h vmapexport.h wdtfile.h wmo.h Matrix4.h Matrix4.cpp vec3d.h)
+    adtfile.h dbcfile.h modelheaders.h model.h mpq_libmpq04.h vmapexport.h wdtfile.h wmo.h vec3d.h)
 
 target_link_libraries(${EXECUTABLE_NAME} mpqlib g3dlite)
 

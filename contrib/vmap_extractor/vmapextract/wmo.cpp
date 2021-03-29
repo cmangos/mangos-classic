@@ -109,14 +109,16 @@ bool WMORoot::open()
             DoodadData.Spawns.resize(size / sizeof(WMO::MODD));
             f.read(DoodadData.Spawns.data(), size);
         }
+        else if (!strcmp(fourcc, "MOGN"))
+        {
+            GroupNames.resize(size);
+            f.read(GroupNames.data(), size);
+        }
         /*
         else if (!strcmp(fourcc,"MOTX"))
         {
         }
         else if (!strcmp(fourcc,"MOMT"))
-        {
-        }
-        else if (!strcmp(fourcc,"MOGN"))
         {
         }
         else if (!strcmp(fourcc,"MOGI"))
@@ -505,6 +507,22 @@ int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPrecis
     }
 
     return nColTriangles;
+}
+
+bool WMOGroup::ShouldSkip(WMORoot const& root) const
+{
+    // skip unreachable
+    if (mogpFlags & 0x80)
+        return true;
+
+    // skip antiportals
+    if (mogpFlags & 0x4000000)
+        return true;
+
+    if (groupName < int32(root.GroupNames.size()) && !strcmp(&root.GroupNames[groupName], "antiportal"))
+        return true;
+
+    return false;
 }
 
 WMOGroup::~WMOGroup()
