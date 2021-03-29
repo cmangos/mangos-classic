@@ -31,6 +31,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (23226,'spell_ritual_candle_aura'),
 (24693,'spell_hakkar_power_down'),
 (25684,'spell_summon_mana_fiends_moam'),
+(25926,'spell_viscidus_frost_weakness'),
 (25937,'spell_viscidus_freeze'),
 (26009,'spell_cthun_periodic_rotate'),
 (26084,'spell_aq_whirlwind'),
