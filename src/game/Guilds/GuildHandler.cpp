@@ -176,6 +176,9 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
         return;
     }
 
+    // Put record into guild log
+    guild->LogGuildEvent(GUILD_EVENT_LOG_UNINVITE_PLAYER, GetPlayer()->GetObjectGuid(), slot->guid);
+
     // possible last member removed, do cleanup, and no need events
     if (guild->DelMember(slot->guid))
     {
@@ -183,9 +186,6 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
         delete guild;
         return;
     }
-
-    // Put record into guild log
-    guild->LogGuildEvent(GUILD_EVENT_LOG_UNINVITE_PLAYER, GetPlayer()->GetObjectGuid(), slot->guid);
 
     guild->BroadcastEvent(GE_REMOVED, plName.c_str(), _player->GetName());
 }
