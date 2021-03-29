@@ -7336,7 +7336,7 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType, bool sp
 
             // some weapon enchantments have proc flags which need to be checked
             if (spellInfo->procFlags)
-                if (!(spellInfo->procFlags & PROC_FLAG_SUCCESSFUL_MELEE_SPELL_HIT) && spellProc)
+                if (!(spellInfo->procFlags & PROC_FLAG_DEAL_MELEE_ABILITY) && spellProc)
                     continue;
 
             // Use first rank to access spell item enchant procs

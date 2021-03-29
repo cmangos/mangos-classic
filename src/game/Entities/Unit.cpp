@@ -980,7 +980,7 @@ void Unit::Kill(Unit* killer, Unit* victim, DamageEffectType damagetype, SpellEn
         if (Unit* owner = killer->GetOwner())
             ProcDamageAndSpell(ProcSystemArguments(owner, victim, PROC_FLAG_KILL, PROC_FLAG_NONE, PROC_EX_NONE, 0));
 
-    ProcDamageAndSpell(ProcSystemArguments(killer, victim, PROC_FLAG_KILL, PROC_FLAG_KILLED, PROC_EX_NONE, 0));
+    ProcDamageAndSpell(ProcSystemArguments(killer, victim, PROC_FLAG_KILL, PROC_FLAG_HEARTBEAT, PROC_EX_NONE, 0));
 
     // tbc+ has on death proc
 
@@ -1678,18 +1678,18 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* calcDamageInfo, W
     switch (attackType)
     {
         case BASE_ATTACK:
-            calcDamageInfo->procAttacker = PROC_FLAG_SUCCESSFUL_MELEE_HIT;
-            calcDamageInfo->procVictim   = PROC_FLAG_TAKEN_MELEE_HIT;
+            calcDamageInfo->procAttacker = PROC_FLAG_DEAL_MELEE_SWING;
+            calcDamageInfo->procVictim   = PROC_FLAG_TAKE_MELEE_SWING;
             calcDamageInfo->HitInfo      = HITINFO_NORMALSWING2;
             break;
         case OFF_ATTACK:
-            calcDamageInfo->procAttacker = PROC_FLAG_SUCCESSFUL_MELEE_HIT | PROC_FLAG_SUCCESSFUL_OFFHAND_HIT;
-            calcDamageInfo->procVictim   = PROC_FLAG_TAKEN_MELEE_HIT;//|PROC_FLAG_TAKEN_OFFHAND_HIT // not used
+            calcDamageInfo->procAttacker = PROC_FLAG_DEAL_MELEE_SWING | PROC_FLAG_OFF_HAND_WEAPON_SWING;
+            calcDamageInfo->procVictim   = PROC_FLAG_TAKE_MELEE_SWING | PROC_FLAG_MAIN_HAND_WEAPON_SWING;
             calcDamageInfo->HitInfo = HITINFO_LEFTSWING;
             break;
         case RANGED_ATTACK:
-            calcDamageInfo->procAttacker = PROC_FLAG_SUCCESSFUL_RANGED_HIT;
-            calcDamageInfo->procVictim   = PROC_FLAG_TAKEN_RANGED_HIT;
+            calcDamageInfo->procAttacker = PROC_FLAG_DEAL_RANGED_ATTACK;
+            calcDamageInfo->procVictim   = PROC_FLAG_TAKE_RANGED_ATTACK;
             calcDamageInfo->HitInfo = HITINFO_UNK3;             // test (dev note: test what? HitInfo flag possibly not confirmed.)
             break;
         default:
@@ -1896,7 +1896,7 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* calcDamageInfo, W
     // Calculate absorb resist
     if (int32(calcDamageInfo->totalDamage) > 0)
     {
-        calcDamageInfo->procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
+        calcDamageInfo->procVictim |= PROC_FLAG_TAKE_ANY_DAMAGE;
 
         // Calculate absorb & resists
         for (uint8 i = 0; i < m_weaponDamageInfo.weapon[calcDamageInfo->attackType].lines; i++)
