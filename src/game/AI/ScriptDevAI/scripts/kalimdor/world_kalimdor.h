@@ -25,6 +25,9 @@ enum
 
     // Quest 1126
     NPC_HIVE_ASHI_DRONES        = 13136,
+
+    // Quest 6132
+    NPC_HORNIZZ                 = 6019,
 };
 
 enum Encounters

@@ -69,6 +69,7 @@ struct world_map_kalimdor : public ScriptedMap
     {
         switch (pCreature->GetEntry())
         {
+            case NPC_HORNIZZ:
             case NPC_MURKDEEP:
             case NPC_OMEN:
             case NPC_AVALANCHION:

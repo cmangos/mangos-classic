@@ -31,6 +31,7 @@ EndContentData */
 
 
 #include "AI/ScriptDevAI/base/escort_ai.h"
+#include "AI/ScriptDevAI/scripts/kalimdor/world_kalimdor.h"
 
 /*######
 ## npc_aged_dying_ancient_kodo
@@ -239,11 +240,15 @@ enum
     SAY_MELIZZA_2               = -1000787,
     SAY_MELIZZA_3               = -1000788,
 
+    SAY_HORNIZZ_1               = -1010030,
+    SAY_HORNIZZ_2               = -1010031,
+
     NPC_MARAUDINE_MARAUDER      = 4659,
     NPC_MARAUDINE_BONEPAW       = 4660,
     NPC_MARAUDINE_WRANGLER      = 4655,
 
     NPC_MELIZZA                 = 12277,
+    // NPC_HORNIZZ                 = 6019,
 
     POINT_ID_QUEST_COMPLETE     = 1,
     POINT_ID_EVENT_COMPLETE     = 2,
@@ -260,7 +265,9 @@ static const DialogueEntry aIntroDialogue[] =
     {SAY_MELIZZA_1,             NPC_MELIZZA,    4000},
     {SAY_MELIZZA_2,             NPC_MELIZZA,    5000},
     {SAY_MELIZZA_3,             NPC_MELIZZA,    4000},
-    {NPC_MELIZZA,               0,              0},
+    {NPC_MELIZZA,               0,              6000},
+    {SAY_HORNIZZ_1,             NPC_HORNIZZ,    10000},
+    {SAY_HORNIZZ_2,             NPC_HORNIZZ,    0},
     {0, 0, 0},
 };
 
@@ -297,6 +304,10 @@ struct npc_melizza_brimbuzzleAI : public npc_escortAI, private DialogueHelper
     {
         if (uiEntry == NPC_MELIZZA)
             return m_creature;
+
+        if (uiEntry == NPC_HORNIZZ)
+            if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
+                return instance->GetSingleCreatureFromStorage(NPC_HORNIZZ);
 
         return nullptr;
     }
