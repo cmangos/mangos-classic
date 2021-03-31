@@ -29,7 +29,8 @@ enum
     YELL_KILLED_PLAYER      = -1033018,
     YELL_WORGEN_CURSE       = -1033019,
 
-    SPELL_SPAWN             = 10418,
+    SPELL_SPAWN             = 7741,
+    SPELL_ARUGAL_TELEPORT   = 7136,
     SPELL_FIRE              = 6422,
 
     NPC_ASH                 = 3850,
@@ -64,6 +65,7 @@ enum {
     VINCENT_DEATH = 1,
     ARUGAL_VISIBLE,
     ARUGAL_TELEPORT_IN,
+    ARUGAL_TURN_TO_VINCENT,
     ARUGAL_EMOTE_POINT,
     ARUGAL_EMOTE_EXCLAMATION,
     ARUGAL_EMOTE_LAUGH,
