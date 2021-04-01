@@ -1088,32 +1088,30 @@ void Pet::GivePetXP(uint32 xp)
     uint32 maxlevel = std::min(sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL), GetOwner()->getLevel());
 
     // pet not receive xp for level equal to owner level
-    if (level >= maxlevel)
-        return;
-
-    xp *= sWorld.getConfig(CONFIG_FLOAT_RATE_PET_XP_KILL);
-
-    uint32 nextLvlXP = GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP);
-    uint32 curXP = GetUInt32Value(UNIT_FIELD_PETEXPERIENCE);
-    uint32 newXP = curXP + xp;
-
-    while (newXP >= nextLvlXP && level < maxlevel)
+    if (level < maxlevel)
     {
-        newXP -= nextLvlXP;
-        ++level;
 
-        GivePetLevel(level);                              // also update UNIT_FIELD_PETNEXTLEVELEXP and UNIT_FIELD_PETEXPERIENCE to level start
+        xp *= sWorld.getConfig(CONFIG_FLOAT_RATE_PET_XP_KILL);
 
-        nextLvlXP = GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP);
+        uint32 nextLvlXP = GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP);
+        uint32 curXP = GetUInt32Value(UNIT_FIELD_PETEXPERIENCE);
+        uint32 newXP = curXP + xp;
+
+        while (newXP >= nextLvlXP && level < maxlevel)
+        {
+            newXP -= nextLvlXP;
+            ++level;
+
+            GivePetLevel(level);                              // also update UNIT_FIELD_PETNEXTLEVELEXP and UNIT_FIELD_PETEXPERIENCE to level start
+
+            nextLvlXP = GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP);
+        }
+
+        SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, level < maxlevel ? newXP : 0);
     }
 
-    SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, level < maxlevel ? newXP : 0);
-
-    if (getPetType() == HUNTER_PET)
-    {
-        UpdateRequireXpForNextLoyaltyLevel(xp);
-        KillLoyaltyBonus(level);
-    }
+    UpdateRequireXpForNextLoyaltyLevel(xp);
+    KillLoyaltyBonus(level);
 }
 
 void Pet::GivePetLevel(uint32 level)
@@ -1261,8 +1259,8 @@ void Pet::InitStatsForLevel(uint32 petlevel)
                 uint32 mDmg = (GetAttackTime(BASE_ATTACK) * petlevel) / 2000;
 
                 // Set damage
-                SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(mDmg - mDmg / 4));
-                SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((mDmg - mDmg / 4) * 1.5));
+                SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(mDmg - mDmg / 4.f));
+                SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((mDmg - mDmg / 4.f) * 1.5));
             }
             else
             {
@@ -1299,7 +1297,7 @@ void Pet::InitStatsForLevel(uint32 petlevel)
 
                 if (CreatureClassLvlStats const* cCLS = sObjectMgr.GetCreatureClassLvlStats(petlevel, cInfo->UnitClass)) // Info found in ClassLevelStats
                 {
-                    float minDmg = (cCLS->BaseDamage * cInfo->DamageVariance + (cCLS->BaseMeleeAttackPower / 14) * (cInfo->MeleeBaseAttackTime / 1000)) * cInfo->DamageMultiplier;
+                    float minDmg = (cCLS->BaseDamage * cInfo->DamageVariance + (cCLS->BaseMeleeAttackPower / 14) * (cInfo->MeleeBaseAttackTime / 1000.f)) * cInfo->DamageMultiplier;
 
                     // Apply custom damage setting (from config)
                     minDmg *= _GetDamageMod(cInfo->Rank);
