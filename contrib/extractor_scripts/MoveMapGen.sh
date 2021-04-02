@@ -118,18 +118,21 @@ case "$1" in
  "1" )
    createHeader $1
    createMMaps $LIST_A $LIST_B $LIST_C $LIST_D $LIST_F $LIST_G $LIST_H $LIST_I &
+   ./MoveMapGen $PARAMS $OFFMESH --onlyGO
    ;;
  "2" )
    createHeader $1
    createMMaps $LIST_A $LIST_E $LIST_H $LIST_I &
    createMMaps $LIST_B $LIST_C $LIST_D $LIST_F $LIST_G &
+   ./MoveMapGen $PARAMS $OFFMESH --onlyGO
    ;;
  "4" )
    createHeader $1
    createMMaps $LIST_A &
    createMMaps $LIST_B &
    createMMaps $LIST_C $LIST_F $LIST_G &
-createMMaps $LIST_D $LIST_E $LIST_H $LIST_I &
+   createMMaps $LIST_D $LIST_E $LIST_H $LIST_I &
+   ./MoveMapGen $PARAMS $OFFMESH --onlyGO
    ;;
  "8" )
    createHeader $1
@@ -141,6 +144,7 @@ createMMaps $LIST_D $LIST_E $LIST_H $LIST_I &
    createMMaps $LIST_F $LIST_H &
    createMMaps $LIST_G &
    createMMaps $LIST_I &
+   ./MoveMapGen $PARAMS $OFFMESH --onlyGO
    ;;
  "offmesh" )
    echo "`date`: Recreate offmeshs from file $OFFMESH_FILE" | tee -a $LOG_FILE

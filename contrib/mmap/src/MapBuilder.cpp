@@ -396,9 +396,9 @@ namespace MMAP
         // List of Transport gameobjects
         buildGameObject("Elevatorcar.m2.vmo", 360);
         buildGameObject("Undeadelevator.m2.vmo", 455);
-        buildGameObject("Undeadelevatordoor.m2.vmo", 462);
+        // buildGameObject("Undeadelevatordoor.m2.vmo", 462); // no model on which to path
         buildGameObject("Ironforgeelevator.m2.vmo", 561);
-        buildGameObject("Ironforgeelevatordoor.m2.vmo", 562);
+        // buildGameObject("Ironforgeelevatordoor.m2.vmo", 562); // no model on which to path
         buildGameObject("Gnomeelevatorcar01.m2.vmo", 807);
         buildGameObject("Gnomeelevatorcar02.m2.vmo", 808);
         buildGameObject("Gnomeelevatorcar03.m2.vmo", 827); // missing vmap - reusing 03
