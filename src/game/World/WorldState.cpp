@@ -115,6 +115,7 @@ void WorldState::Load()
         while (result->NextRow());
     }
     StartWarEffortEvent();
+    SpawnWarEffortGos();
     RespawnEmeraldDragons();
 }
 
@@ -527,6 +528,7 @@ void WorldState::AddWarEffortProgress(AQResources resource, uint32 count)
     uint32 id = uint32(resource);
     if (id >= aqWorldStateTotalsMap.size())
         id -= 5;
+    ChangeWarEffortGoSpawns(resource);
     if (m_aqData.m_WarEffortCounters[resource] >= aqWorldStateTotalsMap[id].second) // fulfilled this condition - check all
     {
         bool success = true;
@@ -563,6 +565,19 @@ void WorldState::HandleWarEffortPhaseTransition(uint32 newPhase)
     StartWarEffortEvent();
 }
 
+void WorldState::StartWarEffortEvent()
+{
+    switch (m_aqData.m_phase)
+    {
+        case PHASE_1_GATHERING_RESOURCES: sGameEventMgr.StartEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_1); break;
+        case PHASE_2_TRANSPORTING_RESOURCES: sGameEventMgr.StartEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_2); break;
+        case PHASE_3_GONG_TIME: sGameEventMgr.StartEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_3); break;
+        case PHASE_4_10_HOUR_WAR: sGameEventMgr.StartEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_4); break;
+        case PHASE_5_DONE: sGameEventMgr.StartEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_5); break;
+        default: break;
+    }
+}
+
 void WorldState::StopWarEffortEvent()
 {
     switch (m_aqData.m_phase)
@@ -576,17 +591,117 @@ void WorldState::StopWarEffortEvent()
     }
 }
 
-void WorldState::StartWarEffortEvent()
+void WorldState::SpawnWarEffortGos()
 {
-    switch (m_aqData.m_phase)
+    for (uint32 i = 0; i < RESOURCE_MAX; ++i)
+        ChangeWarEffortGoSpawns(AQResources(i));
+}
+
+enum AQResourceTier
+{
+    RESOURCE_TIER_0,
+    RESOURCE_TIER_1,
+    RESOURCE_TIER_2,
+    RESOURCE_TIER_3,
+    RESOURCE_TIER_4,
+    RESOURCE_TIER_5,
+};
+
+struct WarEffortSpawn
+{
+    AQResourceGroup resourceGroup;
+    AQResourceTier resourceTier;
+    uint32 dbGuid;
+    Team team;
+};
+
+enum
+{
+    WAR_EFFORT_DB_GUID_PREFIX = 155000,
+
+    MAP_AZEROTH = 0,
+    MAP_KALIMDOR = 1,
+};
+
+// TODO: Fill
+static std::map<std::pair<AQResourceGroup, Team>, std::vector<AQResources>> teamResourcesMap
+{
+    { {RESOURCE_GROUP_SKINNING, ALLIANCE}, {AQ_HEAVY_LEATHER, AQ_RUGGED_LEATHER, AQ_THICK_LEATHER_ALLY}},
+    { {RESOURCE_GROUP_COOKING, ALLIANCE}, {AQ_RAINBOW_FIN_ALBACORE, AQ_ROAST_RAPTOR, AQ_SPOTTED_YELLOWTAIL_ALLY}}
+};
+
+// TODO: Fill
+static WarEffortSpawn warEffortSpawns[] =
+{
+    { RESOURCE_GROUP_SKINNING, RESOURCE_TIER_1, WAR_EFFORT_DB_GUID_PREFIX + 10, ALLIANCE},
+    { RESOURCE_GROUP_BANDAGES, RESOURCE_TIER_1, WAR_EFFORT_DB_GUID_PREFIX + 11, ALLIANCE},
+    { RESOURCE_GROUP_BARS,     RESOURCE_TIER_1, WAR_EFFORT_DB_GUID_PREFIX + 12, ALLIANCE},
+    { RESOURCE_GROUP_COOKING,  RESOURCE_TIER_1, WAR_EFFORT_DB_GUID_PREFIX + 13, ALLIANCE},
+    { RESOURCE_GROUP_HERBS,    RESOURCE_TIER_1, WAR_EFFORT_DB_GUID_PREFIX + 14, ALLIANCE},
+};
+
+AQResourceTier GetResourceTier(uint32 counter, uint32 max)
+{
+    if (max * 90 / 100 < counter)
+        return RESOURCE_TIER_5;
+    if (max * 70 / 100 < counter)
+        return RESOURCE_TIER_4;
+    if (max * 50 / 100 < counter)
+        return RESOURCE_TIER_3;
+    if (max * 30 / 100 < counter)
+        return RESOURCE_TIER_2;
+    if (max * 10 / 100 < counter)
+        return RESOURCE_TIER_1;
+    return RESOURCE_TIER_0;
+}
+
+void WorldState::ChangeWarEffortGoSpawns(AQResources resource)
+{
+    auto resourceInfo = GetResourceInfo(resource);
+    auto counterInfo = GetResourceCounterAndMax(resourceInfo.first, resourceInfo.second);
+    auto tier = GetResourceTier(counterInfo.first, counterInfo.second);
+    std::vector<uint32> spawnsForSchedule;
+    for (auto& spawn : warEffortSpawns)
+        if (resourceInfo.first == spawn.resourceGroup && tier >= spawn.resourceTier)
+            if (m_aqData.m_spawnedDbGuids.find(spawn.dbGuid) == m_aqData.m_spawnedDbGuids.end())
+                spawnsForSchedule.push_back(spawn.dbGuid);
+    for (uint32 dbGuid : spawnsForSchedule)
+        m_aqData.m_spawnedDbGuids.insert(dbGuid);
+
+    sMapMgr.DoForAllMapsWithMapId(resourceInfo.second == ALLIANCE ? MAP_AZEROTH : MAP_KALIMDOR, [=](Map* map)
     {
-        case PHASE_1_GATHERING_RESOURCES: sGameEventMgr.StartEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_1); break;
-        case PHASE_2_TRANSPORTING_RESOURCES: sGameEventMgr.StartEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_2); break;
-        case PHASE_3_GONG_TIME: sGameEventMgr.StartEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_3); break;
-        case PHASE_4_10_HOUR_WAR: sGameEventMgr.StartEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_4); break;
-        case PHASE_5_DONE: sGameEventMgr.StartEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_5); break;
-        default: break;
+        for (uint32 dbGuid : spawnsForSchedule)
+        {
+            m_aqData.m_spawnedDbGuids.insert(dbGuid);
+            WorldObject::SpawnGameObject(dbGuid, map);
+        }
+    });
+}
+
+std::pair<AQResourceGroup, Team> WorldState::GetResourceInfo(AQResources resource)
+{
+    // TODO: Fill
+    switch (resource)
+    {
+        case AQ_RAINBOW_FIN_ALBACORE: return { RESOURCE_GROUP_COOKING, ALLIANCE};
+        case AQ_ROAST_RAPTOR: return { RESOURCE_GROUP_COOKING, ALLIANCE };
+        case AQ_SPOTTED_YELLOWTAIL_ALLY: return { RESOURCE_GROUP_COOKING, ALLIANCE };
+        case AQ_PEACEBLOOM:
+        default: return { RESOURCE_GROUP_HERBS , HORDE };
     }
+}
+
+std::pair<uint32, uint32> WorldState::GetResourceCounterAndMax(AQResourceGroup group, Team team)
+{
+    auto& data = teamResourcesMap[{group, team}];
+    uint32 counter = 0;
+    uint32 max = 0;
+    for (auto& resource : data)
+    {
+        counter += m_aqData.m_WarEffortCounters[resource];
+        max += aqWorldStateTotalsMap[resource > RESOURCE_UNIQUE_MAX ? resource - 5 : resource].second;
+    }
+    return {counter, max};
 }
 
 std::string WorldState::GetAQPrintout()

@@ -786,9 +786,17 @@ ChatCommand* ChatHandler::getCommandTable()
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 
+    static ChatCommand warEffortTable[] =
+    {
+        { "show",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleWarEffortCommand,                    "", nullptr },
+        { "phase",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleWarEffortPhaseCommand,               "", nullptr },
+        { "counter",        SEC_ADMINISTRATOR,  false, &ChatHandler::HandleWarEffortCounterCommand,             "", nullptr },
+        { nullptr,          0,                  false, nullptr,                                                 "", nullptr }
+    };
+
     static ChatCommand worldStateTable[] =
     {
-        { "wareffort",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleWarEffortCommand,           "", nullptr },
+        { "wareffort",      SEC_ADMINISTRATOR,  false, nullptr,                                        "", warEffortTable },
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 
