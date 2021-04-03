@@ -86,6 +86,7 @@ void WorldState::Load()
                             }
                             for (uint32 i = 0; i < RESOURCE_MAX; ++i)
                                 loadStream >> m_aqData.m_WarEffortCounters[i];
+                            loadStream >> m_aqData.m_phase2Tier;
                         }
                         catch (std::exception& e)
                         {
@@ -365,6 +366,13 @@ void WorldState::Update(const uint32 diff)
             HandleWarEffortPhaseTransition(m_aqData.m_phase + 1);
         }
         else m_aqData.m_timer -= diff;
+
+        if (m_aqData.m_phase == PHASE_2_TRANSPORTING_RESOURCES)
+        {
+            uint32 remainingDays = m_aqData.m_timer % (DAY * IN_MILLISECONDS);
+            if (remainingDays < m_aqData.m_phase2Tier)
+                ChangeWarEffortPhase2Tier(remainingDays);
+        }
     }
 }
 
@@ -595,8 +603,11 @@ void WorldState::StopWarEffortEvent()
 
 void WorldState::SpawnWarEffortGos()
 {
+    if (m_aqData.m_phase > PHASE_2_TRANSPORTING_RESOURCES)
+        return;
+
     for (uint32 i = 0; i < RESOURCE_MAX; ++i)
-        ChangeWarEffortGoSpawns(AQResources(i));
+        ChangeWarEffortGoSpawns(AQResources(i), m_aqData.m_phase == PHASE_2_TRANSPORTING_RESOURCES ? m_aqData.m_phase2Tier : -1);
 }
 
 enum AQResourceTier
@@ -708,11 +719,13 @@ AQResourceTier GetResourceTier(uint32 counter, uint32 max)
     return RESOURCE_TIER_0;
 }
 
-void WorldState::ChangeWarEffortGoSpawns(AQResources resource)
+void WorldState::ChangeWarEffortGoSpawns(AQResources resource, int32 forcedTier)
 {
     auto resourceInfo = GetResourceInfo(resource);
     auto counterInfo = GetResourceCounterAndMax(resourceInfo.first, resourceInfo.second);
     auto tier = GetResourceTier(counterInfo.first, counterInfo.second);
+    if (forcedTier != -1)
+        tier = AQResourceTier(uint32(forcedTier));
     std::vector<uint32> spawnsForSchedule;
     for (auto& spawn : warEffortSpawns)
         if (resourceInfo.first == spawn.resourceGroup && tier >= spawn.resourceTier)
@@ -725,10 +738,63 @@ void WorldState::ChangeWarEffortGoSpawns(AQResources resource)
     {
         for (uint32 dbGuid : spawnsForSchedule)
         {
-            m_aqData.m_spawnedDbGuids.insert(dbGuid);
             WorldObject::SpawnGameObject(dbGuid, map);
         }
     });
+}
+
+void WorldState::ChangeWarEffortPhase2Tier(uint32 remainingDays)
+{
+    m_aqData.m_phase2Tier = remainingDays;
+    std::set<std::pair<uint32, Team>> guidsForDespawn;
+    for (uint32 dbGuid : m_aqData.m_spawnedDbGuids)
+        for (auto& spawn : warEffortSpawns)
+            if (spawn.dbGuid == dbGuid && spawn.resourceTier > remainingDays)
+                guidsForDespawn.insert({ dbGuid, spawn.team});
+
+    DespawnWarEffortGuids(guidsForDespawn);
+    Save(SAVE_ID_AHN_QIRAJ);
+}
+
+void WorldState::DespawnWarEffortGuids(std::set<std::pair<uint32, Team>>& guids)
+{
+    std::vector<uint32> kalimdor;
+    std::vector<uint32> ek;
+    for (auto& data : guids)
+    {
+        if (data.second == ALLIANCE)
+            ek.push_back(data.first);
+        else
+            kalimdor.push_back(data.first);
+    }
+    if (!ek.empty())
+    {
+        for (uint32 dbGuid : ek)
+            m_aqData.m_spawnedDbGuids.erase(dbGuid);
+
+        sMapMgr.DoForAllMapsWithMapId(MAP_AZEROTH, [=](Map* map)
+        {
+            for (uint32 dbGuid : ek)
+            {
+                if (GameObject* go = map->GetGameObject(dbGuid))
+                    go->AddObjectToRemoveList();
+            }
+        });
+    }
+    if (!kalimdor.empty())
+    {
+        for (uint32 dbGuid : kalimdor)
+            m_aqData.m_spawnedDbGuids.erase(dbGuid);
+
+        sMapMgr.DoForAllMapsWithMapId(MAP_KALIMDOR, [=](Map* map)
+        {
+            for (uint32 dbGuid : kalimdor)
+            {
+                if (GameObject* go = map->GetGameObject(dbGuid))
+                    go->AddObjectToRemoveList();
+            }
+        });
+    }
 }
 
 std::pair<AQResourceGroup, Team> WorldState::GetResourceInfo(AQResources resource)
@@ -795,6 +861,7 @@ std::string AhnQirajData::GetData()
     std::string output = std::to_string(m_phase) + " " + std::to_string(m_timer);
     for (uint32 value : m_WarEffortCounters)
         output += " " + std::to_string(value);
+    output += " " + std::to_string(m_phase2Tier);
     return output;
 }
 

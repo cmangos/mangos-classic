@@ -174,7 +174,8 @@ struct AhnQirajData
     GuidVector m_warEffortWorldstatesPlayers;
     std::mutex m_warEffortMutex;
     std::set<uint32> m_spawnedDbGuids;
-    AhnQirajData() : m_phase(PHASE_0_DISABLED), m_timer(0)
+    uint32 m_phase2Tier;
+    AhnQirajData() : m_phase(PHASE_0_DISABLED), m_timer(0), m_phase2Tier(0)
     {
         memset(m_WarEffortCounters, 0, sizeof(m_WarEffortCounters));
     }
@@ -239,7 +240,9 @@ class WorldState
         void StartWarEffortEvent();
         void StopWarEffortEvent();
         void SpawnWarEffortGos();
-        void ChangeWarEffortGoSpawns(AQResources resource);
+        void ChangeWarEffortGoSpawns(AQResources resource, int32 forcedTier = -1);
+        void ChangeWarEffortPhase2Tier(uint32 remainingDays);
+        void DespawnWarEffortGuids(std::set<std::pair<uint32, Team>>& guids);
         std::pair<AQResourceGroup, Team> GetResourceInfo(AQResources resource);
         std::pair<uint32, uint32> GetResourceCounterAndMax(AQResourceGroup group, Team team);
         std::string GetAQPrintout();
