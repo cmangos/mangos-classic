@@ -36,6 +36,7 @@ EndContentData */
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "AI/ScriptDevAI/base/follower_ai.h"
 #include "AI/ScriptDevAI/scripts/kalimdor/world_kalimdor.h"
+#include "Spells/Scripts/SpellScript.h"
 
 /*######
 ## npc_oox22fe
@@ -572,6 +573,57 @@ bool QuestAccept_npc_kindal_moonweaver(Player* player, Creature* creature, const
     return true;
 }
 
+struct SpecificTargetScript : public SpellScript
+{
+    virtual std::set<uint32> const& GetRequiredTargets() const = 0;
+
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target)
+            return SPELL_FAILED_BAD_TARGETS;
+        auto& targets = GetRequiredTargets();
+        if (targets.find(target->GetObjectGuid().GetEntry()) == targets.end())
+            return SPELL_FAILED_BAD_TARGETS;
+        return SPELL_CAST_OK;
+    }
+};
+
+struct CaptureWildkin : public SpecificTargetScript // 11886
+{
+    std::set<uint32> m_targets = { 2927, 2928, 7808 };
+
+    std::set<uint32> const& GetRequiredTargets() const override { return m_targets; }
+};
+
+struct CaptureHippogryph : public SpecificTargetScript // 11887
+{
+    std::set<uint32> m_targets = { 5300, 5304, 5305, 5306 };
+
+    std::set<uint32> const& GetRequiredTargets() const override { return m_targets; }
+};
+
+struct CaptureFaerieDragon : public SpecificTargetScript // 11888
+{
+    std::set<uint32> m_targets = { 5276, 5278 };
+
+    std::set<uint32> const& GetRequiredTargets() const override { return m_targets; }
+};
+
+struct CaptureTreant : public SpecificTargetScript // 11885
+{
+    std::set<uint32> m_targets = { 7584 };
+
+    std::set<uint32> const& GetRequiredTargets() const override { return m_targets; }
+};
+
+struct CaptureMountainGiant : public SpecificTargetScript // 11889
+{
+    std::set<uint32> m_targets = { 5357, 5358 };
+
+    std::set<uint32> const& GetRequiredTargets() const override { return m_targets; }
+};
+
 void AddSC_feralas()
 {
     Script* pNewScript = new Script;
@@ -602,4 +654,10 @@ void AddSC_feralas()
     pNewScript->Name = "go_cage_door";
     pNewScript->pGOUse = &GOUse_go_cage_door;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<CaptureWildkin>("spell_capture_wildkin");
+    RegisterSpellScript<CaptureHippogryph>("spell_capture_hippogryph");
+    RegisterSpellScript<CaptureFaerieDragon>("spell_capture_faerie_dragon");
+    RegisterSpellScript<CaptureTreant>("spell_capture_treant");
+    RegisterSpellScript<CaptureMountainGiant>("spell_capture_mountain_giant");
 }
