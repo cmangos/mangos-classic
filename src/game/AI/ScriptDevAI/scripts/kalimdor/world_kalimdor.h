@@ -45,6 +45,7 @@ enum Encounters
     TYPE_HIVE               = 1, // Quest 1126
     // TYPE_TETHYR          = 2, // Quest 11198 - tbc+
     TYPE_FREEDOM_CREATURES  = 3, // Quest 2969
+    TYPE_GONG_TIME          = 4, // War Effort
     MAX_ENCOUNTER
 };
 

@@ -308,64 +308,69 @@ struct world_map_kalimdor : public ScriptedMap
 
     void SetData(uint32 uiType, uint32 uiData)
     {
-        if (uiType == TYPE_OMEN)
+        switch (uiType)
         {
-            switch (uiData)
+            case TYPE_OMEN:
             {
-                case NOT_STARTED:
-                    // Count another rocket cluster launched
-                    m_uiRocketsCounter++;
-                    if (m_uiRocketsCounter < MAX_ROCKETS)
-                    {
-                        // 25% chance of spawning Minions of Omen (guessed), only if not already spawned (encounter is set to FAIL in that case)
-                        if (GetData(TYPE_OMEN) == NOT_STARTED && urand(0, 1) < 1)
-                            SetData(TYPE_OMEN, SPECIAL); // This will notify the GO to summon Omen's minions
-                    }
-                    // Set the event in motion and notify the GO to summon Omen
-                    else if (GetData(TYPE_OMEN) != IN_PROGRESS && GetData(TYPE_OMEN) != DONE)   // Check that Omen is not already spawned and event is reset
-                        SetData(TYPE_OMEN, IN_PROGRESS);
-
-                    return; // Don't store NOT_STARTED data unless explicitly told so: we use it to count rockets
-                case SPECIAL:
-                    if (GameObject* pRocketCluster = GetSingleGameObjectFromStorage(GO_ROCKET_CLUSTER))
-                    {
-                        for (uint8 i = POS_IDX_MINION_OMEN_START ; i <= POS_IDX_MINION_OMEN_STOP ; i++)
-                            pRocketCluster->SummonCreature(NPC_MINION_OMEN, aSpawnLocations[i][0], aSpawnLocations[i][1], aSpawnLocations[i][2], aSpawnLocations[i][3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 15 * MINUTE * IN_MILLISECONDS);
-                    }
-                    break;
-                case IN_PROGRESS:
-                    if (GameObject* pRocketCluster = GetSingleGameObjectFromStorage(GO_ROCKET_CLUSTER))
-                    {
-                        if (Creature* pOmen = pRocketCluster->SummonCreature(NPC_OMEN, aSpawnLocations[POS_IDX_OMEN_SPAWN][0], aSpawnLocations[POS_IDX_OMEN_SPAWN][1], aSpawnLocations[POS_IDX_OMEN_SPAWN][2], aSpawnLocations[POS_IDX_OMEN_SPAWN][3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 15 * MINUTE * IN_MILLISECONDS))
+                switch (uiData)
+                {
+                    case NOT_STARTED:
+                        // Count another rocket cluster launched
+                        m_uiRocketsCounter++;
+                        if (m_uiRocketsCounter < MAX_ROCKETS)
                         {
-                            // Moving him to the lake bank
-                            pOmen->SetWalk(true);
-                            pOmen->GetMotionMaster()->MovePoint(1, aSpawnLocations[POS_IDX_OMEN_MOVE][0], aSpawnLocations[POS_IDX_OMEN_MOVE][1], aSpawnLocations[POS_IDX_OMEN_MOVE][2]);
-                            m_uiOmenResetTimer = 15 * MINUTE * IN_MILLISECONDS; // Reset after 15 minutes if not engaged or defeated
+                            // 25% chance of spawning Minions of Omen (guessed), only if not already spawned (encounter is set to FAIL in that case)
+                            if (GetData(TYPE_OMEN) == NOT_STARTED && urand(0, 1) < 1)
+                                SetData(TYPE_OMEN, SPECIAL); // This will notify the GO to summon Omen's minions
                         }
-                    }
-                    break;
-                case DONE:
-                    m_uiOmenMoonlightTimer = 5 * IN_MILLISECONDS;            // Timer before casting the end quest spell
-                    m_uiOmenResetTimer = 5 * MINUTE * IN_MILLISECONDS;       // Prevent another summoning of Omen for 5 minutes (based on spell duration)
-                    break;
+                        // Set the event in motion and notify the GO to summon Omen
+                        else if (GetData(TYPE_OMEN) != IN_PROGRESS && GetData(TYPE_OMEN) != DONE)   // Check that Omen is not already spawned and event is reset
+                            SetData(TYPE_OMEN, IN_PROGRESS);
+
+                        return; // Don't store NOT_STARTED data unless explicitly told so: we use it to count rockets
+                    case SPECIAL:
+                        if (GameObject* pRocketCluster = GetSingleGameObjectFromStorage(GO_ROCKET_CLUSTER))
+                        {
+                            for (uint8 i = POS_IDX_MINION_OMEN_START; i <= POS_IDX_MINION_OMEN_STOP; i++)
+                                pRocketCluster->SummonCreature(NPC_MINION_OMEN, aSpawnLocations[i][0], aSpawnLocations[i][1], aSpawnLocations[i][2], aSpawnLocations[i][3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 15 * MINUTE * IN_MILLISECONDS);
+                        }
+                        break;
+                    case IN_PROGRESS:
+                        if (GameObject* pRocketCluster = GetSingleGameObjectFromStorage(GO_ROCKET_CLUSTER))
+                        {
+                            if (Creature* pOmen = pRocketCluster->SummonCreature(NPC_OMEN, aSpawnLocations[POS_IDX_OMEN_SPAWN][0], aSpawnLocations[POS_IDX_OMEN_SPAWN][1], aSpawnLocations[POS_IDX_OMEN_SPAWN][2], aSpawnLocations[POS_IDX_OMEN_SPAWN][3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 15 * MINUTE * IN_MILLISECONDS))
+                            {
+                                // Moving him to the lake bank
+                                pOmen->SetWalk(true);
+                                pOmen->GetMotionMaster()->MovePoint(1, aSpawnLocations[POS_IDX_OMEN_MOVE][0], aSpawnLocations[POS_IDX_OMEN_MOVE][1], aSpawnLocations[POS_IDX_OMEN_MOVE][2]);
+                                m_uiOmenResetTimer = 15 * MINUTE * IN_MILLISECONDS; // Reset after 15 minutes if not engaged or defeated
+                            }
+                        }
+                        break;
+                    case DONE:
+                        m_uiOmenMoonlightTimer = 5 * IN_MILLISECONDS;            // Timer before casting the end quest spell
+                        m_uiOmenResetTimer = 5 * MINUTE * IN_MILLISECONDS;       // Prevent another summoning of Omen for 5 minutes (based on spell duration)
+                        break;
+                }
+                break;
             }
-        }
-        else if (uiType == TYPE_HIVE)
-        {
-            if (uiData == IN_PROGRESS)
-            	m_uiDronesTimer = 5 * MINUTE * IN_MILLISECONDS;
-        }
-        else if (uiType == TYPE_FREEDOM_CREATURES)
-        {
-            if (uiData == IN_PROGRESS)
-                m_freedSpriteDarter = 0;
-            else if (uiData == SPECIAL)
-            {
-                ++m_freedSpriteDarter;
-                if (m_freedSpriteDarter >= 6)
-                    uiData = DONE;
-            }
+            case TYPE_GONG_TIME:
+                // TODO: Handle initial first gong only
+                break;
+            case TYPE_HIVE:
+                if (uiData == IN_PROGRESS)
+                    m_uiDronesTimer = 5 * MINUTE * IN_MILLISECONDS;
+                break;
+            case TYPE_FREEDOM_CREATURES:
+                if (uiData == IN_PROGRESS)
+                    m_freedSpriteDarter = 0;
+                else if (uiData == SPECIAL)
+                {
+                    ++m_freedSpriteDarter;
+                    if (m_freedSpriteDarter >= 6)
+                        uiData = DONE;
+                }
+                break;
         }
         m_encounter[uiType] = uiData;
     }

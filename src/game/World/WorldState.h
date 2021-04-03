@@ -243,6 +243,7 @@ class WorldState
         void ChangeWarEffortGoSpawns(AQResources resource, int32 forcedTier = -1);
         void ChangeWarEffortPhase2Tier(uint32 remainingDays);
         void DespawnWarEffortGuids(std::set<std::pair<uint32, Team>>& guids);
+        AQPhase GetAqPhase() { return (AQPhase)m_aqData.m_phase; }
         std::pair<AQResourceGroup, Team> GetResourceInfo(AQResources resource);
         std::pair<uint32, uint32> GetResourceCounterAndMax(AQResourceGroup group, Team team);
         std::string GetAQPrintout();

@@ -16,6 +16,7 @@
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "World/WorldState.h"
+#include "AI/ScriptDevAI/scripts/kalimdor/world_kalimdor.h"
 
 enum Quests
 {
@@ -103,6 +104,8 @@ enum Quests
 
     QUEST_HORDE_MAGEWEAVE_BANDAGE_1 = 8607,
     QUEST_HORDE_MAGEWEAVE_BANDAGE_2 = 8608,
+
+    QUEST_BANG_A_GONG               = 8743,
 };
 
 bool QuestRewarded_war_effort(Player* player, Creature* creature, Quest const* quest)
@@ -181,11 +184,27 @@ bool QuestRewarded_war_effort(Player* player, Creature* creature, Quest const* q
     return true;
 }
 
+bool QuestRewarded_war_effort(Player* /*player*/, GameObject* go, Quest const* quest)
+{
+    if (quest->GetQuestId() == QUEST_BANG_A_GONG)
+    {
+        if (sWorldState.GetAqPhase() == PHASE_3_GONG_TIME)
+            if (InstanceData* data = go->GetInstanceData())
+                data->SetData(TYPE_GONG_TIME, 0);
+        sWorldState.HandleWarEffortPhaseTransition(PHASE_4_10_HOUR_WAR);
+    }
+    return true;
+}
 
 void AddSC_war_effort()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_war_effort";
     pNewScript->pQuestRewardedNPC = &QuestRewarded_war_effort;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_scarab_gong";
+    pNewScript->pQuestRewardedGO = &QuestRewarded_war_effort;
     pNewScript->RegisterSelf();
 }
