@@ -150,6 +150,15 @@ struct world_map_kalimdor : public ScriptedMap
             case NPC_AVALANCHION:
                 DoDespawnElementalRifts(ELEMENTAL_EARTH);
                 break;
+            case NPC_COLOSSUS_OF_ZORA:
+                WorldObject::SpawnCreature(155122, instance);
+                break;
+            case NPC_COLOSSUS_OF_REGAL:
+                WorldObject::SpawnCreature(155124, instance);
+                break;
+            case NPC_COLOSSUS_OF_ASHI:
+                WorldObject::SpawnCreature(155123, instance);
+                break;
         }
     }
 
