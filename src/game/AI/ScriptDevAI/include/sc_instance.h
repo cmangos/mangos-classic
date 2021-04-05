@@ -69,6 +69,7 @@ class ScriptedInstance : public InstanceData
 
     protected:
         void DespawnGuids(GuidVector& spawns); // despawns all creature guids and clears contents
+        void RespawnDbGuids(std::vector<uint32>& spawns); // respawns all dbguid creatures
 
         // Storage for GO-Guids and NPC-Guids
         EntryGuidMap m_goEntryGuidStore;                   // Store unique GO-Guids by entry
