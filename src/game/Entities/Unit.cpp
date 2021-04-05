@@ -10581,6 +10581,24 @@ void Unit::SetPvPContested(bool state)
     }
 }
 
+void Unit::RestoreOriginalFaction()
+{
+    if (GetTypeId() == TYPEID_PLAYER)
+        ((Player*)this)->setFactionForRace(getRace());
+    else
+    {
+        Creature* creature = (Creature*)this;
+
+        if (creature->IsPet() || creature->IsTotem())
+        {
+            if (Unit* owner = GetOwner())
+                setFaction(owner->GetFaction());
+        }
+        else
+            setFaction(creature->GetCreatureInfo()->Faction);
+    }
+}
+
 void Unit::KnockBackFrom(Unit* target, float horizontalSpeed, float verticalSpeed)
 {
     float angle = this == target ? GetOrientation() + M_PI_F : target->GetAngle(this);

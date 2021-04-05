@@ -33,6 +33,9 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
+#include "AI/ScriptDevAI/scripts/kalimdor/world_kalimdor.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
+#include <unordered_map>
 
 /*######
 ## npc_morokk
@@ -789,6 +792,434 @@ bool AreaTrigger_at_sentry_point(Player* pPlayer, const AreaTriggerEntry* /*pAt*
     return true;
 };
 
+/*######
+## npc_theramore_combatant
+######*/
+
+enum
+{
+    NPC_GUARD_NARRISHA = 5093,
+    NPC_GUARD_KAHIL = 5091,
+    NPC_GUARD_EDWARD = 4922,
+    NPC_GUARD_TARK = 5094,
+    NPC_GUARD_LANA = 5092,
+    NPC_GUARD_JARAD = 4923,
+
+    NPC_MEDIC_HELAINA = 5200, //Red healer
+    NPC_MEDIC_TAMBERLYN = 5199, //Blue healer
+
+    NPC_MASTER_SZIGETI = 5090,
+    NPC_MASTER_CRITON = 4924,
+
+    NPC_BLUE_CAPTAIN = 5096,
+    NPC_RED_CAPTAIN = 5095,
+
+    SPELL_FIRST_AID = 7162,
+
+    BLUE_TEAM = 1621,
+    RED_TEAM = 1622,
+
+    FACTION_THERAMORE_FRIENDLY = 151,
+
+    SAY_RED_WINNER = 1794, //Szigeti
+    SAY_BLUE_WINNER = 1795, //Szigeti
+    SAY_RED_WINNER_OVERALL = 1773, //Criton
+    SAY_BLUE_WINNER_OVERALL = 1774, //Criton
+
+    SAY_BACK_TO_CORNERS = 1636, //Criton
+
+    SAY_FOR_THE_RED = 1778,
+    SAY_FOR_THE_BLUE = 1777,
+
+    SAY_FIRST_COMBATANTS = 1771,
+    SAY_FIGHT_INTRO = 1643,
+    SAY_FIGHT_START = 1641,
+
+    SAY_EDWARD_LOSS = 1760,
+    SAY_KAHIL_LOSS = 1762,
+    SAY_NARRISHA_LOSS = 1763,
+
+    SAY_JARAD_LOSS = 1766,
+    SAY_LANA_LOSS = 1767,
+    SAY_TARK_LOSS = 1768,
+
+    SAY_RED_MOTIVATION_WIN = 1769,
+    SAY_RED_MOTIVATION_LOSS = 1770,
+
+    SAY_BLUE_MOTIVATION_LOSS = 1765,
+    SAY_BLUE_MOTIVATION_WIN = 1764,
+
+    SAY_RED_FIRST = 1776,
+    SAY_BLUE_FIRST = 1775,
+};
+
+enum CombatantActions
+{
+    COMBATANT_CHECK_HP,
+    COMBATANT_BLUE_WIN,
+    COMBATANT_RED_WIN,
+    COMBATANT_START_POSITION,
+    COMBATANT_START_SPAR,
+    COMBATANT_GET_ALL,
+    COMBATANT_SALUTE,
+    COMBATANT_SWITCH,
+    COMBATANT_SEPARATE,
+    COMBATANT_INTRO,
+    COMBATANT_MOTIVATION,
+    COMBATANT_ACTION_MAX,
+};
+
+static std::unordered_map<uint32, const Position> startingPositions ({
+    {BLUE_TEAM, {-3643.574707f, -4505.717773f, 9.462863f, 3.855592f}},
+    {RED_TEAM, {-3652.405273f, -4514.126953f, 9.462863f, 0.717925f}}
+});
+
+static const uint32 theramore_blue_team[] = {NPC_GUARD_EDWARD, NPC_GUARD_KAHIL, NPC_GUARD_NARRISHA};
+static const uint32 theramore_red_team[] = {NPC_GUARD_JARAD, NPC_GUARD_LANA, NPC_GUARD_TARK};
+
+struct npc_theramore_spar_controller : public CombatAI
+{
+    npc_theramore_spar_controller(Creature* creature) : CombatAI(creature, COMBATANT_ACTION_MAX)
+    {
+        AddCustomAction(COMBATANT_CHECK_HP, true, [&](){ CheckCombatantHP(); });
+        AddCustomAction(COMBATANT_BLUE_WIN, true, [&](){ HandleBlueWin(); });
+        AddCustomAction(COMBATANT_RED_WIN, true, [&](){ HandleRedWin(); });
+        AddCustomAction(COMBATANT_START_SPAR, true, [&](){ StartSparring(); });
+        AddCustomAction(COMBATANT_START_POSITION, 10000u, [&](){ MoveIntoPosition(); });
+        AddCustomAction(COMBATANT_SALUTE, true, [&](){ CombatantSalute(); });
+        AddCustomAction(COMBATANT_INTRO, true, [&](){ CombatantIntro(); });
+        AddCustomAction(COMBATANT_SWITCH, true, [&](){ SwitchMembers(); });
+        AddCustomAction(COMBATANT_SEPARATE, true, [&](){ CombatantSeparate(); });
+        AddCustomAction(COMBATANT_GET_ALL, 2000u, [&](){ GetCombatants(); });
+        AddCustomAction(COMBATANT_MOTIVATION, true, [&](){ HandleMotivation(); });
+    }
+
+    std::unordered_map<uint32, GuidList> teams;
+    std::unordered_map<uint32, ObjectGuid> medics;
+    std::unordered_map<uint32, ObjectGuid> active;
+
+    uint32 m_uiWinningTeam;
+
+    void GetCombatants()
+    {
+        teams.clear();
+        active.clear();
+        for (uint32 red : theramore_red_team)
+        {
+            Creature* redMember = GetClosestCreatureWithEntry(m_creature, red, 20.f);
+            if (redMember && redMember->IsAlive())
+            {
+                redMember->setFaction(FACTION_THERAMORE_FRIENDLY);
+                teams[RED_TEAM].push_back(redMember->GetObjectGuid());
+            }
+        }
+
+        for (uint32 blue : theramore_blue_team)
+        {
+            Creature* blueMember = GetClosestCreatureWithEntry(m_creature, blue, 20.f);
+            if (blueMember && blueMember->IsAlive())
+            {
+                blueMember->setFaction(FACTION_THERAMORE_FRIENDLY);
+                teams[BLUE_TEAM].push_back(blueMember->GetObjectGuid());
+            }
+        }
+
+        if (Creature* redMedic = GetClosestCreatureWithEntry(m_creature, NPC_MEDIC_HELAINA, 20.f))
+            medics[RED_TEAM] = redMedic->GetObjectGuid();
+        if (Creature* blueMedic = GetClosestCreatureWithEntry(m_creature, NPC_MEDIC_TAMBERLYN, 20.f))
+            medics[BLUE_TEAM] = blueMedic->GetObjectGuid();
+    }
+
+    void CheckCombatantHP()
+    {
+        Unit* redCombatant = m_creature->GetMap()->GetUnit(active[RED_TEAM]);
+        Unit* blueCombatant = m_creature->GetMap()->GetUnit(active[BLUE_TEAM]);
+
+        if (redCombatant && blueCombatant)
+        {
+            float redHealth = redCombatant->GetHealthPercent();
+            float blueHealth = blueCombatant->GetHealthPercent();
+            if (redHealth <= 30 || blueHealth <= 30)
+            {
+                ResetTimer(redHealth < blueHealth ? COMBATANT_BLUE_WIN : COMBATANT_RED_WIN, 100);
+
+                redCombatant->RestoreOriginalFaction();
+                blueCombatant->RestoreOriginalFaction();
+                redCombatant->CombatStop(true);
+                blueCombatant->CombatStop(true);
+                
+                Unit* redMedic = m_creature->GetMap()->GetUnit(medics[RED_TEAM]);
+                Unit* blueMedic = m_creature->GetMap()->GetUnit(medics[BLUE_TEAM]);
+
+                if (redMedic && redMedic->IsAlive() && redCombatant->IsAlive())
+                    redMedic->AI()->DoCastSpellIfCan(redCombatant, SPELL_FIRST_AID);
+                if (blueMedic && blueMedic->IsAlive() && blueCombatant->IsAlive())
+                    blueMedic->AI()->DoCastSpellIfCan(blueCombatant, SPELL_FIRST_AID);
+                DisableTimer(COMBATANT_CHECK_HP);
+                return;
+            }
+        }
+        ResetTimer(COMBATANT_CHECK_HP, 1000u);
+    }
+
+    void HandleBlueWin()
+    {
+        Unit* szigeti = GetClosestCreatureWithEntry(m_creature, NPC_MASTER_SZIGETI, 15.f);
+        Creature* redCaptain = GetClosestCreatureWithEntry(m_creature, NPC_RED_CAPTAIN, 20.f);
+        if (szigeti && szigeti->IsAlive())
+        {
+            szigeti->HandleEmote(EMOTE_ONESHOT_POINT);
+            DoBroadcastText(SAY_BLUE_WINNER, szigeti);
+        }
+        for (uint32 member : theramore_blue_team)
+        {
+            Unit* combatant = GetClosestCreatureWithEntry(m_creature, member, 20.f);
+            if (combatant && combatant->GetEntry() != active[BLUE].GetEntry() && combatant->IsAlive())
+            {
+                combatant->HandleEmote(EMOTE_ONESHOT_CHEER);
+            }
+        }
+        if (redCaptain && redCaptain->IsAlive())
+        {
+            switch (active[RED_TEAM].GetEntry())
+            {
+                case NPC_GUARD_JARAD:
+                    DoBroadcastText(SAY_JARAD_LOSS, redCaptain);
+                    break;
+                case NPC_GUARD_LANA:
+                    DoBroadcastText(SAY_LANA_LOSS, redCaptain);
+                    break;
+                case NPC_GUARD_TARK:
+                    DoBroadcastText(SAY_TARK_LOSS, redCaptain);
+                    break;
+                default:
+                    break;
+            }
+        }
+        HandleWin(BLUE_TEAM);
+        m_uiWinningTeam = BLUE_TEAM;
+    }
+
+    void HandleRedWin()
+    {
+        Unit* szigeti = GetClosestCreatureWithEntry(m_creature, NPC_MASTER_SZIGETI, 15.f);
+        Creature* blueCaptain = GetClosestCreatureWithEntry(m_creature, NPC_BLUE_CAPTAIN, 20.f);
+        if (szigeti && szigeti->IsAlive())
+        {
+            szigeti->HandleEmote(EMOTE_ONESHOT_POINT);
+            DoBroadcastText(SAY_RED_WINNER, szigeti);
+        }
+        for (uint32 member : theramore_red_team)
+        {
+            Unit* combatant = GetClosestCreatureWithEntry(m_creature, member, 20.f);
+            if (combatant && combatant->GetEntry() != active[RED_TEAM].GetEntry() && combatant->IsAlive())
+            {
+                combatant->HandleEmote(EMOTE_ONESHOT_CHEER);
+            }
+        }
+        if (blueCaptain && blueCaptain->IsAlive())
+        {
+            switch (active[BLUE_TEAM].GetEntry())
+            {
+                case NPC_GUARD_EDWARD:
+                    DoBroadcastText(SAY_EDWARD_LOSS, blueCaptain);
+                    break;
+                case NPC_GUARD_KAHIL:
+                    DoBroadcastText(SAY_KAHIL_LOSS, blueCaptain);
+                    break;
+                case NPC_GUARD_NARRISHA:
+                    DoBroadcastText(SAY_NARRISHA_LOSS, blueCaptain);
+                    break;
+                default:
+                    break;
+            }
+        }
+        HandleWin(RED_TEAM);
+        m_uiWinningTeam = RED_TEAM;
+    }
+
+    void HandleMotivation()
+    {
+        uint32 winningTeam = m_uiWinningTeam;
+        Creature* redCaptain = GetClosestCreatureWithEntry(m_creature, NPC_RED_CAPTAIN, 20.f);
+        Creature* blueCaptain = GetClosestCreatureWithEntry(m_creature, NPC_BLUE_CAPTAIN, 20.f);
+
+        if (!redCaptain || !blueCaptain || !redCaptain->IsAlive() || !blueCaptain->IsAlive())
+            return;
+
+        switch (winningTeam)
+        {
+            case RED_TEAM:
+                DoBroadcastText(SAY_RED_MOTIVATION_WIN, redCaptain);
+                DoBroadcastText(SAY_BLUE_MOTIVATION_LOSS, blueCaptain);
+                break;
+            case BLUE_TEAM:
+                DoBroadcastText(SAY_BLUE_MOTIVATION_WIN, blueCaptain);
+                DoBroadcastText(SAY_RED_MOTIVATION_LOSS, redCaptain);
+                break;
+            default:
+                break;
+        }
+
+    }
+
+    void HandleWin(uint32 winningTeam)
+    {
+        Unit* criton = GetClosestCreatureWithEntry(m_creature, NPC_MASTER_CRITON, 15.f);
+        uint32 losingTeam = (winningTeam == BLUE_TEAM ? RED_TEAM : BLUE_TEAM);
+
+        if (criton && criton->IsAlive())
+        {
+            DoBroadcastText(SAY_BACK_TO_CORNERS, criton);
+            if (teams[losingTeam].empty())
+            {
+                DoBroadcastText(winningTeam == BLUE_TEAM ? SAY_BLUE_WINNER_OVERALL : SAY_RED_WINNER_OVERALL, criton);
+                ResetTimer(COMBATANT_MOTIVATION, 8000u);
+            }
+        }
+        ResetTimer(COMBATANT_SEPARATE, 100u);
+    }
+
+    void CombatantSalute()
+    {
+        Creature* redMember = dynamic_cast<Creature*>(m_creature->GetMap()->GetUnit(active[RED_TEAM]));
+        Creature* blueMember = dynamic_cast<Creature*>(m_creature->GetMap()->GetUnit(active[BLUE_TEAM]));
+        if (redMember && blueMember && redMember->IsAlive() && blueMember->IsAlive())
+        {
+            redMember->HandleEmote(EMOTE_ONESHOT_SALUTE);
+            DoBroadcastText(SAY_FOR_THE_RED, redMember);
+            blueMember->HandleEmote(EMOTE_ONESHOT_SALUTE);
+            DoBroadcastText(SAY_FOR_THE_BLUE, blueMember);
+        }
+        ResetTimer(COMBATANT_INTRO, 3000u);
+    }
+
+    void CombatantIntro()
+    {
+        Unit* criton = GetClosestCreatureWithEntry(m_creature, NPC_MASTER_CRITON, 15.f);
+        if (criton && criton->IsAlive())
+        {
+            DoBroadcastText(SAY_FIGHT_INTRO, criton);
+        }
+        ResetTimer(COMBATANT_START_SPAR, 3000u);
+    }
+
+    void SwitchMembers()
+    {
+        uint32 winningTeam = m_uiWinningTeam;
+        uint32 losingTeam = (winningTeam == BLUE_TEAM ? RED_TEAM : BLUE_TEAM);
+        Creature* loser = dynamic_cast<Creature*>(m_creature->GetMap()->GetUnit(active[losingTeam]));
+        Creature* winner = dynamic_cast<Creature*>(m_creature->GetMap()->GetUnit(active[winningTeam]));
+
+        if (loser && loser->IsAlive())
+        {
+            Position respawnCoords = loser->GetRespawnPosition();
+            loser->AI()->SetReactState(REACT_PASSIVE);
+            loser->GetMotionMaster()->Clear(true, true);
+            loser->GetMotionMaster()->MovePoint(0, respawnCoords, FORCED_MOVEMENT_RUN);
+        }
+        if (winner && winner->IsAlive())
+        {
+            winner->GetMotionMaster()->MovePoint(1, startingPositions[winningTeam], FORCED_MOVEMENT_WALK);
+        }
+        if (!teams[losingTeam].empty()){
+            active[losingTeam] = teams[losingTeam].front();
+            teams[losingTeam].pop_front();
+            ResetTimer(COMBATANT_START_POSITION, 5000u);
+        }
+        else
+        {
+            if (winner && winner->IsAlive())
+            {
+                Position respawnCoords = winner->GetRespawnPosition();
+                winner->AI()->SetReactState(REACT_PASSIVE);
+                winner->GetMotionMaster()->Clear(true, true);
+                winner->GetMotionMaster()->MovePoint(0, respawnCoords, FORCED_MOVEMENT_RUN);
+            }
+            GetCombatants();
+            ResetTimer(COMBATANT_START_POSITION, 20000u);
+        }
+    }
+
+    void CombatantSeparate()
+    {
+        Creature* redMember = dynamic_cast<Creature*>(m_creature->GetMap()->GetUnit(active[RED_TEAM]));
+        Creature* blueMember = dynamic_cast<Creature*>(m_creature->GetMap()->GetUnit(active[BLUE_TEAM]));
+
+        if (redMember && blueMember)
+        {
+            redMember->GetMotionMaster()->Clear(true, true);
+            redMember->GetMotionMaster()->MovePoint(1, startingPositions[RED_TEAM], FORCED_MOVEMENT_RUN);
+            redMember->AI()->SetReactState(REACT_PASSIVE);
+            blueMember->GetMotionMaster()->Clear(true, true);
+            blueMember->GetMotionMaster()->MovePoint(1, startingPositions[BLUE_TEAM], FORCED_MOVEMENT_RUN);
+            blueMember->AI()->SetReactState(REACT_PASSIVE);
+        }
+        ResetTimer(COMBATANT_SWITCH, 5000u);
+    }
+
+    void StartSparring()
+    {
+        Creature* redMember = dynamic_cast<Creature*>(m_creature->GetMap()->GetUnit(active[RED_TEAM]));
+        Creature* blueMember = dynamic_cast<Creature*>(m_creature->GetMap()->GetUnit(active[BLUE_TEAM]));
+
+        Unit* criton = GetClosestCreatureWithEntry(m_creature, NPC_MASTER_CRITON, 15.f);
+        if (criton && criton->IsAlive())
+        {
+            DoBroadcastText(SAY_FIGHT_START, criton);
+        }
+
+        if (redMember && blueMember)
+        {
+            redMember->SetFactionTemporary(RED_TEAM, TEMPFACTION_RESTORE_COMBAT_STOP);
+            redMember->AI()->SetReactState(REACT_DEFENSIVE);
+            blueMember->SetFactionTemporary(BLUE_TEAM, TEMPFACTION_RESTORE_COMBAT_STOP);
+            blueMember->AI()->SetReactState(REACT_DEFENSIVE);
+            redMember->AI()->AttackStart(blueMember);
+            blueMember->AI()->AttackStart(redMember);
+
+            ResetTimer(COMBATANT_CHECK_HP, 1000u);
+        }
+    }
+
+    void MoveIntoPosition()
+    {
+        if (active.empty() && !teams.empty())
+        {
+            Creature* redCaptain = GetClosestCreatureWithEntry(m_creature, NPC_RED_CAPTAIN, 20.f);
+            Creature* blueCaptain = GetClosestCreatureWithEntry(m_creature, NPC_BLUE_CAPTAIN, 20.f);
+            active[RED_TEAM] = teams[RED_TEAM].front();
+            teams[RED_TEAM].pop_front();
+            active[BLUE_TEAM] = teams[BLUE_TEAM].front();
+            teams[BLUE_TEAM].pop_front();
+            Unit* criton = GetClosestCreatureWithEntry(m_creature, NPC_MASTER_CRITON, 15.f);
+            if (criton && criton->IsAlive())
+            {
+                DoBroadcastText(SAY_FIRST_COMBATANTS, criton);
+            }
+            if (redCaptain && redCaptain->IsAlive())
+            {
+                DoBroadcastText(SAY_RED_FIRST, redCaptain);
+            }
+            if (blueCaptain && blueCaptain->IsAlive())
+            {
+                DoBroadcastText(SAY_BLUE_FIRST, blueCaptain);
+            }
+        }
+        Creature* redMember = dynamic_cast<Creature*>(m_creature->GetMap()->GetUnit(active[RED_TEAM]));
+        Creature* blueMember = dynamic_cast<Creature*>(m_creature->GetMap()->GetUnit(active[BLUE_TEAM]));
+
+        if (redMember && blueMember)
+        {
+            redMember->GetMotionMaster()->Clear(true, true);
+            redMember->GetMotionMaster()->MovePoint(1, startingPositions[RED_TEAM], FORCED_MOVEMENT_WALK);
+            blueMember->GetMotionMaster()->Clear(true, true);
+            blueMember->GetMotionMaster()->MovePoint(1, startingPositions[BLUE_TEAM], FORCED_MOVEMENT_WALK);
+        }
+        ResetTimer(COMBATANT_SALUTE, 5000u);
+    }
+};
+
 void AddSC_dustwallow_marsh()
 {
     Script* pNewScript;
@@ -820,5 +1251,10 @@ void AddSC_dustwallow_marsh()
     pNewScript = new Script;
     pNewScript->Name = "at_sentry_point";
     pNewScript->pAreaTrigger = &AreaTrigger_at_sentry_point;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_theramore_spar_controller";
+    pNewScript->GetAI = &GetNewAIInstance<npc_theramore_spar_controller>;
     pNewScript->RegisterSelf();
 }

@@ -351,6 +351,8 @@ UPDATE creature_template SET ScriptName='npc_ogron' WHERE entry=4983;
 UPDATE creature_template SET ScriptName='npc_morokk' WHERE entry=4500;
 UPDATE creature_template SET ScriptName='npc_private_hendel' WHERE entry=4966;
 UPDATE creature_template SET ScriptName='npc_stinky_ignatz' WHERE entry=4880;
+UPDATE creature_template SET ScriptName='npc_theramore_spar_controller' WHERE entry=5090;
+
 INSERT INTO scripted_areatrigger VALUES
 (302,'at_sentry_point');
 
