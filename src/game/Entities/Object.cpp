@@ -2725,7 +2725,7 @@ int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry cons
 
     if (unitCaster)
         if (Player* modOwner = unitCaster->GetSpellModOwner())
-            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_ALL_EFFECTS, value, nullptr, finalUse);
+            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_ALL_EFFECTS, value, finalUse);
 
     if (unitCaster && spellProto->HasAttribute(SPELL_ATTR_LEVEL_DAMAGE_CALCULATION) && spellProto->spellLevel)
     {

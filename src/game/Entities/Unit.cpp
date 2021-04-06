@@ -1100,7 +1100,7 @@ void Unit::HandleDamageDealt(Unit* dealer, Unit* victim, uint32& damage, CleanDa
             !spellProto->HasAttribute(SPELL_ATTR_EX_NO_THREAT))) && dealer->CanEnterCombat() && victim->CanEnterCombat())
         {
             float threat = damage * sSpellMgr.GetSpellThreatMultiplier(spellProto);
-            victim->AddThreat(dealer, threat, (cleanDamage && cleanDamage->hitOutCome == MELEE_HIT_CRIT), damageSchoolMask, spellProto);
+            victim->AddThreat(dealer, threat, (cleanDamage && cleanDamage->hitOutCome == MELEE_HIT_CRIT), damageSchoolMask);
             if (damagetype != DOT && damagetype != SPELL_DAMAGE_SHIELD) // DOTs dont put in combat but still cause threat
             {
                 dealer->SetInCombatWith(victim);
@@ -1567,7 +1567,7 @@ uint32 Unit::SpellNonMeleeDamageLog(Unit* pVictim, uint32 spellID, uint32 damage
     spellDamageInfo.target->CalculateAbsorbResistBlock(this, &spellDamageInfo, spellInfo);
     Unit::DealDamageMods(this, spellDamageInfo.target, spellDamageInfo.damage, &spellDamageInfo.absorb, SPELL_DIRECT_DAMAGE);
     SendSpellNonMeleeDamageLog(&spellDamageInfo);
-    DealSpellDamage(&spellDamageInfo, true, false);
+    DealSpellDamage(&spellDamageInfo, true, true);
     return spellDamageInfo.damage;
 }
 
@@ -2326,7 +2326,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
 
             Unit::SendSpellNonMeleeDamageLog(this, caster, (*i)->GetSpellProto()->Id, splitted, schoolMask, splitted_absorb, 0, (damagetype == DOT), 0, false, true);
 
-            CleanDamage cleanDamage(splitted, BASE_ATTACK, MELEE_HIT_NORMAL, splitted > 0);
+            CleanDamage cleanDamage = CleanDamage(splitted, BASE_ATTACK, MELEE_HIT_NORMAL, splitted > 0);
             Unit::DealDamage(this, caster, splitted, &cleanDamage, DIRECT_DAMAGE, schoolMask, (*i)->GetSpellProto(), false);
         }
 
@@ -2359,7 +2359,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
 
             Unit::SendSpellNonMeleeDamageLog(this, caster, (*i)->GetSpellProto()->Id, splitted, schoolMask, split_absorb, 0, (damagetype == DOT), 0, false, true);
 
-            CleanDamage cleanDamage(splitted, BASE_ATTACK, MELEE_HIT_NORMAL, splitted > 0);
+            CleanDamage cleanDamage = CleanDamage(splitted, BASE_ATTACK, MELEE_HIT_NORMAL, splitted > 0);
             Unit::DealDamage(this, caster, splitted, &cleanDamage, DIRECT_DAMAGE, schoolMask, (*i)->GetSpellProto(), false);
         }
     }
@@ -2373,20 +2373,20 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
     *absorb = damage - RemainingDamage - *resist;
 }
 
-void Unit::CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damageInfo, SpellEntry const* spellProto, WeaponAttackType attType)
+void Unit::CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* spellDamageInfo, SpellEntry const* spellProto, WeaponAttackType attType)
 {
     if (RollAbilityPartialBlockOutcome(pCaster, attType, spellProto))
     {
-        damageInfo->blocked = std::min(GetShieldBlockValue(), damageInfo->damage);
-        damageInfo->damage -= damageInfo->blocked;
+        spellDamageInfo->blocked = std::min(GetShieldBlockValue(), spellDamageInfo->damage);
+        spellDamageInfo->damage -= spellDamageInfo->blocked;
     }
 
-    CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), SPELL_DIRECT_DAMAGE, damageInfo->damage, &damageInfo->absorb, &damageInfo->resist, IsReflectableSpell(spellProto), IsResistableSpell(spellProto), IsBinarySpell(*spellProto));
+    CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), SPELL_DIRECT_DAMAGE, spellDamageInfo->damage, &spellDamageInfo->absorb, &spellDamageInfo->resist, IsReflectableSpell(spellProto), IsResistableSpell(spellProto), IsBinarySpell(*spellProto));
 
-    const uint32 bonus = (damageInfo->resist < 0 ? uint32(std::abs(damageInfo->resist)) : 0);
-    damageInfo->damage += bonus;
-    const uint32 malus = (damageInfo->resist > 0 ? (damageInfo->absorb + uint32(damageInfo->resist)) : damageInfo->absorb);
-    damageInfo->damage = (damageInfo->damage <= malus ? 0 : (damageInfo->damage - malus));
+    const uint32 bonus = (spellDamageInfo->resist < 0 ? uint32(std::abs(spellDamageInfo->resist)) : 0);
+    spellDamageInfo->damage += bonus;
+    const uint32 malus = (spellDamageInfo->resist > 0 ? (spellDamageInfo->absorb + uint32(spellDamageInfo->resist)) : spellDamageInfo->absorb);
+    spellDamageInfo->damage = (spellDamageInfo->damage <= malus ? 0 : (spellDamageInfo->damage - malus));
 }
 
 void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool extra)
@@ -3329,7 +3329,7 @@ float Unit::GetCritTakenMultiplier(SpellSchoolMask /*dmgSchoolMask*/, SpellDmgCl
     return std::max(0.0f, multiplier);
 }
 
-uint32 Unit::CalculateCritAmount(const Unit* victim, uint32 amount, const SpellEntry* entry, bool heal) const
+uint32 Unit::CalculateCritAmount(const Unit *victim, uint32 amount, const SpellEntry* entry, bool heal) const
 {
     if (!entry)
         return 0;
@@ -3491,7 +3491,7 @@ float Unit::CalculateEffectiveCritChance(const Unit* victim, WeaponAttackType at
     return std::max(0.0f, std::min(chance, 100.0f));
 }
 
-float Unit::CalculateEffectiveMissChance(const Unit* victim, WeaponAttackType attType, const SpellEntry* ability) const
+float Unit::CalculateEffectiveMissChance(const Unit *victim, WeaponAttackType attType, const SpellEntry* ability) const
 {
     float chance = 0.0f;
 
@@ -3602,7 +3602,7 @@ float Unit::CalculateSpellMissChance(const Unit* victim, SpellSchoolMask schoolM
     {
         case SPELL_DAMAGE_CLASS_MELEE:
         case SPELL_DAMAGE_CLASS_RANGED:
-            return CalculateEffectiveMissChance(victim, GetWeaponAttackType(spell), spell);
+            return CalculateEffectiveMissChance(victim, GetWeaponAttackType(spell));
     }
     chance += victim->GetMissChance(spell, schoolMask);
     // Victim's own chance appears to be zero / below zero / unmeaningful for some reason (debuffs?): skip calculation, unit can't be missed
@@ -8215,7 +8215,7 @@ float Unit::ApplyTotalThreatModifier(float threat, SpellSchoolMask schoolMask)
 
 //======================================================================
 
-void Unit::AddThreat(Unit* pVictim, float threat /*= 0.0f*/, bool crit /*= false*/, SpellSchoolMask schoolMask /*= SPELL_SCHOOL_MASK_NONE*/, SpellEntry const* threatSpell /*= nullptr*/)
+void Unit::AddThreat(Unit* pVictim, float threat /*= 0.0f*/, bool crit /*= false*/, SpellSchoolMask schoolMask /*= SPELL_SCHOOL_MASK_NONE*/, SpellEntry const* threatSpell /*= nullptr*/ /*= nullptr*/)
 {
     // Only mobs can manage threat lists
     if (CanHaveThreatList())

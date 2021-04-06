@@ -4678,7 +4678,7 @@ void Aura::PeriodicTick()
             if (pdamage)
                 procVictim |= PROC_FLAG_TAKE_ANY_DAMAGE;
 
-            CleanDamage cleanDamage(pdamage, BASE_ATTACK, MELEE_HIT_NORMAL, pdamage || absorb);
+            CleanDamage cleanDamage =  CleanDamage(pdamage, BASE_ATTACK, MELEE_HIT_NORMAL, pdamage || absorb);
             Unit::DealDamage(caster, target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(spellProto), spellProto, true);
 
             Unit::ProcDamageAndSpell(ProcSystemArguments(caster, target, procAttacker, procVictim, PROC_EX_NORMAL_HIT, pdamage, BASE_ATTACK, spellProto));
@@ -4748,7 +4748,7 @@ void Aura::PeriodicTick()
             if (pdamage)
                 procVictim |= PROC_FLAG_TAKE_ANY_DAMAGE;
 
-            CleanDamage cleanDamage(pdamage, BASE_ATTACK, MELEE_HIT_NORMAL, pdamage || absorb);
+            CleanDamage cleanDamage =  CleanDamage(pdamage, BASE_ATTACK, MELEE_HIT_NORMAL, pdamage || absorb);
             int32 new_damage = Unit::DealDamage(pCaster, target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(spellProto), spellProto, false);
             Unit::ProcDamageAndSpell(ProcSystemArguments(pCaster, target, procAttacker, procVictim, PROC_EX_NORMAL_HIT, pdamage, BASE_ATTACK, spellProto));
 
@@ -4834,7 +4834,7 @@ void Aura::PeriodicTick()
                 Unit::DealDamageMods(pCaster, pCaster, damage, &absorb, NODAMAGE, spellProto);
                 if (pCaster->GetHealth() > damage)
                 {
-                    CleanDamage cleanDamage(damage, BASE_ATTACK, MELEE_HIT_NORMAL, damage > 0);
+                    CleanDamage cleanDamage = CleanDamage(damage, BASE_ATTACK, MELEE_HIT_NORMAL, damage > 0);
                     Unit::DealDamage(pCaster, pCaster, damage, &cleanDamage, NODAMAGE, GetSpellSchoolMask(spellProto), spellProto, true);
                 }
                 else
@@ -5888,6 +5888,23 @@ bool SpellAuraHolder::DropAuraCharge()
             caster->RemoveAuraCharge(m_spellProto->Id);
 
     return m_procCharges == 0;
+}
+
+void SpellAuraHolder::ResetSpellModCharges()
+{
+    for (uint8 i = 0; i < MAX_EFFECT_INDEX; i++)
+        if (m_auras[i])
+            if (SpellModifier* spellMod = m_auras[i]->GetSpellModifier())
+                spellMod->charges = m_procCharges;
+}
+
+bool SpellAuraHolder::HasModifier(const uint64& modId) const
+{
+    for (uint8 i = 0; i < MAX_EFFECT_INDEX; i++)
+        if (m_auras[i] && m_auras[i]->GetSpellModifier())
+            if (m_auras[i]->GetSpellModifier()->modId == modId)
+                return true;
+    return false;
 }
 
 bool SpellAuraHolder::HasMechanic(uint32 mechanic) const

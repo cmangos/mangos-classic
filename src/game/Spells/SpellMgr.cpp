@@ -146,7 +146,7 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, WorldObject* caster, Spell*
     if (spell)
     {
         if (Player* modOwner = spell->GetCaster()->GetSpellModOwner())
-            modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_CASTING_TIME, castTime, spell);
+            modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_CASTING_TIME, castTime);
 
         if (!spellInfo->HasAttribute(SPELL_ATTR_ABILITY) && !spellInfo->HasAttribute(SPELL_ATTR_TRADESPELL) && !spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS))
             castTime = int32(castTime * spell->GetCaster()->GetFloatValue(UNIT_MOD_CAST_SPEED));

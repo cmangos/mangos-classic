@@ -45,6 +45,7 @@
 #include "Timer.h"
 #include "AI/BaseAI/UnitAI.h"
 #include "Spells/SpellDefines.h"
+#include "PlayerDefines.h"
 
 #include <list>
 #include <array>
@@ -109,40 +110,6 @@ enum SpellPartialResist
 };
 
 #define NUM_SPELL_PARTIAL_RESISTS 5
-
-enum SpellModOp
-{
-    SPELLMOD_DAMAGE                     = 0,
-    SPELLMOD_DURATION                   = 1,
-    SPELLMOD_THREAT                     = 2,
-    SPELLMOD_ATTACK_POWER               = 3,
-    SPELLMOD_CHARGES                    = 4,
-    SPELLMOD_RANGE                      = 5,
-    SPELLMOD_RADIUS                     = 6,
-    SPELLMOD_CRITICAL_CHANCE            = 7,
-    SPELLMOD_ALL_EFFECTS                = 8,
-    SPELLMOD_NOT_LOSE_CASTING_TIME      = 9,
-    SPELLMOD_CASTING_TIME               = 10,
-    SPELLMOD_COOLDOWN                   = 11,
-    SPELLMOD_SPEED                      = 12,
-    SPELLMOD_UNK1                       = 13, // unused
-    SPELLMOD_COST                       = 14,
-    SPELLMOD_CRIT_DAMAGE_BONUS          = 15,
-    SPELLMOD_RESIST_MISS_CHANCE         = 16,
-    SPELLMOD_JUMP_TARGETS               = 17,
-    SPELLMOD_CHANCE_OF_SUCCESS          = 18, // Only used with SPELL_AURA_ADD_FLAT_MODIFIER and affects proc spells
-    SPELLMOD_ACTIVATION_TIME            = 19,
-    SPELLMOD_EFFECT_PAST_FIRST          = 20,
-    SPELLMOD_GLOBAL_COOLDOWN            = 21,
-    SPELLMOD_DOT                        = 22,
-    SPELLMOD_HASTE                      = 23,
-    SPELLMOD_SPELL_BONUS_DAMAGE         = 24,
-    SPELLMOD_UNK2                       = 25, // unused
-    // SPELLMOD_FREQUENCY_OF_SUCCESS    = 26,                // not used in 2.4.3
-    SPELLMOD_MULTIPLE_VALUE             = 27,
-    SPELLMOD_RESIST_DISPEL_CHANCE       = 28,
-    MAX_SPELLMOD                        = 32,
-};
 
 enum SpellFacingFlags
 {
@@ -1516,7 +1483,7 @@ class Unit : public WorldObject
         void DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss);
 
         void CalculateSpellDamage(SpellNonMeleeDamage* spellDamageInfo, int32 damage, SpellEntry const* spellInfo, WeaponAttackType attackType = BASE_ATTACK);
-        void DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss, bool resetLeash);
+        void DealSpellDamage(SpellNonMeleeDamage* spellDamageInfo, bool durabilityLoss, bool resetLeash);
 
         SpellMissInfo MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell, uint32* heartbeatResistChance = nullptr);
         SpellMissInfo MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell, SpellSchoolMask schoolMask, uint32* heartbeatResistChance = nullptr);
@@ -1704,7 +1671,6 @@ class Unit : public WorldObject
 
         void EnergizeBySpell(Unit* victim, SpellEntry const* spellInfo, uint32 damage, Powers powerType);
         uint32 SpellNonMeleeDamageLog(Unit* pVictim, uint32 spellID, uint32 damage);
-
         SpellCastResult CastSpell(Unit* Victim, uint32 spellId, uint32 triggeredFlags, Item* castItem = nullptr, Aura* triggeredByAura = nullptr, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = nullptr);
         SpellCastResult CastSpell(Unit* Victim, SpellEntry const* spellInfo, uint32 triggeredFlags, Item* castItem = nullptr, Aura* triggeredByAura = nullptr, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = nullptr);
         SpellCastResult CastCustomSpell(Unit* Victim, uint32 spellId, int32 const* bp0, int32 const* bp1, int32 const* bp2, uint32 triggeredFlags, Item* castItem = nullptr, Aura* triggeredByAura = nullptr, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = nullptr);
@@ -1713,12 +1679,10 @@ class Unit : public WorldObject
         SpellCastResult CastSpell(float x, float y, float z, SpellEntry const* spellInfo, uint32 triggeredFlags, Item* castItem = nullptr, Aura* triggeredByAura = nullptr, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = nullptr);
         SpellCastResult CastSpell(SpellCastTargets& targets, SpellEntry const* spellInfo, uint32 triggeredFlags, Item* castItem = nullptr, Aura* triggeredByAura = nullptr, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = nullptr);
         SpellCastResult CastCustomSpell(SpellCastTargets& targets, SpellEntry const* spellInfo, int32 const* bp0, int32 const* bp1, int32 const* bp2, uint32 triggeredFlags, Item* castItem = nullptr, Aura* triggeredByAura = nullptr, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = nullptr);
-
+        
         // Single flag overload uint32
         SpellCastResult CastSpell(Unit* Victim, uint32 spellId, TriggerCastFlags triggeredFlags, Item* castItem = nullptr, Aura* triggeredByAura = nullptr, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = nullptr)
-        {
-            return CastSpell(Victim, spellId, uint32(triggeredFlags), castItem, triggeredByAura, originalCaster, triggeredBy);
-        }
+        { return CastSpell(Victim, spellId, uint32(triggeredFlags), castItem, triggeredByAura, originalCaster, triggeredBy); }
         SpellCastResult CastCustomSpell(Unit* Victim, uint32 spellId, int32 const* bp0, int32 const* bp1, int32 const* bp2, TriggerCastFlags triggeredFlags, Item* castItem = nullptr, Aura* triggeredByAura = nullptr, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = nullptr)
         {
             return CastCustomSpell(Victim, spellId, bp0, bp1, bp2, uint32(triggeredFlags), castItem, triggeredByAura, originalCaster, triggeredBy);
@@ -1730,9 +1694,7 @@ class Unit : public WorldObject
 
         // Single flag overload SpellEntry
         SpellCastResult CastSpell(Unit* Victim, SpellEntry const* spellInfo, TriggerCastFlags triggeredFlags, Item* castItem = nullptr, Aura* triggeredByAura = nullptr, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = nullptr)
-        {
-            return CastSpell(Victim, spellInfo, uint32(triggeredFlags), castItem, triggeredByAura, originalCaster, triggeredBy);
-        }
+        { return CastSpell(Victim, spellInfo, uint32(triggeredFlags), castItem, triggeredByAura, originalCaster, triggeredBy); }
         SpellCastResult CastCustomSpell(Unit* Victim, SpellEntry const* spellInfo, int32 const* bp0, int32 const* bp1, int32 const* bp2, TriggerCastFlags triggeredFlags, Item* castItem = nullptr, Aura* triggeredByAura = nullptr, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = nullptr)
         {
             return CastCustomSpell(Victim, spellInfo, bp0, bp1, bp2, uint32(triggeredFlags), castItem, triggeredByAura, originalCaster, triggeredBy);

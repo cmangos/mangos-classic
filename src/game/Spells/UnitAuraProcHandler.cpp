@@ -1551,7 +1551,7 @@ SpellAuraProcResult Unit::HandleProcTriggerDamageAuraProc(ProcExecutionData& dat
     Unit* victim = data.target; Aura* triggeredByAura = data.triggeredByAura;
     SpellEntry const* spellInfo = triggeredByAura->GetSpellProto();
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "ProcDamageAndSpell: doing %u damage from spell id %u (triggered by auratype %u of spell %u)",
-        triggeredByAura->GetModifier()->m_amount, spellInfo->Id, triggeredByAura->GetModifier()->m_auraname, triggeredByAura->GetId());
+                     triggeredByAura->GetModifier()->m_amount, spellInfo->Id, triggeredByAura->GetModifier()->m_auraname, triggeredByAura->GetId());
     // Trigger damage can be resisted...
     if (SpellMissInfo missInfo = this->SpellHitResult(victim, spellInfo, uint8(1 << triggeredByAura->GetEffIndex()), false))
     {

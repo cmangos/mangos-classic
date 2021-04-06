@@ -269,6 +269,18 @@ class SpellLog
         uint32 m_currentEffect;
 };
 
+class SpellModRAII
+{
+    public:
+        SpellModRAII(Spell* spell, Player* modOwner, bool success = false);
+        void SetSuccess() { m_success = true; }
+        ~SpellModRAII();
+    private:
+        Spell* m_spell;
+        Player* m_modOwner;
+        bool m_success;
+};
+
 class Spell
 {
         friend struct MaNGOS::SpellNotifierPlayer;
@@ -408,7 +420,7 @@ class Spell
         bool CheckSpellCancelsConfuse(uint32& param1) const;
 
         int32 CalculateSpellEffectValue(SpellEffectIndex i, Unit* target, bool maximum = false, bool finalUse = true)
-        { return m_trueCaster->CalculateSpellEffectValue(target, m_spellInfo, i, &m_currentBasePoints[i], maximum, finalUse); }
+        { return m_caster->CalculateSpellEffectValue(target, m_spellInfo, i, &m_currentBasePoints[i], maximum, finalUse); }
         int32 CalculateSpellEffectDamage(Unit* unitTarget, int32 damage);
         static uint32 CalculatePowerCost(SpellEntry const* spellInfo, Unit* caster, Spell* spell = nullptr, Item* castItem = nullptr, bool finalUse = false);
 
@@ -533,6 +545,11 @@ class Spell
 
         void CleanupTargetList();
         void ClearCastItem();
+
+        // spell mods
+        std::set<SpellModifierPair> m_usedAuraCharges; // TODO: Consider changing into reference.
+
+        static void SelectMountByAreaAndSkill(Unit* target, SpellEntry const* parentSpell, uint32 spellId75, uint32 spellId150, uint32 spellId225, uint32 spellId300, uint32 spellIdSpecial);
 
         bool CanBeInterrupted() const { return m_spellState <= SPELL_STATE_DELAYED || m_spellState == SPELL_STATE_CHANNELING; }
 

@@ -166,7 +166,10 @@ class SpellAuraHolder
         uint32 GetAuraCharges() const { return m_procCharges; }
         void SetAuraCharges(uint32 charges, bool update = true);
 
+        // SpellMods
         bool DropAuraCharge();                               // return true if last charge dropped
+        void ResetSpellModCharges();
+        bool HasModifier(const uint64& modId) const;
 
         uint32 GetAuraApplyTime() const { return m_applyTime; }
         uint32 GetAuraApplyMSTime() const { return m_applyMSTime; } // milliseconds time
@@ -426,8 +429,6 @@ class Aura
             return maxDuration > 0 && m_modifier.periodictime > 0 ? maxDuration / m_modifier.periodictime : 0;
         }
         uint32 GetStackAmount() const { return GetHolder()->GetStackAmount(); }
-
-        bool DropAuraCharge();                               // return true if last charge dropped
 
         void SetLoadedState(int32 damage, uint32 periodicTime)
         {
