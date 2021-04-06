@@ -5358,7 +5358,10 @@ void Spell::EffectResurrect(SpellEffectIndex eff_idx)
             m_caster->GetTypeId() == TYPEID_PLAYER ? "" : m_caster->GetNameForLocaleIdx(player->GetSession()->GetSessionDbLocaleIndex()));
     }
 
-    m_spellLog.AddLog(uint32(m_spellInfo->Effect[eff_idx]), unitTarget->GetObjectGuid());
+    if (unitTarget)
+        m_spellLog.AddLog(uint32(m_spellInfo->Effect[eff_idx]), unitTarget->GetObjectGuid());
+    else if (corpseTarget)
+        m_spellLog.AddLog(uint32(m_spellInfo->Effect[eff_idx]), corpseTarget->GetObjectGuid());
 }
 
 void Spell::EffectAddExtraAttacks(SpellEffectIndex /*eff_idx*/)
