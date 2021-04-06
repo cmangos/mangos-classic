@@ -26,7 +26,7 @@ enum
     ACTION_ON_KILL_COOLDOWN = 1001,
 };
 
-CombatAI::CombatAI(Creature* creature, uint32 combatActions) : ScriptedAI(creature), CombatActions(combatActions), m_onKillCooldown(false)
+CombatAI::CombatAI(Creature* creature, uint32 combatActions) : ScriptedAI(creature), CombatActions(combatActions), m_onKillCooldown(false), m_stopTargeting(false)
 {
     AddCustomAction(ACTION_CASTING_RESTORE, true, [&]() { HandleTargetRestoration(); });
     AddCustomAction(ACTION_ON_KILL_COOLDOWN, true, [&]() { m_onKillCooldown = false; });
@@ -81,7 +81,7 @@ void CombatAI::HandleTargetRestoration()
 
 bool CombatAI::IsTargetingRestricted()
 {
-    return m_storedTarget;
+    return m_stopTargeting || m_storedTarget;
 }
 
 void CombatAI::AddOnKillText(int32 text)

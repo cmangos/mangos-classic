@@ -38,6 +38,7 @@ class CombatAI : public ScriptedAI, public CombatActions
         void HandleDelayedInstantAnimation(SpellEntry const* spellInfo) override;
         void HandleTargetRestoration();
         bool IsTargetingRestricted();
+        void StopTargeting(bool state) { m_stopTargeting = state; }
 
         void AddOnKillText(int32 text);
         template<typename... Targs>
@@ -54,6 +55,8 @@ class CombatAI : public ScriptedAI, public CombatActions
 
         std::vector<int32> m_onDeathTexts;
         bool m_onKillCooldown;
+
+        bool m_stopTargeting;
 };
 
 // Implementation is identical to EAI
