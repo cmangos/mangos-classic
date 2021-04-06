@@ -83,8 +83,10 @@ enum
 
     // phases
     PHASE_NORMAL                = 1,
-    PHASE_FROZEN                = 2,
-    PHASE_EXPLODED              = 3,
+    PHASE_SLOWED                = 2,
+    PHASE_SLOWED_MORE           = 3,
+    PHASE_FROZEN                = 4,
+    PHASE_EXPLODED              = 5,
 };
 
 static const uint32 auiGlobSummonSpells[MAX_VISCIDUS_GLOBS] = { 25865, 25866, 25867, 25868, 25869, 25870, 25871, 25872, 25873, 25874, 25875, 25876, 25877, 25878, 25879, 25880, 25881, 25882, 25883, 25884 };
@@ -121,17 +123,17 @@ struct boss_viscidusAI : public CombatAI
 
     ScriptedInstance* m_instance;
 
-    uint8 m_uiPhase;
+    uint8 m_phase;
 
-    uint32 m_uiHitCount;
+    uint32 m_hitCount;
 
     GuidList m_lGlobesGuidList;
 
     void Reset() override
     {
         CombatAI::Reset();
-        m_uiPhase                 = PHASE_NORMAL;
-        m_uiHitCount              = 0;
+        m_phase                 = PHASE_NORMAL;
+        m_hitCount              = 0;
 
         DoCastSpellIfCan(nullptr, SPELL_MEMBRANE_VISCIDUS, CAST_TRIGGERED);
         DoCastSpellIfCan(nullptr, SPELL_VISCIDUS_WEAKNESS, CAST_TRIGGERED);
@@ -201,7 +203,7 @@ struct boss_viscidusAI : public CombatAI
             {
                 m_creature->RemoveAurasDueToSpell(SPELL_INVIS_SELF);
                 m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-                m_uiPhase = PHASE_NORMAL;
+                m_phase = PHASE_NORMAL;
 
                 SetCombatScriptStatus(false);
                 SetMeleeEnabled(true);
@@ -225,7 +227,7 @@ struct boss_viscidusAI : public CombatAI
         {
             m_creature->RemoveAurasDueToSpell(SPELL_INVIS_SELF);
             m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-            m_uiPhase = PHASE_NORMAL;
+            m_phase = PHASE_NORMAL;
 
             SetCombatScriptStatus(false);
             SetMeleeEnabled(true);
@@ -233,96 +235,131 @@ struct boss_viscidusAI : public CombatAI
         }
     }
 
-    void IncreaseSlowPhaseIfCan()
+    void SetPhase(uint8 phase)
     {
-        if (m_uiPhase != PHASE_NORMAL)
-            return;
+        // Clean-up any potential phase aura before setting new phase
+        m_creature->RemoveAurasDueToSpell(SPELL_VISCIDUS_SLOWED);
+        m_creature->RemoveAurasDueToSpell(SPELL_VISCIDUS_SLOWED_MORE);
+        m_creature->RemoveAurasDueToSpell(SPELL_VISCIDUS_FREEZE);
 
-        ++m_uiHitCount;
-
-        if (m_uiHitCount >= HITCOUNT_FREEZE)
+        switch (phase)
         {
-            m_uiPhase = PHASE_FROZEN;
-            m_uiHitCount = 0;
-
-            if (m_uiHitCount == HITCOUNT_FREEZE)
-                DoScriptText(EMOTE_FROZEN, m_creature);
-            m_creature->RemoveAurasDueToSpell(SPELL_VISCIDUS_SLOWED_MORE);
-            DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_FREEZE, CAST_TRIGGERED);
-        }
-        else if (m_uiHitCount >= HITCOUNT_SLOW_MORE)
-        {
-            if (m_uiHitCount == HITCOUNT_SLOW_MORE)
-                DoScriptText(EMOTE_FREEZE, m_creature);
-            m_creature->RemoveAurasDueToSpell(SPELL_VISCIDUS_SLOWED);
-            DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_SLOWED_MORE, CAST_TRIGGERED);
-        }
-        else if (m_uiHitCount >= HITCOUNT_SLOW)
-        {
-            if (m_uiHitCount == HITCOUNT_SLOW)
+            case PHASE_NORMAL:
+                break;
+            case PHASE_SLOWED:
+            {
                 DoScriptText(EMOTE_SLOW, m_creature);
-            DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_SLOWED, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_SLOWED, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+                break;
+            }
+            case PHASE_SLOWED_MORE:
+            {
+                DoScriptText(EMOTE_FREEZE, m_creature);
+                DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_SLOWED_MORE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+                break;
+            }
+            case PHASE_FROZEN:
+            {
+                // Reset hit count for frozen phase and shattering
+                m_hitCount = 0;
+                DoScriptText(EMOTE_FROZEN, m_creature);
+                DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_FREEZE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+                break;
+            }
+            case PHASE_EXPLODED:
+            {
+                if (m_creature->GetHealthPercent() <= 5.0f)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_SUICIDE_TRIGGER, CAST_TRIGGERED) == CAST_OK)
+                        m_creature->CastSpell(nullptr, SPELL_VISCIDUS_SUICIDE, TRIGGERED_OLD_TRIGGERED);
+                }
+                else if (DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_EXPLODE, CAST_TRIGGERED | CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_EXPLODE, m_creature);
+                    // Reset hit count for normal and freezing phase
+                    m_hitCount = 0;
+                    m_lGlobesGuidList.clear();
+                    uint32 uiGlobeCount = m_creature->GetHealthPercent() / 5.0f;
+
+                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_GLOBS, CAST_TRIGGERED);
+
+                    for (uint8 i = 0; i < uiGlobeCount; ++i)
+                        DoCastSpellIfCan(m_creature, auiGlobSummonSpells[i], CAST_TRIGGERED);
+
+                    m_creature->RemoveAurasDueToSpell(SPELL_VISCIDUS_FREEZE);
+                    ResetTimer(VISCIDUS_EXPLODE, 2000);
+
+                    SetCombatScriptStatus(true);
+                    SetCombatMovement(false, true);
+                    SetMeleeEnabled(false);
+                    m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+                }
+                break;
+            }
+            // Unexpected phase requested : return before setting
+            default:
+                return;
         }
+        m_phase = phase;
     }
 
-    void IncreaseFrozenPhaseIfCan()
+    void IncreaseHitCount()
     {
-        if (m_uiPhase != PHASE_FROZEN)
-            return;
+        ++m_hitCount;
 
-        ++m_uiHitCount;
-
-        // only count melee attacks
-        if (m_uiHitCount >= HITCOUNT_EXPLODE)
+        switch (m_phase)
         {
-            if (m_creature->GetHealthPercent() <= 5.0f)
+            case PHASE_NORMAL:
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_SUICIDE_TRIGGER, CAST_TRIGGERED) == CAST_OK)
-                    m_creature->CastSpell(nullptr, SPELL_VISCIDUS_SUICIDE, TRIGGERED_OLD_TRIGGERED);
+                if (m_hitCount == HITCOUNT_SLOW)
+                    SetPhase(PHASE_SLOWED);
+                break;
             }
-            else if (DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_EXPLODE, CAST_TRIGGERED | CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+            case PHASE_SLOWED:
             {
-                DoScriptText(EMOTE_EXPLODE, m_creature);
-                m_uiPhase = PHASE_EXPLODED;
-                m_uiHitCount = 0;
-                m_lGlobesGuidList.clear();
-                uint32 uiGlobeCount = m_creature->GetHealthPercent() / 5.0f;
-
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_GLOBS, CAST_TRIGGERED);
-
-                for (uint8 i = 0; i < uiGlobeCount; ++i)
-                    DoCastSpellIfCan(m_creature, auiGlobSummonSpells[i], CAST_TRIGGERED);
-
-                m_creature->RemoveAurasDueToSpell(SPELL_VISCIDUS_FREEZE);
-                ResetTimer(VISCIDUS_EXPLODE, 2000);
-
-                SetCombatScriptStatus(true);
-                SetCombatMovement(false, true);
-                SetMeleeEnabled(false);
-                m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+                if (m_hitCount == HITCOUNT_SLOW_MORE)
+                    SetPhase(PHASE_SLOWED_MORE);
+                break;
             }
+            case PHASE_SLOWED_MORE:
+            {
+                if (m_hitCount == HITCOUNT_FREEZE)
+                    SetPhase(PHASE_FROZEN);
+                break;
+            }
+            case PHASE_FROZEN:
+            {
+                if (m_hitCount == HITCOUNT_CRACK)
+                    DoScriptText(EMOTE_CRACK, m_creature);
+                else if (m_hitCount == HITCOUNT_SHATTER)
+                    DoScriptText(EMOTE_SHATTER, m_creature);
+                else if (m_hitCount == HITCOUNT_EXPLODE)
+                    SetPhase(PHASE_EXPLODED);
+                break;
+            }
+            default:
+                return;
         }
-        else if (m_uiHitCount == HITCOUNT_SHATTER)
-            DoScriptText(EMOTE_SHATTER, m_creature);
-        else if (m_uiHitCount == HITCOUNT_CRACK)
-            DoScriptText(EMOTE_CRACK, m_creature);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
         {
-            if (m_uiPhase == PHASE_EXPLODED)
+            if (m_phase == PHASE_EXPLODED)
                 return;
 
             // reset phase if not already exploded
-            m_uiPhase = PHASE_NORMAL;
-            m_uiHitCount = 0;
+            m_phase = PHASE_NORMAL;
+            m_hitCount = 0;
         }
         else if (eventType == AI_EVENT_CUSTOM_B)
-            IncreaseSlowPhaseIfCan();
-        else if (eventType == AI_EVENT_CUSTOM_C)
-            IncreaseFrozenPhaseIfCan();
+        {
+            if (m_phase >= PHASE_NORMAL && m_phase < PHASE_FROZEN)
+                IncreaseHitCount();
+        }
+        else if (eventType == AI_EVENT_CUSTOM_C && m_phase == PHASE_FROZEN)
+            IncreaseHitCount();
     }
 
     void ExecuteAction(uint32 action) override
