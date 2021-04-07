@@ -367,7 +367,7 @@ void UnitAI::OnSpellCastStateChange(Spell const* spell, bool state, WorldObject*
         }
         else
         {
-            if (m_unit->GetVictim() && !GetCombatScriptStatus())
+            if (m_unit->GetVictim() && !IsTargetingRestricted())
                 m_unit->SetTarget(m_unit->GetVictim());
             else
                 m_unit->SetTarget(nullptr);
@@ -427,7 +427,7 @@ void UnitAI::OnChannelStateChange(Spell const* spell, bool state, WorldObject* t
     }
     else
     {
-        if (m_unit->GetVictim() && !GetCombatScriptStatus())
+        if (m_unit->GetVictim() && !IsTargetingRestricted())
             m_unit->SetTarget(m_unit->GetVictim());
         else
             m_unit->SetTarget(nullptr);

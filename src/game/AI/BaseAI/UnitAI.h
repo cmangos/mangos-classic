@@ -476,7 +476,7 @@ class UnitAI
         void ClearSelfRoot();
 
         virtual void HandleDelayedInstantAnimation(SpellEntry const* spellInfo) {}
-        virtual bool IsTargetingRestricted() { return false; }
+        virtual bool IsTargetingRestricted() { return GetCombatScriptStatus(); }
 
         virtual void HandleAssistanceCall(Unit* sender, Unit* invoker) {} // implemented for creatures
 

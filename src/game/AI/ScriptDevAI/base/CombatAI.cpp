@@ -81,7 +81,7 @@ void CombatAI::HandleTargetRestoration()
 
 bool CombatAI::IsTargetingRestricted()
 {
-    return m_stopTargeting || m_storedTarget;
+    return m_stopTargeting || m_storedTarget || ScriptedAI::IsTargetingRestricted();
 }
 
 void CombatAI::AddOnKillText(int32 text)
