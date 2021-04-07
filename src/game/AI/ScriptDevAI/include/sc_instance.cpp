@@ -224,10 +224,10 @@ void ScriptedInstance::DespawnGuids(GuidVector& spawns)
     spawns.clear();
 }
 
-void ScriptedInstance::RespawnDbGuids(std::vector<uint32>& spawns)
+void ScriptedInstance::RespawnDbGuids(std::vector<uint32>& spawns, uint32 respawnDelay)
 {
     for (uint32 spawn : spawns)
-        instance->GetSpawnManager().RespawnCreature(spawn);
+        instance->GetSpawnManager().RespawnCreature(spawn, respawnDelay);
 }
 
 /// Returns a pointer to a loaded GameObject that was stored in m_goEntryGuidStore. Can return nullptr

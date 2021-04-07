@@ -31,6 +31,7 @@ class SpawnInfo
     public:
         SpawnInfo(TimePoint when, uint32 dbguid, HighGuid high) : m_respawnTime(when), m_dbguid(dbguid), m_high(high) {}
         TimePoint const& GetRespawnTime() const { return m_respawnTime; }
+        void SetRespawnTime(TimePoint const& time) { m_respawnTime = time; }
         bool ConstructForMap(Map& map); // can fail due to linking, pooling not yet supported
         uint32 GetDbGuid() const { return m_dbguid; }
         HighGuid GetHighGuid() const { return m_high; }
@@ -49,8 +50,8 @@ class SpawnManager
         void AddCreature(uint32 respawnDelay, uint32 dbguid);
         void AddGameObject(uint32 respawnDelay, uint32 dbguid);
 
-        void RespawnCreature(uint32 dbguid);
-        void RespawnGameObject(uint32 dbguid);
+        void RespawnCreature(uint32 dbguid, uint32 respawnDelay = 0); // seconds
+        void RespawnGameObject(uint32 dbguid, uint32 respawnDelay = 0); // seconds
 
         void RespawnAll();
 

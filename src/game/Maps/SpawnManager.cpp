@@ -46,7 +46,7 @@ void SpawnManager::AddGameObject(uint32 respawnDelay, uint32 dbguid)
     std::sort(m_spawns.begin(), m_spawns.end());
 }
 
-void SpawnManager::RespawnCreature(uint32 dbguid)
+void SpawnManager::RespawnCreature(uint32 dbguid, uint32 respawnDelay)
 {
     for (auto itr = m_spawns.begin(); itr != m_spawns.end(); )
     {
@@ -54,17 +54,24 @@ void SpawnManager::RespawnCreature(uint32 dbguid)
         if (spawnInfo.GetDbGuid() == dbguid && spawnInfo.GetHighGuid() == HIGHGUID_UNIT)
         {
             m_map.GetPersistentState()->SaveCreatureRespawnTime(dbguid, 0);
-            if (spawnInfo.ConstructForMap(m_map))
+            if (respawnDelay > 0)
+                spawnInfo.SetRespawnTime(m_map.GetCurrentClockTime() + std::chrono::seconds(respawnDelay));
+            else
             {
-                itr = m_spawns.erase(itr);
-                continue;
+                if (spawnInfo.ConstructForMap(m_map))
+                {
+                    itr = m_spawns.erase(itr);
+                    continue;
+                }
             }
         }
         ++itr;
     }
+    if (respawnDelay > 0)
+        std::sort(m_spawns.begin(), m_spawns.end());
 }
 
-void SpawnManager::RespawnGameObject(uint32 dbguid)
+void SpawnManager::RespawnGameObject(uint32 dbguid, uint32 miliseconds)
 {
     for (auto itr = m_spawns.begin(); itr != m_spawns.end(); )
     {
