@@ -961,7 +961,7 @@ namespace MaNGOS
             }
         }
 
-        template<class T> inline void Visit(GridRefManager<T>&  m)
+        template<class T> inline void Visit(GridRefManager<T>& m)
         {
             if (!i_originalCaster || !i_castingObject)
                 return;
@@ -1025,7 +1025,10 @@ namespace MaNGOS
                     case PUSH_SRC_CENTER:
                     case PUSH_DEST_CENTER:
                     case PUSH_TARGET_CENTER:
-                        if (itr->getSource()->GetDistance(i_centerX, i_centerY, i_centerZ, DIST_CALC_COMBAT_REACH) <= i_radius)
+                        float radius = i_radius;
+                        if (i_originalCaster->IsControlledByPlayer() && !itr->getSource()->IsControlledByPlayer())
+                            radius += itr->getSource()->GetCombatReach();
+                        if (itr->getSource()->GetDistance(i_centerX, i_centerY, i_centerZ, DIST_CALC_NONE) <= radius * radius)
                             i_data.push_back(itr->getSource());
                         break;
                 }
