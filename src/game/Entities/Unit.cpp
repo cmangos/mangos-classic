@@ -3602,7 +3602,7 @@ float Unit::CalculateSpellMissChance(const Unit* victim, SpellSchoolMask schoolM
     {
         case SPELL_DAMAGE_CLASS_MELEE:
         case SPELL_DAMAGE_CLASS_RANGED:
-            return CalculateEffectiveMissChance(victim, GetWeaponAttackType(spell));
+            return CalculateEffectiveMissChance(victim, GetWeaponAttackType(spell), spell);
     }
     chance += victim->GetMissChance(spell, schoolMask);
     // Victim's own chance appears to be zero / below zero / unmeaningful for some reason (debuffs?): skip calculation, unit can't be missed
