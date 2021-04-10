@@ -4423,6 +4423,17 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_BAD_TARGETS;
             }
 
+            if ((m_targets.m_targetMask == TARGET_FLAG_SELF || m_trueCaster == target) && m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_TARGET_SELF))
+            {
+                if (IsOnlySelfTargeting(m_spellInfo))
+                    sLog.outCustomLog("Spell ID %u cast at self explicitly even though it has SPELL_ATTR_EX_CANT_TARGET_SELF", m_spellInfo->Id);
+
+                return SPELL_FAILED_BAD_TARGETS;
+            }
+
+            if (!selfTargeting && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE_2))
+                return SPELL_FAILED_BAD_TARGETS;
+
             // check creature type
             // ignore self casts (including area casts when caster selected as target)
             if (non_caster_target)
@@ -6595,6 +6606,9 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
 				if (info.filter == TARGET_HELPFUL)
 					return false;
         }
+
+        if (targetType != TARGET_UNIT_CASTER && targetType != TARGET_UNIT_CASTER_PET && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE_2))
+            return false;
     }
 
     if (target->IsCreature() && target != m_targets.getUnitTarget() && info.enumerator == TARGET_ENUMERATOR_CHAIN && info.filter == TARGET_HARMFUL) // TODO: Mother Shahraz beams can target totems
