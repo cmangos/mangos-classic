@@ -197,10 +197,11 @@ class WorldSession
         bool isLogingOut() const { return _logoutTime || m_playerLogout; }
 
         /// Engage the logout process for the user
-        void LogoutRequest(time_t requestTime, bool saveToDB = true)
+        void LogoutRequest(time_t requestTime, bool saveToDB = true, bool kickSession = false)
         {
             _logoutTime = requestTime;
             m_playerSave = saveToDB;
+            m_kickSession = kickSession;
         }
 
         /// Is logout cooldown expired?
@@ -743,6 +744,7 @@ class WorldSession
         bool m_playerSave;                                  // should we have to save the player after logout request
         bool m_inQueue;                                     // session wait in auth.queue
         bool m_playerLoading;                               // code processed in LoginPlayer
+        bool m_kickSession;
 
         // True when the player is in the process of logging out (WorldSession::LogoutPlayer is currently executing)
         bool m_playerLogout;

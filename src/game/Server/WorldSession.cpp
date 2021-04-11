@@ -94,7 +94,7 @@ bool WorldSessionFilter::Process(WorldPacket const& packet) const
 WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, time_t mute_time, LocaleConstant locale) :
     m_muteTime(mute_time),
     _player(nullptr), m_Socket(sock ? sock->shared<WorldSocket>() : nullptr), _security(sec), _accountId(id), _logoutTime(0),
-    m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_orderCounter(0), m_playerSave(true),
+    m_inQueue(false), m_playerLoading(false), m_kickSession(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_orderCounter(0), m_playerSave(true),
     m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetStorageLocaleIndexFor(locale)),
     m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED), m_sessionState(WORLD_SESSION_STATE_CREATED),
     m_requestSocket(nullptr) {}
@@ -484,7 +484,10 @@ bool WorldSession::Update(uint32 diff)
                 LogoutPlayer();
 
             if (m_kickTime && m_kickTime <= time(nullptr))
-                KickPlayer(true);
+            {
+                KickPlayer(true, true);
+                return false;
+            }
 
             return true;
 
@@ -735,6 +738,16 @@ void WorldSession::LogoutPlayer()
     SetInCharSelection();
 
     LogoutRequest(0);
+
+    if (m_kickSession)
+    {
+        if (m_Socket)
+        {
+            m_Socket->Close();
+            m_Socket = nullptr;
+        }
+        m_kickSession = false;
+    }
 }
 
 /// Kick a player out of the World
@@ -743,6 +756,7 @@ void WorldSession::KickPlayer(bool save, bool inPlace)
     m_playerSave = save;
     if (inPlace)
     {
+        m_kickSession = true;
         LogoutPlayer();
         return;
     }
@@ -761,7 +775,7 @@ void WorldSession::KickPlayer(bool save, bool inPlace)
     else
         LogoutRequest(time(nullptr) - 20, false);
 #else
-    LogoutRequest(time(nullptr) - 20, false);
+    LogoutRequest(time(nullptr) - 20, false, true);
 #endif
 }
 
