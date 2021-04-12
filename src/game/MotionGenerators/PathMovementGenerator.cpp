@@ -143,7 +143,12 @@ bool AbstractPathMovementGenerator::Update(Unit& unit, const uint32& diff)
     {
         // Foolproofing if current spline was tampered with or ran out of splines in the path:
         if (unit.movespline->FinalDestination() != m_spline.back())
-            return false;
+        {
+            if (unit.movespline->Finalized()) // stopped movement evidence
+                Initialize(unit);
+            else
+                return false;
+        }
 
         if (m_cyclic)
         {
