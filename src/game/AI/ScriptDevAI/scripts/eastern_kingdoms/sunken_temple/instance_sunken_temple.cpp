@@ -253,8 +253,8 @@ void instance_sunken_temple::SetData(uint32 uiType, uint32 uiData)
                 if (Creature* pShade = GetSingleCreatureFromStorage(NPC_SHADE_OF_HAKKAR))
                     pShade->ForcedDespawn();
 
-                // Reset flames
-                DoUpdateFlamesFlags(true);
+                // Reset flames - remove no interact flag
+                DoUpdateFlamesFlags(false);
                 m_uiFlameCounter = 0;
 
                 // Despawn the evil circle visuals
