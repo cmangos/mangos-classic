@@ -4408,9 +4408,9 @@ void Aura::HandleShapeshiftBoosts(bool apply)
     if (apply)
     {
         if (spellId1)
-            target->CastSpell(target, spellId1, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+            target->CastSpell(nullptr, spellId1, TRIGGERED_OLD_TRIGGERED, nullptr, this);
         if (spellId2)
-            target->CastSpell(target, spellId2, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+            target->CastSpell(nullptr, spellId2, TRIGGERED_OLD_TRIGGERED, nullptr, this);
 
         if (target->GetTypeId() == TYPEID_PLAYER)
         {
@@ -4422,7 +4422,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                 SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(itr.first);
                 if (!spellInfo || !IsNeedCastSpellAtFormApply(spellInfo, form))
                     continue;
-                target->CastSpell(target, itr.first, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                target->CastSpell(nullptr, itr.first, TRIGGERED_OLD_TRIGGERED, nullptr, this);
             }
 
             // Leader of the Pack
@@ -4430,7 +4430,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             {
                 SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(24932);
                 if (spellInfo && spellInfo->Stances & (1 << (form - 1)))
-                    target->CastSpell(target, 24932, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                    target->CastSpell(nullptr, 24932, TRIGGERED_OLD_TRIGGERED, nullptr, this);
             }
 
             // Heart of the Wild
@@ -4442,7 +4442,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                     if (i->GetSpellProto()->SpellIconID == 240 && i->GetModifier()->m_miscvalue == 3)
                     {
                         int32 HotWMod = i->GetModifier()->m_amount;
-                        target->CastCustomSpell(target, HotWSpellId, &HotWMod, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                        target->CastCustomSpell(nullptr, HotWSpellId, &HotWMod, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                         break;
                     }
                 }
