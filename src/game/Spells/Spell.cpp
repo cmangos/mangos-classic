@@ -7237,7 +7237,7 @@ void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex,
 
             while (chainTargetCount && next != filterUnitList.end())
             {
-                if (!prev->IsWithinDist(*next, m_jumpRadius))
+                if (!prev->GetDistance(*next, true, DIST_CALC_NONE) > m_jumpRadius * m_jumpRadius)
                     break;
 
                 if (!prev->IsWithinLOSInMap(*next, true))
@@ -7265,14 +7265,14 @@ void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex,
             newList.push_back(unitTarget);
             bool isInGroup = m_caster->IsInGroup(unitTarget);
             filterUnitList.pop_front();
-            filterUnitList.sort(LowestHPNearestOrder(unitTarget, DIST_CALC_COMBAT_REACH));
+            filterUnitList.sort(LowestHPNearestOrder(unitTarget, DIST_CALC_NONE));
             Unit* prev = unitTarget;
             UnitList::iterator next = filterUnitList.begin();
             chainTargetCount -= 1; // unit target is one
 
             while (chainTargetCount && next != filterUnitList.end())
             {
-                if (!prev->IsWithinCombatDist(*next, m_jumpRadius))
+                if (!prev->GetDistance(*next, true, DIST_CALC_NONE) > m_jumpRadius * m_jumpRadius)
                 {
                     ++next;
                     continue;

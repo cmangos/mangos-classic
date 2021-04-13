@@ -189,7 +189,7 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
     if (target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->IsTotem())
         return;
 
-    if (i_dynobject.GetDistance(target, true, DIST_CALC_COMBAT_REACH) > i_dynobject.GetRadius())
+    if (i_dynobject.GetDistance(target, true, DIST_CALC_NONE) > i_dynobject.GetRadius() * i_dynobject.GetRadius())
         return;
 
     // Evade target
