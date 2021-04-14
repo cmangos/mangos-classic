@@ -7272,8 +7272,12 @@ void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex,
 
             while (chainTargetCount && next != filterUnitList.end())
             {
+                // since we do not iterate through closest but through HP, we must check all units
                 if (prev->GetDistance(*next, true, DIST_CALC_NONE) > m_jumpRadius * m_jumpRadius)
-                    break;
+                {
+                    ++next;
+                    continue;
+                }
 
                 if (!prev->IsWithinLOSInMap(*next, true))
                 {
