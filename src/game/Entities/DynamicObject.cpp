@@ -24,8 +24,9 @@
 #include "Grids/GridNotifiersImpl.h"
 #include "Spells/SpellMgr.h"
 #include "Server/DBCStores.h"
+#include "Spells/Scripts/SpellScript.h"
 
-DynamicObject::DynamicObject() : WorldObject(), m_spellId(0), m_effIndex(), m_radius(0), m_positive(false), m_target()
+DynamicObject::DynamicObject() : WorldObject(), m_spellId(0), m_effIndex(), m_radius(0), m_positive(false), m_target(), m_auraScript(nullptr)
 {
     m_objectType |= TYPEMASK_DYNAMICOBJECT;
     m_objectTypeId = TYPEID_DYNAMICOBJECT;
@@ -106,6 +107,8 @@ bool DynamicObject::Create(uint32 guidlow, Unit* caster, uint32 spellId, SpellEf
     m_target = target;
     m_damage = damage;
     m_basePoints = basePoints;
+
+    m_auraScript = SpellScriptMgr::GetAuraScript(m_spellId);
 
     return true;
 }
@@ -207,12 +210,7 @@ bool DynamicObject::isVisibleForInState(Player const* u, WorldObject const* view
 
 void DynamicObject::OnPersistentAreaAuraEnd()
 {
-    switch (m_spellId)
-    {
-        case 30632: // Magtheridon - Debris
-            if (Unit* owner = GetCaster())
-                owner->CastSpell(nullptr, 30631, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetObjectGuid());
-            break;
-    }
+    if (m_auraScript)
+        m_auraScript->OnPersistentAreaAuraEnd(this);
 }
 

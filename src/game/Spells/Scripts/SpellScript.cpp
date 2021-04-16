@@ -17,6 +17,7 @@
 */
 
 #include "SpellScript.h"
+#include "Entities/DynamicObject.h"
 
 std::map<uint32, SpellScript*> SpellScriptMgr::m_spellScriptMap = std::map<uint32, SpellScript*>();
 std::map<uint32, AuraScript*> SpellScriptMgr::m_auraScriptMap = std::map<uint32, AuraScript*>();

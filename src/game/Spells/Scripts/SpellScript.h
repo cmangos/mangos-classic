@@ -23,6 +23,8 @@
 #include <map>
 #include <functional>
 
+class DynamicObject;
+
 struct PeriodicTriggerData
 {
     Unit* caster; Unit* target; WorldObject* targetObject;
@@ -109,6 +111,8 @@ struct AuraScript
     virtual void OnPeriodicDummy(Aura* /*aura*/) const {}
     // called on periodic tick end
     virtual void OnPeriodicTickEnd(Aura* /*aura*/) const {}
+    // called on persistent area aura dyngo lifetime end
+    virtual void OnPersistentAreaAuraEnd(DynamicObject* dynGo) const {}
 };
 
 class SpellScriptMgr
