@@ -93,7 +93,7 @@ static const uint32 uiImprovedScorch[3] =
 
 //class Player;
 
-class MANGOS_DLL_SPEC PlayerbotMageAI : PlayerbotClassAI
+class PlayerbotMageAI : PlayerbotClassAI
 {
     public:
         PlayerbotMageAI(Player& master, Player& bot, PlayerbotAI& ai);

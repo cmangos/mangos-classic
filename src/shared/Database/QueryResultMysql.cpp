@@ -24,7 +24,6 @@
 QueryResultMysql::QueryResultMysql(MYSQL_RES* result, MYSQL_FIELD* fields, uint64 rowCount, uint32 fieldCount) :
     QueryResult(rowCount, fieldCount), mResult(result)
 {
-
     mCurrentRow = new Field[mFieldCount];
     MANGOS_ASSERT(mCurrentRow);
 

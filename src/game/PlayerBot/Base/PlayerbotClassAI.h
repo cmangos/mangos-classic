@@ -41,7 +41,7 @@ enum JOB_TYPE
     JOB_HEAL        = 0x04,
     JOB_TANK        = 0x08,
     JOB_MASTER      = 0x10,     // Not a fan of this distinction but user (or rather, admin) choice
-    JOB_TANK_MASTER = 0x19, 
+    JOB_TANK_MASTER = 0x19,
     JOB_DPS         = 0x20,
     JOB_ALL_NO_MT   = 0x3E,     // all of the above except Main Tank
     JOB_ALL         = 0x3F,     // all of the above
@@ -58,7 +58,7 @@ struct heal_priority
     bool operator<(const heal_priority& a) const { return type < a.type; }
 };
 
-class MANGOS_DLL_SPEC PlayerbotClassAI
+class PlayerbotClassAI
 {
     public:
         PlayerbotClassAI(Player& master, Player& bot, PlayerbotAI& ai);

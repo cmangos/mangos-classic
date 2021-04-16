@@ -22,7 +22,6 @@
 #include "Platform/CompilerDefs.h"
 
 #include <cstdint>
-
 #include <sys/types.h>
 
 #define MANGOS_LITTLEENDIAN 0
@@ -37,6 +36,7 @@
 #endif // MANGOS_ENDIAN
 
 #define MANGOS_SCRIPT_NAME "mangosscript"
+
 #define MANGOS_PATH_MAX 1024
 
 #if PLATFORM == PLATFORM_WINDOWS
@@ -80,12 +80,10 @@ typedef void* MANGOS_LIBRARY_HANDLE;
 #endif // PLATFORM
 
 #if PLATFORM == PLATFORM_WINDOWS
-#  define MANGOS_DLL_SPEC __declspec(dllexport)
 #  ifndef DECLSPEC_NORETURN
 #    define DECLSPEC_NORETURN __declspec(noreturn)
 #  endif // DECLSPEC_NORETURN
 #else // PLATFORM != PLATFORM_WINDOWS
-#  define MANGOS_DLL_SPEC
 #  define DECLSPEC_NORETURN
 #endif // PLATFORM
 

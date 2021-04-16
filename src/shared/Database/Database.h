@@ -218,12 +218,12 @@ class Database
         // set this to allow async transactions
         // you should call it explicitly after your server successfully started up
         // NO ASYNC TRANSACTIONS DURING SERVER STARTUP - ONLY DURING RUNTIME!!!
-        void AllowAsyncTransactions() { m_bAllowAsyncTransactions = true; }
+        void AllowAsyncTransactions() { m_allowAsyncTransactions = true; }
 
     protected:
         Database() :
             m_nQueryConnPoolSize(1), m_pAsyncConn(nullptr), m_pResultQueue(nullptr),
-            m_threadBody(nullptr), m_delayThread(nullptr), m_bAllowAsyncTransactions(false),
+            m_threadBody(nullptr), m_delayThread(nullptr), m_allowAsyncTransactions(false),
             m_iStmtIndex(-1), m_logSQL(false), m_pingIntervallms(0)
         {
             m_nQueryCounter = -1;
@@ -267,7 +267,7 @@ class Database
         SqlDelayThread*     m_threadBody;                   ///< Pointer to delay sql executer (owned by m_delayThread)
         MaNGOS::Thread*     m_delayThread;                  ///< Pointer to executer thread
 
-        bool m_bAllowAsyncTransactions;                     ///< flag which specifies if async transactions are enabled
+        std::atomic<bool> m_allowAsyncTransactions;         ///< flag which specifies if async transactions are enabled
 
         // PREPARED STATEMENT REGISTRY
         typedef std::mutex LOCK_TYPE;

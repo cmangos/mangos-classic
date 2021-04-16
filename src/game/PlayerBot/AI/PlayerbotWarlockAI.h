@@ -131,7 +131,7 @@ enum WarlockSpells
 };
 
 //class Player;
-class MANGOS_DLL_SPEC PlayerbotWarlockAI : PlayerbotClassAI
+class PlayerbotWarlockAI : PlayerbotClassAI
 {
     public:
         PlayerbotWarlockAI(Player& master, Player& bot, PlayerbotAI& ai);

@@ -103,7 +103,7 @@ enum
 };
 //class Player;
 
-class MANGOS_DLL_SPEC PlayerbotShamanAI : PlayerbotClassAI
+class PlayerbotShamanAI : PlayerbotClassAI
 {
     public:
         PlayerbotShamanAI(Player& master, Player& bot, PlayerbotAI& ai);

@@ -49,7 +49,7 @@ struct ContainerUnorderedMap< TypeList<H, T>, KEY_TYPE >
     ContainerUnorderedMap<T, KEY_TYPE> _TailElements;
 };
 
-template < class OBJECT_TYPES, class KEY_TYPE = OBJECT_HANDLE >
+template<class OBJECT_TYPES, class KEY_TYPE = OBJECT_HANDLE>
 class TypeUnorderedMapContainer
 {
     public:

@@ -335,7 +335,7 @@ bool Database::Execute(const char* sql)
     else
     {
         // if async execution is not available
-        if (!m_bAllowAsyncTransactions)
+        if (!m_allowAsyncTransactions)
             return DirectExecute(sql);
 
         // Simple sql statement
@@ -404,7 +404,7 @@ bool Database::CommitTransaction()
         return false;
 
     // if async execution is not available
-    if (!m_bAllowAsyncTransactions)
+    if (!m_allowAsyncTransactions)
         return CommitTransactionDirect();
 
     // add SqlTransaction to the async queue
@@ -453,13 +453,13 @@ bool Database::CheckRequiredField(char const* table_name, char const* required_n
         return true;
     }
 
-    // check fail, prepare readabale error message
+    // check fail, prepare readable error message
 
     // search current required_* field in DB
     const char* db_name;
     if (!strcmp(table_name, "db_version"))
         db_name = "WORLD";
-    else if (!strcmp(table_name, "character_db_version"))
+    else if (!strcmp(table_name, "character_db_version") || !strcmp(table_name, "playerbot_db_version"))
         db_name = "CHARACTER";
     else if (!strcmp(table_name, "realmd_db_version"))
         db_name = "REALMD";
@@ -559,7 +559,7 @@ bool Database::ExecuteStmt(const SqlStatementID& id, SqlStmtParameters* params)
     else
     {
         // if async execution is not available
-        if (!m_bAllowAsyncTransactions)
+        if (!m_allowAsyncTransactions)
             return DirectExecuteStmt(id, params);
 
         // Simple sql statement

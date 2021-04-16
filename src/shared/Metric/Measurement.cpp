@@ -43,7 +43,7 @@ std::stringstream& operator<<(std::stringstream& out, const Measurement& measure
     out << " ";
 
     MANGOS_ASSERT(measurement._fields.size() > 0);
-    
+
     const auto& last = measurement._fields.rbegin()->first;
     for (const auto& field : measurement._fields)
     {

@@ -80,7 +80,7 @@ enum WarriorSpells
 
 //class Player;
 
-class MANGOS_DLL_SPEC PlayerbotWarriorAI : PlayerbotClassAI
+class PlayerbotWarriorAI : PlayerbotClassAI
 {
     public:
         PlayerbotWarriorAI(Player& master, Player& bot, PlayerbotAI& ai);

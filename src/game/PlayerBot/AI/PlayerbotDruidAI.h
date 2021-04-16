@@ -80,7 +80,7 @@ enum DruidSpells
 
 //class Player;
 
-class MANGOS_DLL_SPEC PlayerbotDruidAI : PlayerbotClassAI
+class PlayerbotDruidAI : PlayerbotClassAI
 {
     public:
         PlayerbotDruidAI(Player& master, Player& bot, PlayerbotAI& ai);

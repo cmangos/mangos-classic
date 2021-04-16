@@ -30,7 +30,7 @@ class PlayerbotClassAI;
 
 typedef std::unordered_map<ObjectGuid, Player*> PlayerBotMap;
 
-class MANGOS_DLL_SPEC PlayerbotMgr
+class PlayerbotMgr
 {
         // static functions, available without a PlayerbotMgr instance
     public:

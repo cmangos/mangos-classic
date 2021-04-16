@@ -22,6 +22,7 @@
 #include <boost/any.hpp>
 #include <boost/asio.hpp>
 #include <chrono>
+#include <functional>
 #include <iostream>
 #include <map>
 #include <thread>

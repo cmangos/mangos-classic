@@ -43,7 +43,6 @@ DatabasePostgre::DatabasePostgre()
 
 DatabasePostgre::~DatabasePostgre()
 {
-
 }
 
 SqlConnection* DatabasePostgre::CreateConnection()

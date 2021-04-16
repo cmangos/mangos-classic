@@ -25,7 +25,7 @@
 #include "Utilities/LinkedReference/Reference.h"
 
 template <class TO, class FROM>
-class MANGOS_DLL_SPEC RefManager : public LinkedListHead
+class RefManager : public LinkedListHead
 {
     public:
 

@@ -175,7 +175,7 @@ enum CombatManeuverReturns
     RETURN_ANY_ERROR                    = 0x4C  // All the ERROR values bitwise OR'ed
 };
 
-class MANGOS_DLL_SPEC PlayerbotAI
+class PlayerbotAI
 {
     public:
         enum ScenarioType
