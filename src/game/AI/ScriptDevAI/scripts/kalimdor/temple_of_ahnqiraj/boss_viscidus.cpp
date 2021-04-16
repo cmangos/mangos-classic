@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Viscidus
-SD%Complete: 90
-SDComment:
+SD%Complete: 95
+SDComment: Viscidus globs miss their speed update while they move to the center.
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData
 
@@ -56,6 +56,7 @@ enum
     SPELL_VISCIDUS_EXPLODE      = 25938,
     SPELL_VISCIDUS_SUICIDE_TRIGGER = 26003,                 // Cast when Viscidus shatters and is below 10% HP - triggers 26002
     SPELL_VISCIDUS_SUICIDE      = 26002,                    // Actual suicide spell
+    SPELL_HATE_TO_ZERO          = 20538,
 
     // Spell for globs
     SPELL_REJOIN_VISCIDUS       = 25896,
@@ -196,12 +197,7 @@ struct boss_viscidusAI : public CombatAI
             m_lGlobesGuidList.remove(summoned->GetObjectGuid());
 
             if (m_lGlobesGuidList.empty())
-            {
-                m_creature->RemoveAurasDueToSpell(SPELL_INVIS_STALKER);
-                m_creature->RemoveAurasDueToSpell(SPELL_INVIS_SELF);
-                m_creature->RemoveAurasDueToSpell(SPELL_STUN_SELF);
-                m_phase = PHASE_NORMAL;
-            }
+                SetPhase(PHASE_NORMAL);
         }
     }
 
@@ -217,12 +213,7 @@ struct boss_viscidusAI : public CombatAI
         summoned->ForcedDespawn(1000);
 
         if (m_lGlobesGuidList.empty())
-        {
-            m_creature->RemoveAurasDueToSpell(SPELL_INVIS_STALKER);
-            m_creature->RemoveAurasDueToSpell(SPELL_STUN_SELF);
-            m_creature->RemoveAurasDueToSpell(SPELL_INVIS_SELF);
-            m_phase = PHASE_NORMAL;
-        }
+            SetPhase(PHASE_NORMAL);
     }
 
     void SetPhase(uint8 phase)
@@ -235,6 +226,12 @@ struct boss_viscidusAI : public CombatAI
         switch (phase)
         {
             case PHASE_NORMAL:
+                m_creature->RemoveAurasDueToSpell(SPELL_INVIS_STALKER);
+                m_creature->RemoveAurasDueToSpell(SPELL_STUN_SELF);
+                m_creature->RemoveAurasDueToSpell(SPELL_INVIS_SELF);
+                DoCastSpellIfCan(nullptr, SPELL_MEMBRANE_VISCIDUS, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+                DoCastSpellIfCan(nullptr, SPELL_VISCIDUS_WEAKNESS, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+                DoCastSpellIfCan(m_creature, SPELL_HATE_TO_ZERO);
                 break;
             case PHASE_SLOWED:
             {
@@ -368,6 +365,8 @@ struct boss_viscidusAI : public CombatAI
     {
         // Reset hit count for normal and freezing phase
         m_hitCount = 0;
+        m_creature->RemoveAurasDueToSpell(SPELL_MEMBRANE_VISCIDUS);
+        m_creature->RemoveAurasDueToSpell(SPELL_VISCIDUS_WEAKNESS);
         m_lGlobesGuidList.clear();
 
         DoCastSpellIfCan(m_creature, SPELL_SUMMON_GLOBS, TRIGGERED_IGNORE_GCD);
@@ -427,7 +426,7 @@ struct ViscidusSummonGlobs : public SpellScript
 
         uint8 globeCount = floor(spell->GetUnitTarget()->GetHealthPercent() / 5.0f);
 
-        for (uint8 i = 0; i < globeCount; ++i)
+        for (uint8 i = 0; i <= globeCount; ++i)
             spell->GetUnitTarget()->CastSpell(spell->GetUnitTarget(), auiGlobSummonSpells[i], TRIGGERED_IGNORE_GCD);
 
         // Make invisible and stun self
