@@ -65,7 +65,7 @@ enum PaladinSpells
 };
 //class Player;
 
-class MANGOS_DLL_SPEC PlayerbotPaladinAI : PlayerbotClassAI
+class PlayerbotPaladinAI : PlayerbotClassAI
 {
     public:
         PlayerbotPaladinAI(Player& master, Player& bot, PlayerbotAI& ai);

@@ -77,7 +77,7 @@ enum PriestSpells
 };
 //class Player;
 
-class MANGOS_DLL_SPEC PlayerbotPriestAI : PlayerbotClassAI
+class PlayerbotPriestAI : PlayerbotClassAI
 {
     public:
         PlayerbotPriestAI(Player& master, Player& bot, PlayerbotAI& ai);

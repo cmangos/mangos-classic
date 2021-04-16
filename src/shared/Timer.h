@@ -20,7 +20,7 @@
 #define MANGOS_TIMER_H
 
 #include "Common.h"
-#include "chrono"
+#include <chrono>
 
 inline std::chrono::steady_clock::time_point GetApplicationStartTime()
 {
@@ -38,6 +38,14 @@ class WorldTimer
         // get current server time
         static uint32 getMSTime();
 
+        static inline uint32 getMSTimeDiff(const uint32& oldMSTime, std::chrono::steady_clock::time_point newTime)
+        {
+            using namespace std::chrono;
+
+            uint32 newMSTime = uint32(duration_cast<milliseconds>(newTime - GetApplicationStartTime()).count());
+            return getMSTimeDiff(oldMSTime, newMSTime);
+        }
+
         // get time difference between two timestamps
         static inline uint32 getMSTimeDiff(const uint32& oldMSTime, const uint32& newMSTime)
         {
@@ -54,8 +62,10 @@ class WorldTimer
 
         // get last world tick time
         static uint32 tickTime();
+
         // get previous world tick time
         static uint32 tickPrevTime();
+
         // tick world timer
         static uint32 tick();
 

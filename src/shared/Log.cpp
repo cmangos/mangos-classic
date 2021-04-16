@@ -792,7 +792,6 @@ void Log::outCommand(uint32 account, const char* str, ...)
 
 void Log::outChar(const char* str, ...)
 {
-
     if (!str)
         return;
 
