@@ -82,7 +82,6 @@ enum
     SPELL_SUMMON_PORTAL         = 26396,
     SPELL_SUMMON_GIANT_PORTAL   = 26477,
 
-    NPC_VISCIDUS_TRIGGER        = 15925,
     NPC_POISON_CLOUD            = 15933,
 
     NPC_QIRAJI_SCARAB           = 15316,

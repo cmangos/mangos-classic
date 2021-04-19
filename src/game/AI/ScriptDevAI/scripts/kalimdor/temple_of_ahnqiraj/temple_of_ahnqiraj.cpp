@@ -230,12 +230,6 @@ void instance_temple_of_ahnqiraj::OnCreatureRespawn(Creature* creature)
 {
     switch (creature->GetEntry())
     {
-        case NPC_VISCIDUS_TRIGGER:
-        {
-            if (Creature* viscidus = GetSingleCreatureFromStorage(NPC_VISCIDUS))
-                viscidus->AI()->JustSummoned(creature);
-            break;
-        }
         case NPC_QIRAJI_SCARAB:
         case NPC_QIRAJI_SCORPION:
             creature->SetCorpseDelay(5);
