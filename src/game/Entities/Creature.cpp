@@ -437,6 +437,32 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
 
     if (cinfo->CorpseDelay)
         SetCorpseDelay(cinfo->CorpseDelay);
+    else if(sObjectMgr.IsEncounter(GetEntry(), GetMapId()))
+    {
+        // encounter boss forced decay timer to 1h
+        m_corpseDelay = 3600;                               // TODO: maybe add that to config file
+    }
+    else
+    {
+        switch (cinfo->Rank)
+        {
+            case CREATURE_ELITE_RARE:
+                m_corpseDelay = sWorld.getConfig(CONFIG_UINT32_CORPSE_DECAY_RARE);
+                break;
+            case CREATURE_ELITE_ELITE:
+                m_corpseDelay = sWorld.getConfig(CONFIG_UINT32_CORPSE_DECAY_ELITE);
+                break;
+            case CREATURE_ELITE_RAREELITE:
+                m_corpseDelay = sWorld.getConfig(CONFIG_UINT32_CORPSE_DECAY_RAREELITE);
+                break;
+            case CREATURE_ELITE_WORLDBOSS:
+                m_corpseDelay = sWorld.getConfig(CONFIG_UINT32_CORPSE_DECAY_WORLDBOSS);
+                break;
+            default:
+                m_corpseDelay = sWorld.getConfig(CONFIG_UINT32_CORPSE_DECAY_NORMAL);
+                break;
+        }
+    }
 
     return true;
 }
@@ -839,33 +865,6 @@ bool Creature::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo cons
 
     if (!cPos.Relocate(this))
         return false;
-
-    if (sObjectMgr.IsEncounter(GetEntry(), GetMapId()))
-    {
-        // encounter boss forced decay timer to 1h
-        m_corpseDelay = 3600;                               // TODO: maybe add that to config file
-    }
-    else
-    {
-        switch (GetCreatureInfo()->Rank)
-        {
-            case CREATURE_ELITE_RARE:
-                m_corpseDelay = sWorld.getConfig(CONFIG_UINT32_CORPSE_DECAY_RARE);
-                break;
-            case CREATURE_ELITE_ELITE:
-                m_corpseDelay = sWorld.getConfig(CONFIG_UINT32_CORPSE_DECAY_ELITE);
-                break;
-            case CREATURE_ELITE_RAREELITE:
-                m_corpseDelay = sWorld.getConfig(CONFIG_UINT32_CORPSE_DECAY_RAREELITE);
-                break;
-            case CREATURE_ELITE_WORLDBOSS:
-                m_corpseDelay = sWorld.getConfig(CONFIG_UINT32_CORPSE_DECAY_WORLDBOSS);
-                break;
-            default:
-                m_corpseDelay = sWorld.getConfig(CONFIG_UINT32_CORPSE_DECAY_NORMAL);
-                break;
-        }
-    }
 
     // Notify the pvp script
     if (GetMap()->IsBattleGround())
