@@ -1552,6 +1552,14 @@ void CreatureEventAI::ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* 
     ProcessEvents(invoker, sender);
 }
 
+void CreatureEventAI::CorpseRemoved(uint32& respawnDelay)
+{
+    CreatureAI::CorpseRemoved(respawnDelay);
+    // can happen due to forced despawn of allies
+    if ((m_despawnAggregationMask & AGGREGATION_EVADE) != 0)
+        DespawnGuids(m_despawnGuids);
+}
+
 void CreatureEventAI::EnterCombat(Unit* enemy)
 {
     // Check for on combat start events

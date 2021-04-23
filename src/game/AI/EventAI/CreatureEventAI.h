@@ -862,6 +862,7 @@ class CreatureEventAI : public CreatureAI, public TimerManager
         void SummonedCreatureJustDied(Creature* summoned) override;
         void SummonedCreatureDespawn(Creature* summoned) override;
         void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* invoker, uint32 miscValue) override;
+        void CorpseRemoved(uint32& respawnDelay) override;
         // bool IsControllable() const override { return true; }
 
         static int Permissible(const Creature* creature);
