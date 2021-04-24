@@ -11547,6 +11547,9 @@ bool Unit::MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spell
 
     if (spellInfo)
     {
+        if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE_2))
+            return false;
+
         if (selectFlags & (SELECT_FLAG_HAS_AURA | SELECT_FLAG_NOT_AURA))
         {
             if (selectFlags & SELECT_FLAG_HAS_AURA)
@@ -11560,8 +11563,6 @@ bool Unit::MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spell
                 if (target->HasAura(spellInfo->Id))
                     return false;
             }
-
-            return true;
         }
 
         if (selectFlags & SELECT_FLAG_NOT_IMMUNE)
