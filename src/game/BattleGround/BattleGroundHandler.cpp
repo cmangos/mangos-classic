@@ -213,6 +213,8 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
         SendPacket(data);
         DEBUG_LOG("Battleground: player joined queue for bg queue type %u bg type %u: GUID %u, NAME %s", bgQueueTypeId, bgTypeId, _player->GetGUIDLow(), _player->GetName());
     }
+
+    sBattleGroundMgr.ScheduleQueueUpdate(bgQueueTypeId, bgTypeId, _player->GetBattleGroundBracketIdFromLevel(bgTypeId));
 }
 
 // Sent by client while inside battleground; depends on the battleground type
