@@ -2262,7 +2262,7 @@ class Unit : public WorldObject
         uint32 GetDamageDoneByOthers() { return m_damageByOthers; }
         uint32 GetModifierXpBasedOnDamageReceived(uint32 xp);
 
-        void UpdateSplinePosition();
+        void UpdateSplinePosition(bool relocateOnly = false);
     protected:
 
         struct WeaponDamageInfo
