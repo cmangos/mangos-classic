@@ -226,8 +226,8 @@ class FollowMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Fol
         virtual void _setOrientation(Unit& owner);
         virtual void _setLocation(Unit& owner, bool movingNow);
 
-        static inline uint32 _getPollRateBase() { return 250; }
-        static inline uint32 _getPollRateMax() { return 1000; }
+        static inline uint32 _getPollRateBase() { return 400; }
+        static inline uint32 _getPollRateMax() { return 800; }
         virtual uint32 _getPollRateMultiplier(Unit& owner, bool targetMovingNow, bool targetMovedBefore = true) const;
         virtual uint32 _getPollRate(Unit& owner, bool movingNow, bool movingBefore = true) const;
 
