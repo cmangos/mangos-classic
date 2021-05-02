@@ -691,21 +691,19 @@ float FollowMovementGenerator::GetSpeed(Unit& owner) const
     if (owner.IsInCombat() || !i_target.isValid())
         return speed;
 
-    // Use default speed when a mix of PC and NPC units involved (escorting?)
-    if (owner.HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) != i_target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
-        return speed;
-
     // Followers sync with master's speed when not in combat
-    speed = i_target->GetSpeedInMotion();
+    // Use default speed when a mix of PC and NPC units involved (escorting?)
+    if (owner.HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) == i_target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        speed = i_target->GetSpeedInMotion();
 
     // Catchup boost is not allowed, stop here:
     if (!IsBoostAllowed(owner))
         return speed;
 
     // Catch-up speed boost if allowed:
-    // * When following client-controlled units: boost up to max hardcoded speed
+    // * When following client-controlled units or overriden: boost up to max hardcoded speed
     // * When following server-controlled units: try to boost up to own run speed
-    if (i_target->IsClientControlled())
+    if (i_target->IsClientControlled() || m_boost)
     {
         const float bonus = (i_target->GetDistance(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ(), DIST_CALC_NONE) / speed);
         return std::max(owner.GetSpeed(MOVE_WALK), std::min((speed + bonus), 40.0f));
@@ -719,8 +717,8 @@ bool FollowMovementGenerator::IsBoostAllowed(Unit& owner) const
     if (owner.IsInCombat() || !i_target.isValid())
         return false;
 
-    // Do not allow boosting outside of pet/master relationship:
-    if (owner.GetMasterGuid() != i_target->GetObjectGuid())
+    // Do not allow boosting outside of pet/master relationship by default, unless overriden:
+    if (!m_boost && owner.GetMasterGuid() != i_target->GetObjectGuid())
         return false;
 
     // Boost speed only if follower is too far behind
@@ -744,6 +742,10 @@ bool FollowMovementGenerator::IsUnstuckAllowed(Unit& owner) const
 {
     // Do not try to unstuck if in combat
     if (owner.IsInCombat() || !i_target.isValid() || i_target->IsInCombat())
+        return false;
+
+    // Do not try to unstuck when a mix of PC and NPC units involved (escorting?)
+    if (owner.HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) != i_target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         return false;
 
     // Do not try to unstuck while target has not landed or stabilized on terrain in some way

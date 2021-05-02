@@ -176,9 +176,9 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Chas
 class FollowMovementGenerator : public TargetedMovementGeneratorMedium<Unit, FollowMovementGenerator>
 {
     public:
-        FollowMovementGenerator(Unit& target, float offset, float angle, bool main, bool possess)
-            : TargetedMovementGeneratorMedium<Unit, FollowMovementGenerator>(target, offset, angle), m_main(main),
-            m_targetMoving(false), m_targetFaced(false), m_possess(possess)
+        FollowMovementGenerator(Unit& target, float offset, float angle, bool main, bool possess, bool alwaysBoost = false)
+            : TargetedMovementGeneratorMedium<Unit, FollowMovementGenerator>(target, offset, angle),
+              m_main(main), m_possess(possess), m_boost(alwaysBoost), m_targetMoving(false), m_targetFaced(false)
         {
             i_faceTarget = (angle == 0.0f);
         }
@@ -232,9 +232,11 @@ class FollowMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Fol
         virtual uint32 _getPollRate(Unit& owner, bool movingNow, bool movingBefore = true) const;
 
         bool m_main;
+        bool m_possess;
+        bool m_boost;
+
         bool m_targetMoving;
         bool m_targetFaced;
-        bool m_possess;
 };
 
 #endif
