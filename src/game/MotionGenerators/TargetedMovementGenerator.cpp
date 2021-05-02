@@ -809,19 +809,7 @@ bool FollowMovementGenerator::GetResetPosition(Unit& owner, float& x, float& y, 
 bool FollowMovementGenerator::Move(Unit& owner, float x, float y, float z)
 {
     if (!owner.movespline->Finalized())
-    {
-        auto loc = owner.movespline->ComputePosition();
-        if (GenericTransport* transport = owner.GetTransport())
-            transport->CalculatePassengerPosition(loc.x, loc.y, loc.z, &loc.orientation);
-
-        if (owner.movespline->isFacing())
-        {
-            float angle = atan2((loc.y - owner.GetPositionY()), (loc.x - owner.GetPositionX()));
-            loc.orientation = (angle >= 0 ? angle : ((2 * M_PI_F) + angle));
-        }
-
-        owner.Relocate(loc.x, loc.y, loc.z, loc.orientation);
-    }
+        owner.UpdateSplinePosition(true);
 
     if (!i_path)
         i_path = new PathFinder(&owner);
@@ -845,10 +833,21 @@ bool FollowMovementGenerator::Move(Unit& owner, float x, float y, float z)
         // Follower needs to be able to see predicted location to prevent issues and exploits
         const Map* map = owner.GetMap();
         const float height = owner.GetCollisionHeight();
+        const GenericTransport* transport = owner.GetTransport();
 
         for (size_t i = 1; i < path.size(); ++i)
         {
-            if (map->IsInLineOfSight(path[i - 1].x, path[i - 1].y, (path[i - 1].z + height), path[i].x, path[i].y, (path[i].z + height), true))
+            float lx = path[i - 1].x, ly = path[i - 1].y, lz = path[i - 1].z;
+            float nx = path[i].x, ny = path[i].y, nz = path[i].z;
+
+            // Convert local transport spline to global spline for visibility check
+            if (transport)
+            {
+                transport->CalculatePassengerPosition(lx, ly, lz);
+                transport->CalculatePassengerPosition(nx, ny, nz);
+            }
+
+            if (map->IsInLineOfSight(lx, ly, (lz + height), nx, ny, (nz + height), true))
                 continue;
 
             if (i != 1)
