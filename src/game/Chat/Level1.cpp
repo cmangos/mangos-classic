@@ -346,9 +346,8 @@ bool ChatHandler::HandleGPSCommand(char* args)
 
     if (GenericTransport* transport = obj->GetTransport())
     {
-        Position pos;
-        obj->GetPosition(pos.x, pos.y, pos.z, transport);
-        PSendSysMessage("Transport coords: %f %f %f", pos.x, pos.y, pos.z);
+        Position pos = obj->GetPosition(transport);
+        PSendSysMessage("Transport coords: %f %f %f %f", pos.x, pos.y, pos.z, pos.o);
     }
 
     DEBUG_LOG("Player %s GPS call for %s '%s' (%s: %u):",
