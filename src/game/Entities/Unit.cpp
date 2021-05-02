@@ -9162,8 +9162,6 @@ void CharmInfo::InitCharmCreateSpells()
         }
         else
         {
-            m_charmspells[x].SetActionAndType(spellId, ACT_DISABLED);
-
             ActiveStates newstate;
             bool onlyselfcast = true;
 
@@ -9178,6 +9176,7 @@ void CharmInfo::InitCharmCreateSpells()
             else
                 newstate = ACT_PASSIVE;
 
+            m_charmspells[x].SetActionAndType(spellId, newstate);
             AddSpellToActionBar(spellId, newstate);
         }
     }

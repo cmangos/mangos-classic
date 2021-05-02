@@ -35,7 +35,7 @@ int PetAI::Permissible(const Creature* creature)
     return PERMIT_BASE_NO;
 }
 
-PetAI::PetAI(Creature* creature) : UnitAI(creature), m_creature(creature), inCombat(false), m_followAngle(M_PI_F / 2), m_followDist(1.5f)
+PetAI::PetAI(Creature* creature) : CreatureAI(creature), inCombat(false), m_followAngle(M_PI_F / 2), m_followDist(1.5f)
 {
     m_AllySet.clear();
     UpdateAllies();
@@ -52,18 +52,8 @@ PetAI::PetAI(Creature* creature) : UnitAI(creature), m_creature(creature), inCom
             break;
     }
 
-    // TODO: Remove this when unit support is removed
-    SetMeleeEnabled(!(m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE));
-    if (m_creature->IsNoAggroOnSight())
-        SetReactState(REACT_DEFENSIVE);
     if (m_creature->IsGuard() || m_unit->GetCharmInfo()) // guards and charmed targets
         m_visibilityDistance = sWorld.getConfig(CONFIG_FLOAT_SIGHT_GUARDER);
-}
-
-PetAI::PetAI(Unit* unit) : UnitAI(unit), inCombat(false), m_followAngle(PET_FOLLOW_ANGLE), m_followDist(PET_FOLLOW_DIST)
-{
-    m_AllySet.clear();
-    UpdateAllies();
 }
 
 void PetAI::MoveInLineOfSight(Unit* who)
@@ -210,11 +200,11 @@ void PetAI::UpdateAI(const uint32 diff)
                 charminfo->SetSpellOpener();
             }
         }
-        else if (pet)
+        else if (creature)
         {
-            for (uint8 i = 0; i < pet->GetPetAutoSpellSize(); ++i)
+            for (uint8 i = 0; i < creature->GetPetAutoSpellSize(); ++i)
             {
-                uint32 spellId = pet->GetPetAutoSpellOnPos(i);
+                uint32 spellId = creature->GetPetAutoSpellOnPos(i);
                 if (!spellId)
                     continue;
 

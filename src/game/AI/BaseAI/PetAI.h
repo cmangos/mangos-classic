@@ -19,19 +19,18 @@
 #ifndef MANGOS_PETAI_H
 #define MANGOS_PETAI_H
 
-#include "UnitAI.h"
+#include "CreatureAI.h"
 #include "Entities/ObjectGuid.h"
 #include "Timer.h"
 
 class Creature;
 class Spell;
 
-class PetAI : public UnitAI
+class PetAI : public CreatureAI
 {
     public:
 
         explicit PetAI(Creature* creature);
-        explicit PetAI(Unit* unit);
 
         void MoveInLineOfSight(Unit* who) override;
         void AttackStart(Unit* who) override;
@@ -43,7 +42,6 @@ class PetAI : public UnitAI
 
     protected:
         std::string GetAIName() override { return "PetAI"; }
-        Creature* m_creature; // TODO: Make PetAI only available for creatures
 
     private:
         void UpdateAllies();
