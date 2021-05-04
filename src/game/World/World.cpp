@@ -1467,7 +1467,9 @@ void World::Update(uint32 diff)
 #endif
 
     /// <li> Handle session updates
+#ifdef BUILD_METRICS
     auto preSessionTime = std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::now());
+#endif
     UpdateSessions(diff);
 
     /// <li> Update uptime table
@@ -1479,15 +1481,22 @@ void World::Update(uint32 diff)
         m_timers[WUPDATE_UPTIME].Reset();
         LoginDatabase.PExecute("UPDATE uptime SET uptime = %u, maxplayers = %u WHERE realmid = %u AND starttime = " UI64FMTD, tmpDiff, maxClientsNum, realmID, uint64(m_startTime));
     }
-    auto preMapTime = std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::now());
+
     /// <li> Handle all other objects
     ///- Update objects (maps, transport, creatures,...)
+#ifdef BUILD_METRICS
+    auto preMapTime = std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::now());
+#endif
     sMapMgr.Update(diff);
+#ifdef BUILD_METRICS
     auto postMapTime = std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::now());
+#endif
     sBattleGroundMgr.Update(diff);
     sOutdoorPvPMgr.Update(diff);
     sWorldState.Update(diff);
+#ifdef BUILD_METRICS
     auto postSingletonTime = std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::now());
+#endif
     ///- Update groups with offline leaders
     if (m_timers[WUPDATE_GROUPS].Passed())
     {
