@@ -1232,6 +1232,7 @@ class Player : public Unit
         void CompleteQuest(uint32 quest_id);
         void IncompleteQuest(uint32 quest_id);
         void RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver, bool announce = true);
+        bool IsQuestExplored(uint32 quest_id) const;
 
         void FailQuest(uint32 questId);
         void FailQuest(Quest const* quest);

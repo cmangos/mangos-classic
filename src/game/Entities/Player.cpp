@@ -12574,6 +12574,14 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     SendQuestGiverStatusMultiple();
 }
 
+bool Player::IsQuestExplored(uint32 quest_id) const
+{
+    auto itr = mQuestStatus.find(quest_id);
+    if (itr == mQuestStatus.end())
+        return false;
+    return (*itr).second.m_explored;
+}
+
 void Player::FailQuestForGroup(uint32 questId)
 {
     if (Group* group = GetGroup())
