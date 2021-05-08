@@ -390,7 +390,7 @@ class Spell
         void cancel();
 
         void update(uint32 difftime);
-        void cast(bool skipCheck = false);
+        SpellCastResult cast(bool skipCheck = false);
         void finish(bool ok = true);
         void TakePower();
         void TakeAmmo() const;

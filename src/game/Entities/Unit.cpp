@@ -2406,8 +2406,9 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
     // melee attack spell casted at main hand attack only - but only if its not already being executed
     if (attType == BASE_ATTACK && m_currentSpells[CURRENT_MELEE_SPELL] && !m_currentSpells[CURRENT_MELEE_SPELL]->IsExecutedCurrently())
     {
-        m_currentSpells[CURRENT_MELEE_SPELL]->cast();
-        return;
+        SpellCastResult result = m_currentSpells[CURRENT_MELEE_SPELL]->cast();
+        if (result == SPELL_CAST_OK)
+            return;
     }
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MELEE_ATTACK);
