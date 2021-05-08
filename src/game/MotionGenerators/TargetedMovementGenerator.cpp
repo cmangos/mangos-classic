@@ -714,6 +714,7 @@ float FollowMovementGenerator::GetSpeed(Unit& owner) const
 
 bool FollowMovementGenerator::IsBoostAllowed(Unit& owner) const
 {
+    // Do not allow boosting when in combat
     if (owner.IsInCombat() || !i_target.isValid())
         return false;
 
@@ -740,25 +741,19 @@ bool FollowMovementGenerator::IsBoostAllowed(Unit& owner) const
 
 bool FollowMovementGenerator::IsUnstuckAllowed(Unit& owner) const
 {
-    // Do not try to unstuck if in combat
-    if (owner.IsInCombat() || !i_target.isValid() || i_target->IsInCombat())
+    if (!i_target.isValid())
         return false;
 
-    // Do not try to unstuck when a mix of PC and NPC units involved (escorting?)
-    if (owner.HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) != i_target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+    // Do not try to unstuck outside of pet/master relationship
+    if (owner.GetMasterGuid() != i_target->GetObjectGuid())
         return false;
 
     // Do not try to unstuck while target has not landed or stabilized on terrain in some way
     if (i_target->m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_FALLING | MOVEFLAG_FALLINGFAR | MOVEFLAG_FLYING)))
         return false;
 
-    // Do not try to unstuck while indoors (usually in dungeons, but also buildings)
-    if (!i_target->GetTerrain()->IsOutdoors(i_target->GetPositionX(), i_target->GetPositionY(), i_target->GetPositionZ()))
-        if (!owner.GetTerrain()->IsOutdoors(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ()))
-            return false;
-
-    // Do not try to unstuck if boost is not allowed either:
-    return IsBoostAllowed(owner);
+    // Do not try to unstuck if not too far behind:
+    return RequiresNewPosition(owner, owner.GetPosition(owner.GetTransport()));
 }
 
 void FollowMovementGenerator::Initialize(Unit& owner)
@@ -814,7 +809,7 @@ bool FollowMovementGenerator::Move(Unit& owner, float x, float y, float z)
     if (!i_path)
         i_path = new PathFinder(&owner);
 
-    bool stuck = false;
+    bool unstuck = false;
 
     i_path->calculate(x, y, z);
 
@@ -825,11 +820,11 @@ bool FollowMovementGenerator::Move(Unit& owner, float x, float y, float z)
         if (!IsUnstuckAllowed(owner))
             return false;
 
-        stuck = true;
+        unstuck = true;
     }
-    else if (owner.HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) || i_target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+    else if (i_target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
     {
-        // Trim path according to LoS when follower or target is a PC unit
+        // Trim path according to LoS when target is a PC unit
         // Follower needs to be able to see predicted location to prevent issues and exploits
         const Map* map = owner.GetMap();
         const float height = owner.GetCollisionHeight();
@@ -855,12 +850,12 @@ bool FollowMovementGenerator::Move(Unit& owner, float x, float y, float z)
             else if (!IsUnstuckAllowed(owner))
                 return false;
             else
-                stuck = true;
+                unstuck = true;
             break;
         }
     }
 
-    if (stuck)
+    if (unstuck)
     {
         float o;
         _getOrientation(owner, o);
@@ -1026,12 +1021,13 @@ void FollowMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& 
     const bool followerMoving = owner.m_movementInfo.HasMovementFlag(detected);
 
     // Detect target movement and relocation (ignore jumping in place and long falls)
+    const bool targetMovementIgnored = i_target->m_movementInfo.HasMovementFlag(ignored);
     const bool targetMovingLast = m_targetMoving;
-    const bool targetIgnore = i_target->m_movementInfo.HasMovementFlag(ignored);
-    m_targetMoving = (!targetIgnore && i_target->m_movementInfo.HasMovementFlag(detected));
+    m_targetMoving = (!targetMovementIgnored && i_target->m_movementInfo.HasMovementFlag(detected));
+
     bool targetRelocation = false;
     bool targetOrientation = false;
-    bool targetSpeedChanged = (i_speedChanged && m_targetMoving && targetMovingLast);
+    bool targetSpeedChanged = (i_speedChanged && m_targetMoving && targetMovingLast && followerMoving);
     i_speedChanged = false;
 
     if (m_targetMoving && !targetMovingLast)                        // Movement just started: force update
@@ -1042,7 +1038,7 @@ void FollowMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& 
     {
         i_recheckDistance.Update(time_diff);
 
-        if (i_recheckDistance.Passed() && !targetIgnore)
+        if (!targetMovementIgnored && (i_recheckDistance.Passed() || targetSpeedChanged))
         {
             i_recheckDistance.Reset(_getPollRate(owner, m_targetMoving, targetMovingLast));
 
@@ -1052,13 +1048,13 @@ void FollowMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& 
             Position actualPos = owner.GetPosition(owner.GetTransport());
             targetRelocation = (currentTargetPos != i_lastTargetPos || RequiresNewPosition(owner, actualPos));
             targetOrientation = (!targetRelocation && !m_targetMoving && !m_targetFaced);
-            targetSpeedChanged = (targetSpeedChanged && !targetRelocation && !targetOrientation);
+            targetSpeedChanged = (targetSpeedChanged && targetRelocation);
             i_lastTargetPos = currentTargetPos;
         }
     }
 
     // Decide whether it's suitable time to update position or orientation
-    if (targetRelocation)
+    if (targetRelocation || targetSpeedChanged)
     {
         i_recheckDistance.Reset(_getPollRate(owner, m_targetMoving, targetMovingLast));
         _setLocation(owner, m_targetMoving);
