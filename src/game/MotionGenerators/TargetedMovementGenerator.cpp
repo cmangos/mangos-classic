@@ -910,8 +910,6 @@ bool FollowMovementGenerator::_getLocation(Unit& owner, float& x, float& y, floa
 
     float to = i_target->GetOrientation();
 
-    GenericTransport* transport = i_target->GetTransport();
-
     // Server-controlled moving unit: use destination
     if (!i_target->movespline->Finalized() && movingNow)
     {
@@ -920,11 +918,11 @@ bool FollowMovementGenerator::_getLocation(Unit& owner, float& x, float& y, floa
         ty = dest.y;
         tz = dest.z;
 
-        if (transport)
+        if (GenericTransport* transport = i_target->GetTransport())
             transport->CalculatePassengerPosition(tx, ty, tz);
     }
     // Client-controlled moving unit: use simple prediction, unless on transport
-    else if (movingNow && !transport)
+    else if (movingNow)
     {
         const float speed = i_target->GetSpeedInMotion();
         const float o = i_target->m_movementInfo.GetOrientationInMotion(to);
