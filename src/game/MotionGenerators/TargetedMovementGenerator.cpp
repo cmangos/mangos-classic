@@ -861,6 +861,12 @@ bool FollowMovementGenerator::Move(Unit& owner, float x, float y, float z)
         _getOrientation(owner, o);
         _getLocation(owner, x, y, z, false);
 
+        // Do a final sanity LoS check when unstucking self to prevent landing on a wrong walkable surface
+        // Target needs to be able to see this new location to prevent issues and exploits
+        if (i_target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+            if (!i_target->IsWithinLOS(x, y, (z + owner.GetCollisionHeight()), true))
+                i_target->GetPosition(x, y, z);
+
         if (owner.GetTypeId() == TYPEID_PLAYER)
             owner.NearTeleportTo(x, y, z, o);
         else
@@ -904,6 +910,8 @@ bool FollowMovementGenerator::_getLocation(Unit& owner, float& x, float& y, floa
 
     float to = i_target->GetOrientation();
 
+    GenericTransport* transport = i_target->GetTransport();
+
     // Server-controlled moving unit: use destination
     if (!i_target->movespline->Finalized() && movingNow)
     {
@@ -912,11 +920,11 @@ bool FollowMovementGenerator::_getLocation(Unit& owner, float& x, float& y, floa
         ty = dest.y;
         tz = dest.z;
 
-        if (GenericTransport* transport = i_target->GetTransport())
+        if (transport)
             transport->CalculatePassengerPosition(tx, ty, tz);
     }
-    // Client-controlled moving unit: use simple prediction
-    else if (movingNow)
+    // Client-controlled moving unit: use simple prediction, unless on transport
+    else if (movingNow && !transport)
     {
         const float speed = i_target->GetSpeedInMotion();
         const float o = i_target->m_movementInfo.GetOrientationInMotion(to);
