@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2772_01_mangos_command` bit(1) DEFAULT NULL
+  `required_z2774_01_mangos_column_fix` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -934,7 +934,7 @@ UnitFlags BIGINT NOT NULL DEFAULT '-1',
 Faction INT UNSIGNED NOT NULL DEFAULT '0',
 ModelId MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
 EquipmentId MEDIUMINT NOT NULL DEFAULT '0',
-CurHealth INT UNSIGNED NOT NULL DEFAULT '1',
+CurHealth INT UNSIGNED NOT NULL DEFAULT '0',
 CurMana INT UNSIGNED NOT NULL DEFAULT '0',
 SpawnFlags INT UNSIGNED NOT NULL DEFAULT '0',
 PRIMARY KEY(Entry,UnitFlags,ModelId,EquipmentId,CurHealth,CurMana,SpawnFlags)
