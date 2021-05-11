@@ -3820,6 +3820,18 @@ uint32 Unit::GetWeaponSkillValue(WeaponAttackType attType, Unit const* target) c
 
 void Unit::_UpdateSpells(uint32 time)
 {
+#ifdef BUILD_METRICS
+    metric::duration<std::chrono::microseconds> meas("unit.update.spells", {
+        { "entry", std::to_string(GetEntry()) },
+        { "guid", std::to_string(GetGUIDLow()) },
+        { "unit_type", std::to_string(GetGUIDHigh()) },
+        { "map_id", std::to_string(GetMapId()) },
+        { "instance_id", std::to_string(GetInstanceId()) }
+        }, 1000);
+
+    std::vector<uint32> updatedSpellIds;
+#endif
+
     if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL])
         _UpdateAutoRepeatSpell();
 
@@ -3840,6 +3852,9 @@ void Unit::_UpdateSpells(uint32 time)
         SpellAuraHolder* i_holder = m_spellAuraHoldersUpdateIterator->second;
         ++m_spellAuraHoldersUpdateIterator;                 // need shift to next for allow update if need into aura update
         i_holder->UpdateHolder(time);
+#ifdef BUILD_METRICS
+        updatedSpellIds.push_back(i_holder->GetId());
+#endif
     }
 
     // remove expired auras
@@ -3855,6 +3870,12 @@ void Unit::_UpdateSpells(uint32 time)
         else
             ++iter;
     }
+#ifdef BUILD_METRICS
+    std::string logging;
+    for (uint32 spellId : updatedSpellIds)
+        logging += std::to_string(spellId) + ",";
+    meas.add_field("spells", logging);
+#endif
 }
 
 void Unit::_UpdateAutoRepeatSpell()
