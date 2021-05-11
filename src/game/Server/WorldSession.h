@@ -713,6 +713,8 @@ class WorldSession
 
         Messager<WorldSession>& GetMessager() { return m_messager; }
 
+        void SetPacketLogging(bool state);
+
     private:
         // private trade methods
         void moveItems(Item* myItems[], Item* hisItems[]);

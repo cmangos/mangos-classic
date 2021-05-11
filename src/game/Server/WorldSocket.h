@@ -126,6 +126,8 @@ class WorldSocket : public MaNGOS::Socket
         std::deque<uint32> m_opcodeHistoryOut;
         std::deque<uint32> m_opcodeHistoryInc;
 
+        bool m_loggingPackets;
+
     public:
         WorldSocket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler);
 
@@ -144,6 +146,9 @@ class WorldSocket : public MaNGOS::Socket
 
         static std::vector<uint32> m_packetCooldowns;
         std::map<uint32, TimePoint> m_lastPacket;
+
+        bool IsLoggingPackets() const { return m_loggingPackets; }
+        void SetPacketLogging(bool state) { m_loggingPackets = state; }
 };
 
 #endif  /* _WORLDSOCKET_H */

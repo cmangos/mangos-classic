@@ -83,7 +83,7 @@ std::deque<uint32> WorldSocket::GetIncOpcodeHistory()
 }
 
 WorldSocket::WorldSocket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler) : Socket(service, std::move(closeHandler)), m_lastPingTime(std::chrono::system_clock::time_point::min()), m_overSpeedPings(0), m_existingHeader(),
-    m_useExistingHeader(false), m_session(nullptr), m_seed(urand())
+    m_useExistingHeader(false), m_session(nullptr), m_seed(urand()), m_loggingPackets(false)
 {
 }
 
@@ -92,7 +92,7 @@ void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
     if (IsClosed())
         return;
 
-    if (sPacketLog->CanLogPacket())
+    if (sPacketLog->CanLogPacket() && IsLoggingPackets())
         sPacketLog->LogPacket(pct, SERVER_TO_CLIENT, GetRemoteIpAddress(), GetRemotePort());
 
     // Dump outgoing packet.
@@ -214,7 +214,7 @@ bool WorldSocket::ProcessIncomingData()
         ReadSkip(validBytesRemaining);
     }
 
-    if (sPacketLog->CanLogPacket())
+    if (sPacketLog->CanLogPacket() && IsLoggingPackets())
         sPacketLog->LogPacket(*pct, CLIENT_TO_SERVER, GetRemoteIpAddress(), GetRemotePort());
 
     sLog.outWorldPacketDump(GetRemoteEndpoint().c_str(), pct->GetOpcode(), pct->GetOpcodeName(), *pct, true);

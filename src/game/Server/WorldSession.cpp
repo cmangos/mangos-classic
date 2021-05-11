@@ -1069,6 +1069,12 @@ std::deque<uint32> WorldSession::GetIncOpcodeHistory()
         return std::deque<uint32>();
 }
 
+void WorldSession::SetPacketLogging(bool state)
+{
+    if (m_Socket)
+        m_Socket->SetPacketLogging(state);
+}
+
 void WorldSession::SendAuthOk() const
 {
     WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4 + 1 + 4 + 1);

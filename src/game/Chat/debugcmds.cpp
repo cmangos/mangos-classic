@@ -1628,3 +1628,13 @@ bool ChatHandler::HandleDebugRespawnDynguid(char* args)
         target->GetMap()->GetSpawnManager().RespawnCreature(dbguid);
     return true;
 }
+
+bool ChatHandler::HandleDebugPacketLog(char* args)
+{
+    uint32 value;
+    if (!ExtractUInt32(&args, value))
+        return false;
+
+    GetSession()->SetPacketLogging(value == 1);
+    return true;
+}
