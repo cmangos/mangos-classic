@@ -291,6 +291,8 @@ void GameObject::Update(const uint32 diff)
         return;
     }
 
+    m_events.Update(diff);
+
     switch (m_lootState)
     {
         case GO_NOT_READY:
