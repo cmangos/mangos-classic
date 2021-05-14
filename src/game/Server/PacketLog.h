@@ -43,6 +43,7 @@ class PacketLog
         static PacketLog* instance();
 
         void Initialize();
+        void Reinitialize();
         bool CanLogPacket() const { return (_file != nullptr); }
         void LogPacket(WorldPacket const& packet, Direction direction, boost::asio::ip::address const& addr, uint16 port);
 
