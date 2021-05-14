@@ -8511,7 +8511,7 @@ bool Unit::IsSuppressedTarget(Unit* target) const
 
 bool Unit::IsOfflineTarget(Unit* victim) const
 {
-    if (victim->IsFeigningDeathSuccessfully())
+    if (!IsIgnoringFeignDeath() && victim->IsFeigningDeathSuccessfully())
         return true;
 
     return false;
@@ -9656,7 +9656,7 @@ void Unit::SetFeignDeath(bool apply, ObjectGuid casterGuid /*= ObjectGuid()*/, u
 
         if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         {
-            if (success)
+            if (success) // TODO: Determine if IsIgnoringFeignDeath needs to be implemented in threat system too
             {
                 // Successful FD: set state, stop attack (+clear target for player-controlled npcs) and clear combat if applicable
                 addUnitState(UNIT_STAT_FEIGN_DEATH);

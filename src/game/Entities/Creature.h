@@ -62,7 +62,7 @@ enum CreatureFlagsExtra
     CREATURE_EXTRA_FLAG_FORCE_ATTACKING_CAPABILITY = 0x00080000,   // 524288 SetForceAttackingCapability(true); for nonattackable, nontargetable creatures that should be able to attack nontheless
     CREATURE_EXTRA_FLAG_DYNGUID                = 0x00100000,       // 1048576 Temporary transition flag - spawns of this entry use dynguid system
     CREATURE_EXTRA_FLAG_COUNT_SPAWNS           = 0x00200000,       // 2097152 count creature spawns in Map*
-    // CREATURE_EXTRA_FLAG_REUSE               = 0x00400000,       // 4194304 - reuse
+    CREATURE_EXTRA_FLAG_IGNORE_FEIGN_DEATH     = 0x00400000,       // 4194304 Ignores Feign Death
     CREATURE_EXTRA_FLAG_DUAL_WIELD_FORCED      = 0x00800000,       // 8388606 creature is alwyas dual wielding (even if unarmed)
     // CREATURE_EXTRA_FLAG_REUSE               = 0x01000000,       // 16777216
 };
@@ -834,6 +834,8 @@ class Creature : public Unit
         void SetNoLoot(bool state) { m_noLoot = state; }
         bool IsNoReputation() { return m_noReputation; }
         void SetNoReputation(bool state) { m_noReputation = state; }
+        bool IsIgnoringFeignDeath() const { return m_ignoringFeignDeath; }
+        void SetIgnoreFeignDeath(bool state) { m_ignoringFeignDeath = state; }
 
         virtual void AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto = nullptr, bool permanent = false, uint32 forcedDuration = 0) override;
 
@@ -905,6 +907,7 @@ class Creature : public Unit
         bool m_noXP;
         bool m_noLoot;
         bool m_noReputation;
+        bool m_ignoringFeignDeath;
 
         // Script logic
         bool m_countSpawns;

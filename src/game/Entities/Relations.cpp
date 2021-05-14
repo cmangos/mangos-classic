@@ -1145,7 +1145,7 @@ bool Unit::CanAttackOnSight(Unit const* target) const
         return false;
 
     // Do not aggro while a successful feign death is active
-    if (target->IsFeigningDeathSuccessfully())
+    if (!IsIgnoringFeignDeath() && target->IsFeigningDeathSuccessfully())
         return false;
 
     // Pets in disabled state (e.g. when player is mounted) do not draw aggro on sight
