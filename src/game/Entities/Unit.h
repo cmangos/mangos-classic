@@ -1810,8 +1810,6 @@ class Unit : public WorldObject
         Unit* GetSpawner(WorldObject const* pov = nullptr) const;
 
         // Additional related server-side and client-side ownership-related methods
-        // Spell mod owner: static player whose spell mods apply to this unit (server-side)
-        virtual Player* GetSpellModOwner() const { return nullptr; }
         // Beneficiary: owner of the xp/loot/etc credit, master or self (server-side)
         Unit* GetBeneficiary() const;
         Player* GetBeneficiaryPlayer() const;
@@ -1919,9 +1917,6 @@ class Unit : public WorldObject
 
         Spell* GetCurrentSpell(CurrentSpellTypes spellType) const { return m_currentSpells[spellType]; }
         Spell* FindCurrentSpellBySpellId(uint32 spell_id) const;
-
-        bool CheckAndIncreaseCastCounter();
-        void DecreaseCastCounter() { if (m_castCounter) --m_castCounter; }
 
         ObjectGuid m_ObjectSlotGuid[4];
 
@@ -2471,7 +2466,6 @@ class Unit : public WorldObject
 
         AttackerSet m_attackers;                            // Used to help know who is currently attacking this unit
         Spell* m_currentSpells[CURRENT_MAX_SPELL];
-        uint32 m_castCounter;                               // count casts chain of triggered spells for prevent infinity cast crashes
 
         UnitVisibility m_Visibility;
         Position m_last_notified_position;
@@ -2617,12 +2611,12 @@ bool Unit::CheckAllControlledUnits(Func const& func, uint32 controlledMask) cons
 // The spell target is always first unless there is a target at _completely_ the same position (unbelievable case)
 struct TargetDistanceOrderNear
 {
-    Unit const* m_mainTarget;
+    WorldObject const* m_mainTarget;
     DistanceCalculation m_distcalc;
 
-    TargetDistanceOrderNear(Unit const* target, DistanceCalculation distcalc = DIST_CALC_NONE) : m_mainTarget(target), m_distcalc(distcalc) {}
+    TargetDistanceOrderNear(WorldObject const* target, DistanceCalculation distcalc = DIST_CALC_NONE) : m_mainTarget(target), m_distcalc(distcalc) {}
     // functor for operator ">"
-    bool operator()(Unit const* _Left, Unit const* _Right) const
+    bool operator()(WorldObject const* _Left, WorldObject const* _Right) const
     {
         return m_mainTarget->GetDistanceOrder(_Left, _Right, m_distcalc);
     }
@@ -2632,11 +2626,11 @@ struct TargetDistanceOrderNear
 // The spell target is always first unless there is a target at _completely_ the same position (unbelievable case)
 struct TargetDistanceOrderFarAway
 {
-    Unit const* m_mainTarget;
+    WorldObject const* m_mainTarget;
     DistanceCalculation m_distcalc;
-    TargetDistanceOrderFarAway(Unit const* target, DistanceCalculation distcalc = DIST_CALC_NONE) : m_mainTarget(target), m_distcalc(distcalc) {}
+    TargetDistanceOrderFarAway(WorldObject const* target, DistanceCalculation distcalc = DIST_CALC_NONE) : m_mainTarget(target), m_distcalc(distcalc) {}
     // functor for operator "<"
-    bool operator()(Unit const* _Left, Unit const* _Right) const
+    bool operator()(WorldObject const* _Left, WorldObject const* _Right) const
     {
         return !m_mainTarget->GetDistanceOrder(_Left, _Right, m_distcalc);
     }
@@ -2644,10 +2638,10 @@ struct TargetDistanceOrderFarAway
 
 struct LowestHPNearestOrder
 {
-    Unit const* m_mainTarget;
+    WorldObject const* m_mainTarget;
     DistanceCalculation m_distcalc;
 
-    LowestHPNearestOrder(Unit const* target, DistanceCalculation distcalc = DIST_CALC_NONE) : m_mainTarget(target), m_distcalc(distcalc) {}
+    LowestHPNearestOrder(WorldObject const* target, DistanceCalculation distcalc = DIST_CALC_NONE) : m_mainTarget(target), m_distcalc(distcalc) {}
     // functor for operator ">"
     bool operator()(Unit const* _Left, Unit const* _Right) const
     {

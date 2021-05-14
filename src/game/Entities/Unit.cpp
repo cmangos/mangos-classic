@@ -347,8 +347,6 @@ Unit::Unit() :
     for (auto& m_currentSpell : m_currentSpells)
         m_currentSpell = nullptr;
 
-    m_castCounter = 0;
-
     // m_Aura = nullptr;
     // m_AurasCheck = 2000;
     // m_removeAuraTimer = 4;
@@ -10390,17 +10388,6 @@ void Unit::CleanupDeletedAuras()
     for (AuraList::const_iterator itr = m_deletedAuras.begin(); itr != m_deletedAuras.end(); ++itr)
         delete *itr;
     m_deletedAuras.clear();
-}
-
-bool Unit::CheckAndIncreaseCastCounter()
-{
-    uint32 maxCasts = sWorld.getConfig(CONFIG_UINT32_MAX_SPELL_CASTS_IN_CHAIN);
-
-    if (maxCasts && m_castCounter >= maxCasts)
-        return false;
-
-    ++m_castCounter;
-    return true;
 }
 
 bool Unit::IsShapeShifted() const

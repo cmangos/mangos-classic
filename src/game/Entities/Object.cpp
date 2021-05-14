@@ -1045,7 +1045,7 @@ WorldObject::WorldObject() :
     m_currMap(nullptr), m_mapId(0),
     m_InstanceId(0), m_isActiveObject(false),
     m_visibilityData(this),
-    m_debugFlags(0), m_transport(nullptr)
+    m_debugFlags(0), m_transport(nullptr), m_castCounter(0)
 {
 }
 
@@ -2807,4 +2807,15 @@ bool operator!=(const Position& left, const Position& right)
 bool WorldObject::IsUsingNewSpawningSystem() const
 {
     return GetDbGuid() && GetDbGuid() != GetGUIDLow();
+}
+
+bool WorldObject::CheckAndIncreaseCastCounter()
+{
+    uint32 maxCasts = sWorld.getConfig(CONFIG_UINT32_MAX_SPELL_CASTS_IN_CHAIN);
+
+    if (maxCasts && m_castCounter >= maxCasts)
+        return false;
+
+    ++m_castCounter;
+    return true;
 }
