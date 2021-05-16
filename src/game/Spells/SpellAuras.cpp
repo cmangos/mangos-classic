@@ -5061,7 +5061,7 @@ void Aura::PeriodicTick()
             if (spellDamageInfo.damage)
                 procVictim |= PROC_FLAG_TAKE_ANY_DAMAGE;
 
-            pCaster->DealSpellDamage(&spellDamageInfo, true, false);
+            Unit::DealSpellDamage(pCaster, &spellDamageInfo, true, false);
 
             Unit::ProcDamageAndSpell(ProcSystemArguments(pCaster, spellDamageInfo.target, procAttacker, procVictim, procEx, spellDamageInfo.damage, BASE_ATTACK, spellProto));
             break;

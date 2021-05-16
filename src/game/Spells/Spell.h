@@ -383,7 +383,7 @@ class Spell
         void EffectSummonDemon(SpellEffectIndex eff_idx);
 
         Spell(WorldObject* caster, SpellEntry const* info, uint32 triggeredFlags, ObjectGuid originalCasterGUID = ObjectGuid(), SpellEntry const* triggeredBy = nullptr);
-        ~Spell();
+        virtual ~Spell();
 
         SpellCastResult SpellStart(SpellCastTargets const* targets, Aura* triggeredByAura = nullptr);
 
