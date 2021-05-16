@@ -55,8 +55,53 @@ struct Stealth : public AuraScript
     }
 };
 
+void CastHighestStealthRank(Unit* caster)
+{
+    if (!caster->IsPlayer())
+        return;
+
+    // get highest rank of the Stealth spell
+    SpellEntry const* stealthSpellEntry = nullptr;
+    const PlayerSpellMap& sp_list = static_cast<Player*>(caster)->GetSpellMap();
+    for (const auto& itr : sp_list)
+    {
+        // only highest rank is shown in spell book, so simply check if shown in spell book
+        if (!itr.second.active || itr.second.disabled || itr.second.state == PLAYERSPELL_REMOVED)
+            continue;
+
+        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(itr.first);
+        if (!spellInfo)
+            continue;
+
+        if (spellInfo->IsFitToFamily(SPELLFAMILY_ROGUE, uint64(0x0000000000400000)))
+        {
+            stealthSpellEntry = spellInfo;
+            break;
+        }
+    }
+
+    // no Stealth spell found
+    if (!stealthSpellEntry)
+        return;
+
+    // reset cooldown on it if needed
+    if (!caster->IsSpellReady(*stealthSpellEntry))
+        caster->RemoveSpellCooldown(*stealthSpellEntry);
+
+    caster->CastSpell(nullptr, stealthSpellEntry, TRIGGERED_OLD_TRIGGERED);
+}
+
+struct VanishRogue : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        CastHighestStealthRank(spell->GetCaster());
+    }
+};
+
 void LoadRogueScripts()
 {
     RegisterSpellScript<spell_preparation>("spell_preparation");
     RegisterAuraScript<Stealth>("spell_stealth");
+    RegisterSpellScript<VanishRogue>("spell_vanish");
 }

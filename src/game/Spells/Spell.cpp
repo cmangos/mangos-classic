@@ -2858,45 +2858,6 @@ void Spell::cast(bool skipCheck)
                 AddPrecastSpell(25771);                     // Forbearance
             break;
         }
-        case SPELLFAMILY_ROGUE:
-        {
-            if (m_spellInfo->IsFitToFamilyMask(uint64(0x0000000000000800)) && m_spellInfo->Reagent[0] == 5140) // vanish base spell
-            {
-                if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                    break;
-
-                // get highest rank of the Stealth spell
-                SpellEntry const* stealthSpellEntry = nullptr;
-                const PlayerSpellMap& sp_list = ((Player*)m_caster)->GetSpellMap();
-                for (const auto& itr : sp_list)
-                {
-                    // only highest rank is shown in spell book, so simply check if shown in spell book
-                    if (!itr.second.active || itr.second.disabled || itr.second.state == PLAYERSPELL_REMOVED)
-                        continue;
-
-                    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(itr.first);
-                    if (!spellInfo)
-                        continue;
-
-                    if (spellInfo->IsFitToFamily(SPELLFAMILY_ROGUE, uint64(0x0000000000400000)))
-                    {
-                        stealthSpellEntry = spellInfo;
-                        break;
-                    }
-                }
-
-                // no Stealth spell found
-                if (!stealthSpellEntry)
-                    return;
-
-                // reset cooldown on it if needed
-                if (!m_caster->IsSpellReady(*stealthSpellEntry))
-                    m_caster->RemoveSpellCooldown(*stealthSpellEntry);
-
-                m_caster->CastSpell(m_caster, stealthSpellEntry, TRIGGERED_OLD_TRIGGERED);
-            }
-            break;
-        }
         default:
             break;
     }

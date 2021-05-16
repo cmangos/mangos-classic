@@ -150,6 +150,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (1785,'spell_stealth'),
 (1786,'spell_stealth'),
 (1787,'spell_stealth'),
+(1856,'spell_vanish'),
+(1857,'spell_vanish'),
 (14185,'spell_preparation');
 
 -- Battleground and Outdoor PvP
