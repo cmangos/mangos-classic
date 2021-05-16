@@ -99,9 +99,18 @@ struct VanishRogue : public SpellScript
     }
 };
 
+struct ImprovedSap : public SpellScript
+{
+    void OnSuccessfulFinish(Spell* spell) const override
+    {
+        CastHighestStealthRank(spell->GetCaster());
+    }
+};
+
 void LoadRogueScripts()
 {
     RegisterSpellScript<spell_preparation>("spell_preparation");
     RegisterAuraScript<Stealth>("spell_stealth");
     RegisterSpellScript<VanishRogue>("spell_vanish");
+    RegisterSpellScript<ImprovedSap>("spell_improved_sap");
 }
