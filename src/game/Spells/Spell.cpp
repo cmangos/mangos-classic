@@ -1655,8 +1655,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 m_targets.m_mapId = st->target_mapId;
 
                 // far-teleport spells are handled in SpellEffect, elsewise report an error about an unexpected map (spells are always locally)
-                if (st->target_mapId != m_caster->GetMapId() && m_spellInfo->Effect[effIndex] != SPELL_EFFECT_TELEPORT_UNITS && m_spellInfo->Effect[effIndex] != SPELL_EFFECT_BIND)
-                    sLog.outError("SPELL: wrong map (%u instead %u) target coordinates for spell ID %u", st->target_mapId, m_caster->GetMapId(), m_spellInfo->Id);
+                if (st->target_mapId != m_trueCaster->GetMapId() && m_spellInfo->Effect[effIndex] != SPELL_EFFECT_TELEPORT_UNITS && m_spellInfo->Effect[effIndex] != SPELL_EFFECT_BIND)
+                    sLog.outError("SPELL: wrong map (%u instead %u) target coordinates for spell ID %u", st->target_mapId, m_trueCaster->GetMapId(), m_spellInfo->Id);
             }
             else
                 sLog.outError("SPELL: unknown target coordinates for spell ID %u", m_spellInfo->Id);
@@ -1664,10 +1664,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
         }
         case TARGET_LOCATION_CASTER_HOME_BIND:
         {
-            if (m_caster->GetTypeId() == TYPEID_PLAYER)
+            if (m_trueCaster->IsPlayer())
             {
                 float x, y, z;
-                static_cast<Player*>(m_caster)->GetHomebindLocation(x, y, z, m_targets.m_mapId);
+                static_cast<Player*>(m_trueCaster)->GetHomebindLocation(x, y, z, m_targets.m_mapId);
                 m_targets.setDestination(x, y, z);
             }
             break;
@@ -1915,11 +1915,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
         }
         case TARGET_UNIT_CASTER_PET:
         {
-            Pet* tmpUnit = m_caster->GetPet();
-            if (tmpUnit)
-            {
+            if (Pet* tmpUnit = m_caster->GetPet())
                 tempUnitList.push_back(tmpUnit);
-            }
             break;
         }
         case TARGET_UNIT:
@@ -1928,7 +1925,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             if (!newUnitTarget)
                 break;
 
-            if (!m_caster->CanAssistSpell(newUnitTarget, m_spellInfo))
+            if (!m_trueCaster->CanAssistSpell(newUnitTarget, m_spellInfo))
             {
                 if (CheckAndAddMagnetTarget(newUnitTarget, effIndex, targetB, targetingData))
                     break;
@@ -2086,7 +2083,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             {
                 MaNGOS::AllGameObjectEntriesListInPosRangeCheck go_check(x, y, z, entriesToUse, radius);
                 MaNGOS::GameObjectListSearcher<MaNGOS::AllGameObjectEntriesListInPosRangeCheck> checker(tempGOList, go_check);
-                Cell::VisitGridObjects(m_caster, checker, radius);
+                Cell::VisitGridObjects(m_trueCaster, checker, radius);
             }
 
             break;
@@ -2114,7 +2111,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
         {
             if (Unit* target = m_targets.getUnitTarget())
             {
-                if (m_caster->CanAssistSpell(target, m_spellInfo))
+                if (m_trueCaster->CanAssistSpell(target, m_spellInfo))
                     tempUnitList.push_back(target);
             }
             break;
