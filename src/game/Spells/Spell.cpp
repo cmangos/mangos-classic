@@ -2893,6 +2893,8 @@ void Spell::cast(bool skipCheck)
     // set to real guid to be sent later to the client
     m_targets.updateTradeSlotItem();
 
+    GetSpellCastTime(m_spellInfo, m_trueCaster, this, true); // consumes mods in a dirty but code reusable way
+
     m_duration = CalculateSpellDuration(m_spellInfo, m_caster);
 
     FillTargetMap();
