@@ -6530,7 +6530,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
     {
         // Check targets for not_selectable unit flag and remove
         // A player can cast spells on his pet (or other controlled unit) though in any state
-        if (target->GetMasterGuid() != affectiveCaster->GetObjectGuid() && !scriptTarget)
+        if ((!affectiveCaster || target->GetMasterGuid() != affectiveCaster->GetObjectGuid()) && !scriptTarget)
         {
             // unselectable targets skipped in all cases except targets with TARGET_SCRIPT
             if (!m_ignoreUnselectableTarget && target != m_targets.getUnitTarget() &&
@@ -6548,7 +6548,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
                 return false;
         }
 
-        if (affectiveCaster->IsPlayer())
+        if (affectiveCaster && affectiveCaster->IsPlayer())
         {
             // Do not allow these spells to target creatures not tapped by us (Banish, Polymorph, many quest spells)
             if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_TARGET_TAPPED))
