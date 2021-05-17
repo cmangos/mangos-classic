@@ -403,6 +403,22 @@ bool ChatHandler::HandleDebugSendQuestInvalidMsgCommand(char* args)
     return true;
 }
 
+bool ChatHandler::HandleDebugListUpdateFieldsCommand(char* args)
+{
+    Unit* pTarget = getSelectedUnit();
+
+    if (!pTarget)
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    ShowAllUpdateFieldsHelper(pTarget);
+
+    return true;
+}
+
 bool ChatHandler::HandleDebugGetItemStateCommand(char* args)
 {
     if (!*args)
@@ -811,7 +827,7 @@ bool ChatHandler::HandleDebugSetItemValueCommand(char* args)
     return HandleSetValueHelper(item, field, typeStr, valStr);
 }
 
-bool ChatHandler::HandleDebugSetValueCommand(char* args)
+bool ChatHandler::HandleDebugSetValueByIndexCommand(char* args)
 {
     Unit* target = getSelectedUnit();
     if (!target)
@@ -919,7 +935,7 @@ bool ChatHandler::HandleDebugGetItemValueCommand(char* args)
     return HandleGetValueHelper(item, field, typeStr);
 }
 
-bool ChatHandler::HandleDebugGetValueCommand(char* args)
+bool ChatHandler::HandleDebugGetValueByIndexCommand(char* args)
 {
     Unit* target = getSelectedUnit();
     if (!target)
@@ -1017,6 +1033,182 @@ bool ChatHandler::HandlerDebugModValueHelper(Object* target, uint32 field, char*
     }
 
     return true;
+}
+
+bool ChatHandler::HandleDebugSetValueByNameCommand(char* args)
+{
+    Unit* target = getSelectedUnit();
+    if (!target)
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    char* fieldName = ExtractQuotedOrLiteralArg(&args);
+    if (!fieldName)
+        return false;
+
+    if (UpdateFieldData const* pField = UpdateFields::GetUpdateFieldDataByName(fieldName))
+    {
+        if ((pField->objectTypeMask & target->GetTypeMask()) == 0)
+        {
+            SendSysMessage("Target does have that field.");
+            return true;
+        }
+
+        switch (pField->valueType)
+        {
+            case UF_TYPE_INT:
+            {
+                uint32 value;
+                if (!ExtractUInt32(&args, value))
+                    return false;
+
+                target->SetUInt32Value(pField->offset, value);
+                PSendSysMessage("Field %s of %s set to %u.", pField->name, target->GetName(), value);
+                break;
+            }
+            case UF_TYPE_TWO_SHORT:
+            {
+                uint32 value1;
+                if (!ExtractUInt32(&args, value1))
+                    return false;
+
+                uint32 value2;
+                if (!ExtractUInt32(&args, value2))
+                    return false;
+
+                target->SetUInt16Value(pField->offset, 0, value1);
+                target->SetUInt16Value(pField->offset, 1, value2);
+                PSendSysMessage("Field %s of %s set to %u/%u.", pField->name, target->GetName(), value1, value2);
+                break;
+            }
+            case UF_TYPE_FLOAT:
+            {
+                float value;
+                if (!ExtractFloat(&args, value))
+                    return false;
+
+                target->SetFloatValue(pField->offset, value);
+                PSendSysMessage("Field %s of %s set to %g.", pField->name, target->GetName(), value);
+                break;
+            }
+            case UF_TYPE_BYTES:
+            case UF_TYPE_BYTES2:
+            {
+                uint32 value1;
+                if (!ExtractUInt32(&args, value1))
+                    return false;
+
+                uint32 value2;
+                if (!ExtractUInt32(&args, value2))
+                    return false;
+
+                uint32 value3;
+                if (!ExtractUInt32(&args, value3))
+                    return false;
+
+                uint32 value4;
+                if (!ExtractUInt32(&args, value4))
+                    return false;
+
+                target->SetByteValue(pField->offset, 0, value1);
+                target->SetByteValue(pField->offset, 1, value2);
+                target->SetByteValue(pField->offset, 2, value3);
+                target->SetByteValue(pField->offset, 3, value4);
+                PSendSysMessage("Field %s of %s set to %u/%u/%u/%u.", pField->name, target->GetName(), value1, value2, value3, value4);
+                break;
+            }
+            default:
+            {
+                SendSysMessage("Unsupported field type.");
+                break;
+            }
+        }
+       
+    }
+    else
+        SendSysMessage("Wrong field name.");
+
+    return true;
+}
+
+bool ChatHandler::HandleDebugGetValueByNameCommand(char* args)
+{
+    Unit* target = getSelectedUnit();
+    if (!target)
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    char* fieldName = ExtractQuotedOrLiteralArg(&args);
+    if (!fieldName)
+        return false;
+
+    if (UpdateFieldData const* pField = UpdateFields::GetUpdateFieldDataByName(fieldName))
+    {
+        if ((pField->objectTypeMask & target->GetTypeMask()) == 0)
+        {
+            SendSysMessage("Target does have that field.");
+            return true;
+        }
+        PSendSysMessage("Update field info for %s", target->GetGuidStr().c_str());
+        ShowUpdateFieldHelper(target, pField->offset);
+    }
+    else
+        SendSysMessage("Wrong field name.");
+
+    return true;
+}
+
+void ChatHandler::ShowAllUpdateFieldsHelper(Object const* target)
+{
+    PSendSysMessage("Update field info for %s", target->GetGuidStr().c_str());
+
+    for (uint16 index = 0; index < target->GetValuesCount(); index++)
+    {
+        if (!target->GetUInt32Value(index))
+            continue;
+
+        ShowUpdateFieldHelper(target, index);
+    }
+}
+
+void ChatHandler::ShowUpdateFieldHelper(Object const* target, uint16 index)
+{
+    if (UpdateFieldData const* pField = UpdateFields::GetUpdateFieldDataByTypeMaskAndOffset(target->GetTypeMask(), index))
+    {
+        std::string fieldName = pField->name;
+        if (index > pField->offset)
+            fieldName += "+" + std::to_string(index - pField->offset);
+
+        switch (pField->valueType)
+        {
+            case UF_TYPE_INT:
+                PSendSysMessage("%s: %u", fieldName.c_str(), target->GetUInt32Value(index));
+                break;
+            case UF_TYPE_TWO_SHORT:
+                PSendSysMessage("%s: %u/%u", fieldName.c_str(), target->GetUInt16Value(index, 0), target->GetUInt16Value(index, 1));
+                break;
+            case UF_TYPE_FLOAT:
+                PSendSysMessage("%s: %g", fieldName.c_str(), target->GetFloatValue(index));
+                break;
+            case UF_TYPE_GUID:
+                if (index == pField->offset)
+                    PSendSysMessage("%s: %s", fieldName.c_str(), target->GetGuidValue(index).GetString().c_str());
+                break;
+            case UF_TYPE_BYTES:
+            case UF_TYPE_BYTES2:
+                PSendSysMessage("%s: %u/%u/%u/%u", fieldName.c_str(), target->GetByteValue(index, 0), target->GetByteValue(index, 1), target->GetByteValue(index, 2), target->GetByteValue(index, 3));
+                break;
+            default:
+                SendSysMessage("Unsupported field type.");
+                break;
+        }
+    }
 }
 
 bool ChatHandler::HandleDebugModItemValueCommand(char* args)

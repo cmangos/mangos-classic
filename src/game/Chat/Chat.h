@@ -249,15 +249,18 @@ class ChatHandler
         bool HandleDebugAnimCommand(char* args);
         bool HandleDebugBattlegroundCommand(char* args);
         bool HandleDebugBattlegroundStartCommand(char* args);
+        bool HandleDebugListUpdateFieldsCommand(char* args);
         bool HandleDebugGetItemStateCommand(char* args);
         bool HandleDebugGetItemValueCommand(char* args);
         bool HandleDebugGetLootRecipientCommand(char* args);
-        bool HandleDebugGetValueCommand(char* args);
+        bool HandleDebugGetValueByIndexCommand(char* args);
+        bool HandleDebugGetValueByNameCommand(char* args);
         bool HandleDebugModItemValueCommand(char* args);
         bool HandleDebugModValueCommand(char* args);
         bool HandleDebugSetAuraStateCommand(char* args);
         bool HandleDebugSetItemValueCommand(char* args);
-        bool HandleDebugSetValueCommand(char* args);
+        bool HandleDebugSetValueByIndexCommand(char* args);
+        bool HandleDebugSetValueByNameCommand(char* args);
         bool HandleDebugSpellCheckCommand(char* args);
         bool HandleDebugSpellCoefsCommand(char* args);
         bool HandleDebugSpellModsCommand(char* args);
@@ -770,6 +773,8 @@ class ChatHandler
         void HandleLearnSkillRecipesHelper(Player* player, uint32 skill_id);
         bool HandleGoHelper(Player* _player, uint32 mapid, float x, float y, float const* zPtr = nullptr, float const* ortPtr = nullptr);
         bool HandleGetValueHelper(Object* target, uint32 field, char* typeStr);
+        void ShowAllUpdateFieldsHelper(Object const* target);
+        void ShowUpdateFieldHelper(Object const* target, uint16 index);
         bool HandlerDebugModValueHelper(Object* target, uint32 field, char* typeStr, char* valStr);
         bool HandleSetValueHelper(Object* target, uint32 field, char* typeStr, char* valStr);
 
