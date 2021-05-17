@@ -182,7 +182,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
     BuildMovementUpdate(&buf, updateFlags);
     UpdateMask updateMask;
     updateMask.SetCount(m_valuesCount);
-    _SetCreateBits(&updateMask, target);
+    _SetCreateBits(updateMask, target);
     BuildValuesUpdate(updatetype, &buf, &updateMask, target);
     data->AddUpdateBlock(buf);
 }
@@ -200,20 +200,25 @@ void Object::SendCreateUpdateToPlayer(Player* player) const
     }
 }
 
-void Object::BuildValuesUpdateBlockForPlayer(UpdateData* data, Player* target) const
+void Object::BuildValuesUpdateBlockForPlayer(UpdateData& data, Player* target) const
+{
+    UpdateMask updateMask;
+    updateMask.SetCount(m_valuesCount);
+
+    _SetUpdateBits(updateMask, target);
+    if (updateMask.HasData())
+        BuildValuesUpdateBlockForPlayer(data, updateMask, target);
+}
+
+void Object::BuildValuesUpdateBlockForPlayer(UpdateData& data, UpdateMask& updateMask, Player* target) const
 {
     ByteBuffer buf(500);
 
     buf << uint8(UPDATETYPE_VALUES);
     buf << GetPackGUID();
 
-    UpdateMask updateMask;
-    updateMask.SetCount(m_valuesCount);
-
-    _SetUpdateBits(&updateMask, target);
     BuildValuesUpdate(UPDATETYPE_VALUES, &buf, &updateMask, target);
-
-    data->AddUpdateBlock(buf);
+    data.AddUpdateBlock(buf);
 }
 
 void Object::BuildForcedValuesUpdateBlockForPlayer(UpdateData* data, Player* target) const
@@ -226,7 +231,7 @@ void Object::BuildForcedValuesUpdateBlockForPlayer(UpdateData* data, Player* tar
     UpdateMask updateMask;
     updateMask.SetCount(m_valuesCount);
 
-    _SetCreateBits(&updateMask, target);
+    _SetCreateBits(updateMask, target);
     BuildValuesUpdate(UPDATETYPE_VALUES, &buf, &updateMask, target);
 
     data->AddUpdateBlock(buf);
@@ -454,7 +459,8 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     uint32 value = m_uint32Values[index];
 
                     // Fog of War: replace absolute health values with percentages for non-allied units according to settings
-                    if (!static_cast<const Unit*>(this)->IsFogOfWarVisibleHealth(target))
+                    if (!static_cast<const Unit*>(this)->IsFogOfWarVisibleHealth(target) &&
+                        !target->CanSeeSpecialInfoOf(static_cast<const Unit*>(this)))
                     {
                         switch (index)
                         {
@@ -464,20 +470,6 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     }
 
                     *data << value;
-                }
-                // Fog of War: hide stat values for non-allied units according to settings
-                else if ((index == UNIT_FIELD_RANGEDATTACKTIME ||
-                          index == UNIT_FIELD_MINDAMAGE || index == UNIT_FIELD_MAXDAMAGE ||
-                          index == UNIT_FIELD_MINOFFHANDDAMAGE || index == UNIT_FIELD_MAXOFFHANDDAMAGE ||
-                          (index >= UNIT_FIELD_STAT0 && index < UNIT_FIELD_BASE_MANA) ||
-                          index == UNIT_FIELD_BASE_HEALTH || index == UNIT_FIELD_ATTACK_POWER ||
-                          index == UNIT_FIELD_ATTACK_POWER_MODS || index == UNIT_FIELD_ATTACK_POWER_MULTIPLIER ||
-                          index == UNIT_FIELD_RANGED_ATTACK_POWER || index == UNIT_FIELD_RANGED_ATTACK_POWER_MODS ||
-                          index == UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER || index == UNIT_FIELD_MINRANGEDDAMAGE ||
-                          index == UNIT_FIELD_MAXRANGEDDAMAGE || (index >= UNIT_FIELD_POWER_COST_MODIFIER && index <= UNIT_FIELD_POWER_COST_MULTIPLIER_06)) &&
-                          !static_cast<const Unit*>(this)->IsFogOfWarVisibleStats(target))
-                {
-                    *data << uint32(0);
                 }
                 else if (index == UNIT_FIELD_FLAGS)
                 {
@@ -714,6 +706,54 @@ void Object::ClearUpdateMask(bool remove)
     }
 }
 
+uint16 Object::GetUpdateFieldFlagsForTarget(Player const* target, uint16 const*& flags) const
+{
+    flags = UpdateFields::GetUpdateFieldFlagsArray(GetTypeId());
+    uint16 visibleFlag = UF_FLAG_PUBLIC | UF_FLAG_DYNAMIC;
+
+    if (target == this)
+        visibleFlag |= UF_FLAG_PRIVATE;
+
+    switch (GetTypeId())
+    {
+        case TYPEID_ITEM:
+        case TYPEID_CONTAINER:
+            if (static_cast<Item const*>(this)->GetOwnerGuid() == target->GetObjectGuid())
+                visibleFlag |= UF_FLAG_OWNER_ONLY | UF_FLAG_UNK2;
+            break;
+        case TYPEID_UNIT:
+        case TYPEID_PLAYER:
+        {
+            if (static_cast<Unit const*>(this)->GetMasterGuid() == target->GetObjectGuid())
+                visibleFlag |= UF_FLAG_OWNER_ONLY;
+
+            if (HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_SPECIALINFO))
+                if (target->CanSeeSpecialInfoOf(static_cast<Unit const*>(this)))
+                    visibleFlag |= UF_FLAG_SPECIAL_INFO;
+
+            if (static_cast<Unit const*>(this)->IsInGroup(target, false, false))
+                visibleFlag |= UF_FLAG_GROUP_ONLY;
+            break;
+        }
+        case TYPEID_GAMEOBJECT:
+            if (static_cast<GameObject const*>(this)->GetOwnerGuid() == target->GetObjectGuid())
+                visibleFlag |= UF_FLAG_OWNER_ONLY;
+            break;
+        case TYPEID_DYNAMICOBJECT:
+            if (static_cast<DynamicObject const*>(this)->GetCasterGuid() == target->GetObjectGuid())
+                visibleFlag |= UF_FLAG_OWNER_ONLY;
+            break;
+        case TYPEID_CORPSE:
+            if (static_cast<Corpse const*>(this)->GetOwnerGuid() == target->GetObjectGuid())
+                visibleFlag |= UF_FLAG_OWNER_ONLY;
+            break;
+        case TYPEID_OBJECT:
+            break;
+    }
+
+    return visibleFlag;
+}
+
 void Object::_LoadIntoDataField(const char* data, uint32 startOffset, uint32 count)
 {
     if (!data)
@@ -732,18 +772,38 @@ void Object::_LoadIntoDataField(const char* data, uint32 startOffset, uint32 cou
     }
 }
 
-void Object::_SetUpdateBits(UpdateMask* updateMask, Player* /*target*/) const
+void Object::MarkUpdateFieldsWithFlagForUpdate(UpdateMask& updateMask, uint16 flag)
 {
+    uint16 const* flags = UpdateFields::GetUpdateFieldFlagsArray(GetTypeId());
+    MANGOS_ASSERT(flags);
+
     for (uint16 index = 0; index < m_valuesCount; ++index)
-        if (m_changedValues[index])
-            updateMask->SetBit(index);
+    {
+        if (GetUInt32Value(index) != 0 && (flags[index] & flag))
+            updateMask.SetBit(index);
+    }
 }
 
-void Object::_SetCreateBits(UpdateMask* updateMask, Player* /*target*/) const
+void Object::_SetUpdateBits(UpdateMask& updateMask, Player* target) const
 {
+    uint16 const* flags = nullptr;
+    uint16 visibleFlag = GetUpdateFieldFlagsForTarget(target, flags);
+    MANGOS_ASSERT(flags);
+
     for (uint16 index = 0; index < m_valuesCount; ++index)
-        if (GetUInt32Value(index) != 0)
-            updateMask->SetBit(index);
+        if (m_changedValues[index] && (flags[index] & visibleFlag))
+            updateMask.SetBit(index);
+}
+
+void Object::_SetCreateBits(UpdateMask& updateMask, Player* target) const
+{
+    uint16 const* flags = nullptr;
+    uint16 visibleFlag = GetUpdateFieldFlagsForTarget(target, flags);
+    MANGOS_ASSERT(flags);
+
+    for (uint16 index = 0; index < m_valuesCount; ++index)
+        if (GetUInt32Value(index) != 0 && (flags[index] & visibleFlag))
+            updateMask.SetBit(index);
 }
 
 void Object::SetInt32Value(uint16 index, int32 value)
@@ -997,7 +1057,7 @@ void Object::BuildUpdateDataForPlayer(Player* pl, UpdateDataMapType& update_play
         iter = p.first;
     }
 
-    BuildValuesUpdateBlockForPlayer(&iter->second, iter->first);
+    BuildValuesUpdateBlockForPlayer(iter->second, iter->first);
 }
 
 void Object::AddToClientUpdateList()

@@ -23,6 +23,8 @@
 #include "Entities/Player.h"
 #include "Globals/ObjectMgr.h"
 #include "Entities/ObjectGuid.h"
+#include "Entities/UpdateData.h"
+#include "Entities/UpdateMask.h"
 #include "Groups/Group.h"
 #include "Tools/Formulas.h"
 #include "Globals/ObjectAccessor.h"
@@ -306,6 +308,52 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
         // quest related GO state dependent from raid membership
         if (isRaidGroup())
             player->UpdateForQuestWorldObjects();
+
+        // Broadcast new player group member fields to rest of the group
+        UpdateData groupData;
+
+        // Broadcast group members' fields to player
+        for (GroupReference* itr = GetFirstMember(); itr != nullptr; itr = itr->next())
+        {
+            if (itr->getSource() == player)
+                continue;
+
+            if (Player* member = itr->getSource())
+            {
+                if (player->HasAtClient(member))
+                {
+                    UpdateMask updateMask;
+                    updateMask.SetCount(member->GetValuesCount());
+                    member->MarkUpdateFieldsWithFlagForUpdate(updateMask, UF_FLAG_GROUP_ONLY);
+                    if (updateMask.HasData())
+                        member->BuildValuesUpdateBlockForPlayer(groupData, updateMask, player);
+                }
+
+                if (member->HasAtClient(player))
+                {
+                    UpdateMask updateMask;
+                    updateMask.SetCount(member->GetValuesCount());
+                    member->MarkUpdateFieldsWithFlagForUpdate(updateMask, UF_FLAG_GROUP_ONLY);
+                    if (updateMask.HasData())
+                    {
+                        UpdateData newData;
+                        player->BuildValuesUpdateBlockForPlayer(newData, updateMask, member);
+
+                        if (newData.HasData())
+                        {
+                            WorldPacket newDataPacket = newData.BuildPacket(0, false);
+                            member->SendDirectMessage(newDataPacket);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (groupData.HasData())
+        {
+            WorldPacket groupDataPacket = groupData.BuildPacket(0, false);
+            player->SendDirectMessage(groupDataPacket);
+        }
     }
 
     return true;
