@@ -748,10 +748,12 @@ struct go_ai_suppression : public GameObjectAI
         {
             if (m_uiFumeTimer <= uiDiff)
             {
-                // TODO replace by go->Use(go) or go->Use(nullptr) once GO casting is added in core
                 // The loot state check may be removed in that case because it should probably be handled in the Gameobject::Use() code
                 if (m_go->GetLootState() == GO_READY)
+                {
                     m_go->SendGameObjectCustomAnim(m_go->GetObjectGuid());
+                    m_go->CastSpell(nullptr, nullptr, m_go->GetGOInfo()->trap.spellId, TRIGGERED_OLD_TRIGGERED);
+                }
                 m_uiFumeTimer = 5 * IN_MILLISECONDS;
             }
             else
