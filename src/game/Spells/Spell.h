@@ -160,7 +160,7 @@ class SpellCastTargets
 
         bool IsEmpty() const { return !m_GOTargetGUID && !m_unitTargetGUID && !m_itemTarget && !m_CorpseTargetGUID; }
 
-        void Update(Unit* caster);
+        void Update(WorldObject* caster);
 
         Position m_srcPos;
         Position m_destPos;

@@ -122,8 +122,8 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, WorldObject* caster, Spell*
             return 0;
 
         // spell targeted to non-trading trade slot item instant at trade success apply
-        if (spell->GetCaster()->GetTypeId() == TYPEID_PLAYER)
-            if (TradeData* my_trade = ((Player*)(spell->GetCaster()))->GetTradeData())
+        if (caster->IsPlayer())
+            if (TradeData* my_trade = static_cast<Player*>(caster)->GetTradeData())
                 if (Item* nonTrade = my_trade->GetTraderData()->GetItem(TRADE_SLOT_NONTRADED))
                     if (nonTrade == spell->m_targets.getItemTarget())
                         return 0;
@@ -145,13 +145,17 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, WorldObject* caster, Spell*
 
     if (spell)
     {
-        if (Player* modOwner = spell->GetCaster()->GetSpellModOwner())
+        if (Player* modOwner = caster->GetSpellModOwner())
             modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_CASTING_TIME, castTime, consume);
 
-        if (!spellInfo->HasAttribute(SPELL_ATTR_ABILITY) && !spellInfo->HasAttribute(SPELL_ATTR_TRADESPELL) && !spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS))
-            castTime = int32(castTime * spell->GetCaster()->GetFloatValue(UNIT_MOD_CAST_SPEED));
-        else if (spell->IsRangedSpell() && !spell->IsAutoRepeat())
-            castTime = int32(castTime * spell->GetCaster()->m_modAttackSpeedPct[RANGED_ATTACK]);
+        if (caster->IsUnit())
+        {
+            Unit* unitCaster = static_cast<Unit*>(caster);
+            if (!spellInfo->HasAttribute(SPELL_ATTR_ABILITY) && !spellInfo->HasAttribute(SPELL_ATTR_TRADESPELL) && !spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS))
+                castTime = int32(castTime * unitCaster->GetFloatValue(UNIT_MOD_CAST_SPEED));
+            else if (spell->IsRangedSpell() && !spell->IsAutoRepeat())
+                castTime = int32(castTime * unitCaster->m_modAttackSpeedPct[RANGED_ATTACK]);
+        }
     }
 
     // [workaround] holy light need script effect, but 19968 spell for it have 2.5 cast time sec

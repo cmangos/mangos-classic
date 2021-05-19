@@ -141,11 +141,11 @@ void SpellCastTargets::setCorpseTarget(Corpse* corpse)
     m_CorpseTargetGUID = corpse->GetObjectGuid();
 }
 
-void SpellCastTargets::Update(Unit* caster)
+void SpellCastTargets::Update(WorldObject* caster)
 {
     m_GOTarget   = m_GOTargetGUID ? caster->GetMap()->GetGameObject(m_GOTargetGUID) : nullptr;
     m_unitTarget = m_unitTargetGUID ?
-                   (m_unitTargetGUID == caster->GetObjectGuid() ? caster : ObjectAccessor::GetUnit(*caster, m_unitTargetGUID)) :
+                   (m_unitTargetGUID == caster->GetObjectGuid() ? static_cast<Unit*>(caster) : ObjectAccessor::GetUnit(*caster, m_unitTargetGUID)) :
                    nullptr;
 
     m_itemTarget = nullptr;
@@ -3995,7 +3995,7 @@ void Spell::TakeAmmo() const
 
 void Spell::TakeReagents()
 {
-    if (!m_caster->IsPlayer())
+    if (!m_trueCaster->IsPlayer())
         return;
 
     if (IgnoreItemRequirements())                           // reagents used in triggered spell removed by original spell or don't must be removed.
@@ -6496,7 +6496,7 @@ void Spell::UpdatePointers()
 {
     UpdateOriginalCasterPointer();
 
-    m_targets.Update(m_caster);
+    m_targets.Update(m_trueCaster);
 }
 
 bool Spell::CheckTargetCreatureType(Unit* target, SpellEntry const* spellInfo)
