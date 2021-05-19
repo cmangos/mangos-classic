@@ -309,7 +309,7 @@ void SpellLog::SendToSet()
 
     // put total effect counter in packet
     m_spellLogData.put<uint32>(m_spellLogDataEffectsCounterPos, m_spellLogDataEffectsCounter);
-    m_spell->GetCaster()->SendMessageToSet(m_spellLogData, true);
+    m_spell->GetTrueCaster()->SendMessageToSet(m_spellLogData, true);
 
     // make it ready for another log if need
     Initialize();
