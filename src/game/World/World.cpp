@@ -827,8 +827,6 @@ void World::SetInitialWorldSettings()
         exit(1);
     }
 
-    UpdateFields::InitializeUpdateFieldFlags();
-
     ///- Loading strings. Getting no records means core load has to be canceled because no error message can be output.
     sLog.outString("Loading MaNGOS strings...");
     if (!sObjectMgr.LoadMangosStrings())

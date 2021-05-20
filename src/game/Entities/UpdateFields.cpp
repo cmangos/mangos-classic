@@ -361,15 +361,10 @@ static std::array<UpdateFieldData, 324> constexpr g_updateFieldsData =
     { TYPEMASK_CORPSE       , "CORPSE_END"                                      , 0x26 , 0  , UF_TYPE_NONE     , UF_FLAG_NONE },
 }};
 
-static std::array<uint16, CONTAINER_END> g_containerUpdateFieldFlags = {};
-static std::array<uint16, PLAYER_END> g_playerUpdateFieldFlags = {};
-static std::array<uint16, GAMEOBJECT_END> g_gameObjectUpdateFieldFlags = {};
-static std::array<uint16, DYNAMICOBJECT_END> g_dynamicObjectUpdateFieldFlags = {};
-static std::array<uint16, CORPSE_END> g_corpseUpdateFieldFlags = {};
-
 template<std::size_t SIZE>
-static void SetupUpdateFieldFlagsArray(uint8 objectTypeMask, std::array<uint16, SIZE>& flagsVector)
+static std::array<uint16, SIZE> SetupUpdateFieldFlagsArray(uint8 objectTypeMask)
 {
+    std::array<uint16, SIZE> flagsArray;
     for (auto const& itr : g_updateFieldsData)
     {
         if ((itr.objectTypeMask & objectTypeMask) == 0)
@@ -377,19 +372,17 @@ static void SetupUpdateFieldFlagsArray(uint8 objectTypeMask, std::array<uint16, 
 
         for (uint16 i = itr.offset; i < itr.offset + itr.size; i++)
         {
-            flagsVector.at(i) = itr.flags;
+            flagsArray.at(i) = itr.flags;
         }
     }
+    return flagsArray;
 }
 
-void UpdateFields::InitializeUpdateFieldFlags()
-{
-    SetupUpdateFieldFlagsArray(TYPEMASK_OBJECT | TYPEMASK_ITEM | TYPEMASK_CONTAINER, g_containerUpdateFieldFlags);
-    SetupUpdateFieldFlagsArray(TYPEMASK_OBJECT | TYPEMASK_UNIT | TYPEMASK_PLAYER, g_playerUpdateFieldFlags);
-    SetupUpdateFieldFlagsArray(TYPEMASK_OBJECT | TYPEMASK_GAMEOBJECT, g_gameObjectUpdateFieldFlags);
-    SetupUpdateFieldFlagsArray(TYPEMASK_OBJECT | TYPEMASK_DYNAMICOBJECT, g_dynamicObjectUpdateFieldFlags);
-    SetupUpdateFieldFlagsArray(TYPEMASK_OBJECT | TYPEMASK_CORPSE, g_corpseUpdateFieldFlags);
-}
+static std::array<uint16, CONTAINER_END> const g_containerUpdateFieldFlags = SetupUpdateFieldFlagsArray<CONTAINER_END>(TYPEMASK_OBJECT | TYPEMASK_ITEM | TYPEMASK_CONTAINER);
+static std::array<uint16, PLAYER_END> const g_playerUpdateFieldFlags = SetupUpdateFieldFlagsArray<PLAYER_END>(TYPEMASK_OBJECT | TYPEMASK_UNIT | TYPEMASK_PLAYER);
+static std::array<uint16, GAMEOBJECT_END> const g_gameObjectUpdateFieldFlags = SetupUpdateFieldFlagsArray<GAMEOBJECT_END>(TYPEMASK_OBJECT | TYPEMASK_GAMEOBJECT);
+static std::array<uint16, DYNAMICOBJECT_END> const g_dynamicObjectUpdateFieldFlags = SetupUpdateFieldFlagsArray<DYNAMICOBJECT_END>(TYPEMASK_OBJECT | TYPEMASK_DYNAMICOBJECT);
+static std::array<uint16, CORPSE_END> const g_corpseUpdateFieldFlags = SetupUpdateFieldFlagsArray<CORPSE_END>(TYPEMASK_OBJECT | TYPEMASK_CORPSE);
 
 uint16 const* UpdateFields::GetUpdateFieldFlagsArray(uint8 objectTypeId)
 {
