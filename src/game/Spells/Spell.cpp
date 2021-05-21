@@ -783,12 +783,8 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
     targetInfo.diminishLevel = DIMINISHING_LEVEL_1;
     targetInfo.diminishGroup = DIMINISHING_NONE;
 
-    Unit* affectiveCaster = GetAffectiveCasterOrOwner();
     // Calculate hit result
-    if (affectiveCaster)
-        targetInfo.missCondition = m_ignoreHitResult ? SPELL_MISS_NONE : affectiveCaster->SpellHitResult(target, m_spellInfo, targetInfo.effectMask, m_reflectable, false, &targetInfo.heartbeatResistChance);
-    else
-        targetInfo.missCondition = SPELL_MISS_NONE;
+    targetInfo.missCondition = m_ignoreHitResult ? SPELL_MISS_NONE : Unit::SpellHitResult(m_trueCaster, target, m_spellInfo, targetInfo.effectMask, m_reflectable, false, &targetInfo.heartbeatResistChance);
 
     // spell fly from visual cast object
     WorldObject* affectiveObject = GetAffectiveCasterObject();
@@ -834,7 +830,7 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
             targetInfo.effectHitMask = notImmunedMask;
             // Calculate reflected spell result on caster
             if (m_caster)
-                targetInfo.reflectResult =  m_caster->SpellHitResult(m_caster, m_spellInfo, targetInfo.effectMask, m_reflectable, true, &targetInfo.heartbeatResistChance);
+                targetInfo.reflectResult = Unit::SpellHitResult(m_caster, m_caster, m_spellInfo, targetInfo.effectMask, m_reflectable, true, &targetInfo.heartbeatResistChance);
             // Caster reflects back spell which was already reflected by victim
             if (targetInfo.reflectResult == SPELL_MISS_REFLECT || !m_caster)
                 // Full circle: it's impossible to reflect further, "Immune" shows up
@@ -851,7 +847,7 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
         targetInfo.reflectResult = SPELL_MISS_NONE;
 
     // only check DR for units and unit owned GOs
-    if (Unit* realCaster = affectiveCaster)
+    if (Unit* realCaster = GetAffectiveCasterOrOwner())
     {
         bool isReflected = targetInfo.missCondition == SPELL_MISS_REFLECT && targetInfo.reflectResult == SPELL_MISS_NONE;
         if ((targetInfo.missCondition == SPELL_MISS_NONE || isReflected) && CanSpellDiminish())
