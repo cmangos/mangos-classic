@@ -92,7 +92,7 @@ void Camera::SetView(WorldObject* obj, bool update_far_sight_field /*= true*/)
 
 void Camera::Event_ViewPointVisibilityChanged()
 {
-    if (!m_owner.HaveAtClient(m_source))
+    if (!m_owner.HasAtClient(m_source))
         ResetView();
 }
 

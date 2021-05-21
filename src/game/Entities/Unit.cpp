@@ -7884,7 +7884,7 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     // mobs always detect players (detect == true)... return 'false' for those mobs which have (detect == false)
     // players detect players only in Player::HandleStealthedUnitsDetection()
     if (!detect)
-        return (u->GetTypeId() == TYPEID_PLAYER) ? ((Player*)u)->HaveAtClient(this) : false;
+        return (u->GetTypeId() == TYPEID_PLAYER) ? ((Player*)u)->HasAtClient(this) : false;
 
     // Special cases
 

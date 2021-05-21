@@ -1105,6 +1105,9 @@ void Map::UpdateObjectVisibility(WorldObject* obj, Cell cell, const CellPair& ce
     MaNGOS::VisibleChangesNotifier notifier(*obj);
     TypeContainerVisitor<MaNGOS::VisibleChangesNotifier, WorldTypeMapContainer > player_notifier(notifier);
     cell.Visit(cellpair, player_notifier, *this, *obj, obj->GetVisibilityData().GetVisibilityDistance());
+    for (auto guid : notifier.GetUnvisitedGuids())
+        if (Player* player = GetPlayer(guid))
+            player->UpdateVisibilityOf(player->GetCamera().GetBody(), obj);
 }
 
 void Map::SendInitSelf(Player* player) const
@@ -1129,15 +1132,15 @@ void Map::SendInitSelf(Player* player) const
     // build other passengers at transport also (they always visible and marked as visible and will not send at visibility update at add to map
     if (GenericTransport* transport = player->GetTransport())
     {
-        for (auto itr : transport->GetPassengers())
+        for (auto passenger : transport->GetPassengers())
         {
-            if (player != itr)
+            if (player != passenger)
             {
-                if (player->HaveAtClient(itr) || itr->isVisibleForInState(player, player, false))
+                if (player->HasAtClient(passenger) || passenger->isVisibleForInState(player, player, false))
                 {
-                    player->m_clientGUIDs.insert(itr->GetObjectGuid());
+                    player->AddAtClient(passenger);
                     hasTransport = true;
-                    itr->BuildCreateUpdateBlockForPlayer(&updateData, player);
+                    passenger->BuildCreateUpdateBlockForPlayer(&updateData, player);
                 }
             }
         }

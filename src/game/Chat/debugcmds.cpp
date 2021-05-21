@@ -1422,7 +1422,7 @@ bool ChatHandler::HandleDebugHaveAtClientCommand(char* /*args*/)
         return false;
     }
 
-    if (player->HaveAtClient(target))
+    if (player->HasAtClient(target))
         PSendSysMessage("Target %s is at your client.", target->GetName());
     else
         PSendSysMessage("Target %s is not at your client.", target->GetName());
@@ -1441,7 +1441,7 @@ bool ChatHandler::HandleDebugIsVisibleCommand(char* /*args*/)
     }
 
     Camera& camera = player->GetCamera();
-    if (target->isVisibleForInState(player, camera.GetBody(), player->HaveAtClient(target)))
+    if (target->isVisibleForInState(player, camera.GetBody(), player->HasAtClient(target)))
         PSendSysMessage("Target %s should be visible at client.", target->GetName());
     else
         PSendSysMessage("Target %s should not be visible at client.", target->GetName());

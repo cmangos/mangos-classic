@@ -600,7 +600,7 @@ void Group::UpdatePlayerOutOfRange(Player* pPlayer)
 
     for (GroupReference* itr = GetFirstMember(); itr != nullptr; itr = itr->next())
         if (Player* player = itr->getSource())
-            if (player != pPlayer && !player->HaveAtClient(pPlayer))
+            if (player != pPlayer && !player->HasAtClient(pPlayer))
                 player->GetSession()->SendPacket(data);
 }
 
@@ -976,10 +976,10 @@ void Group::_updateMembersOnRosterChanged(Player* changed)
         {
             if (member != changed && member->IsInWorld())
             {
-                if (member->HaveAtClient(changed))
+                if (member->HasAtClient(changed))
                     update(member, changed);
 
-                if (changed->HaveAtClient(member))
+                if (changed->HasAtClient(member))
                     update(changed, member);
             }
         }

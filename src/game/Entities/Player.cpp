@@ -1957,9 +1957,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             m_movementInfo.t_guid = GetObjectGuid();
             m_movementInfo.t_time = currentTransport->GetPathProgress();
 
-            if (!HaveAtClient(currentTransport)) // in sniff, this aggregates all surroundings and sends them at once
+            if (!HasAtClient(currentTransport)) // in sniff, this aggregates all surroundings and sends them at once
             {
-                m_clientGUIDs.insert(currentTransport->GetObjectGuid());
+                AddAtClient(currentTransport);
                 currentTransport->SendCreateUpdateToPlayer(this);
             }
         }
@@ -16788,8 +16788,13 @@ void Player::SetRestBonus(float rest_bonus_new)
 
 void Player::ResetMap()
 {
-    Unit::ResetMap();
+    for (auto guid : m_clientGUIDs)
+    {
+        if (WorldObject* object = GetMap()->GetWorldObject(guid))
+            object->RemoveClientIAmAt(this);
+    }
     m_clientGUIDs.clear();
+    Unit::ResetMap();
 }
 
 void Player::HandleStealthedUnitsDetection()
@@ -16804,18 +16809,19 @@ void Player::HandleStealthedUnitsDetection()
 
     for (UnitList::const_iterator i = stealthedUnits.begin(); i != stealthedUnits.end(); ++i)
     {
-        if ((*i) == this)
+        Unit* target = *i;
+        if (target == this)
             continue;
 
-        bool hasAtClient = HaveAtClient((*i));
-        bool hasDetected = (*i)->IsVisibleForOrDetect(this, viewPoint, true);
+        bool hasAtClient = HasAtClient(target);
+        bool hasDetected = target->IsVisibleForOrDetect(this, viewPoint, true);
 
         if (hasDetected)
         {
             if (!hasAtClient)
             {
                 ObjectGuid i_guid = (*i)->GetObjectGuid();
-                (*i)->SendCreateUpdateToPlayer(this);
+                target->SendCreateUpdateToPlayer(this);
                 m_clientGUIDs.insert(i_guid);
 
                 DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "%s is detected in stealth by player %u. Distance = %f", i_guid.GetString().c_str(), GetGUIDLow(), GetDistance(*i));
@@ -16825,10 +16831,10 @@ void Player::HandleStealthedUnitsDetection()
         {
             if (hasAtClient)
             {
-                (*i)->DestroyForPlayer(this);
-                if ((*i)->GetTypeId() == TYPEID_UNIT)
-                    BeforeVisibilityDestroy(static_cast<Creature*>(*i));
-                m_clientGUIDs.erase((*i)->GetObjectGuid());
+                target->DestroyForPlayer(this);
+                if (target->GetTypeId() == TYPEID_UNIT)
+                    BeforeVisibilityDestroy(static_cast<Creature*>(target));
+                RemoveAtClient(target);
             }
         }
     }
@@ -17594,6 +17600,18 @@ bool Player::CanJoinToBattleground() const
     return true;
 }
 
+void Player::AddAtClient(WorldObject* target)
+{
+    m_clientGUIDs.insert(target->GetObjectGuid());
+    target->AddClientIAmAt(this);
+}
+
+void Player::RemoveAtClient(WorldObject* target)
+{
+    m_clientGUIDs.erase(target->GetObjectGuid());
+    target->RemoveClientIAmAt(this);
+}
+
 bool Player::IsVisibleInGridForPlayer(Player* pl) const
 {
     // gamemaster in GM mode see all, including ghosts
@@ -17668,7 +17686,7 @@ void Player::BeforeVisibilityDestroy(Creature* creature)
 
 void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* target)
 {
-    if (HaveAtClient(target))
+    if (HasAtClient(target))
     {
         if (!target->isVisibleForInState(this, viewPoint, true))
         {
@@ -17678,7 +17696,7 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* targe
                 BeforeVisibilityDestroy(static_cast<Creature*>(target));
 
             target->DestroyForPlayer(this);
-            m_clientGUIDs.erase(t_guid);
+            RemoveAtClient(target);
 
             DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "UpdateVisibilityOf: %s out of range for player %u. Distance = %f", t_guid.GetString().c_str(), GetGUIDLow(), GetDistance(target));
         }
@@ -17689,7 +17707,7 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* targe
         {
             target->SendCreateUpdateToPlayer(this);
             if (target->GetTypeId() != TYPEID_GAMEOBJECT || !((GameObject*)target)->IsMoTransport())
-                m_clientGUIDs.insert(target->GetObjectGuid());
+                AddAtClient(target);
 
             DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "UpdateVisibilityOf: %s is visible now for player %u. Distance = %f", target->GetGuidStr().c_str(), GetGUIDLow(), GetDistance(target));
         }
@@ -17712,7 +17730,7 @@ inline void UpdateVisibilityOf_helper(GuidSet& s64, GameObject* target)
 template<class T>
 void Player::UpdateVisibilityOf(WorldObject const* viewPoint, T* target, UpdateData& data, WorldObjectSet& visibleNow)
 {
-    if (HaveAtClient(target))
+    if (HasAtClient(target))
     {
         if (!target->isVisibleForInState(this, viewPoint, true))
         {
@@ -17722,7 +17740,7 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, T* target, UpdateD
                 BeforeVisibilityDestroy(dynamic_cast<Creature*>(target));
 
             target->BuildOutOfRangeUpdateBlock(&data);
-            m_clientGUIDs.erase(t_guid);
+            RemoveAtClient(target);
 
             DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "UpdateVisibilityOf(TemplateV): %s is out of range for %s. Distance = %f", t_guid.GetString().c_str(), GetGuidStr().c_str(), GetDistance(target));
         }
@@ -17733,7 +17751,7 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, T* target, UpdateD
         {
             visibleNow.insert(target);
             target->BuildCreateUpdateBlockForPlayer(&data, this);
-            UpdateVisibilityOf_helper(m_clientGUIDs, target);
+            AddAtClient(target);
 
             DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "UpdateVisibilityOf(TemplateV): %s is visible now for %s. Distance = %f", target->GetGuidStr().c_str(), GetGuidStr().c_str(), GetDistance(target));
         }
