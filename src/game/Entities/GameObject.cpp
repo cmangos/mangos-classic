@@ -419,6 +419,7 @@ void GameObject::Update(const uint32 diff)
                             radius = float(goInfo->trap.diameter);
 
                         bool valid = true;
+                        bool IsBattleGroundTrap = !radius && goInfo->trap.cooldown == 3 && m_respawnTime == 0;
                         if (!radius)
                         {
                             if (goInfo->trap.cooldown != 3)     // cast in other case (at some triggering/linked go/etc explicit call)
@@ -445,7 +446,11 @@ void GameObject::Update(const uint32 diff)
                             }
                             else
                             {
-                                switch (goInfo->trapCustom.triggerOn)
+                                uint32 triggerOn = goInfo->trapCustom.triggerOn;
+                                if (IsBattleGroundTrap)
+                                    triggerOn = 2;
+
+                                switch (triggerOn)
                                 {
                                     case 1: // friendly
                                     {
@@ -471,7 +476,7 @@ void GameObject::Update(const uint32 diff)
                                 }
                             }
 
-                            if (target && (!goInfo->trapCustom.triggerOn || !target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))) // do not trigger on hostile traps if not selectable
+                            if (target && (IsBattleGroundTrap || !goInfo->trapCustom.triggerOn || !target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))) // do not trigger on hostile traps if not selectable
                                 Use(target);
                         }
                     }
