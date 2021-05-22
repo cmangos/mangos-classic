@@ -1016,6 +1016,10 @@ float FollowMovementGenerator::GetDynamicTargetDistance(Unit& owner, bool forRan
     if (i_offset > FOLLOW_DIST_GAP_FOR_DIST_FACTOR)
         allowed_dist += FOLLOW_DIST_RECALCULATE_FACTOR * i_offset;
 
+    // Additional leeway for wandering units
+    if (i_target->GetMotionMaster()->GetCurrentMovementGeneratorType() == RANDOM_MOTION_TYPE)
+        allowed_dist *= 2;
+
     return allowed_dist;
 }
 
@@ -1052,8 +1056,22 @@ void FollowMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& 
             i_target->GetPosition(currentTargetPos.x, currentTargetPos.y, currentTargetPos.z, owner.GetTransport());
 
             Position actualPos = owner.GetPosition(owner.GetTransport());
-            targetRelocation = (currentTargetPos != i_lastTargetPos || RequiresNewPosition(owner, actualPos));
-            targetOrientation = (!targetRelocation && !m_targetMoving && !m_targetFaced);
+
+            // Tracking PC units requires additional orientation tick
+            if (i_target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+            {
+                targetRelocation = (currentTargetPos != i_lastTargetPos || RequiresNewPosition(owner, actualPos));
+                targetOrientation = (!targetRelocation && !m_targetMoving && !m_targetFaced);
+            }
+            // Tracking NPC units has no orientation tick and relaxed tracking for wandering targets
+            else
+            {
+                if (i_target->GetMotionMaster()->GetCurrentMovementGeneratorType() == RANDOM_MOTION_TYPE)
+                    targetRelocation = RequiresNewPosition(owner, actualPos);
+                else
+                    targetRelocation = (currentTargetPos != i_lastTargetPos || RequiresNewPosition(owner, actualPos));
+            }
+
             targetSpeedChanged = (targetSpeedChanged && targetRelocation);
             i_lastTargetPos = currentTargetPos;
         }
