@@ -1373,6 +1373,10 @@ void ObjectMgr::LoadGameObjects()
         uint32 guid         = fields[ 0].GetUInt32();
         uint32 entry        = fields[ 1].GetUInt32();
 
+        if (entry == 0)
+            if (uint32 randomEntry = sObjectMgr.GetRandomGameObjectEntry(guid))
+                entry = randomEntry;
+
         GameObjectInfo const* gInfo = GetGameObjectInfo(entry);
         if (!gInfo)
         {
