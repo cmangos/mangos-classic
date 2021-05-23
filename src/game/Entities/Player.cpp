@@ -3948,6 +3948,13 @@ void Player::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
 
             m_items[i]->BuildCreateUpdateBlockForPlayer(data, target);
         }
+        for (int i = BUYBACK_SLOT_START; i < BUYBACK_SLOT_END; ++i)
+        {
+            if (m_items[i] == nullptr)
+                continue;
+
+            m_items[i]->BuildCreateUpdateBlockForPlayer(data, target);
+        }
     }
 
     Unit::BuildCreateUpdateBlockForPlayer(data, target);
