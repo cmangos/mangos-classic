@@ -1004,6 +1004,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Creature Data...");
     sObjectMgr.LoadCreatures();
 
+    sLog.outString("Loading Gameobject Spawn Entry Data..."); // must be before LoadGameObjects
+    sObjectMgr.LoadGameObjectSpawnEntry();
+
     sLog.outString("Loading Gameobject Data...");
     sObjectMgr.LoadGameObjects();
 
