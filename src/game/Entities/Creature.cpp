@@ -116,6 +116,8 @@ void CreatureCreatePos::SelectFinalPoint(Creature* cr)
         else
             m_closeObject->GetClosePoint(m_pos.x, m_pos.y, m_pos.z, cr->GetObjectBoundingRadius(), m_dist, m_angle);
     }
+    else
+        cr->UpdateAllowedPositionZ(m_pos.x, m_pos.y, m_pos.z);
 }
 
 bool CreatureCreatePos::Relocate(Creature* cr) const
