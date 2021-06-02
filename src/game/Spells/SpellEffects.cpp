@@ -4285,18 +4285,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, spells[urand(0, 1)], TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 26275:                                 // PX-238 Winter Wondervolt TRAP
-                {
-                    uint32 spells[4] = {26272, 26157, 26273, 26274};
-
-                    // check presence
-                    for (int j = 0; j < 4; ++j)
-                        if (unitTarget->HasAura(spells[j], EFFECT_INDEX_0))
-                            return;
-
-                    unitTarget->CastSpell(unitTarget, spells[urand(0, 3)], TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
                 case 26465:                                 // Mercurial Shield - need remove one 26464 Mercurial Shield aura
                     unitTarget->RemoveAuraHolderFromStack(26464);
                     return;
