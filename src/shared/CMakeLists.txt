@@ -245,7 +245,7 @@ else()
 endif()
 
 # Specific definition for an issue with boost/stacktrace when building on macOS
-if(APPLE)
+if(APPLE OR "${CMAKE_SYSTEM_NAME}" STREQUAL "FreeBSD")
   add_compile_definitions(_GNU_SOURCE)
 endif()
 
