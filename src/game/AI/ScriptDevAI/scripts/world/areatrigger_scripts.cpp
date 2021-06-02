@@ -32,6 +32,7 @@ at_ancient_leaf                 3587
 at_huldar_miran                 171
 at_twilight_grove               4017
 at_hive_tower                   3146
+at_wondervolt                   4030,4032,4026,4029,4027,4028,4031
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
@@ -340,6 +341,39 @@ bool AreaTrigger_at_hive_tower(Player* player, AreaTriggerEntry const* /*pAt*/)
     return false;
 }
 
+/*######
+## at_wondervolt
+######*/
+
+enum
+{
+    GO_WONDERVOLT_TRAP = 180797
+};
+
+bool AreaTrigger_at_wondervolt(Player* player, AreaTriggerEntry const* /*at*/)
+{
+    if (player->IsGameMaster())
+        return false;
+
+    uint32 transformSpells[4] = {26272, 26157, 26273, 26274};
+
+    // Check if player is already transformed
+    for (auto transformSpell : transformSpells)
+    {
+        if (player->HasAura(transformSpell, EFFECT_INDEX_0))
+            return false;
+    }
+
+    // Trigger the PX-238 Winter Wondervolt trap for player
+    if (GameObject* wondervolt = GetClosestGameObjectWithEntry(player, GO_WONDERVOLT_TRAP, 20.0f))
+    {
+        wondervolt->Use(player);
+        return true;
+    }
+
+    return false;
+}
+
 void AddSC_areatrigger_scripts()
 {
     Script* pNewScript = new Script;
@@ -380,5 +414,10 @@ void AddSC_areatrigger_scripts()
     pNewScript = new Script;
     pNewScript->Name = "at_hive_tower";
     pNewScript->pAreaTrigger = &AreaTrigger_at_hive_tower;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_wondervolt";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_wondervolt;
     pNewScript->RegisterSelf();
 }
