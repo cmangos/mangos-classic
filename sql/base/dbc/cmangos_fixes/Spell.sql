@@ -189,3 +189,8 @@ UPDATE spell_template SET AttributesEx=AttributesEx|1024 WHERE Id IN(21740,21921
 
 -- AQ40 - C'Thun - Summon Mouth Tentacles - restricted to one target
 UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id=26237;
+
+-- Wandering Plague (player version): as per parent spell tooltip should only targets friendly units, not every units nor self
+-- SPELL_ATTR_EX_CANT_TARGET_SELF + TARGET_UNIT_ENEMY_NEAR_CASTER (parent spell caster is hostile to player and player's friends)
+-- Note: could this be possibly handled through unimplemented SPELL_ATTR_EX_UNK11 ?
+UPDATE spell_template SET `AttributesEx`=AttributesEx|0x00080000, EffectImplicitTargetA1=2, EffectImplicitTargetA2=2, EffectImplicitTargetA3=2 WHERE Id=3439;
