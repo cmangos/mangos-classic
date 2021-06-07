@@ -466,20 +466,6 @@ bool QuestAccept_npc_keeper_remulos(Player* pPlayer, Creature* pCreature, const 
     return false;
 }
 
-bool EffectDummyCreature_conjure_rift(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* /*pCreatureTarget*/, ObjectGuid /*originalCasterGuid*/)
-{
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_CONJURE_RIFT && uiEffIndex == EFFECT_INDEX_0)
-    {
-        pCaster->SummonCreature(NPC_ERANIKUS_TYRANT, aEranikusLocations[0].m_fX, aEranikusLocations[0].m_fY, aEranikusLocations[0].m_fZ, aEranikusLocations[0].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
-
-        // always return true when we are handling this spell and effect
-        return true;
-    }
-
-    return false;
-}
-
 /*######
 ## boss_eranikus
 ######*/
@@ -830,6 +816,15 @@ UnitAI* GetAI_boss_eranikus(Creature* pCreature)
     return new boss_eranikusAI(pCreature);
 }
 
+struct ConjureDreamRift : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+            spell->GetCaster()->SummonCreature(NPC_ERANIKUS_TYRANT, aEranikusLocations[0].m_fX, aEranikusLocations[0].m_fY, aEranikusLocations[0].m_fZ, aEranikusLocations[0].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
+    }
+};
+
 /*######
 ## go_omen_cluster
 ######*/
@@ -856,7 +851,6 @@ void AddSC_moonglade()
     pNewScript->Name = "npc_keeper_remulos";
     pNewScript->GetAI = &GetAI_npc_keeper_remulos;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_keeper_remulos;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_conjure_rift;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -868,4 +862,6 @@ void AddSC_moonglade()
     pNewScript->Name = "go_omen_cluster";
     pNewScript->pGOUse = &GOUse_go_omen_cluster;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<ConjureDreamRift>("spell_conjure_dream_rift");
 }
