@@ -40,6 +40,7 @@ EndContentData */
 enum
 {
     SPELL_CONJURE_RIFT          = 25813,            // summon Eranikus
+    SPELL_DRAGON_HOVER          = 18430,
     SPELL_HEALING_TOUCH         = 23381,
     SPELL_REGROWTH              = 20665,
     SPELL_REJUVENATION          = 20664,
@@ -52,6 +53,8 @@ enum
     NPC_REMULOS                 = 11832,
     NPC_TYRANDE_WHISPERWIND     = 15633,            // appears with the priestess during the event to help the players - should cast healing spells
     NPC_ELUNE_PRIESTESS         = 15634,
+
+    FACTION_CENARION_CIRCLE     = 996,
 
     QUEST_NIGHTMARE_MANIFESTS   = 8736,
 
@@ -201,42 +204,42 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
         }
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        switch (pSummoned->GetEntry())
+        switch (summoned->GetEntry())
         {
             case NPC_ERANIKUS_TYRANT:
-                m_eranikusGuid = pSummoned->GetObjectGuid();
-                // Make Eranikus unattackable first
-                // ToDo: uncomment the fly effect when it will be possible to cancel it properly
-                // pSummoned->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
-                pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                pSummoned->SetLevitate(true);
+                m_eranikusGuid = summoned->GetObjectGuid();
+                // Make Eranikus fly and unattackable
+                summoned->CastSpell(nullptr, SPELL_DRAGON_HOVER, TRIGGERED_OLD_TRIGGERED);
+                summoned->SetHover(true);
+                summoned->SetImmuneToNPC(true);
+                summoned->SetImmuneToPlayer(true);
                 break;
             case NPC_NIGHTMARE_PHANTASM:
                 // ToDo: set faction to DB
-                pSummoned->setFaction(14);
-                pSummoned->AI()->AttackStart(m_creature);
+                summoned->setFaction(14);
+                summoned->AI()->AttackStart(m_creature);
                 break;
         }
     }
 
-    void SummonedMovementInform(Creature* pSummoned, uint32 uiType, uint32 uiPointId) override
+    void SummonedMovementInform(Creature* summoned, uint32 type, uint32 pointId) override
     {
-        if (uiType != POINT_MOTION_TYPE || pSummoned->GetEntry() != NPC_ERANIKUS_TYRANT)
+        if (type != POINT_MOTION_TYPE || summoned->GetEntry() != NPC_ERANIKUS_TYRANT)
             return;
 
-        switch (uiPointId)
+        switch (pointId)
         {
             case POINT_ID_ERANIKUS_FLIGHT:
                 // Set Eranikus to face Remulos
-                pSummoned->SetFacingToObject(m_creature);
+                summoned->SetFacingToObject(m_creature);
                 break;
             case POINT_ID_ERANIKUS_COMBAT:
-                // Start attack
-                pSummoned->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                pSummoned->AI()->AttackStart(m_creature);
-                DoScriptText(SAY_ERANIKUS_ATTACK_2, pSummoned);
+                summoned->SetImmuneToNPC(false);
+                summoned->SetImmuneToPlayer(false);
+                summoned->AI()->AttackStart(m_creature);
+                DoScriptText(SAY_ERANIKUS_ATTACK_2, summoned);
                 break;
         }
     }
@@ -261,15 +264,15 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
             case 2:
                 DoScriptText(SAY_REMULOS_INTRO_2, m_creature);
                 break;
-            case 13:
+            case 14:
                 StartNextDialogueText(NPC_REMULOS);
                 SetEscortPaused(true);
                 break;
-            case 17:
+            case 18:
                 StartNextDialogueText(SAY_REMULOS_DEFEND_2);
                 SetEscortPaused(true);
                 break;
-            case 18:
+            case 19:
                 SetEscortPaused(true);
                 break;
         }
@@ -287,35 +290,40 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
         }
     }
 
-    void JustDidDialogueStep(int32 iEntry) override
+    void JustDidDialogueStep(int32 entry) override
     {
-        switch (iEntry)
+        switch (entry)
         {
             case NPC_REMULOS:
-                if (Player* pPlayer = GetPlayerForEscort())
-                    DoScriptText(SAY_REMULOS_INTRO_3, m_creature, pPlayer);
+                if (Player* player = GetPlayerForEscort())
+                    DoScriptText(SAY_REMULOS_INTRO_3, m_creature, player);
                 break;
             case SPELL_CONJURE_RIFT:
                 DoCastSpellIfCan(m_creature, SPELL_CONJURE_RIFT);
                 break;
             case SAY_ERANIKUS_SPAWN:
                 // This big yellow emote was removed at some point in WotLK
-                // DoScriptText(EMOTE_SUMMON_ERANIKUS, pEranikus);
+                if (Creature* eranikus = m_creature->GetMap()->GetCreature(m_eranikusGuid))
+                    DoScriptText(EMOTE_SUMMON_ERANIKUS, eranikus);
                 break;
             case NPC_ERANIKUS_TYRANT:
-                if (Player* pPlayer = GetPlayerForEscort())
-                    DoScriptText(SAY_REMULOS_DEFEND_1, m_creature, pPlayer);
-                if (Creature* pEranikus = m_creature->GetMap()->GetCreature(m_eranikusGuid))
-                    pEranikus->GetMotionMaster()->MovePoint(POINT_ID_ERANIKUS_FLIGHT, aEranikusLocations[1].m_fX, aEranikusLocations[1].m_fY, aEranikusLocations[1].m_fZ);
+                if (Player* player = GetPlayerForEscort())
+                    DoScriptText(SAY_REMULOS_DEFEND_1, m_creature, player);
+                if (Creature* eranikus = m_creature->GetMap()->GetCreature(m_eranikusGuid))
+                {
+                    eranikus->RemoveAurasDueToSpell(SPELL_DRAGON_HOVER);
+                    eranikus->GetMotionMaster()->MovePoint(POINT_ID_ERANIKUS_FLIGHT, aEranikusLocations[1].m_fX, aEranikusLocations[1].m_fY, aEranikusLocations[1].m_fZ, FORCED_MOVEMENT_FLIGHT);
+                }
                 SetEscortPaused(false);
                 break;
             case SAY_REMULOS_DEFEND_2:
-                if (Creature* pEranikus = m_creature->GetMap()->GetCreature(m_eranikusGuid))
-                    m_creature->SetFacingToObject(pEranikus);
+                if (Creature* eranikus = m_creature->GetMap()->GetCreature(m_eranikusGuid))
+                    m_creature->SetFacingToObject(eranikus);
                 break;
             case SAY_REMULOS_DEFEND_3:
                 SetEscortPaused(true);
-                m_uiShadesummonTimer = 5000;
+                m_creature->SetFactionTemporary(996, TEMPFACTION_RESTORE_RESPAWN);
+                m_uiShadesummonTimer = 5 * IN_MILLISECONDS;
                 break;
         }
     }
@@ -372,7 +380,6 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
                         DoScriptText(SAY_ERANIKUS_ATTACK_1, pEranikus);
 
                     ++m_uiSummonCount;
-                    SetEscortPaused(false);
                     m_bIsFirstWave = false;
                 }
 
@@ -398,11 +405,13 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
                 {
                     m_uiShadesummonTimer = 0;
 
-                    if (Creature* pEranikus = m_creature->GetMap()->GetCreature(m_eranikusGuid))
+                    if (Creature* eranikus = m_creature->GetMap()->GetCreature(m_eranikusGuid))
                     {
-                        pEranikus->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0);
-                        pEranikus->SetLevitate(false);
-                        pEranikus->GetMotionMaster()->MovePoint(POINT_ID_ERANIKUS_COMBAT, aEranikusLocations[2].m_fX, aEranikusLocations[2].m_fY, aEranikusLocations[2].m_fZ);
+                        // Land and start attacking
+                        eranikus->RemoveAurasDueToSpell(SPELL_DRAGON_HOVER);
+                        eranikus->SetHover(false);
+                        eranikus->HandleEmote(EMOTE_ONESHOT_LAND);
+                        eranikus->GetMotionMaster()->MovePoint(POINT_ID_ERANIKUS_COMBAT, aEranikusLocations[2].m_fX, aEranikusLocations[2].m_fY, aEranikusLocations[2].m_fZ);
                     }
                 }
                 else
