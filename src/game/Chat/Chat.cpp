@@ -3431,9 +3431,16 @@ void ChatHandler::ShowNpcOrGoSpawnInformation(uint32 guid)
     {
         uint16 top_pool_id = sPoolMgr.IsPartOfTopPool<Pool>(pool_id);
         if (!top_pool_id || top_pool_id == pool_id)
-            PSendSysMessage(LANG_NPC_GO_INFO_POOL, uint32(pool_id));
+        {
+            PoolTemplateData const& pool_template = sPoolMgr.GetPoolTemplate(pool_id);
+            PSendSysMessage(LANG_NPC_GO_INFO_POOL, uint32(pool_id), pool_template.description.c_str());
+        }
         else
-            PSendSysMessage(LANG_NPC_GO_INFO_TOP_POOL, uint32(pool_id), uint32(top_pool_id));
+        {
+            PoolTemplateData const& pool_template = sPoolMgr.GetPoolTemplate(pool_id);
+            PoolTemplateData const& mother_template = sPoolMgr.GetPoolTemplate(top_pool_id);
+            PSendSysMessage(LANG_NPC_GO_INFO_TOP_POOL, uint32(pool_id), pool_template.description.c_str(), uint32(top_pool_id), mother_template.description.c_str());
+        }
 
         if (int16 event_id = sGameEventMgr.GetGameEventId<Pool>(top_pool_id))
         {
