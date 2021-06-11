@@ -82,6 +82,8 @@ enum SaveIds
 
 enum GameEvents
 {
+    GAME_EVENT_GURUBASHI_ARENA = 16,
+
     // Prepatch event
     //GAME_EVENT_BEFORE_THE_STORM = 100,
 

@@ -17,6 +17,7 @@
 #include "world_eastern_kingdoms.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/scripts/world/world_map_scripts.h"
+#include "World/WorldState.h"
 
 /* *********************************************************
  *                  EASTERN KINGDOMS
@@ -35,8 +36,18 @@ struct world_map_eastern_kingdoms : public ScriptedMap
             case NPC_PRESTOR:
             case NPC_WINDSOR:
             case NPC_FALSTAD_WILDHAMMER:
+            case NPC_SHORT_JOHN_MITHRIL:
                 m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
                 break;
+        }
+    }
+
+    void OnEventHappened(uint16 event_id, bool activate, bool resume) override
+    {
+        if (event_id == GAME_EVENT_GURUBASHI_ARENA && activate)
+        {
+            if (Creature* creature = GetSingleCreatureFromStorage(NPC_SHORT_JOHN_MITHRIL))
+                creature->GetMotionMaster()->MoveWaypoint();
         }
     }
 

@@ -12,6 +12,8 @@ enum
     NPC_WINDSOR                 = 12580,
 
     NPC_FALSTAD_WILDHAMMER      = 5635,
+
+    NPC_SHORT_JOHN_MITHRIL      = 14508,
 };
 
 #endif
