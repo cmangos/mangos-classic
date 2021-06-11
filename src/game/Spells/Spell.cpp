@@ -2696,7 +2696,10 @@ void Spell::Prepare()
 
     // calculate cast time (calculated after first CheckCast check to prevent charge counting for first CheckCast fail)
     if (!m_ignoreCastTime)
-        m_casttime = GetSpellCastTime(m_spellInfo, m_caster, this);
+    {
+        SpellModRAII spellModController(this, m_caster->GetSpellModOwner(), false, true);
+        m_casttime = GetSpellCastTime(m_spellInfo, m_trueCaster, this, true);
+    }
 
     // set timer base at cast time
     ReSetTimer();
@@ -2756,6 +2759,10 @@ void Spell::cancel()
 
     // channeled spells don't display interrupted message even if they are interrupted, possible other cases with no "Interrupted" message
     bool sendInterrupt = !(IsChanneledSpell(m_spellInfo) || m_autoRepeat);
+
+    if (Player* player = m_caster->GetSpellModOwner()) // reset casting time mods
+        if (player->GetSpellModSpell() != this && !m_usedAuraCharges.empty())
+            player->ResetSpellModsDueToCanceledSpell(m_usedAuraCharges);
 
     m_autoRepeat = false;
     switch (m_spellState)
@@ -2892,8 +2899,6 @@ void Spell::cast(bool skipCheck)
     // traded items have trade slot instead of guid in m_itemTargetGUID
     // set to real guid to be sent later to the client
     m_targets.updateTradeSlotItem();
-
-    GetSpellCastTime(m_spellInfo, m_trueCaster, this, true); // consumes mods in a dirty but code reusable way
 
     m_duration = CalculateSpellDuration(m_spellInfo, m_caster);
 
@@ -7608,7 +7613,7 @@ void Spell::OnSummon(Creature* summon)
         return script->OnSummon(this, summon);
 }
 
-SpellModRAII::SpellModRAII(Spell* spell, Player* modOwner, bool success) : m_spell(spell), m_modOwner(modOwner), m_success(success)
+SpellModRAII::SpellModRAII(Spell* spell, Player* modOwner, bool success, bool onlySave) : m_spell(spell), m_modOwner(modOwner), m_success(success), m_onlySave(onlySave)
 {
     if (m_modOwner && !modOwner->GetSpellModSpell()) // only if first spell in depth
         m_modOwner->SetSpellModSpell(spell);
@@ -7618,10 +7623,13 @@ SpellModRAII::~SpellModRAII()
 {
     if (m_modOwner && m_modOwner->GetSpellModSpell() == m_spell) // only if this spell is toplevel
     {
-        if (m_success)
-            m_modOwner->RemoveSpellMods(m_spell->m_usedAuraCharges);
-        else
-            m_modOwner->ResetSpellModsDueToCanceledSpell(m_spell->m_usedAuraCharges);
+        if (!m_onlySave)
+        {
+            if (m_success)
+                m_modOwner->RemoveSpellMods(m_spell->m_usedAuraCharges);
+            else
+                m_modOwner->ResetSpellModsDueToCanceledSpell(m_spell->m_usedAuraCharges);
+        }
         m_modOwner->SetSpellModSpell(nullptr);
     }
 }

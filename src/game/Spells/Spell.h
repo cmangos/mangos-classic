@@ -272,13 +272,14 @@ class SpellLog
 class SpellModRAII
 {
     public:
-        SpellModRAII(Spell* spell, Player* modOwner, bool success = false);
+        SpellModRAII(Spell* spell, Player* modOwner, bool success = false, bool onlySave = false);
         void SetSuccess() { m_success = true; }
         ~SpellModRAII();
     private:
         Spell* m_spell;
         Player* m_modOwner;
         bool m_success;
+        bool m_onlySave; // casting time
 };
 
 class Spell
@@ -547,7 +548,7 @@ class Spell
         void ClearCastItem();
 
         // spell mods
-        std::set<SpellModifierPair> m_usedAuraCharges; // TODO: Consider changing into reference.
+        std::set<SpellModifierPair> m_usedAuraCharges;
 
         static void SelectMountByAreaAndSkill(Unit* target, SpellEntry const* parentSpell, uint32 spellId75, uint32 spellId150, uint32 spellId225, uint32 spellId300, uint32 spellIdSpecial);
 
