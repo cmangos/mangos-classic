@@ -449,7 +449,6 @@ void instance_stratholme::SetData(uint32 uiType, uint32 uiData)
             {
                 if (Creature* pBaron = GetSingleCreatureFromStorage(NPC_BARON))
                     DoScriptText(SAY_UNDEAD_DEFEAT, pBaron);
-                DoOpenSlaughterhouseDoor(true);
                 DoUseDoorOrButton(GO_ZIGGURAT_DOOR_5);
             }
             m_auiEncounter[uiType] = uiData;
@@ -677,8 +676,6 @@ void instance_stratholme::OnCreatureEvade(Creature* pCreature)
         case NPC_BLACK_GUARD:
             // Fail in Slaughterhouse after Ramstein
             SetData(TYPE_BLACK_GUARDS, FAIL);
-            // Open Slaughterhouse door again because Black Guards will move back in
-            DoOpenSlaughterhouseDoor(true);
             break;
     }
 }
@@ -716,7 +713,6 @@ void instance_stratholme::OnCreatureDeath(Creature* pCreature)
             m_luiGuardGUIDs.remove(pCreature->GetObjectGuid());
             if (m_luiGuardGUIDs.empty())
                 SetData(TYPE_BLACK_GUARDS, DONE);
-
             break;
 
         // Scarlet Bastion defense and Timmy spawn support
@@ -1049,9 +1045,8 @@ void instance_stratholme::Update(uint32 uiDiff)
     {
         if (m_uiBlackGuardsTimer <= uiDiff)
         {
-            // Open the Slaughterhouse door and set a timer to close it after 10 sec to let some time to the 5 Black Guards to move out
+            // Open the Slaughterhouse door to let the 5 Black Guards to move out
             DoOpenSlaughterhouseDoor(true);
-            m_uiSlaughterDoorTimer = 10000;
 
             for (GuidList::const_iterator itr = m_luiGuardGUIDs.begin(); itr != m_luiGuardGUIDs.end(); ++itr)
             {
