@@ -535,6 +535,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 8876:          // Thrash
         case 9205:          // Hate to Zero (Hate to Zero)
         case 9460:          // Corrosive Ooze
+        case 9464:          // Barbs
         case 9941:          // Spell Reflection
         case 10022:         // Deadly Poison
         case 10072:         // Splintered Obsidian
