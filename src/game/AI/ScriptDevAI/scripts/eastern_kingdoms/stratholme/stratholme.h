@@ -70,6 +70,8 @@ enum
     GO_PORT_TRAP_GATE_3         = 175355,                   // Undead side
     GO_PORT_TRAP_GATE_4         = 175354,
 
+    FACTION_VICTIM              = 42,
+
     QUEST_DEAD_MAN_PLEA         = 8945,
     QUEST_MEDALLION_FAITH       = 5122,
 
@@ -236,6 +238,8 @@ class instance_stratholme : public ScriptedInstance
 
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
+
+        bool CheckConditionCriteriaMeet(Player const* player, uint32 instanceConditionId, WorldObject const* conditionSource, uint32 conditionSourceType) const override;
 
         void OnCreatureEnterCombat(Creature* pCreature) override;
         void OnCreatureEvade(Creature* pCreature);

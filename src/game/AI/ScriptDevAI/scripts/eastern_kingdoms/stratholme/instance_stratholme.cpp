@@ -102,6 +102,7 @@ void instance_stratholme::OnCreatureCreate(Creature* pCreature)
     switch (pCreature->GetEntry())
     {
         case NPC_AURIUS:
+            pCreature->SetStandState(UNIT_STAND_STATE_KNEEL);
             if (m_auiEncounter[TYPE_AURIUS] == DONE)
                 pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
         // no break here
@@ -1107,9 +1108,11 @@ void instance_stratholme::Update(uint32 uiDiff)
                 {
                     float fX, fY, fZ;
                     pBaron->GetRandomPoint(pBaron->GetPositionX(), pBaron->GetPositionY(), pBaron->GetPositionZ(), 4.0f, fX, fY, fZ);
+                    pAurius->SetStandState(UNIT_STAND_STATE_STAND);
                     pAurius->NearTeleportTo(fX, fY, fZ, pAurius->GetOrientation());
                     pAurius->SetRespawnCoord(fX, fY, fZ, pAurius->GetOrientation());
                     DoScriptText(SAY_AURIUS_AGGRO, pAurius);
+                    pAurius->SetFactionTemporary(FACTION_VICTIM, TEMPFACTION_RESTORE_RESPAWN);
                     pAurius->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP);
                     pAurius->AI()->AttackStart(pBaron);
                 }
@@ -1235,6 +1238,16 @@ void instance_stratholme::Update(uint32 uiDiff)
         else
             m_uiSlaugtherSquareTimer -= uiDiff;
     }
+}
+
+bool instance_stratholme::CheckConditionCriteriaMeet(Player const* player, uint32 instanceConditionId, WorldObject const* conditionSource, uint32 conditionSourceType) const
+{
+    if (instanceConditionId == INSTANCE_CONDITION_ID_NORMAL_MODE)
+        return GetData(TYPE_AURIUS) == DONE;
+    else
+        script_error_log("instance_stratholme::CheckConditionCriteriaMeet called with unsupported Id %u. Called with param plr %s, src %s, condition source type %u",
+                     instanceConditionId, player ? player->GetGuidStr().c_str() : "nullptr", conditionSource ? conditionSource->GetGuidStr().c_str() : "nullptr", conditionSourceType);
+    return false;
 }
 
 InstanceData* GetInstanceData_instance_stratholme(Map* pMap)

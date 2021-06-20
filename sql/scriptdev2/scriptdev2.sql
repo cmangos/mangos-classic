@@ -2168,7 +2168,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1329020','My death means nothing.... light... will... prevail!','0','6','0','0','11817','ysida YSIDA_SAY_RUN_FAIL'),
 
 ('-1329021','Rivendare!  I come for you!','0','1','0','0','6236','aurius YELL_AURIUS_AGGRO'),
-('-1329022','Argh!','0','0','0','0','989','aurius SAY_AURIUS_DEATH'),
+('-1329022','Argh!','0','0','0','0','6237','aurius SAY_AURIUS_DEATH'),
 
 ('-1329023','Move back and hold the line!  We cannot fail or all will be lost!','0','1','0','0','6377','YELL_BASTION_BARRICADE'),
 ('-1329024','Move to the stairs and defend!','0','1','0','0','6378','YELL_BASTION_STAIRS'),
