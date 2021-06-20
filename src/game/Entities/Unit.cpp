@@ -8957,7 +8957,10 @@ uint32 Unit::GetCreatePowers(Powers power) const
 void Unit::AddToWorld()
 {
     WorldObject::AddToWorld();
-    ScheduleAINotify(GetTypeId() == TYPEID_UNIT && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) ? sWorld.getConfig(CONFIG_UINT32_CREATURE_RESPAWN_AGGRO_DELAY) : 0);
+    uint32 delay = 0;
+    if (IsCreature() && !IsPlayerControlled())
+        delay = GetUInt32Value(UNIT_CREATED_BY_SPELL) ? 1000 : sWorld.getConfig(CONFIG_UINT32_CREATURE_RESPAWN_AGGRO_DELAY);
+    ScheduleAINotify(delay);
 }
 
 void Unit::RemoveFromWorld()
