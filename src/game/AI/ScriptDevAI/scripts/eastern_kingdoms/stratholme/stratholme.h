@@ -55,14 +55,14 @@ enum
 
     GO_SERVICE_ENTRANCE         = 175368,
     GO_GAUNTLET_GATE1           = 175357,
-    GO_PORT_SLAUGHTER_GATE      = 175358,                   // Port used at the undeads event
+    GO_PORT_SLAUGHTER_GATE      = 175358,                   // Port used at the undead event
     GO_ZIGGURAT_DOOR_1          = 175380,                   // Baroness
     GO_ZIGGURAT_DOOR_2          = 175379,                   // Nerub'enkan
     GO_ZIGGURAT_DOOR_3          = 175381,                   // Maleki
     GO_ZIGGURAT_DOOR_4          = 175405,                   // Ramstein
     GO_ZIGGURAT_DOOR_5          = 175796,                   // Baron
-    GO_PORT_GAUNTLET            = 175374,                   // Port from gauntlet to slaugther
-    GO_PORT_SLAUGTHER           = 175373,                   // Port at slaugther
+    GO_PORT_GAUNTLET            = 175374,                   // Port from gauntlet to slaughter
+    GO_PORT_SLAUGHTER           = 175373,                   // Port at slaughter
     GO_PORT_ELDERS              = 175377,                   // Port at elders square
     GO_YSIDA_CAGE               = 181071,                   // Cage to open after baron event is done
     GO_PORT_TRAP_GATE_1         = 175351,                   // Portcullis used in the gate traps (rats trap)
@@ -114,12 +114,12 @@ enum
     NPC_SOTHOS                  = 16102,
 };
 
-static const uint32 aGates[] =
+static const uint32 gates[] =
 {
     GO_PORT_TRAP_GATE_1, GO_PORT_TRAP_GATE_2, GO_PORT_TRAP_GATE_3, GO_PORT_TRAP_GATE_4
 };
 
-static const uint32 aPlaguedCritters[] =
+static const uint32 plaguedCritters[] =
 {
     NPC_PLAGUED_RAT, NPC_PLAGUED_MAGGOT, NPC_PLAGUED_INSECT
 };
@@ -129,7 +129,7 @@ struct EventLocation
     float m_fX, m_fY, m_fZ, m_fO;
 };
 
-static const EventLocation aStratholmeLocation[] =
+static const EventLocation stratholmeLocation[] =
 {
     {3725.577f, -3599.484f, 142.367f},                      // Barthilas door run
     {4068.284f, -3535.678f, 122.771f, 2.50f},               // Barthilas tele
@@ -164,7 +164,7 @@ static const int ScarletEventYells[] =
     YELL_BASTION_HALL_LIGHTS, YELL_BASTION_INNER_1, YELL_BASTION_INNER_2
 };
 
-static const EventLocation aDefensePoints[] =
+static const EventLocation defensePoints[] =
 {
     {3662.84f, -3175.15f, 126.559f},                        // Last barricade before the Scarlet Bastion (Courtyard)
     {3661.57f, -3157.80f, 128.945f},                        // Scarlet Bastion stairs (Courtyard)
@@ -176,7 +176,7 @@ static const EventLocation aDefensePoints[] =
     {3661.89f, -3192.89f, 126.691f}                         // Barricades before the last one (Courtyard): in last position for conveniently iterate over the table
 };
 
-static const EventLocation aScarletGuards[] =               // Spawned when players cleared some parts of the Bastion
+static const EventLocation scarletGuards[] =               // Spawned when players cleared some parts of the Bastion
 {
     {3598.213f, -3094.812f, 135.657f, 5.3425f},             // Hall of Lights
     {3602.198f, -3096.243f, 134.120f},
@@ -186,7 +186,7 @@ static const EventLocation aScarletGuards[] =               // Spawned when play
     {3437.445f, -3080.316f, 135.000f}
 };
 
-static const EventLocation aScourgeInvaders[] =             // Attack when players cleared some parts of the Bastion
+static const EventLocation scourgeInvaders[] =             // Attack when players cleared some parts of the Bastion
 {
     {3614.702f, -3187.642f, 131.406f, 4.024f},              // Timmy. TIMMYYYYYYY !!!
     {3647.36f, -3139.70f, 134.78f, 2.1962f},                // Entrance
@@ -197,7 +197,7 @@ static const EventLocation aScourgeInvaders[] =             // Attack when playe
     {3443.18f, -3083.90f, 135.01f, 2.1563f}
 };
 
-static const EventLocation aScarletLastStand[] =            // Positions remaining Scarlet defenders will move to if the position is lost
+static const EventLocation scarletLastStand[] =            // Positions remaining Scarlet defenders will move to if the position is lost
 {
     {3658.43f, -3178.07f, 126.696f, 5.23599f},              // Last barricade
     {3665.62f, -3173.88f, 126.551f, 5.02655f},
@@ -207,7 +207,7 @@ static const EventLocation aScarletLastStand[] =            // Positions remaini
     {3661.57f, -3157.80f, 128.945f, 5.23599f}
 };
 
-static const EventLocation aGateTrap[] =                    // Positions of the two Gate Traps
+static const EventLocation gateTrap[] =                    // Positions of the two Gate Traps
 {
     {3612.29f, -3335.39f, 124.077f, 3.14159f},              // Scarlet side
     {3919.88f, -3547.34f, 134.269f, 2.94961f}               // Undead side
@@ -217,79 +217,79 @@ struct ZigguratStore
 {
     ObjectGuid m_doorGuid;
     ObjectGuid m_crystalGuid;
-    GuidList m_lZigguratAcolyteGuid;
+    GuidList m_zigguratAcolyteGuid;
 };
 
 class instance_stratholme : public ScriptedInstance
 {
     public:
-        instance_stratholme(Map* pMap);
+        instance_stratholme(Map* map);
         ~instance_stratholme() {}
 
         void Initialize() override;
 
-        void OnPlayerEnter(Player* pPlayer) override;
+        void OnPlayerEnter(Player* player) override;
 
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
+        void OnCreatureCreate(Creature* creature) override;
+        void OnObjectCreate(GameObject* go) override;
 
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
+        void SetData(uint32 type, uint32 data) override;
+        uint32 GetData(uint32 type) const override;
 
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
 
         bool CheckConditionCriteriaMeet(Player const* player, uint32 instanceConditionId, WorldObject const* conditionSource, uint32 conditionSourceType) const override;
 
-        void OnCreatureEnterCombat(Creature* pCreature) override;
-        void OnCreatureEvade(Creature* pCreature);
-        void OnCreatureDeath(Creature* pCreature) override;
+        void OnCreatureEnterCombat(Creature* creature) override;
+        void OnCreatureEvade(Creature* creature);
+        void OnCreatureDeath(Creature* creature) override;
         void OnCreatureRespawn(Creature* creature) override;
 
         void Update(const uint32 diff) override;
 
     protected:
-        bool StartSlaugtherSquare();
+        bool StartSlaughterSquare();
         void DoSortZiggurats();
-        void DoOpenSlaughterhouseDoor(bool bOpen);
-        void ThazudinAcolyteJustDied(Creature* pCreature);
+        void DoOpenSlaughterhouseDoor(bool open);
+        void ThazudinAcolyteJustDied(Creature* creature);
 
-        void DoSpawnScarletGuards(uint8 uiStep, Player* pSummoner);
-        void DoSpawnScourgeInvaders(uint8 uiStep, Player* pSummoner);
-        void DoMoveBackDefenders(uint8 uiStep, Creature* pCreature);
-        void DoScarletBastionDefense(uint8 uiStep, Creature* pCreature);
+        void DoSpawnScarletGuards(uint8 step, Player* summoner);
+        void DoSpawnScourgeInvaders(uint8 step, Player* summoner);
+        void DoMoveBackDefenders(uint8 step, Creature* creature);
+        void DoScarletBastionDefense(uint8 step, Creature* creature);
 
-        void DoGateTrap(uint8 uiGate);
-        void DoSpawnPlaguedCritters(uint8 uiGate, Player* pPlayer);
-        uint32 m_uiGateTrapTimers[2][3];
+        void DoGateTrap(uint8 gate);
+        void DoSpawnPlaguedCritters(uint8 gate, Player* player);
+        uint32 m_gateTrapTimers[2][3];
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
 
-        uint32 m_uiBaronRunTimer;
-        uint32 m_uiBarthilasRunTimer;
-        uint32 m_uiMindlessSummonTimer;
-        uint32 m_uiSlaugtherSquareTimer;
-        uint32 m_uiSlaughterDoorTimer;
-        uint32 m_uiBlackGuardsTimer;
-        uint32 m_uiAuriusSummonTimer;
-        bool m_bIsSlaughterDoorOpen;
+        uint32 m_baronRunTimer;
+        uint32 m_barthilasRunTimer;
+        uint32 m_mindlessSummonTimer;
+        uint32 m_slaughterSquareTimer;
+        uint32 m_slaughterDoorTimer;
+        uint32 m_blackGuardsTimer;
+        uint32 m_auriusSummonTimer;
+        bool m_isSlaughterDoorOpen;
 
-        uint32 m_uiYellCounter;
-        uint32 m_uiMindlessCount;
-        uint8 m_uiPostboxesUsed;
+        uint32 m_yellCounter;
+        uint32 m_mindlessCount;
+        uint8 m_postboxesUsed;
 
         bool m_jarienKilled;
         bool m_sothosKilled;
 
         ZigguratStore m_zigguratStorage[MAX_ZIGGURATS];
 
-        GuidList m_suiCrimsonDefendersLowGuids[MAX_DEFENSE_POINTS];
-        GuidList m_luiCrystalGUIDs;
-        GuidSet m_sAbomnationGUID;
-        GuidList m_luiAcolyteGUIDs;
-        GuidList m_luiUndeadGUIDs;
-        GuidList m_luiGuardGUIDs;
+        GuidList m_crimsonDefendersLowGuids[MAX_DEFENSE_POINTS];
+        GuidList m_crystalGUIDs;
+        GuidSet m_abominationGUIDs;
+        GuidList m_acolyteGUIDs;
+        GuidList m_undeadGUIDs;
+        GuidList m_guardGUIDs;
 };
 
 #endif
