@@ -4383,7 +4383,7 @@ bool ChatHandler::HandleQuestAddCommand(char* args)
     }
 
     // ok, normal (creature/GO starting) quest
-    if (player->CanAddQuest(pQuest, true))
+    if (player->CanAddQuest(pQuest, true) && !player->IsCurrentQuest(pQuest->GetQuestId()))
     {
         player->AddQuest(pQuest, nullptr);
 
