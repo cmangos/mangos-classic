@@ -93,7 +93,6 @@ struct boss_thekalBaseAI : public ScriptedAI
         damage = std::min(damage, m_creature->GetHealth() - 1);
 
         m_creature->InterruptNonMeleeSpells(true);
-        m_creature->SetHealth(0);
         m_creature->StopMoving();
         m_creature->ClearComboPointHolders();
         m_creature->RemoveAllAurasOnDeath();
