@@ -156,12 +156,6 @@ struct boss_nefarianAI : public CombatAI
     void StartLanding()
     {
         m_creature->SetWalk(false);
-        auto wpPath = sWaypointMgr.GetPathFromOrigin(m_creature->GetEntry(), m_creature->GetGUIDLow(), 0, PATH_FROM_ENTRY);
-        std::vector<G3D::Vector3> path;
-        for (auto& data : *wpPath)
-        {
-            path.emplace_back(data.second.x, data.second.y, data.second.z);
-        }
         m_creature->GetMotionMaster()->MoveWaypoint(0, FORCED_MOVEMENT_NONE, true);
     }
 
