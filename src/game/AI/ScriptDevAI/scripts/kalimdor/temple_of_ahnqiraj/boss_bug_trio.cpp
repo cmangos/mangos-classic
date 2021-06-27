@@ -138,11 +138,12 @@ struct boss_silithidRoyaltyAI : public CombatAI
 
     void DoDummyConsume()
     {
+        m_creature->SetNoLoot(true);
         DoScriptText(EMOTE_CONSUMED, m_creature);
         m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
         DoSpecialAbility();
         m_creature->CastSpell(nullptr, SPELL_BLOODY_DEATH, TRIGGERED_OLD_TRIGGERED);
-        m_creature->ForcedDespawn(3000);    // Despawn as we are "consumed", also prevent looting
+        m_creature->ForcedDespawn(3000);    // Despawn as we are "consumed"
     }
 
     void DoSpecialAbility()
