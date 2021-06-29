@@ -4490,27 +4490,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         m_caster->CastCustomSpell(unitTarget, 28375, &damage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 28617:                                 // Web Wrap (Maexxna: pull spell initialiser)
-                {
-                    if (!m_originalCaster)
-                        return;
-
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    float dist = m_caster->GetDistance(unitTarget, false);
-                    // Switch the pull target spell based on the distance from the web wrap position
-                    uint32 pullSpellId = 28621;
-                    if (dist < 25.0f)
-                        pullSpellId = 28618;
-                    else if (dist < 50.0f)
-                        pullSpellId = 28619;
-                    else if (dist < 75.0f)
-                        pullSpellId = 28620;
-
-                    unitTarget->CastSpell(m_caster, pullSpellId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_originalCaster->GetObjectGuid());
-                    return;
-                }
                 case 28628:                                 // Clear Web Wrap (Maexxna: clear effects on player)
                 {
                     if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)

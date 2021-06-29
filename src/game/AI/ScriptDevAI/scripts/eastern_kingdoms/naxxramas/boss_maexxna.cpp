@@ -229,7 +229,7 @@ struct boss_maexxnaAI : public ScriptedAI
                 invisibleMen.resize(targets.size());
 
                 for (uint8 i = 0; i < targets.size(); i++)
-                    targets[i]->CastSpell(invisibleMen[i], SPELL_WEB_WRAP_INIT, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
+                    targets[i]->CastSpell(invisibleMen[i], SPELL_WEB_WRAP_INIT, TRIGGERED_IGNORE_UNSELECTABLE_FLAG, nullptr, nullptr, m_creature->GetObjectGuid());
 
                 m_webWrapTimer = TIMER_40_SEC;
             }
@@ -366,6 +366,32 @@ UnitAI* GetAI_npc_invible_man(Creature* creature)
     return new npc_invisible_manAI(creature);
 }
 
+// Web Wrap (Maexxna: pull spell initialiser)
+struct WebWrap : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (!spell->GetAffectiveCasterObject())
+            return;
+
+        Unit* unitTarget = spell->GetUnitTarget();
+        if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || spell->GetCaster()->GetTypeId() != TYPEID_PLAYER)
+            return;
+
+        float dist = spell->GetCaster()->GetDistance(unitTarget, false);
+        // Switch the pull target spell based on the distance from the web wrap position
+        uint32 pullSpellId = SPELL_WEB_WRAP_500;
+        if (dist < 25.0f)
+            pullSpellId = SPELL_WEB_WRAP_200;
+        else if (dist < 50.0f)
+            pullSpellId = SPELL_WEB_WRAP_300;
+        else if (dist < 75.0f)
+            pullSpellId = SPELL_WEB_WRAP_400;
+
+        unitTarget->CastSpell(spell->GetCaster(), pullSpellId, TRIGGERED_INSTANT_CAST, nullptr, nullptr, spell->GetAffectiveCasterObject()->GetObjectGuid());
+    }
+};
+
 void AddSC_boss_maexxna()
 {
     Script* newScript = new Script;
@@ -382,4 +408,6 @@ void AddSC_boss_maexxna()
     newScript->Name = "npc_invible_man";
     newScript->GetAI = &GetAI_npc_invible_man;
     newScript->RegisterSelf();
+
+    RegisterSpellScript<WebWrap>("spell_web_wrap");
 }
