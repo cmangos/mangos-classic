@@ -47,11 +47,12 @@ enum
     SPELL_WEB_WRAP_300          = 28619,
     SPELL_WEB_WRAP_400          = 28620,
     SPELL_WEB_WRAP_500          = 28621,
-//    SPELL_WEBWRAP_STUN          = 28622,                    // Triggered by spells 28618 - 28621
+    SPELL_WEBWRAP_STUN          = 28622,                    // Triggered by spells 28618 - 28621
     SPELL_WEB_WRAP_SUMMON       = 28627,
     SPELL_CLEAR_WEB_WRAP_TARGET = 28628,
     SPELL_CLEAR_WEB_WRAP_SELF   = 28629,
     SPELL_SELF_STUN             = 29826,                    // Spell Id unsure
+    SPELL_KILL_WEBWRAP          = 29108,
 
     NPC_SPIDERLING              = 17055,
     NPC_INVISIBLE_MAN           = 17286,                    // Handle the summoning of the players and Web Wrap NPCs
@@ -371,24 +372,59 @@ struct WebWrap : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        if (!spell->GetAffectiveCasterObject())
-            return;
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (!spell->GetAffectiveCasterObject())
+                return;
 
-        Unit* unitTarget = spell->GetUnitTarget();
-        if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || spell->GetCaster()->GetTypeId() != TYPEID_PLAYER)
-            return;
+            Unit* unitTarget = spell->GetUnitTarget();
+            if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || spell->GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                return;
 
-        float dist = spell->GetCaster()->GetDistance(unitTarget, false);
-        // Switch the pull target spell based on the distance from the web wrap position
-        uint32 pullSpellId = SPELL_WEB_WRAP_500;
-        if (dist < 25.0f)
-            pullSpellId = SPELL_WEB_WRAP_200;
-        else if (dist < 50.0f)
-            pullSpellId = SPELL_WEB_WRAP_300;
-        else if (dist < 75.0f)
-            pullSpellId = SPELL_WEB_WRAP_400;
+            float dist = spell->GetCaster()->GetDistance(unitTarget, false);
+            // Switch the pull target spell based on the distance from the web wrap position
+            uint32 pullSpellId = SPELL_WEB_WRAP_500;
+            if (dist < 25.0f)
+                pullSpellId = SPELL_WEB_WRAP_200;
+            else if (dist < 50.0f)
+                pullSpellId = SPELL_WEB_WRAP_300;
+            else if (dist < 75.0f)
+                pullSpellId = SPELL_WEB_WRAP_400;
 
-        unitTarget->CastSpell(spell->GetCaster(), pullSpellId, TRIGGERED_INSTANT_CAST, nullptr, nullptr, spell->GetAffectiveCasterObject()->GetObjectGuid());
+            unitTarget->CastSpell(spell->GetCaster(), pullSpellId, TRIGGERED_INSTANT_CAST, nullptr, nullptr, spell->GetAffectiveCasterObject()->GetObjectGuid());
+        }
+    }
+};
+
+// Clear Web Wrap
+struct ClearWebWrap : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            Unit* unitTarget = spell->GetUnitTarget();
+            switch(spell->m_spellInfo->Id)
+            {
+                case SPELL_CLEAR_WEB_WRAP_TARGET:   // Clear Web Wrap (Maexxna: clear effects on player)
+                {
+                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        unitTarget->RemoveAurasDueToSpell(SPELL_WEB_WRAP_SUMMON);   // Web Wrap polymorph
+                        unitTarget->RemoveAurasDueToSpell(SPELL_WEBWRAP_STUN);      // Web Wrap stun and DoT
+                    }
+                    break;
+                }
+                case SPELL_CLEAR_WEB_WRAP_SELF:     // Clear Web Wrap (Maexxna: kill Web Wrap NPC)
+                {
+                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)
+                        unitTarget->CastSpell(nullptr, SPELL_KILL_WEBWRAP, TRIGGERED_OLD_TRIGGERED);  // Kill Web Wrap
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
     }
 };
 
@@ -410,4 +446,5 @@ void AddSC_boss_maexxna()
     newScript->RegisterSelf();
 
     RegisterSpellScript<WebWrap>("spell_web_wrap");
+    RegisterSpellScript<ClearWebWrap>("spell_clear_web_wrap");
 }

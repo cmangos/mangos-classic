@@ -4490,21 +4490,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         m_caster->CastCustomSpell(unitTarget, 28375, &damage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 28628:                                 // Clear Web Wrap (Maexxna: clear effects on player)
-                {
-                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        unitTarget->RemoveAurasDueToSpell(28627); // Web Wrap polymorph
-                        unitTarget->RemoveAurasDueToSpell(28622); // Web Wrap stun and DoT
-                    }
-                    return;
-                }
-                case 28629:                                 // Clear Web Wrap (Maexxna: kill Web Wrap NPC)
-                {
-                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)
-                        unitTarget->CastSpell(nullptr, 29108, TRIGGERED_OLD_TRIGGERED);  // Kill Web Wrap
-                    return;
-                }
                 case 29336:                                 // Despawn Buffet
                 case 29379:                                 // Despawn Crypt Guards
                 case 30134:                                 // Despawn Boss Adds
