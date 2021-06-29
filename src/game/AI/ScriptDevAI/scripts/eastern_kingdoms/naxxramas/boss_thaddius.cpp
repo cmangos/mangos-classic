@@ -246,7 +246,7 @@ bool EffectDummyNPC_spell_thaddius_encounter(Unit* /*caster*/, uint32 spellId, S
             return true;
         case SPELL_THADIUS_LIGHTNING_VISUAL:
             if (effIndex == EFFECT_INDEX_0 && creatureTarget->GetEntry() == NPC_THADDIUS)
-                creatureTarget->SetInCombatWithZone();
+                creatureTarget->SetInCombatWithZone(false);
             return true;
     }
     return false;
