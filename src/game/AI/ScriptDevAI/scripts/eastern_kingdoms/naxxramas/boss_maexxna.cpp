@@ -23,6 +23,8 @@ EndScriptData
 
 */
 
+#include "AI/ScriptDevAI/base/CombatAI.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "naxxramas.h"
 
@@ -124,38 +126,42 @@ struct npc_web_wrapAI : public ScriptedAI
 #   boss_maexxna
 ###################*/
 
-struct boss_maexxnaAI : public ScriptedAI
+enum MaexxnaActions
 {
-    boss_maexxnaAI(Creature* creature) : ScriptedAI(creature)
-    {
-        m_instance = (instance_naxxramas*)creature->GetInstanceData();
-        Reset();
+    MAEXXNA_WEBWRAP,
+    MAEXXNA_WEBSPRAY,
+    MAEXXNA_POISON_SHOCK,
+    MAEXXNA_NECROTIC_POISON,
+    MAEXXNA_SUMMON_SPIDERLING,
+    MAEXXNA_ENRAGE_HP_CHECK,
+    MAEXXNA_ACTION_MAX,
+};
 
-        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+struct boss_maexxnaAI : public CombatAI
+{
+    boss_maexxnaAI(Creature* creature) : CombatAI(creature, MAEXXNA_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    {
+        AddTimerlessCombatAction(MAEXXNA_ENRAGE_HP_CHECK, true);         // Soft enrage à 30%
+        AddCombatAction(MAEXXNA_WEBWRAP, 20000u);
+        AddCombatAction(MAEXXNA_WEBSPRAY, 40000u);
+        AddCombatAction(MAEXXNA_POISON_SHOCK, 10000u, 20000u);
+        AddCombatAction(MAEXXNA_NECROTIC_POISON, 20000u, 30000u);
+        AddCombatAction(MAEXXNA_SUMMON_SPIDERLING, 30000u);
     }
 
-    instance_naxxramas* m_instance;
-
-    uint32 m_webWrapTimer;
-    uint32 m_webSprayTimer;
-    uint32 m_poisonShockTimer;
-    uint32 m_necroticPoisonTimer;
-    uint32 m_summonSpiderlingTimer;
-    bool   m_isEnraged;
+    ScriptedInstance* m_instance;
 
     CreatureList m_summoningTriggers;
     SelectAttackingTargetParams m_webWrapParams;
 
     void Reset() override
     {
-        m_webWrapTimer            = 20 * IN_MILLISECONDS;
-        m_webSprayTimer           = TIMER_40_SEC;
-        m_poisonShockTimer        = urand(10, 20) * IN_MILLISECONDS;
-        m_necroticPoisonTimer     = urand(20, 30) * IN_MILLISECONDS;
-        m_summonSpiderlingTimer   = 30 * IN_MILLISECONDS;
-        m_isEnraged                  = false;
+        CombatAI::Reset();
+
         m_webWrapParams.range.minRange = 0;
         m_webWrapParams.range.maxRange = 100;
+
+        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void Aggro(Unit* /*who*/) override
@@ -194,97 +200,86 @@ struct boss_maexxnaAI : public ScriptedAI
         summoned->ForcedDespawn();
     }
 
-    void UpdateAI(const uint32 diff) override
+    void ExecuteAction(uint32 action) override
     {
-        // Do nothing if no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // Web Wrap
-        // ToDo: the targets and triggers selection is probably done through spells 29280, 29281, 29282, 29283, 29285 & 29287
-        // But because we are walking in Guessland until more reliable data are available, let's do the selection manually here
-        if (m_webWrapTimer < diff)
+        switch (action)
         {
-            // Randomly pick 3 targets, excluding current victim (main tank)
-            std::vector<Unit*> targets;
-            m_creature->SelectAttackingTargets(targets, ATTACKING_TARGET_ALL_SUITABLE, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_TANK, m_webWrapParams);
-
-            if (targets.size() > MAX_PLAYERS_WEB_WRAP)
+            case MAEXXNA_ENRAGE_HP_CHECK:
             {
-                std::shuffle(targets.begin(), targets.end(), *GetRandomGenerator());
-                targets.resize(MAX_PLAYERS_WEB_WRAP);
-            }
-
-            if (!targets.empty())
-            {
-                // Check we have enough summoning NPCs spawned in regards of player targets
-                if (m_summoningTriggers.size() < targets.size())
+                if (m_creature->GetHealthPercent() < 30.0f)
                 {
-                    script_error_log("Error in script Naxxramas::boss_maexxna: less summoning NPCs (entry %u) than expected targets (%u) for Web Wrap ability. Check your DB", NPC_INVISIBLE_MAN, MAX_PLAYERS_WEB_WRAP);
-                    return;
+                    if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
+                    {
+                        DoScriptText(EMOTE_BOSS_GENERIC_FRENZY, m_creature);
+                        DisableCombatAction(action);
+                    }
+                }
+                break;
+            }
+            case MAEXXNA_WEBWRAP:
+            {
+                // Web Wrap
+                // ToDo: the targets and triggers selection is probably done through spells 29280, 29281, 29282, 29283, 29285 & 29287
+                // But because we are walking in Guessland until more reliable data are available, let's do the selection manually here
+                // Randomly pick 3 targets, excluding current victim (main tank)
+                std::vector<Unit*> targets;
+                m_creature->SelectAttackingTargets(targets, ATTACKING_TARGET_ALL_SUITABLE, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_TANK, m_webWrapParams);
+
+                if (targets.size() > MAX_PLAYERS_WEB_WRAP)
+                {
+                    std::shuffle(targets.begin(), targets.end(), *GetRandomGenerator());
+                    targets.resize(MAX_PLAYERS_WEB_WRAP);
                 }
 
-                // Randomly pick up to three trigger NPCs
-                std::vector<Unit*> invisibleMen(m_summoningTriggers.begin(), m_summoningTriggers.end());
-                std::shuffle(invisibleMen.begin(), invisibleMen.end(), *GetRandomGenerator());
-                invisibleMen.resize(targets.size());
+                if (!targets.empty())
+                {
+                    // Check we have enough summoning NPCs spawned in regards of player targets
+                    if (m_summoningTriggers.size() < targets.size())
+                    {
+                        script_error_log("Error in script Naxxramas::boss_maexxna: less summoning NPCs (entry %u) than expected targets (%u) for Web Wrap ability. Check your DB", NPC_INVISIBLE_MAN, MAX_PLAYERS_WEB_WRAP);
+                        break;
+                    }
 
-                for (uint8 i = 0; i < targets.size(); i++)
-                    targets[i]->CastSpell(invisibleMen[i], SPELL_WEB_WRAP_INIT, TRIGGERED_IGNORE_UNSELECTABLE_FLAG, nullptr, nullptr, m_creature->GetObjectGuid());
+                    // Randomly pick up to three trigger NPCs
+                    std::vector<Unit*> invisibleMen(m_summoningTriggers.begin(), m_summoningTriggers.end());
+                    std::shuffle(invisibleMen.begin(), invisibleMen.end(), *GetRandomGenerator());
+                    invisibleMen.resize(targets.size());
 
-                m_webWrapTimer = TIMER_40_SEC;
+                    for (uint8 i = 0; i < targets.size(); i++)
+                        targets[i]->CastSpell(invisibleMen[i], SPELL_WEB_WRAP_INIT, TRIGGERED_IGNORE_UNSELECTABLE_FLAG, nullptr, nullptr, m_creature->GetObjectGuid());
+
+                    ResetCombatAction(action, TIMER_40_SEC);
+                    break;
+                }
             }
-        }
-        else
-            m_webWrapTimer -= diff;
-
-        // Web Spray
-        if (m_webSprayTimer < diff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_WEBSPRAY) == CAST_OK)
-                m_webSprayTimer = TIMER_40_SEC;
-        }
-        else
-            m_webSprayTimer -= diff;
-
-        // Poison Shock
-        if (m_poisonShockTimer < diff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_POISONSHOCK) == CAST_OK)
-                m_poisonShockTimer = urand(10, 20) * IN_MILLISECONDS;
-        }
-        else
-            m_poisonShockTimer -= diff;
-
-        // Necrotic Poison
-        if (m_necroticPoisonTimer < diff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_NECROTICPOISON) == CAST_OK)
-                m_necroticPoisonTimer = urand(20, 30) * IN_MILLISECONDS;
-        }
-        else
-            m_necroticPoisonTimer -= diff;
-
-        // Summon 10 Spiderlings
-        if (m_summonSpiderlingTimer < diff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPIDERLING_1) == CAST_OK)
-                m_summonSpiderlingTimer = TIMER_40_SEC;
-        }
-        else
-            m_summonSpiderlingTimer -= diff;
-
-        // Enrage if not already enraged and below 30%
-        if (!m_isEnraged && m_creature->GetHealthPercent() < 30.0f)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
+            case MAEXXNA_WEBSPRAY:
             {
-                DoScriptText(EMOTE_BOSS_GENERIC_FRENZY, m_creature);
-                m_isEnraged = true;
+                if (DoCastSpellIfCan(m_creature, SPELL_WEBSPRAY) == CAST_OK)
+                    ResetCombatAction(action, TIMER_40_SEC);
+                break;
             }
+            case MAEXXNA_POISON_SHOCK:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_POISONSHOCK) == CAST_OK)
+                    ResetCombatAction(action, urand(10, 20) * IN_MILLISECONDS);
+                break;
+            }
+            case MAEXXNA_NECROTIC_POISON:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_NECROTICPOISON) == CAST_OK)
+                    ResetCombatAction(action, urand(20, 30) * IN_MILLISECONDS);
+                break;
+            }
+            // Summon 10 Spiderlings
+            case MAEXXNA_SUMMON_SPIDERLING:
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPIDERLING_1) == CAST_OK)
+                    ResetCombatAction(action, TIMER_40_SEC);
+                break;
+            }
+            default:
+                break;
         }
-
-        DoMeleeAttackIfReady();
     }
 };
 
@@ -293,18 +288,33 @@ struct boss_maexxnaAI : public ScriptedAI
 ###################*/
 
 // This NPC handles the spell sync between the player that is web wrapped (with a DoT) and the related Web Wrap NPC
-struct npc_invisible_manAI : public ScriptedAI
+struct npc_invisible_manAI : public ScriptedAI, public TimerManager
 {
-    npc_invisible_manAI(Creature* creature) : ScriptedAI(creature) { Reset(); }
+    npc_invisible_manAI(Creature* creature) : ScriptedAI(creature) {
+        AddCustomAction(1, true, [&]() { HandleVictimCheck(); });
+        Reset();
+    }
 
     ObjectGuid m_victimGuid;
-    uint32 m_doWebWrapVisualTimer;
 
     void Reset() override
     {
         m_victimGuid.Clear();
-        m_doWebWrapVisualTimer = 0;
     }
+
+    void HandleVictimCheck() {
+            if (Player* victim = m_creature->GetMap()->GetPlayer(m_victimGuid))
+            {
+                if (victim->IsAlive())
+                {
+                    // Make the player cast the visual effects spells with a delay to ensure he/she has reach his/her destination
+                    victim->CastSpell(victim, SPELL_WEB_WRAP_SUMMON, TRIGGERED_OLD_TRIGGERED);
+                    DisableTimer(1);
+                }
+                else
+                    m_victimGuid.Clear();
+            }
+    };
 
     void MoveInLineOfSight(Unit* /*who*/) override {}
     void AttackStart(Unit* /*who*/) override {}
@@ -320,7 +330,7 @@ struct npc_invisible_manAI : public ScriptedAI
             case SPELL_WEB_WRAP_500:
             {
                 m_victimGuid = target->GetObjectGuid();
-                m_doWebWrapVisualTimer = (spell->Id == SPELL_WEB_WRAP_200 ? 5 : 6) * IN_MILLISECONDS;
+                ResetTimer(1, (spell->Id == SPELL_WEB_WRAP_200 ? 5 : 6) * IN_MILLISECONDS);
                 break;
             }
             default:
@@ -330,25 +340,7 @@ struct npc_invisible_manAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff) override
     {
-        if (m_doWebWrapVisualTimer)
-        {
-            if (m_doWebWrapVisualTimer < diff)
-            {
-                if (Player* victim = m_creature->GetMap()->GetPlayer(m_victimGuid))
-                {
-                    if (victim->IsAlive())
-                    {
-                        // Make the player cast the visual effects spells with a delay to ensure he/she has reach his/her destination
-                        victim->CastSpell(victim, SPELL_WEB_WRAP_SUMMON, TRIGGERED_OLD_TRIGGERED);
-                        m_doWebWrapVisualTimer = 0;
-                    }
-                    else
-                        m_victimGuid.Clear();
-                }
-            }
-            else
-                m_doWebWrapVisualTimer -= diff;
-        }
+        UpdateTimers(diff);
     }
 };
 
