@@ -4034,7 +4034,7 @@ bool ChatHandler::HandleLookupAccountEmailCommand(char* args)
     std::string email = emailStr;
     LoginDatabase.escape_string(email);
     //                                                 0   1         2        3        4
-    QueryResult* result = LoginDatabase.PQuery("SELECT id, username, ip, gmlevel, expansion FROM account a join account_logons b on (a.id=b.accountId) WHERE email " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'  ORDER BY loginTime DESC LIMIT 1"), email.c_str());
+    QueryResult* result = LoginDatabase.PQuery("SELECT a.id, username, ip, gmlevel, expansion FROM account a join account_logons b on (a.id=b.accountId) WHERE email " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'  ORDER BY loginTime DESC LIMIT 1"), email.c_str());
 
     return ShowAccountListHelper(result, &limit);
 }
@@ -4074,7 +4074,7 @@ bool ChatHandler::HandleLookupAccountNameCommand(char* args)
 
     LoginDatabase.escape_string(account);
     //                                                 0   1         2        3        4
-    QueryResult* result = LoginDatabase.PQuery("SELECT id, username, ip, gmlevel, expansion FROM account a join account_logons b on (a.id=b.accountId) WHERE username " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%' ORDER BY loginTime DESC LIMIT 1"), account.c_str());
+    QueryResult* result = LoginDatabase.PQuery("SELECT a.id, username, ip, gmlevel, expansion FROM account a join account_logons b on (a.id=b.accountId) WHERE username " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%' ORDER BY loginTime DESC LIMIT 1"), account.c_str());
 
     return ShowAccountListHelper(result, &limit);
 }
@@ -4144,7 +4144,7 @@ bool ChatHandler::HandleLookupPlayerIpCommand(char* args)
     std::string ip = ipStr;
     LoginDatabase.escape_string(ip);
 
-    QueryResult* result = LoginDatabase.PQuery("SELECT id,username, distinct ip FROM account a join account_logons b on (a.id=b.accountId) WHERE b.ip " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'  ORDER BY loginTime DESC LIMIT 1"), ip.c_str());
+    QueryResult* result = LoginDatabase.PQuery("SELECT a.id, username, distinct ip FROM account a join account_logons b on (a.id=b.accountId) WHERE b.ip " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'  ORDER BY loginTime DESC LIMIT 1"), ip.c_str());
 
     return LookupPlayerSearchCommand(result, &limit);
 }
