@@ -328,6 +328,18 @@ UnitAI* GetAI_npc_diseased_maggot(Creature* creature)
     return new npc_diseased_maggotAI(creature);
 }
 
+struct PlagueWaveController : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& /* data */) const override
+    {
+        Unit* triggerTarget = aura->GetTriggerTarget();
+        uint32 spellForTick[6] = { 30116, 30117, 30118, 30119, 30118, 30117 };  // Circling back and forth through the 4 plague areas
+        uint32 tick = (aura->GetAuraTicks() - 1) % 6;
+
+        triggerTarget->CastSpell(triggerTarget, spellForTick[tick], TRIGGERED_OLD_TRIGGERED, nullptr, aura, aura->GetCasterGuid(), nullptr);
+    }
+};
+
 void AddSC_boss_heigan()
 {
 
@@ -340,5 +352,6 @@ void AddSC_boss_heigan()
     newScript->Name = "npc_diseased_maggot";
     newScript->GetAI = &GetAI_npc_diseased_maggot;
     newScript->RegisterSelf();
-    newScript = new Script;
+
+    RegisterAuraScript<PlagueWaveController>("spell_plague_wave_controller");
 }

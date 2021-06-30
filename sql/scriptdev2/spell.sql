@@ -82,9 +82,11 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28781,'spell_gothik_side_assault'),
 (29201,'spell_loatheb_corrupted_mind'),
 (29330,'spell_sapphiron_despawn_buffet'),
+(29351,'spell_plague_wave_controller'),
 (29874,'spell_gothik_side_assault'),
 (29875,'spell_check_gothik_side'),
 (29897,'spell_icecrown_guardian_periodic'),
+(30114,'spell_plague_wave_controller'),
 (30132,'spell_sapphiron_iceblock');
 
 -- TBC
