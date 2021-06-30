@@ -344,21 +344,6 @@ struct npc_invisible_manAI : public ScriptedAI, public TimerManager
     }
 };
 
-UnitAI* GetAI_npc_web_wrap(Creature* creature)
-{
-    return new npc_web_wrapAI(creature);
-}
-
-UnitAI* GetAI_boss_maexxna(Creature* creature)
-{
-    return new boss_maexxnaAI(creature);
-}
-
-UnitAI* GetAI_npc_invible_man(Creature* creature)
-{
-    return new npc_invisible_manAI(creature);
-}
-
 // Web Wrap (Maexxna: pull spell initialiser)
 struct WebWrap : public SpellScript
 {
@@ -424,17 +409,17 @@ void AddSC_boss_maexxna()
 {
     Script* newScript = new Script;
     newScript->Name = "boss_maexxna";
-    newScript->GetAI = &GetAI_boss_maexxna;
+    newScript->GetAI = &GetNewAIInstance<boss_maexxnaAI>;
     newScript->RegisterSelf();
 
     newScript = new Script;
     newScript->Name = "npc_web_wrap";
-    newScript->GetAI = &GetAI_npc_web_wrap;
+    newScript->GetAI = &GetNewAIInstance<npc_web_wrapAI>;
     newScript->RegisterSelf();
 
     newScript = new Script;
     newScript->Name = "npc_invible_man";
-    newScript->GetAI = &GetAI_npc_invible_man;
+    newScript->GetAI = &GetNewAIInstance<npc_invisible_manAI>;
     newScript->RegisterSelf();
 
     RegisterSpellScript<WebWrap>("spell_web_wrap");
