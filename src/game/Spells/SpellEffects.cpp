@@ -1309,14 +1309,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     static_cast<Creature*>(m_caster)->ForcedDespawn(2000);
                     return;
                 }
-                case 28006:                                 // Arcane Cloaking
-                {
-                    // Naxxramas Entry Flag Effect DND
-                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
-                        m_caster->CastSpell(unitTarget, 29296, TRIGGERED_OLD_TRIGGERED);
-
-                    return;
-                }
                 case 28089:                                 // Polarity Shift
                 {
                     if (!unitTarget)

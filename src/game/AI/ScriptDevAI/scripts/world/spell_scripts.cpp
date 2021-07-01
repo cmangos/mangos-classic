@@ -167,7 +167,10 @@ struct GreaterInvisibilityMob : public AuraScript
     }
 };
 
-// PX-238 Winter Wondervolt TRAP
+/* *****************************
+*  PX-238 Winter Wondervolt TRAP
+*******************************/
+
 struct WondervoltTrap : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -181,6 +184,25 @@ struct WondervoltTrap : public SpellScript
     }
 };
 
+/* ************************************************************
+*  Arcane Cloaking
+*  Quests 9121, 9122, 9123, 9378 - Naxxramas, The Dread Citadel
+**************************************************************/
+
+struct ArcaneCloaking : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            Unit* caster = spell->GetCaster();
+            // Naxxramas Entry Flag Effect DND
+            if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+                caster->CastSpell(caster, 29296, TRIGGERED_OLD_TRIGGERED);  // Cast Naxxramas Entry Flag Trigger DND
+        }
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -190,5 +212,6 @@ void AddSC_spell_scripts()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<WondervoltTrap>("spell_wondervolt_trap");
+    RegisterSpellScript<ArcaneCloaking>("spell_arcane_cloaking");
     RegisterAuraScript<GreaterInvisibilityMob>("spell_greater_invisibility_mob");
 }
