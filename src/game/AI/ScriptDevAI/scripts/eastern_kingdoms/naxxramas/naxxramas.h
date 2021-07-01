@@ -203,6 +203,8 @@ enum
     SPELL_CLEAR_ALL_SHACKLES    = 29910,                    // Cast by Kel'Thuzad if more than three Guardians of Icecrown are controlled
 
     MAX_SHACKLES                = 3,                        // How many Guardians of Icecrown can be crowed control without Kel'Thuzad dispelling the shackles
+
+    SPELL_EXPLODE               = 28433,                    // Used by Living Poison blobs when players come in range
 };
 
 enum GothikSpellDummy
