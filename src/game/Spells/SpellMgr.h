@@ -513,8 +513,12 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 3284:          // Violent Shield
         case 3417:          // Thrash
         case 3418:          // Improved Blocking
+        case 3509:          // Sloth Passive
+        case 3512:          // Sludge Passive
+        case 3582:          // Torch Burst
         case 3616:          // Poison Proc
         case 3637:          // Improved Blocking III
+        case 4148:          // Growl of Fortitude
         case 5111:          // Living Flame Passive
         case 5301:          // Defensive State (DND)
         case 5680:          // Torch Burn
@@ -522,11 +526,19 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 6498:          // Feed Sarilus Passive
         case 6718:          // Phasing Stealth
         case 6752:          // Weak Poison Proc
+        case 6820:          // Corrupted Agility Passive
+        case 6821:          // Corrupted Strength Passive
+        case 6822:          // Corrupted Stamina Passive
+        case 6823:          // Corrupted Intellect Passive
+        case 6923:          // Growl of Fortitude Proc
         case 6947:          // Curse of the Bleakheart Proc
+        case 6961:          // Knockdown Proc
         case 7056:          // Pacified
         case 7090:          // Bear Form (Shapeshift)
+        case 7095:          // Knockdown Proc
         case 7165:          // Battle Stance (Rank 1)
         case 7276:          // Poison Proc
+        case 7999:          // Soot Covering
         case 8247:          // Wandering Plague
         case 8279:          // Stealth Detection
         case 8393:          // Barbs
@@ -536,6 +548,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 9205:          // Hate to Zero (Hate to Zero)
         case 9460:          // Corrosive Ooze
         case 9464:          // Barbs
+        case 9769:          // Radiation
         case 9941:          // Spell Reflection
         case 10022:         // Deadly Poison
         case 10072:         // Splintered Obsidian
@@ -592,6 +605,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 20514:         // Ruul Snowhoof Shapechange (DND)
         case 21061:         // Putrid Breath
         case 21857:         // Lava Shield
+        case 21862:         // Radiation
         case 22128:         // Thorns
         case 22578:         // Glowy (Black)
         case 22735:         // Spirit of Runn Tum
