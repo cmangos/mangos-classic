@@ -1043,8 +1043,9 @@ bool instance_naxxramas::DoHandleEvent(uint32 eventId)
                         }
                     }
                 }
-                return true;
+                return false;
             }
+            return true;
         case EVENT_CLEAR_SHACKLES:
             m_shackledGuardians = 0;
             m_checkGuardiansTimer = 2 * IN_MILLISECONDS;    // Check every two seconds how many Guardians of Icecrown are shackled
