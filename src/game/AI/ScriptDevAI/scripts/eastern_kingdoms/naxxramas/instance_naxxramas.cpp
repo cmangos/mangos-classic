@@ -1026,9 +1026,7 @@ bool instance_naxxramas::DoHandleEvent(uint32 eventId)
                             zombie->AttackStop();
                             zombie->SetTarget(nullptr);
                             zombie->AI()->DoResetThreat();
-                            zombie->GetMotionMaster()->Clear();
-                            zombie->SetWalk(true);
-                            zombie->GetMotionMaster()->MoveFollow(gluth, ATTACK_DISTANCE, 0);
+                            zombie->GetMotionMaster()->MovePoint(0, gluth->GetPositionX(), gluth->GetPositionY(), gluth->GetPositionZ());
                         }
                     }
                 }
