@@ -622,7 +622,7 @@ void AreaAura::Update(uint32 diff)
             // or if caster is a not player (as NPCs do not support group so aura is only removed by moving out of range)
             if (caster->GetMasterGuid() != target->GetObjectGuid()  &&
                 caster->GetObjectGuid() != target->GetMasterGuid()  &&
-                caster->GetTypeId() == TYPEID_PLAYER)
+                caster->IsPlayerControlled())
             {
                 Player* check = caster->GetBeneficiaryPlayer();
 
