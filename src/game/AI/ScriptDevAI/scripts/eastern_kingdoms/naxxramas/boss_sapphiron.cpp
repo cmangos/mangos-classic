@@ -174,7 +174,7 @@ struct boss_sapphironAI : public CombatAI
             m_creature->HandleEmote(EMOTE_ONESHOT_LIFTOFF);
             m_creature->SetHover(true);
             m_creature->CastSpell(nullptr, SPELL_DRAGON_HOVER, TRIGGERED_OLD_TRIGGERED);
-            ResetCombatAction(SAPPHIRON_ICEBOLT, 5u * IN_MILLISECONDS);
+            ResetCombatAction(SAPPHIRON_ICEBOLT, 8u * IN_MILLISECONDS);
         }
     }
 
@@ -254,14 +254,13 @@ struct boss_sapphironAI : public CombatAI
                     {
                         ++m_iceboltCount;
                         ResetCombatAction(action, GetSubsequentActionTimer(action));
-                        DoScriptText(EMOTE_GENERIC_ENRAGED, m_creature);
                     }
                 }
                 else
                 {
                     m_iceboltCount = 0;
                     DisableCombatAction(action);
-                    ResetCombatAction(SAPPHIRON_FROST_BREATH, 2000u);    // Five Icebolt were cast, switch to Frost Breath (Ice Bomb) after that
+                    ResetCombatAction(SAPPHIRON_FROST_BREATH, 100u);    // Five Icebolt were cast, switch to Frost Breath (Ice Bomb) after that
                 }
                 return;
             }
@@ -272,7 +271,7 @@ struct boss_sapphironAI : public CombatAI
                     DoCastSpellIfCan(m_creature, SPELL_FROST_BREATH_DUMMY, CAST_TRIGGERED);
                     DoScriptText(EMOTE_BREATH, m_creature);
                     DisableCombatAction(action);
-                    ResetTimer(SAPPHIRON_LANDING_PHASE, 11u * IN_MILLISECONDS);
+                    ResetTimer(SAPPHIRON_LANDING_PHASE, 10u * IN_MILLISECONDS);
                 }
                 return;
             }
@@ -281,7 +280,7 @@ struct boss_sapphironAI : public CombatAI
                 if (DoCastSpellIfCan(m_creature, SPELL_BESERK) == CAST_OK)
                 {
                     DoScriptText(EMOTE_GENERIC_ENRAGED, m_creature);
-                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                    DisableCombatAction(action);
                 }
                 return;
             }
