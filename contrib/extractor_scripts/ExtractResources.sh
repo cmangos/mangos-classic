@@ -18,7 +18,7 @@ LOG_FILE="MaNGOSExtractor.log"
 DETAIL_LOG_FILE="MaNGOSExtractor_detailed.log"
 
 ## Change this to a value fitting for your sys!
-NUM_CPU="2"
+NUM_THREAD="2"
 
 ## ! Use below only for finetuning or if you know what you are doing !
 
@@ -91,11 +91,11 @@ fi
 if [ "$USE_MMAPS" = "1" ]
 then
   ## Obtain number of processes
-  echo "How many CPUs should be used for extracting mmaps? (1, 2, 4, 8)"
+  echo "How many CPU threads should be used for extracting mmaps? (1, 2, 4, 8)"
   read line
   echo
-  if [ $line -eq 1 ] || [ $line -eq 2 ] || [ $line -eq 4 ] || [ $line -eq 8 ]; then 
-    NUM_CPU=$line
+  if [ $line -eq 1 ] || [ $line -eq 2 ] || [ $line -eq 4 ] || [ $line -eq 8 ]; then
+    NUM_THREAD=$line
   else
     echo "Only numbers 1,2,4 and 8 are supported!"
     exit 1
@@ -140,7 +140,7 @@ fi
 ## Give some status
 echo
 echo "Current Settings:"
-echo "Extract DBCs/maps: $USE_AD, Extract vmaps: $USE_VMAPS, Extract mmaps: $USE_MMAPS, Processes for mmaps: $NUM_CPU"
+echo "Extract DBCs/maps: $USE_AD, Extract vmaps: $USE_VMAPS, Extract mmaps: $USE_MMAPS, Processes for mmaps: $NUM_THREAD"
 if [ "$USE_AD" = "1" ] && [ "$AD_RES" = "-f 0" ]; then
   echo "maps extraction will be high-resolution";
 fi
@@ -174,13 +174,13 @@ else
 fi
 if [ "$USE_MMAPS" = "1" ]
 then
-  echo "Mmaps will be extracted with $NUM_CPU processes" | tee -a $LOG_FILE
+  echo "Mmaps will be extracted with $NUM_THREAD processes" | tee -a $LOG_FILE
 else
   echo "Mmaps files won't be extracted!" | tee -a $LOG_FILE
 fi
 echo | tee -a $LOG_FILE
 
-echo "$(date): Start extracting dataz for MaNGOS, DBCs/maps $USE_AD, vmaps $USE_VMAPS, mmaps $USE_MMAPS on $NUM_CPU processes" | tee $DETAIL_LOG_FILE
+echo "$(date): Start extracting dataz for MaNGOS, DBCs/maps $USE_AD, vmaps $USE_VMAPS, mmaps $USE_MMAPS on $NUM_THREAD processes" | tee $DETAIL_LOG_FILE
 echo | tee -a $DETAIL_LOG_FILE
 
 ## Extract dbcs and maps
@@ -216,5 +216,5 @@ then
     echo "Current time: $(date)"
     sleep $USE_MMAPS_DELAY
   fi
-  sh MoveMapGen.sh $NUM_CPU $LOG_FILE $DETAIL_LOG_FILE
+  sh MoveMapGen.sh $NUM_THREAD $LOG_FILE $DETAIL_LOG_FILE
 fi
