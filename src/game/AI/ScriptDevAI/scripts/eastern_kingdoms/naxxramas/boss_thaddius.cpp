@@ -19,17 +19,16 @@ SDName: Boss_Thaddius
 SD%Complete: 100
 SDComment:
 SDCategory: Naxxramas
-EndScriptData
+EndScriptData */
 
-*/
-
-#include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
+/* ContentData
 boss_thaddius
 boss_stalagg
 boss_feugen
 EndContentData */
 
-
+#include "AI/ScriptDevAI/base/CombatAI.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "naxxramas.h"
 
 enum
@@ -84,27 +83,42 @@ enum
 ** boss_thaddius
 ************/
 
-struct boss_thaddiusAI : public ScriptedAI
+enum ThaddiusActions
 {
-    boss_thaddiusAI(Creature* creature) : ScriptedAI(creature)
+    THADDIUS_POLARITY_SHIFT,
+    THADDIUS_CHAIN_LIGHTNING,
+    THADDIUS_BALL_LIGHTNING,
+    THADDIUS_BERSERK,
+    THADDIUS_ACTION_MAX,
+};
+
+struct boss_thaddiusAI : public CombatAI
+{
+    boss_thaddiusAI(Creature* creature) : CombatAI(creature, THADDIUS_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_instance = (instance_naxxramas*)creature->GetInstanceData();
-        Reset();
+        AddCombatAction(THADDIUS_POLARITY_SHIFT, true);
+        AddCombatAction(THADDIUS_CHAIN_LIGHTNING, true);
+        AddCombatAction(THADDIUS_BALL_LIGHTNING, true);
+        AddCombatAction(THADDIUS_BERSERK, true);
     }
 
-    instance_naxxramas* m_instance;
+    ScriptedInstance* m_instance;
 
-    uint32 m_polarityShiftTimer;
-    uint32 m_chainLightningTimer;
-    uint32 m_ballLightningTimer;
-    uint32 m_berserkTimer;
+    uint32 GetSubsequentActionTimer(uint32 id)
+    {
+        switch (id)
+        {
+            case THADDIUS_CHAIN_LIGHTNING: return 15u * IN_MILLISECONDS;
+            case THADDIUS_POLARITY_SHIFT: return 30u * IN_MILLISECONDS;
+            case THADDIUS_BALL_LIGHTNING: return 3u * IN_MILLISECONDS;
+            case THADDIUS_BERSERK: return 10u * MINUTE * IN_MILLISECONDS;
+            default: return 0;
+        }
+    }
 
     void Reset() override
     {
-        m_polarityShiftTimer = 15 * IN_MILLISECONDS;
-        m_chainLightningTimer = 8 * IN_MILLISECONDS;
-        m_ballLightningTimer = 3 * IN_MILLISECONDS;
-        m_berserkTimer = 6 * MINUTE * IN_MILLISECONDS;
+        CombatAI::Reset();
 
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_creature->SetImmuneToPlayer(true);
@@ -119,6 +133,11 @@ struct boss_thaddiusAI : public ScriptedAI
             case 1: DoScriptText(SAY_AGGRO_2, m_creature); break;
             case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
         }
+
+        ResetCombatAction(THADDIUS_CHAIN_LIGHTNING, 8u * IN_MILLISECONDS);
+        ResetCombatAction(THADDIUS_POLARITY_SHIFT, 15u * IN_MILLISECONDS);
+        ResetCombatAction(THADDIUS_BERSERK, 6u * MINUTE * IN_MILLISECONDS);
+        ResetCombatAction(THADDIUS_BALL_LIGHTNING, 3u * IN_MILLISECONDS);
 
         // Make Attackable
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -160,66 +179,48 @@ struct boss_thaddiusAI : public ScriptedAI
         }
     }
 
-    void UpdateAI(const uint32 diff) override
+    void ExecuteAction(uint32 action) override
     {
         if (!m_instance)
             return;
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // Berserk
-        if (m_berserkTimer < diff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_BESERK) == CAST_OK)                  // allow combat movement?
-                m_berserkTimer = 10 * MINUTE * IN_MILLISECONDS;
-        }
-        else
-            m_berserkTimer -= diff;
-
-        // Polarity Shift
-        if (m_polarityShiftTimer < diff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_POLARITY_SHIFT, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+            case THADDIUS_CHAIN_LIGHTNING:
             {
-                DoScriptText(SAY_ELECT, m_creature);
-                m_polarityShiftTimer = 30 * IN_MILLISECONDS;
+                Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
+                if (target && DoCastSpellIfCan(target, SPELL_CHAIN_LIGHTNING) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                return;
+            }
+            case THADDIUS_POLARITY_SHIFT:
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_POLARITY_SHIFT, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                {
+                    DoScriptText(SAY_ELECT, m_creature);
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                }
+                return;
+            }
+            case THADDIUS_BALL_LIGHTNING:
+            {
+                Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_IN_MELEE_RANGE);
+                if (!target)
+                {
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_BALL_LIGHTNING) == CAST_OK)
+                        ResetCombatAction(action, GetSubsequentActionTimer(action));
+                }
+                return;
+            }
+            case THADDIUS_BERSERK:
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_BESERK) == CAST_OK)                  // allow combat movement?
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                return;
             }
         }
-        else
-            m_polarityShiftTimer -= diff;
-
-        // Chain Lightning
-        if (m_chainLightningTimer < diff)
-        {
-            Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
-            if (target && DoCastSpellIfCan(target, SPELL_CHAIN_LIGHTNING) == CAST_OK)
-                m_chainLightningTimer = 15 * IN_MILLISECONDS;
-        }
-        else
-            m_chainLightningTimer -= diff;
-
-        // Ball Lightning if no target in melee range
-        Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_IN_MELEE_RANGE);
-        if (!target)
-        {
-            if (m_ballLightningTimer < diff)
-            {
-                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_BALL_LIGHTNING) == CAST_OK)
-                    m_ballLightningTimer = 3 * IN_MILLISECONDS;
-            }
-            else
-                m_ballLightningTimer -= diff;
-        }
-        else
-            DoMeleeAttackIfReady();
     }
 };
-
-UnitAI* GetAI_boss_thaddius(Creature* creature)
-{
-    return new boss_thaddiusAI(creature);
-}
 
 bool EffectDummyNPC_spell_thaddius_encounter(Unit* /*caster*/, uint32 spellId, SpellEffectIndex effIndex, Creature* creatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
@@ -319,7 +320,7 @@ struct boss_thaddiusAddsAI : public ScriptedAI
         return otherAdd;
     }
 
-    void Aggro(Unit* who) override
+    void Aggro(Unit* /*who*/) override
     {
         if (!m_instance)
             return;
@@ -603,7 +604,7 @@ void AddSC_boss_thaddius()
 {
     Script* newScript = new Script;
     newScript->Name = "boss_thaddius";
-    newScript->GetAI = &GetAI_boss_thaddius;
+    newScript->GetAI = &GetNewAIInstance<boss_thaddiusAI>;
     newScript->pEffectDummyNPC = &EffectDummyNPC_spell_thaddius_encounter;
     newScript->RegisterSelf();
 
