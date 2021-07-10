@@ -1805,25 +1805,82 @@ Loot::Loot(Player* player, Corpse* corpse, LootType type) :
     m_lootTarget = corpse;
     m_guidTarget = corpse->GetObjectGuid();
 
-    if (type != LOOT_INSIGNIA || corpse->GetType() == CORPSE_BONES)
+    if (type != LOOT_INSIGNIA && corpse->GetType() == CORPSE_BONES)
         return;
+
+    MANGOS_ASSERT(player->GetBattleGround());
 
     if (!corpse->lootForBody)
     {
         corpse->lootForBody = true;
         uint32 pLevel;
-        if (Player* plr = sObjectAccessor.FindPlayer(corpse->GetOwnerGuid()))
+        Player* plr = sObjectAccessor.FindPlayer(corpse->GetOwnerGuid());
+        if (plr)
             pLevel = plr->GetLevel();
         else
             pLevel = player->GetLevel(); // TODO:: not correct, need to save real player level in the corpse data in case of logout
 
-         m_ownerSet.insert(player->GetObjectGuid());
-         m_lootMethod = NOT_GROUP_TYPE_LOOT;
-         m_clientLootType = CLIENT_LOOT_CORPSE;
+        m_ownerSet.insert(player->GetObjectGuid());
+        m_lootMethod = NOT_GROUP_TYPE_LOOT;
+        m_clientLootType = CLIENT_LOOT_CORPSE;
+        if (uint32 refLootId = player->GetBattleGround()->GetPlayerSkinRefLootId())
+            FillLoot(refLootId, LootTemplates_Reference, player, true);
 
-        if (player->GetBattleGround()->GetTypeId() == BATTLEGROUND_AV)
-            FillLoot(0, LootTemplates_Creature, player, false);
+        if (plr && player->InBattleGround() && player->GetBattleGroundTypeId() == BATTLEGROUND_AV)
+        {
+            // not doable in current loot system - cant pass looted players rank - would need to be separate refloots
+            uint32 rank = plr->GetHonorHighestRankInfo().rank;
+            uint32 rankItem = 0;
+            if (rank < 6)
+                if (plr->GetTeam() == ALLIANCE)
+                    rankItem = 17326;
+                else
+                    rankItem = 17502;
+            else if (rank < 10)
+                if (plr->GetTeam() == ALLIANCE)
+                    rankItem = 17327;
+                else
+                    rankItem = 17503;
+            else if (plr->GetTeam() == ALLIANCE)
+                rankItem = 17328;
+            else
+                rankItem = 17504;
 
+            if (rankItem)
+            {
+                LootStoreItem storeitem = LootStoreItem(rankItem, 75, 0, 0, 0, 1);
+                AddItem(storeitem);
+            }
+
+            // doable in refloot
+            uint32 questItem = 0;
+            if (plr->GetTeam() == ALLIANCE)
+                questItem = 17306;
+            else
+                questItem = 17423;
+
+            if (questItem)
+            {
+                LootStoreItem storeitem = LootStoreItem(questItem, 100, 0, 0, 1, 1);
+                AddItem(storeitem);
+            }
+            LootStoreItem storeitem = LootStoreItem(17422, 75, 0, 0, 0, 20);
+            AddItem(storeitem);
+
+            // Everyone can loot in AV.
+            for (auto& itr : player->GetBattleGround()->GetPlayers())
+            {
+                if (itr.second.playerTeam != player->GetTeam())
+                    continue;
+
+                for (auto lootItem : m_lootItems)
+                {
+                    if (lootItem->itemId == rankItem || lootItem->itemId == questItem)
+                        lootItem->allowedGuid.emplace(itr.first);
+                }
+            }
+        }
+        
         // It may need a better formula
         // Now it works like this: lvl10: ~6copper, lvl70: ~9silver
         m_gold = (uint32)(urand(50, 150) * 0.016f * pow(((float)pLevel) / 5.76f, 2.5f) * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY));
