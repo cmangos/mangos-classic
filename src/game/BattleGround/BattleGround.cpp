@@ -1729,8 +1729,12 @@ void BattleGround::HandleTriggerBuff(ObjectGuid go_guid)
 */
 void BattleGround::HandleKillPlayer(Player* player, Player* killer)
 {
-    // add +1 deaths
-    UpdatePlayerScore(player, SCORE_DEATHS, 1);
+    if (!player->HasAura(27827)) // do not count spirit of redemption
+    {
+        // add +1 deaths
+        UpdatePlayerScore(player, SCORE_DEATHS, 1);
+        player->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+    }
 
     // add +1 kills to group and +1 killing_blows to killer
     if (killer)

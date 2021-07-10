@@ -7566,6 +7566,10 @@ void Player::RemovedInsignia(Player* looterPlr)
     if (!corpse)
         return;
 
+    WorldPacket data(SMSG_PLAYER_SKINNED, 1);
+    data << uint8(0);
+    GetSession()->SendPacket(data);
+
     // We have to convert player corpse to bones, not to be able to resurrect there
     // SpawnCorpseBones isn't handy, 'cos it saves player while he in BG
     Corpse* bones = sObjectAccessor.ConvertCorpseForPlayer(GetObjectGuid(), true);
@@ -7574,6 +7578,7 @@ void Player::RemovedInsignia(Player* looterPlr)
 
     // Now we must make bones lootable, and send player loot
     bones->SetFlag(CORPSE_FIELD_DYNAMIC_FLAGS, CORPSE_DYNFLAG_LOOTABLE);
+    bones->ForceValuesUpdateAtIndex(CORPSE_DYNFLAG_LOOTABLE);
 
     // We store the level of our player in the gold field
     // We retrieve this information at Player::SendLoot()
