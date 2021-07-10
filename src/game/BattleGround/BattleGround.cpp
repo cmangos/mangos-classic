@@ -183,7 +183,7 @@ void BattleGround::BroadcastWorker(Do& _do)
             _do(plr);
 }
 
-BattleGround::BattleGround(): m_buffChange(false), m_startDelayTime(0), m_startMaxDist(0)
+BattleGround::BattleGround(): m_buffChange(false), m_startDelayTime(0), m_startMaxDist(0), m_playerSkinReflootId(0)
 {
     m_typeId            = BATTLEGROUND_TYPE_NONE;
     m_status            = STATUS_NONE;

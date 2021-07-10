@@ -558,7 +558,7 @@ class BattleGround
         // door-events are automaticly added - but _ALL_ other must be in this vector
         std::map<uint8, uint8> m_activeEvents;
 
-
+        uint32 GetPlayerSkinRefLootId() const { return m_playerSkinReflootId; }
     protected:
         // this method is called, when BG cannot spawn its own spirit guide, or something is wrong, It correctly ends BattleGround
         void EndNow();
@@ -636,6 +636,8 @@ class BattleGround
         float m_teamStartLocZ[PVP_TEAM_COUNT];
         float m_teamStartLocO[PVP_TEAM_COUNT];
         float m_startMaxDist;
+
+        uint32 m_playerSkinReflootId;
 };
 
 // helper functions for world state list fill

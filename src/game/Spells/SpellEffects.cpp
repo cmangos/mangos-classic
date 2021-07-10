@@ -5788,11 +5788,47 @@ void Spell::EffectSpiritHeal(SpellEffectIndex /*eff_idx*/)
 void Spell::EffectSkinPlayerCorpse(SpellEffectIndex /*eff_idx*/)
 {
     DEBUG_LOG("Effect: SkinPlayerCorpse");
-    if ((m_caster->GetTypeId() != TYPEID_PLAYER) || (unitTarget->GetTypeId() != TYPEID_PLAYER) || (unitTarget->IsAlive()))
+    Player* playerCaster = m_caster->IsPlayer() ? (Player*)m_caster : nullptr;
+    if (!playerCaster)
         return;
+    
+    Unit* target = unitTarget;
+    if (!target && corpseTarget)
+        target = sObjectAccessor.FindPlayer(corpseTarget->GetOwnerGuid());
 
-    ((Player*)unitTarget)->RemovedInsignia((Player*)m_caster);
-    m_spellLog.AddLog(uint32(SPELL_EFFECT_SKIN_PLAYER_CORPSE), unitTarget->GetObjectGuid());
+    if (!target)
+    {
+        Corpse* bones = sObjectAccessor.ConvertCorpseForPlayer(corpseTarget->GetOwnerGuid(), true);
+        if (!bones)
+            return;
+
+        // Now we must make bones lootable, and send player loot
+        bones->SetFlag(CORPSE_FIELD_DYNAMIC_FLAGS, CORPSE_DYNFLAG_LOOTABLE);
+
+        // We store the level of our player in the gold field
+        // We retrieve this information at Player::SendLoot()
+        bones->lootRecipient = playerCaster;
+
+        Loot*& bonesLoot = bones->m_loot;
+        if (!bonesLoot)
+            bonesLoot = new Loot(playerCaster, bones, LOOT_INSIGNIA);
+        else
+        {
+            if (bonesLoot->GetLootType() != LOOT_INSIGNIA)
+            {
+                delete bonesLoot;
+                bonesLoot = new Loot(playerCaster, bones, LOOT_INSIGNIA);
+            }
+        }
+
+        bonesLoot->ShowContentTo(playerCaster);
+
+        DEBUG_LOG("Effect SkinPlayerCorpse: corpse owner was not found");
+        return;
+    }
+
+    ((Player*)target)->RemovedInsignia((Player*)m_caster);
+    m_spellLog.AddLog(uint32(SPELL_EFFECT_SKIN_PLAYER_CORPSE), target->GetObjectGuid());
 }
 
 void Spell::EffectBind(SpellEffectIndex /*eff_idx*/)
