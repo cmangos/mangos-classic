@@ -1500,7 +1500,7 @@ void ObjectMgr::LoadGameObjects()
 
 void ObjectMgr::LoadGameObjectSpawnEntry()
 {
-    m_creatureSpawnEntryMap.clear();
+    m_gameobjectSpawnEntryMap.clear();
 
     QueryResult* result = WorldDatabase.Query("SELECT guid, entry FROM gameobject_spawn_entry");
 
