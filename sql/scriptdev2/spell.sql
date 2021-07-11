@@ -69,6 +69,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28007,'spell_summon_unrelenting'),
 (28009,'spell_summon_unrelenting'),
 (28011,'spell_summon_unrelenting'),
+(28374,'spell_gluth_decimate'),
 (28408,'spell_chains_kel_thuzad'),
 (28415,'spell_trigger_KT_add'),
 (28416,'spell_trigger_KT_add'),

@@ -34,6 +34,7 @@ enum
     SPELL_DOUBLE_ATTACK             = 19818,
     SPELL_MORTALWOUND               = 25646,
     SPELL_DECIMATE                  = 28374,
+    SPELL_DECIMATE_DAMAGE           = 28375,
     SPELL_ENRAGE                    = 28371,
     SPELL_BERSERK                   = 26662,
     SPELL_TERRIFYING_ROAR           = 29685,
@@ -179,10 +180,33 @@ struct boss_gluthAI : public CombatAI
     }
 };
 
+// Reduce all players and Zombie Chow NPCs HP to 5% max HP
+struct Decimate : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx ) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (Unit* unitTarget = spell->GetUnitTarget())
+            {
+                // Return if not player, pet nor Zombie Chow NPC
+                if (unitTarget->GetTypeId() == TYPEID_UNIT && !unitTarget->IsControlledByPlayer() && unitTarget->GetEntry() != NPC_ZOMBIE_CHOW)
+                    return;
+
+                int32 damage = unitTarget->GetHealth() - unitTarget->GetMaxHealth() * 0.05f;
+                if (damage > 0)
+                    spell->GetCaster()->CastCustomSpell(unitTarget, SPELL_DECIMATE_DAMAGE, &damage, nullptr, nullptr, TRIGGERED_INSTANT_CAST);
+            }
+        }
+    }
+};
+
 void AddSC_boss_gluth()
 {
     Script* newScript = new Script;
     newScript->Name = "boss_gluth";
     newScript->GetAI = &GetNewAIInstance<boss_gluthAI>;
     newScript->RegisterSelf();
+
+    RegisterSpellScript<Decimate>("spell_gluth_decimate");
 }
