@@ -86,6 +86,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (29201,'spell_loatheb_corrupted_mind'),
 (29330,'spell_sapphiron_despawn_buffet'),
 (29351,'spell_plague_wave_controller'),
+(29682,'spell_gluth_call_all_zombies'),
 (29874,'spell_gothik_side_assault'),
 (29875,'spell_check_gothik_side'),
 (29897,'spell_icecrown_guardian_periodic'),

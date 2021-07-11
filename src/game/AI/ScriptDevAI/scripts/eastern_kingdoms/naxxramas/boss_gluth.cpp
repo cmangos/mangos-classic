@@ -197,6 +197,24 @@ struct Decimate : public SpellScript
     }
 };
 
+struct CallAllZombies : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx ) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (Unit* unitTarget = spell->GetUnitTarget())
+            {
+                if (unitTarget->IsAlive())
+                {
+                    float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(spell->m_spellInfo->EffectRadiusIndex[effIdx]));
+                    unitTarget->GetMotionMaster()->MoveFollow(spell->GetCaster(), radius, 0);
+                }
+            }
+        }
+    }
+};
+
 struct ZombieChowSearch : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx ) const override
@@ -230,5 +248,6 @@ void AddSC_boss_gluth()
     newScript->RegisterSelf();
 
     RegisterSpellScript<Decimate>("spell_gluth_decimate");
+    RegisterSpellScript<CallAllZombies>("spell_gluth_call_all_zombies");
     RegisterSpellScript<ZombieChowSearch>("spell_gluth_zombie_search");
 }
