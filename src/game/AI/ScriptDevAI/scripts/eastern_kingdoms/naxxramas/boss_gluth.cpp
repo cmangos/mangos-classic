@@ -240,6 +240,15 @@ struct ZombieChowSearch : public SpellScript
     }
 };
 
+struct ZombieChowSearchHeal : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx ) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+            spell->GetCaster()->SetHealth(spell->GetCaster()->GetHealth() + spell->GetCaster()->GetMaxHealth() * 0.05f); // Gain 5% heal
+    }
+};
+
 void AddSC_boss_gluth()
 {
     Script* newScript = new Script;
@@ -250,4 +259,5 @@ void AddSC_boss_gluth()
     RegisterSpellScript<Decimate>("spell_gluth_decimate");
     RegisterSpellScript<CallAllZombies>("spell_gluth_call_all_zombies");
     RegisterSpellScript<ZombieChowSearch>("spell_gluth_zombie_search");
+    RegisterSpellScript<ZombieChowSearchHeal>("spell_gluth_zombie_search_heal");
 }
