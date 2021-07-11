@@ -69,6 +69,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28007,'spell_summon_unrelenting'),
 (28009,'spell_summon_unrelenting'),
 (28011,'spell_summon_unrelenting'),
+(28169,'spell_grobbulus_mutating_injection'),
 (28236,'spell_gluth_zombie_search'),
 (28374,'spell_gluth_decimate'),
 (28408,'spell_chains_kel_thuzad'),

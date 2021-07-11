@@ -1494,18 +1494,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             case 28084:                                     // Negative Charge
                 target->RemoveAurasDueToSpell(29660);
                 return;
-            case 28169:                                     // Mutating Injection
-            {
-                if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
-                    // Embalming Cloud
-                    target->CastSpell(target, 28322, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-                else // Removed by dispell
-                    // Mutagen Explosion
-                    target->CastSpell(target, 28206, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-                // Poison Cloud
-                target->CastSpell(target, 28240, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-                return;
-            }
             case 29104:                                     // Anub'Rekhan Aura
             {
                 if (m_removeMode == AURA_REMOVE_BY_DEATH && target->GetTypeId() == TYPEID_PLAYER)

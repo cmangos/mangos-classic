@@ -35,6 +35,8 @@ enum
 {
     SPELL_SLIME_STREAM              = 28137,
     SPELL_MUTATING_INJECTION        = 28169,
+    SPELL_EMBALMING_CLOUD           = 28322,
+    SPELL_MUTAGEN_EXPLOSION         = 28206,
     SPELL_POISON_CLOUD              = 28240,
     SPELL_SLIME_SPRAY               = 28157,
     SPELL_SUMMON_FALLOUT_SLIME      = 28218,
@@ -153,10 +155,34 @@ struct boss_grobbulusAI : public CombatAI
     }
 };
 
+struct MutatingInjection : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+        {
+            Unit* target = aura->GetTarget();
+            if (!target)
+                return;
+
+            if (aura->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+                // Embalming Cloud
+                target->CastSpell(target, SPELL_EMBALMING_CLOUD, TRIGGERED_OLD_TRIGGERED, nullptr, aura);
+            else // Removed by dispel
+                // Mutagen Explosion
+                target->CastSpell(target, SPELL_MUTAGEN_EXPLOSION, TRIGGERED_OLD_TRIGGERED, nullptr, aura);
+            // Poison Cloud
+            target->CastSpell(target, SPELL_POISON_CLOUD, TRIGGERED_OLD_TRIGGERED, nullptr, aura);
+        }
+    }
+};
+
 void AddSC_boss_grobbulus()
 {
     Script* newScript = new Script;
     newScript->Name = "boss_grobbulus";
     newScript->GetAI = &GetNewAIInstance<boss_grobbulusAI>;
     newScript->RegisterSelf();
+
+    RegisterAuraScript<MutatingInjection>("spell_grobbulus_mutating_injection");
 }
