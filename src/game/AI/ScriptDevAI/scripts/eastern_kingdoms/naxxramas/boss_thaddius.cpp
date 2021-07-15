@@ -656,19 +656,19 @@ struct ThaddiusChargeDamage : public SpellScript
         {
             switch (spell->m_spellInfo->Id)
             {
-                case SPELL_POSITIVE_CHARGE_DAMAGE:                      // Positive Charge
-                    if (target->HasAura(SPELL_NEGATIVE_CHARGE))   // Only deal damage if target has Negative Charge
-                        return true;
+                case SPELL_POSITIVE_CHARGE_DAMAGE:                // Positive Charge
+                    if (target->HasAura(SPELL_POSITIVE_CHARGE))   // Only deal damage to targets without Positive Charge
+                        return false;
                     break;
-                case SPELL_NEGATIVE_CHARGE_DAMAGE:                      // Negative Charge
-                    if (target->HasAura(SPELL_POSITIVE_CHARGE))   // Only deal damage if target has Positive Charge
-                        return true;
+                case SPELL_NEGATIVE_CHARGE_DAMAGE:                // Negative Charge
+                    if (target->HasAura(SPELL_NEGATIVE_CHARGE))   // Only deal damage to targets without Negative Charge
+                        return false;
                     break;
                 default:
                     break;
             }
         }
-        return false;
+        return true;
     }
 };
 
