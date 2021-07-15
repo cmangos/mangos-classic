@@ -58,6 +58,12 @@ enum
     SPELL_BALL_LIGHTNING            = 28299,
     SPELL_CHAIN_LIGHTNING           = 28167,
     SPELL_POLARITY_SHIFT            = 28089,
+    SPELL_POSITIVE_CHARGE           = 28059,
+    SPELL_NEGATIVE_CHARGE           = 28084,
+    SPELL_POSITIVE_CHARGE_BUFF      = 29659,
+    SPELL_NEGATIVE_CHARGE_BUFF      = 29660,
+    SPELL_POSITIVE_CHARGE_DAMAGE    = 28062,
+    SPELL_NEGATIVE_CHARGE_DAMAGE    = 28085,
     SPELL_BESERK                    = 27680,
 
     // Stalagg & Feugen Spells
@@ -600,6 +606,112 @@ UnitAI* GetAI_boss_feugen(Creature* creature)
     return new boss_feugenAI(creature);
 }
 
+/****************
+** Polarity Shift
+****************/
+
+struct PolarityShift : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx ) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (Unit* unitTarget = spell->GetUnitTarget())
+            {
+                unitTarget->RemoveAurasDueToSpell(SPELL_POSITIVE_CHARGE);
+                unitTarget->RemoveAurasDueToSpell(SPELL_NEGATIVE_CHARGE);
+
+                uint64 scriptValue = spell->GetScriptValue();
+
+                // 28059 : Positive Charge, 28084 : Negative Charge
+                switch (scriptValue)
+                {
+                    case 0: // first target random
+                        scriptValue = urand(0, 1) ? SPELL_POSITIVE_CHARGE : SPELL_NEGATIVE_CHARGE;
+                        spell->SetScriptValue(scriptValue);
+                        unitTarget->CastSpell(unitTarget, scriptValue, TRIGGERED_INSTANT_CAST);
+                        break;
+                    case SPELL_POSITIVE_CHARGE: // second target the other
+                        spell->SetScriptValue(1);
+                        unitTarget->CastSpell(unitTarget, SPELL_NEGATIVE_CHARGE, TRIGGERED_INSTANT_CAST);
+                        break;
+                    case SPELL_NEGATIVE_CHARGE:
+                        spell->SetScriptValue(1);
+                        unitTarget->CastSpell(unitTarget, SPELL_POSITIVE_CHARGE, TRIGGERED_INSTANT_CAST);
+                        break;
+                    default: // third and later random
+                        unitTarget->CastSpell(unitTarget, urand(0, 1) ? SPELL_POSITIVE_CHARGE : SPELL_NEGATIVE_CHARGE, TRIGGERED_INSTANT_CAST);
+                        break;
+                }
+            }
+        }
+    }
+};
+
+struct ThaddiusChargeDamage : public SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            switch (spell->m_spellInfo->Id)
+            {
+                case SPELL_POSITIVE_CHARGE_DAMAGE:                      // Positive Charge
+                    if (target->HasAura(SPELL_NEGATIVE_CHARGE))   // Only deal damage if target has Negative Charge
+                        return true;
+                    break;
+                case SPELL_NEGATIVE_CHARGE_DAMAGE:                      // Negative Charge
+                    if (target->HasAura(SPELL_POSITIVE_CHARGE))   // Only deal damage if target has Positive Charge
+                        return true;
+                    break;
+                default:
+                    break;
+            }
+        }
+        return false;
+    }
+};
+
+struct ThaddiusCharge : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+        {
+            Unit* target = aura->GetTarget();
+            if (!target)
+                return;
+
+            // On Polarity Shift, remove the previous damage buffs
+            uint32 buffAuraIds[2] = { SPELL_POSITIVE_CHARGE_BUFF , SPELL_NEGATIVE_CHARGE_BUFF };
+            for (auto buffAura: buffAuraIds)
+                target->RemoveAurasDueToSpell(buffAura);
+        }
+    }
+
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        if (Unit* target = aura->GetTarget())
+        {
+
+            uint32 buffAuraId = aura->GetId() == SPELL_POSITIVE_CHARGE ? SPELL_POSITIVE_CHARGE_BUFF : SPELL_NEGATIVE_CHARGE_BUFF;
+            float range = 13.f; // Static value from DBC files. As the value is the same for both spells we can hardcode it instead of accessing is through sSpellRadiusStore
+
+            uint32 curCount = 0;
+            PlayerList playerList;
+            GetPlayerListWithEntryInWorld(playerList, target, range);
+            for (Player* player : playerList)
+                if (target != player && player->HasAura(aura->GetId()))
+                    ++curCount;
+
+            // Remove previous buffs in case we have less targets of the same charge near use than in previous tick
+            target->RemoveAurasDueToSpell(buffAuraId);
+                for (uint32 i = 0; i < curCount; i++)
+                    target->CastSpell(target, buffAuraId, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void AddSC_boss_thaddius()
 {
     Script* newScript = new Script;
@@ -617,4 +729,8 @@ void AddSC_boss_thaddius()
     newScript->Name = "boss_feugen";
     newScript->GetAI = &GetAI_boss_feugen;
     newScript->RegisterSelf();
+
+    RegisterSpellScript<PolarityShift>("spell_thaddius_polarity_shift");
+    RegisterSpellScript<ThaddiusChargeDamage>("spell_thaddius_charge_damage");
+    RegisterAuraScript<ThaddiusCharge>("spell_thaddius_charge_buff");
 }
