@@ -19,10 +19,6 @@
 ## Additional Parameters to be forwarded to MoveMapGen, see mmaps/readme for instructions
 PARAMS="--silent --configInputPath config.json"
 
-## Already a few map extracted, and don't care anymore
-EXCLUDE_MAPS=""
-#EXCLUDE_MAPS="0 1 530 571" # example to exclude the continents
-
 ## Offmesh file
 OFFMESH_FILE="offmesh.txt"
 
