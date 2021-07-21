@@ -76,6 +76,7 @@ namespace MMAP
     {
         public:
             MapBuilder(const char* configInputPath,
+                       int threads,
                        bool skipLiquid          = false,
                        bool skipContinents      = false,
                        bool skipJunkMaps        = true,
@@ -136,6 +137,8 @@ namespace MMAP
 
             // build performance - not really used for now
             rcContext* m_rcContext;
+
+            int m_threads;
     };
 }
 

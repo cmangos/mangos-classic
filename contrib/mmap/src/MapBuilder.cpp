@@ -27,6 +27,7 @@
 
 #include <climits>
 #include <fstream>
+#include <queue>
 
 using namespace VMAP;
 
@@ -51,8 +52,9 @@ void from_json(const json& j, rcConfig& config)
 
 namespace MMAP
 {
-    MapBuilder::MapBuilder(const char* configInputPath, bool skipLiquid, bool skipContinents, bool skipJunkMaps,
+    MapBuilder::MapBuilder(const char* configInputPath, int threads, bool skipLiquid, bool skipContinents, bool skipJunkMaps,
                            bool skipBattlegrounds, bool debug, const char* offMeshFilePath) :
+        m_threads(threads),
         m_debug(debug),
         m_skipContinents(skipContinents),
         m_skipJunkMaps(skipJunkMaps),
@@ -66,6 +68,7 @@ namespace MMAP
         m_terrainBuilder = new TerrainBuilder(skipLiquid);
         m_rcContext = new rcContext(false);
 
+        printf("Using %d thread(s) for processing.\n", threads);
         discoverTiles();
     }
 
@@ -501,6 +504,8 @@ namespace MMAP
         // now start building mmtiles for each tile
         printf("[Map %03i] We have %u tiles.                          \n", mapID, uint32(tiles->size()));
 
+        std:queue<std::thread> threads;
+
         uint32 currentTile = 0;
         for (std::set<uint32>::iterator it = tiles->begin(); it != tiles->end(); ++it)
         {
@@ -513,7 +518,32 @@ namespace MMAP
             if (shouldSkipTile(mapID, tileX, tileY))
                 continue;
 
-            buildTile(mapID, tileX, tileY, navMesh, currentTile, uint32(tiles->size()));
+            // Make a copy of the original navMesh object to work on a separate
+            // thread since "the data should not be reused in other nav meshes"
+            // (see dtNavMesh::addTile description)
+            dtNavMesh* navMeshCopy = dtAllocNavMesh();
+            dtStatus dtResult = navMeshCopy->init(navMesh->getParams());
+            if (dtStatusFailed(dtResult))
+            {
+                printf("[Map %03i] Failed to copy navmesh!                   \n", mapID);
+                continue;
+            }
+
+            threads.emplace(std::thread(&MapBuilder::buildTile, this, mapID, tileX, tileY, navMeshCopy, currentTile, uint32(tiles->size())));
+
+            // If the threads queue is full - wait until first thread is finished
+            if (threads.size() == m_threads) {
+                std::thread &t = threads.front();
+                t.join();
+                threads.pop();
+            }
+        }
+
+        // If there are threads still left in the queue - wait until they finish
+        while (!threads.empty()) {
+            std::thread &t = threads.front();
+            t.join();
+            threads.pop();
         }
 
         dtFreeNavMesh(navMesh);
