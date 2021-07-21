@@ -526,6 +526,7 @@ namespace MMAP
             if (dtStatusFailed(dtResult))
             {
                 printf("[Map %03i] Failed to copy navmesh!                   \n", mapID);
+                printf("%s\n", dtGetReason(dtResult));
                 continue;
             }
 
@@ -645,6 +646,7 @@ namespace MMAP
         if (dtStatusFailed(dtResult))
         {
             printf("[Map %03i] Failed creating navmesh!                   \n", mapID);
+            printf("%s\n", dtGetReason(dtResult));
             return;
         }
 
@@ -875,6 +877,7 @@ namespace MMAP
             if (!tileRef || dtStatusFailed(dtResult))
             {
                 printf("%s Failed adding tile to navmesh!                     \n", tileString);
+                printf("%s\n", dtGetReason(dtResult));
                 continue;
             }
 

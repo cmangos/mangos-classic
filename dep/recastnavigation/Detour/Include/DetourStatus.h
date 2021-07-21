@@ -62,4 +62,23 @@ inline bool dtStatusDetail(dtStatus status, unsigned int detail)
 	return (status & detail) != 0;
 }
 
+inline char* dtGetReason(dtStatus status) {
+	if ((status & DT_WRONG_MAGIC) != 0)
+		return "Reason: 'Input data is not recognized'\n";
+	if ((status & DT_WRONG_VERSION) != 0)
+		return "Reason: 'Input data is in wrong version'\n";
+	if ((status & DT_OUT_OF_MEMORY) != 0)
+		return "Reason: 'Operation ran out of memory'\n";
+	if ((status & DT_INVALID_PARAM) != 0)
+		return "Reason: 'An input parameter was invalid'\n";
+	if ((status & DT_BUFFER_TOO_SMALL) != 0)
+		return "Reason: 'Result buffer for the query was too small to store all results'\n";
+	if ((status & DT_OUT_OF_NODES) != 0)
+		return "Reason: 'Query ran out of nodes during search'\n";
+	if ((status & DT_PARTIAL_RESULT) != 0)
+		return "Reason: 'Query did not reach the end location, returning best guess'\n";
+	if ((status & DT_ALREADY_OCCUPIED) != 0)
+		return "Reason: 'A tile has already been assigned to the given x,y coordinate'\n";
+}
+
 #endif // DETOURSTATUS_H
