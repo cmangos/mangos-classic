@@ -641,7 +641,8 @@ namespace MMAP
 
         navMesh = dtAllocNavMesh();
         printf("[Map %03i] Creating navMesh...                        \r", mapID);
-        if (!navMesh->init(&navMeshParams))
+        dtStatus dtResult = navMesh->init(&navMeshParams);
+        if (dtStatusFailed(dtResult))
         {
             printf("[Map %03i] Failed creating navmesh!                   \n", mapID);
             return;
