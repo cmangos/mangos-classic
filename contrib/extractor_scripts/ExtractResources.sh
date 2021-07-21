@@ -17,9 +17,6 @@ LOG_FILE="MaNGOSExtractor.log"
 ## Detailed log file
 DETAIL_LOG_FILE="MaNGOSExtractor_detailed.log"
 
-## Change this to a value fitting for your sys!
-NUM_THREAD="2"
-
 ## ! Use below only for finetuning or if you know what you are doing !
 
 USE_AD="0"
@@ -29,6 +26,7 @@ USE_MMAPS_OFFMESH="0"
 USE_MMAPS_DELAY=""
 AD_RES=""
 VMAP_RES=""
+NUM_THREAD=""
 
 if [ "$1" = "a" ]
 then
@@ -91,14 +89,18 @@ fi
 if [ "$USE_MMAPS" = "1" ]
 then
   ## Obtain number of processes
-  echo "How many CPU threads should be used for extracting mmaps? (1, 2, 4, 8)"
+  echo "How many CPU threads should be used for extracting mmaps? (leave empty to use all available threads)"
   read line
   echo
-  if [ $line -eq 1 ] || [ $line -eq 2 ] || [ $line -eq 4 ] || [ $line -eq 8 ]; then
-    NUM_THREAD=$line
+  if [[ ! -z $line ]]; then
+    if [[ $line =~ ^[1-9+]$ ]]; then
+      NUM_THREAD=$line
+    else
+      echo "Only numbers are allowed!"
+      exit 1
+    fi
   else
-    echo "Only numbers 1,2,4 and 8 are supported!"
-    exit 1
+    NUM_THREAD="all"
   fi
   ## Extract MMaps delayed?
   if [ "$USE_MMAPS_DELAY" != "no" ]; then
@@ -174,13 +176,13 @@ else
 fi
 if [ "$USE_MMAPS" = "1" ]
 then
-  echo "Mmaps will be extracted with $NUM_THREAD processes" | tee -a $LOG_FILE
+  echo "Mmaps will be extracted using $NUM_THREAD CPU threads" | tee -a $LOG_FILE
 else
   echo "Mmaps files won't be extracted!" | tee -a $LOG_FILE
 fi
 echo | tee -a $LOG_FILE
 
-echo "$(date): Start extracting dataz for MaNGOS, DBCs/maps $USE_AD, vmaps $USE_VMAPS, mmaps $USE_MMAPS on $NUM_THREAD processes" | tee $DETAIL_LOG_FILE
+echo "$(date): Start extracting MaNGOS data: DBCs/maps $USE_AD, vmaps $USE_VMAPS, mmaps $USE_MMAPS using $NUM_THREAD CPU threads" | tee $DETAIL_LOG_FILE
 echo | tee -a $DETAIL_LOG_FILE
 
 ## Extract dbcs and maps
@@ -216,5 +218,5 @@ then
     echo "Current time: $(date)"
     sleep $USE_MMAPS_DELAY
   fi
-  sh MoveMapGen.sh $NUM_THREAD $LOG_FILE $DETAIL_LOG_FILE
+  sh MoveMapGen.sh "maps" $LOG_FILE $DETAIL_LOG_FILE $NUM_THREAD
 fi
