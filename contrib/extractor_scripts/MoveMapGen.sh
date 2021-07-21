@@ -102,8 +102,8 @@ case "$1" in
     ./MoveMapGen $MAPS_LIST $PARAMS $OFFMESH --buildGameObjects | tee -a $DETAIL_LOG_FILE
    ;;
  "offmesh" )
-   echo "`date`: Recreate offmeshs from file $OFFMESH_FILE" | tee -a $LOG_FILE
-   echo "Recreate offmeshs from file $OFFMESH_FILE" | tee -a $DETAIL_LOG_FILE
+   echo "`date`: Recreate offmeshes from file $OFFMESH_FILE" | tee -a $LOG_FILE
+   echo "Recreate offmeshes from file $OFFMESH_FILE" | tee -a $DETAIL_LOG_FILE
    while read map tile line
    do
      ./MoveMapGen $PARAMS $OFFMESH $map --tile $tile | tee -a $DETAIL_LOG_FILE

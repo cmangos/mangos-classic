@@ -12,7 +12,7 @@
 
 ## Expected param 1 to be 'a' for all, else ask some questions
 
-## Normal log file (if not overwritten by second param
+## Normal log file (if not overwritten by second param)
 LOG_FILE="MaNGOSExtractor.log"
 ## Detailed log file
 DETAIL_LOG_FILE="MaNGOSExtractor_detailed.log"
