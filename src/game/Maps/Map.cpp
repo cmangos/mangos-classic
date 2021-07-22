@@ -982,6 +982,7 @@ void Map::GameObjectRelocation(GameObject* go, float x, float y, float z, float 
         RemoveFromGrid(go, oldGrid, old_cell);
         AddToGrid(go, newGrid, new_cell);
         go->GetViewPoint().Event_GridChanged(&(*newGrid)(new_cell.CellX(), new_cell.CellY()));
+		go->Relocate(x, y, z, orientation);
     }
     else
     {
