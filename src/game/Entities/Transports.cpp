@@ -488,7 +488,6 @@ void ElevatorTransport::Update(const uint32 /*diff*/)
 
         GetMap()->GameObjectRelocation(this, currentPos.x, currentPos.y, currentPos.z, GetOrientation());
         // SummonCreature(1, currentPos.x, currentPos.y, currentPos.z, GetOrientation(), TEMPSPAWN_TIMED_DESPAWN, 5000);
-        UpdateModelPosition();
 
         UpdatePassengerPositions(GetPassengers());
     }

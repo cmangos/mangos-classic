@@ -987,12 +987,10 @@ void Map::GameObjectRelocation(GameObject* go, float x, float y, float z, float 
         AddToGrid(go, newGrid, new_cell);
         go->GetViewPoint().Event_GridChanged(&(*newGrid)(new_cell.CellX(), new_cell.CellY()));
     }
-    else
-    {
-        go->Relocate(x, y, z, orientation);
-        go->UpdateModelPosition();
-        go->UpdateObjectVisibility();
-    }
+
+    go->Relocate(x, y, z, orientation);
+    go->UpdateModelPosition();
+    go->UpdateObjectVisibility();
 }
 
 bool Map::CreatureCellRelocation(Creature* c, const Cell& new_cell)
