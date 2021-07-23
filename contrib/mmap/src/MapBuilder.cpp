@@ -27,7 +27,7 @@
 
 #include <climits>
 #include <fstream>
-#include <queue>
+#include <future>
 
 using namespace VMAP;
 
@@ -504,7 +504,7 @@ namespace MMAP
         // now start building mmtiles for each tile
         printf("[Map %03i] We have %u tiles.                          \n", mapID, uint32(tiles->size()));
 
-        std:queue<std::thread> threads;
+        std:vector<std::future<void>> futures;
 
         uint32 currentTile = 0;
         for (std::set<uint32>::iterator it = tiles->begin(); it != tiles->end(); ++it)
@@ -530,22 +530,32 @@ namespace MMAP
                 continue;
             }
 
-            threads.emplace(std::thread(&MapBuilder::buildTile, this, mapID, tileX, tileY, navMeshCopy, currentTile, uint32(tiles->size())));
+            futures.emplace_back(std::async(std::launch::async, &MapBuilder::buildTile, this, mapID, tileX, tileY, navMeshCopy, currentTile, uint32(tiles->size())));
 
-            // If the threads queue is full - wait until first thread is finished
-            if (threads.size() == m_threads) {
-                std::thread &t = threads.front();
-                t.join();
-                threads.pop();
+            // If the futures queue is full - check if any futures have finished execution, get the result and remove them from the vector
+            while (futures.size() == m_threads)
+            {
+                for (std::vector<std::future<void>>::iterator f = futures.begin(); f != futures.end();)
+                {
+                    std::future_status status = f->wait_for(std::chrono::seconds(0));
+                    if (status == std::future_status::ready)
+                    {
+                        f->get();
+                        f = futures.erase(f);
+                    }
+                    else
+                    {
+                        ++f;
+                    }
+                }
+                std::this_thread::yield();
             }
         }
 
-        // If there are threads still left in the queue - wait until they finish
-        while (!threads.empty()) {
-            std::thread &t = threads.front();
-            t.join();
-            threads.pop();
-        }
+        // If there are futures still left in the vector - wait until they finish
+        if (futures.size() > 0)
+            for (auto& f : futures)
+                f.get();
 
         dtFreeNavMesh(navMesh);
 
