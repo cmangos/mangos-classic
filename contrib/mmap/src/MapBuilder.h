@@ -21,7 +21,6 @@
 
 #include <vector>
 #include <set>
-#include <map>
 
 #include "TerrainBuilder.h"
 #include "IntermediateValues.h"
