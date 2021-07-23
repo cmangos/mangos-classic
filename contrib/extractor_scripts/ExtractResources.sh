@@ -39,7 +39,7 @@ else
   ## do some questioning!
   echo
   echo "Welcome to helper script to extract required dataz for MaNGOS!"
-  echo "Should all dataz (dbc, maps, vmaps and mmaps be extracted? (y/n)"
+  echo "Should all dataz (dbc, maps, vmaps and mmaps) be extracted? (y/n)"
   read line
   if [ "$line" = "y" ]
   then
@@ -60,7 +60,7 @@ else
 
     echo
     echo "Should mmaps be extracted? (y/n)"
-    echo "WARNING! This will take several hours! (you can later tell to start delayed)"
+    echo "WARNING! This may take several hours with small number of CPU threads!"
     read line
     if [ "$line" = "y" ]
     then
@@ -80,7 +80,7 @@ fi
 ## Special case: Only reextract offmesh tiles
 if [ "$USE_MMAPS_OFFMESH" = "1" ]
 then
-  echo "Only extracting offmesh meshes"
+  echo "Only extracting offmesh tiles"
   MoveMapGen.sh offmesh $LOG_FILE $DETAIL_LOG_FILE
   exit 0
 fi
