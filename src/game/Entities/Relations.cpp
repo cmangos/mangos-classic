@@ -1073,7 +1073,7 @@ bool Unit::CanAttackSpell(Unit const* target, SpellEntry const* spellInfo, bool 
             return false;
     }
 
-    if (CanAttack(target))
+    if (CanAttackInCombat(target))
     {
         if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         {
@@ -1154,6 +1154,40 @@ bool Unit::CanAttackOnSight(Unit const* target) const
         return false;
 
     return (CanAttack(target) && IsEnemy(target));
+}
+
+/////////////////////////////////////////////////
+/// [Serverside] Opposition: Unit can attack a target on sight
+///
+/// @note Relations API Tier 3
+///
+/// This function is not intented to have client-side counterpart by original design.
+/// Typically used for combat checks for at war case
+/////////////////////////////////////////////////
+bool Unit::CanAttackInCombat(Unit const* target) const
+{
+    if (!CanAttack(target))
+    {
+        if (target->IsPlayerControlled()) // If this is not fine grained enough, incorporation into CanAttack or copypaste of that whole func will be necessary
+        {
+            // NPC should be able to attack players who are at war with the npc
+            if (IsFriend(target))
+            {
+                if (const Player* unitPlayer = target->GetControllingPlayer())
+                {
+                    if (const FactionTemplateEntry* thisFactionTemplate = GetFactionTemplateEntry())
+                    {
+                        FactionEntry const* thisFactionEntry = sFactionStore.LookupEntry(thisFactionTemplate->faction);
+                        if (thisFactionEntry && thisFactionEntry->HasReputation() && unitPlayer->GetReputationMgr().IsAtWar(thisFactionEntry))
+                            return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    return true;
 }
 
 /////////////////////////////////////////////////
