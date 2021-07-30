@@ -612,6 +612,8 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 22781:         // Thornling
         case 22788:         // Grow
         case 22856:         // Ice Lock (Guard Slip'kik ice trap in Dire Maul)
+        case 23255:         // Deep Wounds
+        case 24313:         // Shade Visual
         case 25592:         // Hate to Zero (Hate to Zero)
         case 26341:         // Saurfang's Rage
         case 27987:         // Unholy Aura
