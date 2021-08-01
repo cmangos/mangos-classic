@@ -181,6 +181,7 @@ struct AhnQirajData
         memset(m_WarEffortCounters, 0, sizeof(m_WarEffortCounters));
     }
     std::string GetData();
+    uint32 GetDaysRemaining() const;
 };
 
 enum LoveIsInTheAirLeaders

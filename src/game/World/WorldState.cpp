@@ -302,7 +302,7 @@ void WorldState::HandlePlayerLeaveZone(Player* player, uint32 zoneId)
 bool WorldState::IsConditionFulfilled(uint32 conditionId, uint32 state) const
 {
     if (conditionId == WAR_EFFORT_DAYS_LEFT)
-        return uint32(m_aqData.m_timer / DAY * IN_MILLISECONDS) == state;
+        return m_aqData.GetDaysRemaining() == state;
 
     return m_transportStates.at(conditionId) == state;
 }
@@ -568,6 +568,12 @@ void WorldState::HandleWarEffortPhaseTransition(uint32 newPhase)
         case PHASE_2_TRANSPORTING_RESOURCES:
             m_aqData.m_phase = PHASE_2_TRANSPORTING_RESOURCES;
             m_aqData.m_timer = 5 * DAY * IN_MILLISECONDS;
+            {
+                std::lock_guard<std::mutex> guard(m_aqData.m_warEffortMutex);
+                for (ObjectGuid& guid : m_aqData.m_warEffortWorldstatesPlayers)
+                    if (Player* player = sObjectMgr.GetPlayer(guid))
+                        player->SendUpdateWorldState(WORLD_STATE_AQ_DAYS_LEFT, m_aqData.GetDaysRemaining());
+            }
             break;
         case PHASE_4_10_HOUR_WAR:
             m_aqData.m_phase = PHASE_4_10_HOUR_WAR;
@@ -868,40 +874,46 @@ std::string AhnQirajData::GetData()
     return output;
 }
 
+uint32 AhnQirajData::GetDaysRemaining() const
+{
+    return uint32(m_timer / (DAY * IN_MILLISECONDS));
+}
 void WorldState::FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 zoneId)
 {
-    if (sGameEventMgr.IsActiveHoliday(HOLIDAY_LOVE_IS_IN_THE_AIR))
+    switch (zoneId)
     {
-        switch (zoneId)
+        case ZONEID_STORMWIND_CITY:
+        case ZONEID_DARNASSUS:
+        case ZONEID_IRONFORGE:
+        case ZONEID_ORGRIMMAR:
+        case ZONEID_THUNDER_BLUFF:
+        case ZONEID_UNDERCITY:
         {
-            case ZONEID_STORMWIND_CITY: // TODO: Add rest
+            if (sGameEventMgr.IsActiveHoliday(HOLIDAY_LOVE_IS_IN_THE_AIR))
             {
-                if (sGameEventMgr.IsActiveHoliday(HOLIDAY_LOVE_IS_IN_THE_AIR))
-                {
-                    uint32 allianceSum = GetLoveIsInTheAirCounter(LOVE_LEADER_BOLVAR) + GetLoveIsInTheAirCounter(LOVE_LEADER_TYRANDE) + GetLoveIsInTheAirCounter(LOVE_LEADER_MAGNI);
-                    uint32 hordeSum = GetLoveIsInTheAirCounter(LOVE_LEADER_CAIRNE) + GetLoveIsInTheAirCounter(LOVE_LEADER_THRALL) + GetLoveIsInTheAirCounter(LOVE_LEADER_SYLVANAS);
-                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_BOLVAR, GetLoveIsInTheAirCounter(LOVE_LEADER_BOLVAR));
-                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_TYRANDE, GetLoveIsInTheAirCounter(LOVE_LEADER_TYRANDE));
-                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_MAGNI, GetLoveIsInTheAirCounter(LOVE_LEADER_MAGNI));
-                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_TOTAL_ALLIANCE, allianceSum);
-                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_CAIRNE, GetLoveIsInTheAirCounter(LOVE_LEADER_CAIRNE));
-                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_THRALL, GetLoveIsInTheAirCounter(LOVE_LEADER_THRALL));
-                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_SYLVANAS, GetLoveIsInTheAirCounter(LOVE_LEADER_SYLVANAS));
-                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_TOTAL_HORDE, hordeSum);
-                }
-
-                if (m_aqData.m_phase == PHASE_1_GATHERING_RESOURCES)
-                {
-                    // totals first
-                    for (auto itr = aqWorldStateTotalsMap.begin(); itr != aqWorldStateTotalsMap.end(); ++itr)
-                        FillInitialWorldStateData(data, count, (*itr).first, (*itr).second);
-                    for (auto itr = aqWorldstateMap.begin(); itr != aqWorldstateMap.end(); ++itr)
-                        FillInitialWorldStateData(data, count, m_aqData.m_WarEffortCounters[(*itr).first], (*itr).second);
-                }
-                else if (m_aqData.m_phase == PHASE_2_TRANSPORTING_RESOURCES)
-                    FillInitialWorldStateData(data, count, WORLD_STATE_AQ_DAYS_LEFT, uint32(m_aqData.m_timer / DAY * IN_MILLISECONDS));
-                break;
+                uint32 allianceSum = GetLoveIsInTheAirCounter(LOVE_LEADER_BOLVAR) + GetLoveIsInTheAirCounter(LOVE_LEADER_TYRANDE) + GetLoveIsInTheAirCounter(LOVE_LEADER_MAGNI);
+                uint32 hordeSum = GetLoveIsInTheAirCounter(LOVE_LEADER_CAIRNE) + GetLoveIsInTheAirCounter(LOVE_LEADER_THRALL) + GetLoveIsInTheAirCounter(LOVE_LEADER_SYLVANAS);
+                FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_BOLVAR, GetLoveIsInTheAirCounter(LOVE_LEADER_BOLVAR));
+                FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_TYRANDE, GetLoveIsInTheAirCounter(LOVE_LEADER_TYRANDE));
+                FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_MAGNI, GetLoveIsInTheAirCounter(LOVE_LEADER_MAGNI));
+                FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_TOTAL_ALLIANCE, allianceSum);
+                FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_CAIRNE, GetLoveIsInTheAirCounter(LOVE_LEADER_CAIRNE));
+                FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_THRALL, GetLoveIsInTheAirCounter(LOVE_LEADER_THRALL));
+                FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_SYLVANAS, GetLoveIsInTheAirCounter(LOVE_LEADER_SYLVANAS));
+                FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_TOTAL_HORDE, hordeSum);
             }
+
+            if (m_aqData.m_phase == PHASE_1_GATHERING_RESOURCES)
+            {
+                // totals first
+                for (auto itr = aqWorldStateTotalsMap.begin(); itr != aqWorldStateTotalsMap.end(); ++itr)
+                    FillInitialWorldStateData(data, count, (*itr).first, (*itr).second);
+                for (auto itr = aqWorldstateMap.begin(); itr != aqWorldstateMap.end(); ++itr)
+                    FillInitialWorldStateData(data, count, m_aqData.m_WarEffortCounters[(*itr).first], (*itr).second);
+            }
+            else if (m_aqData.m_phase == PHASE_2_TRANSPORTING_RESOURCES)
+                FillInitialWorldStateData(data, count, WORLD_STATE_AQ_DAYS_LEFT, m_aqData.GetDaysRemaining());
+            break;
         }
     }
 }
