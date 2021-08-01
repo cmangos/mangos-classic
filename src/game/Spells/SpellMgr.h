@@ -576,6 +576,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 13767:         // Hate to Zero (Hate to Zero)
         case 13787:         // Demon Armor
         case 14111:         // Bloodpetal Poison Proc
+        case 14133:         // Muculent Fever Proc
         case 14178:         // Sticky Tar
         case 15088:         // Flurry
         case 15097:         // Enrage
