@@ -301,6 +301,9 @@ void WorldState::HandlePlayerLeaveZone(Player* player, uint32 zoneId)
 
 bool WorldState::IsConditionFulfilled(uint32 conditionId, uint32 state) const
 {
+    if (conditionId == WAR_EFFORT_DAYS_LEFT)
+        return uint32(m_aqData.m_timer / DAY * IN_MILLISECONDS) == state;
+
     return m_transportStates.at(conditionId) == state;
 }
 

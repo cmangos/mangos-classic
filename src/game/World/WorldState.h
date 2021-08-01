@@ -55,9 +55,10 @@ enum GoId
     OBJECT_EVENT_TRAP_SYLVANAS  = 181093,
 };
 
-//enum Conditions
-//{
-//};
+enum Conditions
+{
+    WAR_EFFORT_DAYS_LEFT = 2113,
+};
 
 enum Events
 {
