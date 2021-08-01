@@ -909,7 +909,7 @@ void WorldState::FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 
                 for (auto itr = aqWorldStateTotalsMap.begin(); itr != aqWorldStateTotalsMap.end(); ++itr)
                     FillInitialWorldStateData(data, count, (*itr).first, (*itr).second);
                 for (auto itr = aqWorldstateMap.begin(); itr != aqWorldstateMap.end(); ++itr)
-                    FillInitialWorldStateData(data, count, m_aqData.m_WarEffortCounters[(*itr).first], (*itr).second);
+                    FillInitialWorldStateData(data, count, (*itr).second, m_aqData.m_WarEffortCounters[(*itr).first]);
             }
             else if (m_aqData.m_phase == PHASE_2_TRANSPORTING_RESOURCES)
                 FillInitialWorldStateData(data, count, WORLD_STATE_AQ_DAYS_LEFT, m_aqData.GetDaysRemaining());
