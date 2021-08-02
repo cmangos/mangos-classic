@@ -424,7 +424,7 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
 
                     if (Creature* eranikus = m_creature->GetMap()->GetCreature(m_eranikusGuid))
                         DoScriptText(SAY_ERANIKUS_ATTACK_1, eranikus);
--
+
                     ++m_summonCount;
                     m_isFirstWave = false;
                 }
