@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 # This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
 #
@@ -9,6 +10,12 @@
 # This program is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+if [ ! -d "$(pwd)/Data" ]
+then
+  echo "Data folder not found. Make sure you have copied the script to the client folder and the 'Data' folder has the correct case."
+  exit 1
+fi
 
 ## Expected param 1 to be 'a' for all, else ask some questions
 
@@ -198,10 +205,23 @@ if [ "$USE_VMAPS" = "1" ]
 then
   echo "$(date): Start extraction of vmaps..." | tee -a $LOG_FILE
   ./vmap_extractor $VMAP_RES | tee -a $DETAIL_LOG_FILE
+  exit_code="${PIPESTATUS[0]}"
+  if [[ "$exit_code" -ne "0" ]]; then
+    echo "$(date): Extraction of vmaps failed with errors. Aborting extraction. See the log file for more details."
+    exit "$exit_code"
+  fi
   echo "$(date): Extracting of vmaps finished" | tee -a $LOG_FILE
-  mkdir vmaps
+  if [ ! -d "$(pwd)/vmaps" ]
+  then
+    mkdir vmaps
+  fi
   echo "$(date): Start assembling of vmaps..." | tee -a $LOG_FILE
   ./vmap_assembler Buildings vmaps | tee -a $DETAIL_LOG_FILE
+  exit_code="${PIPESTATUS[0]}"
+  if [[ "$exit_code" -ne "0" ]]; then
+    echo "$(date): Assembling of vmaps failed with errors. Aborting extraction. See the log file for more details."
+    exit "$exit_code"
+  fi
   echo "$(date): Assembling of vmaps finished" | tee -a $LOG_FILE
 
   echo | tee -a $LOG_FILE
