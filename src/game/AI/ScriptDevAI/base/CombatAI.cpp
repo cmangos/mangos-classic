@@ -289,7 +289,9 @@ void RangedCombatAI::UpdateAI(const uint32 diff)
     {
         if (m_rangedModeSetting == TYPE_PROXIMITY || m_rangedModeSetting == TYPE_DISTANCER)
         {
-            if (m_currentRangedMode && m_creature->CanReachWithMeleeAttack(victim))
+            if (!m_currentRangedMode && victim->IsImmobilizedState() && IsCombatMovement() && m_mainSpellInfo && m_mainSpellCost * 2 < m_creature->GetPower(POWER_MANA) && m_creature->IsSpellReady(*m_mainSpellInfo))
+                DistanceYourself();
+            else if (m_currentRangedMode && m_creature->CanReachWithMeleeAttack(victim))
                 SetCurrentRangedMode(false);
             else if (!m_currentRangedMode && !m_creature->CanReachWithMeleeAttack(victim, 2.f) && m_mainSpellInfo && m_mainSpellCost * 2 < m_creature->GetPower(POWER_MANA) && m_creature->IsSpellReady(*m_mainSpellInfo))
                 SetCurrentRangedMode(true);

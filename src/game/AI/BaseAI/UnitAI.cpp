@@ -285,7 +285,7 @@ void UnitAI::SetFollowMovement(bool enable)
 
 bool UnitAI::IsCombatMovement() const
 {
-    return m_unit && !m_unit->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT);
+    return !m_unit->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT);
 }
 
 void UnitAI::HandleMovementOnAttackStart(Unit* victim) const
