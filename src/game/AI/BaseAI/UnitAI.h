@@ -482,6 +482,8 @@ class UnitAI
 
         virtual bool IsPreventingDeath() const { return false; }
 
+        bool IsMeleeEnabled() const { return m_meleeEnabled; }
+
     protected:
         virtual std::string GetAIName() { return "UnitAI"; }
         void DespawnGuids(GuidVector& spawns); // despawns all creature guids and clears contents

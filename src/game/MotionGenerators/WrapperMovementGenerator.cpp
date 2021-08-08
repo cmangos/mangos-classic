@@ -39,6 +39,22 @@ void AbstractWrapperMovementGenerator::Initialize(Unit& owner)
         i_spline.Launch();
         i_dispatched = true;
     }
+
+    if (!owner.IsPlayerControlled())
+    {
+        i_useTimer = true;
+        if (owner.movespline->isFacingTarget())
+        {
+            if (Unit* target = ObjectAccessor::GetUnit(owner, ObjectGuid(owner.movespline->GetFacing().target)))
+            {
+                if (owner.CanAttackInCombat(target))
+                {
+                    owner.Attack(target, owner.AI()->IsMeleeEnabled());
+                    owner.SetTarget(target);
+                }
+            }
+        }
+    }
 }
 
 void AbstractWrapperMovementGenerator::Finalize(Unit& owner)
@@ -52,27 +68,8 @@ void AbstractWrapperMovementGenerator::Finalize(Unit& owner)
             owner.InterruptMoving();
     }
     // Inform AI about spline completed
-    else
-    {
-        const MovementGeneratorType type = GetMovementGeneratorType();
-
-        if (UnitAI* ai = owner.AI())
-            ai->MovementInform(type, i_id);
-
-        if (owner.GetTypeId() == TYPEID_UNIT && static_cast<Creature&>(owner).IsTemporarySummon())
-        {
-            ObjectGuid const& spawnerGuid = owner.GetSpawnerGuid();
-
-            if (spawnerGuid.IsCreatureOrPet())
-            {
-                if (Creature* spawner = owner.GetMap()->GetAnyTypeCreature(spawnerGuid))
-                {
-                    if (UnitAI* ai = spawner->AI())
-                        ai->SummonedMovementInform(&static_cast<Creature&>(owner), type, i_id);
-                }
-            }
-        }
-    }
+    else if (!i_informed)
+        Inform(owner);
 }
 
 void AbstractWrapperMovementGenerator::Interrupt(Unit& owner)
@@ -86,7 +83,7 @@ void AbstractWrapperMovementGenerator::Reset(Unit& owner)
     Initialize(owner);
 }
 
-bool AbstractWrapperMovementGenerator::Update(Unit& owner, const uint32&/* diff*/)
+bool AbstractWrapperMovementGenerator::Update(Unit& owner, const uint32& diff)
 {
     if (i_delayed && !i_dispatched)
     {
@@ -94,7 +91,50 @@ bool AbstractWrapperMovementGenerator::Update(Unit& owner, const uint32&/* diff*
         i_dispatched = true;
     }
 
-    return !owner.movespline->Finalized();
+    bool finalized = owner.movespline->Finalized();
+    if (finalized && i_useTimer && !i_informed)
+        Inform(owner);
+
+    if (finalized && i_useTimer)
+    {
+        if (i_timerSet)
+        {
+            m_delayTimer.Update(diff);
+            return !m_delayTimer.Passed();
+        }
+        else
+        {
+            m_delayTimer.Reset(1000);
+            i_timerSet = true;
+            return true;
+        }
+    }
+
+    return !finalized;
+}
+
+void AbstractWrapperMovementGenerator::Inform(Unit& owner)
+{
+    i_informed = true;
+
+    const MovementGeneratorType type = GetMovementGeneratorType();
+
+    if (UnitAI* ai = owner.AI())
+        ai->MovementInform(type, i_id);
+
+    if (owner.GetTypeId() == TYPEID_UNIT && static_cast<Creature&>(owner).IsTemporarySummon())
+    {
+        ObjectGuid const& spawnerGuid = owner.GetSpawnerGuid();
+
+        if (spawnerGuid.IsCreatureOrPet())
+        {
+            if (Creature* spawner = owner.GetMap()->GetAnyTypeCreature(spawnerGuid))
+            {
+                if (UnitAI* ai = spawner->AI())
+                    ai->SummonedMovementInform(&static_cast<Creature&>(owner), type, i_id);
+            }
+        }
+    }
 }
 
 void EffectMovementGenerator::Initialize(Unit& owner)

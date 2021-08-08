@@ -1660,7 +1660,7 @@ void CreatureEventAI::SpellHitTarget(Unit* target, const SpellEntry* spellInfo)
 void CreatureEventAI::UpdateAI(const uint32 diff)
 {
     // Check if we are in combat (also updates calls threat update code)
-    bool Combat = m_creature->SelectHostileTarget() && m_creature->GetVictim();
+    bool Combat = m_creature->SelectHostileTarget();
 
     UpdateEventTimers(diff);
 
