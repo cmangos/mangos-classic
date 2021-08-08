@@ -380,7 +380,7 @@ void ScriptedAI::SetEquipmentSlots(bool loadDefault, int32 mainHand, int32 offHa
     if (offHand >= 0)
     {
         m_creature->SetVirtualItem(VIRTUAL_ITEM_SLOT_1, offHand);
-        if(offHand == 1)
+        if (offHand >= 1)
             m_creature->SetCanDualWield(true);
         else
             m_creature->SetCanDualWield(false);
