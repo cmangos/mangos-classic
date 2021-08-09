@@ -40,10 +40,28 @@ bool GOUse_go_defias_cannon(Player* /*pPlayer*/, GameObject* pGo)
     return false;
 }
 
+struct UnarmedWoodcutter : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() != EFFECT_INDEX_0)
+            return;
+
+        if (apply)
+            static_cast<Creature*>(aura->GetTarget())->LoadEquipment(0, true);
+
+        else
+            static_cast<Creature*>(aura->GetTarget())->LoadEquipment(641, true);
+
+    }
+};
+
 void AddSC_deadmines()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "go_defias_cannon";
     pNewScript->pGOUse = &GOUse_go_defias_cannon;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<UnarmedWoodcutter>("spell_unarmed_woodcutter");
 }
