@@ -35,6 +35,8 @@ enum
     NPC_SQUALLSHAPER        = 1732,
 
     QUEST_FORTUNE_AWAITS    = 7938,
+
+    GUID_PREFIX = 3600000,
 };
 
 class instance_deadmines : public ScriptedInstance
@@ -58,6 +60,11 @@ class instance_deadmines : public ScriptedInstance
         void Load(const char* chrIn) override;
 
         void Update(const uint32 diff) override;
+
+        void SpawnFirstDeadminesPatrol();
+        void SpawnSecondDeadminesPatrol();
+        void SpawnThirdDeadminesPatrol();
+        bool m_firstEnter;
 
     private:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
