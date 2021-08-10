@@ -1760,7 +1760,12 @@ void Aura::HandleWaterBreathing(bool apply, bool /*Real*/)
     Unit* target = GetTarget();
 
     if (target->GetTypeId() == TYPEID_PLAYER)
-        static_cast<Player*>(target)->SetWaterBreathingIntervalMultiplier(apply ? 0 : target->GetTotalAuraMultiplier(SPELL_AURA_MOD_WATER_BREATHING));
+    {
+        if (apply || target->HasAuraType(SPELL_AURA_WATER_BREATHING))
+            static_cast<Player*>(target)->SetWaterBreathingIntervalMultiplier(0);
+        else
+            static_cast<Player*>(target)->SetWaterBreathingIntervalMultiplier(target->GetTotalAuraMultiplier(SPELL_AURA_MOD_WATER_BREATHING));
+    }
 }
 
 void Aura::HandleModWaterBreathing(bool /*apply*/, bool /*Real*/)
