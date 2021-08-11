@@ -738,11 +738,11 @@ void Unit::RemoveSpellsCausingAura(AuraType auraType, SpellAuraHolder* except)
     }
 }
 
-void Unit::RemoveSpellsCausingAura(AuraType auraType, SpellAuraHolder* except, bool onlyNegative)
+void Unit::RemoveSpellsCausingAura(AuraType auraType, SpellAuraHolder* except, bool onlyMechanic)
 {
     for (AuraList::const_iterator iter = m_modAuras[auraType].begin(); iter != m_modAuras[auraType].end();)
     {
-        if ((*iter)->GetHolder() == except || (onlyNegative && ((*iter)->GetHolder()->IsPositive() || (*iter)->GetHolder()->GetSpellProto()->HasAttribute(SPELL_ATTR_AURA_IS_DEBUFF))))
+        if ((*iter)->GetHolder() == except || (onlyMechanic && GetAllSpellMechanicMask((*iter)->GetSpellProto()) == 0))
         {
             ++iter;
             continue;

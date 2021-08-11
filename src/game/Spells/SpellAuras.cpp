@@ -1891,7 +1891,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
                 uint32 aurMechMask = GetAllSpellMechanicMask(aurSpellInfo);
 
-                if ((*iter)->IsPositive() || aurSpellInfo->HasAttribute(SPELL_ATTR_AURA_IS_DEBUFF))
+                if (aurMechMask == 0) // all shapeshift removing spells have some mechanic mask. 33572 and 38132 confirmed not removed on poly
                 {
                     ++iter;
                     continue;
