@@ -1,5 +1,6 @@
 ALTER TABLE db_version CHANGE COLUMN required_z2774_01_mangos_column_fix required_z2776_01_mangos_creature_immunity bit;
 
+DROP TABLE IF EXISTS creature_immunities;
 CREATE TABLE creature_immunities(
 `Entry` INT UNSIGNED NOT NULL COMMENT 'creature_template entry',
 `SetId` INT UNSIGNED NOT NULL DEFAULT '0' COMMENT 'immunity set ID',
