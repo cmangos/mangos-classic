@@ -19572,9 +19572,6 @@ void Player::SetRestType(RestType n_r_type, uint32 areaTriggerId /*= 0*/)
     }
     else
     {
-        if (GetLevel() < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL) && (time_inn_enter == 0 || time(nullptr) - time_inn_enter > 180))
-            SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_RESTED);
-
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
 
         inn_trigger_id = areaTriggerId;
