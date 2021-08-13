@@ -5844,12 +5844,14 @@ void Spell::EffectSummonDemon(SpellEffectIndex eff_idx)
                 // Enslave demon effect, without mana cost and cooldown
                 summon->CastSpell(nullptr, 22707, TRIGGERED_OLD_TRIGGERED);  // short root spell on infernal from sniffs
                 m_caster->CastSpell(summon, 20882, TRIGGERED_OLD_TRIGGERED);
-                summon->CastSpell(nullptr, 22699, TRIGGERED_NONE);  // Inferno effect
-                summon->CastSpell(x, y, z, 20310, TRIGGERED_NONE);  // Stun
+                summon->CastSpell(nullptr, 22703, TRIGGERED_NONE);  // Inferno effect - in wotlk cast automatically
                 summon->AI()->DoCastSpellIfCan(nullptr, 19483, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+                summon->CastSpell(nullptr, 22764, TRIGGERED_NONE); // aggro spell
                 break;
             }
         }
+
+        OnSummon(summon);
     }
 }
 
