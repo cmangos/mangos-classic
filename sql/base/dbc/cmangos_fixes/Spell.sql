@@ -203,3 +203,5 @@ UPDATE spell_template SET `AttributesEx`=AttributesEx|0x00080000, EffectImplicit
 
 -- Added Ignore LoS attribute for Web Wrab spells used in Maexxna encounter (trigger NPC is sometimes behind spider web GOs that break LoS with player)
 UPDATE `spell_template` SET `AttributesEx2`=AttributesEx2|0x00000004 WHERE `id` BETWEEN 28617 AND 28621;
+
+UPDATE spell_template SET Attributes=Attributes|0x04000000 WHERE Id IN(24378,23505,23493,24379,23451,23978); -- all battleground power-up spells: Berserking, Restoration, and Speed
