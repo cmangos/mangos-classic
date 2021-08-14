@@ -281,6 +281,7 @@ class WorldState
         uint32 m_emeraldDragonsTimer;
         std::vector<uint32> m_emeraldDragonsChosenPositions;
         AhnQirajData m_aqData;
+        std::map<uint32, AQResources> m_aqWorldstateMapReverse;
 
         LoveIsInTheAir m_loveIsInTheAirData;
         GuidVector m_loveIsInTheAirCapitalsPlayers;
