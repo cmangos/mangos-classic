@@ -387,10 +387,20 @@ Aura* CreateAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const
     if (IsAreaAuraEffect(spellproto->Effect[eff]))
         aura = new AreaAura(spellproto, eff, currentDamage, currentBasePoints, holder, target, caster, castItem);
 
-    if (aura)
-        aura->OnAuraInit();
-    
-    return new Aura(spellproto, eff, currentDamage, currentBasePoints, holder, target, caster, castItem);
+    if (!aura)
+    {
+        uint32 triggeredSpellId = spellproto->EffectTriggerSpell[eff];
+        if (SpellEntry const* triggeredSpellInfo = sSpellTemplate.LookupEntry<SpellEntry>(triggeredSpellId))
+            for (unsigned int i : triggeredSpellInfo->EffectImplicitTargetA)
+                if (i == TARGET_UNIT_CHANNEL_TARGET)
+                    aura = new SingleEnemyTargetAura(spellproto, eff, currentDamage, currentBasePoints, holder, target, caster, castItem);
+    }
+
+    if (!aura)
+        aura = new Aura(spellproto, eff, currentDamage, currentBasePoints, holder, target, caster, castItem);
+
+    aura->OnAuraInit();
+    return aura;
 }
 
 SpellAuraHolder* CreateSpellAuraHolder(SpellEntry const* spellproto, Unit* target, WorldObject* caster, Item* castItem /*= nullptr*/, SpellEntry const* triggeredBy /*= nullptr*/)
