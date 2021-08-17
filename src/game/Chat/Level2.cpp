@@ -821,7 +821,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
         uint32 id;
         if (ExtractUInt32(&cId, id))
         {
-            result = WorldDatabase.PQuery("SELECT guid, id, position_x, position_y, position_z, orientation, map, (POW(position_x - '%f', 2) + POW(position_y - '%f', 2) + POW(position_z - '%f', 2)) AS order_ FROM gameobject WHERE map = '%i' AND id = '%u' ORDER BY order_ ASC LIMIT 1",
+            result = WorldDatabase.PQuery("SELECT guid, id, position_x, position_y, position_z, orientation, map, (POW(position_x - '%f', 2) + POW(position_y - '%f', 2) + POW(position_z - '%f', 2)) AS order_ FROM gameobject WHERE map = '%i' AND guid = '%u' ORDER BY order_ ASC LIMIT 1",
                                           pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), pl->GetMapId(), id);
         }
         else
@@ -897,17 +897,23 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
         return false;
     }
 
+    
+    const char* name = "";
     GameObjectInfo const* goI = ObjectMgr::GetGameObjectInfo(id);
-
-    if (!goI)
-    {
-        PSendSysMessage(LANG_GAMEOBJECT_NOT_EXIST, id);
-        return false;
-    }
+    if (goI)
+        name = goI->name;
 
     GameObject* target = m_session->GetPlayer()->GetMap()->GetGameObject(ObjectGuid(HIGHGUID_GAMEOBJECT, id, lowguid));
 
-    PSendSysMessage(LANG_GAMEOBJECT_DETAIL, lowguid, goI->name, lowguid, id, x, y, z, uint32(mapid), o);
+    PSendSysMessage(LANG_GAMEOBJECT_DETAIL, lowguid, name, lowguid, id, x, y, z, uint32(mapid), o);
+
+    if (auto vector = sObjectMgr.GetAllRandomGameObjectEntries(target->GetGUIDLow()))
+    {
+        std::string output;
+        for (uint32 entry : *vector)
+            output += std::to_string(entry) + ",";
+        PSendSysMessage("GO is part of gameobject_spawn_entry: %s", output.data());
+    }
 
     if (target)
     {
@@ -923,7 +929,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
         ShowNpcOrGoSpawnInformation<GameObject>(target->GetGUIDLow());
 
         if (target->GetGoType() == GAMEOBJECT_TYPE_DOOR)
-            PSendSysMessage(LANG_COMMAND_GO_STATUS_DOOR, uint32(target->GetGoState()), uint32(target->GetLootState()), GetOnOffStr(target->IsCollisionEnabled()), goI->door.startOpen ? "open" : "closed");
+            PSendSysMessage(LANG_COMMAND_GO_STATUS_DOOR, uint32(target->GetGoState()), uint32(target->GetLootState()), GetOnOffStr(target->IsCollisionEnabled()), goI && goI->door.startOpen ? "open" : "closed");
         else
             PSendSysMessage(LANG_COMMAND_GO_STATUS, uint32(target->GetGoState()), uint32(target->GetLootState()), GetOnOffStr(target->IsCollisionEnabled()));
     }
@@ -1205,10 +1211,11 @@ bool ChatHandler::HandleGameObjectNearCommand(char* args)
 
             GameObjectInfo const* gInfo = ObjectMgr::GetGameObjectInfo(entry);
 
-            if (!gInfo)
-                continue;
+            const char* name = "Random (creature_spawn_template)";
+            if (gInfo)
+                name = gInfo->name;
 
-            PSendSysMessage(LANG_GO_MIXED_LIST_CHAT, guid, PrepareStringNpcOrGoSpawnInformation<GameObject>(guid).c_str(), entry, guid, gInfo->name, x, y, z, mapid);
+            PSendSysMessage(LANG_GO_MIXED_LIST_CHAT, guid, PrepareStringNpcOrGoSpawnInformation<GameObject>(guid).c_str(), entry, guid, name, x, y, z, mapid);
 
             ++count;
         }
