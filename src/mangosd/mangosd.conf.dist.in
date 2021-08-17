@@ -917,6 +917,14 @@ TalentsInspecting = 1
 #        Reaction time for creature assistance call
 #        Default: 1500 (1.5s)
 #
+#    CreatureCheckForHelpRadius
+#        Range at which a close moving npc can be assisted
+#        Default: 5 yards
+#
+#    CreatureCheckForHelpAggroDelay
+#        Time during which at combat start check for help is disabled
+#        Default: 2000 (2 seconds)
+#
 #    CreatureFamilyFleeDelay
 #        Time during which creature can flee when no assistant found
 #        Default: 10000 (10s)
@@ -1003,6 +1011,8 @@ LeashRadius = 30
 CreatureFamilyFleeAssistanceRadius = 30
 CreatureFamilyAssistanceRadius = 10
 CreatureFamilyAssistanceDelay = 1500
+CreatureCheckForHelpRadius = 5
+CreatureCheckForHelpAggroDelay = 2000
 CreatureFamilyFleeDelay = 10000
 WorldBossLevelDiff = 3
 Corpse.EmptyLootShow = 1
