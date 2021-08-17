@@ -2333,6 +2333,7 @@ class Unit : public WorldObject
         void UpdateSplinePosition(bool relocateOnly = false);
 
         virtual bool CanCallForAssistance() const { return true; }
+        virtual bool CanCheckForHelp() const { return true; }
     protected:
         bool MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spellInfo, uint32 selectFlags, SelectAttackingTargetParams params) const;
 
@@ -2651,6 +2652,22 @@ struct LowestHPNearestOrder
             return m_mainTarget->GetDistanceOrder(_Left, _Right, m_distcalc);
         return _Left->GetHealthPercent() < _Right->GetHealthPercent();
     }
+};
+
+template<typename Func>
+class UnitLambdaEvent : public BasicEvent
+{
+    public:
+    UnitLambdaEvent(Unit& owner, Func const& func) : m_owner(owner), m_func(func) {}
+
+    virtual bool Execute(uint64 /*e_time*/, uint32 /*p_time*/)
+    {
+        m_func(m_owner);
+        return true;
+    }
+
+    Unit& m_owner;
+    Func m_func;
 };
 
 /** @} */

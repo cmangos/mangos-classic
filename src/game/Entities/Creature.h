@@ -827,6 +827,9 @@ class Creature : public Unit
         bool CanAggro() const { return m_canAggro; }
         void SetCanAggro(bool canAggro) { m_canAggro = canAggro; }
 
+        bool CanCheckForHelp() const override { return m_checkForHelp; }
+        void SetCanCheckForHelp(bool state) { m_checkForHelp = state; }
+
         void SetNoRewards() { m_noXP = true; m_noLoot = true; m_noReputation = true; }
         bool IsNoXp() { return m_noXP; }
         void SetNoXP(bool state) { m_noXP = state; }
@@ -875,6 +878,7 @@ class Creature : public Unit
         uint32 m_corpseDelay;                               // (secs) delay between death and corpse disappearance
         TimePoint m_pickpocketRestockTime;                  // (msecs) time point of pickpocket restock
         bool m_canAggro;                                    // controls response of creature to attacks
+        bool m_checkForHelp;                                // controls checkforhelp in ai
         float m_respawnradius;
 
         CreatureSubtype m_subtype;                          // set in Creatures subclasses for fast it detect without dynamic_cast use

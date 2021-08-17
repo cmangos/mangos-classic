@@ -68,7 +68,7 @@ void UnitAI::MoveInLineOfSight(Unit* who)
         return;
 
     if (who->GetObjectGuid().IsCreature() && who->IsInCombat())
-        CheckForHelp(who, m_unit, 10.0);
+        CheckForHelp(who, m_unit, sWorld.getConfig(CONFIG_FLOAT_CREATURE_CHECK_FOR_HELP_RADIUS));
 
     if (!HasReactState(REACT_AGGRESSIVE)) // mobs who are aggressive can still assist
         return;
@@ -441,15 +441,12 @@ void UnitAI::CheckForHelp(Unit* who, Unit* me, float distance)
     if (!victim)
         return;
 
-    if (me->IsInCombat() || !me->CanCallForAssistance() || !who->CanCallForAssistance())
+    if (me->IsInCombat() || !me->CanCallForAssistance() || !who->CanCallForAssistance() || !me->CanCheckForHelp())
         return;
 
     // pulling happens once panic/retreating ends
     if (who->hasUnitState(UNIT_STAT_PANIC | UNIT_STAT_RETREATING))
         return;
-
-    if (me->GetMap()->Instanceable())
-        distance = distance / 2.5f;
 
     if (me->CanInitiateAttack() && me->CanAttackOnSight(victim) && victim->isInAccessablePlaceFor(me) && victim->IsVisibleForOrDetect(me, me, false))
     {
