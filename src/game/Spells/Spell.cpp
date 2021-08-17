@@ -6414,16 +6414,16 @@ void Spell::DelayedChannel()
 
 void Spell::UpdateOriginalCasterPointer()
 {
-    if (m_originalCasterGUID == m_caster->GetObjectGuid())
-        m_originalCaster = m_caster;
+    if (m_originalCasterGUID == m_trueCaster->GetObjectGuid() && m_trueCaster->IsUnit())
+        m_originalCaster = static_cast<Unit*>(m_trueCaster);
     else if (m_originalCasterGUID.IsGameObject())
     {
-        GameObject* go = m_caster->IsInWorld() ? m_caster->GetMap()->GetGameObject(m_originalCasterGUID) : nullptr;
+        GameObject* go = m_trueCaster->IsInWorld() ? m_trueCaster->GetMap()->GetGameObject(m_originalCasterGUID) : nullptr;
         m_originalCaster = go ? go->GetOwner() : nullptr;
     }
     else
     {
-        Unit* unit = ObjectAccessor::GetUnit(*m_caster, m_originalCasterGUID);
+        Unit* unit = ObjectAccessor::GetUnit(*m_trueCaster, m_originalCasterGUID);
         m_originalCaster = unit && unit->IsInWorld() ? unit : nullptr;
     }
 }
