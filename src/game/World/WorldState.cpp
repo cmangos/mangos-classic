@@ -61,6 +61,35 @@ std::map<AQResources, WorldStateID> aqWorldstateMap =
     {AQ_RUNECLOTH_BANDAGE_HORDE, WORLD_STATE_AQ_RUNECLOTH_BANDAGE_HORDE_NOW},
 };
 
+std::vector<std::pair<WorldStateID, uint32>> aqWorldStateTotalsMap =
+{
+    {WORLD_STATE_AQ_PEACEBLOOM_TOTAL, 96000},
+    {WORLD_STATE_AQ_LEAN_WOLF_STEAK_TOTAL, 10000},
+    {WORLD_STATE_AQ_TIN_BARS_TOTAL, 22000},
+    {WORLD_STATE_AQ_WOOL_BANDAGE_TOTAL, 250000},
+    {WORLD_STATE_AQ_FIREBLOOM_TOTAL, 19000},
+    {WORLD_STATE_AQ_HEAVY_LEATHER_TOTAL, 60000},
+    {WORLD_STATE_AQ_MITHRIL_BARS_TOTAL, 18000},
+    {WORLD_STATE_AQ_MAGEWEAVE_BANDAGE_TOTAL, 250000},
+    {WORLD_STATE_AQ_RUGGED_LEATHER_TOTAL, 60000},
+    {WORLD_STATE_AQ_BAKED_SALMON_TOTAL, 10000},
+    {WORLD_STATE_AQ_LIGHT_LEATHER_TOTAL, 180000},
+    {WORLD_STATE_AQ_LINEN_BANDAGE_TOTAL, 800000},
+    {WORLD_STATE_AQ_MEDIUM_LEATHER_TOTAL, 110000},
+    {WORLD_STATE_AQ_STRANGLEKELP_TOTAL, 33000},
+    {WORLD_STATE_AQ_RAINBOW_FIN_ALBACORE_TOTAL, 14000},
+    {WORLD_STATE_AQ_IRON_BARS_TOTAL, 28000},
+    {WORLD_STATE_AQ_ROAST_RAPTOR_TOTAL, 20000},
+    {WORLD_STATE_AQ_SILK_BANDAGE_TOTAL, 600000},
+    {WORLD_STATE_AQ_THORIUM_BARS_TOTAL, 24000},
+    {WORLD_STATE_AQ_ARTHAS_TEARS_TOTAL, 20000},
+    {WORLD_STATE_AQ_COPPER_BARS_TOTAL, 45000},
+    {WORLD_STATE_AQ_PURPLE_LOTUS_TOTAL, 13000},
+    {WORLD_STATE_AQ_THICK_LEATHER_TOTAL, 40000},
+    {WORLD_STATE_AQ_SPOTTED_YELLOWTAIL_TOTAL, 8500},
+    {WORLD_STATE_AQ_RUNECLOTH_BANDAGE_TOTAL, 200000},
+};
+
 WorldState::WorldState() : m_emeraldDragonsState(0xF), m_emeraldDragonsTimer(0), m_emeraldDragonsChosenPositions(4, 0)
 {
     memset(m_loveIsInTheAirData.counters, 0, sizeof(LoveIsInTheAir));
@@ -343,7 +372,7 @@ bool WorldState::IsConditionFulfilled(uint32 conditionId, uint32 state) const
 
     auto itr = m_aqWorldstateMapReverse.find(conditionId);
     if (itr != m_aqWorldstateMapReverse.end())
-        return m_aqData.m_WarEffortCounters[(*itr).second] == state;
+        return m_aqData.m_WarEffortCounters[(*itr).second] == aqWorldStateTotalsMap[(*itr).second].second;
 
     return m_transportStates.at(conditionId) == state;
 }
@@ -504,36 +533,6 @@ void WorldState::RespawnEmeraldDragons()
             WorldObject::SummonCreature(TempSpawnSettings(nullptr, m_emeraldDragonsChosenPositions[3], emeraldDragonSpawns[3][0], emeraldDragonSpawns[3][1], emeraldDragonSpawns[3][2], emeraldDragonSpawns[3][3], TEMPSPAWN_DEAD_DESPAWN, 0, false, false, pathIds[3]), map);
     });
 }
-
-// AQ War Effort code
-std::vector<std::pair<WorldStateID, uint32>> aqWorldStateTotalsMap =
-{
-    {WORLD_STATE_AQ_PEACEBLOOM_TOTAL, 96000},
-    {WORLD_STATE_AQ_LEAN_WOLF_STEAK_TOTAL, 10000},
-    {WORLD_STATE_AQ_TIN_BARS_TOTAL, 22000},
-    {WORLD_STATE_AQ_WOOL_BANDAGE_TOTAL, 250000},
-    {WORLD_STATE_AQ_FIREBLOOM_TOTAL, 19000},
-    {WORLD_STATE_AQ_HEAVY_LEATHER_TOTAL, 60000},
-    {WORLD_STATE_AQ_MITHRIL_BARS_TOTAL, 18000},
-    {WORLD_STATE_AQ_MAGEWEAVE_BANDAGE_TOTAL, 250000},
-    {WORLD_STATE_AQ_RUGGED_LEATHER_TOTAL, 60000},
-    {WORLD_STATE_AQ_BAKED_SALMON_TOTAL, 10000},
-    {WORLD_STATE_AQ_LIGHT_LEATHER_TOTAL, 180000},
-    {WORLD_STATE_AQ_LINEN_BANDAGE_TOTAL, 800000},
-    {WORLD_STATE_AQ_MEDIUM_LEATHER_TOTAL, 110000},
-    {WORLD_STATE_AQ_STRANGLEKELP_TOTAL, 33000},
-    {WORLD_STATE_AQ_RAINBOW_FIN_ALBACORE_TOTAL, 14000},
-    {WORLD_STATE_AQ_IRON_BARS_TOTAL, 28000},
-    {WORLD_STATE_AQ_ROAST_RAPTOR_TOTAL, 20000},
-    {WORLD_STATE_AQ_SILK_BANDAGE_TOTAL, 600000},
-    {WORLD_STATE_AQ_THORIUM_BARS_TOTAL, 24000},
-    {WORLD_STATE_AQ_ARTHAS_TEARS_TOTAL, 20000},
-    {WORLD_STATE_AQ_COPPER_BARS_TOTAL, 45000},
-    {WORLD_STATE_AQ_PURPLE_LOTUS_TOTAL, 13000},
-    {WORLD_STATE_AQ_THICK_LEATHER_TOTAL, 40000},
-    {WORLD_STATE_AQ_SPOTTED_YELLOWTAIL_TOTAL, 8500},
-    {WORLD_STATE_AQ_RUNECLOTH_BANDAGE_TOTAL, 200000},
-};
 
 void WorldState::AddWarEffortProgress(AQResources resource, uint32 count)
 {
