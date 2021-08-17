@@ -264,7 +264,7 @@ void SpellCastTargets::write(ByteBuffer& data) const
 void SpellLog::Initialize()
 {
     m_spellLogData.Initialize(SMSG_SPELLLOGEXECUTE);
-    m_spellLogData << m_spell->GetCaster()->GetPackGUID();
+    m_spellLogData << m_spell->GetTrueCaster()->GetPackGUID();
     m_spellLogData << uint32(m_spell->m_spellInfo->Id);
     m_spellLogDataEffectsCounterPos = m_spellLogData.wpos();
     m_spellLogData << uint32(0);                            //placeholder
