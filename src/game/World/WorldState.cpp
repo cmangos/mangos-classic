@@ -372,7 +372,12 @@ bool WorldState::IsConditionFulfilled(uint32 conditionId, uint32 state) const
 
     auto itr = m_aqWorldstateMapReverse.find(conditionId);
     if (itr != m_aqWorldstateMapReverse.end())
-        return m_aqData.m_WarEffortCounters[(*itr).second] == aqWorldStateTotalsMap[(*itr).second].second;
+    {
+        uint32 id = (*itr).second;
+        if (id >= aqWorldStateTotalsMap.size())
+            id -= 5;
+        return m_aqData.m_WarEffortCounters[id] == aqWorldStateTotalsMap[id].second;
+    }
 
     return m_transportStates.at(conditionId) == state;
 }
