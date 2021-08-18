@@ -903,7 +903,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
     if (goI)
         name = goI->name;
 
-    GameObject* target = m_session->GetPlayer()->GetMap()->GetGameObject(ObjectGuid(HIGHGUID_GAMEOBJECT, id, lowguid));
+    GameObject* target = m_session->GetPlayer()->GetMap()->GetGameObject(lowguid);
 
     PSendSysMessage(LANG_GAMEOBJECT_DETAIL, lowguid, name, lowguid, id, x, y, z, uint32(mapid), o);
 
@@ -1329,11 +1329,8 @@ bool ChatHandler::HandleGameObjectRespawnCommand(char* args)
     if (!lowguid)
         return false;
 
-    GameObject* obj = nullptr;
-
     // by DB guid
-    if (GameObjectData const* go_data = sObjectMgr.GetGOData(lowguid))
-        obj = GetGameObjectWithGuid(lowguid, go_data->id);
+    GameObject* obj = m_session->GetPlayer()->GetMap()->GetGameObject(lowguid);
 
     if (!obj)
     {
