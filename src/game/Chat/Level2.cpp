@@ -1211,7 +1211,7 @@ bool ChatHandler::HandleGameObjectNearCommand(char* args)
 
             GameObjectInfo const* gInfo = ObjectMgr::GetGameObjectInfo(entry);
 
-            const char* name = "Random (creature_spawn_template)";
+            const char* name = "Random (gameobject_spawn_entry)";
             if (gInfo)
                 name = gInfo->name;
 
