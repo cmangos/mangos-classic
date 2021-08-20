@@ -907,7 +907,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
 
     PSendSysMessage(LANG_GAMEOBJECT_DETAIL, lowguid, name, lowguid, id, x, y, z, uint32(mapid), o);
 
-    if (auto vector = sObjectMgr.GetAllRandomGameObjectEntries(target->GetGUIDLow()))
+    if (auto vector = sObjectMgr.GetAllRandomGameObjectEntries(target->GetDbGuid()))
     {
         std::string output;
         for (uint32 entry : *vector)
