@@ -502,9 +502,20 @@ void PoolGroup<GameObject>::Spawn1Object(MapPersistentState& mapState, PoolObjec
         }
         // for not loaded grid just update respawn time (avoid work for instances until implemented support)
         else if (!instantly)
+        {
             // for spawned by default object only
             if (data->spawntimesecsmin >= 0)
-                mapState.SaveGORespawnTime(obj->guid, time(nullptr) + data->GetRandomRespawnTime());
+            {
+                uint32 respawnTime = data->GetRandomRespawnTime();
+                mapState.SaveGORespawnTime(obj->guid, time(nullptr) + respawnTime);
+                if (dataMap)
+                {
+                    GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(data->id);
+                    if (!goinfo || goinfo->ExtraFlags & GAMEOBJECT_EXTRA_FLAG_DYNGUID)
+                        dataMap->GetSpawnManager().RespawnGameObject(obj->guid, respawnTime);
+                }
+            }
+        }
     }
 }
 
@@ -524,7 +535,7 @@ void PoolGroup<Creature>::ReSpawn1Object(MapPersistentState& mapState, PoolObjec
         // for non-instanceable maps pool spawn can be at different map from provided mapState
         if (MapPersistentState* dataMapState = mapState.GetMapId() == data->mapid ? &mapState : sMapPersistentStateMgr.GetPersistentState(data->mapid, 0))
             if (Map* dataMap = dataMapState->GetMap())
-                if (Creature* pCreature = dataMap->GetCreature(data->GetObjectGuid(obj->guid)))
+                if (Creature* pCreature = dataMap->GetCreature(obj->guid))
                     pCreature->GetMap()->Add(pCreature);
     }
 }
