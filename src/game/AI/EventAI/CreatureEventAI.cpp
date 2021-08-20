@@ -172,15 +172,6 @@ void CreatureEventAI::InitAI()
             }
         }
     }
-    else
-    {
-        std::string aiName = m_creature->GetAIName();
-        if (aiName == "EventAI") // Only show error on explicitly assigned EAI in DB
-        {
-            sLog.outErrorEventAI("EventMap for Creature Id: %u, %s is empty but creature is using CreatureEventAI: '%s'.",
-                m_creature->GetEntry(), m_creature->GetGuidStr().c_str(), aiName.c_str());
-        }
-    }
 }
 
 bool CreatureEventAI::IsTimerExecutedEvent(EventAI_Type type) const
