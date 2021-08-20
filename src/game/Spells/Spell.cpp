@@ -6567,10 +6567,13 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
                                 return false;
                             break;
                         case TARGET_LOS_CASTER:
-                            if (WorldObject* caster = GetCastingObject())
+                            if (target != m_caster)
                             {
-                                if (!target->IsWithinLOSInMap(caster, true))
-                                    return false;
+                                if (WorldObject* caster = GetCastingObject())
+                                {
+                                    if (!target->IsWithinLOSInMap(caster, true))
+                                        return false;
+                                }
                             }
                             break;
                     }
