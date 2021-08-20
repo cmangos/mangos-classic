@@ -379,7 +379,7 @@ Spell::Spell(WorldObject* caster, SpellEntry const* info, uint32 triggeredFlags,
     m_powerCost = 0;                                        // setup to correct value in Spell::prepare, don't must be used before.
     m_casttime = 0;                                         // setup to correct value in Spell::prepare, don't must be used before.
     m_timer = 0;                                            // will set to cast time in prepare
-    m_creationTime = m_caster->GetMap()->GetCurrentMSTime();
+    m_creationTime = m_trueCaster->GetMap()->GetCurrentMSTime();
     m_updated = false;
     m_duration = 0;
     m_maxRange = 0.f;
