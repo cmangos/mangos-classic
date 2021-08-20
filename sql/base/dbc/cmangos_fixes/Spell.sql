@@ -205,3 +205,23 @@ UPDATE spell_template SET `AttributesEx`=AttributesEx|0x00080000, EffectImplicit
 UPDATE `spell_template` SET `AttributesEx2`=AttributesEx2|0x00000004 WHERE `id` BETWEEN 28617 AND 28621;
 
 UPDATE spell_template SET Attributes=Attributes|0x04000000 WHERE Id IN(24378,23505,23493,24379,23451,23978); -- all battleground power-up spells: Berserking, Restoration, and Speed
+
+-- LOS targeting section
+-- All other confirmed totems that ignore LOS
+UPDATE spell_template SET AttributesEx2=AttributesEx2|0x00000004 WHERE Id IN(8230,8250,8514,10607,10611,15036,25554,25579,25580);
+-- Warrior Beneficial Shouts
+UPDATE spell_template SET AttributesEx2=AttributesEx2|0x00000004 WHERE Id IN(469,2048,5242,6192,6673,11549,11550,11551,25289,27578);
+-- Furious howl
+UPDATE spell_template SET AttributesEx2=AttributesEx2|0x00000004 WHERE Id IN(24604,24605,24603,24597);
+-- Unleashed Rage
+UPDATE spell_template SET AttributesEx2=AttributesEx2|0x00000004 WHERE Id IN(30803,30804,30805,30806,30807);
+-- Priest healing spells
+UPDATE spell_template SET AttributesEx2=AttributesEx2|0x00000004 WHERE Id IN(596,996,10960,10961,25308,25316,23455,23458,23459,25329,27803,27804,27805);
+-- Enchants
+UPDATE spell_template SET AttributesEx2=AttributesEx2|0x00000004 WHERE Id IN(27996,28005);
+
+-- BUG correction
+-- equip only item spells with travel time
+UPDATE spell_template SET Speed=0 WHERE Id IN(14824,14825,14826,14827,14828,14829,29413,29414,29415,29416,29417,29418,44972);
+
+UPDATE `spell_template` SET `RangeIndex` = 0 WHERE `Id` IN (16613,16619,16630,16631);
