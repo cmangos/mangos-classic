@@ -5510,8 +5510,9 @@ void Spell::EffectPullTowards(SpellEffectIndex eff_idx)
     float speedXY = float(m_spellInfo->EffectMiscValue[eff_idx]) * 0.1f;
     float time = dist / speedXY;
     float speedZ = ((z - unitTarget->GetPositionZ()) + 0.5f * time * time * Movement::gravity) / time;
+    float angle = unitTarget->GetAngle(x, y) + M_PI_F;
 
-    unitTarget->KnockBackFrom(m_caster, -speedXY, speedZ);
+    unitTarget->KnockBackWithAngle(angle, speedXY, speedZ);
 }
 
 void Spell::EffectSummonDeadPet(SpellEffectIndex /*eff_idx*/)
