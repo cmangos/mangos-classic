@@ -3795,6 +3795,7 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
 
         // Cases where m_amount already has the correct value (spells cast with CastCustomSpell or absolute values)
         case 12976:                                         // Warrior Last Stand triggered spell (Cast with percentage-value by CastCustomSpell)
+        case 16609:                                         // Warchief's Blessing
         {
             if (Real)
             {
