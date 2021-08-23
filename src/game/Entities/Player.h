@@ -896,15 +896,16 @@ class Player : public Unit
 
         bool TeleportToBGEntryPoint();
 
-        void SetSummonPoint(uint32 mapid, float x, float y, float z)
+        void SetSummonPoint(uint32 mapid, float x, float y, float z, ObjectGuid summoner)
         {
             m_summon_expire = time(nullptr) + MAX_PLAYER_SUMMON_DELAY;
             m_summon_mapid = mapid;
             m_summon_x = x;
             m_summon_y = y;
             m_summon_z = z;
+            m_summoner = summoner;
         }
-        void SummonIfPossible(bool agree);
+        void SummonIfPossible(bool agree, ObjectGuid guid);
 
         bool Create(uint32 guidlow, const std::string& name, uint8 race, uint8 class_, uint8 gender, uint8 skin, uint8 face, uint8 hairStyle, uint8 hairColor, uint8 facialHair, uint8 outfitId);
 
@@ -2401,6 +2402,7 @@ class Player : public Unit
         float  m_summon_x;
         float  m_summon_y;
         float  m_summon_z;
+        ObjectGuid m_summoner;
 
     private:
         // internal common parts for CanStore/StoreItem functions

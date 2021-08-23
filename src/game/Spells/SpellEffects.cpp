@@ -4690,7 +4690,7 @@ void Spell::EffectStuck(SpellEffectIndex /*eff_idx*/)
 
 void Spell::EffectSummonPlayer(SpellEffectIndex /*eff_idx*/)
 {
-    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+    if (!unitTarget || !unitTarget->IsPlayer())
         return;
 
     // Evil Twin (ignore player summon, but hide this for summoner)
@@ -4700,13 +4700,13 @@ void Spell::EffectSummonPlayer(SpellEffectIndex /*eff_idx*/)
     float x, y, z;
     m_caster->GetPosition(x, y, z);
 
-    ((Player*)unitTarget)->SetSummonPoint(m_caster->GetMapId(), x, y, z);
+    static_cast<Player*>(unitTarget)->SetSummonPoint(m_caster->GetMapId(), x, y, z, m_caster->GetObjectGuid());
 
     WorldPacket data(SMSG_SUMMON_REQUEST, 8 + 4 + 4);
     data << m_caster->GetObjectGuid();                      // summoner guid
     data << uint32(m_caster->GetZoneId());                  // summoner zone
     data << uint32(MAX_PLAYER_SUMMON_DELAY * IN_MILLISECONDS); // auto decline after msecs
-    ((Player*)unitTarget)->GetSession()->SendPacket(data);
+    static_cast<Player*>(unitTarget)->GetSession()->SendPacket(data);
 }
 
 static ScriptInfo generateActivateCommand()

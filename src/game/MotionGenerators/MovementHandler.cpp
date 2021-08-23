@@ -581,7 +581,7 @@ void WorldSession::HandleSummonResponseOpcode(WorldPacket& recv_data)
     ObjectGuid summonerGuid;
     recv_data >> summonerGuid;
 
-    _player->SummonIfPossible(true);
+    _player->SummonIfPossible(true, summonerGuid);
 }
 
 void WorldSession::HandleMoveTimeSkippedOpcode(WorldPacket& recv_data)

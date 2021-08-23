@@ -18358,8 +18358,12 @@ void Player::UpdateEverything()
     }
 }
 
-void Player::SummonIfPossible(bool agree)
+void Player::SummonIfPossible(bool agree, ObjectGuid guid)
 {
+    // old duplicate summon notification from client or hacking
+    if (guid != m_summoner)
+        return;
+
     if (!agree)
     {
         m_summon_expire = 0;
@@ -18379,6 +18383,7 @@ void Player::SummonIfPossible(bool agree)
         bg->HandlePlayerDroppedFlag(this);
 
     m_summon_expire = 0;
+    m_summoner.Clear();
 
     TeleportTo(m_summon_mapid, m_summon_x, m_summon_y, m_summon_z, GetOrientation());
 }
