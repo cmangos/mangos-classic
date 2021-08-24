@@ -2654,11 +2654,10 @@ struct LowestHPNearestOrder
     }
 };
 
-template<typename Func>
 class UnitLambdaEvent : public BasicEvent
 {
     public:
-    UnitLambdaEvent(Unit& owner, Func const& func) : m_owner(owner), m_func(func) {}
+    UnitLambdaEvent(Unit& owner, std::function<void(Unit&)> const& func) : m_owner(owner), m_func(func) {}
 
     virtual bool Execute(uint64 /*e_time*/, uint32 /*p_time*/)
     {
@@ -2667,7 +2666,7 @@ class UnitLambdaEvent : public BasicEvent
     }
 
     Unit& m_owner;
-    Func m_func;
+    std::function<void(Unit&)> m_func;
 };
 
 /** @} */
