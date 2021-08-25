@@ -1948,9 +1948,6 @@ class Unit : public WorldObject
         float m_modAttackSpeedPct[3];
         float m_modAttackBaseDPSPct[MAX_ATTACK] = { 1.0f, 1.0f, 1.0f };
 
-        // Event handler
-        EventProcessor m_events;
-
         // stat system
         bool HandleStatModifier(UnitMods unitMod, UnitModifierType modifierType, float amount, bool apply);
         void SetModifierValue(UnitMods unitMod, UnitModifierType modifierType, float value) { m_auraModifiersGroup[unitMod][modifierType] = value; }
