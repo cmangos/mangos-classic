@@ -19,7 +19,7 @@
 #include "Auth/HMACSHA1.h"
 #include "BigNumber.h"
 
-HMACSHA1::HMACSHA1(uint32 len, uint8* seed)
+HMACSHA1::HMACSHA1(uint32 len, uint8 const* seed)
 {
     memcpy(&m_key, seed, len);
 #if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
@@ -31,7 +31,7 @@ HMACSHA1::HMACSHA1(uint32 len, uint8* seed)
 #endif
 }
 
-HMACSHA1::HMACSHA1(uint32 len, uint8* seed, bool) // to get over the default constructor
+HMACSHA1::HMACSHA1(uint32 len, uint8 const* seed, bool) // to get over the default constructor
 {
 #if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
     m_ctx = HMAC_CTX_new();
@@ -54,7 +54,7 @@ HMACSHA1::~HMACSHA1()
 
 void HMACSHA1::UpdateBigNumber(BigNumber* bn)
 {
-    UpdateData(bn->AsByteArray(), bn->GetNumBytes());
+    UpdateData(bn->AsByteArray().data(), bn->GetNumBytes());
 }
 
 void HMACSHA1::UpdateData(const uint8* data, int length)
@@ -64,6 +64,11 @@ void HMACSHA1::UpdateData(const uint8* data, int length)
 #else
     HMAC_Update(&m_ctx, data, length);
 #endif
+}
+
+void HMACSHA1::UpdateData(const std::string& str)
+{
+    UpdateData((uint8 const*)str.c_str(), str.length());
 }
 
 void HMACSHA1::Initialize()

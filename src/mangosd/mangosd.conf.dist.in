@@ -26,6 +26,7 @@ ConfVersion=2021021901
 #    LoginDatabaseInfo
 #    WorldDatabaseInfo
 #    CharacterDatabaseInfo
+#    LogsDatabaseInfo
 #        Database connection settings for the world server.
 #        Default:
 #                ---MYSQL---
@@ -40,6 +41,7 @@ ConfVersion=2021021901
 #    LoginDatabaseConnections
 #    WorldDatabaseConnections
 #    CharacterDatabaseConnections
+#    LogsDatabaseConnections
 #        Amount of connections to database which will be used for SELECT queries. Maximum 16 connections per database.
 #        Please, note, for data consistency only one connection for each database is used for transactions and async SELECTs.
 #        So formula to find out how many connections will be established: X = #_connections + 1
@@ -65,12 +67,20 @@ ConfVersion=2021021901
 RealmID = 1
 DataDir = "."
 LogsDir = ""
+<<<<<<< HEAD
 LoginDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;classicrealmd"
 WorldDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;classicmangos"
 CharacterDatabaseInfo = "127.0.0.1;3306;mangos;mangos;classiccharacters"
+=======
+LoginDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;tbcrealmd"
+WorldDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;tbcmangos"
+CharacterDatabaseInfo = "127.0.0.1;3306;mangos;mangos;tbccharacters"
+LogsDatabaseInfo      = "127.0.0.1;3306;mangos;mangos;tbclogs"
+>>>>>>> b455500dff39... [s2433] Anticheat: Initial implementation
 LoginDatabaseConnections = 1
 WorldDatabaseConnections = 1
 CharacterDatabaseConnections = 1
+LogsDatabaseConnections = 1
 MaxPingTime = 30
 WorldServerPort = 8085
 BindIP = "0.0.0.0"

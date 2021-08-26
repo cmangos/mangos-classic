@@ -39,6 +39,7 @@
 #include "Tools/Language.h"
 #include "Chat/Chat.h"
 #include "Spells/SpellMgr.h"
+#include "Anticheat/Anticheat.hpp"
 
 #ifdef BUILD_PLAYERBOT
 #include "PlayerBot/Base/PlayerbotMgr.h"
@@ -110,8 +111,13 @@ class CharacterHandler
     public:
         void HandleCharEnumCallback(QueryResult* result, uint32 account)
         {
-            if (WorldSession* session = sWorld.FindSession(account))
-                session->HandleCharEnum(result);
+            WorldSession* session = sWorld.FindSession(account);
+            if (!session)
+            {
+                delete result;
+                return;
+            }
+            session->HandleCharEnum(result);
         }
 
         void HandlePlayerLoginCallback(QueryResult* /*dummy*/, SqlQueryHolder* holder)
@@ -142,7 +148,8 @@ class CharacterHandler
 
             // The bot's WorldSession is owned by the bot's Player object
             // The bot's WorldSession is deleted by PlayerbotMgr::LogoutPlayerBot
-            WorldSession* botSession = new WorldSession(lqh->GetAccountId(), nullptr, SEC_PLAYER, 0, DEFAULT_LOCALE);
+            WorldSession* botSession = new WorldSession(lqh->GetAccountId(), nullptr, SEC_PLAYER, 0, DEFAULT_LOCALE, masterSession->GetAccountName(), 0);
+            botSession->SetNoAnticheat();
             botSession->HandlePlayerLogin(lqh); // will delete lqh
             masterSession->GetPlayer()->GetPlayerbotMgr()->OnBotLogin(botSession->GetPlayer());
         }
@@ -173,7 +180,7 @@ void WorldSession::HandleCharEnum(QueryResult* result)
 
     data.put<uint8>(0, num);
 
-    SendPacket(data, true);
+    m_anticheat->SendCharEnum(std::move(data));
 }
 
 void WorldSession::HandleCharEnumOpcode(WorldPacket& /*recv_data*/)
@@ -537,7 +544,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     ObjectGuid playerGuid = holder->GetGuid();
 
     Player* pCurrChar = new Player(this);
-    SetPlayer(pCurrChar);
+    SetPlayer(pCurrChar, playerGuid);
     m_playerLoading = true;
 
     m_initialZoneUpdated = false;
@@ -803,6 +810,7 @@ void WorldSession::HandlePlayerReconnect()
     m_initialZoneUpdated = false;
 
     SetOnline();
+    m_anticheat->NewPlayer();
 
     Group* group = _player->GetGroup();
 

@@ -35,6 +35,7 @@
 #include "Grids/GridNotifiersImpl.h"
 #include "Grids/CellImpl.h"
 #include "GMTickets/GMTicketMgr.h"
+#include "Anticheat/Anticheat.hpp"
 
 bool WorldSession::CheckChatMessage(std::string& msg, bool addon/* = false*/)
 {
@@ -180,11 +181,26 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                 return;
 
             if (type == CHAT_MSG_SAY)
+            {
                 GetPlayer()->Say(msg, lang);
+
+                if (lang != LANG_ADDON && !m_anticheat->IsSilenced())
+                    m_anticheat->Say(msg);
+            }
             else if (type == CHAT_MSG_EMOTE)
+            {
                 GetPlayer()->TextEmote(msg);
+
+                if (lang != LANG_ADDON && !m_anticheat->IsSilenced())
+                    m_anticheat->Say(msg);
+            }
             else if (type == CHAT_MSG_YELL)
+            {
                 GetPlayer()->Yell(msg, lang);
+
+                if (lang != LANG_ADDON && !m_anticheat->IsSilenced())
+                    m_anticheat->Say(msg);
+            }
         } break;
 
         case CHAT_MSG_WHISPER:
@@ -237,6 +253,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             }
 
             GetPlayer()->Whisper(msg, lang, player->GetObjectGuid());
+
+            if (lang != LANG_ADDON && !m_anticheat->IsSilenced())
+                m_anticheat->Whisper(msg, player->GetObjectGuid());
         } break;
 
         case CHAT_MSG_PARTY:
@@ -481,8 +500,15 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                 return;
 
             if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
+            {
                 if (Channel* chn = cMgr->GetChannel(channel, _player))
+                {
                     chn->Say(_player, msg.c_str(), lang);
+
+                    if (lang != LANG_ADDON && (chn->HasFlag(Channel::ChannelFlags::CHANNEL_FLAG_GENERAL) || chn->IsStatic()))
+                        m_anticheat->Channel(msg);
+                }
+            }
         } break;
 
         case CHAT_MSG_AFK:
@@ -506,6 +532,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                 {
                     if (!CheckChatMessage(msg))
                         msg = GetMangosString(type == CHAT_MSG_AFK ? LANG_PLAYER_AFK_DEFAULT : LANG_PLAYER_DND_DEFAULT);
+                    else
+                        m_anticheat->AutoReply(msg);
 
                     _player->autoReplyMsg = msg;
                 }
@@ -514,6 +542,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             {
                 if (msg.empty() || !CheckChatMessage(msg))
                     msg = GetMangosString(type == CHAT_MSG_AFK ? LANG_PLAYER_AFK_DEFAULT : LANG_PLAYER_DND_DEFAULT);
+                else
+                    m_anticheat->AutoReply(msg);
 
                 _player->autoReplyMsg = msg;
 

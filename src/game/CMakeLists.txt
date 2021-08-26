@@ -24,6 +24,11 @@ add_definitions(-D__ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES=0)
 # Find all the input files
 FILE(GLOB_RECURSE LIBRARY_SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.h" "*.cpp")
 
+# Remove Anticheat.cpp.
+if(NOT USE_ANTICHEAT)
+    list(REMOVE_ITEM LIBRARY_SRCS "Anticheat/Anticheat.cpp")
+endif()
+
 if(NOT BUILD_SCRIPTDEV)
   # exclude script folder for faster build time (used for dev mode)
   set (EXCLUDE_DIR "AI/ScriptDevAI/scripts/")

@@ -111,12 +111,15 @@ bool SRP6::CalculateVerifier(const std::string& rI, const char* salt)
     uint8 mDigest[SHA_DIGEST_LENGTH];
     memset(mDigest, 0, SHA_DIGEST_LENGTH);
     if (I.GetNumBytes() <= SHA_DIGEST_LENGTH)
-        memcpy(mDigest, I.AsByteArray(), I.GetNumBytes());
+    {
+        auto const vect_I = I.AsByteArray();
+        memcpy(mDigest, vect_I.data(), vect_I.size());
+    }
 
     std::reverse(mDigest, mDigest + SHA_DIGEST_LENGTH);
 
     Sha1Hash sha;
-    sha.UpdateData(s.AsByteArray(), s.GetNumBytes());
+    sha.UpdateData(s.AsByteArray());
     sha.UpdateData(mDigest, SHA_DIGEST_LENGTH);
     sha.Finalize();
     BigNumber x;
@@ -131,7 +134,7 @@ void SRP6::HashSessionKey(void)
     uint8 t[32];
     uint8 t1[16];
     uint8 vK[40];
-    memcpy(t, S.AsByteArray(32), 32);
+    memcpy(t, S.AsByteArray(32).data(), 32);
     for (int i = 0; i < 16; ++i)
     {
         t1[i] = t[i * 2];
@@ -160,7 +163,7 @@ void SRP6::HashSessionKey(void)
 
 bool SRP6::Proof(uint8* lp_M, int l)
 {
-    if (!memcmp(M.AsByteArray(), lp_M, l))
+    if (!memcmp(M.AsByteArray().data(), lp_M, l))
         return false;
 
     return true;

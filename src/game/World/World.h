@@ -617,6 +617,8 @@ class World
         void LoadWorldSafeLocs() const;
         void LoadGraveyardZones();
         GraveyardManager& GetGraveyardManager() { return m_graveyardManager; }
+
+        void SendGMTextFlags(uint32 accountFlag, int32 stringId, std::string type, const char* message);
     protected:
         void _UpdateGameTime();
         // callback for UpdateRealmCharacters

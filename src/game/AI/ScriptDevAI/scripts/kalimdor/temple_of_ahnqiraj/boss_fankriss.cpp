@@ -96,7 +96,7 @@ struct boss_fankrissAI : public CombatAI
         if (m_instance)
             m_instance->SetData(TYPE_FANKRISS, IN_PROGRESS);
 
-        std::random_shuffle(m_summonWormSpells.begin(), m_summonWormSpells.end());
+        std::shuffle(m_summonWormSpells.begin(), m_summonWormSpells.end(), *GetRandomGenerator());
     }
 
     void JustReachedHome() override
@@ -149,7 +149,7 @@ struct boss_fankrissAI : public CombatAI
                         // Determine how many Spawn of Fankriss will be spawned in the next wave
                         m_wormsSpawnPerWave = urand(1, 3);
                         // Randomise the summoning spells so each NPC spawns in a different location
-                        std::random_shuffle(m_summonWormSpells.begin(), m_summonWormSpells.end());
+                        std::shuffle(m_summonWormSpells.begin(), m_summonWormSpells.end(), *GetRandomGenerator());
                         ResetCombatAction(action, urand(22000, 70000));
                     }
                     else    // Summon another Spawn of Fankriss in a few seconds

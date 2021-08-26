@@ -21,6 +21,7 @@
 #include "World/World.h"
 #include "Social/SocialMgr.h"
 #include "Chat/Chat.h"
+#include "Anticheat/Anticheat.hpp"
 
 Channel::Channel(const std::string& name, uint32 channel_id/* = 0*/)
     : m_name(name)
@@ -651,9 +652,15 @@ void Channel::Say(Player* player, const char* text, uint32 lang)
     if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
         lang = LANG_UNIVERSAL;
 
+    auto const silenced = player->GetSession()->GetAnticheat()->IsSilenced();
+
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, CHAT_MSG_CHANNEL, text, Language(lang), player->GetChatTag(), guid, player->GetName(), ObjectGuid(), "", m_name.c_str(), player->GetHonorRankInfo().rank);
-    SendMessage(data, (moderator ? ObjectGuid() : guid));
+    // if the source is silenced, send only to them
+    if (silenced)
+        player->GetSession()->SendPacket(data);
+    else
+        SendMessage(data, (moderator ? ObjectGuid() : guid));
 }
 
 void Channel::Invite(Player* player, const char* targetName)
@@ -686,6 +693,9 @@ void Channel::Invite(Player* player, const char* targetName)
         return;
     }
 
+    // Record invite to antispam here
+    player->GetSession()->GetAnticheat()->ChannelInvite(m_name, targetGuid);
+
     if (IsBanned(targetGuid))
     {
         WorldPacket data;
@@ -704,7 +714,7 @@ void Channel::Invite(Player* player, const char* targetName)
 
     // invite player
     WorldPacket data;
-    if (!target->GetSocial()->HasIgnore(guid))
+    if (!target->GetSocial()->HasIgnore(guid) && !player->GetSession()->GetAnticheat()->IsSilenced())
     {
         MakeInvite(data, m_name, guid);
         SendToOne(data, targetGuid);

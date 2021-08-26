@@ -80,6 +80,7 @@ enum ChannelId
 
 class Channel
 {
+    public:
         enum ChannelFlags
         {
             CHANNEL_FLAG_NONE       = 0x00,
@@ -124,6 +125,8 @@ class Channel
             // 0x40
             // 0x80
         };
+
+    private:
 
         struct PlayerInfo
         {

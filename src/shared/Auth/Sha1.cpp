@@ -36,6 +36,11 @@ void Sha1Hash::UpdateData(const uint8* dta, int len)
     SHA1_Update(&mC, dta, len);
 }
 
+void Sha1Hash::UpdateData(const std::vector<uint8>& data)
+{
+    SHA1_Update(&mC, data.data(), data.size());
+}
+
 void Sha1Hash::UpdateData(const std::string& str)
 {
     UpdateData((uint8 const*)str.c_str(), str.length());
@@ -49,7 +54,7 @@ void Sha1Hash::UpdateBigNumbers(BigNumber* bn0, ...)
     BigNumber* bn = bn0;
     while (bn)
     {
-        UpdateData(bn->AsByteArray(), bn->GetNumBytes());
+        UpdateData(bn->AsByteArray());
         bn = va_arg(v, BigNumber*);
     }
     va_end(v);

@@ -364,6 +364,7 @@ bool AuthSocket::_HandleLogonChallenge()
     LoginDatabase.escape_string(_safelogin);
     _safelocale = m_locale;
     LoginDatabase.escape_string(_safelocale);
+    LoginDatabase.escape_string(m_os);
 
     pkt << uint8(CMD_AUTH_LOGON_CHALLENGE);
     pkt << uint8(0x00);
@@ -420,7 +421,7 @@ bool AuthSocket::_HandleLogonChallenge()
             {
                 ///- If the account is banned, reject the logon attempt
                 QueryResult* banresult = LoginDatabase.PQuery("SELECT banned_at,expires_at FROM account_banned WHERE "
-                                         "account_id = %u AND active = 1 AND (expires_at > UNIX_TIMESTAMP() OR expires_at = banned_at)", fields[1].GetUInt32());
+                                         "account_id = %u AND active = 1 AND (expires_at > UNIX_TIMESTAMP() OR expires_at = banned_at)", fields[0].GetUInt32());
                 if (banresult)
                 {
                     if ((*banresult)[0].GetUInt64() == (*banresult)[1].GetUInt64())
@@ -449,12 +450,12 @@ bool AuthSocket::_HandleLogonChallenge()
                     pkt << uint8(AUTH_LOGON_SUCCESS);
 
                     // B may be calculated < 32B so we force minimal length to 32B
-                    pkt.append(srp.GetHostPublicEphemeral().AsByteArray(32), 32);      // 32 bytes
+                    pkt.append(srp.GetHostPublicEphemeral().AsByteArray(32));      // 32 bytes
                     pkt << uint8(1);
-                    pkt.append(srp.GetGeneratorModulo().AsByteArray(), 1);
+                    pkt.append(srp.GetGeneratorModulo().AsByteArray());
                     pkt << uint8(32);
-                    pkt.append(srp.GetPrime().AsByteArray(32), 32);
-                    pkt.append(s.AsByteArray(), s.GetNumBytes());// 32 bytes
+                    pkt.append(srp.GetPrime().AsByteArray(32));
+                    pkt.append(s.AsByteArray());// 32 bytes
                     pkt.append(VersionChallenge.data(), VersionChallenge.size());
                     uint8 securityFlags = 0;
 
@@ -584,7 +585,7 @@ bool AuthSocket::_HandleLogonProof()
         ///- Update the sessionkey, current ip and login time and reset number of failed logins in the account table for this account
         // No SQL injection (escaped user input) and IP address as received by socket
         const char* K_hex = srp.GetStrongSessionKey().AsHexStr();
-        LoginDatabase.PExecute("UPDATE account SET sessionkey = '%s', locale = '%s', failed_logins = 0 WHERE username = '%s'", K_hex, _safelocale.c_str(), _safelogin.c_str());
+        LoginDatabase.PExecute("UPDATE account SET sessionkey = '%s', locale = '%s', failed_logins = 0, os = '%s' WHERE username = '%s'", K_hex, _safelocale.c_str(), m_os.c_str(), _safelogin.c_str());
         if (QueryResult* loginfail = LoginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'", _safelogin.c_str()))
             LoginDatabase.PExecute("INSERT INTO account_logons(accountId,ip,loginTime,loginSource) VALUES('%u','%s',NOW(),'%u')", loginfail->Fetch()[0].GetUInt32(), m_address.c_str(), LOGIN_TYPE_REALMD);
         OPENSSL_free((void*)K_hex);
@@ -721,7 +722,7 @@ bool AuthSocket::_HandleReconnectChallenge()
     pkt << (uint8)  CMD_AUTH_RECONNECT_CHALLENGE;
     pkt << (uint8)  0x00;
     _reconnectProof.SetRand(16 * 8);
-    pkt.append(_reconnectProof.AsByteArray(16), 16);        // 16 bytes random
+    pkt.append(_reconnectProof.AsByteArray(16));        // 16 bytes random
     pkt.append(VersionChallenge.data(), VersionChallenge.size());
     Write((const char*)pkt.contents(), pkt.size());
     return true;
@@ -919,8 +920,8 @@ void AuthSocket::LoadRealmlist(ByteBuffer& pkt, uint32 acctid)
                 if (!ok_build)
                     realmFlags = RealmFlags(realmFlags | REALM_FLAG_OFFLINE);
 
-                //if (!buildInfo) // always false since updated 10 lines above if null. ToDo: fix
-                //    realmFlags = RealmFlags(realmFlags & ~REALM_FLAG_SPECIFYBUILD);
+                if (!buildInfo)
+                    realmFlags = RealmFlags(realmFlags & ~REALM_FLAG_SPECIFYBUILD);
 
                 pkt << uint8(i.second.icon);               // realm type (this is second column in Cfg_Configs.dbc)
                 pkt << uint8(lock);                         // flags, if 0x01, then realm locked

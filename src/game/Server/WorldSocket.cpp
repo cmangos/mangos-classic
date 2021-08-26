@@ -33,6 +33,7 @@
 #include "Log.h"
 #include "Server/DBCStores.h"
 #include "CommonDefines.h"
+#include "Anticheat/Anticheat.hpp"
 
 #include <chrono>
 #include <functional>
@@ -135,11 +136,11 @@ bool WorldSocket::Open()
 
     BigNumber seed1;
     seed1.SetRand(16 * 8);
-    packet.append(seed1.AsByteArray(16), 16);               // new encryption seeds
+    packet.append(seed1.AsByteArray(16).data(), 16);               // new encryption seeds
 
     BigNumber seed2;
     seed2.SetRand(16 * 8);
-    packet.append(seed2.AsByteArray(16), 16);               // new encryption seeds
+    packet.append(seed2.AsByteArray(16).data(), 16);               // new encryption seeds
 
     SendPacket(packet);
 
@@ -295,15 +296,16 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     uint8 digest[20];
     uint32 clientSeed;
     uint32 ClientBuild;
+    uint32 unk2;
     LocaleConstant locale;
-    std::string account;
+    std::string account, os;
     Sha1Hash sha1;
     BigNumber v, s, g, N, K;
     WorldPacket packet, SendAddonPacked;
 
     // Read the content of the packet
     recvPacket >> ClientBuild;
-    recvPacket.read_skip<uint32>();
+    recvPacket >> unk2;
     recvPacket >> account;
     recvPacket >> clientSeed;
     recvPacket.read(digest, 20);
@@ -340,7 +342,9 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
                              "v, "                       //5
                              "s, "                       //6
                              "mutetime, "                //7
-                             "locale "                   //8
+                             "locale, "                  //8
+                             "os, "                      //9
+                             "flags "                    //10
                              "FROM account a "
                              "WHERE username = '%s'",
                              safe_account.c_str());
@@ -401,6 +405,10 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     time_t mutetime = time_t (fields[7].GetUInt64());
 
     locale = GetLocaleByName(fields[8].GetString());
+
+    os = fields[9].GetString();
+
+    uint32 accountFlags = fields[10].GetUInt32();
 
     delete result;
 
@@ -467,6 +475,17 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
               account.c_str(),
               address.c_str());
 
+    ClientOSType clientOS;
+    if (os == "Win")
+        clientOS = CLIENT_OS_WIN;
+    else if (os == "OSX")
+        clientOS = CLIENT_OS_MAC;
+    else
+    {
+        sLog.outError("WorldSocket::HandleAuthSession: Unrecognized OS '%s' for account '%s' from %s", os.c_str(), account.c_str(), address.c_str());
+        return -1;
+    }
+
     // Update the last_ip in the database
     // No SQL injection, username escaped.
     static SqlStatementID updAccount;
@@ -475,10 +494,6 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     stmt.PExecute(id, address.c_str(), std::to_string(LOGIN_TYPE_MANGOSD).c_str());
 
     m_crypt.Init(&K);
-
-    // Create and send the Addon packet
-    if (sAddOnHandler.BuildAddonPacket(recvPacket, SendAddonPacked))
-        SendPacket(SendAddonPacked);
 
     m_session = sWorld.FindSession(id);
     if (m_session)
@@ -500,14 +515,50 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
             if (IsClosed() || counter > 20)
                 return false;
         }
+
+        m_session->SetGameBuild(ClientBuild);
+        m_session->SetOS(clientOS);
+
+        std::unique_ptr<SessionAnticheatInterface> anticheat = sAnticheatLib->NewSession(m_session, K);
+
+        // when false, the client sent invalid addon data.  kick!
+        WorldPacket addonPacket; // yes its copypasted atm cos of reconnect
+        if (!anticheat->ReadAddonInfo(&recvPacket, addonPacket))
+        {
+            sLog.outBasic("WorldSocket::HandleAuthSession: Account %s (id %u) IP %s sent bad addon info.  Kicking.",
+                account.c_str(), id, address.c_str());
+            return -1;
+        }
+        else
+            SendPacket(addonPacket);
+
+        m_session->SetDelayedAnticheat(std::move(anticheat));
+        m_session->GetMessager().AddMessage([](WorldSession* session)
+        {
+            session->AssignAnticheat();
+        });
     }
     else
     {
         // new session
-        if (!(m_session = new WorldSession(id, this, AccountTypes(security), mutetime, locale)))
+        if (!(m_session = new WorldSession(id, this, AccountTypes(security), mutetime, locale, account, accountFlags)))
             return false;
 
         m_session->LoadTutorialsData();
+        m_session->SetGameBuild(ClientBuild);
+        m_session->SetOS(clientOS);
+        m_session->InitializeAnticheat(K);
+
+        // when false, the client sent invalid addon data.  kick!
+        WorldPacket addonPacket;
+        if (!m_session->GetAnticheat()->ReadAddonInfo(&recvPacket, addonPacket))
+        {
+            sLog.outBasic("WorldSocket::HandleAuthSession: Account %s (id %u) IP %s sent bad addon info.  Kicking.",
+                account.c_str(), id, address.c_str());
+            return -1;
+        }
+        else
+            SendPacket(addonPacket);
 
         sWorld.AddSession(m_session);
     }

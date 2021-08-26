@@ -54,8 +54,16 @@ class CharacterHandler;
 class GMTicket;
 class MovementInfo;
 class WorldSession;
+class SessionAnticheatInterface;
 
 struct OpcodeHandler;
+
+enum ClientOSType
+{
+    CLIENT_OS_UNKNOWN,
+    CLIENT_OS_WIN,
+    CLIENT_OS_MAC
+};
 
 enum PartyOperation
 {
@@ -101,6 +109,14 @@ struct CharacterNameQueryResponse
     uint32              classid     = 0;        // pc's class
 };
 
+enum AccountFlags
+{
+    ACCOUNT_FLAG_SHOW_ANTICHEAT = 0x01,
+    ACCOUNT_FLAG_SILENCED       = 0x02,
+    ACCOUNT_FLAG_SHOW_ANTISPAM  = 0x04,
+    ACCOUNT_FLAG_HIDDEN         = 0x08,
+};
+
 // class to deal with packet processing
 // allows to determine if next packet is safe to be processed
 class PacketFilter
@@ -144,7 +160,7 @@ class WorldSession
         friend class CharacterHandler;
 
     public:
-        WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, time_t mute_time, LocaleConstant locale);
+        WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, time_t mute_time, LocaleConstant locale, std::string accountName, uint32 accountFlags);
         ~WorldSession();
 
         // Set this session have no attached socket but keep it alive for short period of time to permit a possible reconnection
@@ -178,9 +194,15 @@ class WorldSession
         bool IsInitialZoneUpdated() { return m_initialZoneUpdated; }
 
         AccountTypes GetSecurity() const { return _security; }
+        uint32 GetAccountFlags() const { return m_accountFlags; }
+        bool HasAccountFlag(uint32 flags) const { return (m_accountFlags & flags) != 0; }
+        void AddAccountFlag(uint32 flags) { m_accountFlags |= flags; }
+        void RemoveAccountFlag(uint32 flags) { m_accountFlags &= ~flags; }
         uint32 GetAccountId() const { return _accountId; }
+        std::string const& GetAccountName() const { return m_accountName; }
         Player* GetPlayer() const { return _player; }
         char const* GetPlayerName() const;
+        std::string GetChatType(uint32 type);
         void SetSecurity(AccountTypes security) { _security = security; }
 #ifdef BUILD_PLAYERBOT
         // Players connected without socket are bot
@@ -188,7 +210,18 @@ class WorldSession
 #else
         const std::string GetRemoteAddress() const { return m_Socket ? m_Socket->GetRemoteAddress() : "disconnected"; }
 #endif
-        void SetPlayer(Player* plr) { _player = plr; }
+        const std::string& GetLocalAddress() const { return m_localAddress; }
+
+        void SetPlayer(Player* plr, uint32 playerGuid);
+
+        void InitializeAnticheat(const BigNumber& K);
+        void AssignAnticheat();
+        void SetDelayedAnticheat(std::unique_ptr<SessionAnticheatInterface>&& anticheat);
+        SessionAnticheatInterface* GetAnticheat() const { return m_anticheat.get(); }
+
+#ifdef BUILD_PLAYERBOT
+        void SetNoAnticheat();
+#endif
 
         /// Session in auth.queue currently
         void SetInQueue(bool state) { m_inQueue = state; }
@@ -320,7 +353,12 @@ class WorldSession
         void SetLatency(uint32 latency) { m_latency = latency; }
         void ResetClientTimeDelay() { m_clientTimeDelay = 0; }
         uint32 getDialogStatus(const Player* pPlayer, const Object* questgiver, uint32 defstatus) const;
-
+        ClientOSType GetOS() const { return m_clientOS; }
+        void SetOS(ClientOSType os) { m_clientOS = os; }
+        uint32 GetGameBuild() const { return m_gameBuild; }
+        void SetGameBuild(uint32 version) { m_gameBuild = version; }
+        uint32 GetAccountMaxLevel() const { return m_accountMaxLevel; }
+        void SetAccountMaxLevel(uint32 level) { m_accountMaxLevel = level; }
         uint32 GetOrderCounter() const { return m_orderCounter; }
         void IncrementOrderCounter() { ++m_orderCounter; }
 
@@ -334,6 +372,7 @@ class WorldSession
 
         void SendAuthOk() const;
         void SendAuthQueued() const;
+        void SendKickReason(uint8 reason, std::string const& string) const;
         // opcodes handlers
         void Handle_NULL(WorldPacket& recvPacket);          // not used
         void Handle_EarlyProccess(WorldPacket& recvPacket); // just mark packets processed in WorldSocket::OnRead
@@ -685,7 +724,6 @@ class WorldSession
         void HandleBattlefieldListOpcode(WorldPacket& recv_data);
         void HandleLeaveBattlefieldOpcode(WorldPacket& recv_data);
 
-        void HandleWardenDataOpcode(WorldPacket& recv_data);
         void HandleWorldTeleportOpcode(WorldPacket& recv_data);
         void HandleMinimapPingOpcode(WorldPacket& recv_data);
         void HandleRandomRollOpcode(WorldPacket& recv_data);
@@ -704,6 +742,9 @@ class WorldSession
         void HandleSetTaxiBenchmarkOpcode(WorldPacket& recv_data);
 
 #define MOVEMENT_PACKET_TIME_DELAY 0
+
+        // Warden
+        void HandleWardenDataOpcode(WorldPacket& recv_data);
 
         // Movement
         void SynchronizeMovement(MovementInfo& movementInfo);
@@ -733,13 +774,22 @@ class WorldSession
         Player* _player;
         std::shared_ptr<WorldSocket> m_Socket;              // socket pointer is owned by the network thread which created it
         std::shared_ptr<WorldSocket> m_requestSocket;       // a new socket for this session is requested (double connection)
+        std::string m_localAddress;
         WorldSessionState m_sessionState;                   // this session state
 
         AccountTypes _security;
         uint32 _accountId;
+        std::string m_accountName;
+        uint32 m_accountFlags;
 
-        // Anticheat
+        // anticheat
+        ClientOSType m_clientOS;
+        uint32 m_gameBuild;
+        uint32 m_accountMaxLevel;
         uint32 m_orderCounter;
+        uint32 m_lastAnticheatUpdate;
+        std::unique_ptr<SessionAnticheatInterface> m_delayedAnticheat;
+        std::unique_ptr<SessionAnticheatInterface> m_anticheat;
 
         time_t _logoutTime;                                 // when logout will be processed after a logout request
         time_t m_kickTime;

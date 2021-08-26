@@ -60,7 +60,7 @@ void AuthCrypt::Init(BigNumber* bn)
 
     _key.resize(len);
     auto const key = bn->AsByteArray();
-    std::copy(key, key + len, _key.begin());
+    std::copy(key.begin(), key.end(), _key.begin());
 
     _initialized = true;
 }

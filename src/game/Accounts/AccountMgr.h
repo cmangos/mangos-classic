@@ -50,6 +50,7 @@ class AccountMgr
         bool GetName(uint32 acc_id, std::string& name) const;
         uint32 GetCharactersCount(uint32 acc_id) const;
         std::string CalculateShaPassHash(std::string& name, std::string& password) const;
+        uint32 GetFlags(uint32 acc_id) const;
 
         static bool normalizeString(std::string& utf8str);
 };

@@ -376,6 +376,11 @@ class ByteBuffer
             _wpos += cnt;
         }
 
+        void append(const std::vector<uint8>& buffer)
+        {
+            append(buffer.data(), buffer.size());
+        }
+
         void append(const ByteBuffer& buffer)
         {
             if (buffer.wpos())

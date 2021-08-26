@@ -30,11 +30,12 @@ class BigNumber;
 class HMACSHA1
 {
     public:
-        HMACSHA1(uint32 len, uint8* seed);
-        HMACSHA1(uint32 len, uint8* seed, bool);
+        HMACSHA1(uint32 len, const uint8* seed);
+        HMACSHA1(uint32 len, const uint8* seed, bool);
         ~HMACSHA1();
         void UpdateBigNumber(BigNumber* bn);
         void UpdateData(const uint8* data, int length);
+        void UpdateData(const std::string& str);
         void Initialize();
         void Finalize();
         uint8* GetDigest() { return m_digest; };

@@ -90,6 +90,7 @@ enum MangosStrings
     LANG_GM_NO_WHISPER                  = 64,
     //                                    65, not used
     LANG_USING_SCRIPT_LIB_NONE          = 66,
+    LANG_GM_ANNOUNCE_COLOR              = 67,
     // Room for more level 0              67-99 not used
 
     // level 1 chat

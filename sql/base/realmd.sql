@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `realmd_db_version`;
 CREATE TABLE `realmd_db_version` (
-  `required_z2775_01_realmd_raf` bit(1) DEFAULT NULL
+  `required_z2778_01_realmd_anticheat` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Last applied sql update to DB';
 
 --
@@ -52,12 +52,15 @@ CREATE TABLE `account` (
   `lockedIp` varchar(30) NOT NULL DEFAULT '0.0.0.0',
   `failed_logins` int(11) unsigned NOT NULL DEFAULT '0',
   `locked` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `last_login` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `last_module` char(32) DEFAULT '',
+  `module_day` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `active_realm_id` int(11) unsigned NOT NULL DEFAULT '0',
   `expansion` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `mutetime` bigint(40) unsigned NOT NULL DEFAULT '0',
   `locale` varchar(4) NOT NULL DEFAULT '',
+  `os` VARCHAR(4) NOT NULL DEFAULT '0',
   `token` text,
+  `flags` INT UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_username` (`username`),
   KEY `idx_gmlevel` (`gmlevel`)
@@ -70,10 +73,10 @@ CREATE TABLE `account` (
 LOCK TABLES `account` WRITE;
 /*!40000 ALTER TABLE `account` DISABLE KEYS */;
 INSERT INTO `account` VALUES
-(1,'ADMINISTRATOR',3,'','312B99EEF1C0196BB73B79D114CE161C5D089319E6EF54FAA6117DAB8B672C14','8EB5DE915AA3D805FA7099CF61C0BB8A77990EA869078A0C5B9EEE55828F4505','','2006-04-25 10:18:56','127.0.0.1',0,0,'1970-01-01 00:00:01',0,0,0,'',NULL),
-(2,'GAMEMASTER',2,'','681F5A7D4DE26DBFD3060EE37E03B79FD154875FB18F44DBF843963F193FC1AC','8873CD861DEFBF124232D6A29E4884E34C73385304A8AC44175976B1003DCFD7','','2006-04-25 10:18:56','127.0.0.1',0,0,'1970-01-01 00:00:01',0,0,0,'',NULL),
-(3,'MODERATOR',1,'','2CA85C9853E44A6DCE09FC92EBDE57EF20975281EB7604326E25751AF8576859','AD68B088D7BCE5E4B734495A7A956F1D5DD1BAB61FB0FEE46C737D93EC166DF5','','2006-04-25 10:19:35','127.0.0.1',0,0,'1970-01-01 00:00:01',0,0,0,'',NULL),
-(4,'PLAYER',0,'','3738EC7E7C731FD431C716990C6D97CA5C1D50EF0DA7DE9819076DE1D03AA891','EBA23AF194D89B8061CA7FEBA06D336B1C38D8FBDABA76F2C51D45141362D881','','2006-04-25 10:19:35','127.0.0.1',0,0,'1970-01-01 00:00:01',0,0,0,'',NULL);
+(1,'ADMINISTRATOR',3,'','312B99EEF1C0196BB73B79D114CE161C5D089319E6EF54FAA6117DAB8B672C14','8EB5DE915AA3D805FA7099CF61C0BB8A77990EA869078A0C5B9EEE55828F4505','','2006-04-25 10:18:56','127.0.0.1',0,0,'',0,0,0,0,'',0,NULL,0),
+(2,'GAMEMASTER',2,'','681F5A7D4DE26DBFD3060EE37E03B79FD154875FB18F44DBF843963F193FC1AC','8873CD861DEFBF124232D6A29E4884E34C73385304A8AC44175976B1003DCFD7','','2006-04-25 10:18:56','127.0.0.1',0,0,'',0,0,0,0,'',0,NULL,0),
+(3,'MODERATOR',1,'','2CA85C9853E44A6DCE09FC92EBDE57EF20975281EB7604326E25751AF8576859','AD68B088D7BCE5E4B734495A7A956F1D5DD1BAB61FB0FEE46C737D93EC166DF5','','2006-04-25 10:19:35','127.0.0.1',0,0,'',0,0,0,0,'',0,NULL,0),
+(4,'PLAYER',0,'','3738EC7E7C731FD431C716990C6D97CA5C1D50EF0DA7DE9819076DE1D03AA891','EBA23AF194D89B8061CA7FEBA06D336B1C38D8FBDABA76F2C51D45141362D881','','2006-04-25 10:19:35','127.0.0.1',0,0,'',0,0,0,0,'',0,NULL,0);
 /*!40000 ALTER TABLE `account` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -219,6 +222,274 @@ LOCK TABLES `uptime` WRITE;
 /*!40000 ALTER TABLE `uptime` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+DROP TABLE IF EXISTS `antispam_detected`;
+DROP TABLE IF EXISTS `antispam_mute`;
+DROP TABLE IF EXISTS `antispam_scores`;
+
+DROP TABLE IF EXISTS `system_fingerprint_usage`;
+
+CREATE TABLE `system_fingerprint_usage` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `fingerprint` int(10) unsigned NOT NULL,
+  `account` int(10) unsigned NOT NULL,
+  `ip` varchar(16) NOT NULL,
+  `realm` int(10) unsigned NOT NULL,
+  `time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `architecture` varchar(16) DEFAULT NULL,
+  `cputype` varchar(64) DEFAULT NULL,
+  `activecpus` int(10) unsigned DEFAULT NULL,
+  `totalcpus` int(10) unsigned DEFAULT NULL,
+  `pagesize` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fingerprint` (`fingerprint`),
+  KEY `account` (`account`),
+  KEY `ip` (`ip`)
+) ENGINE=InnoDB AUTO_INCREMENT=77 DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `antispam_replacement`;
+
+CREATE TABLE `antispam_replacement` (
+  `from` varchar(32) NOT NULL DEFAULT '',
+  `to` varchar(32) NOT NULL DEFAULT '',
+  PRIMARY KEY (`from`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+insert  into `antispam_replacement`(`from`,`to`) values ('\\\\/\\\\/','W'),('/\\/\\','M'),('0','O'),('...hic!',''),('()','O'),('\\/\\/','W'),('/\\\\','A'),('VV','W'),('@','O'),('/V\\','M'),('/\\\\/\\\\','M'),('㎜','MM'),('!<','K');
+
+DROP TABLE IF EXISTS `antispam_unicode`;
+DROP TABLE IF EXISTS `antispam_unicode_replacement`;
+
+CREATE TABLE `antispam_unicode_replacement` (
+  `from` mediumint(5) unsigned NOT NULL DEFAULT '0',
+  `to` mediumint(5) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`from`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+insert  into `antispam_unicode_replacement`(`from`,`to`) values (1063,52),(1054,79),(1057,67),(1052,77),(927,79),(1050,75),(913,65),(917,69),(1062,85),(9675,79),(1040,65),(1058,84),(1064,87),(1025,69),(1055,78),(1065,87),(922,75),(924,77),(1045,69),(968,87),(192,65),(210,79),(211,79),(242,79),(324,78),(328,78),(332,79),(466,79),(59336,78),(12562,84),(8745,78),(65325,77),(959,79),(945,65),(954,75),(12295,79),(65323,75),(65296,79),(65355,75),(65357,77),(65319,71),(925,78);
+
+DROP TABLE IF EXISTS `antispam_blacklist`;
+
+CREATE TABLE `antispam_blacklist` (
+  `string` varchar(64) NOT NULL,
+  PRIMARY KEY (`string`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+/*Data for the table `antispam_blacklist` */
+
+insert  into `antispam_blacklist`(`string`) values 
+(' <<<10G=1$--and'),
+(' http://400elysium.tk/ '),
+(' W W W .N O S T 100.C O M !50 %'),
+(' www.aoaue.com'),
+(' [www.y2IgoId.com>10g=2$/Power] '),
+('\"COM\"'),
+('\"T100\"'),
+('\"T100\" plus \"COM\"<<'),
+(',finally we got 500g\r\n,finally w'),
+('.c¡£ 0m'),
+('100COM'),
+('10g='),
+('1OOCOM'),
+('2$/Power]'),
+('300elysium.tk'),
+('300ELYSIUMTK'),
+('400elysium.tk/'),
+('400ELYSIUMTK'),
+('4GAMEPOWER'),
+('4WOWCOM'),
+('50G=10.00$'),
+('7 days non-stop hard working,fin'),
+('<<<100G=12$--and'),
+('<<<10G=1$'),
+('>>\"NOS\"'),
+('?\\/!CT0RYW0WC0M'),
+('aoaue'),
+('aoauecom'),
+('com>10g'),
+('elysium-gifts.tk'),
+('elysium-projecttk'),
+('ELYSIUMABCWOW'),
+('ELYSIUMAEWOW'),
+('ELYSIUMAPKWOW'),
+('ELYSIUMDFTWOW'),
+('ELYSIUMFDCWOW'),
+('ELYSIUMGIFTSTK'),
+('ELYSIUMKSDWOW'),
+('ELYSIUMKYWOW'),
+('ELYSIUMLOLWOW'),
+('ELYSIUMORWOW'),
+('ELYSIUMPROJECTTK'),
+('ELYSIUMRDWOW'),
+('ELYSIUMRSWOW'),
+('ELYSIUMSAYWOW'),
+('ELYSIUMSHEWOW'),
+('ELYSIUMSNKWOW'),
+('ELYSIUMTXTWOW'),
+('ELYSIUMUFNWOW'),
+('ELYSIUMUSAWOW'),
+('ELYSIUMWOWTK'),
+('ELYSIUMXGHWOW'),
+('ELYSIUMXXXWOW'),
+('ELYSIUMZZZWOW'),
+('EPICITEMSHONOR'),
+('FASTLVLCOM'),
+('finally we got 500g'),
+('finallywegot500g'),
+('Flask/Epic items/Honor'),
+('g(2+2)wowcom'),
+('G-4-VV-0-W--C--0--M'),
+('G4W@W'),
+('G4WOW'),
+('G4WOWCOM'),
+('GFOURWOWCOM'),
+('GO1D4MMO'),
+('GOALDMOCOM'),
+('GoId/eppic items/Bags'),
+('GOLADAMOCOM'),
+('GOLADMOCOM'),
+('GOLD4MMO'),
+('GOLDAMOCOM'),
+('GOLDCEO'),
+('GOLDCOM'),
+('GOLDDEALRU'),
+('GOLDINSIDER'),
+('GOLDPOWER'),
+('GOLODMOCOM'),
+('GOLODOMOCOM'),
+('GOXLD4MOCOM'),
+('GOXLD4XMMOCOM'),
+('GOXLDX4MXMOCOM'),
+('GOXLDXMOCOM'),
+('Greetingsafter7days'),
+('http://elysium-pro.tk'),
+('http://elysium-project.tk'),
+('HTTPSELySIUMProJECtTK'),
+('HTTPSWWWELYSIUMGIFTSTK'),
+('HTTPSWWWELYSIUMPROJECTTK'),
+('HTTPSWWWY2IGOIDCOM>'),
+('HTTPWWWY2IGOIDCOM>'),
+('ILOVEUGOLD'),
+('ITEM4GAME'),
+('ITEM4WOW'),
+('ITEM4WOW.COM'),
+('ITEM4WOW.COM<---here'),
+('ITEM4WOWCOM'),
+('LAODAN8841'),
+('leveling1-60=350$'),
+('LOD.COM<<<'),
+('LODCOM<<<---)('),
+('LOVEWOWHAHA'),
+('LOVEWOWHAHACOM'),
+('love£¨wow£©haha'),
+('LV60/ ---'),
+('LVLGOCOM'),
+('MMO4PAL'),
+('MMOANKCOM'),
+('MMOGOCOM'),
+('MMOGSCOM'),
+('MMOLORD'),
+('MMOOKCOM'),
+('MMOSECOM'),
+('MMOTANKCOM'),
+('MONEYCIRCLERU'),
+('MONEYFORGAMES'),
+('NAXXGAMES'),
+('NAXXGAMESCOM'),
+('NIGHTHAVEN20G'),
+('NOST!OO'),
+('NOST100'),
+('NOST1OO'),
+('OKOGAME'),
+('OKOGAMES'),
+('OKOGOMES'),
+('owhaha.com'),
+('OWHAHACOM'),
+('power1-60'),
+('POWERLV60'),
+('PVPBANK'),
+('PVPBCOMANK'),
+('QQ1353341694'),
+('QQ211772670'),
+('QQ373353356'),
+('RNRNOOK'),
+('RNRNOSE'),
+('SAGEBLADECOM'),
+('SELLNGOLD'),
+('SINBAGAME'),
+('SINBAGOLD'),
+('SINBAONLINE'),
+('SKYPEBAUDIEA'),
+('SKYPEBRAT7TH'),
+('SKYPEELYSUIM'),
+('SKYPEELYSUIMKFWOW'),
+('SKYPEELYSUIMWOWOW'),
+('SKYPEEMIL8LI'),
+('SKYPEFELWOOD'),
+('SKYPEJASZUINS'),
+('SKYPEJAZZYTSWOW'),
+('SKYPELAR2IDA'),
+('SKYPEMOONCLOTH'),
+('SKYPEPROJECTERWOW'),
+('SKYPESPRAGUEI'),
+('SKYPEVANILLA'),
+('Stockof60characters'),
+('SUSANGAME'),
+('T100'),
+('T100plusCOM'),
+('two weeks of non-stop hard worki'),
+('URL divide into three'),
+('URLintothreepart'),
+('V1CTORYWOW'),
+('VICTORYW0W'),
+('VICTORYWOW'),
+('VICTORYWOW.COM'),
+('VICTORYWOWCOM'),
+('working,finally we got 500g'),
+('WOWJEVERLY'),
+('WOWMARY'),
+('WTSITEM'),
+('www.aoaue.com'),
+('WWW.G(2+2)WOW.COM'),
+('WWW.G-4-VV-0-W--C--0--M'),
+('WWW.G4WOW.COM'),
+('www.lovewowhah'),
+('www.love£¨wow£©haha .com'),
+('www.love£¨wow£©haha .com________'),
+('www.love£¨wow£©haha .c¡£ 0m'),
+('www.y2IgoId.com'),
+('www.y2IgoId.com>'),
+('www.y2IgoId.com>10g=2$/Power'),
+('www.y2IgoId.com>10g=2$/Power LV6'),
+('WWW.Y2LGOLD.COM'),
+('www.y2lgold.com>'),
+('WWW.Y2LGOLD.COM>Gold'),
+('WWWELYSIUMGIFTSTK'),
+('WWWELYSIUMPROJECTTK'),
+('WWWELYSIUMWOWTK'),
+('WWWG4WOWCOM'),
+('WWWMMOTANK'),
+('WWWNAXXGAMESCOM'),
+('WWWNOST'),
+('WWWNOST100COM'),
+('wwwy2IgoIdcom'),
+('WWWY2IGOIDCOM>'),
+('WWWY2LGOLD.COM'),
+('WWWY2LGOLDCOM'),
+('WWWY@LGOLDCOM'),
+('X2GOLD'),
+('XIAOBAIMOSHOUJINGJI'),
+('y(1+1)lgold'),
+('y2IgoId'),
+('y2IgoId.com'),
+('y2IgoIdcom'),
+('Y2LGOLD'),
+('Y2LGOLD.COM'),
+('Y2LGOLDCOM'),
+('YOURGNET'),
+('[GM]'),
+('[www.y2IgoId.com>10g=2$/Power] L');
+
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

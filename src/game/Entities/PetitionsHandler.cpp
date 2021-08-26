@@ -28,6 +28,13 @@
 #include "Guilds/GuildMgr.h"
 #include "Entities/GossipDef.h"
 #include "Social/SocialMgr.h"
+#include "Anticheat/Anticheat.hpp"
+
+/*enum PetitionType // dbc data
+{
+    PETITION_TYPE_GUILD      = 1,
+    PETITION_TYPE_ARENA_TEAM = 3
+};*/
 
 // Charters ID in item_template
 #define GUILD_CHARTER               5863
@@ -89,6 +96,15 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recv_data)
         SendGuildCommandResult(GUILD_CREATE_S, name, ERR_GUILD_NAME_EXISTS_S);
         return;
     }
+
+    // Check guild petition name (use whisper type - 6)
+    if (sAnticheatLib->ValidateGuildName(name))
+    {
+        sLog.outBasic("Attempt to create guild petition with spam name \"%s\"", name.c_str());
+        SendGuildCommandResult(GUILD_CREATE_S, name, ERR_GUILD_NAME_INVALID);
+        return;
+    }
+
     if (sObjectMgr.IsReservedName(name) || !ObjectMgr::IsValidCharterName(name))
     {
         SendGuildCommandResult(GUILD_CREATE_S, name, ERR_GUILD_NAME_INVALID);

@@ -1,0 +1,37 @@
+token: '<discord token goes here>'
+channel: '<channel for anticheat/antispam notifications>'
+
+database:
+    logs:
+        host: 'localhost'
+        port: 3306
+        user: 'root'
+        pass: ''
+        name: 'logs'
+        
+    realm:
+        host: 'localhost'
+        port: 3306
+        user: 'root'
+        pass: ''
+        name: 'login'
+
+
+realm:
+    Full Realm Name:
+        host: 'localhost'
+        port: 3443
+        user: '<gm user account for bot>'
+        pass: '<password>'
+        
+    Some Other Realm:
+        host: 'localhost'
+        port: 3443
+        user: '<gm user account for bot>'
+        pass: '<password>'
+
+bot:
+    commands_prefix: '!'
+    commands_require_mention: False
+    plugins:
+        - plugins.bot
