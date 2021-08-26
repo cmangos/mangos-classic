@@ -2688,7 +2688,7 @@ void Spell::Prepare()
     // calculate cast time (calculated after first CheckCast check to prevent charge counting for first CheckCast fail)
     if (!m_ignoreCastTime)
     {
-        SpellModRAII spellModController(this, m_caster->GetSpellModOwner(), false, true);
+        SpellModRAII spellModController(this, m_trueCaster->GetSpellModOwner(), false, true);
         m_casttime = GetSpellCastTime(m_spellInfo, m_trueCaster, this, true);
     }
 
