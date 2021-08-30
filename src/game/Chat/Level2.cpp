@@ -907,16 +907,16 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
 
     PSendSysMessage(LANG_GAMEOBJECT_DETAIL, lowguid, name, lowguid, id, x, y, z, uint32(mapid), o);
 
-    if (auto vector = sObjectMgr.GetAllRandomGameObjectEntries(target->GetDbGuid()))
-    {
-        std::string output;
-        for (uint32 entry : *vector)
-            output += std::to_string(entry) + ",";
-        PSendSysMessage("GO is part of gameobject_spawn_entry: %s", output.data());
-    }
-
     if (target)
     {
+        if (auto vector = sObjectMgr.GetAllRandomGameObjectEntries(target->GetDbGuid()))
+        {
+            std::string output;
+            for (uint32 entry : *vector)
+                output += std::to_string(entry) + ",";
+            PSendSysMessage("GO is part of gameobject_spawn_entry: %s", output.data());
+        }
+
         time_t curRespawnDelay = target->GetRespawnTimeEx() - time(nullptr);
         if (curRespawnDelay < 0)
             curRespawnDelay = 0;
