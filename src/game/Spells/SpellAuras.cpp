@@ -1043,8 +1043,8 @@ void Aura::TriggerSpell()
                         return;
                     }
                     // Stalagg Chain and Feugen Chain
-                    // case 28096:
-                    // case 28111:
+                    case 28096:
+                    case 28111:
 //                    // Guardian of Icecrown Passive
 //                    case 29897: break;
 //                    // Mind Exhaustion Passive
