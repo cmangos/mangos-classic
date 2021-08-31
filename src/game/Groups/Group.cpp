@@ -475,17 +475,17 @@ void Group::SetTargetIcon(uint8 id, ObjectGuid targetGuid)
 
 static void GetDataForXPAtKill_helper(Player* player, Unit const* victim, uint32& sum_level, Player*& member_with_max_level, Player*& not_gray_member_with_max_level)
 {
-    const uint32 level = player->getLevel();
+    const uint32 level = player->GetLevel();
 
     sum_level += level;
 
-    if (!member_with_max_level || member_with_max_level->getLevel() < level)
+    if (!member_with_max_level || member_with_max_level->GetLevel() < level)
         member_with_max_level = player;
 
     if (MaNGOS::XP::IsTrivialLevelDifference(level, victim->GetLevelForTarget(player)))
         return;
 
-    if (!not_gray_member_with_max_level || not_gray_member_with_max_level->getLevel() < level)
+    if (!not_gray_member_with_max_level || not_gray_member_with_max_level->GetLevel() < level)
         not_gray_member_with_max_level = player;
 }
 
@@ -1366,7 +1366,7 @@ static void RewardGroupAtKill_helper(Player* pGroupGuy, Unit* pVictim, uint32 co
         if (pVictim->GetTypeId() == TYPEID_UNIT)
         {
             Creature* creatureVictim = static_cast<Creature*>(pVictim);
-            float rate = group_rate * float(pGroupGuy->getLevel()) / sum_level;
+            float rate = group_rate * float(pGroupGuy->GetLevel()) / sum_level;
 
             // if is in dungeon then all receive full reputation at kill
             // rewarded any alive/dead/near_corpse group member
@@ -1374,7 +1374,7 @@ static void RewardGroupAtKill_helper(Player* pGroupGuy, Unit* pVictim, uint32 co
 
             // XP updated only for alive group member
             if (pGroupGuy->IsAlive() && not_gray_member_with_max_level &&
-                pGroupGuy->getLevel() <= not_gray_member_with_max_level->getLevel())
+                pGroupGuy->GetLevel() <= not_gray_member_with_max_level->GetLevel())
             {
                 float itr_xp = (member_with_max_level == not_gray_member_with_max_level) ? xp * rate : (xp * rate * 0.5f) + 1.0f;
 

@@ -236,9 +236,9 @@ bool inline ConditionEntry::Evaluate(WorldObject const* target, Map const* map, 
             Unit const* unit = static_cast<Unit const*>(target);
             switch (m_value2)
             {
-                case 0: return unit->getLevel() == m_value1;
-                case 1: return unit->getLevel() >= m_value1;
-                case 2: return unit->getLevel() <= m_value1;
+                case 0: return unit->GetLevel() == m_value1;
+                case 1: return unit->GetLevel() >= m_value1;
+                case 2: return unit->GetLevel() <= m_value1;
             }
             return false;
         }

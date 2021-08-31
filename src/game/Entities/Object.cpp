@@ -2686,7 +2686,7 @@ int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry cons
     int32 randomPoints = spellProto->EffectDieSides[effect_index];
     if (unitCaster && basePointsPerLevel != 0.f)
     {
-        int32 level = int32(unitCaster->getLevel());
+        int32 level = int32(unitCaster->GetLevel());
         if (level > (int32)spellProto->maxLevel&& spellProto->maxLevel > 0)
             level = (int32)spellProto->maxLevel;
         else if (level < (int32)spellProto->baseLevel)
@@ -2765,7 +2765,7 @@ int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry cons
 
         if (damage)
         {
-            value = int32(value * 0.25f * exp(unitCaster->getLevel() * (70 - spellProto->spellLevel) / 1000.0f));
+            value = int32(value * 0.25f * exp(unitCaster->GetLevel() * (70 - spellProto->spellLevel) / 1000.0f));
         }
     }
     return value;

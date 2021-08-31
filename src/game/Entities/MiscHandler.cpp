@@ -173,7 +173,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
             continue;
 
         // check if target's level is in level range
-        uint32 lvl = pl->getLevel();
+        uint32 lvl = pl->GetLevel();
         if (lvl < level_min || lvl > level_max)
             continue;
 

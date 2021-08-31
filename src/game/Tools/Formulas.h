@@ -223,10 +223,10 @@ namespace MaNGOS
             int total_kills  = killer->CalculateTotalKills(victim, today, today);
             // int k_rank       = killer->CalculateHonorRank( killer->GetTotalHonor() );
             uint32 v_rank    = victim->GetHonorRankInfo().visualRank;
-            uint32 k_level   = killer->getLevel();
-            // int v_level      = victim->getLevel();
+            uint32 k_level   = killer->GetLevel();
+            // int v_level      = victim->GetLevel();
             float diff_honor = (victim->GetRankPoints() / (killer->GetRankPoints() + 1)) + 1;
-            float diff_level = (victim->getLevel() * (1.0 / (killer->getLevel())));
+            float diff_level = (victim->GetLevel() * (1.0 / (killer->GetLevel())));
 
             int f = (10 - total_kills) >= 0 ? (10 - total_kills) : 0;
             int honor_points = int(((float)(f * 0.25) * (float)((k_level + (v_rank * 5 + 1)) * (1 + 0.05 * diff_honor) * diff_level)));
@@ -338,7 +338,7 @@ namespace MaNGOS
             if (target->IsTotem() || target->IsPet() || target->IsNoXp() || target->IsCritter())
                 return 0;
 
-            float xp_gain = BaseGain(unit->getLevel(), target->getLevel());
+            float xp_gain = BaseGain(unit->GetLevel(), target->GetLevel());
             if (xp_gain == 0.0f)
                 return 0;
 

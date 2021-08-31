@@ -49,7 +49,7 @@ struct FormScalingAttackPowerAuras : public AuraScript
             else if (Aura* aura = data.target->GetAura(16972, EFFECT_INDEX_0)) // rank 1
                 predatoryStrikes = aura;
             if (predatoryStrikes)
-                value += data.target->getLevel() * predatoryStrikes->GetAmount() / 100;
+                value += data.target->GetLevel() * predatoryStrikes->GetAmount() / 100;
         }
         return value;
     }

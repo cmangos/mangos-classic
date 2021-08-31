@@ -1667,8 +1667,8 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
             }
 
             // Generate extra money for pick pocket loot
-            const uint32 a = urand(0, creature->getLevel() / 2);
-            const uint32 b = urand(0, player->getLevel() / 2);
+            const uint32 a = urand(0, creature->GetLevel() / 2);
+            const uint32 b = urand(0, player->GetLevel() / 2);
             m_gold = uint32(10 * (a + b) * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY));
 
             break;
@@ -1810,9 +1810,9 @@ Loot::Loot(Player* player, Corpse* corpse, LootType type) :
         corpse->lootForBody = true;
         uint32 pLevel;
         if (Player* plr = sObjectAccessor.FindPlayer(corpse->GetOwnerGuid()))
-            pLevel = plr->getLevel();
+            pLevel = plr->GetLevel();
         else
-            pLevel = player->getLevel(); // TODO:: not correct, need to save real player level in the corpse data in case of logout
+            pLevel = player->GetLevel(); // TODO:: not correct, need to save real player level in the corpse data in case of logout
 
          m_ownerSet.insert(player->GetObjectGuid());
          m_lootMethod = NOT_GROUP_TYPE_LOOT;

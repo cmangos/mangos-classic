@@ -190,7 +190,7 @@ void Player::UpdateMaxPower(Powers power)
 void Player::UpdateAttackPowerAndDamage(bool ranged)
 {
     float val2 = 0.0f;
-    float level = float(getLevel());
+    float level = float(GetLevel());
 
     UnitMods unitMod = ranged ? UNIT_MOD_ATTACK_POWER_RANGED : UNIT_MOD_ATTACK_POWER;
 
@@ -312,7 +312,7 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, fl
 
     if (IsNoWeaponShapeShift())                             // check if player is in shapeshift which doesnt use weapon
     {
-        uint32 lvl = getLevel();
+        uint32 lvl = GetLevel();
         if (lvl > 60)
             lvl = 60;
 

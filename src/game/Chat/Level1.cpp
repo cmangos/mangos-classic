@@ -1950,7 +1950,7 @@ bool ChatHandler::ModifyMountCommandHelper(Player* target, char* args)
         slow = true;
     else
     {
-        const uint32 level = target->getLevel();
+        const uint32 level = target->GetLevel();
         fast = (level >= 60);
         slow = (!fast && level >= 40);
     }

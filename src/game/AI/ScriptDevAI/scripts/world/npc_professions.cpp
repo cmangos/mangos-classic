@@ -173,7 +173,7 @@ enum SpecializationTrainers
 
 int32 GetUnlearnCostMedium(Player* pPlayer)                 // blacksmith, leatherwork
 {
-    uint32 level = pPlayer->getLevel();
+    uint32 level = pPlayer->GetLevel();
 
     if (level < 51)
         return 250000;
@@ -184,7 +184,7 @@ int32 GetUnlearnCostMedium(Player* pPlayer)                 // blacksmith, leath
 
 int32 GetUnlearnCostLow(Player* pPlayer)                    // blacksmith
 {
-    if (pPlayer->getLevel() < 66)
+    if (pPlayer->GetLevel() < 66)
         return 50000;
     return 100000;
 }
@@ -316,7 +316,7 @@ bool GossipHello_npc_prof_blacksmith(Player* pPlayer, Creature* pCreature)
         }
     }
     // WEAPONSMITH SPEC
-    if (pPlayer->HasSpell(S_WEAPON) && pPlayer->getLevel() > 49 && pPlayer->GetSkillValueBase(SKILL_BLACKSMITHING) >= 250)
+    if (pPlayer->HasSpell(S_WEAPON) && pPlayer->GetLevel() > 49 && pPlayer->GetSkillValueBase(SKILL_BLACKSMITHING) >= 250)
     {
         switch (eCreature)
         {
@@ -501,7 +501,7 @@ bool GossipHello_npc_prof_leather(Player* pPlayer, Creature* pCreature)
 
     uint32 eCreature = pCreature->GetEntry();
 
-    if (pPlayer->HasSkill(SKILL_LEATHERWORKING) && pPlayer->GetSkillValueBase(SKILL_LEATHERWORKING) >= 225 && pPlayer->getLevel() > 39)
+    if (pPlayer->HasSkill(SKILL_LEATHERWORKING) && pPlayer->GetSkillValueBase(SKILL_LEATHERWORKING) >= 225 && pPlayer->GetLevel() > 39)
     {
         switch (eCreature)
         {

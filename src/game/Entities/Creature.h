@@ -652,7 +652,7 @@ class Creature : public Unit
         void SetWalk(bool enable, bool asDefault = true);
 
         // TODO: Research mob shield block values
-        uint32 GetShieldBlockValue() const override { return (getLevel() / 2 + uint32(GetStat(STAT_STRENGTH) / 20)); }
+        uint32 GetShieldBlockValue() const override { return (GetLevel() / 2 + uint32(GetStat(STAT_STRENGTH) / 20)); }
 
         bool HasSpell(uint32 spellID) const override;
         void UpdateSpell(int32 index, int32 newSpellId) { m_spells[index] = newSpellId; }

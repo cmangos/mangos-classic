@@ -3275,7 +3275,7 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     std::string curCorpseDecayStr = secsToTimeString(std::chrono::system_clock::to_time_t(target->GetCorpseDecayTimer()), true);
 
     PSendSysMessage(LANG_NPCINFO_CHAR, target->GetGuidStr().c_str(), faction, npcflags, Entry, displayid, nativeid);
-    PSendSysMessage(LANG_NPCINFO_LEVEL, target->getLevel());
+    PSendSysMessage(LANG_NPCINFO_LEVEL, target->GetLevel());
     PSendSysMessage(LANG_NPCINFO_HEALTH, target->GetCreateHealth(), target->GetMaxHealth(), target->GetHealth());
     PSendSysMessage(LANG_NPCINFO_FLAGS, target->GetUInt32Value(UNIT_FIELD_FLAGS), target->GetUInt32Value(UNIT_DYNAMIC_FLAGS), target->getFaction());
     PSendSysMessage(LANG_COMMAND_RAWPAWNTIMES, defRespawnDelayStr.c_str(), curRespawnDelayStr.c_str());
@@ -3523,7 +3523,7 @@ bool ChatHandler::HandleCharacterLevelCommand(char* args)
     if (!ExtractPlayerTarget(&nameStr, &target, &target_guid, &target_name))
         return false;
 
-    int32 oldlevel = target ? target->getLevel() : Player::GetLevelFromDB(target_guid);
+    int32 oldlevel = target ? target->GetLevel() : Player::GetLevelFromDB(target_guid);
     if (nolevel)
         newlevel = oldlevel;
 
@@ -3575,9 +3575,9 @@ bool ChatHandler::HandleLevelUpCommand(char* args)
         {
             if (pet->getPetType() == HUNTER_PET)
             {
-                uint32 newPetLevel = pet->getLevel() + addlevel;
+                uint32 newPetLevel = pet->GetLevel() + addlevel;
 
-                if (newPetLevel <= player->getLevel())
+                if (newPetLevel <= player->GetLevel())
                 {
                     pet->GivePetLevel(newPetLevel);
 
@@ -3595,7 +3595,7 @@ bool ChatHandler::HandleLevelUpCommand(char* args)
     if (!ExtractPlayerTarget(&nameStr, &target, &target_guid, &target_name))
         return false;
 
-    int32 oldlevel = target ? target->getLevel() : Player::GetLevelFromDB(target_guid);
+    int32 oldlevel = target ? target->GetLevel() : Player::GetLevelFromDB(target_guid);
     int32 newlevel = oldlevel + addlevel;
 
     if (newlevel < 1)
