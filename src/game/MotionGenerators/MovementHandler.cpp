@@ -482,7 +482,7 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recv_data)
     data << movementInfo.jump.cosAngle;
     data << movementInfo.jump.sinAngle;
     data << movementInfo.jump.xyspeed;
-    data << movementInfo.jump.velocity;
+    data << movementInfo.jump.zspeed;
     mover->SendMessageToSetExcept(data, _player);
 }
 

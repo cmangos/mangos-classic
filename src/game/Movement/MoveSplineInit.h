@@ -79,10 +79,10 @@ namespace Movement
              */
             void SetFall();
 
-            /* Sets the velocity (in case you want to have custom movement velocity)
+            /* Sets the zspeed (in case you want to have custom movement zspeed)
              * if no set, speed will be selected based on unit's speeds and current movement mode
              * Has no effect if falling mode enabled
-             * velocity shouldn't be negative
+             * zspeed shouldn't be negative
              */
             void SetVelocity(float vel);
 
