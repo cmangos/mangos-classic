@@ -2561,6 +2561,9 @@ void Spell::EffectApplyAreaAura(SpellEffectIndex eff_idx)
 
 void Spell::EffectSummon(SpellEffectIndex eff_idx)
 {
+    if (m_trueCaster->IsGameObject())
+        return;
+
     if (m_caster->GetPetGuid())
         return;
 
@@ -2991,8 +2994,8 @@ void Spell::EffectSummonWild(SpellEffectIndex eff_idx)
         return;
 
     // Level of pet summoned
-    uint32 level = m_caster->GetLevel();
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+    uint32 level = m_trueCaster->GetLevel();
+    if (!m_trueCaster->IsPlayer())
     {
         // pet players do not need this
         // TODO :: Totem, Pet and Critter may not use this. This is probably wrongly used and need more research.
@@ -3008,10 +3011,10 @@ void Spell::EffectSummonWild(SpellEffectIndex eff_idx)
     if (!cInfo)
         return;
 
-    if (m_caster->GetLevel() >= cInfo->MaxLevel)
+    if (m_trueCaster->GetLevel() >= cInfo->MaxLevel)
         level = cInfo->MaxLevel;
 
-    else if (m_caster->GetLevel() <= cInfo->MinLevel)
+    else if (m_trueCaster->GetLevel() <= cInfo->MinLevel)
         level = cInfo->MinLevel;
 
     // select center of summon position
@@ -3039,7 +3042,7 @@ void Spell::EffectSummonWild(SpellEffectIndex eff_idx)
             }
             // Summon in random point all other units if location present
             else
-                m_caster->GetRandomPoint(center_x, center_y, center_z, radius, px, py, pz);
+                m_trueCaster->GetRandomPoint(center_x, center_y, center_z, radius, px, py, pz);
         }
         // Summon if dest location not present near caster
         else
@@ -3047,29 +3050,29 @@ void Spell::EffectSummonWild(SpellEffectIndex eff_idx)
             if (radius > 0.0f)
             {
                 // not using bounding radius of caster here
-                m_caster->GetClosePoint(px, py, pz, 0.0f, radius);
+                m_trueCaster->GetClosePoint(px, py, pz, 0.0f, radius);
             }
             else
             {
                 // EffectRadiusIndex 0 or 36
-                px = m_caster->GetPositionX();
-                py = m_caster->GetPositionY();
-                pz = m_caster->GetPositionZ();
+                px = m_trueCaster->GetPositionX();
+                py = m_trueCaster->GetPositionY();
+                pz = m_trueCaster->GetPositionZ();
             }
         }
 
         if (Creature* summon = WorldObject::SummonCreature(
-            TempSpawnSettings(m_caster, creature_entry, px, py, pz, m_caster->GetOrientation(), summonType, m_duration, false,
-                IsSpellSetRun(m_spellInfo), 0, 0, 0, false, false, m_spellInfo->Id), m_caster->GetMap()))
+            TempSpawnSettings(m_trueCaster, creature_entry, px, py, pz, m_trueCaster->GetOrientation(), summonType, m_duration, false,
+                IsSpellSetRun(m_spellInfo), 0, 0, 0, false, false, m_spellInfo->Id), m_trueCaster->GetMap()))
         {
             // UNIT_FIELD_CREATEDBY are not set for these kind of spells.
             // Does exceptions exist? If so, what are they?
             // summon->SetCreatorGuid(m_caster->GetObjectGuid());
 
             // Notify original caster if not done already
-            if (m_originalCaster && (m_originalCaster != m_caster) && (m_originalCaster->AI()))
+            if (m_originalCaster && (m_originalCaster != m_trueCaster) && (m_originalCaster->AI()))
                 m_originalCaster->AI()->JustSummoned(summon);
-            else if (m_caster->AI())
+            else if (m_trueCaster->IsUnit() && m_caster->AI())
                 m_caster->AI()->JustSummoned(summon);
         }
     }
@@ -3077,6 +3080,9 @@ void Spell::EffectSummonWild(SpellEffectIndex eff_idx)
 
 void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
 {
+    if (m_trueCaster->IsGameObject())
+        return;
+
     uint32 pet_entry = m_spellInfo->EffectMiscValue[eff_idx];
     if (!pet_entry)
         return;
