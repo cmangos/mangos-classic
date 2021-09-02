@@ -142,6 +142,20 @@ INSERT INTO world_template VALUES
 UPDATE creature_template SET ScriptName='npc_war_effort' WHERE
 entry IN(15383,15431,15432,15434,15437,15445,15446,15448,15450,15451,15452,15453,15455,15456,15457,15459,15460,15469,15477,15508,15512,15515,15522,15525,15528,15529,15532,15533,15534,15535);
 
+/* Scourge Invasion */
+UPDATE creature_template SET ScriptName='scourge_invasion_necrotic_shard' WHERE entry IN (16136,16172);
+UPDATE creature_template SET ScriptName='scourge_invasion_necropolis' WHERE entry=16401;
+UPDATE creature_template SET ScriptName='scourge_invasion_mouth' WHERE entry=16995;
+UPDATE creature_template SET ScriptName='scourge_invasion_necropolis_health' WHERE entry=16421;
+UPDATE creature_template SET ScriptName='scourge_invasion_necropolis_relay' WHERE entry=16386;
+UPDATE creature_template SET ScriptName='scourge_invasion_necropolis_proxy' WHERE entry=16398;
+UPDATE creature_template SET ScriptName='scourge_invasion_minion_spawner' WHERE entry IN (16306,16336,16338);
+UPDATE creature_template SET ScriptName='scourge_invasion_cultist_engineer' WHERE entry=16230;
+UPDATE creature_template SET ScriptName='scourge_invasion_minion' WHERE entry IN (16143,16383);
+UPDATE creature_template SET ScriptName='npc_pallid_horror' WHERE entry IN (16394,16382);
+UPDATE gameobject_template SET ScriptName='scourge_invasion_go_circle' WHERE entry=181136;
+UPDATE gameobject_template SET ScriptName='scourge_invasion_go_necropolis' WHERE entry IN (181154,181215,181223,181374,181373);
+
 /*  */
 /* ZONE */
 /* */

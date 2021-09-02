@@ -128,6 +128,13 @@ struct Die
     uint32 chance[Sides];
 };
 
+template<typename T, typename... Args>
+T PickRandomValue(T first, Args ...rest)
+{
+    T array[sizeof...(rest) + 1] = { first, rest... };
+    return array[urand(0, (sizeof...(rest)))];
+}
+
 inline void ApplyModUInt32Var(uint32& var, int32 val, bool apply)
 {
     int32 cur = var;

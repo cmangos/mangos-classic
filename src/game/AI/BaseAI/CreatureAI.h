@@ -31,6 +31,8 @@ class CreatureAI : public UnitAI
 
         virtual void Reset();
 
+        virtual void OnRemoveFromWorld() {}
+
         virtual void EnterCombat(Unit* enemy) override;
         virtual void AttackStart(Unit* who) override;
         virtual void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType damageType, SpellEntry const* spellInfo) override;

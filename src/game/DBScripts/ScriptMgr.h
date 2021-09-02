@@ -367,6 +367,7 @@ struct ScriptInfo
         {
             uint32 eventType;                               // datalong
             uint32 radius;                                  // datalong2
+            uint32 value;                                   // datalong3
         } sendAIEvent;
 
         struct                                              // SCRIPT_COMMAND_SET_FACING (36)

@@ -753,6 +753,10 @@ class ChatHandler
         bool HandleWarEffortCommand(char* args);
         bool HandleWarEffortPhaseCommand(char* args);
         bool HandleWarEffortCounterCommand(char* args);
+        bool HandleScourgeInvasionCommand(char* args);
+        bool HandleScourgeInvasionStateCommand(char* args);
+        bool HandleScourgeInvasionBattlesWonCommand(char* args);
+        bool HandleScourgeInvasionStartZone(char* args);
 
         // Battleground
         bool HandleBattlegroundStartCommand(char* args);

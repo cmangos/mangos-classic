@@ -37,7 +37,9 @@ GameObject* GetClosestGameObjectWithEntry(WorldObject* source, uint32 entry, flo
 Creature* GetClosestCreatureWithEntry(WorldObject* source, uint32 entry, float maxSearchRange, bool onlyAlive = true, bool onlyDead = false, bool excludeSelf = false);
 
 void GetGameObjectListWithEntryInGrid(GameObjectList& goList, WorldObject* source, uint32 entry, float maxSearchRange);
+void GetGameObjectListWithEntryInGrid(GameObjectList& goList, WorldObject* source, std::vector<uint32> const& entries, float maxSearchRange);
 void GetCreatureListWithEntryInGrid(CreatureList& creatureList, WorldObject* source, uint32 entry, float maxSearchRange);
+void GetCreatureListWithEntryInGrid(CreatureList& creatureList, WorldObject* source, std::vector<uint32> const& entries, float maxSearchRange);
 void GetPlayerListWithEntryInWorld(PlayerList& playerList, WorldObject* source, float maxSearchRange);
 
 // Used in: hyjalAI.cpp

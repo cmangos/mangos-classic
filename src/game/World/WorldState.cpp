@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <map>
 #include <World/WorldStateDefines.h>
+#include "AI/ScriptDevAI/scripts/world/scourge_invasion.h"
 
 std::map<AQResources, WorldStateID> aqWorldstateMap =
 {
@@ -179,12 +180,42 @@ void WorldState::Load()
                     else
                         memset(m_loveIsInTheAirData.counters, 0, sizeof(LoveIsInTheAir));
                     break;
+                case SAVE_ID_SCOURGE_INVASION:
+                    if (data.size())
+                    {
+                        try
+                        {
+                            uint32 state;
+                            loadStream >> state;
+                            m_siData.m_state = SIState(state);
+                            for (uint32 i = 0; i < SI_TIMER_MAX; ++i)
+                            {
+                                uint64 time;
+                                loadStream >> time;
+                                m_siData.m_timers[i] = std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::from_time_t(time));
+                            }
+                            loadStream >> m_siData.m_battlesWon >> m_siData.m_lastAttackZone;
+                            for (uint32 i = 0; i < SI_REMAINING_MAX; ++i)
+                                loadStream >> m_siData.m_remaining[i];
+                        }
+                        catch (std::exception& e)
+                        {
+                            sLog.outError("%s", e.what());
+                            m_siData.Reset();
+                        }
+                    }
+                    break;
             }
         }
         while (result->NextRow());
     }
     StartWarEffortEvent();
     SpawnWarEffortGos();
+    if (m_siData.m_state == STATE_1_ENABLED)
+    {
+        StartScourgeInvasion();
+        HandleDefendedZones();
+    }
     RespawnEmeraldDragons();
 }
 
@@ -225,6 +256,12 @@ void WorldState::Save(SaveIds saveId)
                 loveData += std::to_string(m_loveIsInTheAirData.counters[i]);
             }
             SaveHelper(loveData, SAVE_ID_LOVE_IS_IN_THE_AIR);
+            break;
+        }
+        case SAVE_ID_SCOURGE_INVASION:
+        {
+            std::string siData = m_siData.GetData();
+            SaveHelper(siData, SAVE_ID_SCOURGE_INVASION);
             break;
         }
         default: break;
@@ -379,12 +416,37 @@ bool WorldState::IsConditionFulfilled(uint32 conditionId, uint32 state) const
         return m_aqData.m_WarEffortCounters[id] == aqWorldStateTotalsMap[id].second;
     }
 
+    // Scourge Invasion
+    switch (conditionId)
+    {
+        case WORLD_STATE_SCOURGE_WINTERSPRING:
+            return GetSIRemaining(SI_REMAINING_WINTERSPRING) > 0;
+        case WORLD_STATE_SCOURGE_AZSHARA:
+            return GetSIRemaining(SI_REMAINING_AZSHARA) > 0;
+        case WORLD_STATE_SCOURGE_BLASTED_LANDS:
+            return GetSIRemaining(SI_REMAINING_BLASTED_LANDS) > 0;
+        case WORLD_STATE_SCOURGE_BURNING_STEPPES:
+            return GetSIRemaining(SI_REMAINING_BURNING_STEPPES) > 0;
+        case WORLD_STATE_SCOURGE_TANARIS:
+            return GetSIRemaining(SI_REMAINING_TANARIS) > 0;
+        case WORLD_STATE_SCOURGE_EASTERN_PLAGUELANDS:
+            return GetSIRemaining(SI_REMAINING_EASTERN_PLAGUELANDS) > 0;
+    }
+
     return m_transportStates.at(conditionId) == state;
 }
 
 void WorldState::HandleConditionStateChange(uint32 conditionId, uint32 state)
 {
     m_transportStates[conditionId] = state;
+}
+
+Map* WorldState::GetMap(uint32 mapId, Position const& invZone)
+{
+    Map* map = sMapMgr.FindMap(mapId);
+    if (!map)
+        sLog.outError("ScourgeInvasionEvent::GetMap found no map with mapId %d, x: %d, y: %d.", mapId, invZone.x, invZone.y);
+    return map;
 }
 
 void WorldState::HandleExternalEvent(uint32 eventId, uint32 param)
@@ -451,6 +513,31 @@ void WorldState::Update(const uint32 diff)
             if (remainingDays < m_aqData.m_phase2Tier)
                 ChangeWarEffortPhase2Tier(remainingDays);
         }
+    }
+
+    if (m_siData.m_state != STATE_0_DISABLED)
+    {
+        if (m_siData.m_broadcastTimer <= diff)
+        {
+            m_siData.m_broadcastTimer = 10000;
+            BroadcastSIWorldstates();
+
+            if (m_siData.m_state == STATE_1_ENABLED)
+            {
+                for (auto& zone : m_siData.m_attackPoints)
+                {
+                    if (zone.second.zoneId == ZONEID_UNDERCITY)
+                        StartNewCityAttackIfTime(SI_TIMER_UNDERCITY, zone.second.zoneId);
+                    else if (zone.second.zoneId == ZONEID_STORMWIND_CITY)
+                        StartNewCityAttackIfTime(SI_TIMER_STORMWIND, zone.second.zoneId);
+                }
+
+                auto now = sWorld.GetCurrentClockTime();
+                for (auto& zone : m_siData.m_invasionPoints)
+                    HandleActiveZone(GetTimerIdForZone(zone.second.zoneId), zone.second.zoneId, zone.second.remainingVar, now);
+            }
+        }
+        else m_siData.m_broadcastTimer -= diff;
     }
 }
 
@@ -538,6 +625,8 @@ void WorldState::RespawnEmeraldDragons()
             WorldObject::SummonCreature(TempSpawnSettings(nullptr, m_emeraldDragonsChosenPositions[3], emeraldDragonSpawns[3][0], emeraldDragonSpawns[3][1], emeraldDragonSpawns[3][2], emeraldDragonSpawns[3][3], TEMPSPAWN_DEAD_DESPAWN, 0, false, false, pathIds[3]), map);
     });
 }
+
+// War effort section
 
 void WorldState::AddWarEffortProgress(AQResources resource, uint32 count)
 {
@@ -878,7 +967,9 @@ std::string WorldState::GetAQPrintout()
 
 std::string AhnQirajData::GetData()
 {
-    std::string output = std::to_string(m_phase) + " " + std::to_string(m_timer);
+    auto curTime = World::GetCurrentClockTime();
+    auto respawnTime = std::chrono::milliseconds(m_timer) + curTime;
+    std::string output = std::to_string(m_phase) + " " + std::to_string(uint64(Clock::to_time_t(respawnTime)));
     for (uint32 value : m_WarEffortCounters)
         output += " " + std::to_string(value);
     output += " " + std::to_string(m_phase2Tier);
@@ -889,8 +980,683 @@ uint32 AhnQirajData::GetDaysRemaining() const
 {
     return uint32(m_timer / (DAY * IN_MILLISECONDS));
 }
+
+// Scourge invasion section
+
+void WorldState::SetScourgeInvasionState(SIState state)
+{
+    SIState oldState = m_siData.m_state;
+    if (oldState == state)
+        return;
+    
+    m_siData.m_state = state;
+    if (oldState == STATE_0_DISABLED)
+        StartScourgeInvasion();
+    else if (state == STATE_0_DISABLED)
+        StopScourgeInvasion();
+}
+
+void WorldState::StartScourgeInvasion()
+{
+    sGameEventMgr.StartEvent(GAME_EVENT_SCOURGE_INVASION);
+    BroadcastSIWorldstates();
+    if (m_siData.m_state == STATE_1_ENABLED)
+    {
+        for (auto& zone : m_siData.m_attackPoints)
+        {
+            if (zone.second.zoneId == ZONEID_UNDERCITY)
+                StartNewCityAttackIfTime(SI_TIMER_UNDERCITY, zone.second.zoneId);
+            else if (zone.second.zoneId == ZONEID_STORMWIND_CITY)
+                StartNewCityAttackIfTime(SI_TIMER_STORMWIND, zone.second.zoneId);
+        }
+
+        // randomization of init so that not every invasion starts the same way
+        std::vector<uint32> randomIds(m_siData.m_invasionPoints.size());
+        uint32 i = 0;
+        for (auto& zone : m_siData.m_invasionPoints)
+        {
+            randomIds[i] = zone.first;
+            ++i;
+        }
+        std::shuffle(randomIds.begin(), randomIds.end(), *GetRandomGenerator());
+        for (auto id : randomIds)
+            OnEnable(m_siData.m_invasionPoints[id]);
+    }
+}
+
+ScourgeInvasionData::ScourgeInvasionData() : m_state(STATE_0_DISABLED), m_battlesWon(0), m_broadcastTimer(10000)
+{
+    memset(m_remaining, 0, sizeof(m_remaining));
+
+    InvasionZone winterspring;
+    {
+        winterspring.map = 1;
+        winterspring.zoneId = ZONEID_WINTERSPRING;
+        winterspring.remainingVar = SI_REMAINING_WINTERSPRING;
+        winterspring.necroAmount = 3;
+        winterspring.mouth.push_back(Position(7736.56f, -4033.75f, 696.327f, 5.51524f));
+    }
+
+    InvasionZone tanaris;
+    {
+        tanaris.map = 1;
+        tanaris.zoneId = ZONEID_TANARIS;
+        tanaris.remainingVar = SI_REMAINING_TANARIS;
+        tanaris.necroAmount = 3;
+        tanaris.mouth.push_back(Position(-8352.68f, -3972.68f, 10.0753f, 2.14675f));
+    }
+
+    InvasionZone azshara;
+    {
+        azshara.map = 1;
+        azshara.zoneId = ZONEID_AZSHARA;
+        azshara.remainingVar = SI_REMAINING_AZSHARA;
+        azshara.necroAmount = 2;
+        azshara.mouth.push_back(Position(3273.75f, -4276.98f, 125.509f, 5.44543f));
+    }
+
+    InvasionZone blasted_lands;
+    {
+        blasted_lands.map = 0;
+        blasted_lands.zoneId = ZONEID_BLASTED_LANDS;
+        blasted_lands.remainingVar = SI_REMAINING_BLASTED_LANDS;
+        blasted_lands.necroAmount = 2;
+        blasted_lands.mouth.push_back(Position(-11429.3f, -3327.82f, 7.73628f, 1.0821f));
+    }
+
+    InvasionZone eastern_plaguelands;
+    {
+        eastern_plaguelands.map = 0;
+        eastern_plaguelands.zoneId = ZONEID_EASTERN_PLAGUELANDS;
+        eastern_plaguelands.remainingVar = SI_REMAINING_EASTERN_PLAGUELANDS;
+        eastern_plaguelands.necroAmount = 2;
+        eastern_plaguelands.mouth.push_back(Position(2014.55f, -4934.52f, 73.9846f, 0.0698132f));
+    }
+
+    InvasionZone burning_steppes;
+    {
+        burning_steppes.map = 0;
+        burning_steppes.zoneId = ZONEID_BURNING_STEPPES;
+        burning_steppes.remainingVar = SI_REMAINING_BURNING_STEPPES;
+        burning_steppes.necroAmount = 2;
+        burning_steppes.mouth.push_back(Position(-8229.53f, -1118.11f, 144.012f, 6.17846f));
+    }
+
+    m_invasionPoints.emplace(ZONEID_WINTERSPRING, winterspring);
+    m_invasionPoints.emplace(ZONEID_TANARIS, tanaris);
+    m_invasionPoints.emplace(ZONEID_AZSHARA, azshara);
+    m_invasionPoints.emplace(ZONEID_BLASTED_LANDS, blasted_lands);
+    m_invasionPoints.emplace(ZONEID_EASTERN_PLAGUELANDS, eastern_plaguelands);
+    m_invasionPoints.emplace(ZONEID_BURNING_STEPPES, burning_steppes);
+
+    CityAttack undercity;
+    {
+        undercity.map = 0;
+        undercity.zoneId = ZONEID_UNDERCITY;
+        undercity.pallid.push_back(Position(1595.87f, 440.539f, -46.3349f, 2.28207f)); // Royal Quarter
+        undercity.pallid.push_back(Position(1659.2f, 265.988f, -62.1788f, 3.64283f)); // Trade Quarter
+    }
+
+    CityAttack stormwind;
+    {
+        stormwind.map = 0;
+        stormwind.zoneId = ZONEID_STORMWIND_CITY;
+        stormwind.pallid.push_back(Position(-8578.15f, 886.382f, 87.3148f, 0.586275f)); // Stormwind Keep
+        stormwind.pallid.push_back(Position(-8578.15f, 886.382f, 87.3148f, 0.586275f)); // Trade District
+    }
+
+    m_attackPoints.emplace(ZONEID_UNDERCITY, undercity);
+    m_attackPoints.emplace(ZONEID_STORMWIND_CITY, stormwind);
+}
+
+void ScourgeInvasionData::Reset()
+{
+    std::lock_guard<std::mutex> guard(m_siMutex);
+    for (auto& timepoint : m_timers)
+        timepoint = TimePoint();
+
+    m_battlesWon = 0;
+    m_lastAttackZone = 0;
+    m_broadcastTimer = 10000;
+    memset(m_remaining, 0, sizeof(m_remaining));
+}
+
+std::string ScourgeInvasionData::GetData()
+{
+    std::string output = std::to_string(m_state) + " ";
+    for (auto& timer : m_timers)
+        output += std::to_string(timer.time_since_epoch().count()) + " ";
+    output += std::to_string(m_battlesWon) + " " + std::to_string(m_lastAttackZone) + " ";
+    for (auto& remaining : m_remaining)
+        output += std::to_string(remaining) + " ";
+    return output;
+}
+
+void WorldState::StopScourgeInvasion()
+{
+    sGameEventMgr.StopEvent(GAME_EVENT_SCOURGE_INVASION);
+    sGameEventMgr.StopEvent(GAME_EVENT_SCOURGE_INVASION_WINTERSPRING);
+    sGameEventMgr.StopEvent(GAME_EVENT_SCOURGE_INVASION_TANARIS);
+    sGameEventMgr.StopEvent(GAME_EVENT_SCOURGE_INVASION_AZSHARA);
+    sGameEventMgr.StopEvent(GAME_EVENT_SCOURGE_INVASION_BLASTED_LANDS);
+    sGameEventMgr.StopEvent(GAME_EVENT_SCOURGE_INVASION_EASTERN_PLAGUELANDS);
+    sGameEventMgr.StopEvent(GAME_EVENT_SCOURGE_INVASION_BURNING_STEPPES);
+    BroadcastSIWorldstates();
+    m_siData.Reset();
+
+    for (auto& zone : m_siData.m_attackPoints)
+        OnDisable(zone.second);
+
+    for (auto& zone : m_siData.m_invasionPoints)
+        OnDisable(zone.second);
+}
+
+uint32 WorldState::GetSIRemaining(SIRemaining remaining) const
+{
+    return m_siData.m_remaining[remaining];
+}
+
+uint32 WorldState::GetSIRemainingByZone(uint32 zoneId) const
+{
+    SIRemaining remainingId;
+    switch (zoneId)
+    {
+        default:
+        case ZONEID_WINTERSPRING: remainingId = SI_REMAINING_WINTERSPRING; break;
+        case ZONEID_AZSHARA: remainingId = SI_REMAINING_AZSHARA; break;
+        case ZONEID_EASTERN_PLAGUELANDS: remainingId = SI_REMAINING_EASTERN_PLAGUELANDS; break;
+        case ZONEID_BLASTED_LANDS: remainingId = SI_REMAINING_BLASTED_LANDS; break;
+        case ZONEID_BURNING_STEPPES: remainingId = SI_REMAINING_BURNING_STEPPES; break;
+        case ZONEID_TANARIS: remainingId = SI_REMAINING_TANARIS; break;
+    }
+    return GetSIRemaining(remainingId);
+}
+
+void WorldState::SetSIRemaining(SIRemaining remaining, uint32 value)
+{
+    std::lock_guard<std::mutex> guard(m_siData.m_siMutex);
+    m_siData.m_remaining[remaining] = value;
+}
+
+TimePoint WorldState::GetSITimer(SITimers timer)
+{
+    return m_siData.m_timers[timer];
+}
+
+void WorldState::SetSITimer(SITimers timer, TimePoint timePoint)
+{
+    m_siData.m_timers[timer] = timePoint;
+}
+
+uint32 WorldState::GetBattlesWon()
+{
+    std::lock_guard<std::mutex> guard(m_siData.m_siMutex);
+    return m_siData.m_battlesWon;
+}
+
+void WorldState::AddBattlesWon(int32 count)
+{
+    std::lock_guard<std::mutex> guard(m_siData.m_siMutex);
+    m_siData.m_battlesWon += count;
+    HandleDefendedZones();
+}
+
+uint32 WorldState::GetLastAttackZone()
+{
+    std::lock_guard<std::mutex> guard(m_siData.m_siMutex);
+    return m_siData.m_lastAttackZone;
+}
+
+void WorldState::SetLastAttackZone(uint32 zoneId)
+{
+    std::lock_guard<std::mutex> guard(m_siData.m_siMutex);
+    m_siData.m_lastAttackZone = zoneId;
+}
+
+void WorldState::BroadcastSIWorldstates()
+{
+    uint32 victories = GetBattlesWon();
+
+    uint32 remainingAzshara = GetSIRemaining(SI_REMAINING_AZSHARA);
+    uint32 remainingBlastedLands = GetSIRemaining(SI_REMAINING_BLASTED_LANDS);
+    uint32 remainingBurningSteppes = GetSIRemaining(SI_REMAINING_BURNING_STEPPES);
+    uint32 remainingEasternPlaguelands = GetSIRemaining(SI_REMAINING_EASTERN_PLAGUELANDS);
+    uint32 remainingTanaris = GetSIRemaining(SI_REMAINING_TANARIS);
+    uint32 remainingWinterspring = GetSIRemaining(SI_REMAINING_WINTERSPRING);
+
+    HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();
+    for (const auto& itr : m)
+    {
+        Player* pl = itr.second;
+        // do not process players which are not in world
+        if (!pl->IsInWorld())
+            continue;
+
+        pl->SendUpdateWorldState(WORLD_STATE_SCOURGE_AZSHARA, remainingAzshara > 0 ? 1 : 0);
+        pl->SendUpdateWorldState(WORLD_STATE_SCOURGE_BLASTED_LANDS, remainingBlastedLands > 0 ? 1 : 0);
+        pl->SendUpdateWorldState(WORLD_STATE_SCOURGE_BURNING_STEPPES, remainingBurningSteppes > 0 ? 1 : 0);
+        pl->SendUpdateWorldState(WORLD_STATE_SCOURGE_EASTERN_PLAGUELANDS, remainingEasternPlaguelands > 0 ? 1 : 0);
+        pl->SendUpdateWorldState(WORLD_STATE_SCOURGE_TANARIS, remainingTanaris > 0 ? 1 : 0);
+        pl->SendUpdateWorldState(WORLD_STATE_SCOURGE_WINTERSPRING, remainingWinterspring > 0 ? 1 : 0);
+
+        pl->SendUpdateWorldState(WORLD_STATE_SCOURGE_BATTLES_WON, victories);
+        pl->SendUpdateWorldState(WORLD_STATE_SCOURGE_NECROPOLIS_AZSHARA, remainingAzshara);
+        pl->SendUpdateWorldState(WORLD_STATE_SCOURGE_NECROPOLIS_BLASTED_LANDS, remainingBlastedLands);
+        pl->SendUpdateWorldState(WORLD_STATE_SCOURGE_NECROPOLIS_BURNING_STEPPES, remainingBurningSteppes);
+        pl->SendUpdateWorldState(WORLD_STATE_SCOURGE_NECROPOLIS_EASTERN_PLAGUELANDS, remainingEasternPlaguelands);
+        pl->SendUpdateWorldState(WORLD_STATE_SCOURGE_NECROPOLIS_TANARIS, remainingTanaris);
+        pl->SendUpdateWorldState(WORLD_STATE_SCOURGE_NECROPOLIS_WINTERSPRING, remainingWinterspring);
+    }
+}
+
+void WorldState::HandleDefendedZones()
+{
+    if (m_siData.m_battlesWon < 50) {
+        sGameEventMgr.StopEvent(GAME_EVENT_SCOURGE_INVASION_50_INVASIONS);
+        sGameEventMgr.StopEvent(GAME_EVENT_SCOURGE_INVASION_100_INVASIONS);
+        sGameEventMgr.StopEvent(GAME_EVENT_SCOURGE_INVASION_150_INVASIONS);
+    }
+    else if (m_siData.m_battlesWon >= 50 && m_siData.m_battlesWon < 100)
+        sGameEventMgr.StartEvent(GAME_EVENT_SCOURGE_INVASION_50_INVASIONS);
+    else if (m_siData.m_battlesWon >= 100 && m_siData.m_battlesWon < 150) {
+        sGameEventMgr.StopEvent(GAME_EVENT_SCOURGE_INVASION_50_INVASIONS);
+        sGameEventMgr.StartEvent(GAME_EVENT_SCOURGE_INVASION_100_INVASIONS);
+    }
+    else if (m_siData.m_battlesWon >= 150) {
+        sGameEventMgr.StopEvent(GAME_EVENT_SCOURGE_INVASION);
+        sGameEventMgr.StopEvent(GAME_EVENT_SCOURGE_INVASION_50_INVASIONS);
+        sGameEventMgr.StopEvent(GAME_EVENT_SCOURGE_INVASION_100_INVASIONS);
+        sGameEventMgr.StartEvent(GAME_EVENT_SCOURGE_INVASION_INVASIONS_DONE);
+        sGameEventMgr.StartEvent(GAME_EVENT_SCOURGE_INVASION_150_INVASIONS);
+    }
+}
+
+void WorldState::StartZoneEvent(SIZoneIds eventId)
+{
+    switch (eventId)
+    {
+        default:
+        case SI_ZONE_AZSHARA: StartNewInvasion(ZONEID_AZSHARA); break;
+        case SI_ZONE_BLASTED_LANDS: StartNewInvasion(ZONEID_BLASTED_LANDS); break;
+        case SI_ZONE_BURNING_STEPPES: StartNewInvasion(ZONEID_BURNING_STEPPES); break;
+        case SI_ZONE_EASTERN_PLAGUELANDS: StartNewInvasion(ZONEID_EASTERN_PLAGUELANDS); break;
+        case SI_ZONE_TANARIS: StartNewInvasion(ZONEID_TANARIS); break;
+        case SI_ZONE_WINTERSPRING: StartNewInvasion(ZONEID_WINTERSPRING); break;
+        case SI_ZONE_STORMWIND: StartNewCityAttack(ZONEID_STORMWIND_CITY); break;
+        case SI_ZONE_UNDERCITY: StartNewCityAttack(ZONEID_UNDERCITY); break;
+    }
+}
+
+void WorldState::StartNewInvasionIfTime(uint32 attackTimeVar, uint32 zoneId)
+{
+    TimePoint now = sWorld.GetCurrentClockTime();
+
+    // Not yet time
+    if (now < sWorldState.GetSITimer(SITimers(attackTimeVar)))
+        return;
+
+    StartNewInvasion(zoneId);
+}
+
+void WorldState::StartNewCityAttackIfTime(uint32 attackTimeVar, uint32 zoneId)
+{
+    TimePoint now = sWorld.GetCurrentClockTime();
+
+    // Not yet time
+    if (now < sWorldState.GetSITimer(SITimers(attackTimeVar)))
+        return;
+
+    StartNewCityAttack(zoneId);
+}
+
+void WorldState::StartNewInvasion(uint32 zoneId)
+{
+    if (IsActiveZone(zoneId))
+        return;
+
+    // Don't attack same zone as before.
+    if (zoneId == sWorldState.GetLastAttackZone())
+        return;
+
+    // If we have at least one victory and more than 1 active zones stop here.
+    if (GetActiveZones() > 1 && sWorldState.GetBattlesWon() > 0)
+        return;
+
+    sLog.outBasic("[Scourge Invasion Event] Starting new invasion in %d.", zoneId);
+
+    ScourgeInvasionData::InvasionZone& zone = m_siData.m_invasionPoints[zoneId];
+
+    Map* mapPtr = GetMap(zone.map, zone.mouth[0]);
+
+    if (!mapPtr)
+    {
+        sLog.outError("ScourgeInvasionEvent::StartNewInvasionIfTime unable to access required map (%d). Retrying next update.", zone.map);
+        return;
+    }
+
+    switch (zoneId)
+    {
+        case ZONEID_AZSHARA: sGameEventMgr.StartEvent(GAME_EVENT_SCOURGE_INVASION_AZSHARA); break;
+        case ZONEID_BLASTED_LANDS: sGameEventMgr.StartEvent(GAME_EVENT_SCOURGE_INVASION_BLASTED_LANDS); break;
+        case ZONEID_BURNING_STEPPES: sGameEventMgr.StartEvent(GAME_EVENT_SCOURGE_INVASION_BURNING_STEPPES); break;
+        case ZONEID_EASTERN_PLAGUELANDS: sGameEventMgr.StartEvent(GAME_EVENT_SCOURGE_INVASION_EASTERN_PLAGUELANDS); break;
+        case ZONEID_TANARIS: sGameEventMgr.StartEvent(GAME_EVENT_SCOURGE_INVASION_TANARIS); break;
+        case ZONEID_WINTERSPRING: sGameEventMgr.StartEvent(GAME_EVENT_SCOURGE_INVASION_WINTERSPRING); break;
+    }
+
+    if (mapPtr)
+        SummonMouth(mapPtr, zone, zone.mouth[0]);
+}
+
+void WorldState::StartNewCityAttack(uint32 zoneId)
+{
+    sLog.outBasic("[Scourge Invasion Event] Starting new City attack in zone %d.", zoneId);
+
+    ScourgeInvasionData::CityAttack& zone = m_siData.m_attackPoints[zoneId];
+
+    uint32 SpawnLocationID = (urand(0, zone.pallid.size() - 1));
+
+    Map* mapPtr = GetMap(zone.map, zone.pallid[SpawnLocationID]);
+
+    // If any of the required maps are not available we return. Will cause the invasion to be started
+    // on next update instead
+    if (!mapPtr)
+    {
+        sLog.outError("ScourgeInvasionEvent::StartNewCityAttackIfTime unable to access required map (%d). Retrying next update.", zone.map);
+        return;
+    }
+
+    if (m_siData.m_pendingPallids.find(zoneId) != m_siData.m_pendingPallids.end())
+        return;
+
+    if (!m_siData.m_attackPoints[zoneId].pallidGuid.IsEmpty())
+        return;
+
+    if (mapPtr && SummonPallid(mapPtr, zone, zone.pallid[SpawnLocationID], SpawnLocationID))
+        sLog.outBasic("[Scourge Invasion Event] Pallid Horror summoned in zone %d.", zoneId);
+    else
+        sLog.outError("ScourgeInvasionEvent::StartNewCityAttackIfTime unable to spawn pallid in %d.", zone.map);
+}
+
+bool WorldState::ResumeInvasion(ScourgeInvasionData::InvasionZone& zone)
+{
+    // Dont have a save variable to know which necropolises had already been destroyed, so we
+    // just summon the same amount, but not necessarily the same necropolises
+    sLog.outBasic("[Scourge Invasion Event] Resuming Scourge invasion in zone %d", zone.zoneId);
+
+    uint32 num_necropolises_remaining = sWorldState.GetSIRemaining(SIRemaining(zone.remainingVar));
+
+    // Just making sure we can access all maps before starting the invasion
+    for (uint32 i = 0; i < num_necropolises_remaining; i++)
+    {
+        if (!GetMap(zone.map, zone.mouth[0]))
+        {
+            sLog.outError("ScourgeInvasionEvent::ResumeInvasion map %d not accessible. Retry next update.", zone.map);
+            return false;
+        }
+    }
+
+    Map* mapPtr = GetMap(zone.map, zone.mouth[0]);
+    if (!mapPtr)
+    {
+        sLog.outError("ScourgeInvasionEvent::ResumeInvasion failed getting map, even after making sure they were loaded....");
+        return false;
+    }
+
+    SummonMouth(mapPtr, zone, zone.mouth[0]);
+
+    return true;
+}
+
+bool WorldState::SummonMouth(Map* map, ScourgeInvasionData::InvasionZone& zone, Position position)
+{
+    AddPendingInvasion(zone.zoneId);
+    map->GetMessager().AddMessage([=](Map* map)
+    {
+        // Remove old mouth if required.
+        Creature* existingMouth = map->GetCreature(zone.mouthGuid);
+
+        if (existingMouth)
+            existingMouth->RemoveFromWorld();
+
+        if (Creature* mouth = WorldObject::SummonCreature(TempSpawnSettings(nullptr, NPC_MOUTH_OF_KELTHUZAD, position.x, position.y, position.z, position.o, TEMPSPAWN_DEAD_DESPAWN, 0, true), map))
+        {
+            mouth->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, mouth, mouth, EVENT_MOUTH_OF_KELTHUZAD_ZONE_START);
+            sWorldState.SetMouthGuid(zone.zoneId, mouth->GetObjectGuid());
+            sWorldState.SetSIRemaining(SIRemaining(zone.remainingVar), zone.necroAmount);
+        }
+        sWorldState.RemovePendingInvasion(zone.zoneId);
+    });
+
+    return true;
+}
+
+bool WorldState::SummonPallid(Map* map, ScourgeInvasionData::CityAttack& zone, Position position, uint32 spawnLoc)
+{
+    AddPendingPallid(zone.zoneId);
+    map->GetMessager().AddMessage([=](Map* map)
+    {
+        // Remove old pallid if required.
+        Creature* existingPallid = map->GetCreature(zone.pallidGuid);
+        uint32 pathID = 0;
+
+        if (existingPallid)
+            existingPallid->RemoveFromWorld();
+
+        if (Creature* pallid = WorldObject::SummonCreature(TempSpawnSettings(nullptr, PickRandomValue(NPC_PALLID_HORROR, NPC_PATCHWORK_TERROR), position.x, position.y, position.z, position.o, TEMPSPAWN_DEAD_DESPAWN, 0, true), map))
+        {
+            pallid->GetMotionMaster()->Clear(false, true);
+            if (pallid->GetZoneId() == ZONEID_UNDERCITY)
+                pathID = spawnLoc == 0 ? 1 : 0;
+            else
+                pathID = spawnLoc == 0 ? 2 : 3;
+
+            pallid->GetMotionMaster()->MoveWaypoint(pathID, PATH_FROM_ENTRY);
+
+            sWorldState.SetPallidGuid(zone.zoneId, pallid->GetObjectGuid());
+        }
+        sWorldState.RemovePendingPallid(zone.zoneId);
+    });
+
+    return true;
+}
+
+void WorldState::HandleActiveZone(uint32 attackTimeVar, uint32 zoneId, uint32 remainingVar, TimePoint now)
+{
+    TimePoint timePoint = sWorldState.GetSITimer(SITimers(attackTimeVar));
+
+    ScourgeInvasionData::InvasionZone& zone = m_siData.m_invasionPoints[zoneId];
+
+    Map* map = sMapMgr.FindMap(zone.map);
+
+    if (zone.zoneId != zoneId)
+        return;
+
+    uint32 remaining = GetSIRemaining(SIRemaining(remainingVar));
+
+    // Calculate the next possible attack between ZONE_ATTACK_TIMER_MIN and ZONE_ATTACK_TIMER_MAX.
+    uint32 zoneAttackTimer = urand(ZONE_ATTACK_TIMER_MIN, ZONE_ATTACK_TIMER_MAX);
+    TimePoint next_attack = now + std::chrono::milliseconds(zoneAttackTimer);
+    uint64 timeToNextAttack = (next_attack - now).count();
+
+    if (zone.mouthGuid)
+    {
+        map->GetMessager().AddMessage([=](Map* map)
+        {
+            // Handles the inactive zone, without a Mouth of Kel'Thuzad summoned (which spawns the whole zone event).
+            Creature* mouth = map->GetCreature(zone.mouthGuid);
+            if (!mouth)
+                sWorldState.SetMouthGuid(zone.zoneId, ObjectGuid()); // delays spawning until next tick
+            // Handles the active zone that has no necropolis left.
+            else if (timePoint < now && remaining == 0)
+            {
+                sWorldState.SetSITimer(SITimers(attackTimeVar), next_attack);
+                sWorldState.AddBattlesWon(1);
+                sWorldState.SetLastAttackZone(zoneId);
+
+                sLog.outBasic("[Scourge Invasion Event] The Scourge has been defeated in %d, next attack starting in %d minutes.", zoneId, uint32(timeToNextAttack / 60));
+                sLog.outBasic("[Scourge Invasion Event] %d victories", sWorldState.GetBattlesWon());
+
+                if (mouth)
+                    mouth->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, mouth, mouth, EVENT_MOUTH_OF_KELTHUZAD_ZONE_STOP);
+                else
+                    sLog.outError("ScourgeInvasionEvent::HandleActiveZone ObjectGuid %d not found.", zone.mouthGuid);
+            }
+        });
+    }
+    else
+    {
+        // If more than one zones are alreay being attacked, set the timer again to ZONE_ATTACK_TIMER.
+        if (GetActiveZones() > 1)
+            sWorldState.SetSITimer(SITimers(attackTimeVar), next_attack);
+
+        // Try to start the zone if attackTimeVar is 0.
+        StartNewInvasionIfTime(attackTimeVar, zoneId);
+    }
+}
+
+void WorldState::SetPallidGuid(uint32 zoneId, ObjectGuid guid)
+{
+    m_siData.m_attackPoints[zoneId].pallidGuid = guid;
+}
+
+void WorldState::SetMouthGuid(uint32 zoneId, ObjectGuid guid)
+{
+    m_siData.m_invasionPoints[zoneId].mouthGuid = guid;
+}
+
+void WorldState::AddPendingInvasion(uint32 zoneId)
+{
+    std::lock_guard<std::mutex> guard(m_siData.m_siMutex);
+    m_siData.m_pendingInvasions.insert(zoneId);
+}
+
+void WorldState::RemovePendingInvasion(uint32 zoneId)
+{
+    std::lock_guard<std::mutex> guard(m_siData.m_siMutex);
+    m_siData.m_pendingInvasions.erase(zoneId);
+}
+
+void WorldState::AddPendingPallid(uint32 zoneId)
+{
+    std::lock_guard<std::mutex> guard(m_siData.m_siMutex);
+    m_siData.m_pendingPallids.insert(zoneId);
+}
+
+void WorldState::RemovePendingPallid(uint32 zoneId)
+{
+    std::lock_guard<std::mutex> guard(m_siData.m_siMutex);
+    m_siData.m_pendingPallids.erase(zoneId);
+}
+
+void WorldState::OnEnable(ScourgeInvasionData::InvasionZone& zone)
+{
+    // If there were remaining necropolises in the old zone before shutdown, we
+    // restore that zone
+    if (sWorldState.GetSIRemaining(SIRemaining(zone.remainingVar)) > 0)
+        ResumeInvasion(zone);
+    // Otherwise we start a new Invasion
+    else
+        StartNewInvasionIfTime(GetTimerIdForZone(zone.zoneId), zone.zoneId);
+}
+
+void WorldState::OnDisable(ScourgeInvasionData::InvasionZone& zone)
+{
+    if (!zone.mouthGuid)
+        return;
+
+    Map* map = GetMap(zone.map, zone.mouth[0]);
+
+    map->GetMessager().AddMessage([guid = zone.mouthGuid](Map* map)
+    {
+        if (Creature* mouth = map->GetCreature(guid))
+            mouth->ForcedDespawn();
+    });
+}
+
+void WorldState::OnDisable(ScourgeInvasionData::CityAttack& zone)
+{
+    if (!zone.pallidGuid)
+        return;
+
+    Map* map = GetMap(zone.map, zone.pallid[0]);
+
+    map->GetMessager().AddMessage([guid = zone.pallidGuid](Map* map)
+    {
+        if (Creature* pallid = map->GetCreature(guid))
+            pallid->ForcedDespawn();
+    });
+}
+
+bool WorldState::IsActiveZone(uint32 zoneId)
+{
+    return false;
+}
+
+uint32 WorldState::GetActiveZones()
+{
+    int i = 0;
+    i += m_siData.m_pendingInvasions.size();
+    for (const auto& invasionPoint : m_siData.m_invasionPoints)
+    {
+        Map* mapPtr = GetMap(invasionPoint.second.map, invasionPoint.second.mouth[0]);
+        if (!mapPtr)
+        {
+            sLog.outError("ScourgeInvasionEvent::GetActiveZones no map for zone %d.", invasionPoint.second.map);
+            continue;
+        }
+
+        Creature* pMouth = mapPtr->GetCreature(invasionPoint.second.mouthGuid);
+        if (pMouth)
+            i++;
+    }
+    return i;
+}
+
+uint32 WorldState::GetTimerIdForZone(uint32 zoneId)
+{
+    uint32 attackTime = 0;
+    switch (zoneId)
+    {
+        case ZONEID_TANARIS: attackTime = SI_TIMER_TANARIS; break;
+        case ZONEID_BLASTED_LANDS: attackTime = SI_TIMER_BLASTED_LANDS; break;
+        case ZONEID_EASTERN_PLAGUELANDS: attackTime = SI_TIMER_EASTERN_PLAGUELANDS; break;
+        case ZONEID_BURNING_STEPPES: attackTime = SI_TIMER_BURNING_STEPPES; break;
+        case ZONEID_WINTERSPRING: attackTime = SI_TIMER_WINTERSPRING; break;
+        case ZONEID_AZSHARA: attackTime = SI_TIMER_AZSHARA; break;
+    }
+    return attackTime;
+}
+
 void WorldState::FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 zoneId)
 {
+    if (m_siData.m_state != PHASE_0_DISABLED) // scourge invasion active - need to send all worldstates
+    {
+        uint32 victories = GetBattlesWon();
+
+        uint32 remainingAzshara = GetSIRemaining(SI_REMAINING_AZSHARA);
+        uint32 remainingBlastedLands = GetSIRemaining(SI_REMAINING_BLASTED_LANDS);
+        uint32 remainingBurningSteppes = GetSIRemaining(SI_REMAINING_BURNING_STEPPES);
+        uint32 remainingEasternPlaguelands = GetSIRemaining(SI_REMAINING_EASTERN_PLAGUELANDS);
+        uint32 remainingTanaris = GetSIRemaining(SI_REMAINING_TANARIS);
+        uint32 remainingWinterspring = GetSIRemaining(SI_REMAINING_WINTERSPRING);
+
+        FillInitialWorldStateData(data, count, WORLD_STATE_SCOURGE_AZSHARA, remainingAzshara > 0 ? 1 : 0);
+        FillInitialWorldStateData(data, count, WORLD_STATE_SCOURGE_BLASTED_LANDS, remainingBlastedLands > 0 ? 1 : 0);
+        FillInitialWorldStateData(data, count, WORLD_STATE_SCOURGE_BURNING_STEPPES, remainingBurningSteppes > 0 ? 1 : 0);
+        FillInitialWorldStateData(data, count, WORLD_STATE_SCOURGE_EASTERN_PLAGUELANDS, remainingEasternPlaguelands > 0 ? 1 : 0);
+        FillInitialWorldStateData(data, count, WORLD_STATE_SCOURGE_TANARIS, remainingTanaris > 0 ? 1 : 0);
+        FillInitialWorldStateData(data, count, WORLD_STATE_SCOURGE_WINTERSPRING, remainingWinterspring > 0 ? 1 : 0);
+
+        FillInitialWorldStateData(data, count, WORLD_STATE_SCOURGE_BATTLES_WON, victories);
+        FillInitialWorldStateData(data, count, WORLD_STATE_SCOURGE_NECROPOLIS_AZSHARA, remainingAzshara);
+        FillInitialWorldStateData(data, count, WORLD_STATE_SCOURGE_NECROPOLIS_BLASTED_LANDS, remainingBlastedLands);
+        FillInitialWorldStateData(data, count, WORLD_STATE_SCOURGE_NECROPOLIS_BURNING_STEPPES, remainingBurningSteppes);
+        FillInitialWorldStateData(data, count, WORLD_STATE_SCOURGE_NECROPOLIS_EASTERN_PLAGUELANDS, remainingEasternPlaguelands);
+        FillInitialWorldStateData(data, count, WORLD_STATE_SCOURGE_NECROPOLIS_TANARIS, remainingTanaris);
+        FillInitialWorldStateData(data, count, WORLD_STATE_SCOURGE_NECROPOLIS_WINTERSPRING, remainingWinterspring);
+    }
+
     switch (zoneId)
     {
         case ZONEID_STORMWIND_CITY:

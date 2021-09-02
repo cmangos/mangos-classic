@@ -770,8 +770,9 @@ struct CreatureEventAI_Event
         // EVENT_T_TARGET_NOT_REACHABLE                     = 36
         struct
         {
-            uint32 unused;
-        } unreachable;
+            uint32 eventId;
+            uint32 data;
+        } map_event;
         // RAW
         struct
         {
@@ -893,6 +894,7 @@ class CreatureEventAI : public CreatureAI
 
         uint32 m_EventUpdateTime;                           // Time between event updates
         uint32 m_EventDiff;                                 // Time between the last event call
+        bool   m_bEmptyList;
 
         // Variables used by Events themselves
         typedef std::vector<CreatureEventAIHolder> CreatureEventAIList;

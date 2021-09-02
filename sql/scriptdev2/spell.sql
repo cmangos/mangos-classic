@@ -120,7 +120,10 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (29875,'spell_check_gothik_side'),
 (29897,'spell_icecrown_guardian_periodic'),
 (30114,'spell_plague_wave_controller'),
-(30132,'spell_sapphiron_iceblock');
+(30132,'spell_sapphiron_iceblock'),
+(28091,'spell_despawner_self'),
+(28345,'spell_communique_trigger'),
+(31315,'spell_summon_boss');
 
 -- TBC
 

@@ -672,6 +672,28 @@ namespace MaNGOS
             // prevent clone this object
             AllGameObjectEntriesListInObjectRangeCheck(AllGameObjectEntriesListInObjectRangeCheck const&);
     };
+    
+    // combine with above somehow? fuck
+    class AllGameObjectsMatchingOneEntryInRange
+    {
+        public:
+            AllGameObjectsMatchingOneEntryInRange(WorldObject const* pObject, std::vector<uint32> const& entries, float fMaxRange)
+                : m_pObject(pObject), entries(entries), m_fRange(fMaxRange) {}
+            bool operator() (GameObject* pGo)
+            {
+                for (const auto entry : entries) {
+                    if (pGo->GetEntry() == entry && m_pObject->IsWithinDist(pGo, m_fRange, false)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+        private:
+            WorldObject const* m_pObject;
+            std::vector<uint32> entries;
+            float m_fRange;
+    };
 
     // x y z version of above
     class AllGameObjectEntriesListInPosRangeCheck
@@ -1259,6 +1281,27 @@ namespace MaNGOS
         private:
             const WorldObject* m_pObject;
             uint32 m_uiEntry;
+            float m_fRange;
+    };
+
+    class AllCreaturesMatchingOneEntryInRange
+    {
+        public:
+            AllCreaturesMatchingOneEntryInRange(WorldObject const* pObject, std::vector<uint32> const& entries, float fMaxRange)
+                : m_pObject(pObject), entries(entries), m_fRange(fMaxRange) {}
+            bool operator() (Unit* pUnit)
+            {
+                for (const auto entry : entries) {
+                    if (pUnit->GetEntry() == entry && m_pObject->IsWithinDist(pUnit, m_fRange, false)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+        private:
+            WorldObject const* m_pObject;
+            std::vector<uint32> entries;
             float m_fRange;
     };
 

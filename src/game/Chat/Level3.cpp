@@ -6685,6 +6685,50 @@ bool ChatHandler::HandleWarEffortCounterCommand(char* args)
     return true;
 }
 
+bool ChatHandler::HandleScourgeInvasionCommand(char* args)
+{
+    return true;
+}
+
+bool ChatHandler::HandleScourgeInvasionStateCommand(char* args)
+{
+    uint32 value;
+    if (!ExtractUInt32(&args, value) || value >= SI_STATE_MAX)
+    {
+        PSendSysMessage("Enter valid value for state.");
+        return true;
+    }
+
+    sWorldState.SetScourgeInvasionState(SIState(value));
+    return true;
+}
+
+bool ChatHandler::HandleScourgeInvasionBattlesWonCommand(char* args)
+{
+    int32 value;
+    if (!ExtractInt32(&args, value))
+    {
+        PSendSysMessage("Enter valid count for battles won.");
+        return true;
+    }
+
+    sWorldState.AddBattlesWon(value);
+    return true;
+}
+
+bool ChatHandler::HandleScourgeInvasionStartZone(char* args)
+{
+    int32 value;
+    if (!ExtractInt32(&args, value))
+    {
+        PSendSysMessage("Enter valid SIZoneId (0-7).");
+        return true;
+    }
+
+    sWorldState.StartZoneEvent(SIZoneIds(value));
+    return true;
+}
+
 enum ModSpells
 {
     // client spells
