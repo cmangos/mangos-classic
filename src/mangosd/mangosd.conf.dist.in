@@ -67,16 +67,10 @@ ConfVersion=2021021901
 RealmID = 1
 DataDir = "."
 LogsDir = ""
-<<<<<<< HEAD
 LoginDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;classicrealmd"
 WorldDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;classicmangos"
 CharacterDatabaseInfo = "127.0.0.1;3306;mangos;mangos;classiccharacters"
-=======
-LoginDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;tbcrealmd"
-WorldDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;tbcmangos"
-CharacterDatabaseInfo = "127.0.0.1;3306;mangos;mangos;tbccharacters"
-LogsDatabaseInfo      = "127.0.0.1;3306;mangos;mangos;tbclogs"
->>>>>>> b455500dff39... [s2433] Anticheat: Initial implementation
+LogsDatabaseInfo      = "127.0.0.1;3306;mangos;mangos;classiclogs"
 LoginDatabaseConnections = 1
 WorldDatabaseConnections = 1
 CharacterDatabaseConnections = 1
