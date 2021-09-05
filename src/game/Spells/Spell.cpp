@@ -2988,6 +2988,7 @@ SpellCastResult Spell::cast(bool skipCheck)
                                         m_caster->SetInCombatWithVictim(target);
                                         m_caster->GetCombatManager().TriggerCombatTimer(uint32(ihit.timeDelay + 500));
                                     }
+                                break;
                             }
                         }
                     }
