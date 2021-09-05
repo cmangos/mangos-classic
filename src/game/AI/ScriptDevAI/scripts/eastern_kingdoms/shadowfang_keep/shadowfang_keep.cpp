@@ -612,7 +612,7 @@ struct npc_deathstalker_vincentAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff) override
     {
-        if (m_creature->IsInCombat() && m_creature->getFaction() == FACTION_FRIENDLY)
+        if (m_creature->IsInCombat() && m_creature->GetFaction() == FACTION_FRIENDLY)
             EnterEvadeMode();
 
         ScriptedAI::UpdateAI(diff);

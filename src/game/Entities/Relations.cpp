@@ -282,7 +282,7 @@ ReputationRank Unit::GetReactionTo(const Corpse* corpse) const
 
     if (const FactionTemplateEntry* thisTemplate = GetFactionTemplateEntry())
     {
-        if (const uint32 corpseTemplateId = corpse->getFaction())
+        if (const uint32 corpseTemplateId = corpse->GetFaction())
         {
             if (const FactionTemplateEntry* corpseTemplate = sFactionTemplateStore.LookupEntry(corpseTemplateId))
                 return GetFactionReaction(thisTemplate, corpseTemplate);

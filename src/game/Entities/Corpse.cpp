@@ -250,7 +250,7 @@ bool Corpse::LoadFromDB(uint32 lowguid, Field* fields)
     return true;
 }
 
-uint32 Corpse::getFaction() const
+uint32 Corpse::GetFaction() const
 {
     if (const uint8 race = getRace())
     {

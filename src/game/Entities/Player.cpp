@@ -2449,7 +2449,7 @@ void Player::SetGameMaster(bool on)
         SetImmuneToNPC(false);
         SetImmuneToPlayer(false);
 
-        CallForAllControlledUnits(SetGameMasterOffHelper(getFaction()), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
+        CallForAllControlledUnits(SetGameMasterOffHelper(GetFaction()), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 
         FreezeMirrorTimers(false);
 

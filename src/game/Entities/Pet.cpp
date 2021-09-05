@@ -257,7 +257,7 @@ bool Pet::LoadPetFromDB(Player* owner, Position const& spawnPos, uint32 petentry
     }
 
     setPetType(pet_type);
-    setFaction(owner->getFaction());
+    setFaction(owner->GetFaction());
     SetUInt32Value(UNIT_CREATED_BY_SPELL, summon_spell_id);
 
     // reget for sure use real creature info selected for Pet at load/creating

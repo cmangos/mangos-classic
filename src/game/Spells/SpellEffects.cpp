@@ -2613,7 +2613,7 @@ void Spell::EffectSummon(SpellEffectIndex eff_idx)
     spawnCreature->SetOwnerGuid(m_caster->GetObjectGuid());
     spawnCreature->SetUInt32Value(UNIT_FIELD_FLAGS, cInfo->UnitFlags);
     spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS, cInfo->NpcFlags);
-    spawnCreature->setFaction(m_caster->getFaction());
+    spawnCreature->setFaction(m_caster->GetFaction());
     spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, 0);
     spawnCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
@@ -3200,7 +3200,7 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
         spawnCreature->SetOwnerGuid(m_caster->GetObjectGuid());
         spawnCreature->SetUInt32Value(UNIT_FIELD_FLAGS, cInfo->UnitFlags);
         spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS, cInfo->NpcFlags);
-        spawnCreature->setFaction(m_caster->getFaction());
+        spawnCreature->setFaction(m_caster->GetFaction());
         spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, 0);
         spawnCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
@@ -3435,7 +3435,7 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
 
     pet->SetLoading(true);
     pet->SetOwnerGuid(plr->GetObjectGuid());
-    pet->setFaction(plr->getFaction());
+    pet->setFaction(plr->GetFaction());
     pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
     if (plr->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
@@ -3579,7 +3579,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     }
 
     NewSummon->SetOwnerGuid(m_caster->GetObjectGuid());
-    NewSummon->setFaction(m_caster->getFaction());
+    NewSummon->setFaction(m_caster->GetFaction());
     NewSummon->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(nullptr)));
     NewSummon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
@@ -4319,17 +4319,17 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                             {105, {27248, 27513}}   // Thunderbluff
                         };
 
-                    if (loveAirSpellsMapForFaction.count(m_caster->getFaction()))
+                    if (loveAirSpellsMapForFaction.count(m_caster->GetFaction()))
                     {
                         if (!urand(0, 5))                       // Sets 1 in 6 chance to cast Heartbroken
                             PledgeGiftOrHeartbroken = 26898;    // Heartbroken
                         else if (!unitTarget->HasAura(26680))
                         {
-                            PledgeGiftOrHeartbroken = loveAirSpellsMapForFaction[m_caster->getFaction()][1];    // Pledge of Adoration for related faction
+                            PledgeGiftOrHeartbroken = loveAirSpellsMapForFaction[m_caster->GetFaction()][1];    // Pledge of Adoration for related faction
                             unitTarget->CastSpell(unitTarget, 26680, TRIGGERED_OLD_TRIGGERED);                  // Cast Adored
                         }
                         else
-                            PledgeGiftOrHeartbroken = loveAirSpellsMapForFaction[m_caster->getFaction()][0];    // Pledge of Friendship for related faction
+                            PledgeGiftOrHeartbroken = loveAirSpellsMapForFaction[m_caster->GetFaction()][0];    // Pledge of Friendship for related faction
 
                         unitTarget->CastSpell(unitTarget, PledgeGiftOrHeartbroken, TRIGGERED_OLD_TRIGGERED);
                         m_caster->RemoveAurasDueToSpell(27741);                             // Remove Love is in the Air from guard
@@ -4375,17 +4375,17 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                             {875, {27520, 27503}}   // Ironforge gnomes
                         };
 
-                    if (loveAirSpellsMapForFaction.count(m_caster->getFaction()))
+                    if (loveAirSpellsMapForFaction.count(m_caster->GetFaction()))
                     {
                         if (!urand(0, 5))                       // Sets 1 in 6 chance to cast Heartbroken
                             PledgeGiftOrHeartbroken = 26898;    // Heartbroken
                         else if (!unitTarget->HasAura(26680))
                         {
-                            PledgeGiftOrHeartbroken = loveAirSpellsMapForFaction[m_caster->getFaction()][1];    // Gift of Adoration for related faction
+                            PledgeGiftOrHeartbroken = loveAirSpellsMapForFaction[m_caster->GetFaction()][1];    // Gift of Adoration for related faction
                             unitTarget->CastSpell(unitTarget, 26680, TRIGGERED_OLD_TRIGGERED);                  // Cast Adored
                         }
                         else
-                            PledgeGiftOrHeartbroken = loveAirSpellsMapForFaction[m_caster->getFaction()][0];    // Gift of Friendship for related faction
+                            PledgeGiftOrHeartbroken = loveAirSpellsMapForFaction[m_caster->GetFaction()][0];    // Gift of Friendship for related faction
 
                         unitTarget->CastSpell(unitTarget, PledgeGiftOrHeartbroken, TRIGGERED_OLD_TRIGGERED);
                         m_caster->RemoveAurasDueToSpell(27741);                             // Remove Love is in the Air from civilian
@@ -4605,7 +4605,7 @@ void Spell::EffectDuel(SpellEffectIndex eff_idx)
         return;
     }
 
-    pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, m_caster->getFaction());
+    pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, m_caster->GetFaction());
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->GetLevel() + 1);
 
     pGameObj->SetRespawnTime(m_duration > 0 ? m_duration / IN_MILLISECONDS : 0);
@@ -4877,7 +4877,7 @@ void Spell::EffectSummonTotem(SpellEffectIndex eff_idx)
 
     // pTotem->SetName("");                                 // generated by client
     pTotem->SetOwnerGuid(m_caster->GetObjectGuid());
-    pTotem->setFaction(m_caster->getFaction());
+    pTotem->setFaction(m_caster->GetFaction());
     pTotem->SetLevel(m_caster->GetLevel());
     pTotem->SetTypeBySummonSpell(m_spellInfo);              // must be after Create call where m_spells initialized
 
@@ -5439,7 +5439,7 @@ void Spell::EffectSummonCritter(SpellEffectIndex eff_idx)
 
     // critter->SetName("");                                // generated by client
     critter->SetOwnerGuid(m_caster->GetObjectGuid());
-    critter->setFaction(m_caster->getFaction());
+    critter->setFaction(m_caster->GetFaction());
     critter->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
     critter->SelectLevel();                                 // some summoned critters have different from 1 DB data for level/hp
     const CreatureInfo* info = critter->GetCreatureInfo();

@@ -1375,7 +1375,7 @@ class Unit : public WorldObject
         virtual void SetSheath(SheathState sheathed) { SetByteValue(UNIT_FIELD_BYTES_2, 0, sheathed); }
 
         // faction template id
-        uint32 getFaction() const { return GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE); }
+        uint32 GetFaction() const override { return GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE); }
         void setFaction(uint32 faction) { SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, faction); }
         FactionTemplateEntry const* GetFactionTemplateEntry() const;
         void RestoreOriginalFaction();

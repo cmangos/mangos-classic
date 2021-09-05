@@ -87,7 +87,7 @@ void instance_scarlet_monastery::OnObjectCreate(GameObject* pGo)
 void instance_scarlet_monastery::OnCreatureRespawn(Creature* creature)
 {
     if (GetData(TYPE_ASHBRINGER_EVENT) == IN_PROGRESS)
-        if (creature->IsAlive() && !creature->IsInCombat() && creature->getFaction() != 35)
+        if (creature->IsAlive() && !creature->IsInCombat() && creature->GetFaction() != 35)
             if (m_sAshbringerFriendlyGuids.find(creature->GetObjectGuid()) != m_sAshbringerFriendlyGuids.end())
                 creature->setFaction(35);
 }

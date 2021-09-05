@@ -478,7 +478,7 @@ void AreaAura::Update(uint32 diff)
                         for (auto target : nearbyTargets)
                         {
                             // Due to the lack of support for NPC groups or formations, are considered of the same party NPCs with same faction than caster
-                            if (target != owner && target->IsAlive() && target->getFaction() == ((Creature*)owner)->getFaction())
+                            if (target != owner && target->IsAlive() && target->GetFaction() == ((Creature*)owner)->GetFaction())
                                 targets.push_back(target);
                         }
                     }

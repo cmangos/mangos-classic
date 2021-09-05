@@ -828,7 +828,7 @@ bool ChatHandler::HandleModifyFactionCommand(char* args)
     {
         if (chr)
         {
-            uint32 factionid = chr->getFaction();
+            uint32 factionid = chr->GetFaction();
             uint32 flag      = chr->GetUInt32Value(UNIT_FIELD_FLAGS);
             uint32 npcflag   = chr->GetUInt32Value(UNIT_NPC_FLAGS);
             uint32 dyflag    = chr->GetUInt32Value(UNIT_DYNAMIC_FLAGS);
