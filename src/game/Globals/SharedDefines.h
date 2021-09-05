@@ -312,7 +312,7 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_FACING_TARGET                = 0x00000200,// 9 TODO: CONFIRM!
     SPELL_ATTR_EX_NO_THREAT                    = 0x00000400,// 10 no generates threat on cast 100%
     SPELL_ATTR_EX_DONT_REFRESH_DURATION_ON_RECAST = 0x00000800,// 11 Aura will not refresh its duration when recast
-    SPELL_ATTR_EX_IS_PICKPOCKET                = 0x00001000,// 12
+    SPELL_ATTR_EX_FAILURE_BREAKS_STEALTH       = 0x00001000,// 12
     SPELL_ATTR_EX_FARSIGHT                     = 0x00002000,// 13 related to farsight
     SPELL_ATTR_EX_CHANNEL_TRACK_TARGET         = 0x00004000,// 14
     SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY     = 0x00008000,// 15 remove auras on immunity

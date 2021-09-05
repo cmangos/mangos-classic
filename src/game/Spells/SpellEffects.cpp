@@ -3634,7 +3634,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
         ((Player*)m_caster)->PetSpellInitialize();
         NewSummon->SetLoading(false);
     }
-    else
+    else // current implementation of SPELL_ATTR_EX_FAILURE_BREAKS_STEALTH
     {
         NewSummon->SetLoading(false);
         // Notify Summoner
