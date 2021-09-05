@@ -2979,7 +2979,7 @@ SpellCastResult Spell::cast(bool skipCheck)
                 {
                     if (Unit* target = m_targets.getUnitTarget())
                     {
-                        for (auto& ihit : m_UniqueTargetInfo)
+                        for (auto const& ihit : m_UniqueTargetInfo)
                         {
                             if (target->GetObjectGuid() == ihit.targetGUID)                 // Found in list
                             {
