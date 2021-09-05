@@ -533,7 +533,7 @@ void CreatureLinkingHolder::ProcessSlaveGuidList(CreatureLinkingEvent eventType,
 
     for (auto slave_itr = slaveGuidList.begin(); slave_itr != slaveGuidList.end();)
     {
-        Creature* pSlave = pSource->GetMap()->GetCreature((*slave_itr).second);
+        Creature* pSlave = pSource->GetMap()->GetCreature((*slave_itr).first);
         if ((!pSlave || pSlave->IsCorpse()) && preprocessFlag) // dynguid respawning
             pSource->GetMap()->GetSpawnManager().RespawnCreature((*slave_itr).first);
         if (!pSlave)
