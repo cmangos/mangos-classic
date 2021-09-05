@@ -576,6 +576,17 @@ void Spell::FillTargetMap()
                             }
                         }
                     }
+
+                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_REQUIRE_ALL_TARGETS))
+                    {
+                        // spells which should only be cast if a target was found
+                        if (unitTargetList.size() <= 0)
+                        {
+                            finish(false);
+                            return;
+                        }
+                    }
+
                     for (Unit* unit : unitTargetList)
                         AddUnitTarget(unit, effectMask);
                 }
