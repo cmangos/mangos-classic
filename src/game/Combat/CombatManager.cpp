@@ -172,3 +172,9 @@ void CombatManager::TriggerCombatTimer(bool pvp)
     m_combatTimer = pvp ? 5000 : 15000;
     m_lastRefreshPos = m_owner->GetPosition();
 }
+
+void CombatManager::TriggerCombatTimer(uint32 timer)
+{
+    m_combatTimer = timer;
+    m_lastRefreshPos = m_owner->GetPosition();
+}

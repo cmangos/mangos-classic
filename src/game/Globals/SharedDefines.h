@@ -321,7 +321,7 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_UNK18                        = 0x00040000,// 18
     SPELL_ATTR_EX_CANT_TARGET_SELF             = 0x00080000,// 19 spells with area effect or friendly targets that exclude the caster
     SPELL_ATTR_EX_REQ_TARGET_COMBO_POINTS      = 0x00100000,// 20 Req combo points on target
-    SPELL_ATTR_EX_UNK21                        = 0x00200000,// 21
+    SPELL_ATTR_EX_THREAT_ONLY_ON_MISS          = 0x00200000,// 21
     SPELL_ATTR_EX_REQ_COMBO_POINTS             = 0x00400000,// 22 Use combo points (in 4.x not required combo point target selected)
     SPELL_ATTR_EX_UNK23                        = 0x00800000,// 23
     SPELL_ATTR_EX_UNK24                        = 0x01000000,// 24 Req fishing pole??
@@ -358,7 +358,7 @@ enum SpellAttributesEx2
     SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT         = 0x00080000,// 19 does not necessarly need shapeshift
     SPELL_ATTR_EX2_FACING_TARGETS_BACK         = 0x00100000,// 20 TODO: CONFIRM!
     SPELL_ATTR_EX2_DAMAGE_REDUCED_SHIELD       = 0x00200000,// 21 for ice blocks, pala immunity buffs, priest absorb shields, but used also for other spells -> not sure!
-    SPELL_ATTR_EX2_UNK22                       = 0x00400000,// 22
+    SPELL_ATTR_EX2_NO_INITIAL_THREAT           = 0x00400000,// 22
     SPELL_ATTR_EX2_IS_ARCANE_CONCENTRATION     = 0x00800000,// 23 Only mage Arcane Concentration have this flag
     SPELL_ATTR_EX2_UNK24                       = 0x01000000,// 24
     SPELL_ATTR_EX2_UNK25                       = 0x02000000,// 25
@@ -388,9 +388,9 @@ enum SpellAttributesEx3
     SPELL_ATTR_EX3_DONT_DISPLAY_CHANNEL_BAR    = 0x00002000,// 13
     SPELL_ATTR_EX3_IS_HONORLESS_TARGET         = 0x00004000,// 14 "Honorless Target" only this spells have this flag
     SPELL_ATTR_EX3_RANGED_ATTACK               = 0x00008000,// 15 Spells with this attribute are processed as ranged attacks in client
-    SPELL_ATTR_EX3_CANT_TRIGGER_PROC           = 0x00010000,// 16 confirmed by patchnotes
-    SPELL_ATTR_EX3_NO_INITIAL_AGGRO            = 0x00020000,// 17 Causes no aggro if not missed
-    SPELL_ATTR_EX3_CANT_MISS                   = 0x00040000,// 18 Spell should always hit its target
+    SPELL_ATTR_EX3_SUPPRESS_CASTER_PROCS       = 0x00010000,// 16
+    SPELL_ATTR_EX3_SUPPRESS_TARGET_PROCS       = 0x00020000,// 17
+    SPELL_ATTR_EX3_ALWAYS_HIT                  = 0x00040000,// 18 Spell should always hit its target 
     SPELL_ATTR_EX3_UNK19                       = 0x00080000,// 19
     SPELL_ATTR_EX3_DEATH_PERSISTENT            = 0x00100000,// 20 Death persistent spells
     SPELL_ATTR_EX3_UNK21                       = 0x00200000,// 21

@@ -643,7 +643,7 @@ void Spell::prepareDataForTriggerSystem()
     // TODO: possible exist spell attribute for this
     m_canTrigger = true;
 
-    if ((m_CastItem && m_spellInfo->SpellFamilyFlags == nullptr) || m_spellInfo->HasAttribute(SPELL_ATTR_EX3_CANT_TRIGGER_PROC) || m_doNotProc)
+    if ((m_CastItem && m_spellInfo->SpellFamilyFlags == nullptr) || m_doNotProc)
         m_canTrigger = false;                               // Do not trigger from item cast spell
 
     // some negative spells have positive effects to another or same targets
@@ -729,6 +729,12 @@ void Spell::PrepareMasksForProcSystem(uint8 effectMask, uint32& procAttacker, ui
         procAttacker = PROC_FLAG_DEAL_HARMFUL_PERIODIC;
         procVictim = PROC_FLAG_TAKE_HARMFUL_PERIODIC;
     }
+
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_SUPPRESS_CASTER_PROCS))
+        procAttacker = 0;
+
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_SUPPRESS_TARGET_PROCS))
+        procVictim = 0;
 }
 
 void Spell::CleanupTargetList()
