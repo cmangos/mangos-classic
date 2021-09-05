@@ -4429,6 +4429,32 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                 if (holder->IsWeaponBuffCoexistableWith(foundHolder))
                     continue;
 
+                // Carry over removed Aura's remaining damage if Aura still has ticks remaining
+                if (foundHolder->GetSpellProto()->Id == 12654) // Rolling ignites
+                {
+                    for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+                    {
+                        if (Aura* aur = holder->GetAuraByEffectIndex(SpellEffectIndex(i)))
+                        {
+                            // m_auraname can be modified to SPELL_AURA_NONE for area auras, use original
+                            AuraType aurNameReal = AuraType(aurSpellInfo->EffectApplyAuraName[i]);
+
+                            if (aurNameReal == SPELL_AURA_PERIODIC_DAMAGE && aur->GetAuraDuration() > 0)
+                            {
+                                if (Aura* existing = foundHolder->GetAuraByEffectIndex(SpellEffectIndex(i)))
+                                {
+                                    int32 remainingTicks = existing->GetAuraMaxTicks() - existing->GetAuraTicks();
+                                    int32 remainingDamage = existing->GetModifier()->m_amount * remainingTicks;
+
+                                    aur->GetModifier()->m_amount += int32(remainingDamage / aur->GetAuraMaxTicks());
+                                }
+                                else
+                                    DEBUG_LOG("Holder (spell %u) on target (lowguid: %u) doesn't have aura on effect index %u. skipping.", aurSpellInfo->Id, holder->GetTarget()->GetGUIDLow(), i);
+                            }
+                        }
+                    }
+                }
+
                 // can be only single
                 RemoveSpellAuraHolder(foundHolder, AURA_REMOVE_BY_STACK);
                 break;
