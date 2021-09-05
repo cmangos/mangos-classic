@@ -3377,7 +3377,7 @@ bool Player::IsNeedCastPassiveLikeSpellAtLearn(SpellEntry const* spellInfo) cons
 {
     ShapeshiftForm form = GetShapeshiftForm();
 
-    if (IsNeedCastSpellAtFormApply(spellInfo, form))        // SPELL_ATTR_PASSIVE | SPELL_ATTR_HIDDEN_CLIENTSIDE spells
+    if (IsNeedCastSpellAtFormApply(spellInfo, form))        // SPELL_ATTR_PASSIVE | SPELL_ATTR_DO_NOT_DISPLAY spells
         return true;                                        // all stance req. cases, not have auarastate cases
 
     if (!spellInfo->HasAttribute(SPELL_ATTR_PASSIVE))

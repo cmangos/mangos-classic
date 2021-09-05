@@ -1401,7 +1401,7 @@ bool ChatHandler::HandleLearnAllCommand(char* /*args*/)
 
                     // skip passives
                     if (newSpell->HasAttribute(SPELL_ATTR_PASSIVE) ||
-                        newSpell->HasAttribute(SPELL_ATTR_HIDDEN_CLIENTSIDE) ||
+                        newSpell->HasAttribute(SPELL_ATTR_DO_NOT_DISPLAY) ||
                         newSpell->HasAttribute(SPELL_ATTR_EX2_DISPLAY_IN_STANCE_BAR))
                         continue;
                 }

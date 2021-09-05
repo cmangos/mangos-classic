@@ -1236,7 +1236,7 @@ void Unit::JustKilledCreature(Unit* killer, Creature* victim, Player* responsibl
 
     // Interrupt channeling spell when a Possessed Summoned is killed
     SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(victim->GetUInt32Value(UNIT_CREATED_BY_SPELL));
-    if (spellInfo && spellInfo->HasAttribute(SPELL_ATTR_EX_FARSIGHT) && spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNELED_1))
+    if (spellInfo && spellInfo->HasAttribute(SPELL_ATTR_EX_TOGGLE_FARSIGHT) && spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNELED_1))
     {
         Unit* creator = victim->GetMap()->GetUnit(victim->GetCreatorGuid());
         if (creator && creator->GetCharmGuid() == victim->GetObjectGuid())
@@ -1615,7 +1615,7 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage* spellDamageInfo, int32 dama
     }
 
     // if crit add critical bonus
-    if (crit && !spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS))
+    if (crit && !spellInfo->HasAttribute(SPELL_ATTR_EX3_IGNORE_CASTER_MODIFIERS))
     {
         spellDamageInfo->HitInfo |= SPELL_HIT_TYPE_CRIT;
         damage = CalculateCritAmount(pVictim, damage, spellInfo);
@@ -2708,7 +2708,7 @@ SpellMissInfo Unit::SpellHitResult(WorldObject* caster, Unit* pVictim, SpellEntr
         if (roll_chance_combat(chance))
             return SPELL_MISS_REFLECT;
     }
-    if (!spell->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
+    if (!spell->HasAttribute(SPELL_ATTR_NO_IMMUNITIES))
     {
         // TODO: improve for partial application
         // Check for immune
@@ -6487,7 +6487,7 @@ Unit* Unit::SelectMagnetTarget(Unit* victim, Spell* spell)
     // Magic case
     if (spell && (spell->m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE || spell->m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC))
     {
-        if (spell->m_spellInfo->HasAttribute(SPELL_ATTR_ABILITY) || spell->m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_BE_REDIRECTED) || spell->m_spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
+        if (spell->m_spellInfo->HasAttribute(SPELL_ATTR_ABILITY) || spell->m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_BE_REDIRECTED) || spell->m_spellInfo->HasAttribute(SPELL_ATTR_NO_IMMUNITIES))
             return nullptr;
 
         Unit::AuraList const& magnetAuras = victim->GetAurasByType(SPELL_AURA_SPELL_MAGNET);
@@ -6614,7 +6614,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellEntry const* spellProto, ui
         return pdamage;
 
     // Some spells don't benefit from done mods
-    if (spellProto->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS))
+    if (spellProto->HasAttribute(SPELL_ATTR_EX3_IGNORE_CASTER_MODIFIERS))
         return pdamage;
 
     // For totems get damage bonus from owner (statue isn't totem in fact)
@@ -6713,7 +6713,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellEntry const* spellProto, ui
  */
 uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellEntry const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack)
 {
-    if (!spellProto || damagetype == DIRECT_DAMAGE)
+    if (!spellProto || damagetype == DIRECT_DAMAGE || spellProto->HasAttribute(SPELL_ATTR_EX4_IGNORE_DAMAGE_TAKEN_MODIFIERS))
         return pdamage;
 
     uint32 schoolMask = GetSpellSchoolMask(spellProto);
@@ -6797,7 +6797,7 @@ int32 Unit::SpellBaseDamageBonusTaken(SpellSchoolMask schoolMask) const
 uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellEntry const* spellProto, int32 healamount, DamageEffectType damagetype, uint32 stack)
 {
     // Some spells don't benefit from done mods
-    if (spellProto->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS))
+    if (spellProto->HasAttribute(SPELL_ATTR_EX3_IGNORE_CASTER_MODIFIERS))
         return healamount;
 
     // For totems get healing bonus from owner (statue isn't totem in fact)
@@ -7045,7 +7045,7 @@ bool Unit::IsImmuneToSpell(SpellEntry const* spellInfo, bool /*castOnSelf*/, uin
 
 bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool /*castOnSelf*/) const
 {
-    if (spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
+    if (spellInfo->HasAttribute(SPELL_ATTR_NO_IMMUNITIES))
         return false;
 
     // If m_immuneToEffect type contain this effect type, IMMUNE effect.
@@ -7103,7 +7103,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
         return pdamage;
 
     // Some spells don't benefit from done mods
-    if (spellProto && spellProto->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS))
+    if (spellProto && spellProto->HasAttribute(SPELL_ATTR_EX3_IGNORE_CASTER_MODIFIERS))
         return pdamage;
 
     // differentiate for weapon damage based spells
@@ -7298,6 +7298,9 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
 uint32 Unit::MeleeDamageBonusTaken(Unit* caster, uint32 pdamage, WeaponAttackType attType, SpellSchoolMask schoolMask, SpellEntry const* spellProto, DamageEffectType damagetype, uint32 stack, bool flat)
 {
     if (pdamage == 0)
+        return pdamage;
+
+    if (spellProto && spellProto->HasAttribute(SPELL_ATTR_EX4_IGNORE_DAMAGE_TAKEN_MODIFIERS))
         return pdamage;
 
     // differentiate for weapon damage based spells
@@ -10184,7 +10187,7 @@ void Unit::RemoveAurasAtMechanicImmunity(uint32 mechMask, uint32 exceptSpellId, 
             ++iter;
         else if (non_positive && iter->second->IsPositive())
             ++iter;
-        else if (spell->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
+        else if (spell->HasAttribute(SPELL_ATTR_NO_IMMUNITIES))
             ++iter;
         else if (iter->second->HasMechanicMask(mechMask))
         {

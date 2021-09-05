@@ -2510,7 +2510,7 @@ void RemoveItemsSetItem(Player* player, ItemPrototype const* proto);
 template <class T> void Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue, bool finalUse)
 {
     SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
-    if (!spellInfo || spellInfo->SpellFamilyName != GetSpellClass() || spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS)) return; // client condition
+    if (!spellInfo || spellInfo->SpellFamilyName != GetSpellClass() || spellInfo->HasAttribute(SPELL_ATTR_EX3_IGNORE_CASTER_MODIFIERS)) return; // client condition
     int32 totalpct = 100;
     int32 totalflat = 0;
     std::vector<SpellModifier*> consumedFiniteMods;

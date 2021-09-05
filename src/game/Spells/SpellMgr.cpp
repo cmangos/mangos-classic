@@ -77,7 +77,7 @@ int32 CalculateSpellDuration(SpellEntry const* spellInfo, Unit const* caster)
 {
     int32 duration = GetSpellDuration(spellInfo);
 
-    if (duration != -1 && caster && !spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS))
+    if (duration != -1 && caster && !spellInfo->HasAttribute(SPELL_ATTR_EX3_IGNORE_CASTER_MODIFIERS))
     {
         int32 maxduration = GetSpellMaxDuration(spellInfo);
 
@@ -151,7 +151,7 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, WorldObject* caster, Spell*
         if (caster->IsUnit())
         {
             Unit* unitCaster = static_cast<Unit*>(caster);
-            if (!spellInfo->HasAttribute(SPELL_ATTR_ABILITY) && !spellInfo->HasAttribute(SPELL_ATTR_TRADESPELL) && !spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS))
+            if (!spellInfo->HasAttribute(SPELL_ATTR_ABILITY) && !spellInfo->HasAttribute(SPELL_ATTR_TRADESPELL) && !spellInfo->HasAttribute(SPELL_ATTR_EX3_IGNORE_CASTER_MODIFIERS))
                 castTime = int32(castTime * unitCaster->GetFloatValue(UNIT_MOD_CAST_SPEED));
             else if (spell->IsRangedSpell() && !spell->IsAutoRepeat())
                 castTime = int32(castTime * unitCaster->m_modAttackSpeedPct[RANGED_ATTACK]);

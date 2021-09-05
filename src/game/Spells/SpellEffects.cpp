@@ -3385,7 +3385,7 @@ void Spell::EffectEnchantItemTmp(SpellEffectIndex eff_idx)
     else if (m_spellInfo->Id == 28891 || m_spellInfo->Id == 28898)
         duration = 3600;                                    // 1 hour
     // some fishing pole bonuses
-    else if (m_spellInfo->HasAttribute(SPELL_ATTR_HIDDEN_CLIENTSIDE))
+    else if (m_spellInfo->HasAttribute(SPELL_ATTR_DO_NOT_DISPLAY))
         duration = 600;                                     // 10 mins
     // default case
     else

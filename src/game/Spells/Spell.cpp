@@ -414,7 +414,7 @@ Spell::Spell(WorldObject* caster, SpellEntry const* info, uint32 triggeredFlags,
     CleanupTargetList();
 
     m_spellLog.Initialize();
-    m_needSpellLog = (m_spellInfo->Attributes & (SPELL_ATTR_HIDE_IN_COMBAT_LOG | SPELL_ATTR_HIDDEN_CLIENTSIDE)) == 0;
+    m_needSpellLog = (m_spellInfo->Attributes & (SPELL_ATTR_HIDE_IN_COMBAT_LOG | SPELL_ATTR_DO_NOT_DISPLAY)) == 0;
 
     m_travellingStart = UINT32_MAX;
 
@@ -582,6 +582,7 @@ void Spell::FillTargetMap()
                         // spells which should only be cast if a target was found
                         if (unitTargetList.size() <= 0)
                         {
+                            SendCastResult(SPELL_FAILED_BAD_TARGETS);
                             finish(false);
                             return;
                         }
@@ -1116,7 +1117,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 
         spellDamageInfo.damage = m_damage;
         spellDamageInfo.HitInfo = target->HitInfo;
-        if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS))
+        if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_IGNORE_CASTER_MODIFIERS))
         {
             if (target->isCrit) // GOs cant crit
             {
@@ -1222,7 +1223,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, 
     const bool traveling = m_spellState == SPELL_STATE_TRAVELING;
 
     // Recheck immune (only for delayed spells)
-    if (traveling && !m_spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
+    if (traveling && !m_spellInfo->HasAttribute(SPELL_ATTR_NO_IMMUNITIES))
     {
         uint8 notImmunedMask = 0;
         for (uint8 effIndex = 0; effIndex < MAX_EFFECT_INDEX; ++effIndex)
