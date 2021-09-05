@@ -686,8 +686,11 @@ class GameObject : public WorldObject
 
         ObjectGuid const& GetOwnerGuid() const override { return GetGuidValue(OBJECT_FIELD_CREATED_BY); }
         void SetOwnerGuid(ObjectGuid guid) override;
+        ObjectGuid const GetSpawnerGuid() const { return m_spawnerGuid; }
+        void SetSpawnerGuid(ObjectGuid guid) { m_spawnerGuid = guid; }
 
         Unit* GetOwner() const;
+        WorldObject* GetSpawner() const;
 
         void SetSpellId(uint32 id)
         {
@@ -892,6 +895,8 @@ class GameObject : public WorldObject
         std::unique_ptr<GameObjectAI> m_AI;
 
         uint32 m_dbGuid;
+
+        ObjectGuid m_spawnerGuid;
 
     private:
         void SwitchDoorOrButton(bool activate, bool alternative = false);

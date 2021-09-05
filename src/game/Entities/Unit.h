@@ -1802,8 +1802,6 @@ class Unit : public WorldObject
         virtual void SetSelectionGuid(ObjectGuid guid) { SetTargetGuid(guid); }
         // Master: automatically resolves to charmer or owner guid
         ObjectGuid const& GetMasterGuid() const { ObjectGuid const& guid = GetCharmerGuid(); return (guid ? guid : GetOwnerGuid()); }
-        // Spawner: guid of a unit, who is reponsible for starting this unit's parent script (only for script-spawned units within Unit hierarchy)
-        virtual ObjectGuid const GetSpawnerGuid() const { return ObjectGuid(); }
 
         // Convenience unit getters for some of the logical guid constructs above
         Unit* GetOwner(WorldObject const* pov = nullptr, bool recursive = false) const;

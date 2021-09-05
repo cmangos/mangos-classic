@@ -926,6 +926,18 @@ Unit* GameObject::GetOwner() const
     return ObjectAccessor::GetUnit(*this, GetOwnerGuid());
 }
 
+WorldObject* GameObject::GetSpawner() const
+{
+    if (!IsInWorld())
+        return nullptr;
+
+    ObjectGuid spawnerGuid = GetSpawnerGuid();
+    if (spawnerGuid.IsGameObject())
+        return GetMap()->GetGameObject(spawnerGuid);
+    else
+        return GetMap()->GetUnit(spawnerGuid);
+}
+
 GameObjectInfo const* GameObject::GetGOInfo() const
 {
     return m_goInfo;

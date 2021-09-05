@@ -943,6 +943,8 @@ class WorldObject : public Object
 
         virtual ObjectGuid const& GetOwnerGuid() const { return GetGuidValue(OBJECT_FIELD_GUID); }
         virtual void SetOwnerGuid(ObjectGuid /*guid*/) { }
+        // Spawner: guid of a unit, who is reponsible for starting this objects's parent script (only for script-spawned objects)
+        virtual ObjectGuid const GetSpawnerGuid() const { return ObjectGuid(); }
 
         float GetDistance(const WorldObject* obj, bool is3D = true, DistanceCalculation distcalc = DIST_CALC_BOUNDING_RADIUS) const;
         float GetDistance(float x, float y, float z, DistanceCalculation distcalc = DIST_CALC_BOUNDING_RADIUS, bool transport = false) const;
