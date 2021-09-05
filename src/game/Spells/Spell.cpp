@@ -2955,6 +2955,32 @@ SpellCastResult Spell::cast(bool skipCheck)
             m_spellState = SPELL_STATE_TRAVELING;
             SetDelayStart(0);
             SetSpellStartTravelling(m_caster->GetMap()->GetCurrentMSTime());
+
+            if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT) &&
+                !m_spellInfo->HasAttribute(SPELL_ATTR_EX_THREAT_ONLY_ON_MISS) &&
+                !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_NO_INITIAL_THREAT)) // attribute checks
+            {
+                if (m_caster && m_caster->IsPlayerControlled()) // only player casters
+                {
+                    if (Unit* target = m_targets.getUnitTarget())
+                    {
+                        for (auto& ihit : m_UniqueTargetInfo)
+                        {
+                            if (target->GetObjectGuid() == ihit.targetGUID)                 // Found in list
+                            {
+                                if (m_caster->CanAttack(target)) // can attack
+                                    if ((!IsPositiveEffectMask(m_spellInfo, ihit.effectHitMask, m_caster, target)
+                                        && m_caster->IsVisibleForOrDetect(target, target, false)
+                                        && m_caster->CanEnterCombat() && target->CanEnterCombat())) // can see and enter combat
+                                    {
+                                        m_caster->SetInCombatWithVictim(target);
+                                        m_caster->GetCombatManager().TriggerCombatTimer(uint32(ihit.timeDelay + 500));
+                                    }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
     else // Immediate spell, no big deal
