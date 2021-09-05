@@ -497,7 +497,6 @@ void PoolGroup<GameObject>::Spawn1Object(MapPersistentState& mapState, PoolObjec
                     if (sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY))
                         pGameobject->SaveRespawnTime();
                 }
-                dataMap->Add(pGameobject);
             }
         }
         // for not loaded grid just update respawn time (avoid work for instances until implemented support)

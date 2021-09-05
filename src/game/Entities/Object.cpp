@@ -1971,7 +1971,6 @@ GameObject* WorldObject::SpawnGameObject(uint32 dbGuid, Map* map)
         delete gameobject;
         return nullptr;
     }
-    map->Add(gameobject);
     return gameobject;
 }
 
