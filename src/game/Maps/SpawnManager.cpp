@@ -27,11 +27,16 @@ bool operator<(SpawnInfo const& lhs, SpawnInfo const& rhs)
 
 bool SpawnInfo::ConstructForMap(Map& map)
 {
+    m_inUse = true;
+    bool result = false;
     if (GetHighGuid() == HIGHGUID_UNIT)
-        return WorldObject::SpawnCreature(GetDbGuid(), &map);
+        result = WorldObject::SpawnCreature(GetDbGuid(), &map);
     else if (GetHighGuid() == HIGHGUID_GAMEOBJECT)
-        return WorldObject::SpawnGameObject(GetDbGuid(), &map);
-    return false;
+        result = WorldObject::SpawnGameObject(GetDbGuid(), &map);
+    if (result)
+        SetUsed();
+    m_inUse = false;
+    return result;
 }
 
 void SpawnManager::AddCreature(uint32 respawnDelay, uint32 dbguid)
@@ -49,25 +54,24 @@ void SpawnManager::AddGameObject(uint32 respawnDelay, uint32 dbguid)
 void SpawnManager::RespawnCreature(uint32 dbguid, uint32 respawnDelay)
 {
     bool found = false;
-    for (auto itr = m_spawns.begin(); itr != m_spawns.end(); )
+    auto itr = m_spawns.begin();
+    for (; itr != m_spawns.end(); )
     {
         auto& spawnInfo = *itr;
-        if (spawnInfo.GetDbGuid() == dbguid && spawnInfo.GetHighGuid() == HIGHGUID_UNIT)
+        if (!spawnInfo.IsUsed() && spawnInfo.GetDbGuid() == dbguid && spawnInfo.GetHighGuid() == HIGHGUID_UNIT)
         {
             found = true;
             m_map.GetPersistentState()->SaveCreatureRespawnTime(dbguid, time(nullptr) + respawnDelay);
             if (respawnDelay > 0)
                 spawnInfo.SetRespawnTime(m_map.GetCurrentClockTime() + std::chrono::seconds(respawnDelay));
-            else if (spawnInfo.ConstructForMap(m_map))
-            {
-                itr = m_spawns.erase(itr);
-                continue;
-            }
+            break;
         }
         ++itr;
     }
     if (!found)
         AddCreature(respawnDelay, dbguid);
+    else
+        (*itr).ConstructForMap(m_map);
     if (respawnDelay > 0)
         std::sort(m_spawns.begin(), m_spawns.end());
 }
@@ -75,25 +79,24 @@ void SpawnManager::RespawnCreature(uint32 dbguid, uint32 respawnDelay)
 void SpawnManager::RespawnGameObject(uint32 dbguid, uint32 respawnDelay)
 {
     bool found = false;
-    for (auto itr = m_spawns.begin(); itr != m_spawns.end(); )
+    auto itr = m_spawns.begin();
+    for (; itr != m_spawns.end(); )
     {
         auto& spawnInfo = *itr;
-        if (spawnInfo.GetDbGuid() == dbguid && spawnInfo.GetHighGuid() == HIGHGUID_GAMEOBJECT)
+        if (!spawnInfo.IsUsed() && spawnInfo.GetDbGuid() == dbguid && spawnInfo.GetHighGuid() == HIGHGUID_GAMEOBJECT)
         {
             found = true;
             m_map.GetPersistentState()->SaveGORespawnTime(dbguid, time(nullptr) + respawnDelay);
             if (respawnDelay > 0)
                 spawnInfo.SetRespawnTime(m_map.GetCurrentClockTime() + std::chrono::seconds(respawnDelay));
-            else if (spawnInfo.ConstructForMap(m_map))
-            {
-                itr = m_spawns.erase(itr);
-                continue;
-            }
+            break;
         }
         ++itr;
     }
     if (!found)
         AddGameObject(respawnDelay, dbguid);
+    else
+        (*itr).ConstructForMap(m_map);
     if (respawnDelay > 0)
         std::sort(m_spawns.begin(), m_spawns.end());
 }
@@ -107,10 +110,7 @@ void SpawnManager::RespawnAll()
             m_map.GetPersistentState()->SaveGORespawnTime(spawnInfo.GetDbGuid(), 0);
         if (spawnInfo.GetHighGuid() == HIGHGUID_UNIT)
             m_map.GetPersistentState()->SaveCreatureRespawnTime(spawnInfo.GetDbGuid(), 0);
-        if (spawnInfo.ConstructForMap(m_map))
-            itr = m_spawns.erase(itr);
-        else
-            break;
+        spawnInfo.ConstructForMap(m_map);
     }
 }
 
@@ -120,10 +120,11 @@ void SpawnManager::Update()
     for (auto itr = m_spawns.begin(); itr != m_spawns.end();)
     {
         auto& spawnInfo = *itr;
-        if (spawnInfo.GetRespawnTime() <= now && spawnInfo.ConstructForMap(m_map))
+        if (spawnInfo.IsUsed() ||
+            (spawnInfo.GetRespawnTime() <= now && spawnInfo.ConstructForMap(m_map)))
             itr = m_spawns.erase(itr);
         else
-            break;
+            ++itr;
     }
 }
 

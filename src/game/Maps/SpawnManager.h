@@ -29,16 +29,20 @@ class Map;
 class SpawnInfo
 {
     public:
-        SpawnInfo(TimePoint when, uint32 dbguid, HighGuid high) : m_respawnTime(when), m_dbguid(dbguid), m_high(high) {}
+        SpawnInfo(TimePoint when, uint32 dbguid, HighGuid high) : m_respawnTime(when), m_dbguid(dbguid), m_high(high), m_used(false), m_inUse(false){}
         TimePoint const& GetRespawnTime() const { return m_respawnTime; }
         void SetRespawnTime(TimePoint const& time) { m_respawnTime = time; }
         bool ConstructForMap(Map& map); // can fail due to linking, pooling not yet supported
         uint32 GetDbGuid() const { return m_dbguid; }
         HighGuid GetHighGuid() const { return m_high; }
+        void SetUsed() { m_used = true; }
+        bool IsUsed() const { return m_inUse || m_used; }
     private:
         TimePoint m_respawnTime;
         uint32 m_dbguid;
         HighGuid m_high;
+        bool m_used;
+        bool m_inUse;
 };
 
 bool operator<(SpawnInfo const& lhs, SpawnInfo const& rhs);
@@ -61,7 +65,7 @@ class SpawnManager
     private:
         Map& m_map;
 
-        std::vector<SpawnInfo> m_spawns;
+        std::vector<SpawnInfo> m_spawns; // must only be erased from in Update
 };
 
 #endif

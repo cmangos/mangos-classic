@@ -480,7 +480,7 @@ void CreatureLinkingHolder::DoCreatureLinkingEvent(CreatureLinkingEvent eventTyp
                 pMaster = pSource->GetMap()->GetCreature(pInfo->masterDBGuid);
             }
 
-            if ((!pMaster || !pMaster->IsAlive()) && eventType == LINKING_EVENT_EVADE && pSource->IsUsingNewSpawningSystem())
+            if ((!pMaster || pMaster->IsCorpse()) && eventType == LINKING_EVENT_EVADE && pSource->IsUsingNewSpawningSystem())
                 pSource->GetMap()->GetSpawnManager().RespawnCreature(pInfo->masterDBGuid);
             else if (pMaster)
             {
@@ -534,7 +534,7 @@ void CreatureLinkingHolder::ProcessSlaveGuidList(CreatureLinkingEvent eventType,
     for (auto slave_itr = slaveGuidList.begin(); slave_itr != slaveGuidList.end();)
     {
         Creature* pSlave = pSource->GetMap()->GetCreature((*slave_itr).second);
-        if ((!pSlave || !pSlave->IsAlive()) && preprocessFlag) // dynguid respawning
+        if ((!pSlave || pSlave->IsCorpse()) && preprocessFlag) // dynguid respawning
             pSource->GetMap()->GetSpawnManager().RespawnCreature((*slave_itr).first);
         if (!pSlave)
         {
