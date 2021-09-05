@@ -2981,7 +2981,7 @@ SpellCastResult Spell::cast(bool skipCheck)
                             if (target->GetObjectGuid() == ihit.targetGUID)                 // Found in list
                             {
                                 if (m_caster->CanAttack(target)) // can attack
-                                    if ((!IsPositiveEffectMask(m_spellInfo, ihit.effectHitMask, m_caster, target)
+                                    if ((!IsPositiveEffectMask(m_spellInfo, ihit.effectMask, m_caster, target)
                                         && m_caster->IsVisibleForOrDetect(target, target, false)
                                         && m_caster->CanEnterCombat() && target->CanEnterCombat())) // can see and enter combat
                                     {
