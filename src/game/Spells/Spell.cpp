@@ -594,6 +594,9 @@ void Spell::FillTargetMap()
                 processedUnits = true;
                 for (uint8 rightTarget = 0; rightTarget < 2; ++rightTarget) // need to process target A and B separately due to effect masks
                 {
+                    bool ignored = rightTarget ? ignoredTargets.second : ignoredTargets.first;
+                    if (ignored)
+                        continue;
                     UnitList& unitTargetList = targetingData.data[i].tmpUnitList[rightTarget];
                     uint8 effectMask = targetMask[rightTarget];
                     SpellTargetFilterScheme scheme = filterScheme[rightTarget];
@@ -656,6 +659,9 @@ void Spell::FillTargetMap()
                 processedGOs = true;
                 for (uint8 rightTarget = 0; rightTarget < 2; ++rightTarget) // need to process target A and B separately due to effect masks
                 {
+                    bool ignored = rightTarget ? ignoredTargets.second : ignoredTargets.first;
+                    if (ignored)
+                        continue;
                     GameObjectList& goTargetList = targetingData.data[i].tmpGOList[rightTarget];
                     uint8 effectMask = targetMask[rightTarget];
                     if (!goTargetList.empty()) // GO case
