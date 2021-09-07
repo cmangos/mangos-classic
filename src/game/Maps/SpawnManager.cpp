@@ -70,7 +70,7 @@ void SpawnManager::RespawnCreature(uint32 dbguid, uint32 respawnDelay)
     }
     if (!found)
         AddCreature(respawnDelay, dbguid);
-    else
+    else if (respawnDelay == 0)
         (*itr).ConstructForMap(m_map);
     if (respawnDelay > 0)
         std::sort(m_spawns.begin(), m_spawns.end());
@@ -95,7 +95,7 @@ void SpawnManager::RespawnGameObject(uint32 dbguid, uint32 respawnDelay)
     }
     if (!found)
         AddGameObject(respawnDelay, dbguid);
-    else
+    else if (respawnDelay == 0)
         (*itr).ConstructForMap(m_map);
     if (respawnDelay > 0)
         std::sort(m_spawns.begin(), m_spawns.end());
