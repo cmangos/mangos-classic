@@ -53,7 +53,7 @@ enum
     NPC_REMULOS                 = 11832,
     NPC_TYRANDE_WHISPERWIND     = 15633,            // appears with the priestess during the event to help the players - should cast healing spells
     NPC_ELUNE_PRIESTESS         = 15634,
-    NPC_MOONGLADE_WARDEN        = 11822,
+    NPC_NIGHTHAVEN_DEFENDER     = 15495,
 
     FACTION_CENARION_CIRCLE     = 996,
 
@@ -95,6 +95,8 @@ enum
     SAY_ERANIKUS_DEFEAT_3       = -1000696,
     EMOTE_ERANIKUS_REDEEM       = -1000697,        // world emote before WotLK
 
+    PRIESTESS_MOUNT_ID          = 9695,
+
     EMOTE_TYRANDE_KNEEL         = -1000698,
     SAY_TYRANDE_REDEEMED        = -1000699,
 
@@ -111,7 +113,7 @@ enum
     POINT_ID_ERANIKUS_REDEEMED  = 3,
 
     MAX_SHADOWS                 = 3,                // the max shadows summoned per turn
-    MAX_WARDEN                  = 10,               // The max number of Moonglade Wardens summoned to fight the Nightmare Phantasm
+    MAX_DEFENDERS               = 10,               // The max number of Moonglade Defender summoned to fight the Nightmare Phantasm
     MAX_SUMMON_TURNS            = 10,               // There are about 10 summoned shade waves
 };
 
@@ -168,8 +170,8 @@ static EventLocations shadowsLocations[] =
     {7963.00f, -2492.03f, 487.84f}
 };
 
-// Spawn points of the 10 Moonglade Wardens that are periodically summoned to fight the Nightmare Phantasms
-static EventLocations wardensLocations [] =
+// Spawn points of the 10 Moonglade Defenders that are periodically summoned to fight the Nightmare Phantasms
+static EventLocations defendersLocations [] =
 {
     {7868.226f, -2556.95f, 487.07f},
     {7867.39f, -2578.96f, 486.95f}
@@ -188,7 +190,7 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
     uint32 m_outroTimer;
 
     ObjectGuid m_eranikusGuid;
-    GuidList m_wardenList;
+    GuidList m_defendersList;
 
     uint8 m_outroPhase;
     uint8 m_summonCount;
@@ -230,8 +232,8 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
                 summoned->setFaction(14);
                 summoned->AI()->AttackStart(m_creature);
                 break;
-            case NPC_MOONGLADE_WARDEN:
-                m_wardenList.push_back(summoned->GetObjectGuid());
+                case NPC_NIGHTHAVEN_DEFENDER:
+                m_defendersList.push_back(summoned->GetObjectGuid());
                 summoned->SetWalk(false);
                 summoned->GetMotionMaster()->MoveWaypoint(0);
                 break;
@@ -240,22 +242,22 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
 
     void SummonedCreatureJustDied(Creature* summoned) override
     {
-        if (summoned->GetEntry() == NPC_MOONGLADE_WARDEN)
-            m_wardenList.remove(summoned->GetObjectGuid());
+        if (summoned->GetEntry() == NPC_NIGHTHAVEN_DEFENDER)
+            m_defendersList.remove(summoned->GetObjectGuid());
     }
 
     void DoDespawnSummoned()
     {
-        for (auto wardenGuid : m_wardenList)
+        for (auto defenderGuid : m_defendersList)
         {
-            if (Creature* warden = m_creature->GetMap()->GetCreature(wardenGuid))
-                warden->ForcedDespawn();
+            if (Creature* defender = m_creature->GetMap()->GetCreature(defenderGuid))
+                defender->ForcedDespawn();
         }
     }
 
     void SummonedJustReachedHome(Creature* summoned) override
     {
-        if (summoned->GetEntry() == NPC_MOONGLADE_WARDEN)
+        if (summoned->GetEntry() == NPC_NIGHTHAVEN_DEFENDER)
             summoned->GetMotionMaster()->MoveWaypoint(0);
     }
 
@@ -264,19 +266,9 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
         if (type != POINT_MOTION_TYPE || summoned->GetEntry() != NPC_ERANIKUS_TYRANT)
             return;
 
-        switch (pointId)
-        {
-            case POINT_ID_ERANIKUS_FLIGHT:
-                // Set Eranikus to face Remulos
-                summoned->SetFacingToObject(m_creature);
-                break;
-            case POINT_ID_ERANIKUS_COMBAT:
-                summoned->SetImmuneToNPC(false);
-                summoned->SetImmuneToPlayer(false);
-                summoned->AI()->AttackStart(m_creature);
-                DoScriptText(SAY_ERANIKUS_ATTACK_2, summoned);
-                break;
-        }
+        if (pointId == POINT_ID_ERANIKUS_FLIGHT)
+            // Set Eranikus to face Remulos
+            summoned->SetFacingToObject(m_creature);
     }
 
     void JustDied(Unit* killer) override
@@ -413,13 +405,13 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
                     for (uint8 i = 0; i < MAX_SHADOWS; ++i)
                         m_creature->SummonCreature(NPC_NIGHTMARE_PHANTASM, shadowsLocations[i].m_fX, shadowsLocations[i].m_fY, shadowsLocations[i].m_fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
 
-                    for (uint8 i = 0; i < MAX_WARDEN; ++i)
+                    for (uint8 i = 0; i < MAX_DEFENDERS; ++i)
                     {
                         // Alternate between two spawn positions
                         uint8 index = i % 2;
                         float fX, fY, fZ;
-                        m_creature->GetRandomPoint(wardensLocations[index].m_fX, wardensLocations[index].m_fY, wardensLocations[index].m_fZ, 3.0f, fX, fY, fZ);
-                        m_creature->SummonCreature(NPC_MOONGLADE_WARDEN, fX, fY, fZ, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 3 * MINUTE * IN_MILLISECONDS);
+                        m_creature->GetRandomPoint(defendersLocations[index].m_fX, defendersLocations[index].m_fY, defendersLocations[index].m_fZ, 3.0f, fX, fY, fZ);
+                        m_creature->SummonCreature(NPC_NIGHTHAVEN_DEFENDER, fX, fY, fZ, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 3 * MINUTE * IN_MILLISECONDS);
                     }
 
                     if (Creature* eranikus = m_creature->GetMap()->GetCreature(m_eranikusGuid))
@@ -442,14 +434,14 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
                         m_creature->SummonCreature(NPC_NIGHTMARE_PHANTASM, fX, fY, fZ, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 3 * MINUTE * IN_MILLISECONDS);
                     }
 
-                    // Summon Moonglade Warden to patrol the area (and fight) if any are dead
-                    for (uint32 i = 0; i < MAX_WARDEN - m_wardenList.size(); ++i)
+                    // Summon Moonglade Defender to patrol the area (and fight) if any are dead
+                    for (uint32 i = 0; i < MAX_DEFENDERS - m_defendersList.size(); ++i)
                     {
                         // Alternate between two spawn positions
                         uint8 index = i % 2;
                         float fX, fY, fZ;
-                        m_creature->GetRandomPoint(wardensLocations[index].m_fX, wardensLocations[index].m_fY, wardensLocations[index].m_fZ, 3.0f, fX, fY, fZ);
-                        m_creature->SummonCreature(NPC_MOONGLADE_WARDEN, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+                        m_creature->GetRandomPoint(defendersLocations[index].m_fX, defendersLocations[index].m_fY, defendersLocations[index].m_fZ, 3.0f, fX, fY, fZ);
+                        m_creature->SummonCreature(NPC_NIGHTHAVEN_DEFENDER, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                     }
 
                     ++m_summonCount;
@@ -462,13 +454,8 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
                     m_shadesummonTimer = 0;
 
                     if (Creature* eranikus = m_creature->GetMap()->GetCreature(m_eranikusGuid))
-                    {
                         // Land and start attacking
-                        eranikus->RemoveAurasDueToSpell(SPELL_DRAGON_HOVER);
-                        eranikus->SetHover(false);
-                        eranikus->HandleEmote(EMOTE_ONESHOT_LAND);
                         eranikus->GetMotionMaster()->MovePoint(POINT_ID_ERANIKUS_COMBAT, eranikusLocations[2].m_fX, eranikusLocations[2].m_fY, eranikusLocations[2].m_fZ);
-                    }
                 }
                 else
                     m_shadesummonTimer = urand(20 * IN_MILLISECONDS, 30 * IN_MILLISECONDS);
@@ -638,7 +625,8 @@ struct boss_eranikusAI : public ScriptedAI
         for (uint8 j = 0; j < MAX_PRIESTESS; ++j)
         {
             m_creature->GetRandomPoint(tyrandeLocations[0].m_fX, tyrandeLocations[0].m_fY, tyrandeLocations[0].m_fZ, 10.0f, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_ELUNE_PRIESTESS, fX, fY, fZ, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 0);
+            if (Creature* priestess = m_creature->SummonCreature(NPC_ELUNE_PRIESTESS, fX, fY, fZ, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 0))
+                priestess->Mount(PRIESTESS_MOUNT_ID);
         }
     }
 
@@ -687,7 +675,10 @@ struct boss_eranikusAI : public ScriptedAI
                 }
                 // Unmount the priestess - unk what is their exact purpose (maybe healer)
                 else if (summoned->GetEntry() == NPC_ELUNE_PRIESTESS)
+                {
                     summoned->Unmount();
+                    summoned->AI()->AttackStart(m_creature);    // Prietess of Elune do not really attack Eranikus but they need to be in combat to periodically cast Mass Heal
+                }
                 break;
             case POINT_ID_TYRANDE_ABSOLUTION:
                 if (summoned->GetEntry() == NPC_TYRANDE_WHISPERWIND)
@@ -701,11 +692,31 @@ struct boss_eranikusAI : public ScriptedAI
 
     void MovementInform(uint32 type, uint32 pointId) override
     {
-        if (type != POINT_MOTION_TYPE || pointId != POINT_ID_ERANIKUS_REDEEMED)
+        if (type != POINT_MOTION_TYPE)
             return;
 
-        DoScriptText(SAY_REDEEMED_1, m_creature);
-        m_eventTimer = 11 * IN_MILLISECONDS;
+        switch (pointId)
+        {
+            case POINT_ID_ERANIKUS_COMBAT:
+            {
+                // Land and start attacking
+                m_creature->SetImmuneToNPC(false);
+                m_creature->SetImmuneToPlayer(false);
+                m_creature->AI()->AttackStart(m_creature);
+                DoScriptText(SAY_ERANIKUS_ATTACK_2, m_creature);
+                m_creature->RemoveAurasDueToSpell(SPELL_DRAGON_HOVER);
+                m_creature->SetHover(false);
+                m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
+                break;
+            }
+            case POINT_ID_ERANIKUS_REDEEMED:
+            {
+                DoScriptText(SAY_REDEEMED_1, m_creature);
+                m_eventTimer = 11 * IN_MILLISECONDS;
+                break;
+            }
+            default: break;
+        }
     }
 
     void UpdateAI(const uint32 diff) override
@@ -816,7 +827,8 @@ struct boss_eranikusAI : public ScriptedAI
                     break;
                 case 50:
                     // Summon Tyrande - she enters the fight this time
-                    m_creature->SummonCreature(NPC_TYRANDE_WHISPERWIND, tyrandeLocations[0].m_fX, tyrandeLocations[0].m_fY, tyrandeLocations[0].m_fZ, 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
+                    if (Creature* tyrande = m_creature->SummonCreature(NPC_TYRANDE_WHISPERWIND, tyrandeLocations[0].m_fX, tyrandeLocations[0].m_fY, tyrandeLocations[0].m_fZ, 0, TEMPSPAWN_CORPSE_DESPAWN, 0))
+                        tyrande->Mount(PRIESTESS_MOUNT_ID);
                     m_healthCheck = 35;
                     break;
                 case 35:
