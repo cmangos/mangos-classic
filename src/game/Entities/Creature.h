@@ -153,9 +153,9 @@ struct CreatureInfo
     uint32  VendorTemplateId;
     uint32  GossipMenuId;
     VisibilityDistanceType visibilityDistanceType;
+    uint32  CorpseDelay;
     uint32  EquipmentTemplateId;
     uint32  Civilian;
-    uint32  CorpseDelay;
     char const* AIName;
     uint32  ScriptID;
 
