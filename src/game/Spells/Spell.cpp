@@ -1952,7 +1952,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
         case TARGET_UNIT_NEAR_CASTER:
         {
             m_targets.m_targetMask = 0;
-            float max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
+            float max_range = radius + unMaxTargets * m_jumpRadius;
 
             UnitList tempTargetUnitMap;
 
@@ -2371,7 +2371,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
 
             if (targetingData.chainTargetCount[effIndex] > 1)
             {
-                float max_range = targetingData.chainTargetCount[effIndex] * CHAIN_SPELL_JUMP_RADIUS;
+                float max_range = targetingData.chainTargetCount[effIndex] * m_jumpRadius;
                 Group* group = nullptr;
 
                 //if target and caster are members in the same group then apply member only filtering
@@ -2410,7 +2410,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 }
 
                 UnitList tempAoeList;
-                MaNGOS::AnyFriendlyOrGroupMemberUnitInUnitRangeCheck u_check(m_caster, group, m_spellInfo, max_range);
+                MaNGOS::AnyFriendlyOrGroupMemberUnitInUnitRangeCheck u_check(m_caster, unitTarget, group, m_spellInfo, max_range);
                 MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyOrGroupMemberUnitInUnitRangeCheck> searcher(tempAoeList, u_check);
                 Cell::VisitAllObjects(m_caster, searcher, max_range);
                 tempAoeList.erase(std::remove(tempAoeList.begin(), tempAoeList.end(), unitTarget), tempAoeList.end());

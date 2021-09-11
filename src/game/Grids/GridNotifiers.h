@@ -928,12 +928,12 @@ namespace MaNGOS
     class AnyFriendlyOrGroupMemberUnitInUnitRangeCheck
     {
         public:
-            AnyFriendlyOrGroupMemberUnitInUnitRangeCheck(Unit const* obj, Group const* group, SpellEntry const* spellInfo, float range)
-                : i_group(group), i_obj(obj), i_spellInfo(spellInfo), i_range(range) {}
+            AnyFriendlyOrGroupMemberUnitInUnitRangeCheck(Unit const* obj, Unit const* target, Group const* group, SpellEntry const* spellInfo, float range)
+                : i_group(group), i_obj(obj), i_target(target), i_spellInfo(spellInfo), i_range(range) {}
             Unit const& GetFocusObject() const { return *i_obj; }
             bool operator()(Unit* u)
             {
-                if (!u->IsAlive() || !i_obj->IsWithinDistInMap(u, i_range) || !i_obj->CanAssistSpell(u, i_spellInfo))
+                if (!u->IsAlive() || !i_target->IsWithinDistInMap(u, i_range) || !i_obj->CanAssistSpell(u, i_spellInfo))
                     return false;
 
                 //if group is defined then we apply group members only filtering
@@ -982,6 +982,7 @@ namespace MaNGOS
         private:
             Group const* i_group;
             Unit const* i_obj;
+            Unit const* i_target;
             SpellEntry const* i_spellInfo;
             float i_range;
     };
