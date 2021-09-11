@@ -145,7 +145,7 @@ enum UnitBytes2Offsets : uint8
     UNIT_BYTES_2_OFFSET_UNKNOWN      = 3, // shapeshift form in tbc
 };
 
-// byte value (UNIT_FIELD_BYTES_1,0)
+// byte value (UNIT_FIELD_BYTES_1,UNIT_BYTES_1_OFFSET_STAND_STATE)
 enum UnitStandStateType
 {
     UNIT_STAND_STATE_STAND             = 0,
