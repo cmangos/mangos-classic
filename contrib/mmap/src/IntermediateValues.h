@@ -35,9 +35,10 @@ namespace MMAP
         rcContourSet* contours;
         rcPolyMesh* polyMesh;
         rcPolyMeshDetail* polyMeshDetail;
+        const char* m_workdir;
 
-        IntermediateValues() :  compactHeightfield(NULL), heightfield(NULL),
-            contours(NULL), polyMesh(NULL), polyMeshDetail(NULL) {}
+        IntermediateValues();
+        IntermediateValues(const char* workdir);
         ~IntermediateValues();
 
         void writeIV(uint32 mapID, uint32 tileX, uint32 tileY);

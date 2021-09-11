@@ -29,7 +29,7 @@
 
 namespace MMAP
 {
-    TerrainBuilder::TerrainBuilder(bool skipLiquid) : m_skipLiquid(skipLiquid) { }
+    TerrainBuilder::TerrainBuilder(bool skipLiquid, const char* workdir) : m_skipLiquid(skipLiquid), m_workdir(workdir) { }
     TerrainBuilder::~TerrainBuilder() { }
 
     /**************************************************************************/
@@ -81,7 +81,7 @@ namespace MMAP
     bool TerrainBuilder::loadMap(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData, Spot portion)
     {
         char mapFileName[255];
-        sprintf(mapFileName, "maps/%03u%02u%02u.map", mapID, tileY, tileX);
+        sprintf(mapFileName, "%s/maps/%03u%02u%02u.map", m_workdir, mapID, tileY, tileX);
 
         FILE* mapFile = fopen(mapFileName, "rb");
         if (!mapFile)
@@ -558,8 +558,10 @@ namespace MMAP
     /**************************************************************************/
     bool TerrainBuilder::loadVMap(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData)
     {
+        char vmaps_dir[1024];
         IVMapManager* vmapManager = new VMapManager2();
-        VMAPLoadResult result = vmapManager->loadMap("vmaps", mapID, tileX, tileY);
+        sprintf(vmaps_dir, "%s/vmaps", m_workdir);
+        VMAPLoadResult result = vmapManager->loadMap(vmaps_dir, mapID, tileX, tileY);
         bool retval = false;
 
         do

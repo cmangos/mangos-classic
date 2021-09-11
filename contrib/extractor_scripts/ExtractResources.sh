@@ -11,6 +11,9 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 ## Expected param 1 to be 'a' for all, else ask some questions
+## optionally param 1 or param 2 is the path to game client
+
+PREFIX="$(dirname $0)"
 
 ## Normal log file (if not overwritten by second param)
 LOG_FILE="MaNGOSExtractor.log"
@@ -77,11 +80,33 @@ else
   fi
 fi
 
+if [ "$1" != "a" ] && [ "x$1" != "x" ] && [ -d "$1" ]
+then
+  CLIENT_PATH="$1"
+  OUTPUT_PATH="$2"
+elif [ "x$2" != "x" ] && [ -d "$2" ]
+then
+  CLIENT_PATH="$2"
+  OUTPUT_PATH=$3
+fi
+
+if [ "x$CLIENT_PATH" != "x" ]
+then
+  AD_OPT_RES="-i $CLIENT_PATH"
+  VMAP_OPT_RES="-d $CLIENT_PATH/Data"
+fi
+
+if [ "x$OUTPUT_PATH" != "x" ] && [ -d "$OUTPUT_PATH" ]
+then
+  AD_OPT_RES="$AD_OPT_RES -o $OUTPUT_PATH"
+  VMAP_OPT_RES="$VMAP_OPT_RES -o $OUTPUT_PATH"
+fi
+
 ## Special case: Only reextract offmesh tiles
 if [ "$USE_MMAPS_OFFMESH" = "1" ]
 then
   echo "Only extracting offmesh tiles"
-  MoveMapGen.sh offmesh $LOG_FILE $DETAIL_LOG_FILE
+  $PREFIX/MoveMapGen.sh offmesh "$OUTPUT_PATH" $LOG_FILE $DETAIL_LOG_FILE
   exit 0
 fi
 
@@ -189,7 +214,7 @@ echo | tee -a $DETAIL_LOG_FILE
 if [ "$USE_AD" = "1" ]
 then
  echo "$(date): Start extraction of DBCs and map files..." | tee -a $LOG_FILE
- ./ad $AD_RES | tee -a $DETAIL_LOG_FILE
+ $PREFIX/ad $AD_RES $AD_OPT_RES | tee -a $DETAIL_LOG_FILE
  echo "$(date): Extracting of DBCs and map files finished" | tee -a $LOG_FILE
  echo | tee -a $LOG_FILE
  echo | tee -a $DETAIL_LOG_FILE
@@ -199,11 +224,11 @@ fi
 if [ "$USE_VMAPS" = "1" ]
 then
   echo "$(date): Start extraction of vmaps..." | tee -a $LOG_FILE
-  ./vmap_extractor $VMAP_RES | tee -a $DETAIL_LOG_FILE
+  $PREFIX/vmap_extractor $VMAP_RES $VMAP_OPT_RES | tee -a $DETAIL_LOG_FILE
   echo "$(date): Extracting of vmaps finished" | tee -a $LOG_FILE
-  mkdir vmaps
+  mkdir ${OUTPUT_PATH:-.}/vmaps
   echo "$(date): Start assembling of vmaps..." | tee -a $LOG_FILE
-  ./vmap_assembler Buildings vmaps | tee -a $DETAIL_LOG_FILE
+  $PREFIX/vmap_assembler ${OUTPUT_PATH:-.}/Buildings ${OUTPUT_PATH:-.}/vmaps | tee -a $DETAIL_LOG_FILE
   echo "$(date): Assembling of vmaps finished" | tee -a $LOG_FILE
 
   echo | tee -a $LOG_FILE
@@ -218,5 +243,5 @@ then
     echo "Current time: $(date)"
     sleep $USE_MMAPS_DELAY
   fi
-  sh MoveMapGen.sh "maps" $LOG_FILE $DETAIL_LOG_FILE $NUM_THREAD
+  sh MoveMapGen.sh "maps" "$OUTPUT_PATH" $LOG_FILE $DETAIL_LOG_FILE $NUM_THREAD
 fi

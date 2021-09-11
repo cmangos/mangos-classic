@@ -38,7 +38,8 @@ enum ModelFlags
 
 struct WMODoodadData;
 
-extern const char* szWorkDirWmo;
+const int path_l = 1024;
+extern char szWorkDirWmo[path_l + 512];
 extern const char* szRawVMAPMagic;                          // vmap magic string for extracted raw vmap data
 extern std::unordered_map<std::string, WMODoodadData> WmoDoodads;
 
