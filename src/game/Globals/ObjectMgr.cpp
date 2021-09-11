@@ -7819,10 +7819,6 @@ inline void _DoStringError(int32 entry, char const* text, ...)
         sLog.outErrorScriptLib("%s", buf);
     else if (entry <= MIN_CREATURE_AI_TEXT_STRING_ID)       // eventAI error
         sLog.outErrorEventAI("%s", buf);
-    else if (entry < MIN_DB_SCRIPT_STRING_ID)               // mangos string error
-        sLog.outError("%s", buf);
-    else // if (entry > MIN_DB_SCRIPT_STRING_ID)            // DB script text error
-        sLog.outErrorDb("DB-SCRIPTS: %s", buf);
 }
 
 bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min_value, int32 max_value, bool extra_content)
@@ -9152,14 +9148,6 @@ void ObjectMgr::GetAreaTriggerLocales(uint32 entry, int32 loc_idx, std::string* 
 // Functions for scripting access
 bool LoadMangosStrings(DatabaseType& db, char const* table, int32 start_value, int32 end_value, bool extra_content)
 {
-    // MAX_DB_SCRIPT_STRING_ID is max allowed negative value for scripts (scrpts can use only more deep negative values
-    // start/end reversed for negative values
-    if (start_value > MAX_DB_SCRIPT_STRING_ID || end_value >= start_value)
-    {
-        sLog.outErrorDb("Table '%s' attempt loaded with reserved by mangos range (%d - %d), strings not loaded.", table, start_value, end_value + 1);
-        return false;
-    }
-
     return sObjectMgr.LoadMangosStrings(db, table, start_value, end_value, extra_content);
 }
 

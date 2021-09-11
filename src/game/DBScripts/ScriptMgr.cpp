@@ -255,17 +255,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                         sLog.outErrorDb("Table `%s` has invalid talk text id (dataint = %i) in SCRIPT_COMMAND_TALK for script id %u", tablename, tmp.textId[0], tmp.id);
                         continue;
                     }
-
-                    for (int i = 0; i < MAX_TEXT_ID; ++i)
-                    {
-                        if (tmp.textId[i] && (tmp.textId[i] < MIN_DB_SCRIPT_STRING_ID || tmp.textId[i] >= MAX_DB_SCRIPT_STRING_ID))
-                        {
-                            sLog.outErrorDb("Table `%s` has out of range text_id%u (dataint = %i expected %u-%u) in SCRIPT_COMMAND_TALK for script id %u", tablename, i + 1, tmp.textId[i], MIN_DB_SCRIPT_STRING_ID, MAX_DB_SCRIPT_STRING_ID, tmp.id);
-                        }
-                    }
                 }
-
-                // if (!GetMangosStringLocale(tmp.dataint)) will be checked after dbscript_string loading
                 break;
             }
             case SCRIPT_COMMAND_EMOTE:                      // 1
@@ -973,31 +963,19 @@ void ScriptMgr::LoadRelayScripts()
 
 void ScriptMgr::LoadDbScriptStrings()
 {
-    // load both dbscript_strings and creature_ai_texts here because either may be referenced by dbscript_random_templates
-    sObjectMgr.LoadMangosStrings(WorldDatabase, "dbscript_string", MIN_DB_SCRIPT_STRING_ID, MAX_DB_SCRIPT_STRING_ID, true);
+    // load creature_ai_texts here because it may be referenced by dbscript_random_templates
     sObjectMgr.LoadMangosStrings(WorldDatabase, "creature_ai_texts", MIN_CREATURE_AI_TEXT_STRING_ID, MAX_CREATURE_AI_TEXT_STRING_ID, true);
 
-    std::set<int32> ids;
-
-    for (int32 i = MIN_DB_SCRIPT_STRING_ID; i < MAX_DB_SCRIPT_STRING_ID; ++i)
-        if (sObjectMgr.GetMangosStringLocale(i))
-            ids.insert(i);
-
-    CheckRandomStringTemplates(ids);
-
-    CheckScriptTexts(sQuestEndScripts, ids);
-    CheckScriptTexts(sQuestStartScripts, ids);
-    CheckScriptTexts(sSpellScripts, ids);
-    CheckScriptTexts(sGameObjectScripts, ids);
-    CheckScriptTexts(sGameObjectTemplateScripts, ids);
-    CheckScriptTexts(sEventScripts, ids);
-    CheckScriptTexts(sGossipScripts, ids);
-    CheckScriptTexts(sCreatureDeathScripts, ids);
-    CheckScriptTexts(sCreatureMovementScripts, ids);
-    CheckScriptTexts(sRelayScripts, ids);
-
-    for (int32 id : ids)
-    sLog.outErrorDb("Table `dbscript_string` has unused string id %u", id);
+    CheckScriptTexts(sQuestEndScripts);
+    CheckScriptTexts(sQuestStartScripts);
+    CheckScriptTexts(sSpellScripts);
+    CheckScriptTexts(sGameObjectScripts);
+    CheckScriptTexts(sGameObjectTemplateScripts);
+    CheckScriptTexts(sEventScripts);
+    CheckScriptTexts(sGossipScripts);
+    CheckScriptTexts(sCreatureDeathScripts);
+    CheckScriptTexts(sCreatureMovementScripts);
+    CheckScriptTexts(sRelayScripts);
 }
 
 void ScriptMgr::LoadDbScriptRandomTemplates()
@@ -1047,7 +1025,7 @@ void ScriptMgr::CheckRandomRelayTemplates()
                 sLog.outErrorDb("Table `dbscript_random_templates` entry (%u) uses nonexistent relay ID (%u).", templateData.first, data.first);
 }
 
-void ScriptMgr::CheckScriptTexts(ScriptMapMapName const& scripts, std::set<int32>& ids)
+void ScriptMgr::CheckScriptTexts(ScriptMapMapName const& scripts)
 {
     for (ScriptMapMap::const_iterator itrMM = scripts.second.begin(); itrMM != scripts.second.end(); ++itrMM)
     {
@@ -1057,11 +1035,8 @@ void ScriptMgr::CheckScriptTexts(ScriptMapMapName const& scripts, std::set<int32
             {
                 for (int i : itrM->second.textId)
                 {
-                    if (i && !sObjectMgr.GetMangosStringLocale(i))
-                        sLog.outErrorDb("Table `dbscript_string` is missing string id %u, used in database script table %s id %u.", i, scripts.first, itrMM->first);
-
-                    if (ids.find(i) != ids.end())
-                        ids.erase(i);
+                    if (i && !sObjectMgr.GetBroadcastText(i))
+                        sLog.outErrorDb("Table `broadcast_text` is missing string id %u, used in database script table %s id %u.", i, scripts.first, itrMM->first);
                 }
 
                 if (itrM->second.talk.stringTemplateId)
@@ -1069,8 +1044,10 @@ void ScriptMgr::CheckScriptTexts(ScriptMapMapName const& scripts, std::set<int32
                     auto& vector = m_scriptTemplates[STRING_TEMPLATE][itrM->second.talk.stringTemplateId];
                     for (auto& data : vector)
                     {
-                        if (!sObjectMgr.GetMangosStringLocale(data.first))
-                            sLog.outErrorDb("Table `%s` is missing string id %d, used in database script template table dbscript_random_templates id %u.", itrM->second.talk.stringTemplateId > 0 ? "dbscript_string" : "creature_ai_texts", data.first, itrM->second.talk.stringTemplateId);
+                        if (data.first < 0 && !sObjectMgr.GetMangosStringLocale(data.first))
+                            sLog.outErrorDb("Table `creature_ai_texts` is missing string id %d, used in database script template table dbscript_random_templates id %u.", data.first, itrM->second.talk.stringTemplateId);
+                        else if (data.first > 0 && !sObjectMgr.GetBroadcastText(data.first))
+                            sLog.outErrorDb("Table `broadcast_text` is missing string id %d, used in database script template table dbscript_random_templates id %u.", data.first, itrM->second.talk.stringTemplateId);
                     }
                 }
             }

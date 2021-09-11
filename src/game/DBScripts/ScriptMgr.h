@@ -35,7 +35,7 @@ struct SpellEntry;
 enum ScriptCommand                                          // resSource, resTarget are the resulting Source/ Target after buddy search is done
 {
     SCRIPT_COMMAND_TALK                     = 0,            // resSource = WorldObject, resTarget = Unit/none
-    // dataint = text entry from dbscript_string -table. dataint2-4 optional for random selected texts.
+    // dataint = text id from broadcast_text table. dataint2-4 optional for random selected texts.
     SCRIPT_COMMAND_EMOTE                    = 1,            // resSource = Unit, resTarget = Unit/none
     // datalong1 = emote_id, dataint1-4 optional for random selected emotes
     SCRIPT_COMMAND_FIELD_SET                = 2,            // source = any, datalong = field_id, datalong2 = value
@@ -659,7 +659,7 @@ class ScriptMgr
 
     private:
         void LoadScripts(ScriptMapMapName& scripts, const char* tablename);
-        void CheckScriptTexts(ScriptMapMapName const& scripts, std::set<int32>& ids);
+        void CheckScriptTexts(ScriptMapMapName const& scripts);
 
         typedef std::vector<std::string> ScriptNameMap;
         typedef std::unordered_map<uint32, uint32> AreaTriggerScriptMap;

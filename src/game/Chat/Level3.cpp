@@ -255,7 +255,6 @@ bool ChatHandler::HandleReloadAllScriptsCommand(char* /*args*/)
     HandleReloadDBScriptsOnSpellCommand((char*)"a");
     HandleReloadDBScriptsOnRelayCommand((char*)"a");
     SendGlobalSysMessage("DB tables `*_scripts` reloaded.");
-    HandleReloadDbScriptStringCommand((char*)"a");
     return true;
 }
 
@@ -792,14 +791,6 @@ bool ChatHandler::HandleReloadEventAIScriptsCommand(char* /*args*/)
     sLog.outString("Re-Loading Scripts from `creature_ai_scripts`...");
     sEventAIMgr.LoadCreatureEventAI_Scripts();
     SendGlobalSysMessage("DB table `creature_ai_scripts` reloaded.");
-    return true;
-}
-
-bool ChatHandler::HandleReloadDbScriptStringCommand(char* /*args*/)
-{
-    sLog.outString("Re-Loading Script strings from `dbscript_string`...");
-    sScriptMgr.LoadDbScriptStrings();
-    SendGlobalSysMessage("DB table `dbscript_string` reloaded.");
     return true;
 }
 

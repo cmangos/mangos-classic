@@ -1110,7 +1110,5 @@ enum MangosStrings
     // Use for custom patches             11000-11999
 
     // NOT RESERVED IDS                   12000-1999999999
-    // `dbscript_string` table index     2000000000-2000999999 (MIN_DB_SCRIPT_STRING_ID-MAX_DB_SCRIPT_STRING_ID)
-    // For other tables maybe             2001000000-2147483647 (max index)
 };
 #endif
