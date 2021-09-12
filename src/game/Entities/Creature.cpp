@@ -1708,6 +1708,7 @@ void Creature::SetDeathState(DeathState s)
     {
         SetTargetGuid(ObjectGuid());                        // remove target selection in any cases (can be set at aura remove in Unit::SetDeathState)
         SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
+        Unmount();
 
         Unit::SetDeathState(CORPSE);
     }
