@@ -260,7 +260,6 @@ bool ChatHandler::HandleReloadAllScriptsCommand(char* /*args*/)
 
 bool ChatHandler::HandleReloadAllEventAICommand(char* /*args*/)
 {
-    HandleReloadEventAITextsCommand((char*)"a");
     HandleReloadEventAISummonsCommand((char*)"a");
     HandleReloadEventAIScriptsCommand((char*)"a");
     return true;
@@ -766,15 +765,6 @@ bool ChatHandler::HandleReloadBattleEventCommand(char* /*args*/)
     sLog.outString("Re-Loading BattleGround Eventindexes...");
     sBattleGroundMgr.LoadBattleEventIndexes();
     SendGlobalSysMessage("DB table `gameobject_battleground` and `creature_battleground` reloaded.");
-    return true;
-}
-
-bool ChatHandler::HandleReloadEventAITextsCommand(char* /*args*/)
-{
-
-    sLog.outString("Re-Loading Texts from `creature_ai_texts`...");
-    sEventAIMgr.LoadCreatureEventAI_Texts(true);
-    SendGlobalSysMessage("DB table `creature_ai_texts` reloaded.");
     return true;
 }
 

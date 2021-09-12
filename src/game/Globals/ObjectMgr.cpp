@@ -7815,10 +7815,7 @@ inline void _DoStringError(int32 entry, char const* text, ...)
     vsnprintf(buf, 256, text, ap);
     va_end(ap);
 
-    if (entry <= MAX_CREATURE_AI_TEXT_STRING_ID)            // script library error
-        sLog.outErrorScriptLib("%s", buf);
-    else if (entry <= MIN_CREATURE_AI_TEXT_STRING_ID)       // eventAI error
-        sLog.outErrorEventAI("%s", buf);
+    sLog.outError("%s", buf);
 }
 
 bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min_value, int32 max_value, bool extra_content)
