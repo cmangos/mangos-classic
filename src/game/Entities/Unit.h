@@ -134,7 +134,7 @@ enum UnitBytes1Offsets : uint8
     UNIT_BYTES_1_OFFSET_STAND_STATE     = 0,
     UNIT_BYTES_1_OFFSET_PET_LOYALTY     = 1,
     UNIT_BYTES_1_OFFSET_SHAPESHIFT_FORM = 2,
-    UNIT_BYTES_1_OFFSET_VIS_FLAG        = 3,
+    UNIT_BYTES_1_OFFSET_VIS_FLAGS       = 3,
 };
 
 enum UnitBytes2Offsets : uint8
@@ -174,10 +174,10 @@ enum UnitStandFlags
 // In wotlk+ they are moved to UNIT_FIELD_BYTES_1,2
 enum UnitVisFlags
 {
-    UNIT_BYTE1_FLAG_GHOST        = 0x01, // applied by SPELL_AURA_GHOST, but some ghost npcs who have invisibility aura instead still have it
-    UNIT_BYTE1_FLAG_CREEP        = 0x02, // applied by SPELL_AURA_MOD_STEALTH
-    UNIT_BYTE1_FLAG_UNTRACKABLE  = 0x04, // applied by SPELL_AURA_UNTRACKABLE
-    UNIT_BYTE1_FLAG_ALL          = 0xFF
+    UNIT_VIS_FLAG_GHOST          = 0x01, // applied by SPELL_AURA_GHOST, but some ghost npcs who have invisibility aura instead still have it
+    UNIT_VIS_FLAG_CREEP          = 0x02, // applied by SPELL_AURA_MOD_STEALTH
+    UNIT_VIS_FLAG_UNTRACKABLE    = 0x04, // applied by SPELL_AURA_UNTRACKABLE
+    UNIT_VIS_FLAGS_ALL           = 0xFF
 };
 
 // byte value (UNIT_FIELD_BYTES_2,0)
@@ -1479,6 +1479,9 @@ class Unit : public WorldObject
         bool IsStandState() const;
         bool IsSeatedState() const;
         void SetStandState(uint8 state, bool acknowledge = false);
+
+        void SetVisFlags(uint8 flags) { SetByteFlag(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_VIS_FLAGS, flags); }
+        void RemoveVisFlags(uint8 flags) { RemoveByteFlag(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_VIS_FLAGS, flags); }
 
         bool IsMounted() const { return !!GetMountID(); }
         uint32 GetMountID() const { return GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID); }
