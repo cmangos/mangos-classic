@@ -9037,9 +9037,8 @@ bool DoDisplayText(WorldObject* source, int32 entry, Unit const* target, uint32 
         if (bct->maleText.size() > 0 && !bct->maleText[DEFAULT_LOCALE].empty())
             content = bct->maleText;
     }
-    else
+    else if (MangosStringLocale const* data = sObjectMgr.GetMangosStringLocale(entry))
     {
-        MangosStringLocale const* data = sObjectMgr.GetMangosStringLocale(entry);
         lang = data->LanguageId;
         type = data->Type;
         sound = data->SoundId;
