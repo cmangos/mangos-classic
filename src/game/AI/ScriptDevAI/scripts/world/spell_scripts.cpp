@@ -203,6 +203,28 @@ struct ArcaneCloaking : public SpellScript
     }
 };
 
+enum SpellVisualKitFoodOrDrink
+{
+    SPELL_VISUAL_KIT_FOOD = 406,
+    SPELL_VISUAL_KIT_DRINK = 438
+};
+
+struct FoodAnimation : public AuraScript
+{
+    void OnHeartbeat(Aura* aura) const override
+    {
+        aura->GetTarget()->PlaySpellVisual(SPELL_VISUAL_KIT_FOOD);
+    }
+};
+
+struct DrinkAnimation : public AuraScript
+{
+    void OnHeartbeat(Aura* aura) const override
+    {
+        aura->GetTarget()->PlaySpellVisual(SPELL_VISUAL_KIT_DRINK);
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -214,4 +236,6 @@ void AddSC_spell_scripts()
     RegisterSpellScript<WondervoltTrap>("spell_wondervolt_trap");
     RegisterSpellScript<ArcaneCloaking>("spell_arcane_cloaking");
     RegisterAuraScript<GreaterInvisibilityMob>("spell_greater_invisibility_mob");
+    RegisterAuraScript<FoodAnimation>("spell_food_animation");
+    RegisterAuraScript<DrinkAnimation>("spell_drink_animation");
 }
