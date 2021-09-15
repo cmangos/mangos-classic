@@ -1594,9 +1594,6 @@ void Player::SetDeathState(DeathState s)
 
         clearResurrectRequestData();
 
-        // remove form before other mods to prevent incorrect stats calculation
-        RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
-
         if (Pet* pet = GetPet())
             RemovePet(pet->IsAlive() ? PET_SAVE_REAGENTS : PET_SAVE_AS_CURRENT);
 
