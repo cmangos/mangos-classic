@@ -112,10 +112,6 @@ INSERT INTO `spell_template` (`Id`, `Attributes`, `CastingTimeIndex`, `ProcChanc
 -- Razorgore - Destroy Egg - should not be affected by pushback and interrupt on damage
 UPDATE spell_template SET InterruptFlags=InterruptFlags&~0x12 WHERE Id IN(19873);
 
--- AQ40 - Huhuran - Wyvern Sting/Poison Bolt Volley - Max 10 targets
-UPDATE spell_template SET MaxAffectedTargets=10 WHERE Id IN(26180);
-UPDATE spell_template SET MaxAffectedTargets=15 WHERE Id IN(26052);
-
 -- Onyxia - Wing buffet is interruptible by things but shouldnt
 UPDATE spell_template SET InterruptFlags=0 WHERE Id IN(18500);
 
@@ -144,9 +140,6 @@ UPDATE spell_template SET AttributesEx=(AttributesEx&~0x00000040) WHERE id=29422
 
 -- Remove incorrect interrupt flag for Bellowing Roar spells used in various dragon encounters
 UPDATE spell_template SET InterruptFlags=0 WHERE Id IN (18431, 22686);
-
--- AQ40 - C'Thun - Summon Hook Tentacles - restricted to one target
-UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id=26398;
 
 UPDATE spell_template SET Attributes=320 WHERE id=28282; -- This makes Ashbringer passive aura icon invisible
 UPDATE spell_template SET AttributesEx=32, AttributesEx3=131072 WHERE id=28441; -- AB Effect 000, critters/neutral no longer attack
@@ -193,9 +186,6 @@ UPDATE `spell_template` SET `InterruptFlags` = `InterruptFlags`&~0x00000010 WHER
 -- Fix periodic trigger pet buffing item auras giving threat - this fix is evidenced by 28757 which already has it
 UPDATE spell_template SET AttributesEx=AttributesEx|1024 WHERE Id IN(21740,21921,21925,21927,20988,29233,27039,27042,27205,27208,18350,30023);
 
--- AQ40 - C'Thun - Summon Mouth Tentacles - restricted to one target
-UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id=26237;
-
 -- Wandering Plague (player version): as per parent spell tooltip should only targets friendly units, not every units nor self
 -- SPELL_ATTR_EX_CANT_TARGET_SELF + TARGET_UNIT_ENEMY_NEAR_CASTER (parent spell caster is hostile to player and player's friends)
 -- Note: could this be possibly handled through unimplemented SPELL_ATTR_EX_UNK11 ?
@@ -228,3 +218,15 @@ UPDATE `spell_template` SET `RangeIndex` = 0 WHERE `Id` IN (16613,16619,16630,16
 
 -- Toxic Gas - used by Garden Gas in Naxx, remove SPELL_ATTR_EX_CHANNELED_1 and CHANNEL_FLAG_MOVEMENT to prevent aura being removed
 UPDATE spell_template SET AttributesEx=0, ChannelInterruptFlags=0 WHERE Id=30074;
+
+-- MaxAffectedTargets
+UPDATE `spell_template` SET `MaxAffectedTargets` = 1 WHERE `Id` IN (
+26237, -- AQ40 - C'Thun - Summon Mouth Tentacles - restricted to one target
+26398 -- AQ40 - C'Thun - Summon Hook Tentacles - restricted to one target
+);
+
+-- AQ40 - Huhuran - Wyvern Sting/Poison Bolt Volley - Max 10 targets
+UPDATE `spell_template` SET `MaxAffectedTargets` = 10 WHERE `Id` = 26180;
+UPDATE `spell_template` SET `MaxAffectedTargets` = 15 WHERE `Id` = 26052;
+
+
