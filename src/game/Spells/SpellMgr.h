@@ -2002,7 +2002,7 @@ enum ProcFlags : uint32
 {
     PROC_FLAG_NONE                          = 0x00000000,
 
-    PROC_FLAG_HEARTBEAT                     = 0x00000001,   // 00 Killed by aggressor - TODO: change meaning
+    PROC_FLAG_HEARTBEAT                     = 0x00000001,   // 00 Heartbeat
     PROC_FLAG_KILL                          = 0x00000002,   // 01 Kill target (in most cases need XP/Honor reward, see Unit::IsTriggeredAtSpellProcEvent for additinoal check)
 
     PROC_FLAG_DEAL_MELEE_SWING              = 0x00000004,   // 02 Successful melee auto attack

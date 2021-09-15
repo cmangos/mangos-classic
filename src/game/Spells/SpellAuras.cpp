@@ -6240,6 +6240,13 @@ void Aura::OnPeriodicCalculateAmount(uint32& amount)
         script->OnPeriodicCalculateAmount(this, amount);
 }
 
+void Aura::OnHeartbeat()
+{
+    // TODO: move HB resist here
+    if (AuraScript* script = GetAuraScript())
+        script->OnHeartbeat(this);
+}
+
 void Aura::ForcePeriodicity(uint32 periodicTime)
 {
     if (periodicTime == 0)

@@ -845,7 +845,9 @@ class WorldObject : public Object
     public:
         virtual ~WorldObject() {}
 
-        virtual void Update(const uint32 /*diff*/) {}
+        virtual void Update(const uint32 /*diff*/);
+        virtual void Heartbeat() {}
+        virtual uint32 GetHeartbeatDuration() const { return 5000; }
 
         void _Create(uint32 guidlow, HighGuid guidhigh);
 
@@ -1163,6 +1165,7 @@ class WorldObject : public Object
 
         VisibilityData m_visibilityData;
 
+        ShortTimeTracker m_heartBeatTimer;
     private:
         Map* m_currMap;                                     // current object's Map location
 

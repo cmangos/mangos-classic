@@ -405,6 +405,11 @@ class UnitAI
          */
         virtual void OnLeash() {}
 
+        /*
+         * Notifies AI on object heartbeat
+         */
+        virtual void OnHeartbeat() {}
+
         void CheckForHelp(Unit* /*who*/, Unit* /*me*/, float /*dist*/);
         void DetectOrAttack(Unit* who);
         bool CanTriggerStealthAlert(Unit* who, float attackRadius) const;

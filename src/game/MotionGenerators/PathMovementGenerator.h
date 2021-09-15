@@ -83,7 +83,6 @@ class FixedPathMovementGenerator : public AbstractPathMovementGenerator
         bool m_flying;
         float m_speed;
         uint32 m_forcedMovement;
-        ShortTimeTracker m_flightSplineSyncTimer;
 };
 
 class TaxiMovementGenerator : public AbstractPathMovementGenerator

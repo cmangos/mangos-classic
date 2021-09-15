@@ -665,6 +665,7 @@ class GameObject : public WorldObject
         virtual bool Create(uint32 guidlow, uint32 name_id, Map* map, float x, float y, float z, float ang,
                     float rotation0 = 0.0f, float rotation1 = 0.0f, float rotation2 = 0.0f, float rotation3 = 0.0f, uint32 animprogress = GO_ANIMPROGRESS_DEFAULT, GOState go_state = GO_STATE_READY);
         void Update(const uint32 diff) override;
+        void Heartbeat() override;
         GameObjectInfo const* GetGOInfo() const;
 
         bool IsTransport() const;

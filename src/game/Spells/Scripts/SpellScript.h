@@ -112,7 +112,9 @@ struct AuraScript
     // called on periodic tick end
     virtual void OnPeriodicTickEnd(Aura* /*aura*/) const {}
     // called on persistent area aura dyngo lifetime end
-    virtual void OnPersistentAreaAuraEnd(DynamicObject* dynGo) const {}
+    virtual void OnPersistentAreaAuraEnd(DynamicObject* /*dynGo*/) const {}
+    // called on unit heartbeat
+    virtual void OnHeartbeat(Aura* /*aura*/) const {}
 };
 
 class SpellScriptMgr

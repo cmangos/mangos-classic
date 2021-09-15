@@ -910,6 +910,7 @@ class Player : public Unit
         bool Create(uint32 guidlow, const std::string& name, uint8 race, uint8 class_, uint8 gender, uint8 skin, uint8 face, uint8 hairStyle, uint8 hairColor, uint8 facialHair, uint8 outfitId);
 
         void Update(const uint32 diff) override;
+        void Heartbeat() override;
 
         static bool BuildEnumData(QueryResult* result,  WorldPacket& p_data);
 

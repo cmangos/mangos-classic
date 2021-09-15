@@ -1055,6 +1055,16 @@ void WorldObject::CleanupsBeforeDelete()
     RemoveFromWorld();
 }
 
+void WorldObject::Update(const uint32 diff)
+{
+    m_heartBeatTimer.Update(diff);
+    while (m_heartBeatTimer.Passed())
+    {
+        m_heartBeatTimer.Reset(m_heartBeatTimer.GetExpiry() + GetHeartbeatDuration());
+        Heartbeat();
+    }
+}
+
 void WorldObject::_Create(uint32 guidlow, HighGuid guidhigh)
 {
     Object::_Create(guidlow, 0, guidhigh);
