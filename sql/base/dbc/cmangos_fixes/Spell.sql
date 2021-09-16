@@ -219,14 +219,55 @@ UPDATE `spell_template` SET `RangeIndex` = 0 WHERE `Id` IN (16613,16619,16630,16
 -- Toxic Gas - used by Garden Gas in Naxx, remove SPELL_ATTR_EX_CHANNELED_1 and CHANNEL_FLAG_MOVEMENT to prevent aura being removed
 UPDATE spell_template SET AttributesEx=0, ChannelInterruptFlags=0 WHERE Id=30074;
 
+-- ==================
 -- MaxAffectedTargets
 UPDATE `spell_template` SET `MaxAffectedTargets` = 1 WHERE `Id` IN (
+802, -- Mutate Bug (AQ40, Emperor Vek'nilash)
+804, -- Explode Bug (AQ40, Emperor Vek'lor)
+23138, -- Gate of Shazzrah (MC, Shazzrah)
+23173, -- Brood Affliction (BWL, Chromaggus) - TODO: Remove along with rework
+23603, -- Wild Polymorph (BWL, Nefarian)
+24019, -- Axe Flurry (ZG - Gurubashi Axe Thrower)
+24150, -- Stinger Charge Primer (AQ20, Hive'Zara Stinger)
+24781, -- Dream Fog (Emerald Dragons)
+26080, -- Stinger Charge Primer (AQ40, Vekniss Stinger)
 26237, -- AQ40 - C'Thun - Summon Mouth Tentacles - restricted to one target
-26398 -- AQ40 - C'Thun - Summon Hook Tentacles - restricted to one target
+26398, -- AQ40 - C'Thun - Summon Hook Tentacles - restricted to one target
+26524, -- Sand Trap (AQ20 - Kurinnaxx)
+28415, -- Summon Type A Trigger (Naxxramas, Kel'Thuzad)
+28416, -- Summon Type B Trigger (Naxxramas, Kel'Thuzad)
+28417, -- Summon Type C Trigger (Naxxramas, Kel'Thuzad)
+28455, -- Summon Type D Trigger (Naxxramas, Kel'Thuzad)
+28560 -- Summon Blizzard (Naxx, Sapphiron)
 );
 
--- AQ40 - Huhuran - Wyvern Sting/Poison Bolt Volley - Max 10 targets
-UPDATE `spell_template` SET `MaxAffectedTargets` = 10 WHERE `Id` = 26180;
-UPDATE `spell_template` SET `MaxAffectedTargets` = 15 WHERE `Id` = 26052;
+UPDATE `spell_template` SET `MaxAffectedTargets` = 2 WHERE `Id` IN (
+10258, -- Awaken Vault Warder (Uldaman)
+28542 -- Life Drain (Naxx, Sapphiron)
+);
+
+UPDATE `spell_template` SET `MaxAffectedTargets` = 5 WHERE `Id` IN (
+29232 -- Fungal Bloom (Loatheb)
+);
+
+UPDATE `spell_template` SET `MaxAffectedTargets` = 6 WHERE `Id` IN (
+25676, -- Drain Mana (correct number has to be researched)
+25754 -- Drain Mana
+);
+
+UPDATE `spell_template` SET `MaxAffectedTargets` = 10 WHERE `Id` IN (
+26180, -- AQ40 - Huhuran - Wyvern Sting/Poison Bolt Volley - Max 10 targets
+28796, -- Poison Bolt Volley (Naxx, Faerlina)
+29213 -- Curse of the Plaguebringer (Naxx, Noth the Plaguebringer)
+);
+
+UPDATE `spell_template` SET `MaxAffectedTargets` = 12 WHERE `Id` IN (
+26457, -- Drain Mana (correct number has to be researched)
+26559 -- Drain Mana
+);
+
+UPDATE `spell_template` SET `MaxAffectedTargets` = 15 WHERE `Id` = 26052; -- Poison Bolt
+-- MaxAffectedTargets
+-- ==================
 
 

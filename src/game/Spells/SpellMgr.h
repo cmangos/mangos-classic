@@ -1374,65 +1374,6 @@ inline bool IsSpellRequiresRangedAP(SpellEntry const* spellInfo)
     return (spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && spellInfo->DmgClass != SPELL_DAMAGE_CLASS_MELEE);
 }
 
-inline uint32 GetAffectedTargets(SpellEntry const* spellInfo, WorldObject* caster)
-{
-    // custom target amount cases
-    switch (spellInfo->SpellFamilyName)
-    {
-        case SPELLFAMILY_GENERIC:
-        {
-            switch (spellInfo->Id)
-            {
-                case 802:                                   // Mutate Bug (AQ40, Emperor Vek'nilash)
-                case 804:                                   // Explode Bug (AQ40, Emperor Vek'lor)
-                case 23138:                                 // Gate of Shazzrah (MC, Shazzrah)
-                case 23173:                                 // Brood Affliction (BWL, Chromaggus) - TODO: Remove along with rework
-                case 24019:                                 // Axe Flurry (ZG - Gurubashi Axe Thrower)
-                case 24150:                                 // Stinger Charge Primer (AQ20, Hive'Zara Stinger)
-                case 24781:                                 // Dream Fog (Emerald Dragons)
-                case 26080:                                 // Stinger Charge Primer (AQ40, Vekniss Stinger)
-                case 26524:                                 // Sand Trap (AQ20 - Kurinnaxx)
-                case 28415:                                 // Summon Type A Trigger (Naxxramas, Kel'Thuzad)
-                case 28416:                                 // Summon Type B Trigger (Naxxramas, Kel'Thuzad)
-                case 28417:                                 // Summon Type C Trigger (Naxxramas, Kel'Thuzad)
-                case 28455:                                 // Summon Type D Trigger (Naxxramas, Kel'Thuzad)
-                case 28560:                                 // Summon Blizzard (Naxx, Sapphiron)
-                    return 1;
-                case 10258:                                 // Awaken Vault Warder (Uldaman)
-                case 28542:                                 // Life Drain (Naxx, Sapphiron)
-                    return 2;
-                case 29232:                                 // Fungal Bloom (Loatheb)
-                    return 5;
-                case 25676:                                 // Drain Mana (correct number has to be researched)
-                case 25754:
-                    return 6;
-                case 28796:                                 // Poison Bolt Volley (Naxx, Faerlina)
-                    return 10;
-                case 26457:                                 // Drain Mana (correct number has to be researched)
-                case 26559:
-                    return 12;
-                default: break;
-            }
-            break;
-        }
-        case SPELLFAMILY_MAGE:
-        {
-            switch (spellInfo->Id)
-            {
-                case 23603:                                 // Wild Polymorph (BWL, Nefarian)
-                    return 1;
-                default:
-                    break;
-            }
-            break;
-        }
-        default:
-            break;
-    }
-
-    return spellInfo->MaxAffectedTargets;
-}
-
 SpellCastResult GetErrorAtShapeshiftedCast(SpellEntry const* spellInfo, uint32 form);
 
 inline bool IsChanneledSpell(SpellEntry const* spellInfo)

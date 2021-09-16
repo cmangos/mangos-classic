@@ -454,7 +454,8 @@ Spell::Spell(WorldObject* caster, SpellEntry const* info, uint32 triggeredFlags,
 
     m_reflectable = IsReflectableSpell(m_spellInfo);
 
-    m_affectedTargetCount = GetAffectedTargets(m_spellInfo, caster);
+    m_affectedTargetCount = m_spellInfo->MaxAffectedTargets;
+
     m_jumpRadius = SpellTargetMgr::GetJumpRadius(m_spellInfo->Id);
     memcpy(m_filteringScheme, SpellTargetMgr::GetSpellTargetingData(m_spellInfo->Id).filteringScheme, sizeof(m_filteringScheme));
 
