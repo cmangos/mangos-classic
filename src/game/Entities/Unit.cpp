@@ -730,9 +730,14 @@ bool Unit::CanReachWithMeleeAttack(Unit const* pVictim, float flat_mod /*= 0.0f*
     // This check is not related to bounding radius
     float dx = GetPositionX() - pVictim->GetPositionX();
     float dy = GetPositionY() - pVictim->GetPositionY();
-    float dz = GetPositionZ() - pVictim->GetPositionZ();
 
-    return dx * dx + dy * dy + dz * dz < reach * reach;
+    if (IsPlayerControlled())
+    {
+        float dz = GetPositionZ() - pVictim->GetPositionZ();
+        return dx * dx + dy * dy + dz * dz < reach* reach;
+    }
+
+    return dx * dx + dy * dy < reach* reach;
 }
 
 void Unit::RemoveSpellsCausingAura(AuraType auraType)
