@@ -42,7 +42,7 @@ void LoadDatabase()
 * @param pSource Source of the text
 * @param pTarget Can be nullptr (depending on CHAT_TYPE of iTextEntry). Possible target for the text
 */
-void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
+void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget, uint32 chatTypeOverride)
 {
     if (!pSource)
     {
@@ -54,12 +54,35 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
     {
         script_error_log("DoScriptText with source entry %u (TypeId=%u, guid=%u) attempts to process text entry %i, but text entry must be negative.",
                          pSource->GetEntry(), pSource->GetTypeId(), pSource->GetGUIDLow(), iTextEntry);
-
         return;
     }
 
-    DoDisplayText(pSource, iTextEntry, pTarget);
-    // TODO - maybe add some call-stack like error output if above function returns false
+    DoDisplayText(pSource, iTextEntry, pTarget, chatTypeOverride);
+}
+
+/**
+* Function that does broadcast text
+*
+* @param iTextEntry Entry of the text
+* @param pSource Source of the text
+* @param pTarget Can be nullptr (depending on CHAT_TYPE of iTextEntry). Possible target for the text
+*/
+void DoBroadcastText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget, uint32 chatTypeOverride)
+{
+    if (!pSource)
+    {
+        script_error_log("DoScriptText entry %i, invalid Source pointer.", iTextEntry);
+        return;
+    }
+
+    if (iTextEntry <= 0)
+    {
+        script_error_log("DoBroadcastText with source entry %u (TypeId=%u, guid=%u) attempts to process text entry %i, but text entry must be positive.",
+                         pSource->GetEntry(), pSource->GetTypeId(), pSource->GetGUIDLow(), iTextEntry);
+        return;
+    }
+
+    DoDisplayText(pSource, iTextEntry, pTarget, chatTypeOverride);
 }
 
 /**

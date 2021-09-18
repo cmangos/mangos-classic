@@ -6885,7 +6885,7 @@ void ObjectMgr::LoadBroadcastText()
 {
     uint32 count = 0;
 
-    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Id, Text, Text1, LanguageID, EmoteID1, EmoteID2, EmoteID3, EmoteDelay1, EmoteDelay2, EmoteDelay3 FROM broadcast_text"));
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Id, Text, Text1, ChatTypeID, LanguageID, SoundEntriesID1, EmoteID1, EmoteID2, EmoteID3, EmoteDelay1, EmoteDelay2, EmoteDelay3 FROM broadcast_text"));
 
     if (!result)
     {
@@ -6912,13 +6912,15 @@ void ObjectMgr::LoadBroadcastText()
 
         bct.maleText[DEFAULT_LOCALE] = fields[1].GetCppString();
         bct.femaleText[DEFAULT_LOCALE] = fields[2].GetCppString();
-        bct.languageId = Language(fields[3].GetUInt32());
-        bct.emoteIds[0] = fields[4].GetUInt32();
-        bct.emoteIds[1] = fields[5].GetUInt32();
-        bct.emoteIds[2] = fields[6].GetUInt32();
-        bct.emoteDelays[0] = fields[7].GetUInt32();
-        bct.emoteDelays[1] = fields[8].GetUInt32();
-        bct.emoteDelays[2] = fields[9].GetUInt32();
+        bct.chatTypeId = ChatType(fields[3].GetUInt32());
+        bct.languageId = Language(fields[4].GetUInt32());
+        bct.soundId1 = fields[5].GetUInt32();
+        bct.emoteIds[0] = fields[6].GetUInt32();
+        bct.emoteIds[1] = fields[7].GetUInt32();
+        bct.emoteIds[2] = fields[8].GetUInt32();
+        bct.emoteDelays[0] = fields[9].GetUInt32();
+        bct.emoteDelays[1] = fields[10].GetUInt32();
+        bct.emoteDelays[2] = fields[11].GetUInt32();
 
         ++count;
     } while (result->NextRow());
@@ -9014,41 +9016,80 @@ GameObjectDataPair const* FindGOData::GetResult() const
     return i_anyData;
 }
 
-bool DoDisplayText(WorldObject* source, int32 entry, Unit const* target /*=nullptr*/)
+bool DoDisplayText(WorldObject* source, int32 entry, Unit const* target, uint32 chatTypeOverride)
 {
-    MangosStringLocale const* data = sObjectMgr.GetMangosStringLocale(entry);
+    uint32 sound, emote, type = 0;
+    Language lang = LANG_UNIVERSAL;
+    std::vector<std::string> content;
+    Gender sourceGender = source->IsUnit() ? (Gender)((Unit*)source)->getGender() : GENDER_NONE;
 
-    if (!data)
+    if (BroadcastText const* bct = sObjectMgr.GetBroadcastText(entry))
+    {
+        lang = bct->languageId;
+        type = bct->chatTypeId;
+        sound = bct->soundId1;
+        emote = bct->emoteIds[0];
+        content = bct->maleText;
+
+        if ((sourceGender == GENDER_FEMALE || sourceGender == GENDER_NONE) && !bct->femaleText[DEFAULT_LOCALE].empty() && bct->femaleText.size() > 0)
+            content = bct->femaleText;
+
+        if (bct->maleText.size() > 0 && !bct->maleText[DEFAULT_LOCALE].empty())
+            content = bct->maleText;
+    }
+    else
+    {
+        MangosStringLocale const* data = sObjectMgr.GetMangosStringLocale(entry);
+        lang = data->LanguageId;
+        type = data->Type;
+        sound = data->SoundId;
+        emote = data->Emote;
+        if (BroadcastText const* bct = data->broadcastText)
+        {
+            if ((sourceGender == GENDER_FEMALE || sourceGender == GENDER_NONE) && !bct->femaleText[DEFAULT_LOCALE].empty() && bct->femaleText.size() > 0)
+                content = bct->femaleText;
+
+            if (bct->maleText.size() > 0 && !bct->maleText[DEFAULT_LOCALE].empty())
+                content = bct->maleText;
+        }
+        else
+            content = data->Content;
+    }
+
+    if (chatTypeOverride > 0)
+        type = chatTypeOverride;
+
+    if (content.empty())
     {
         _DoStringError(entry, "DoScriptText with source %s could not find text entry %i.", source->GetGuidStr().c_str(), entry);
         return false;
     }
 
-    if (data->SoundId)
+    if (sound)
     {
-        switch (data->Type)
+        switch (type)
         {
             case CHAT_TYPE_ZONE_YELL:
             case CHAT_TYPE_ZONE_EMOTE:
-                source->PlayDirectSound(data->SoundId, PlayPacketParameters(PLAY_ZONE, source->GetZoneId()));
+                source->PlayDirectSound(sound, PlayPacketParameters(PLAY_ZONE, source->GetZoneId()));
                 break;
             case CHAT_TYPE_WHISPER:
             case CHAT_TYPE_BOSS_WHISPER:
                 // An error will be displayed for the text
                 if (target && target->GetTypeId() == TYPEID_PLAYER)
-                    source->PlayDirectSound(data->SoundId, PlayPacketParameters(PLAY_TARGET, (Player const*)target));
+                    source->PlayDirectSound(sound, PlayPacketParameters(PLAY_TARGET, (Player const*)target));
                 break;
             default:
-                source->PlayDirectSound(data->SoundId);
+                source->PlayDirectSound(sound);
                 break;
         }
     }
 
-    if (data->Emote)
+    if (emote)
     {
         if (source->GetTypeId() == TYPEID_UNIT || source->GetTypeId() == TYPEID_PLAYER)
         {
-            ((Unit*)source)->HandleEmote(data->Emote);
+            ((Unit*)source)->HandleEmote(emote);
         }
         else
         {
@@ -9057,12 +9098,12 @@ bool DoDisplayText(WorldObject* source, int32 entry, Unit const* target /*=nullp
         }
     }
 
-    if ((data->Type == CHAT_TYPE_WHISPER || data->Type == CHAT_TYPE_BOSS_WHISPER) && (!target || target->GetTypeId() != TYPEID_PLAYER))
+    if ((type == CHAT_TYPE_WHISPER || type == CHAT_TYPE_BOSS_WHISPER || type == CHAT_TYPE_PARTY) && (!target || target->GetTypeId() != TYPEID_PLAYER))
     {
-        _DoStringError(entry, "DoDisplayText entry %i cannot whisper without target unit (TYPEID_PLAYER).", entry);
+        _DoStringError(entry, "DoDisplayText entry %i cannot whisper/party chat without target unit (TYPEID_PLAYER).", entry);
         return false;
     }
 
-    source->MonsterText(data, target);
+    source->MonsterText(content, type, lang, target);
     return true;
 }

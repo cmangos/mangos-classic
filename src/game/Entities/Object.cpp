@@ -1717,20 +1717,15 @@ namespace MaNGOS
     class MonsterChatBuilder
     {
         public:
-            MonsterChatBuilder(WorldObject const& obj, ChatMsg msgtype, MangosStringLocale const* textData, Language language, Unit const* target)
-                : i_object(obj), i_msgtype(msgtype), i_textData(textData), i_language(language), i_target(target), m_gender(obj.IsUnit() ? Gender(static_cast<Unit const&>(obj).getGender()) : GENDER_MALE) {}
+            MonsterChatBuilder(WorldObject const& obj, ChatMsg msgtype, std::vector<std::string> content, Language language, Unit const* target)
+                : i_object(obj), i_msgtype(msgtype), i_content(content), i_language(language), i_target(target) {}
             void operator()(WorldPacket& data, int32 loc_idx)
             {
                 char const* text = nullptr;
-                if (BroadcastText const* bct = i_textData->broadcastText)
-                    text = bct->GetText(loc_idx, m_gender).data();
+                if ((int32)i_content.size() > loc_idx + 1 && !i_content[loc_idx + 1].empty())
+                    text = i_content[loc_idx + 1].c_str();
                 else
-                {
-                    if ((int32)i_textData->Content.size() > loc_idx + 1 && !i_textData->Content[loc_idx + 1].empty())
-                        text = i_textData->Content[loc_idx + 1].c_str();
-                    else
-                        text = i_textData->Content[0].c_str();
-                }
+                    text = i_content[0].c_str();
 
                 ChatHandler::BuildChatPacket(data, i_msgtype, text, i_language, CHAT_TAG_NONE, i_object.GetObjectGuid(), i_object.GetNameForLocaleIdx(loc_idx),
                                              i_target ? i_target->GetObjectGuid() : ObjectGuid(), i_target ? i_target->GetNameForLocaleIdx(loc_idx) : "");
@@ -1739,48 +1734,43 @@ namespace MaNGOS
         private:
             WorldObject const& i_object;
             ChatMsg i_msgtype;
-            MangosStringLocale const* i_textData;
+            std::vector<std::string> i_content;
             Language i_language;
             Unit const* i_target;
-            Gender m_gender;
     };
 }                                                           // namespace MaNGOS
 
 /// Helper function to create localized around a source
-void _DoLocalizedTextAround(WorldObject const* source, MangosStringLocale const* textData, ChatMsg msgtype, Language language, Unit const* target, float range)
+void _DoLocalizedTextAround(WorldObject const* source, std::vector<std::string> content, ChatMsg msgtype, Language language, Unit const* target, float range)
 {
-    MaNGOS::MonsterChatBuilder say_build(*source, msgtype, textData, language, target);
+    MaNGOS::MonsterChatBuilder say_build(*source, msgtype, content, language, target);
     MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder> say_do(say_build);
     MaNGOS::CameraDistWorker<MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder> > say_worker(source, range, say_do);
     Cell::VisitWorldObjects(source, say_worker, range);
 }
 
-/// Function that sends a text associated to a MangosString
-void WorldObject::MonsterText(MangosStringLocale const* textData, Unit const* target) const
+/// Function that sends a text associated to a MangosString or BroadcastText
+void WorldObject::MonsterText(std::vector<std::string> content, uint32 type, Language lang, Unit const* target) const
 {
-    MANGOS_ASSERT(textData);
-
-    Language languageId = textData->broadcastText ? textData->broadcastText->languageId : textData->LanguageId;
-
-    switch (textData->Type)
+    switch (type)
     {
         case CHAT_TYPE_SAY:
-            _DoLocalizedTextAround(this, textData, CHAT_MSG_MONSTER_SAY, languageId, target, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY));
+            _DoLocalizedTextAround(this, content, CHAT_MSG_MONSTER_SAY, lang, target, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY));
             break;
         case CHAT_TYPE_YELL:
-            _DoLocalizedTextAround(this, textData, CHAT_MSG_MONSTER_YELL, languageId, target, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_YELL));
+            _DoLocalizedTextAround(this, content, CHAT_MSG_MONSTER_YELL, lang, target, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_YELL));
             break;
         case CHAT_TYPE_TEXT_EMOTE:
-            _DoLocalizedTextAround(this, textData, CHAT_MSG_MONSTER_EMOTE, LANG_UNIVERSAL, target, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_TEXTEMOTE));
+            _DoLocalizedTextAround(this, content, CHAT_MSG_MONSTER_EMOTE, LANG_UNIVERSAL, target, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_TEXTEMOTE));
             break;
         case CHAT_TYPE_BOSS_EMOTE:
-            _DoLocalizedTextAround(this, textData, CHAT_MSG_RAID_BOSS_EMOTE, LANG_UNIVERSAL, target, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_YELL));
+            _DoLocalizedTextAround(this, content, CHAT_MSG_RAID_BOSS_EMOTE, LANG_UNIVERSAL, target, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_YELL));
             break;
         case CHAT_TYPE_WHISPER:
         {
             if (!target || target->GetTypeId() != TYPEID_PLAYER)
                 return;
-            MaNGOS::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_WHISPER, textData, LANG_UNIVERSAL, target);
+            MaNGOS::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_WHISPER, content, LANG_UNIVERSAL, target);
             MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder> say_do(say_build);
             say_do((Player*)target);
             break;
@@ -1789,14 +1779,14 @@ void WorldObject::MonsterText(MangosStringLocale const* textData, Unit const* ta
         {
             if (!target || target->GetTypeId() != TYPEID_PLAYER)
                 return;
-            MaNGOS::MonsterChatBuilder say_build(*this, CHAT_MSG_RAID_BOSS_WHISPER, textData, LANG_UNIVERSAL, target);
+            MaNGOS::MonsterChatBuilder say_build(*this, CHAT_MSG_RAID_BOSS_WHISPER, content, LANG_UNIVERSAL, target);
             MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder> say_do(say_build);
             say_do((Player*)target);
             break;
         }
         case CHAT_TYPE_ZONE_YELL:
         {
-            MaNGOS::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_YELL, textData, languageId, target);
+            MaNGOS::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_YELL, content, lang, target);
             MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder> say_do(say_build);
             uint32 zoneId = GetZoneId();
             GetMap()->ExecuteMapWorkerZone(zoneId, std::bind(&MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder>::operator(), &say_do, std::placeholders::_1));
@@ -1804,10 +1794,31 @@ void WorldObject::MonsterText(MangosStringLocale const* textData, Unit const* ta
         }
         case CHAT_TYPE_ZONE_EMOTE:
         {
-            MaNGOS::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_EMOTE, textData, languageId, target);
+            MaNGOS::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_EMOTE, content, lang, target);
             MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder> say_do(say_build);
             uint32 zoneId = GetZoneId();
             GetMap()->ExecuteMapWorkerZone(zoneId, std::bind(&MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder>::operator(), &say_do, std::placeholders::_1));
+            break;
+        }
+        case CHAT_TYPE_PARTY:
+        {
+            if (!target || target->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            if (Group* group = ((Player*)target)->GetGroup())
+            {
+                for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+                {
+                    Player* groupMember = itr->getSource();
+
+                    if (!groupMember)
+                        continue;
+
+                    MaNGOS::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_PARTY, content, LANG_UNIVERSAL, groupMember);
+                    MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder> say_do(say_build);
+                    say_do(groupMember);
+                }
+            }
             break;
         }
     }

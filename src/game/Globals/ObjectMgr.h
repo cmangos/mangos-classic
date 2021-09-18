@@ -86,11 +86,12 @@ struct BroadcastText
     uint32 Id;
     std::vector<std::string> maleText;
     std::vector<std::string> femaleText;
+    ChatType chatTypeId; // not contained in SMSG_DB_REPLY, but added here for ease of use
     Language languageId;
     // uint32 conditionId;
     // uint32 emotesId;
     // uint32 flags;
-    // uint32 soundId1;
+    uint32 soundId1;
     // uint32 soundId2;
     uint32 emoteIds[3];
     uint32 emoteDelays[3];
@@ -1304,7 +1305,7 @@ class ObjectMgr
 #define sObjectMgr MaNGOS::Singleton<ObjectMgr>::Instance()
 
 /// generic text function
-bool DoDisplayText(WorldObject* source, int32 entry, Unit const* target = nullptr);
+bool DoDisplayText(WorldObject* source, int32 entry, Unit const* target = nullptr, uint32 chatTypeOverride = 0);
 
 // scripting access functions
 bool LoadMangosStrings(DatabaseType& db, char const* table, int32 start_value = MAX_CREATURE_AI_TEXT_STRING_ID, int32 end_value = std::numeric_limits<int32>::min(), bool extra_content = false);
