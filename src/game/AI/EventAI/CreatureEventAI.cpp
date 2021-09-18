@@ -2103,6 +2103,7 @@ CanCastResult CreatureEventAI::DoCastSpellIfCan(Unit* target, uint32 spellId, ui
                 {
                     case CAST_FAIL_POWER:
                     case CAST_FAIL_TOO_CLOSE:
+                    case CAST_FAIL_CAST_PREVENTED:
                         SetCurrentRangedMode(false);
                         break;
                     case CAST_OK:

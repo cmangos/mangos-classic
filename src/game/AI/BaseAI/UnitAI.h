@@ -53,6 +53,7 @@ enum CanCastResult
     CAST_FAIL_NOT_IN_LOS        = 8,
     CAST_FAIL_COOLDOWN          = 9,
     CAST_FAIL_EVADE             = 10,
+    CAST_FAIL_CAST_PREVENTED    = 11,
 };
 
 enum CastFlags
