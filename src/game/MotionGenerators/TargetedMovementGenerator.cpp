@@ -277,8 +277,16 @@ void ChaseMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& t
             if (this->i_offset == 0.f)
             {
                 if (!owner.CanReachWithMeleeAttack(this->i_target.getTarget()))
+                {
                     if (!i_target->IsFalling())
                         m_reachable = false;
+                }
+                else if (this->i_target->IsFlying() && !owner.CanFly())
+                {
+                    // if npc cant fly and target flies too high up, need to evade
+                    if (owner.GetDistanceZ(this->i_target.getTarget()) > CREATURE_Z_ATTACK_RANGE_MELEE)
+                        m_reachable = false;
+                }
             }
             else
             {
