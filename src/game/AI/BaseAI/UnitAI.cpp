@@ -212,6 +212,9 @@ CanCastResult UnitAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 cast
                     case SPELL_FAILED_PACIFIED:
                     case SPELL_FAILED_SILENCED:
                         return CAST_FAIL_CAST_PREVENTED;
+                    case SPELL_FAILED_PREVENTED_BY_MECHANIC:
+                        if (!caster->IsCrowdControlled())
+                            return CAST_FAIL_CAST_PREVENTED;
                     case SPELL_FAILED_STUNNED:
                     case SPELL_FAILED_CONFUSED:
                     case SPELL_FAILED_FLEEING:

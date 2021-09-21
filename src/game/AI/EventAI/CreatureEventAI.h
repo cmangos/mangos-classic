@@ -901,6 +901,8 @@ class CreatureEventAI : public CreatureAI, public TimerManager
         SpellSchoolMask GetMainAttackSchoolMask() const override { return m_currentRangedMode ? m_mainAttackMask : CreatureAI::GetMainAttackSchoolMask(); }
 
         virtual CanCastResult DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 castFlags = 0) override;
+
+        bool IsMainSpellPrevented(SpellEntry const* spellInfo) const;
     protected:
         std::string GetAIName() override { return "EventAI"; }
         // Event rules specifiers

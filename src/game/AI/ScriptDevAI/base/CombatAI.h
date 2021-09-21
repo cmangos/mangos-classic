@@ -93,6 +93,8 @@ class RangedCombatAI : public CombatAI
         virtual CanCastResult DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 castFlags = 0) override;
 
         void UpdateAI(const uint32 diff) override;
+
+        bool IsMainSpellPrevented(SpellEntry const* spellInfo) const;
     private:
         bool m_rangedMode;
         RangeModeType m_rangedModeSetting;
