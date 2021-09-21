@@ -19,6 +19,7 @@
 #include "Spells/Spell.h"
 #include "Spells/SpellMgr.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
+#include "MotionGenerators/MovementGenerator.h"
 
 enum
 {
@@ -26,7 +27,7 @@ enum
     ACTION_ON_KILL_COOLDOWN = 1001,
 };
 
-CombatAI::CombatAI(Creature* creature, uint32 combatActions) : ScriptedAI(creature), CombatActions(combatActions), m_onKillCooldown(false), m_stopTargeting(false)
+CombatAI::CombatAI(Creature* creature, uint32 combatActions) : ScriptedAI(creature), CombatActions(combatActions), m_onKillCooldown(false), m_stopTargeting(false), m_teleportUnreachable(false)
 {
     AddCustomAction(ACTION_CASTING_RESTORE, true, [&]() { HandleTargetRestoration(); });
     AddCustomAction(ACTION_ON_KILL_COOLDOWN, true, [&]() { m_onKillCooldown = false; });
@@ -53,6 +54,10 @@ void CombatAI::ExecuteActions()
         if (GetActionReadyStatus(i))
             ExecuteAction(i);
     }
+
+    if (m_teleportUnreachable)
+        if (m_creature->GetVictim() && IsCombatMovement() && !m_creature->GetMotionMaster()->GetCurrent()->IsReachable())
+            m_creature->CastSpell(m_creature->GetVictim(), 21727, TRIGGERED_OLD_TRIGGERED);
 }
 
 void CombatAI::HandleDelayedInstantAnimation(SpellEntry const* spellInfo)
@@ -100,6 +105,11 @@ void CombatAI::KilledUnit(Unit* victim)
         DoScriptText(m_onDeathTexts[urand(0, m_onDeathTexts.size() - 1)], m_creature, victim);
         ResetTimer(ACTION_ON_KILL_COOLDOWN, 10000);
     }
+}
+
+void CombatAI::AddUnreachabilityCheck()
+{
+    m_teleportUnreachable = true;
 }
 
 void CombatAI::UpdateAI(const uint32 diff)

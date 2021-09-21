@@ -49,6 +49,8 @@ class CombatAI : public ScriptedAI, public CombatActions
         }
         void KilledUnit(Unit* /*victim*/) override;
 
+        void AddUnreachabilityCheck(); // use in constructor
+
         void UpdateAI(const uint32 diff) override;
     private:
         ObjectGuid m_storedTarget;
@@ -57,6 +59,8 @@ class CombatAI : public ScriptedAI, public CombatActions
         bool m_onKillCooldown;
 
         bool m_stopTargeting;
+
+        bool m_teleportUnreachable;
 };
 
 // Implementation is identical to EAI
