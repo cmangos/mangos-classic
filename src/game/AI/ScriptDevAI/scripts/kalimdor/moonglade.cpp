@@ -221,9 +221,7 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
         {
             case NPC_ERANIKUS_TYRANT:
                 m_eranikusGuid = summoned->GetObjectGuid();
-                // Make Eranikus fly and unattackable
-                summoned->CastSpell(nullptr, SPELL_DRAGON_HOVER, TRIGGERED_OLD_TRIGGERED);
-                summoned->SetHover(true);
+                // Make Eranikus unattackable until the right moment during the event
                 summoned->SetImmuneToNPC(true);
                 summoned->SetImmuneToPlayer(true);
                 break;
@@ -899,7 +897,15 @@ struct ConjureDreamRift : public SpellScript
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         if (effIdx == EFFECT_INDEX_0)
-            spell->GetCaster()->SummonCreature(NPC_ERANIKUS_TYRANT, eranikusLocations[0].m_fX, eranikusLocations[0].m_fY, eranikusLocations[0].m_fZ, eranikusLocations[0].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
+        {
+            // Summon Eranikus Tyrant of the Dream and make him fly
+            if (Creature* eranikus = spell->GetCaster()->SummonCreature(NPC_ERANIKUS_TYRANT, eranikusLocations[0].m_fX, eranikusLocations[0].m_fY, eranikusLocations[0].m_fZ, eranikusLocations[0].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0))
+            {
+                eranikus->CastSpell(nullptr, SPELL_DRAGON_HOVER, TRIGGERED_OLD_TRIGGERED);
+                eranikus->SetHover(true);
+                eranikus->NearTeleportTo(eranikusLocations[0].m_fX, eranikusLocations[0].m_fY, eranikusLocations[0].m_fZ, eranikusLocations[0].m_fO);   // Teleport back Eranikus to its spawn position in case he fell to the ground/lake surface before hover/fly was applied (probably only client side)
+            }
+        }
     }
 };
 
