@@ -8435,20 +8435,32 @@ bool Unit::SelectHostileTarget()
                 AI()->AttackStart(target);
         }
 
+        bool evade = false;
+
         // check if currently selected target is reachable
         // NOTE: path alrteady generated from AttackStart()
         if (AI()->IsCombatMovement())
         {
             if (!GetMotionMaster()->GetCurrent()->IsReachable())
             {
-                if (!GetCombatManager().IsInEvadeMode())
-                    GetCombatManager().StartEvadeTimer();
+                if (!AI()->IsRangedUnit() && getThreatManager().getThreatList().size() == 1 &&
+                    GetDistanceZ(target) > CREATURE_Z_ATTACK_RANGE_MELEE)
+                {
+                    getThreatManager().modifyThreatPercent(target, -101);
+                    evade = true;
+                }
+                else
+                {
+                    if (!GetCombatManager().IsInEvadeMode())
+                        GetCombatManager().StartEvadeTimer();
+                }
             }
             else if(GetCombatManager().IsInEvadeMode())
                 GetCombatManager().StopEvade();
         }
 
-        return true;
+        if (!evade)
+            return true;
     }
     if (IsIgnoringRangedTargets() && !getThreatManager().isThreatListEmpty())
         return true;
