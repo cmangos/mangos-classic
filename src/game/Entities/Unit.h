@@ -2257,6 +2257,8 @@ class Unit : public WorldObject
         // Uncharm (physically revert the charm effect) the unit and reset player control if required
         void Uncharm(Unit* charmed, uint32 spellId = 0);
 
+        void RemoveUnattackableTargets(Unit* charmer = nullptr);
+
         // Combat prevention
         bool CanEnterCombat() const { return m_canEnterCombat && !GetCombatManager().IsEvadingHome(); }
         void SetCanEnterCombat(bool can) { m_canEnterCombat = can; }
