@@ -620,6 +620,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 26341:         // Saurfang's Rage
         case 27987:         // Unholy Aura
         case 28126:         // Spirit Particles (purple)
+        case 28370:         // Toxic Gas
         case 29526:         // Hate to Zero (Hate to Zero)
         case 30074:         // Toxic Gas
             return false;
