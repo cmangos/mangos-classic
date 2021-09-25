@@ -545,6 +545,8 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 8599:          // Enrage
         case 8601:          // Slowing Poison
         case 8876:          // Thrash
+        case 8909:          // Unholy Shield
+        case 8990:          // Retribution Aura (Rank 1)
         case 9205:          // Hate to Zero (Hate to Zero)
         case 9460:          // Corrosive Ooze
         case 9464:          // Barbs
