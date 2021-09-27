@@ -2352,19 +2352,12 @@ void Aura::HandleModPossess(bool apply, bool Real)
 
         if (Player* playerCaster = caster->IsPlayer() ? static_cast<Player*>(caster) : nullptr)
         {
-            UpdateMask updateMask;
-            updateMask.SetCount(target->GetValuesCount());
-            target->MarkUpdateFieldsWithFlagForUpdate(updateMask, UF_FLAG_OWNER_ONLY);
-            if (updateMask.HasData())
+            UpdateData newData;
+            target->BuildValuesUpdateBlockForPlayerWithFlags(newData, playerCaster, UF_FLAG_OWNER_ONLY);
+            if (newData.HasData())
             {
-                UpdateData newData;
-                target->BuildValuesUpdateBlockForPlayer(newData, updateMask, playerCaster);
-
-                if (newData.HasData())
-                {
-                    WorldPacket newDataPacket = newData.BuildPacket(0, false);
-                    playerCaster->SendDirectMessage(newDataPacket);
-                }
+                WorldPacket newDataPacket = newData.BuildPacket(0, false);
+                playerCaster->SendDirectMessage(newDataPacket);
             }
         }
     }

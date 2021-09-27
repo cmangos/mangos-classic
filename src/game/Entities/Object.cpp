@@ -210,6 +210,15 @@ void Object::BuildValuesUpdateBlockForPlayer(UpdateData& data, Player* target) c
         BuildValuesUpdateBlockForPlayer(data, updateMask, target);
 }
 
+void Object::BuildValuesUpdateBlockForPlayerWithFlags(UpdateData& data, Player* target, UpdateFieldFlags flags) const
+{
+    UpdateMask updateMask;
+    updateMask.SetCount(GetValuesCount());
+    MarkUpdateFieldsWithFlagForUpdate(updateMask, (uint16)flags);
+    if (updateMask.HasData())
+        BuildValuesUpdateBlockForPlayer(data, updateMask, target);
+}
+
 void Object::BuildValuesUpdateBlockForPlayer(UpdateData& data, UpdateMask& updateMask, Player* target) const
 {
     ByteBuffer buf(500);
@@ -772,7 +781,7 @@ void Object::_LoadIntoDataField(const char* data, uint32 startOffset, uint32 cou
     }
 }
 
-void Object::MarkUpdateFieldsWithFlagForUpdate(UpdateMask& updateMask, uint16 flag)
+void Object::MarkUpdateFieldsWithFlagForUpdate(UpdateMask& updateMask, uint16 flag) const
 {
     uint16 const* flags = UpdateFields::GetUpdateFieldFlagsArray(GetTypeId());
     MANGOS_ASSERT(flags);
