@@ -26,6 +26,7 @@
 #include "Server/Opcodes.h"
 #include "World/World.h"
 #include "Entities/ObjectGuid.h"
+#include "Server/WorldSession.h"
 
 UpdateData::UpdateData() : m_data(1), m_currentIndex(0)
 {
@@ -165,4 +166,13 @@ void UpdateData::Clear()
 {
     m_data.clear();
     m_outOfRangeGUIDs.clear();
+}
+
+void UpdateData::SendData(WorldSession& session)
+{
+    for (size_t i = 0; i < GetPacketCount(); ++i)
+    {
+        WorldPacket packet = BuildPacket(i);
+        session.SendPacket(packet);
+    }
 }

@@ -4515,20 +4515,9 @@ void Aura::HandleAuraEmpathy(bool apply, bool /*Real*/)
         {
             if (Player* playerCaster = caster->IsPlayer() ? static_cast<Player*>(caster) : nullptr)
             {
-                UpdateMask updateMask;
-                updateMask.SetCount(target->GetValuesCount());
-                updateMask.SetBit(UNIT_FIELD_HEALTH);
-                updateMask.SetBit(UNIT_FIELD_MAXHEALTH);
-                target->MarkUpdateFieldsWithFlagForUpdate(updateMask, UF_FLAG_SPECIAL_INFO);
-
-                UpdateData newData;
-                target->BuildValuesUpdateBlockForPlayer(newData, updateMask, playerCaster);
-
-                if (newData.HasData())
-                {
-                    WorldPacket newDataPacket = newData.BuildPacket(0, false);
-                    playerCaster->SendDirectMessage(newDataPacket);
-                }
+                UpdateData updateData;
+                target->BuildValuesUpdateBlockForPlayerWithFlags(updateData, playerCaster, UpdateFieldFlags(UF_FLAG_SPECIAL_INFO | UF_FLAG_DYNAMIC));
+                updateData.SendData(*playerCaster->GetSession());
             }
         }
     }
