@@ -1196,7 +1196,7 @@ class Player : public Unit
         /***                    GOSSIP SYSTEM                  ***/
         /*********************************************************/
 
-        void PrepareGossipMenu(WorldObject* pSource, uint32 menuId = 0);
+        void PrepareGossipMenu(WorldObject* pSource, uint32 menuId = 0, bool forceQuests = false);
         void SendPreparedGossip(WorldObject* pSource);
         void OnGossipSelect(WorldObject* pSource, uint32 gossipListId);
 
