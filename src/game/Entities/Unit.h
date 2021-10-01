@@ -486,6 +486,8 @@ enum UnitFlags
     UNIT_FLAG_NOT_SELECTABLE        = 0x02000000,
     UNIT_FLAG_SKINNABLE             = 0x04000000,
     UNIT_FLAG_AURAS_VISIBLE         = 0x08000000,           // magic detect
+    UNIT_FLAG_UNK_28                = 0x10000000,
+    UNIT_FLAG_PREVENT_ANIM          = 0x20000000,           // used in Feing Death spell
     UNIT_FLAG_SHEATHE               = 0x40000000,
     UNIT_FLAG_IMMUNE                = 0x80000000,
 
@@ -495,8 +497,6 @@ enum UnitFlags
     UNIT_FLAG_PET_IN_COMBAT         = 0x00000800,           // in combat?, 2.0.8
     UNIT_FLAG_DISARMED              = 0x00200000,           // disable melee spells casting..., "Required melee weapon" added to melee spells tooltip.
 //[-ZERO]    UNIT_FLAG_MOUNT                 = 0x08000000,
-    UNIT_FLAG_UNK_28                = 0x10000000,
-    UNIT_FLAG_UNK_29                = 0x20000000,           // used in Feing Death spell
 };
 
 /// Non Player Character flags
@@ -792,11 +792,11 @@ enum CurrentSpellTypes
     CURRENT_MELEE_SPELL             = 0,
     CURRENT_GENERIC_SPELL           = 1,
     CURRENT_AUTOREPEAT_SPELL        = 2,
-    CURRENT_CHANNELED_SPELL         = 3
+    CURRENT_CHANNELED_SPELL         = 3,
+    CURRENT_MAX_SPELL
 };
 
 #define CURRENT_FIRST_NON_MELEE_SPELL 1
-#define CURRENT_MAX_SPELL             4
 
 enum ActiveStates
 {
@@ -1888,6 +1888,8 @@ class Unit : public WorldObject
         // set withDelayed to true to interrupt delayed spells too
         // delayed+channeled spells are always interrupted
         void InterruptNonMeleeSpells(bool withDelayed, uint32 spell_id = 0);
+        void InterruptSpellsWithChannelFlags(uint32 flags);
+        void InterruptSpellsAndAurasWithInterruptFlags(uint32 flags);
 
         Spell* GetCurrentSpell(CurrentSpellTypes spellType) const { return m_currentSpells[spellType]; }
         Spell* FindCurrentSpellBySpellId(uint32 spell_id) const;
@@ -2136,7 +2138,21 @@ class Unit : public WorldObject
         void KnockBackFrom(Unit* target, float horizontalSpeed, float verticalSpeed);
         void KnockBackWithAngle(float angle, float horizontalSpeed, float verticalSpeed);
 
-        bool isHover() const { return HasAuraType(SPELL_AURA_HOVER); }
+        bool HasHoverAura() const { return HasAuraType(SPELL_AURA_HOVER); }
+        template<typename Func>
+        bool HasAuraWithCondition(Func const& func) const
+        {
+            Unit::SpellAuraHolderMap const& holders = GetSpellAuraHolderMap();
+            for (const auto& holder : holders)
+            {
+                if (func(holder.second))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         void _RemoveAllAuraMods();
         void _ApplyAllAuraMods();

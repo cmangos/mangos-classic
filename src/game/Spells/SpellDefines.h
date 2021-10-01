@@ -382,7 +382,7 @@ enum SpellAuraInterruptFlags // also used for ChannelInterruptFlags
     AURA_INTERRUPT_FLAG_CAST                        = 0x00000004,   // 2    removed by any cast
     AURA_INTERRUPT_FLAG_MOVE                        = 0x00000008,   // 3    removed by any movement
     AURA_INTERRUPT_FLAG_TURNING                     = 0x00000010,   // 4    removed by any turning
-    AURA_INTERRUPT_FLAG_ENTER_COMBAT                = 0x00000020,   // 5    removed by entering combat
+    AURA_INTERRUPT_FLAG_ANIM_CANCELS                = 0x00000020,   // 5    removed by anim
     AURA_INTERRUPT_FLAG_NOT_MOUNTED                 = 0x00000040,   // 6    removed by unmounting
     AURA_INTERRUPT_FLAG_NOT_ABOVEWATER              = 0x00000080,   // 7    removed by entering water
     AURA_INTERRUPT_FLAG_NOT_UNDERWATER              = 0x00000100,   // 8    removed by leaving water

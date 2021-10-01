@@ -4178,6 +4178,18 @@ void Unit::InterruptNonMeleeSpells(bool withDelayed, uint32 spell_id)
         InterruptSpell(CURRENT_CHANNELED_SPELL, true);
 }
 
+void Unit::InterruptSpellsWithChannelFlags(uint32 flags)
+{
+    if (m_currentSpells[CURRENT_CHANNELED_SPELL] && (m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo->ChannelInterruptFlags & flags) != 0)
+        InterruptSpell(CURRENT_CHANNELED_SPELL, true);
+}
+
+void Unit::InterruptSpellsAndAurasWithInterruptFlags(uint32 flags)
+{
+    InterruptSpellsWithChannelFlags(flags);
+    RemoveAurasWithInterruptFlags(flags);
+}
+
 Spell* Unit::FindCurrentSpellBySpellId(uint32 spell_id) const
 {
     for (auto m_currentSpell : m_currentSpells)
@@ -9713,10 +9725,6 @@ bool Unit::SetStunned(bool apply, ObjectGuid casterGuid, uint32 spellID, bool lo
         SetImmobilizedState(apply, true, logout);
 
         ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED, hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_LOGOUT_TIMER));
-
-        if (!logout)
-            ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29, (IsStunned() || IsFeigningDeath()));
-
         return true;
     }
     return false;
@@ -9829,8 +9837,6 @@ void Unit::SetFeignDeath(bool apply, ObjectGuid casterGuid /*= ObjectGuid()*/, u
 
         getHostileRefManager().updateOnlineOfflineState(true);
     }
-
-    ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29, (IsStunned() || IsFeigningDeath()));
 }
 
 bool Unit::IsSitState() const
@@ -11353,7 +11359,7 @@ void Unit::RemoveUnattackableTargets(Unit* charmer)
     {
         attacker->AttackStop(true, true);
         attacker->getThreatManager().modifyThreatPercent(this, -101);     // only remove the possessed creature from threat list because it can be filled by other players
-        if (charmer && IsPropagatingThreatToOwner())
+        if (charmer)
             attacker->AddThreat(charmer);
     }
 }
