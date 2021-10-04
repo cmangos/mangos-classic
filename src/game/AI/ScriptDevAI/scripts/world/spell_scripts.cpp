@@ -225,6 +225,14 @@ struct DrinkAnimation : public AuraScript
     }
 };
 
+struct spell_effect_summon_no_follow_movement : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->AI()->SetFollowMovement(false);
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -238,4 +246,5 @@ void AddSC_spell_scripts()
     RegisterAuraScript<GreaterInvisibilityMob>("spell_greater_invisibility_mob");
     RegisterAuraScript<FoodAnimation>("spell_food_animation");
     RegisterAuraScript<DrinkAnimation>("spell_drink_animation");
+    RegisterSpellScript<spell_effect_summon_no_follow_movement>("spell_effect_summon_no_follow_movement");
 }
