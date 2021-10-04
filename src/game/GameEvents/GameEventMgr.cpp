@@ -670,11 +670,7 @@ uint32 GameEventMgr::Update(ActiveEvents const* activeAtShutdown /*= nullptr*/)
         {
             // DEBUG_LOG("GameEvent %u is not active",itr->first);
             if (IsActiveEvent(itr))
-            {
                 StopEvent(itr);
-                if (m_gameEvents[itr].linkedTo != 0)
-                    StopEvent(m_gameEvents[itr].linkedTo);
-            }
             else
             {
                 if (!m_isGameEventsInit)
