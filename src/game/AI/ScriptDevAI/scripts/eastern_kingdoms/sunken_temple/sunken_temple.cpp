@@ -270,6 +270,20 @@ struct HakkarSummoned : public SpellScript
     }
 };
 
+struct HexOfJammalanAura : public AuraScript // s.12479
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!apply && aura->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+            if (Unit* caster = aura->GetCaster())
+            {
+                caster->CastSpell(target, 12480, TRIGGERED_OLD_TRIGGERED);
+                caster->CastSpell(target, 12483, TRIGGERED_OLD_TRIGGERED);
+            }
+    }
+};
+
 void AddSC_sunken_temple()
 {
     Script* pNewScript = new Script;
@@ -299,4 +313,5 @@ void AddSC_sunken_temple()
 
     RegisterSpellScript<SummonHakkar>("spell_summon_hakkar");
     RegisterSpellScript<HakkarSummoned>("spell_hakkar_summoned");
+    RegisterAuraScript<HexOfJammalanAura>("spell_hex_of_jammalan");
 }
