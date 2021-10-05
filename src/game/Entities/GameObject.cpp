@@ -2533,3 +2533,23 @@ const QuaternionData GameObject::GetLocalRotation() const
 {
     return QuaternionData(GetFloatValue(GAMEOBJECT_ROTATION), GetFloatValue(GAMEOBJECT_ROTATION + 1), GetFloatValue(GAMEOBJECT_ROTATION + 2), GetFloatValue(GAMEOBJECT_ROTATION + 3));
 }
+
+void GameObject::ForcedDespawn(uint32 timeMSToDespawn)
+{
+    if (timeMSToDespawn)
+    {
+        ForcedDespawnDelayGameObjectEvent* pEvent = new ForcedDespawnDelayGameObjectEvent(*this);
+
+        m_events.AddEvent(pEvent, m_events.CalculateTime(timeMSToDespawn));
+        return;
+    }
+
+    SetForcedDespawn();
+    SetLootState(GO_JUST_DEACTIVATED);
+}
+
+bool ForcedDespawnDelayGameObjectEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
+{
+    m_owner.ForcedDespawn();
+    return true;
+}
