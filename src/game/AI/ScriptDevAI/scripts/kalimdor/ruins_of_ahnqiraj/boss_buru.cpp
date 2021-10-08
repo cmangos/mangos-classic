@@ -274,7 +274,7 @@ struct npc_buru_eggAI : public Scripted_NoMovementAI
                 damage = 100 + ((25 - std::min(m_creature->GetDistance(target, true, DIST_CALC_COMBAT_REACH), 25.f)) / 25.f) * 400;
             else if (target->GetEntry() == NPC_BURU)
             {
-                damage = target->GetHealth() * 15 / 100; // 15% hp for buru
+                damage = target->GetMaxHealth() * 15 / 100; // 15% hp for buru
                 static_cast<boss_buruAI*>(target->AI())->ScheduleNewTarget();
             }
             m_creature->CastCustomSpell(target, SPELL_EXPLOSION, &damage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
