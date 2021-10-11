@@ -7502,8 +7502,7 @@ bool Unit::Mount(uint32 displayid, const Aura* aura/* = nullptr*/)
 
 bool Unit::Unmount(const Aura* aura/* = nullptr*/)
 {
-    // Custom mount (non-aura such as taxi or command) overwrites aura mounts, do not dismount on aura removal
-    if (!IsMounted() || (aura && uint32(aura->GetAmount()) != GetMountID()))
+    if (!GetMountID())
         return false;
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_MOUNTED);
@@ -9949,7 +9948,7 @@ void Unit::UpdateModelData()
         SetFloatValue(UNIT_FIELD_COMBATREACH, GetObjectScale() * modelInfo->combat_reach);
 
         SetBaseWalkSpeed(modelInfo->SpeedWalk);
-        SetBaseRunSpeed(modelInfo->SpeedRun);
+        SetBaseRunSpeed(modelInfo->SpeedRun, false);
     }
 }
 

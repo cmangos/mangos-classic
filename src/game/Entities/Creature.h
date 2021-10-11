@@ -821,7 +821,7 @@ class Creature : public Unit
         void SetDetectionRange(uint32 range) { m_detectionRange = range; }
 
         void SetBaseWalkSpeed(float speed) override;
-        void SetBaseRunSpeed(float speed) override;
+        void SetBaseRunSpeed(float speed, bool force = true) override;
 
         void LockOutSpells(SpellSchoolMask schoolMask, uint32 duration) override;
 
