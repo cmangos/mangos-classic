@@ -303,7 +303,7 @@ struct ScriptInfo
         struct                                              // SCRIPT_COMMAND_MOUNT_TO_ENTRY_OR_MODEL (24)
         {
             uint32 creatureOrModelEntry;                    // datalong
-            uint32 empty1;                                  // datalong2
+            uint32 speedChange;                             // datalong2
         } mount;
 
         struct                                              // SCRIPT_COMMAND_SET_RUN (25)

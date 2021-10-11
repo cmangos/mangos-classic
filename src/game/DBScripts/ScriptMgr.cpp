@@ -1909,16 +1909,29 @@ bool ScriptAction::HandleScriptStep()
             if (LogIfNotCreature(pSource))
                 break;
 
+            Creature* creatureSource = static_cast<Creature*>(pSource);
             if (!m_script->mount.creatureOrModelEntry)
-                ((Creature*)pSource)->Unmount();
+            {
+                creatureSource->Unmount();
+                if (m_script->mount.speedChange)
+                {
+                    creatureSource->SetBaseRunSpeed(creatureSource->GetCreatureInfo()->SpeedRun);
+                    creatureSource->UpdateSpeed(MOVE_RUN, true);
+                }
+            }
             else if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
-                ((Creature*)pSource)->Mount(m_script->mount.creatureOrModelEntry);
+                creatureSource->Mount(m_script->mount.creatureOrModelEntry);
             else
             {
                 CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(m_script->mount.creatureOrModelEntry);
                 uint32 display_id = Creature::ChooseDisplayId(ci);
 
-                ((Creature*)pSource)->Mount(display_id);
+                creatureSource->Mount(display_id);
+                if (m_script->mount.speedChange)
+                {
+                    creatureSource->SetBaseRunSpeed(ci->SpeedRun);
+                    creatureSource->UpdateSpeed(MOVE_RUN, true);
+                }
             }
 
             break;
