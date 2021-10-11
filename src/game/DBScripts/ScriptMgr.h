@@ -81,7 +81,7 @@ enum ScriptCommand                                          // resSource, resTar
     // datalong = stand state (enum UnitStandStateType)
     SCRIPT_COMMAND_MODIFY_NPC_FLAGS         = 29,           // resSource = Creature
     // datalong=NPCFlags
-    // datalong2:0x00=toggle, 0x01=add, 0x02=remove
+    // datalong2:0x00=add, 0x01=remove, 0x02=toggle
     SCRIPT_COMMAND_SEND_TAXI_PATH           = 30,           // datalong = taxi path id (source or target must be player)
     SCRIPT_COMMAND_TERMINATE_SCRIPT         = 31,           // datalong = search for npc entry if provided
     // datalong2= search distance
@@ -129,7 +129,7 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_INTERRUPT_SPELL          = 47,           // datalong = SpellType enum CurrentSpellTypes
     SCRIPT_COMMAND_MODIFY_UNIT_FLAGS        = 48,           // resSource = Creature
     // datalong=UnitFlags
-    // datalong2:0x00=toggle, 0x01=add, 0x02=remove
+    // datalong2:0x00=add, 0x01=remove, 0x02=toggle
     SCRIPT_COMMAND_SET_DATA_64              = 49,           // datalong = set data param 1, datalong2 = set data param 2
     SCRIPT_COMMAND_ZONE_PULSE               = 50,           // 
 };
