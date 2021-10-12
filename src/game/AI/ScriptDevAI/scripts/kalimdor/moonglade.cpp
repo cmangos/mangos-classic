@@ -275,6 +275,9 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
         if (Creature* eranikus = m_creature->GetMap()->GetCreature(m_eranikusGuid))
             eranikus->AI()->EnterEvadeMode();
 
+        // Remulos is only targetable for friendly player spells during Eranikus event so reset on death
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
+
         npc_escortAI::JustDied(killer);
     }
 
@@ -284,7 +287,11 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
         {
             case 1:
                 if (Player* player = GetPlayerForEscort())
+                {
                     DoScriptText(SAY_REMULOS_INTRO_1, m_creature, player);
+                    // Remulos is only targetable for friendly player spells during Eranikus event
+                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
+                }
                 break;
             case 2:
                 DoScriptText(SAY_REMULOS_INTRO_2, m_creature);
@@ -359,6 +366,8 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
             pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_NIGHTMARE_MANIFESTS, target);
 
         DoDespawnSummoned();
+        // Remulos is only targetable for friendly player spells during Eranikus event: remove flag on quest completion
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
 
         m_outroTimer = 3 * IN_MILLISECONDS;
     }
@@ -437,7 +446,6 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
                     {
                         // Alternate between two spawn positions
                         uint8 index = i % 2;
-                        float fX, fY, fZ;
                         m_creature->GetRandomPoint(defendersLocations[index].m_fX, defendersLocations[index].m_fY, defendersLocations[index].m_fZ, 3.0f, fX, fY, fZ);
                         m_creature->SummonCreature(NPC_NIGHTHAVEN_DEFENDER, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                     }
