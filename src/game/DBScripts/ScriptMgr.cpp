@@ -137,7 +137,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
         tmp.raw.data[2]        = fields[5].GetUInt32();
         tmp.buddyEntry         = fields[6].GetUInt32();
         tmp.searchRadiusOrGuid = fields[7].GetUInt32();
-        tmp.data_flags         = fields[8].GetUInt8();
+        tmp.data_flags         = fields[8].GetUInt32();
         tmp.textId[0]          = fields[9].GetInt32();
         tmp.textId[1]          = fields[10].GetInt32();
         tmp.textId[2]          = fields[11].GetInt32();

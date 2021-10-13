@@ -449,7 +449,7 @@ struct ScriptInfo
     // Buddy system (entry can be npc or go entry, depending on command)
     uint32 buddyEntry;                                      // buddy_entry
     uint32 searchRadiusOrGuid;                              // search_radius (can also be guid in case of SCRIPT_FLAG_BUDDY_BY_GUID)
-    uint8 data_flags;                                       // data_flags
+    uint32 data_flags;                                      // data_flags
 
     int32 textId[MAX_TEXT_ID];                              // dataint to dataint4
 
