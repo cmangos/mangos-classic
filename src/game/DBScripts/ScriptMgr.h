@@ -139,16 +139,18 @@ enum ScriptCommand                                          // resSource, resTar
 enum ScriptInfoDataFlags
 {
     // default: s/b -> t
-    SCRIPT_FLAG_BUDDY_AS_TARGET             = 0x01,         // s -> b
-    SCRIPT_FLAG_REVERSE_DIRECTION           = 0x02,         // t* -> s* (* result after previous flag is evaluated)
-    SCRIPT_FLAG_SOURCE_TARGETS_SELF         = 0x04,         // s* -> s* (* result after previous flag is evaluated)
-    SCRIPT_FLAG_COMMAND_ADDITIONAL          = 0x08,         // command dependend
-    SCRIPT_FLAG_BUDDY_BY_GUID               = 0x10,         // take the buddy by guid
-    SCRIPT_FLAG_BUDDY_IS_PET                = 0x20,         // buddy is a pet
-    SCRIPT_FLAG_BUDDY_IS_DESPAWNED          = 0x40,         // buddy is dead or despawned
-    SCRIPT_FLAG_BUDDY_BY_POOL               = 0x80          // buddy should be part of a pool
+    SCRIPT_FLAG_BUDDY_AS_TARGET             = 0x001,        // s -> b
+    SCRIPT_FLAG_REVERSE_DIRECTION           = 0x002,        // t* -> s* (* result after previous flag is evaluated)
+    SCRIPT_FLAG_SOURCE_TARGETS_SELF         = 0x004,        // s* -> s* (* result after previous flag is evaluated)
+    SCRIPT_FLAG_COMMAND_ADDITIONAL          = 0x008,        // command dependend
+    SCRIPT_FLAG_BUDDY_BY_GUID               = 0x010,        // take the buddy by guid
+    SCRIPT_FLAG_BUDDY_IS_PET                = 0x020,        // buddy is a pet
+    SCRIPT_FLAG_BUDDY_IS_DESPAWNED          = 0x040,        // buddy is dead or despawned
+    SCRIPT_FLAG_BUDDY_BY_POOL               = 0x080,        // buddy should be part of a pool
+    SCRIPT_FLAG_BUDDY_BY_SPAWN_GROUP        = 0x100,        // buddy is from spawn group - NYI - TODO:
+    SCRIPT_FLAG_ALL_ELIGIBLE_BUDDIES        = 0x200,        // multisource/multitarget - will execute for each eligible
 };
-#define MAX_SCRIPT_FLAG_VALID               (2 * SCRIPT_FLAG_BUDDY_BY_POOL - 1)
+#define MAX_SCRIPT_FLAG_VALID               (2 * SCRIPT_FLAG_ALL_ELIGIBLE_BUDDIES - 1)
 
 struct ScriptInfo
 {
@@ -534,6 +536,7 @@ class ScriptAction
         {}
 
         bool HandleScriptStep();                            // return true IF AND ONLY IF the script should be terminated
+        bool ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTarget, Object* pSourceOrItem);
 
         const char* GetTableName() const { return m_table; }
         uint32 GetId() const { return m_script->id; }
@@ -559,7 +562,7 @@ class ScriptAction
 
         // Helper functions
         bool GetScriptCommandObject(const ObjectGuid guid, bool includeItem, Object*& resultObject) const;
-        bool GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject* pOrigTarget, WorldObject*& pFinalSource, WorldObject*& pFinalTarget) const;
+        bool GetScriptProcessTargets(WorldObject* originalSource, WorldObject* originalTarget, std::vector<WorldObject*>& finalSources, std::vector<WorldObject*>& finalTargets) const;
         bool LogIfNotCreature(WorldObject* pWorldObject) const;
         bool LogIfNotUnit(WorldObject* pWorldObject) const;
         bool LogIfNotGameObject(WorldObject* pWorldObject) const;

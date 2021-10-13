@@ -1123,44 +1123,46 @@ bool ScriptAction::GetScriptCommandObject(const ObjectGuid guid, bool includeIte
 
 /// Select source and target for a script command
 /// Returns false if an error happened
-bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject* pOrigTarget, WorldObject*& pFinalSource, WorldObject*& pFinalTarget) const
+bool ScriptAction::GetScriptProcessTargets(WorldObject* originalSource, WorldObject* originalTarget, std::vector<WorldObject*>& finalSources, std::vector<WorldObject*>& finalTargets) const
 {
-    WorldObject* pBuddy = nullptr;
+    std::vector<WorldObject*> buddies;
 
     if (m_script->buddyEntry || (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_POOL) != 0 || (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_GUID) != 0)
     {
         if (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_GUID)
         {
+            WorldObject* buddy = nullptr;
             if (m_script->IsCreatureBuddy())
             {
                 CreatureData const* cData = sObjectMgr.GetCreatureData(m_script->searchRadiusOrGuid);
-                pBuddy = m_map->GetCreature(cData->GetObjectGuid(m_script->searchRadiusOrGuid));
+                buddy = m_map->GetCreature(cData->GetObjectGuid(m_script->searchRadiusOrGuid));
 
-                if (pBuddy && ((Creature*)pBuddy)->IsAlive() == m_script->IsDeadOrDespawnedBuddy())
+                if (buddy && ((Creature*)buddy)->IsAlive() == m_script->IsDeadOrDespawnedBuddy())
                 {
                     if (m_script->command != SCRIPT_COMMAND_TERMINATE_SCRIPT)
                     {
-                        sLog.outError(" DB-SCRIPTS: Process table `%s` id %u, command %u has buddy %u by guid %u but buddy is dead, skipping.", m_table, m_script->id, m_script->command, pBuddy->GetEntry(), m_script->searchRadiusOrGuid);
+                        sLog.outError(" DB-SCRIPTS: Process table `%s` id %u, command %u has buddy %u by guid %u but buddy is dead, skipping.", m_table, m_script->id, m_script->command, buddy->GetEntry(), m_script->searchRadiusOrGuid);
                         return false;
                     }
-                    else
-                        pBuddy = nullptr;
                 }
             }
             else
             {
                 GameObjectData const* oData = sObjectMgr.GetGOData(m_script->searchRadiusOrGuid);
-                pBuddy = m_map->GetGameObject(ObjectGuid(HIGHGUID_GAMEOBJECT, oData->id, m_script->searchRadiusOrGuid));
+                buddy = m_map->GetGameObject(ObjectGuid(HIGHGUID_GAMEOBJECT, oData->id, m_script->searchRadiusOrGuid));
             }
             // TODO Maybe load related grid if not already done? How to handle multi-map case?
-            if (!pBuddy && m_script->command != SCRIPT_COMMAND_TERMINATE_SCRIPT)
+            if (!buddy && m_script->command != SCRIPT_COMMAND_TERMINATE_SCRIPT)
             {
                 DETAIL_FILTER_LOG(LOG_FILTER_DB_SCRIPT, " DB-SCRIPTS: Process table `%s` id %u, command %u has buddy by guid %u not loaded in map %u (data-flags %u), skipping.", m_table, m_script->id, m_script->command, m_script->searchRadiusOrGuid, m_map->GetId(), m_script->data_flags);
                 return false;
             }
+            // this type can only have one buddy result
+            buddies.push_back(buddy);
         }
         else if (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_POOL)
         {
+            WorldObject* buddy = nullptr;
             if (m_script->IsCreatureBuddy())
             {
                 PoolGroup<Creature> const& pool = sPoolMgr.GetPoolCreatures(m_script->searchRadiusOrGuid);
@@ -1168,27 +1170,27 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject
                 for (auto objItr : equalChancedObjectList)
                 {
                     CreatureData const* cData = sObjectMgr.GetCreatureData(objItr.guid);
-                    if (Creature* buddy = m_map->GetCreature(cData->GetObjectGuid(objItr.guid)))
+                    if (Creature* creatureBuddy = m_map->GetCreature(cData->GetObjectGuid(objItr.guid)))
                     {
-                        if (buddy->IsAlive() != m_script->IsDeadOrDespawnedBuddy())
+                        if (creatureBuddy->IsAlive() != m_script->IsDeadOrDespawnedBuddy())
                         {
-                            pBuddy = buddy;
+                            buddy = creatureBuddy;
                             break;
                         }
                     }
                 }
 
-                if (!pBuddy)
+                if (!buddy)
                 {
                     auto explicitlyChancedObjectList = pool.GetExplicitlyChanced();
                     for (auto objItr : explicitlyChancedObjectList)
                     {
                         CreatureData const* cData = sObjectMgr.GetCreatureData(objItr.guid);
-                        if (Creature* buddy = m_map->GetCreature(cData->GetObjectGuid(objItr.guid)))
+                        if (Creature* creatureBuddy = m_map->GetCreature(cData->GetObjectGuid(objItr.guid)))
                         {
-                            if (buddy->IsAlive() != m_script->IsDeadOrDespawnedBuddy())
+                            if (creatureBuddy->IsAlive() != m_script->IsDeadOrDespawnedBuddy())
                             {
-                                pBuddy = buddy;
+                                buddy = creatureBuddy;
                                 break;
                             }
                         }
@@ -1196,69 +1198,101 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject
                 }
             }
 
-            if (!pBuddy)
+            if (!buddy)
             {
                 sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u has buddy %u by pool id %u and no creature found in map %u (data-flags %u), skipping.", m_table, m_script->id, m_script->command, m_script->buddyEntry, m_script->searchRadiusOrGuid, m_map->GetId(), m_script->data_flags);
                 return false;
             }
+            // this type can only have one buddy result
+            buddies.push_back(buddy);
         }
         else                                                // Buddy by entry
         {
-            if (!pOrigSource && !pOrigTarget)
+            if (!originalSource && !originalTarget)
             {
                 sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u called without buddy %u, but no source for search available, skipping.", m_table, m_script->id, m_script->command, m_script->buddyEntry);
                 return false;
             }
 
             // Prefer non-players as searcher
-            WorldObject* pSearcher = pOrigSource ? pOrigSource : pOrigTarget;
-            if (pSearcher->GetTypeId() == TYPEID_PLAYER && pOrigTarget && pOrigTarget->GetTypeId() != TYPEID_PLAYER)
-                pSearcher = pOrigTarget;
+            WorldObject* origin = originalSource ? originalSource : originalTarget;
+            if (origin->GetTypeId() == TYPEID_PLAYER && originalSource && originalSource->GetTypeId() != TYPEID_PLAYER)
+                origin = originalTarget;
 
             if (m_script->IsCreatureBuddy())
             {
-                Creature* pCreatureBuddy = nullptr;
+                Creature* creatureBuddy = nullptr;
 
-                if (m_script->IsDeadOrDespawnedBuddy())
+                if (m_script->data_flags & SCRIPT_FLAG_ALL_ELIGIBLE_BUDDIES)
                 {
-                    MaNGOS::AllCreaturesOfEntryInRangeCheck u_check(pSearcher, m_script->buddyEntry, m_script->searchRadiusOrGuid);
-                    MaNGOS::CreatureLastSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(pCreatureBuddy, u_check);
-                    Cell::VisitGridObjects(pSearcher, searcher, m_script->searchRadiusOrGuid);
+                    CreatureList creatures;
+                    std::set<uint32> entries; // support for multiple entries
+                    entries.insert(m_script->buddyEntry);
+                    MaNGOS::AllCreatureEntriesWithLiveStateInObjectRangeCheck u_check(*origin, entries, !m_script->IsDeadOrDespawnedBuddy(), m_script->searchRadiusOrGuid);
+                    MaNGOS::CreatureListSearcher<MaNGOS::AllCreatureEntriesWithLiveStateInObjectRangeCheck> searcher(creatures, u_check);
+                    Cell::VisitAllObjects(origin, searcher, m_script->searchRadiusOrGuid); // Visit all, need to find also Pet* objects
+                    for (Creature* creature : creatures)
+                        buddies.push_back(creature);
                 }
                 else
                 {
-                    MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*pSearcher, m_script->buddyEntry, true, false, m_script->searchRadiusOrGuid, true);
-                    MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pCreatureBuddy, u_check);
+                    if (m_script->IsDeadOrDespawnedBuddy())
+                    {
+                        MaNGOS::AllCreaturesOfEntryInRangeCheck u_check(origin, m_script->buddyEntry, m_script->searchRadiusOrGuid);
+                        MaNGOS::CreatureLastSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(creatureBuddy, u_check);
+                        Cell::VisitGridObjects(origin, searcher, m_script->searchRadiusOrGuid);
+                    }
+                    else
+                    {
+                        MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*origin, m_script->buddyEntry, true, false, m_script->searchRadiusOrGuid, true);
+                        MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(creatureBuddy, u_check);
 
-                    if (m_script->data_flags & SCRIPT_FLAG_BUDDY_IS_PET)
-                        Cell::VisitWorldObjects(pSearcher, searcher, m_script->searchRadiusOrGuid);
-                    else                                        // Normal Creature
-                        Cell::VisitGridObjects(pSearcher, searcher, m_script->searchRadiusOrGuid);
-                }
+                        if (m_script->data_flags & SCRIPT_FLAG_BUDDY_IS_PET)
+                            Cell::VisitWorldObjects(origin, searcher, m_script->searchRadiusOrGuid);
+                        else                                        // Normal Creature
+                            Cell::VisitGridObjects(origin, searcher, m_script->searchRadiusOrGuid);
+                    }
 
-                pBuddy = pCreatureBuddy;
+                    if (creatureBuddy)
+                        buddies.push_back(creatureBuddy);
 
-                // TODO: Remove this extra check output after a while - it might have false effects
-                if (!pBuddy && pSearcher->GetEntry() == m_script->buddyEntry)
-                {
-                    sLog.outErrorDb(" DB-SCRIPTS: WARNING: Process table `%s` id %u, command %u has no OTHER buddy %u found - maybe you need to update the script?", m_table, m_script->id, m_script->command, m_script->buddyEntry);
-                    pBuddy = pSearcher;
+                    // TODO: Remove this extra check output after a while - it might have false effects
+                    if (!creatureBuddy && origin->GetEntry() == m_script->buddyEntry)
+                    {
+                        sLog.outErrorDb(" DB-SCRIPTS: WARNING: Process table `%s` id %u, command %u has no OTHER buddy %u found - maybe you need to update the script?", m_table, m_script->id, m_script->command, m_script->buddyEntry);
+                        buddies.push_back(creatureBuddy);
+                    }
                 }
             }
             else
             {
-                GameObject* pGOBuddy = nullptr;
+                if (m_script->data_flags & SCRIPT_FLAG_ALL_ELIGIBLE_BUDDIES)
+                {
+                    GameObjectList gos;
+                    std::set<uint32> entries; // support for multiple entries
+                    entries.insert(m_script->buddyEntry);
+                    MaNGOS::AllGameObjectEntriesListInObjectRangeCheck go_check(*origin, entries, m_script->searchRadiusOrGuid);
+                    MaNGOS::GameObjectListSearcher<MaNGOS::AllGameObjectEntriesListInObjectRangeCheck> checker(gos, go_check);
+                    Cell::VisitGridObjects(origin, checker, m_script->searchRadiusOrGuid);
+                    for (GameObject* go : gos)
+                        buddies.push_back(go);
+                }
+                else
+                {
+                    GameObject* goBuddy = nullptr;
 
-                MaNGOS::NearestGameObjectEntryInObjectRangeCheck u_check(*pSearcher, m_script->buddyEntry, m_script->searchRadiusOrGuid);
-                MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck> searcher(pGOBuddy, u_check);
+                    MaNGOS::NearestGameObjectEntryInObjectRangeCheck u_check(*origin, m_script->buddyEntry, m_script->searchRadiusOrGuid);
+                    MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck> searcher(goBuddy, u_check);
 
-                Cell::VisitGridObjects(pSearcher, searcher, m_script->searchRadiusOrGuid);
-                pBuddy = pGOBuddy;
+                    Cell::VisitGridObjects(origin, searcher, m_script->searchRadiusOrGuid);
+                    if (goBuddy)
+                        buddies.push_back(goBuddy);
+                }                
             }
 
-            if (!pBuddy && m_script->command != SCRIPT_COMMAND_TERMINATE_SCRIPT)
+            if (buddies.empty() && m_script->command != SCRIPT_COMMAND_TERMINATE_SCRIPT)
             {
-                sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u has buddy %u not found in range %u of searcher %s (data-flags %u), skipping.", m_table, m_script->id, m_script->command, m_script->buddyEntry, m_script->searchRadiusOrGuid, pSearcher->GetGuidStr().c_str(), m_script->data_flags);
+                sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u has buddy %u not found in range %u of searcher %s (data-flags %u), skipping.", m_table, m_script->id, m_script->command, m_script->buddyEntry, m_script->searchRadiusOrGuid, origin->GetGuidStr().c_str(), m_script->data_flags);
                 return false;
             }
         }
@@ -1266,20 +1300,19 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject
 
     if (m_script->data_flags & SCRIPT_FLAG_BUDDY_AS_TARGET)
     {
-        pFinalSource = pOrigSource;
-        pFinalTarget = pBuddy;
+        finalTargets = buddies;
     }
     else
     {
-        pFinalSource = pBuddy ? pBuddy : pOrigSource;
-        pFinalTarget = pOrigTarget;
+        if (!buddies.empty())
+            finalSources = buddies;
     }
 
     if (m_script->data_flags & SCRIPT_FLAG_REVERSE_DIRECTION)
-        std::swap(pFinalSource, pFinalTarget);
+        std::swap(finalSources, finalTargets);
 
     if (m_script->data_flags & SCRIPT_FLAG_SOURCE_TARGETS_SELF)
-        pFinalTarget = pFinalSource;
+        finalTargets = finalSources;
 
     return true;
 }
@@ -1338,9 +1371,10 @@ Player* ScriptAction::GetPlayerTargetOrSourceAndLog(WorldObject* pSource, WorldO
 // Return true if and only if further parts of this script shall be skipped
 bool ScriptAction::HandleScriptStep()
 {
-    WorldObject* pSource;
-    WorldObject* pTarget;
-    Object* pSourceOrItem;                                  // Stores a provided pSource (if exists as WorldObject) or source-item
+    std::vector<WorldObject*> sources;
+    std::vector<WorldObject*> targets;
+
+    Object* itemSource = nullptr;
 
     {
         // Add scope for source & target variables so that they are not used below
@@ -1355,14 +1389,48 @@ bool ScriptAction::HandleScriptStep()
         DETAIL_FILTER_LOG(LOG_FILTER_DB_SCRIPT, "DB-SCRIPTS: Process table `%s` id %u, command %u for source %s (%sin world), target %s (%sin world)", m_table, m_script->id, m_script->command, m_sourceGuid.GetString().c_str(), source ? "" : "not ", m_targetGuid.GetString().c_str(), target ? "" : "not ");
 
         // Get expected source and target (if defined with buddy)
-        pSource = source && source->isType(TYPEMASK_WORLDOBJECT) ? (WorldObject*)source : nullptr;
-        pTarget = target && target->isType(TYPEMASK_WORLDOBJECT) ? (WorldObject*)target : nullptr;
-        if (!GetScriptProcessTargets(pSource, pTarget, pSource, pTarget))
+        if (source && source->isType(TYPEMASK_WORLDOBJECT))
+            sources.push_back(static_cast<WorldObject*>(source));
+        if (target && target->isType(TYPEMASK_WORLDOBJECT))
+            targets.push_back(static_cast<WorldObject*>(target));
+        if (!GetScriptProcessTargets(dynamic_cast<WorldObject*>(source), dynamic_cast<WorldObject*>(target), sources, targets))
             return false;
 
-        pSourceOrItem = pSource ? pSource : (source && source->isType(TYPEMASK_ITEM) ? source : nullptr);
+        if (source->isType(TYPEMASK_ITEM))
+            itemSource = source;
     }
 
+    bool finalResult = false;
+
+    std::vector<std::pair<WorldObject*, WorldObject*>> eligiblePairs;
+    if (!targets.empty())
+    {
+        for (auto source : sources)
+            for (auto target : targets)
+                eligiblePairs.emplace_back(source, target);
+    }
+    else
+    {
+        for (auto source : sources)
+            eligiblePairs.emplace_back(source, nullptr);
+    }
+
+    for (auto& data : eligiblePairs)
+    {
+        WorldObject* pSource = data.first;
+        WorldObject* pTarget = data.second;
+        Object* pSourceOrItem = pSource ? pSource : itemSource;
+
+        bool result = ExecuteDbscriptCommand(pSource, pTarget, pSourceOrItem);
+        if (result == true)
+            finalResult = true;
+    }
+
+    return finalResult;
+}
+
+bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTarget, Object* pSourceOrItem)
+{
     if (m_script->condition_id && !sObjectMgr.IsConditionSatisfied(m_script->condition_id, pTarget, m_map, pSource, CONDITION_FROM_DBSCRIPTS))
         return false;
 
