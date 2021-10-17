@@ -61,9 +61,9 @@ struct SpellScript
     // called on target hit after damage deal and proc
     virtual void OnAfterHit(Spell* /*spell*/) const {}
     // called after summoning a creature
-    virtual void OnSummon(Spell* spell, Creature* summon) const {}
+    virtual void OnSummon(Spell* /*spell*/, Creature* /*summon*/) const {}
     // called after summoning a gameobject
-    virtual void OnSummon(Spell* spell, GameObject* summon) const {}
+    virtual void OnSummon(Spell* /*spell*/, GameObject* /*summon*/) const {}
 };
 
 struct AuraCalcData
