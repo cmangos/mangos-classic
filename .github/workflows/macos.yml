@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: |
           brew install boost mysql-client
-          echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl)" >> $GITHUB_ENV
+          echo "OPENSSL_ROOT_DIR=$(brew --prefix --installed openssl)" >> $GITHUB_ENV
 
       - name: Configure
         run: cmake -DBoost_ARCHITECTURE=-x64 -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
