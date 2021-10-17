@@ -2122,7 +2122,7 @@ bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* ci
     if (!InitEntry(cinfo->Entry))
         return false;
 
-    cPos.SelectFinalPoint(this);
+    cPos.SelectFinalPoint(this, false);
 
     if (!cPos.Relocate(this))
         return false;
