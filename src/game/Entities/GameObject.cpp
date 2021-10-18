@@ -1275,6 +1275,30 @@ void GameObject::ResetDoorOrButton()
     m_cooldownTime = 0;
 }
 
+void GameObject::UseOpenableObject(bool open, uint32 withRestoreTime /*=0*/, bool useAlternativeState /*=false*/)
+{
+    if (open)
+    {
+        if (GetGoState() == GO_STATE_READY)
+        {
+            if (GetLootState() == GO_READY)
+                UseDoorOrButton(withRestoreTime, useAlternativeState);
+            else
+                ResetDoorOrButton();
+        }
+    }
+    else
+    {
+        if (GetGoState() == GO_STATE_ACTIVE)
+        {
+            if (GetLootState() == GO_READY)
+                UseDoorOrButton(withRestoreTime, useAlternativeState);
+            else
+                ResetDoorOrButton();
+        }
+    }
+}
+
 void GameObject::UseDoorOrButton(uint32 time_to_restore, bool alternative /* = false */)
 {
     if (m_lootState != GO_READY)

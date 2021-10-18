@@ -793,6 +793,7 @@ class GameObject : public WorldObject
         void UseDoorOrButton(uint32 time_to_restore = 0, bool alternative = false);
         // 0 = use `gameobject`.`spawntimesecs`
         void ResetDoorOrButton();
+        void UseOpenableObject(bool open, uint32 withRestoreTime = 0, bool useAlternativeState = false);
 
         ReputationRank GetReactionTo(Unit const* unit) const override;
 

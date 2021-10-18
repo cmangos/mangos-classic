@@ -44,28 +44,7 @@ void ScriptedInstance::DoUseDoorOrButton(uint32 entry, uint32 withRestoreTime /*
 void ScriptedInstance::DoUseOpenableObject(uint32 entry, bool open, uint32 withRestoreTime, bool useAlternativeState)
 {
     if (GameObject* go = GetSingleGameObjectFromStorage(entry))
-    {
-        if (open)
-        {
-            if (go->GetGoState() == GO_STATE_READY)
-            {
-                if (go->GetLootState() == GO_READY)
-                    go->UseDoorOrButton(withRestoreTime, useAlternativeState);
-                else
-                    go->ResetDoorOrButton();
-            }
-        }
-        else
-        {
-            if (go->GetGoState() == GO_STATE_ACTIVE)
-            {
-                if (go->GetLootState() == GO_READY)
-                    go->UseDoorOrButton(withRestoreTime, useAlternativeState);
-                else
-                    go->ResetDoorOrButton();
-            }
-        }
-    }
+        go->UseOpenableObject(open, withRestoreTime, useAlternativeState);
 }
 
 /**

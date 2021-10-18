@@ -233,6 +233,7 @@ struct ScriptInfo
         {
             uint32 goGuid;                                  // datalong
             uint32 resetDelay;                              // datalong2
+            uint32 alternate;                               // datalong3
         } changeDoor;
 
         struct                                              // SCRIPT_COMMAND_ACTIVATE_OBJECT (13)

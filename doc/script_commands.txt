@@ -217,6 +217,7 @@ Defining a buddy could be done in several way:
 11 SCRIPT_COMMAND_OPEN_DOOR                 source = any
                                             * datalong = db_guid (can be skipped for buddy)
                                             * datalong2 = reset_delay
+                                            * datalong3 = alternate state - bool 0 or 1
 
 12 SCRIPT_COMMAND_CLOSE_DOOR                source = any
                                             * datalong = db_guid (can be skipped for buddy)
@@ -280,6 +281,7 @@ Defining a buddy could be done in several way:
 
 24 SCRIPT_COMMAND_MOUNT_TO_ENTRY_OR_MODEL   resultingSource = Creature
                                             * datalong=creature entry/modelid (depend on data_flags) OR 0 to dismount
+                                            * datalong2=bool 0=no, 1=yes, change speed to creature entry run speed in DB
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: use datalong value as modelid explicit
 
 25 SCRIPT_COMMAND_SET_RUN                   resultingSource = Creature
