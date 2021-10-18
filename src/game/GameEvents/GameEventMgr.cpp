@@ -189,7 +189,7 @@ void GameEventMgr::LoadFromDB()
         sLog.outString(">> Loaded %u game events", count);
     }
 
-    result.reset(WorldDatabase.Query("SELECT entry,UNIX_TIMESTAMP(start_time),UNIX_TIMESTAMP(end_time) FROM game_event_time"));
+    result.reset(WorldDatabase.Query("SELECT entry, start_time, end_time FROM game_event_time"));
     if (!result)
     {
         sLog.outString(">> Table game_event_time is empty!");
@@ -212,10 +212,8 @@ void GameEventMgr::LoadFromDB()
             if (gameEvent.start == time_t(FAR_FUTURE)) // skip loading time if previous loading errored
                 continue;
 
-            uint64 starttime = fields[1].GetUInt64();
-            gameEvent.start = time_t(starttime);
-            uint64 endtime = fields[2].GetUInt64();
-            gameEvent.end = time_t(endtime);
+            gameEvent.start = fields[1].GetTime();
+            gameEvent.end = fields[2].GetTime();
         }
         while (result->NextRow());
     }
