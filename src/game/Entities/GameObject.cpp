@@ -254,6 +254,15 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, float x, float
             SetGoState(goinfo->transport.startOpen ? GO_STATE_ACTIVE : GO_STATE_READY);
             SetGoAnimProgress(animprogress);
             break;
+        case GAMEOBJECT_TYPE_GENERIC:
+        case GAMEOBJECT_TYPE_SPELL_FOCUS:
+        case GAMEOBJECT_TYPE_GOOBER:
+        case GAMEOBJECT_TYPE_CHEST:
+            SetUInt32Value(GAMEOBJECT_DYN_FLAGS, GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE);
+            break;
+        case GAMEOBJECT_TYPE_QUESTGIVER:
+            SetUInt32Value(GAMEOBJECT_DYN_FLAGS, GO_DYNFLAG_LO_ACTIVATE);
+            break;
         default:
             break;
     }
