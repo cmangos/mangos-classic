@@ -509,7 +509,10 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
         }
     }
 
-    setFaction(GetCreatureInfo()->Faction);
+    uint32 faction = GetCreatureInfo()->Faction;
+    if (data && data->spawnTemplate->faction)
+        faction = data->spawnTemplate->faction;
+    setFaction(faction);
 
     SetUInt32Value(UNIT_NPC_FLAGS, GetCreatureInfo()->NpcFlags);
 
@@ -553,10 +556,6 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
 
     SetCanModifyStats(true);
     UpdateAllStats();
-
-    uint32 faction = GetCreatureInfo()->Faction;
-    if (data && data->spawnTemplate->faction)
-        faction = data->spawnTemplate->faction;
 
     // checked and error show at loading templates
     if (FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(faction))
