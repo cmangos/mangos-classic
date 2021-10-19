@@ -152,7 +152,7 @@ namespace Movement
         args.flags.flying = unit.m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_CAN_FLY | MOVEFLAG_HOVER | MOVEFLAG_FLYING | MOVEFLAG_LEVITATING));
     }
 
-    void MoveSplineInit::SetFacing(const Unit* target)
+    void MoveSplineInit::SetFacing(const WorldObject* target)
     {
         args.flags.EnableFacingTarget();
         args.facing.target = target->GetObjectGuid().GetRawValue();
