@@ -968,14 +968,17 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Creature templates...");
     sObjectMgr.LoadCreatureTemplates();
 
-    sLog.outString("Loading Creature template spells...");
-    sObjectMgr.LoadCreatureTemplateSpells();
+    sLog.outString("Loading Creature immunities...");
+    sObjectMgr.LoadCreatureImmunities();
+
+    sLog.outString("Loading Creature spell lists...");
+    sObjectMgr.LoadCreatureSpellLists();
 
     sLog.outString("Loading Creature cooldowns...");
     sObjectMgr.LoadCreatureCooldowns();
 
-    sLog.outString("Loading Creature immunities...");
-    sObjectMgr.LoadCreatureImmunities();
+    sLog.outString("Loading Creature template spells...");
+    sObjectMgr.LoadCreatureTemplateSpells();
 
     sLog.outString("Loading ItemRequiredTarget...");
     sObjectMgr.LoadItemRequiredTarget();

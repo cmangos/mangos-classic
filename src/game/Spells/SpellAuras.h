@@ -187,6 +187,7 @@ class SpellAuraHolder
 
         bool HasMechanic(uint32 mechanic) const;
         bool HasMechanicMask(uint32 mechanicMask) const;
+        bool IsDispellableByMask(uint32 dispelMask, Unit const* caster, SpellEntry const* spellInfo) const;
 
         void UpdateAuraDuration();
 

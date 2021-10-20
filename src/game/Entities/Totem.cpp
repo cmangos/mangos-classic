@@ -66,6 +66,11 @@ bool Totem::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* 
     SetCanParry(false);
     SetCanBlock(false);
 
+    if (GetCreatureInfo()->SpellList)
+        SetSpellList(GetCreatureInfo()->SpellList);
+    else // legacy compatibility
+        SetSpellList(cinfo->Entry * 100 + 0);
+
     return true;
 }
 
@@ -102,8 +107,9 @@ void Totem::Summon(Unit* owner)
         owner->AI()->JustSummoned((Creature*)this);
 
     // there are some totems, which exist just for their visual appeareance
-    for (uint32 spellId : m_spells)
+    for (auto& data : m_spellList.Spells)
     {
+        uint32 spellId = data.second.SpellId;
         if (!spellId)
             break;
         switch (m_type)
@@ -155,6 +161,14 @@ void Totem::UnSummon()
         SetDeathState(DEAD);
 
     AddObjectToRemoveList();
+}
+
+uint32 Totem::GetSpell() const
+{
+    if (m_spellList.Spells.empty())
+        return 0;
+
+    return m_spellList.Spells.begin()->second.SpellId;
 }
 
 void Totem::SetTypeBySummonSpell(SpellEntry const* spellProto)

@@ -8,7 +8,6 @@
 #include "Chat/Chat.h"
 #include "Server/DBCStores.h"                               // Mostly only used the Lookup acces, but a few cases really do use the DBC-Stores
 #include "AI/BaseAI/CreatureAI.h"
-#include "Entities/EntitiesMgr.h"
 #include "Entities/Creature.h"
 
 // Spell targets used by SelectSpell
@@ -186,9 +185,6 @@ struct ScriptedAI : public CreatureAI
 
         // Teleports a player without dropping threat (only teleports to same map)
         void DoTeleportPlayer(Unit* unit, float x, float y, float z, float ori);
-
-        // Returns a list of friendly CC'd units within range
-        CreatureList DoFindFriendlyCC(float range);
 
         // Returns a list of all friendly units missing a specific buff within range
         CreatureList DoFindFriendlyMissingBuff(float range, uint32 spellId, bool inCombat);

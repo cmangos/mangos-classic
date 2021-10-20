@@ -6000,6 +6000,24 @@ bool SpellAuraHolder::HasMechanicMask(uint32 mechanicMask) const
     return false;
 }
 
+bool SpellAuraHolder::IsDispellableByMask(uint32 dispelMask, Unit const* caster, SpellEntry const* spellInfo) const
+{
+    if ((1 << GetSpellProto()->Dispel) & dispelMask)
+    {
+        if (GetSpellProto()->Dispel == DISPEL_MAGIC)
+        {
+            // do not remove positive auras if friendly target
+            //               negative auras if non-friendly target
+            bool positive = IsPositive();
+            if (positive == caster->CanAssistSpell(GetTarget(), spellInfo))
+                if (positive || !IsCharm())
+                    return false;
+        }
+        return true;
+    }
+    return false;
+}
+
 bool SpellAuraHolder::IsPersistent() const
 {
     for (auto aur : m_auras)

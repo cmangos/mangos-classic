@@ -578,6 +578,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "creature_cooldowns",          SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadCreatureCooldownsCommand,       "", nullptr },
         { "creature_involvedrelation",   SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadCreatureQuestInvRelationsCommand, "", nullptr },
         { "creature_loot_template",      SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadLootTemplatesCreatureCommand,   "", nullptr },
+        { "creature_spell_list",         SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadCreatureSpellLists,             "", nullptr },
         { "creature_questrelation",      SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadCreatureQuestRelationsCommand,  "", nullptr },
         { "creature_template_classlevelstats", SEC_ADMINISTRATOR, true, &ChatHandler::HandleReloadCreaturesStatsCommand,     "", nullptr },
         { "dbscript_string",             SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadDbScriptStringCommand,          "", nullptr },

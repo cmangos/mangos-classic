@@ -1066,6 +1066,24 @@ bool ChatHandler::HandleReloadCreatureCooldownsCommand(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleReloadCreatureSpellLists(char* /*args*/)
+{
+    sLog.outString("Reloading creature spell lists...");
+    auto result = sObjectMgr.LoadCreatureSpellLists();
+    SendGlobalSysMessage("Reloaded creature spell lists.");
+    if (result)
+    {
+        sMapMgr.DoForAllMaps([result](Map* map)
+        {
+            map->GetMessager().AddMessage([result](Map* map)
+            {
+                map->GetMapDataContainer().SetCreatureSpellListContainer(result);
+            });
+        });
+    }
+    return true;
+}
+
 bool ChatHandler::HandleLoadScriptsCommand(char* args)
 {
     return *args != 0;

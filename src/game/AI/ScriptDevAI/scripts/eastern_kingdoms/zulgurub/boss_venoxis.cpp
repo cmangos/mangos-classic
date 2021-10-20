@@ -25,6 +25,7 @@ EndScriptData
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "zulgurub.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -46,182 +47,84 @@ enum
     // common spells
     SPELL_SNAKE_FORM        = 23849,
     SPELL_FRENZY            = 23537,
-    SPELL_TRASH             = 3391
+    SPELL_TRASH             = 3391,
+
+    SPELL_LIST_PHASE_1 = 1450701,
+    SPELL_LIST_PHASE_2 = 1450702,
+    SPELL_LIST_PHASE_3 = 1450703,
 };
 
-struct boss_venoxisAI : public ScriptedAI
+enum VenoxisActions
 {
-    boss_venoxisAI(Creature* pCreature) : ScriptedAI(pCreature)
+    VENOXIS_PHASE_2,
+    VENOXIS_PHASE_3,
+    VENOXIS_FRENZY,
+    VENOXIS_ACTION_MAX,
+};
+
+struct boss_venoxisAI : public CombatAI
+{
+    boss_venoxisAI(Creature* creature) : CombatAI(creature, VENOXIS_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
+        AddTimerlessCombatAction(VENOXIS_PHASE_2, true);
+        AddTimerlessCombatAction(VENOXIS_PHASE_3, true);
+        AddTimerlessCombatAction(VENOXIS_FRENZY, true);
     }
 
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiHolyWrathTimer;
-    uint32 m_uiVenomSpitTimer;
-    uint32 m_uiRenewTimer;
-    uint32 m_uiPoisonCloudTimer;
-    uint32 m_uiHolySpellTimer;
-    uint32 m_uiDispellTimer;
-    uint32 m_uiTrashTimer;
-
-    bool m_bPhaseTwo;
-    bool m_bInBerserk;
-
-    void Reset() override
-    {
-        m_uiHolyWrathTimer      = 40000;
-        m_uiVenomSpitTimer      = 5500;
-        m_uiRenewTimer          = 30000;
-        m_uiPoisonCloudTimer    = 2000;
-        m_uiHolySpellTimer      = 10000;
-        m_uiDispellTimer        = 35000;
-        m_uiTrashTimer          = 5000;
-
-        m_bPhaseTwo             = false;
-        m_bInBerserk            = false;
-    }
+    ScriptedInstance* m_instance;
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_VENOXIS, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_VENOXIS, FAIL);
+
+        m_creature->SetSpellList(SPELL_LIST_PHASE_1);
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_VENOXIS, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_VENOXIS, DONE);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // Troll phase
-        if (!m_bPhaseTwo)
+        switch (action)
         {
-            if (m_uiDispellTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_DISPELL) == CAST_OK)
-                    m_uiDispellTimer = urand(15000, 30000);
-            }
-            else
-                m_uiDispellTimer -= uiDiff;
+            case VENOXIS_PHASE_2:
+                if (m_creature->GetHealthPercent() > 50.f)
+                    break;
 
-            if (m_uiRenewTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_RENEW) == CAST_OK)
-                    m_uiRenewTimer = urand(20000, 30000);
-            }
-            else
-                m_uiRenewTimer -= uiDiff;
-
-            if (m_uiHolyWrathTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HOLY_WRATH) == CAST_OK)
-                    m_uiHolyWrathTimer = urand(15000, 25000);
-            }
-            else
-                m_uiHolyWrathTimer -= uiDiff;
-
-            if (m_uiHolySpellTimer < uiDiff)
-            {
-                uint8 uiTargetsInRange = 0;
-
-                // See how many targets are in melee range
-                ThreatList const& tList = m_creature->getThreatManager().getThreatList();
-                for (auto iter : tList)
+                if (DoCastSpellIfCan(nullptr, SPELL_SNAKE_FORM) == CAST_OK)
                 {
-                    if (Unit* pTempTarget = m_creature->GetMap()->GetUnit(iter->getUnitGuid()))
-                    {
-                        if (pTempTarget->GetTypeId() == TYPEID_PLAYER && m_creature->CanReachWithMeleeAttack(pTempTarget))
-                            ++uiTargetsInRange;
-                    }
-                }
-
-                // If there are more targets in melee range cast holy nova, else holy fire
-                // not sure which is the minimum targets for holy nova
-                if (uiTargetsInRange > 3)
-                    DoCastSpellIfCan(m_creature, SPELL_HOLY_NOVA);
-                else
-                {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                        DoCastSpellIfCan(pTarget, SPELL_HOLY_FIRE);
-                }
-
-                m_uiHolySpellTimer = urand(4000, 8000);
-            }
-            else
-                m_uiHolySpellTimer -= uiDiff;
-
-            // Transform at 50% hp
-            if (m_creature->GetHealthPercent() < 50.0f)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_SNAKE_FORM, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
-                {
-                    DoCastSpellIfCan(m_creature, SPELL_PARASITIC_SERPENT, CAST_TRIGGERED);
                     DoScriptText(SAY_TRANSFORM, m_creature);
+                    DoCastSpellIfCan(nullptr, SPELL_POISON_CLOUD); // an instant cloud on change
                     DoResetThreat();
-                    m_bPhaseTwo = true;
+                    m_creature->SetSpellList(SPELL_LIST_PHASE_2);
+                    DisableCombatAction(action);
                 }
-            }
+                break;
+            case VENOXIS_PHASE_3:
+                if (m_creature->GetHealthPercent() > 25.f)
+                    break;
+                m_creature->SetSpellList(SPELL_LIST_PHASE_3);
+                break;
+            case VENOXIS_FRENZY:
+                if (m_creature->GetHealthPercent() > 10.f)
+                    break;
+                if (DoCastSpellIfCan(nullptr, SPELL_FRENZY) == CAST_OK)
+                    DisableCombatAction(action);
+                break;
         }
-        // Snake phase
-        else
-        {
-            if (m_uiPoisonCloudTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_POISON_CLOUD) == CAST_OK)
-                    m_uiPoisonCloudTimer = 15000;
-            }
-            else
-                m_uiPoisonCloudTimer -= uiDiff;
-
-            if (m_uiVenomSpitTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                {
-                    if (DoCastSpellIfCan(pTarget, SPELL_VENOMSPIT) == CAST_OK)
-                        m_uiVenomSpitTimer = urand(15000, 20000);
-                }
-            }
-            else
-                m_uiVenomSpitTimer -= uiDiff;
-        }
-
-        if (m_uiTrashTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_TRASH) == CAST_OK)
-                m_uiTrashTimer = urand(10000, 20000);
-        }
-        else
-            m_uiTrashTimer -= uiDiff;
-
-        if (!m_bInBerserk && m_creature->GetHealthPercent() < 11.0f)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
-                m_bInBerserk = true;
-        }
-
-        DoMeleeAttackIfReady();
     }
 };
-
-UnitAI* GetAI_boss_venoxis(Creature* pCreature)
-{
-    return new boss_venoxisAI(pCreature);
-}
 
 void AddSC_boss_venoxis()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_venoxis";
-    pNewScript->GetAI = &GetAI_boss_venoxis;
+    pNewScript->GetAI = &GetNewAIInstance<boss_venoxisAI>;
     pNewScript->RegisterSelf();
 }

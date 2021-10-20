@@ -788,6 +788,15 @@ CreatureImmunityVector const* ObjectMgr::GetCreatureImmunitySet(uint32 entry, ui
     return &(*setItr).second;
 }
 
+CreatureSpellList* ObjectMgr::GetCreatureSpellList(uint32 Id) const
+{
+    auto itr = m_spellListContainer->spellLists.find(Id);
+    if (itr == m_spellListContainer->spellLists.end())
+        return nullptr;
+
+    return &(*itr).second;
+}
+
 void ObjectMgr::LoadCreatureImmunities()
 {
     uint32 count = 0;
@@ -821,6 +830,102 @@ void ObjectMgr::LoadCreatureImmunities()
 
     sLog.outString(">> Loaded %u creature_immunities definitions", count);
     sLog.outString();
+}
+
+std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
+{
+    std::shared_ptr<CreatureSpellListContainer> newContainer = std::make_shared<CreatureSpellListContainer>();
+    uint32 count = 0;
+
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Id, Type, Param1, Param2, Param3 FROM creature_spell_targeting"));
+    if (result)
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+
+            CreatureSpellListTargeting target;
+            target.Id = fields[0].GetUInt32();
+            target.Type = fields[1].GetUInt32();
+
+            if (target.Type > SPELL_LIST_TARGETING_MAX)
+            {
+                sLog.outErrorDb("LoadCreatureSpellLists: Invalid creature_spell_targeting type %u. Skipping.", target.Type);
+                continue;
+            }
+
+            target.Param1 = fields[2].GetUInt32();
+            target.Param2 = fields[3].GetUInt32();
+            target.Param3 = fields[4].GetUInt32();
+            newContainer->targeting[target.Id] = target;
+        } while (result->NextRow());
+    }
+
+    result.reset(WorldDatabase.Query("SELECT Id, Name, ChanceSupportAction, ChanceRangedAttack FROM creature_spell_list_entry"));
+    if (result)
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+            CreatureSpellList list;
+            list.Id = fields[0].GetUInt32();
+            list.Name = fields[1].GetCppString();
+            if (list.Name.empty())
+            {
+                sLog.outErrorDb("LoadCreatureSpellLists: Invalid creature_spell_list_entry empty name.");
+                continue;
+            }
+
+            list.ChanceSupportAction = fields[2].GetUInt32();
+            list.ChanceRangedAttack = fields[3].GetUInt32();
+            list.Disabled = false;
+            newContainer->spellLists[list.Id] = list;
+        } while (result->NextRow());
+    }
+
+    result.reset(WorldDatabase.Query("SELECT Id, Position, SpellId, Flags, TargetId, ScriptId, Availability, Probability, InitialMin, InitialMax, RepeatMin, RepeatMax FROM creature_spell_list"));
+    if (result)
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+            CreatureSpellListSpell spell;
+            spell.Id = fields[0].GetUInt32();
+            spell.Position = fields[1].GetUInt32();
+            spell.SpellId = fields[2].GetUInt32();
+            spell.Flags = fields[3].GetUInt32();
+
+            if (!sSpellTemplate.LookupEntry<SpellEntry>(spell.SpellId))
+            {
+                sLog.outErrorDb("LoadCreatureSpellLists: Invalid creature_spell_list %u spell %u does not exist. Skipping.", spell.Id, spell.SpellId);
+                continue;
+            }
+
+            uint32 targetId = fields[4].GetUInt32();
+            auto itr = newContainer->targeting.find(targetId);
+            if (itr == newContainer->targeting.end())
+            {
+                sLog.outErrorDb("LoadCreatureSpellLists: Invalid creature_spell_list %u target %u. Skipping.", spell.Id, targetId);
+                continue;
+            }
+            spell.Target = &(*itr).second;
+
+            spell.ScriptId = fields[5].GetUInt32();
+            spell.Availability = fields[6].GetUInt32();
+            spell.Probability = fields[7].GetUInt32();
+            spell.InitialMin = fields[8].GetUInt32();
+            spell.InitialMax = fields[9].GetUInt32();
+            spell.RepeatMin = fields[10].GetUInt32();
+            spell.RepeatMax = fields[11].GetUInt32();
+            newContainer->spellLists[spell.Id].Spells.emplace(spell.Position, spell);
+        } while (result->NextRow());
+    }
+
+    m_spellListContainer = newContainer;
+    sLog.outString(">> Loaded %u creature_spell_list definitions", count);
+    sLog.outString();
+
+    return newContainer;
 }
 
 void ObjectMgr::LoadEquipmentTemplates()
@@ -3275,18 +3380,6 @@ void ObjectMgr::BuildPlayerLevelInfo(uint8 race, uint8 _class, uint8 level, Play
                 info->stats[STAT_SPIRIT]    += (lvl > 38 ? 3 : (lvl > 5 ? 1 : 0));
         }
     }
-}
-
-CreatureTemplateSpells const* ObjectMgr::GetCreatureTemplateSpellSet(uint32 entry, uint32 setId) const
-{
-    auto itr = m_creatureTemplateSpells.find(entry);
-    if (itr != m_creatureTemplateSpells.end())
-    {
-        auto itrSecond = (*itr).second.find(setId);
-        if (itrSecond != (*itr).second.end())
-            return &(*itrSecond).second;
-    }
-    return nullptr;
 }
 
 /* ********************************************************************************************* */
@@ -8832,28 +8925,50 @@ void ObjectMgr::LoadCreatureTemplateSpells()
         {
             Field* fields = result->Fetch();
 
-            CreatureTemplateSpells templateSpells;
+            uint32 entry = fields[0].GetUInt32();
+            uint32 setId = fields[1].GetUInt32();
 
-            templateSpells.entry = fields[0].GetUInt32();
-            templateSpells.setId = fields[1].GetUInt32();
-            for (uint32 i = 0; i < CREATURE_MAX_SPELLS; ++i)
-                templateSpells.spells[i] = fields[2 + i].GetUInt32();
-
-            if (!sCreatureStorage.LookupEntry<CreatureInfo>(templateSpells.entry))
+            if (!sCreatureStorage.LookupEntry<CreatureInfo>(entry))
             {
-                sLog.outErrorDb("LoadCreatureTemplateSpells: Spells found for creature entry %u, but creature does not exist, skipping", templateSpells.entry);
+                sLog.outErrorDb("LoadCreatureTemplateSpells: Spells found for creature entry %u, but creature does not exist, skipping", entry);
                 continue;
             }
-            for (uint8 i = 0; i < CREATURE_MAX_SPELLS; ++i)
-            {
-                if (templateSpells.spells[i] && !sSpellTemplate.LookupEntry<SpellEntry>(templateSpells.spells[i]) && templateSpells.spells[i] != 2) // 2 is attack which is hardcoded in client
-                {
-                    sLog.outErrorDb("LoadCreatureTemplateSpells: Spells found for creature entry %u, assigned spell %u does not exist, set to 0", templateSpells.entry, templateSpells.spells[i]);
-                    templateSpells.spells[i] = 0;
-                }
-            }
 
-            m_creatureTemplateSpells[templateSpells.entry].emplace(templateSpells.setId, templateSpells);
+            auto& spellList = m_spellListContainer->spellLists[entry * 100 + setId];
+            spellList.Disabled = true;
+            auto& spells = spellList.Spells;
+
+            for (uint32 i = 0; i < CREATURE_MAX_SPELLS; ++i)
+            {
+                uint32 spellId = fields[2 + i].GetUInt32();
+                if (!spellId)
+                    continue;
+
+                if (!sSpellTemplate.LookupEntry<SpellEntry>(spellId) && spellId != 2) // 2 is attack which is hardcoded in client
+                {
+                    sLog.outErrorDb("LoadCreatureTemplateSpells: Spells found for creature entry %u, assigned spell %u does not exist, set to 0", entry, spellId);
+                    continue;
+                }
+
+                CreatureSpellListSpell spell;
+                spell.Id = entry * 100 + setId;
+                spell.Position = i;
+                spell.SpellId = spellId;
+                spell.Flags = 0;
+                spell.Target = &m_spellListContainer->targeting[1];
+                spell.InitialMin = 0;
+                spell.InitialMax = 0;
+
+                auto cooldown = GetCreatureCooldownRange(entry, spellId);
+
+                spell.RepeatMin = cooldown.first;
+                spell.RepeatMax = cooldown.second;
+
+                spell.Availability = 100;
+                spell.Probability = 0;
+                spell.ScriptId = 0;
+                spells.emplace(i, spell);
+            }            
         } while (result->NextRow());
     }
 

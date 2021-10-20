@@ -114,9 +114,10 @@ SpellEntry const* ScriptedAI::SelectSpell(Unit* target, int32 school, int32 mech
     uint32 spellCount = 0;
 
     // Check if each spell is viable(set it to null if not)
+    std::vector<uint32> spells = m_unit->GetCharmSpells();
     for (uint8 i = 0; i < 4; ++i)
     {
-        SpellEntry const* tempSpellInfo = GetSpellStore()->LookupEntry<SpellEntry>(m_creature->m_spells[i]);
+        SpellEntry const* tempSpellInfo = GetSpellStore()->LookupEntry<SpellEntry>(spells[i]);
 
         // This spell doesn't exist
         if (!tempSpellInfo)
@@ -124,11 +125,11 @@ SpellEntry const* ScriptedAI::SelectSpell(Unit* target, int32 school, int32 mech
 
         // Targets and Effects checked first as most used restrictions
         // Check the spell targets if specified
-        if (selectTargets && !(SpellSummary[m_creature->m_spells[i]].Targets & (1 << (selectTargets - 1))))
+        if (selectTargets && !(SpellSummary[spells[i]].Targets & (1 << (selectTargets - 1))))
             continue;
 
         // Check the type of spell if we are looking for a specific spell type
-        if (selectEffects && !(SpellSummary[m_creature->m_spells[i]].Effects & (1 << (selectEffects - 1))))
+        if (selectEffects && !(SpellSummary[spells[i]].Effects & (1 << (selectEffects - 1))))
             continue;
 
         // Check for school if specified
@@ -302,18 +303,6 @@ void ScriptedAI::DoTeleportPlayer(Unit* unit, float x, float y, float z, float o
     }
 
     ((Player*)unit)->TeleportTo(unit->GetMapId(), x, y, z, ori, TELE_TO_NOT_LEAVE_COMBAT);
-}
-
-CreatureList ScriptedAI::DoFindFriendlyCC(float range)
-{
-    CreatureList creatureList;
-
-    MaNGOS::FriendlyCCedInRangeCheck u_check(m_creature, range);
-    MaNGOS::CreatureListSearcher<MaNGOS::FriendlyCCedInRangeCheck> searcher(creatureList, u_check);
-
-    Cell::VisitGridObjects(m_creature, searcher, range);
-
-    return creatureList;
 }
 
 CreatureList ScriptedAI::DoFindFriendlyMissingBuff(float range, uint32 spellId, bool inCombat)

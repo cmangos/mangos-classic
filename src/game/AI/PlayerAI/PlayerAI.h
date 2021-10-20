@@ -21,25 +21,29 @@
 
 #include "AI/BaseAI/UnitAI.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
+#include "Entities/CreatureSpellList.h"
 #include <functional>
 #include <vector>
 
 class Player;
 
 // for future use - in case PlayerAI needs a different purpose from control during charms split them
-class PlayerAI : public UnitAI, public TimerManager
+class PlayerAI : public UnitAI
 {
     public:
         PlayerAI(Player* player);
 
-        void UpdateAI(const uint32 diff) override;
         void JustGotCharmed(Unit* charmer) override;
         void EnterEvadeMode() override;
         void AttackClosestEnemy() override;
+
+        CreatureSpellList const& GetSpellList() const override { return m_spellList; }
     protected:
         uint32 LookupHighestLearnedRank(uint32 spellId);
         void AddPlayerSpellAction(uint32 spellId, std::function<Unit*()> selector = nullptr);
         Player* m_player;
+
+        CreatureSpellList m_spellList;
     private:
         struct SpellData
         {

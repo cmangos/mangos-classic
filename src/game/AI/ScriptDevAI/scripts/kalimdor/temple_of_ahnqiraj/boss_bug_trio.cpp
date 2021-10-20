@@ -368,7 +368,7 @@ struct boss_yaujAI : public boss_silithidRoyaltyAI
             }
             case YAUJ_DISPEL:
             {
-                CreatureList targets = DoFindFriendlyCC(50.0f);
+                CreatureList targets = DoFindFriendlyEligibleDispel(50.0f);
                 if (Creature* target = targets.empty() ? nullptr : *(targets.begin()))
                     if (DoCastSpellIfCan(target, SPELL_DISPEL) == CAST_OK)
                         ResetCombatAction(action, urand(10000, 15000));

@@ -148,6 +148,13 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         // get list of all maps
         const MapMapType& Maps() const { return i_maps; }
 
+        template<typename Do> void DoForAllMaps(Do& _do)
+        {
+            for (auto& mapData : i_maps)
+            {
+                _do(mapData.second);
+            }
+        }
         template<typename Do> void DoForAllMapsWithMapId(uint32 mapId, Do& _do);
         template<typename Check> inline WorldObject* SearchOnAllLoadedMap(Check& check);
         void DoForAllMaps(const std::function<void(Map*)>& worker);

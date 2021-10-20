@@ -96,12 +96,14 @@ CreatureEventAI::CreatureEventAI(Creature* creature) : CreatureAI(creature),
     m_LastSpellMaxRange(0),
     m_despawnAggregationMask(0)
 {
-    InitAI();
 
 }
 
 void CreatureEventAI::InitAI()
 {
+    m_CreatureEventAIList.clear();
+    m_distanceSpells.clear();
+    m_mainSpells.clear();
     // Need make copy for filter unneeded steps and safe in case table reload
     CreatureEventAI_Event_Map::const_iterator creatureEventsItr = sEventAIMgr.GetCreatureEventAIMap().find(m_creature->GetEntry());
     if (creatureEventsItr != sEventAIMgr.GetCreatureEventAIMap().end())
@@ -142,21 +144,10 @@ void CreatureEventAI::InitAI()
                         if (i.action[actionIdx].type == ACTION_T_CAST)
                         {
                             if (i.action[actionIdx].cast.castFlags & CAST_MAIN_SPELL)
-                            {
-                                if (!m_mainSpellId)
-                                {
-                                    m_mainSpellId = i.action[actionIdx].cast.spellId;
-                                    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(m_mainSpellId);
-                                    m_mainSpellCost = Spell::CalculatePowerCost(spellInfo, m_creature);
-                                    m_mainSpellMinRange = GetSpellMinRange(sSpellRangeStore.LookupEntry(spellInfo->rangeIndex));
-                                    m_mainAttackMask = SpellSchoolMask(m_mainAttackMask + GetSchoolMask(spellInfo->School));
-                                    m_mainSpellInfo = spellInfo;
-                                }
-                                m_mainSpells.insert(i.action[actionIdx].cast.spellId);
-                            }
+                                AddMainSpell(i.action[actionIdx].cast.spellId);
 
                             if (i.action[actionIdx].cast.castFlags & CAST_DISTANCE_YOURSELF)
-                                m_distanceSpells.insert(i.action[actionIdx].cast.spellId);
+                                AddDistanceSpell(i.action[actionIdx].cast.spellId);
                         }
             }
         }
@@ -389,15 +380,14 @@ bool CreatureEventAI::CheckEvent(CreatureEventAIHolder& holder, Unit* actionInvo
             if (!m_creature->IsInCombat())
                 return false;
 
-            CreatureList pList;
-            DoFindFriendlyCC(pList, (float)event.friendly_is_cc.radius);
+            CreatureList list = DoFindFriendlyEligibleDispel((float)event.friendly_is_cc.radius);
 
             // List is empty
-            if (pList.empty())
+            if (list.empty())
                 return false;
 
             // We don't really care about the whole list, just return first available
-            holder.eventTarget = *(pList.begin());
+            holder.eventTarget = *(list.begin());
             break;
         }
         case EVENT_T_FRIENDLY_MISSING_BUFF:
@@ -1311,7 +1301,7 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             break;
         case ACTION_T_SET_SPELL_SET:
         {
-            m_creature->UpdateSpellSet(action.spellSet.setId);
+            m_creature->SetSpellList(action.spellSet.setId);
             break;
         }
         case ACTION_T_SET_IMMOBILIZED_STATE:
@@ -1345,6 +1335,8 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
 
 void CreatureEventAI::JustRespawned()                       // NOTE that this is called from the AI's constructor as well
 {
+    CreatureAI::JustRespawned();
+    InitAI();
     if (m_creature->IsNoAggroOnSight())
         SetReactState(REACT_DEFENSIVE);
     else
@@ -1542,6 +1534,7 @@ void CreatureEventAI::CorpseRemoved(uint32& respawnDelay)
 
 void CreatureEventAI::EnterCombat(Unit* enemy)
 {
+    CreatureAI::EnterCombat(enemy);
     // Check for on combat start events
     IncreaseDepthIfNecessary();
     for (auto& i : m_CreatureEventAIList)
@@ -1767,13 +1760,6 @@ inline Unit* CreatureEventAI::GetTargetByType(uint32 target, Unit* actionInvoker
             isError = true;
             return nullptr;
     }
-}
-
-void CreatureEventAI::DoFindFriendlyCC(CreatureList& list, float range) const
-{
-    MaNGOS::FriendlyCCedInRangeCheck u_check(m_creature, range);
-    MaNGOS::CreatureListSearcher<MaNGOS::FriendlyCCedInRangeCheck> searcher(list, u_check);
-    Cell::VisitGridObjects(m_creature, searcher, range);
 }
 
 void CreatureEventAI::DoFindFriendlyMissingBuff(CreatureList& list, float range, uint32 spellId, bool inCombat) const

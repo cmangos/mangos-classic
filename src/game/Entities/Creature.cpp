@@ -151,9 +151,6 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_regenTimer = 200;
     m_valuesCount = UNIT_END;
 
-    for (unsigned int& m_spell : m_spells)
-        m_spell = 0;
-
     SetWalk(true, true);
 }
 
@@ -564,7 +561,10 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
             SetPvP(true);
     }
 
-    UpdateSpellSet(0); // by default always 0
+    if (GetCreatureInfo()->SpellList)
+        SetSpellList(GetCreatureInfo()->SpellList);
+    else // legacy compatibility
+        SetSpellList(Entry * 100 + 0);
     UpdateImmunitiesSet(0);
 
     // if eventData set then event active and need apply spell_start
@@ -849,6 +849,7 @@ bool Creature::AIM_Initialize()
 
     // Handle Spawned Events, also calls Reset()
     m_ai->JustRespawned();
+    m_ai->SpellListChanged();
 
     if (InstanceData* mapInstance = GetInstanceData())
         mapInstance->OnCreatureRespawn(this);
@@ -1456,6 +1457,27 @@ float Creature::_GetSpellDamageMod(int32 Rank)
     }
 }
 
+std::vector<uint32> Creature::GetCharmSpells() const
+{
+    std::vector<uint32> spells(CREATURE_MAX_SPELLS, 0);
+    for (auto& data : m_spellList.Spells)
+        spells[data.second.Position] = data.second.SpellId;
+    return spells;
+}
+
+bool Creature::GetSpellCooldown(uint32 spellId, uint32& cooldown) const
+{
+    for (auto& data : m_spellList.Spells)
+    {
+        if (data.second.SpellId == spellId)
+        {
+            cooldown = urand(data.second.RepeatMin, data.second.RepeatMax);
+            return true;
+        }
+    }
+    return false;
+}
+
 bool Creature::CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data /*=nullptr*/, GameEventCreatureData const* eventData /*=nullptr*/)
 {
     m_originalEntry = cinfo->Entry;
@@ -1816,14 +1838,15 @@ SpellEntry const* Creature::ReachWithSpellAttack(Unit* pVictim)
     if (!pVictim)
         return nullptr;
 
-    for (unsigned int m_spell : m_spells)
+    for (auto& data : m_spellList.Spells)
     {
-        if (!m_spell)
+        uint32 spellId = data.second.SpellId;
+        if (!spellId)
             continue;
-        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(m_spell);
+        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
         if (!spellInfo)
         {
-            sLog.outError("WORLD: unknown spell id %i", m_spell);
+            sLog.outError("WORLD: unknown spell id %i", spellId);
             continue;
         }
 
@@ -1868,14 +1891,15 @@ SpellEntry const* Creature::ReachWithSpellCure(Unit* pVictim)
     if (!pVictim)
         return nullptr;
 
-    for (unsigned int m_spell : m_spells)
+    for (auto& data : m_spellList.Spells)
     {
-        if (!m_spell)
+        uint32 spellId = data.second.SpellId;
+        if (!spellId)
             continue;
-        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(m_spell);
+        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
         if (!spellInfo)
         {
-            sLog.outError("WORLD: unknown spell id %i", m_spell);
+            sLog.outError("WORLD: unknown spell id %i", spellId);
             continue;
         }
 
@@ -2156,22 +2180,44 @@ void Creature::SetInCombatWithZone(bool checkAttackability)
 
 bool Creature::HasSpell(uint32 spellID) const
 {
-    uint8 i;
-    for (i = 0; i < CREATURE_MAX_SPELLS; ++i)
-        if (spellID == m_spells[i])
-            break;
-    return i < CREATURE_MAX_SPELLS;                         // break before end of iteration of known spells
+    for (auto& spell : m_spellList.Spells)
+        if (spell.second.SpellId == spellID)
+            return true;
+
+    return false;
 }
 
-void Creature::UpdateSpellSet(uint32 spellSet)
+void Creature::UpdateSpell(int32 index, int32 newSpellId)
+{
+    auto itr = m_spellList.Spells.find(index);
+    if (itr != m_spellList.Spells.end())
+        (*itr).second.SpellId = newSpellId;
+}
+
+void Creature::SetSpellList(uint32 spellSet)
 {
     // Try difficulty dependent version before falling back to base entry
-    CreatureTemplateSpells const* templateSpells = sObjectMgr.GetCreatureTemplateSpellSet(GetCreatureInfo()->Entry, spellSet);
-    if (!templateSpells)
-        templateSpells = sObjectMgr.GetCreatureTemplateSpellSet(GetEntry(), spellSet);
-    if (templateSpells)
-        for (int i = 0; i < CREATURE_MAX_SPELLS; ++i)
-            m_spells[i] = templateSpells->spells[i];
+    auto spellList = GetMap()->GetMapDataContainer().GetCreatureSpellList(spellSet);
+    if (!spellList)
+        return;
+    
+    m_spellList = *spellList;
+    for (auto itr = m_spellList.Spells.begin(); itr != m_spellList.Spells.end();)
+    {
+        auto& spell = (*itr).second;
+        if (spell.Availability < 100)
+        {
+            if (urand(0, 100) > spell.Availability) // such spells will not be available during this spell list lifetime
+            {
+                itr = m_spellList.Spells.erase(itr);
+                continue;
+            }
+        }
+        ++itr;
+    }
+
+    if (AI()) // might not yet be initialized - dealt with at init
+        AI()->SpellListChanged();
 }
 
 void Creature::UpdateImmunitiesSet(uint32 immunitySet)
@@ -2756,9 +2802,18 @@ void Creature::ResetSpellHitCounter()
     m_hitBySpells.clear();
 }
 
-void Creature::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* /*itemProto*/, bool /*permanent*/, uint32 forcedDuration)
+void Creature::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* /*itemProto*/, bool permanent, uint32 forcedDuration)
 {
     uint32 recTime = forcedDuration ? forcedDuration : spellEntry.RecoveryTime;
+    if (!forcedDuration)
+    {
+        uint32 cooldown = 0;
+        bool success = GetSpellCooldown(spellEntry.Id, cooldown);
+        if (!success)
+            success = sObjectMgr.GetCreatureCooldown(GetCreatureInfo()->Entry, spellEntry.Id, cooldown);
+        if (success)
+            recTime = cooldown;
+    }
     if (recTime || spellEntry.CategoryRecoveryTime)
     {
         uint32 categoryRecTime = spellEntry.CategoryRecoveryTime;
@@ -2770,11 +2825,10 @@ void Creature::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* /*
                 modOwner->ApplySpellMod(spellEntry.Id, SPELLMOD_COOLDOWN, categoryRecTime);
         }
 
-        m_cooldownMap.AddCooldown(GetMap()->GetCurrentClockTime(), spellEntry.Id, recTime, spellEntry.Category, categoryRecTime);
+        m_cooldownMap.AddCooldown(GetMap()->GetCurrentClockTime(), spellEntry.Id, recTime, spellEntry.Category, categoryRecTime, 0, permanent);
     }
-    else if (uint32 cooldown = sObjectMgr.GetCreatureCooldown(GetCreatureInfo()->Entry, spellEntry.Id))
+    if (recTime && !permanent)
     {
-        m_cooldownMap.AddCooldown(GetMap()->GetCurrentClockTime(), spellEntry.Id, cooldown, 0, 0);
         if (Player const* player = dynamic_cast<Player const*>(GetCharmer()))
         {
             // send to client
@@ -2782,7 +2836,7 @@ void Creature::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* /*
             data << GetObjectGuid();
             // data << uint8(1);
             data << uint32(spellEntry.Id);
-            data << uint32(cooldown);
+            data << uint32(recTime);
             player->GetSession()->SendPacket(data);
         }
     }

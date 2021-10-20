@@ -1482,6 +1482,7 @@ class Unit : public WorldObject
         void SetCanBlock(const bool flag);
 
         bool CanReactInCombat() const { return (IsAlive() && !IsCrowdControlled() && !GetCombatManager().IsEvadingHome()); }
+        bool CanCastSpellInCombat() const { return (IsAlive() && !GetCombatManager().IsEvadingHome()); } // spells are stopped by spell system
         bool CanDodgeInCombat() const;
         bool CanDodgeInCombat(const Unit* attacker) const;
         bool CanParryInCombat() const;
@@ -1629,6 +1630,7 @@ class Unit : public WorldObject
             return m_spellAuraHolders.find(spellId) != m_spellAuraHolders.end();
         }
         bool HasAuraTypeWithCaster(AuraType auratype, ObjectGuid caster) const;
+        bool HasMechanicMaskOrDispelMaskAura(uint32 dispelMask, uint32 mechanicMask, Unit const* caster) const;
 
         virtual bool HasSpell(uint32 /*spellID*/) const { return false; }
 
@@ -2326,6 +2328,8 @@ class Unit : public WorldObject
 
         virtual bool CanCallForAssistance() const { return true; }
         virtual bool CanCheckForHelp() const { return true; }
+
+        virtual std::vector<uint32> GetCharmSpells() const { return {}; }
     protected:
         bool MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spellInfo, uint32 selectFlags, SelectAttackingTargetParams params) const;
 
