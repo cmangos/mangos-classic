@@ -39,7 +39,7 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_EMOTE                    = 1,            // resSource = Unit, resTarget = Unit/none
     // datalong1 = emote_id, dataint1-4 optional for random selected emotes
     SCRIPT_COMMAND_FIELD_SET                = 2,            // source = any, datalong = field_id, datalong2 = value
-    SCRIPT_COMMAND_MOVE_TO                  = 3,            // resSource = Creature, datalong2 = travel_speed*100, x/y/z
+    SCRIPT_COMMAND_MOVE_TO                  = 3,            // resSource = Creature, datalong1 = relayId, datalong2 = travel_speed*100, datalong3 = forcedMovement, x/y/z/o
     // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: teleport unit to position
     SCRIPT_COMMAND_FLAG_SET                 = 4,            // source = any, datalong = field_id, datalong2 = bitmask
     SCRIPT_COMMAND_FLAG_REMOVE              = 5,            // source = any, datalong = field_id, datalong2 = bitmask
@@ -62,7 +62,7 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_CREATE_ITEM              = 17,           // source or target must be player, datalong = item entry, datalong2 = amount
     SCRIPT_COMMAND_DESPAWN_SELF             = 18,           // resSource = Creature, datalong = despawn delay
     SCRIPT_COMMAND_PLAY_MOVIE               = 19,           // target can only be a player, datalog = movie id
-    SCRIPT_COMMAND_MOVEMENT                 = 20,           // resSource = Creature. datalong = MovementType (0:idle, 1:random or 2:waypoint), datalong2 = wander-distance/pathId, datalong3 = timer
+    SCRIPT_COMMAND_MOVEMENT                 = 20,           // resSource = Creature. datalong = MovementType (0:idle, 1:random or 2:waypoint), datalong2 = wander-distance/pathId, datalong3 = timer/passTarget, dataint1 = forcedMovement
     // data_flags &  SCRIPT_FLAG_COMMAND_ADDITIONAL = Random-movement around current position
     SCRIPT_COMMAND_SET_ACTIVEOBJECT         = 21,           // resSource = Creature
     // datalong=bool 0=off, 1=on
@@ -180,8 +180,9 @@ struct ScriptInfo
 
         struct                                              // SCRIPT_COMMAND_MOVE_TO (3)
         {
-            uint32 unused1;                                 // datalong
+            uint32 relayId;                                 // datalong
             uint32 travelSpeed;                             // datalong2
+            uint32 forcedMovement;                          // datalong3
         } moveTo;
 
         struct                                              // SCRIPT_COMMAND_FLAG_SET (4)
@@ -282,7 +283,7 @@ struct ScriptInfo
         {
             uint32 movementType;                            // datalong
             uint32 wanderORpathId;                          // datalong2
-            uint32 timer;                                   // datalong3
+            uint32 timerOrPassTarget;                       // datalong3
         } movement;
 
         struct                                              // SCRIPT_COMMAND_SET_ACTIVEOBJECT (21)

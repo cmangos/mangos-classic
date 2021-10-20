@@ -30,7 +30,7 @@ class AbstractPathMovementGenerator : public MovementGenerator
 {
     public:
         explicit AbstractPathMovementGenerator(const Movement::PointsArray& path, float orientation = 0, int32 offset = 0);
-        explicit AbstractPathMovementGenerator(const WaypointPath* path, int32 offset = 0, bool cyclic = false);
+        explicit AbstractPathMovementGenerator(const WaypointPath* path, int32 offset = 0, bool cyclic = false, ObjectGuid guid = ObjectGuid());
 
         void Initialize(Unit& owner) override;
         void Finalize(Unit& owner) override;
@@ -52,6 +52,7 @@ class AbstractPathMovementGenerator : public MovementGenerator
         bool m_cyclic;
         bool m_firstCycle;
         uint32 m_startPoint;
+        ObjectGuid m_guid;
 
     private:
         bool m_speedChanged;
@@ -64,7 +65,7 @@ class FixedPathMovementGenerator : public AbstractPathMovementGenerator
             AbstractPathMovementGenerator(path, orientation, offset), m_flying(flying), m_speed(speed), m_forcedMovement(forcedMovement) {}
         FixedPathMovementGenerator(const Movement::PointsArray& path, uint32 forcedMovement, bool flying = false, float speed = 0, int32 offset = 0) :
             FixedPathMovementGenerator(path, 0, forcedMovement, flying, speed, offset) {}
-        FixedPathMovementGenerator(Unit& unit, int32 pathId, WaypointPathOrigin wpOrigin, ForcedMovement forcedMovement, bool flying = false, float speed = 0, int32 offset = 0, bool cyclic = false);
+        FixedPathMovementGenerator(Unit& unit, int32 pathId, WaypointPathOrigin wpOrigin, ForcedMovement forcedMovement, bool flying = false, float speed = 0, int32 offset = 0, bool cyclic = false, ObjectGuid guid = ObjectGuid());
         FixedPathMovementGenerator(Creature& creature);
 
         void Initialize(Unit& unit) override;

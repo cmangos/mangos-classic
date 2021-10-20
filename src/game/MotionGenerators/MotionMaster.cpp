@@ -370,7 +370,7 @@ void MotionMaster::MoveStay(float x, float y, float z, float o, bool asMain)
     Mutate(new StayMovementGenerator(x, y, z, o));
 }
 
-void MotionMaster::MovePoint(uint32 id, Position const& position, ForcedMovement forcedMovement/* = FORCED_MOVEMENT_NONE*/, float speed/* = 0.f*/, bool generatePath/* = true*/)
+void MotionMaster::MovePoint(uint32 id, Position const& position, ForcedMovement forcedMovement/* = FORCED_MOVEMENT_NONE*/, float speed/* = 0.f*/, bool generatePath/* = true*/, ObjectGuid guid/* = ObjectGuid()*/, uint32 relayId/* = 0*/)
 {
     Mutate(new PointMovementGenerator(id, position.x, position.y, position.z, position.o, generatePath, forcedMovement, speed));
 }
@@ -407,10 +407,10 @@ void MotionMaster::MovePath(std::vector<G3D::Vector3>& path, float o, ForcedMove
     Mutate(new FixedPathMovementGenerator(path, o, forcedMovement, flying));
 }
 
-void MotionMaster::MovePath(int32 pathId, WaypointPathOrigin wpOrigin /*= PATH_NO_PATH*/, ForcedMovement forcedMovement, bool flying, float speed, bool cyclic)
+void MotionMaster::MovePath(int32 pathId, WaypointPathOrigin wpOrigin /*= PATH_NO_PATH*/, ForcedMovement forcedMovement, bool flying, float speed, bool cyclic, ObjectGuid guid/* = ObjectGuid()*/)
 {
     m_currentPathId = pathId;
-    Mutate(new FixedPathMovementGenerator(*m_owner, pathId, wpOrigin, forcedMovement, flying, speed, 0, cyclic));
+    Mutate(new FixedPathMovementGenerator(*m_owner, pathId, wpOrigin, forcedMovement, flying, speed, 0, cyclic, guid));
 }
 
 void MotionMaster::MoveRetreat(float x, float y, float z, float o, uint32 delay)
@@ -432,7 +432,7 @@ void MotionMaster::MoveFleeing(Unit* source, uint32 time)
         Mutate(new FleeingMovementGenerator(*source));
 }
 
-void MotionMaster::MoveWaypoint(uint32 pathId /*=0*/, uint32 source /*=0==PATH_NO_PATH*/, uint32 initialDelay /*=0*/, uint32 overwriteEntry /*=0*/, ForcedMovement forcedMovement)
+void MotionMaster::MoveWaypoint(uint32 pathId /*=0*/, uint32 source /*=0==PATH_NO_PATH*/, uint32 initialDelay /*=0*/, uint32 overwriteEntry /*=0*/, ForcedMovement forcedMovement /*=FORCED_MOVEMENT_NONE*/, ObjectGuid guid/* = ObjectGuid()*/)
 {
     if (m_owner->GetTypeId() == TYPEID_UNIT)
     {
@@ -448,6 +448,7 @@ void MotionMaster::MoveWaypoint(uint32 pathId /*=0*/, uint32 source /*=0==PATH_N
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s start MoveWaypoint()", m_owner->GetGuidStr().c_str());
         WaypointMovementGenerator<Creature>* newWPMMgen = new WaypointMovementGenerator<Creature>(*creature);
         newWPMMgen->SetForcedMovement(forcedMovement);
+        newWPMMgen->SetGuid(guid);
         Mutate(newWPMMgen);
         newWPMMgen->InitializeWaypointPath(*creature, pathId, (WaypointPathOrigin)source, initialDelay, overwriteEntry);
     }

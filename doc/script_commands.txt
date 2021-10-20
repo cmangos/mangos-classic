@@ -176,7 +176,9 @@ Defining a buddy could be done in several way:
 
  3 SCRIPT_COMMAND_MOVE_TO                   resultingSource = Creature
                                             If position is very near to current position, or x=y=z=0, then only orientation is changed
+                                            * datalong = dbscripts_on_relay id - executed for source and target same as this script
                                             * datalong2 = travel_speed*100 (use 0 for creature default movement)
+                                            * datalong3 = enum ForcedMovement
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: teleport unit to position
                                             * x/y/z/o
 
@@ -253,10 +255,11 @@ Defining a buddy could be done in several way:
                                             * datalog = movie id
 
 20 SCRIPT_COMMAND_MOVEMENT                  resultingSource = Creature
-                                            * datalong = MovementType (0:idle, 1:random or 2:waypoint)
+                                            * datalong = MovementType (0:idle, 1:random, 2:waypoint, 3:path)
                                             * datalong2 = wanderDistance (for random movement), pathId (for waypoint movement)
-                                            * datalong3 = timer for timed random movement
+                                            * datalong3 = timer for timed random movement or pass target to waypoint and path movegen (by default, source targets self)
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: RandomMovement around current position
+                                            * dataint = enum ForcedMovement
 
 21 SCRIPT_COMMAND_SET_ACTIVEOBJECT          resultingSource = Creature
                                             * datalong=bool 0=off, 1=on

@@ -122,6 +122,9 @@ void PointMovementGenerator::MovementInform(Unit& unit)
                     ai->SummonedMovementInform(static_cast<Creature*>(&unit), type, m_id);
             }
     }
+
+    if (m_relayId)
+        unit.GetMap()->ScriptsStart(sRelayScripts, m_relayId, &unit, m_guid ? unit.GetMap()->GetWorldObject(m_guid) : nullptr);
 }
 
 void RetreatMovementGenerator::Initialize(Unit& unit)
