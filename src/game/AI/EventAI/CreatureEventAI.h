@@ -830,7 +830,7 @@ struct CreatureEventAIHolder
     bool UpdateRepeatTimer(Creature* creature, uint32 repeatMin, uint32 repeatMax);
 };
 
-class CreatureEventAI : public CreatureAI, public TimerManager
+class CreatureEventAI : public CreatureAI
 {
     public:
         explicit CreatureEventAI(Creature* creature);
@@ -843,7 +843,7 @@ class CreatureEventAI : public CreatureAI, public TimerManager
         void GetAIInformation(ChatHandler& reader) override;
 
         void JustRespawned() override;
-        void Reset();
+        void Reset() override;
         void JustReachedHome() override;
         void EnterCombat(Unit* enemy) override;
         void EnterEvadeMode() override;
@@ -857,7 +857,6 @@ class CreatureEventAI : public CreatureAI, public TimerManager
         void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType damagetype, SpellEntry const* spellInfo) override;
         void JustPreventedDeath(Unit* attacker);
         void HealedBy(Unit* healer, uint32& healedAmount) override;
-        void UpdateAI(const uint32 diff) override;
         void ReceiveEmote(Player* player, uint32 textEmote) override;
         void SummonedCreatureJustDied(Creature* summoned) override;
         void SummonedCreatureDespawn(Creature* summoned) override;
@@ -867,7 +866,7 @@ class CreatureEventAI : public CreatureAI, public TimerManager
 
         static int Permissible(const Creature* creature);
 
-        void UpdateEventTimers(const uint32 diff);
+        virtual void UpdateEventTimers(const uint32 diff) override;
         void ProcessEvents(Unit* actionInvoker = nullptr, Unit* AIEventSender = nullptr);
         bool CheckEvent(CreatureEventAIHolder& holder, Unit* actionInvoker = nullptr, Unit* AIEventSender = nullptr);
         void ResetEvent(CreatureEventAIHolder& holder);
@@ -885,32 +884,13 @@ class CreatureEventAI : public CreatureAI, public TimerManager
         void DoFindFriendlyMissingBuff(CreatureList& list, float range, uint32 spellId, bool inCombat) const;
         void DoFindFriendlyCC(CreatureList& list, float range) const;
 
-        void SetRangedMode(bool state, float distance, RangeModeType type);
-        void SetCurrentRangedMode(bool state);
-
-        void JustStoppedMovementOfTarget(SpellEntry const* spell, Unit* victim) override;
-        void OnSpellInterrupt(SpellEntry const* spellInfo) override;
-        void OnSpellCooldownAdded(SpellEntry const* spellInfo) override;
-
-        void DistancingStarted() override;
-        void DistancingEnded() override;
-
         MovementGeneratorType GetDefaultMovement() { return m_defaultMovement; }
-
-        bool IsRangedUnit() override { return m_currentRangedMode; }
-        SpellSchoolMask GetMainAttackSchoolMask() const override { return m_currentRangedMode ? m_mainAttackMask : CreatureAI::GetMainAttackSchoolMask(); }
-
-        virtual CanCastResult DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 castFlags = 0) override;
-
-        bool IsMainSpellPrevented(SpellEntry const* spellInfo) const;
     protected:
         std::string GetAIName() override { return "EventAI"; }
         // Event rules specifiers
         bool IsTimerExecutedEvent(EventAI_Type type) const;
         bool IsRepeatableEvent(EventAI_Type type) const;
         bool IsTimerBasedEvent(EventAI_Type type) const;
-        // Event rules specifiers end
-        void DistanceYourself();
 
         uint32 m_EventUpdateTime;                           // Time between event updates
         uint32 m_EventDiff;                                 // Time between the last event call
@@ -935,23 +915,7 @@ class CreatureEventAI : public CreatureAI, public TimerManager
         std::set<uint32> m_entriesForDespawn;
         GuidVector m_despawnGuids;
 
-        // Caster ai support
-        bool m_rangedMode;
-        RangeModeType m_rangedModeSetting;
-        float m_chaseDistance;
-        bool m_currentRangedMode;
-        std::unordered_set<uint32> m_mainSpells;
-        std::unordered_set<uint32> m_distanceSpells;
-        uint32 m_mainSpellId;
-        uint32 m_mainSpellCost;
-        SpellEntry const* m_mainSpellInfo;
-        float m_mainSpellMinRange;
-        SpellSchoolMask m_mainAttackMask;
-
         MovementGeneratorType m_defaultMovement; // TODO: Extend to all of AI
-
-        // Distancer
-        bool m_distancingCooldown;
 };
 
 #endif

@@ -119,8 +119,8 @@ void PetAI::EnterEvadeMode()
 
 void PetAI::UpdateAI(const uint32 diff)
 {
-    if (!m_unit->IsAlive())
-        return;
+    UpdateTimers(diff, m_creature->IsInCombat());
+
     Creature* creature = (m_unit->GetTypeId() == TYPEID_UNIT) ? static_cast<Creature*>(m_unit) : nullptr;
     Pet* pet = (creature && creature->IsPet()) ? static_cast<Pet*>(m_unit) : nullptr;
 

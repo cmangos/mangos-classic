@@ -322,9 +322,9 @@ enum WhitemaneActions
     WHITEMANE_ACTION_SCARLET_RESURRECTION_ENTER_COMBAT,
 };
 
-struct boss_high_inquisitor_whitemaneAI : public RangedCombatAI
+struct boss_high_inquisitor_whitemaneAI : public CombatAI
 {
-    boss_high_inquisitor_whitemaneAI(Creature* creature) : RangedCombatAI(creature, WHITEMANE_ACTION_MAX), m_instance(static_cast<instance_scarlet_monastery*>(creature->GetInstanceData()))
+    boss_high_inquisitor_whitemaneAI(Creature* creature) : CombatAI(creature, WHITEMANE_ACTION_MAX), m_instance(static_cast<instance_scarlet_monastery*>(creature->GetInstanceData()))
     {
         AddTimerlessCombatAction(WHITEMANE_ACTION_DEEP_SLEEP, true);
         AddCombatAction(WHITEMANE_ACTION_HEAL, true);

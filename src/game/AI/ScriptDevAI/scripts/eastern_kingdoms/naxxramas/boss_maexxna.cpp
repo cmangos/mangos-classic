@@ -288,10 +288,11 @@ struct boss_maexxnaAI : public CombatAI
 ###################*/
 
 // This NPC handles the spell sync between the player that is web wrapped (with a DoT) and the related Web Wrap NPC
-struct npc_invisible_manAI : public ScriptedAI, public TimerManager
+struct npc_invisible_manAI : public ScriptedAI
 {
     npc_invisible_manAI(Creature* creature) : ScriptedAI(creature) {
         AddCustomAction(1, true, [&]() { HandleVictimCheck(); });
+        SetReactState(REACT_PASSIVE);
         Reset();
     }
 
@@ -336,11 +337,6 @@ struct npc_invisible_manAI : public ScriptedAI, public TimerManager
             default:
                 break;
         }
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        UpdateTimers(diff);
     }
 };
 

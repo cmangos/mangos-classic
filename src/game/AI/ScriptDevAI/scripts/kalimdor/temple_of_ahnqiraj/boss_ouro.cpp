@@ -340,9 +340,9 @@ struct npc_ouro_spawnerAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-struct npc_ouro_moundAI : public ScriptedAI, public TimerManager
+struct npc_ouro_moundAI : public ScriptedAI
 {
-    npc_ouro_moundAI(Creature* creature) : ScriptedAI(creature)
+    npc_ouro_moundAI(Creature* creature) : ScriptedAI(creature, 0)
     {
         SetReactState(REACT_DEFENSIVE);
         AddCustomAction(1, true, [&]() { PickNewTarget(); });
@@ -382,12 +382,6 @@ struct npc_ouro_moundAI : public ScriptedAI, public TimerManager
     {
         ScriptedAI::JustRespawned();
         ResetTimer(1, 1000); // delayed first target
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        UpdateTimers(diff);
-        ScriptedAI::UpdateAI(diff);
     }
 };
 

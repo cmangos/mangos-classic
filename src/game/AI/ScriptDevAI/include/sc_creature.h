@@ -47,7 +47,8 @@ enum SCEquip
 struct ScriptedAI : public CreatureAI
 {
     public:
-        explicit ScriptedAI(Creature* creature);
+        explicit ScriptedAI(Creature* creature, uint32 combatActions);
+        explicit ScriptedAI(Creature* creature) : ScriptedAI(creature, 0) {}
         ~ScriptedAI() {}
 
         // *************
@@ -131,7 +132,7 @@ struct ScriptedAI : public CreatureAI
         // void AttackStart(Unit* who) override;
 
         // Called at World update tick
-        void UpdateAI(const uint32 diff) override;
+        // void UpdateAI(const uint32 diff) override;
 
         // Called when an AI Event is received
         void ReceiveAIEvent(AIEventType /*eventType*/, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override {}
@@ -158,7 +159,7 @@ struct ScriptedAI : public CreatureAI
          * Called by default on creature evade and respawn
          * In most scripts also called in the constructor of the AI
          */
-        virtual void Reset() = 0;
+        // virtual void Reset() = 0;
 
         /// Called at creature EnterCombat with an enemy
         /**

@@ -978,7 +978,7 @@ enum npc_aoe_damage_trigger
     SPELL_CONSUMPTION_NPC_16697 = 28874,
 };
 
-struct npc_aoe_damage_triggerAI : public ScriptedAI, public TimerManager
+struct npc_aoe_damage_triggerAI : public ScriptedAI
 {
     npc_aoe_damage_triggerAI(Creature* pCreature) : ScriptedAI(pCreature), m_uiAuraPassive(SetAuraPassive())
     {
@@ -1010,11 +1010,6 @@ struct npc_aoe_damage_triggerAI : public ScriptedAI, public TimerManager
     }
 
     void Reset() override {}
-
-    void UpdateAI(const uint32 diff) override
-    {
-        UpdateTimers(diff);
-    }
 };
 
 /*######
@@ -1027,7 +1022,7 @@ enum
     TARGET_DUMMY_SPAWN_EFFECT   = 4507
 };
 
-struct npc_advanced_target_dummyAI : public ScriptedAI, public TimerManager
+struct npc_advanced_target_dummyAI : public ScriptedAI
 {
     npc_advanced_target_dummyAI(Creature* creature) : ScriptedAI(creature), m_dieTimer(15000)
     {

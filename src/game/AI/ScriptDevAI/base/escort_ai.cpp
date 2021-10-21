@@ -164,13 +164,9 @@ void npc_escortAI::UpdateAI(const uint32 diff)
     UpdateEscortAI(diff);
 }
 
-void npc_escortAI::UpdateEscortAI(const uint32 /*diff*/)
+void npc_escortAI::UpdateEscortAI(const uint32 diff)
 {
-    // Check if we have a current target
-    if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-        return;
-
-    DoMeleeAttackIfReady();
+    ScriptedAI::UpdateAI(diff);
 }
 
 /// Helper function for transition between old Escort Movment and using WaypointMMGen

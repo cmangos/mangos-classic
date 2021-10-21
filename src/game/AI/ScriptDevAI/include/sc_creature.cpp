@@ -19,9 +19,10 @@ struct TSpellSummary
     uint8 Effects;                                          // set of enum SelectEffect
 }* SpellSummary;
 
-ScriptedAI::ScriptedAI(Creature* creature) : CreatureAI(creature),
+ScriptedAI::ScriptedAI(Creature* creature, uint32 combatActions) : CreatureAI(creature, combatActions),
     m_uiEvadeCheckCooldown(2500)
-{}
+{
+}
 
 /// This function shows if combat movement is enabled, overwrite for more info
 void ScriptedAI::GetAIInformation(ChatHandler& reader)
@@ -36,21 +37,6 @@ void ScriptedAI::EnterCombat(Unit* enemy)
 {
     if (enemy)
         Aggro(enemy);
-}
-
-/**
- * Main update function, by default let the creature behave as expected by a mob (threat management and melee dmg)
- * Always handle here threat-management with m_creature->SelectHostileTarget()
- * Handle (if required) melee attack with DoMeleeAttackIfReady()
- * This is usally overwritten to support timers for ie spells
- */
-void ScriptedAI::UpdateAI(const uint32 /*diff*/)
-{
-    // Check if we have a current target
-    if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-        return;
-
-    DoMeleeAttackIfReady();
 }
 
 /**

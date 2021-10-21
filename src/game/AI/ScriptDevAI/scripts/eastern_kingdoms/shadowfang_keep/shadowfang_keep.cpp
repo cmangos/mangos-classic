@@ -58,7 +58,7 @@ enum
     GOSSIP_ITEM_DOOR        = -3033000
 };
 
-struct npc_shadowfang_prisonerAI : public npc_escortAI, public TimerManager
+struct npc_shadowfang_prisonerAI : public npc_escortAI
 {
     npc_shadowfang_prisonerAI(Creature* creature) : npc_escortAI(creature)
     {
@@ -66,7 +66,6 @@ struct npc_shadowfang_prisonerAI : public npc_escortAI, public TimerManager
         m_npcEntry = creature->GetEntry();
         m_speechStep = 1;
         AddCustomAction(1, true, [&]() { HandleSpeech(); });
-        Reset();
     }
 
     ScriptedInstance* m_instance;
@@ -155,14 +154,6 @@ struct npc_shadowfang_prisonerAI : public npc_escortAI, public TimerManager
             default:
                 break;
         }
-    }
-
-    void Reset() override {}
-
-    void UpdateAI(const uint32 diff) override
-    {
-        UpdateTimers(diff);
-        npc_escortAI::UpdateAI(diff);
     }
 };
 
@@ -394,9 +385,9 @@ enum ArugalActions
     ARUGAL_ACTIONS_MAX,
 };
 
-struct boss_arugalAI : public RangedCombatAI
+struct boss_arugalAI : public CombatAI
 {
-    boss_arugalAI(Creature* creature) : RangedCombatAI(creature, ARUGAL_ACTIONS_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    boss_arugalAI(Creature* creature) : CombatAI(creature, ARUGAL_ACTIONS_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
         AddCombatAction(ARUGAL_TELEPORT, 22000, 26000);
         AddCombatAction(ARUGAL_CURSE, 20000, 30000);

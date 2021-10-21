@@ -82,7 +82,7 @@ float RaiderCoords[15][3] =
     {-11467.391f, 1537.989f, 50.726f}  // WP5b
 };
 
-struct npc_daphne_stilwellAI : public npc_escortAI, public TimerManager
+struct npc_daphne_stilwellAI : public npc_escortAI
 {
     npc_daphne_stilwellAI(Creature* creature) : npc_escortAI(creature)
     {
@@ -306,12 +306,6 @@ struct npc_daphne_stilwellAI : public npc_escortAI, public TimerManager
             m_shootTimer -= diff;
 
         DoMeleeAttackIfReady();
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        UpdateTimers(diff);
-        npc_escortAI::UpdateAI(diff);
     }
 };
 
