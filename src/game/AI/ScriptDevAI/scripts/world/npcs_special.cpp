@@ -814,11 +814,15 @@ bool GossipSelect_npc_innkeeper(Player* pPlayer, Creature* pCreature, uint32 /*u
 enum
 {
     SAY_HEAL                    = -1000187,
+    SAY_HEAL_HENZE_NARM_FAULK   = 2283,
 
     SPELL_SYMBOL_OF_LIFE        = 8593,
+    SPELL_QUEST_SELF_HEALING    = 25155,        // unused
     SPELL_SHIMMERING_VESSEL     = 31225,
     SPELL_REVIVE_SELF           = 32343,
 
+    NPC_HENZE_FAULK             = 6172,
+    NPC_NARM_FAULK              = 6177,
     NPC_FURBOLG_SHAMAN          = 17542,        // draenei side
     NPC_BLOOD_KNIGHT            = 17768,        // blood elf side
 };
@@ -828,15 +832,21 @@ struct npc_redemption_targetAI : public ScriptedAI
     npc_redemption_targetAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
     uint32 m_uiEvadeTimer;
-    uint32 m_uiHealTimer;
+    uint32 m_OrientationTimer;
+    uint32 m_TextTimer;
+    uint32 m_EmoteTimer;
 
     ObjectGuid m_playerGuid;
 
     void Reset() override
     {
         m_uiEvadeTimer = 0;
-        m_uiHealTimer  = 0;
+        m_OrientationTimer = 0;
+        m_TextTimer = 0;
+        m_EmoteTimer = 0;
 
+        // Reset Orientation?
+        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
         m_creature->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
         m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
     }
@@ -848,33 +858,69 @@ struct npc_redemption_targetAI : public ScriptedAI
             return;
 
         DoCastSpellIfCan(m_creature, SPELL_REVIVE_SELF);
-        m_creature->SetDeathState(JUST_ALIVED);
+        m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
+        m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+        m_uiEvadeTimer = 2 * MINUTE * IN_MILLISECONDS;
         m_playerGuid = m_guid;
-        m_uiHealTimer = 2000;
+        m_OrientationTimer = 3000;
+        m_TextTimer = 4000;
+        m_EmoteTimer = 7000;
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (m_uiHealTimer)
+        if (m_OrientationTimer)
         {
-            if (m_uiHealTimer <= uiDiff)
+            if (m_OrientationTimer <= uiDiff)
             {
-                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
                 {
-                    DoScriptText(SAY_HEAL, m_creature, pPlayer);
-
-                    // Quests 9600 and 9685 requires kill credit
-                    if (m_creature->GetEntry() == NPC_FURBOLG_SHAMAN || m_creature->GetEntry() == NPC_BLOOD_KNIGHT)
-                        pPlayer->KilledMonsterCredit(m_creature->GetEntry(), m_creature->GetObjectGuid());
+                    m_creature->SetFacingToObject(player);
+                    m_OrientationTimer = 0;
                 }
-
-                m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
-                m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-                m_uiHealTimer = 0;
-                m_uiEvadeTimer = 2 * MINUTE * IN_MILLISECONDS;
             }
             else
-                m_uiHealTimer -= uiDiff;
+                m_OrientationTimer -= uiDiff;
+        }
+
+        if (m_TextTimer)
+        {
+            if (m_TextTimer <= uiDiff)
+            {
+                if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                {
+                    // Quests 1783 and 1786 require NpcFlags i.6866
+                    if (m_creature->GetEntry() == NPC_HENZE_FAULK || m_creature->GetEntry() == NPC_NARM_FAULK)
+                    {
+                        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                        DoBroadcastText(SAY_HEAL_HENZE_NARM_FAULK, m_creature, player);
+                    }
+                    // Quests 9600 and 9685 requires kill credit i.6866/24184
+                    if (m_creature->GetEntry() == NPC_FURBOLG_SHAMAN || m_creature->GetEntry() == NPC_BLOOD_KNIGHT)
+                    {
+                        DoScriptText(SAY_HEAL, m_creature, player);
+                        player->KilledMonsterCredit(m_creature->GetEntry(), m_creature->GetObjectGuid());
+                    }
+
+                    m_TextTimer = 0;
+                }
+            }
+            else
+                m_TextTimer -= uiDiff;
+        }
+
+        if (m_EmoteTimer)
+        {
+            if (m_EmoteTimer <= uiDiff)
+            {
+                if (m_creature->GetEntry() == NPC_HENZE_FAULK || m_creature->GetEntry() == NPC_NARM_FAULK)
+                {
+                    m_creature->HandleEmote(EMOTE_ONESHOT_KNEEL);
+                    m_EmoteTimer = 0;
+                }
+            }
+            else
+                m_EmoteTimer -= uiDiff;
         }
 
         if (m_uiEvadeTimer)
