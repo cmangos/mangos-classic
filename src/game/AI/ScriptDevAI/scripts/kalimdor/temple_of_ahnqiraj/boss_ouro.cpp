@@ -333,7 +333,7 @@ struct npc_ouro_spawnerAI : public Scripted_NoMovementAI
         if (summoned->GetEntry() == NPC_OURO)
         {
             m_creature->ForcedDespawn();
-            m_creature->SetRespawnDelay(7200);
+            m_creature->SetRespawnDelay(604800);
         }
     }
 
