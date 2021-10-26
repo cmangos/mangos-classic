@@ -716,15 +716,19 @@ UnitAI* GetAI_npc_garments_of_quests(Creature* pCreature)
 ## npc_guardian
 ######*/
 
-#define SPELL_DEATHTOUCH                5
+enum GuardianOfB
+{
+    SPELL_DEATHTOUCH            = 5,
+    SAY_AGGRO                   = 2077
+};
 
 struct npc_guardianAI : public ScriptedAI
 {
     npc_guardianAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
-    void Reset() override
+    void Aggro(Unit* who) override
     {
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
+        DoBroadcastText(SAY_AGGRO, m_creature, who);
     }
 
     void UpdateAI(const uint32 /*diff*/) override
