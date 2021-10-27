@@ -162,7 +162,7 @@ UPDATE spell_template SET EffectRadiusIndex1=15 WHERE Id IN(126);
 UPDATE spell_template SET ManaCost=0 WHERE Id IN(20647);
 
 -- Baron Rivendare 10440 does not enter combat and move while "channeling" Unholy Aura 17467
-UPDATE `spell_template` SET `AttributesEx3`=AttributesEx3|0x00020000 WHERE `Id` = 17466; -- SPELL_ATTR_EX3_NO_INITIAL_AGGRO
+UPDATE `spell_template` SET `AttributesEx2`=AttributesEx2|0x00400000 WHERE `Id` = 17466; -- SPELL_ATTR_EX2_NO_INITIAL_AGGRO
 UPDATE `spell_template` SET `AttributesEx` = `AttributesEx`&~0x00000004 WHERE `Id` = 17467; -- SPELL_ATTR_EX_CHANNELED_1
 
 -- Remove SPELL_INTERRUPT_FLAG_ABORT_ON_DMG from Spells falsly interrupted by damage
