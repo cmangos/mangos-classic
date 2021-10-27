@@ -1010,7 +1010,9 @@ namespace MaNGOS
                         float maxHeight = i_radius / 2;
                         float distance = std::min(sqrtf(itr->getSource()->GetDistance2d(i_centerX, i_centerY, DIST_CALC_NONE)), i_radius);
                         float ratio = distance / i_radius;
-                        float conalMaxHeight = maxHeight * ratio;
+                        float conalMaxHeight = maxHeight * ratio; // pvp combat uses true cone from roughly model
+                        if (!i_originalCaster->IsControlledByPlayer() && itr->getSource()->IsControlledByPlayer())
+                            conalMaxHeight = maxHeight; // npcs just do a conal max Z aoe
                         if (i_cone >= 0.f)
                         {
                             if (i_castingObject->isInFront(itr->getSource(), i_radius, i_cone) &&
