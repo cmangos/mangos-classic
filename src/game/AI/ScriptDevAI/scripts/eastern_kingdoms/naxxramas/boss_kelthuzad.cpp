@@ -180,7 +180,7 @@ struct boss_kelthuzadAI : public ScriptedAI
 
         m_phase                = PHASE_NORMAL;
 
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
         m_creature->SetImmuneToPlayer(true);
         SetMeleeEnabled(false);
     }
@@ -407,7 +407,7 @@ struct boss_kelthuzadAI : public ScriptedAI
 
         // Make attackable and engage a target
         m_creature->SetImmuneToPlayer(false);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
         SetMeleeEnabled(true);
         SetReactState(REACT_AGGRESSIVE);
         m_creature->SetInCombatWithZone();

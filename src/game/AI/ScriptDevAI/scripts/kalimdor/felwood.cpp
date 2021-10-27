@@ -64,7 +64,7 @@ struct npc_kittenAI : public FollowerAI
             SetFollowPaused(true);
             DoScriptText(EMOTE_SAB_JUMP, m_creature);
 
-            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
 
             // find a decent way to move to center of moonwell
         }

@@ -3292,7 +3292,7 @@ void Spell::EffectSpawn(SpellEffectIndex /*eff_idx*/)
     {
         case 15750: // Rookery Whelp Spawn-in Spell
         case 26262: // Birth
-            m_caster->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            m_caster->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
             break;
     }
 }
@@ -5443,7 +5443,7 @@ void Spell::EffectSummonCritter(SpellEffectIndex eff_idx)
     critter->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
     critter->SelectLevel();                                 // some summoned critters have different from 1 DB data for level/hp
     const CreatureInfo* info = critter->GetCreatureInfo();
-    // Some companions have additional UNIT_FLAG_NON_ATTACKABLE (0x2), perphaps coming from template, so add template flags
+    // Some companions have additional UNIT_FLAG_SPAWNING (0x2), perphaps coming from template, so add template flags
     critter->SetUInt32Value(UNIT_FIELD_FLAGS, info->UnitFlags);
     critter->SetUInt32Value(UNIT_NPC_FLAGS, info->NpcFlags);// some companions may have quests, so they need npc flags
     critter->InitPetCreateSpells();                         // some companions may have spells (e.g. disgusting oozeling)

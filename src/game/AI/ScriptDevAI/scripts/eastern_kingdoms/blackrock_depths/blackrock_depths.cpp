@@ -270,7 +270,7 @@ struct npc_grimstoneAI : public npc_escortAI
 
     void Reset() override
     {
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
 
         m_uiEventTimer        = 1000;
         m_uiEventPhase        = 0;

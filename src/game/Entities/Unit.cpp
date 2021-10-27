@@ -5709,7 +5709,7 @@ bool Unit::CanInitiateAttack() const
     if (hasUnitState(UNIT_STAT_CAN_NOT_REACT))
         return false;
 
-    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE))
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING | UNIT_FLAG_NOT_SELECTABLE))
         if (GetTypeId() != TYPEID_UNIT || !((Creature*)this)->GetForceAttackingCapability())
             return false;
 
