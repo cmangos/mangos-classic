@@ -1789,6 +1789,8 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
 
             if (info->summoningRitual.animSpell)
                 player->CastSpell(player, info->summoningRitual.animSpell, TRIGGERED_NONE);
+            else
+                player->CastSpell(player, GetSpellId(), TRIGGERED_CHANNEL_ONLY);
 
             // full amount unique participants including original summoner, need more
             if (GetUniqueUseCount() < info->summoningRitual.reqParticipants)

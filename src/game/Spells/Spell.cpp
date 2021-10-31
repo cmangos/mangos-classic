@@ -449,6 +449,7 @@ Spell::Spell(WorldObject* caster, SpellEntry const* info, uint32 triggeredFlags,
     m_ignoreConcurrentCasts = m_IsTriggeredSpell || ((triggeredFlags & TRIGGERED_IGNORE_CURRENT_CASTED_SPELL) != 0) || m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING);
     m_hideInCombatLog = (m_IsTriggeredSpell && !IsAutoRepeatRangedSpell(m_spellInfo)) || ((triggeredFlags & TRIGGERED_HIDE_CAST_IN_COMBAT_LOG) != 0);
     m_resetLeash = (triggeredFlags & TRIGGERED_DO_NOT_RESET_LEASH) == 0;
+    m_channelOnly = (triggeredFlags & TRIGGERED_CHANNEL_ONLY) != 0;
 
     m_clientCast = false;
 
@@ -1086,7 +1087,12 @@ void Spell::AddDestExecution(SpellEffectIndex effIndex)
         else
             m_destTargetInfo.timeDelay = uint64(0);
     }
-    m_destTargetInfo.effectMask |= (1 << effIndex);
+
+    uint32 effectMask = (1 << effIndex);
+
+    effectMask &= (~m_partialApplicationMask);
+
+    m_destTargetInfo.effectMask |= effectMask;
 }
 
 void Spell::DoAllEffectOnTarget(TargetInfo* target)
@@ -3253,7 +3259,7 @@ void Spell::SetCastItem(Item* item)
 void Spell::SendSpellCooldown()
 {
     // (SPELL_ATTR_DISABLED_WHILE_ACTIVE) have infinity cooldown, (SPELL_ATTR_PASSIVE) passive cooldown at triggering
-    if (m_spellInfo->HasAttribute(SPELL_ATTR_PASSIVE))
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) || m_channelOnly)
         return;
 
     m_trueCaster->AddCooldown(*m_spellInfo, m_CastItem ? m_CastItem->GetProto() : nullptr, m_spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE));
@@ -4827,6 +4833,12 @@ SpellCastResult Spell::CheckCast(bool strict)
             return castResult;
     }
 
+    if (m_channelOnly)
+    {
+        m_partialApplicationMask = EFFECT_MASK_ALL; // no effects to be executed but spell needs to go through
+        return SPELL_CAST_OK;
+    }
+
     uint32 availableEffectMask = 0;
     for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
         if (m_spellInfo->Effect[i])
@@ -6155,7 +6167,11 @@ SpellCastResult Spell::CheckPower(bool strict)
 
 bool Spell::IgnoreItemRequirements() const
 {
-    if (m_IsTriggeredSpell)
+    if (m_channelOnly)
+        return true;
+
+    // Workaround for double shard problem
+    if (m_IsTriggeredSpell || this->m_spellInfo->Id == 46546)
     {
         /// Not own traded item (in trader trade slot) req. reagents including triggered spell case
         if (Item* targetItem = m_targets.getItemTarget())
@@ -6799,6 +6815,9 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
 
 bool Spell::IsNeedSendToClient() const
 {
+    if (m_channelOnly)
+        return false;
+
     return m_spellInfo->SpellVisual != 0 || IsChanneledSpell(m_spellInfo) ||
            m_spellInfo->speed > 0.0f || (!m_triggeredByAuraSpell && !m_IsTriggeredSpell);
 }

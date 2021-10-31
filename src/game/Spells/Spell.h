@@ -488,6 +488,7 @@ class Spell
         bool m_ignoreConcurrentCasts;
         bool m_hideInCombatLog;
         bool m_resetLeash;
+        bool m_channelOnly;
         // Not a trigger flag but same type of information
         bool m_clientCast;
 
