@@ -335,6 +335,17 @@ void UnitAI::OnSpellCastStateChange(Spell const* spell, bool state, WorldObject*
         {
             case TARGET_ENUM_UNITS_ENEMY_IN_CONE_24: // ignores everything and keeps turning
                 return;
+            case TARGET_LOCATION_CASTER_SRC:
+            case TARGET_LOCATION_CASTER_DEST:
+                switch (spellInfo->EffectImplicitTargetB[EFFECT_INDEX_0])
+                {
+                    case TARGET_ENUM_UNITS_ENEMY_AOE_AT_SRC_LOC: // ignores everything and keeps turning if instant
+                    case TARGET_ENUM_UNITS_ENEMY_AOE_AT_DEST_LOC:
+                        if (!spell->GetCastTime())
+                            return;
+                        break;
+                }
+                break;
             case TARGET_UNIT_FRIEND:
             case TARGET_UNIT_ENEMY: forceTarget = true; break;
             case TARGET_UNIT_SCRIPT_NEAR_CASTER:
