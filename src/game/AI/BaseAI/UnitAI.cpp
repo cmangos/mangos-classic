@@ -1035,10 +1035,6 @@ void UnitAI::UpdateAI(const uint32 diff)
     if (!combat)
         return;
 
-    UpdateSpellLists();
-
-    ExecuteActions();
-
     Unit* victim = m_unit->GetVictim();
     if (m_rangedMode && victim && CanExecuteCombatAction())
     {
@@ -1065,6 +1061,10 @@ void UnitAI::UpdateAI(const uint32 diff)
                 m_unit->MeleeAttackStart(m_unit->GetVictim());
         }
     }
+
+    UpdateSpellLists();
+
+    ExecuteActions();
 
     DoMeleeAttackIfReady();
 }
@@ -1115,7 +1115,13 @@ void UnitAI::SpellListChanged()
 
 void UnitAI::UpdateSpellLists()
 {
-    if (m_spellListCooldown || !m_unit->IsInCombat() || !CanCastSpell())
+    if (m_spellListCooldown)
+        return;
+
+    ResetTimer(GENERIC_ACTION_SPELL_LIST, 1200);
+    m_spellListCooldown = true;
+
+    if (!m_unit->IsInCombat() || !CanCastSpell())
         return;
 
     CreatureSpellList const& spells = GetSpellList();
@@ -1185,8 +1191,7 @@ void UnitAI::UpdateSpellLists()
         }
     } while (!success && !eligibleSpells.empty());
 
-    ResetTimer(GENERIC_ACTION_SPELL_LIST, 1200);
-    m_spellListCooldown = true;
+
 }
 
 std::pair<bool, Unit*> UnitAI::ChooseTarget(CreatureSpellListTargeting* targetData, uint32 spellId) const
