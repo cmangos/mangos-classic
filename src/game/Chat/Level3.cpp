@@ -3306,6 +3306,18 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     PSendSysMessage("Combat timer: %u", target->GetCombatManager().GetCombatTimer());
     PSendSysMessage("Is in evade mode: %s", target->GetCombatManager().IsInEvadeMode() ? "true" : "false");
 
+    PSendSysMessage("UNIT_FIELD_BYTES_0: %d : %d : %d : %d", target->GetByteValue(UNIT_FIELD_BYTES_0, 0), target->GetByteValue(UNIT_FIELD_BYTES_0, 1),
+        target->GetByteValue(UNIT_FIELD_BYTES_0, 2), target->GetByteValue(UNIT_FIELD_BYTES_0, 3));
+
+    PSendSysMessage("UNIT_FIELD_BYTES_1: %d : %d : %d : %d", target->GetByteValue(UNIT_FIELD_BYTES_1, 0), target->GetByteValue(UNIT_FIELD_BYTES_1, 1),
+        target->GetByteValue(UNIT_FIELD_BYTES_1, 2), target->GetByteValue(UNIT_FIELD_BYTES_1, 3));
+
+    PSendSysMessage("UNIT_FIELD_BYTES_2: %d : %d : %d : %d", target->GetByteValue(UNIT_FIELD_BYTES_2, 0), target->GetByteValue(UNIT_FIELD_BYTES_2, 1),
+        target->GetByteValue(UNIT_FIELD_BYTES_2, 2), target->GetByteValue(UNIT_FIELD_BYTES_2, 3));
+
+    auto& spellList = target->GetSpellList();
+    PSendSysMessage("Spell Lists %s ID %u", spellList.Disabled ? "disabled" : "enabled", spellList.Id);
+
     PSendSysMessage("Combat Timer: %u Leashing disabled: %s", target->GetCombatManager().GetCombatTimer(), target->GetCombatManager().IsLeashingDisabled() ? "true" : "false");
 
     PSendSysMessage("Combat Script: %s", target->AI()->GetCombatScriptStatus() ? "true" : "false");
