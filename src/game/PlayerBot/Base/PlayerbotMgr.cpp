@@ -28,6 +28,7 @@
 #include "../../Globals/ObjectAccessor.h"
 #include "../../Loot/LootMgr.h"
 #include "../../MotionGenerators/WaypointMovementGenerator.h"
+#include "../../Spells/SpellMgr.h"
 #include "../../Tools/Language.h"
 #include "../../World/World.h"
 
@@ -694,35 +695,106 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
     }
 }
 
-void PlayerbotMgr::HandleMasterOutgoingPacket(const WorldPacket& /*packet*/)
+void PlayerbotMgr::HandleMasterOutgoingPacket(const WorldPacket& packet)
 {
-    /*
        switch (packet.GetOpcode())
        {
-        // maybe our bots should only start looting after the master loots?
-        //case SMSG_LOOT_RELEASE_RESPONSE: {}
-        case SMSG_NAME_QUERY_RESPONSE:
-        case SMSG_MONSTER_MOVE:
-        case SMSG_COMPRESSED_UPDATE_OBJECT:
-        case SMSG_DESTROY_OBJECT:
-        case SMSG_UPDATE_OBJECT:
-        case SMSG_STANDSTATE_UPDATE:
-        case MSG_MOVE_HEARTBEAT:
-        case SMSG_QUERY_TIME_RESPONSE:
-        case SMSG_AURA_UPDATE_ALL:
-        case SMSG_CREATURE_QUERY_RESPONSE:
-        case SMSG_GAMEOBJECT_QUERY_RESPONSE:
-            return;
-        default:
-        {
-            const char* oc = LookupOpcodeName(packet.GetOpcode());
+            // If a change in speed was detected for the master
+            // make sure we have the same mount status
+            case SMSG_FORCE_RUN_SPEED_CHANGE:
+            {
+                WorldPacket p(packet);
+                ObjectGuid guid;
 
-            std::ostringstream out;
-            out << "masterout: " << oc;
-            sLog.outError(out.str().c_str());
-        }
+                // Only adjuste speed and mount if this is master that did so
+                p >> guid.ReadAsPacked();
+                if (guid != GetMaster()->GetObjectGuid())
+                    return;
+
+                for (auto it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+                {
+                    Player* const bot = it->second;
+                    if (GetMaster()->IsMounted() && !bot->IsMounted())
+                    {
+                        // Player Part
+                        if (!GetMaster()->GetAurasByType(SPELL_AURA_MOUNTED).empty())
+                        {
+                            int32 master_speed1 = 0;
+                            int32 master_speed2 = 0;
+                            master_speed1 = GetMaster()->GetAurasByType(SPELL_AURA_MOUNTED).front()->GetSpellProto()->EffectBasePoints[1];
+                            master_speed2 = GetMaster()->GetAurasByType(SPELL_AURA_MOUNTED).front()->GetSpellProto()->EffectBasePoints[2];
+
+                            // Bot Part
+                            // Step 1: find spell in bot spellbook that matches the speed change from master
+                            uint32 spellMount = 0;
+                            for (auto & itr : bot->GetSpellMap())
+                            {
+                                uint32 spellId = itr.first;
+                                if (itr.second.state == PLAYERSPELL_REMOVED || itr.second.disabled || IsPassiveSpell(spellId))
+                                    continue;
+                                const SpellEntry* pSpellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
+                                if (!pSpellInfo)
+                                    continue;
+
+                                if (pSpellInfo->EffectApplyAuraName[0] == SPELL_AURA_MOUNTED)
+                                {
+                                    if (pSpellInfo->EffectApplyAuraName[1] == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)
+                                    {
+                                        if (pSpellInfo->EffectBasePoints[1] == master_speed1)
+                                        {
+                                            spellMount = spellId;
+                                            continue;
+                                        }
+                                    }
+                                    else if (pSpellInfo->EffectApplyAuraName[2] == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)
+                                        if (pSpellInfo->EffectBasePoints[2] == master_speed2)
+                                        {
+                                            spellMount = spellId;
+                                            continue;
+                                        }
+                                }
+                            }
+                            if (spellMount > 0 && bot->CastSpell(bot, spellMount, TRIGGERED_NONE) == SPELL_CAST_OK)
+                                continue;
+
+                            // Step 2: no spell found or cast failed -> search for an item in inventory (mount)
+                            // We start with the fastest mounts as bot will not be able to outrun its master since it is following him/her
+                            uint32 skillLevels[] = {375, 300, 225, 150, 75};
+                            for (uint32 level: skillLevels)
+                            {
+                                Item* mount = bot->GetPlayerbotAI()->FindMount(level);
+                                if (mount)
+                                {
+                                    bot->GetPlayerbotAI()->UseItem(mount);
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                    // If master dismounted, do so
+                    else if (!GetMaster()->IsMounted() && bot->IsMounted())    // only execute code if master is the one who dismounted
+                    {
+                        WorldPacket emptyPacket;
+                        bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);  //updated code
+                    }
+                }
+                break;
+            }
+            // maybe our bots should only start looting after the master loots?
+            //case SMSG_LOOT_RELEASE_RESPONSE: {}
+            case SMSG_NAME_QUERY_RESPONSE:
+            case SMSG_MONSTER_MOVE:
+            case SMSG_COMPRESSED_UPDATE_OBJECT:
+            case SMSG_DESTROY_OBJECT:
+            case SMSG_UPDATE_OBJECT:
+            case SMSG_STANDSTATE_UPDATE:
+            case MSG_MOVE_HEARTBEAT:
+            case SMSG_QUERY_TIME_RESPONSE:
+            case SMSG_CREATURE_QUERY_RESPONSE:
+            case SMSG_GAMEOBJECT_QUERY_RESPONSE:
+            default:
+                return;
        }
-     */
 }
 
 void PlayerbotMgr::RemoveBots()
