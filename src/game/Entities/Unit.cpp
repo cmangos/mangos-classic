@@ -3912,7 +3912,7 @@ void Unit::_UpdateSpells(uint32 time)
     std::string logging;
     for (uint32 spellId : updatedSpellIds)
         logging += std::to_string(spellId) + ",";
-    meas.add_field("spells", logging);
+    meas.add_field("spells", "\"" + logging + "\"");
 #endif
 }
 
