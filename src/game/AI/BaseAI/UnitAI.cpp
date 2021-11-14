@@ -276,10 +276,11 @@ void UnitAI::AttackStart(Unit* who)
     if (!who || HasReactState(REACT_PASSIVE))
         return;
 
+    bool targetChange = m_unit->GetVictim() != nullptr && m_unit->GetVictim() != who;
     if (m_unit->Attack(who, m_meleeEnabled))
     {
         m_unit->EngageInCombatWith(who);
-        HandleMovementOnAttackStart(who);
+        HandleMovementOnAttackStart(who, targetChange);
     }
 }
 
@@ -323,7 +324,7 @@ bool UnitAI::IsCombatMovement() const
     return !m_unit->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT);
 }
 
-void UnitAI::HandleMovementOnAttackStart(Unit* victim) const
+void UnitAI::HandleMovementOnAttackStart(Unit* victim, bool targetChange) const
 {
     if (!m_unit->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
     {
@@ -333,7 +334,7 @@ void UnitAI::HandleMovementOnAttackStart(Unit* victim) const
         MotionMaster* creatureMotion = m_unit->GetMotionMaster();
 
         if (!m_unit->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT))
-            creatureMotion->MoveChase(victim, m_attackDistance, m_attackAngle, m_moveFurther);
+            creatureMotion->MoveChase(victim, m_attackDistance, m_attackAngle, m_moveFurther, false, true, targetChange);
         // TODO - adapt this to only stop OOC-MMGens when MotionMaster rewrite is finished
         else if (creatureMotion->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE || creatureMotion->GetCurrentMovementGeneratorType() == RANDOM_MOTION_TYPE)
         {

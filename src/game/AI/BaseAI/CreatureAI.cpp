@@ -62,11 +62,12 @@ void CreatureAI::AttackStart(Unit* who)
     if (!who || HasReactState(REACT_PASSIVE))
         return;
 
+    bool targetChange = m_unit->GetVictim() != nullptr && m_unit->GetVictim() != who;
     if (m_creature->Attack(who, m_meleeEnabled))
     {
         m_creature->EngageInCombatWith(who);
 
-        HandleMovementOnAttackStart(who);
+        HandleMovementOnAttackStart(who, targetChange);
     }
 }
 

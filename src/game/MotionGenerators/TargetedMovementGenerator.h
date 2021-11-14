@@ -141,6 +141,8 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Chas
 
         std::pair<std::string, std::string> GetPrintout() const;
 
+        void AddDelay();
+
     protected:
         float GetDynamicTargetDistance(Unit& owner, bool forRangeCheck) const override;
         void HandleTargetedMovement(Unit& owner, const uint32& time_diff) override;
@@ -155,7 +157,9 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Chas
         virtual bool _getLocation(Unit& owner, float& x, float& y, float& z) const;
         virtual void _setLocation(Unit& owner);
 
-        bool DispatchSplineToPosition(Unit& owner, float x, float y, float z, bool walk, bool cutPath, bool target = false);
+        bool IsReachablePositionToTarget(Unit& owner, float x, float y, float z, Unit& target);
+
+        bool DispatchSplineToPosition(Unit& owner, float x, float y, float z, bool walk, bool cutPath, bool target = false, bool checkReachable = false);
         void CutPath(Unit& owner, PointsArray& path);
         void Backpedal(Unit& owner);
 

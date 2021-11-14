@@ -307,7 +307,7 @@ void MotionMaster::MoveConfused()
     Mutate(new ConfusedMovementGenerator(*m_owner));
 }
 
-void MotionMaster::MoveChase(Unit* target, float dist, float angle, bool moveFurther, bool walk, bool combat)
+void MotionMaster::MoveChase(Unit* target, float dist, float angle, bool moveFurther, bool walk, bool combat, bool delayed)
 {
     // ignore movement request if target not exist
     if (!target)
@@ -318,6 +318,8 @@ void MotionMaster::MoveChase(Unit* target, float dist, float angle, bool moveFur
         auto gen = (ChaseMovementGenerator*)top();
         gen->SetOffsetAndAngle(dist, angle, moveFurther);
         gen->SetNewTarget(*target);
+        if (delayed)
+            gen->AddDelay();
         return;
     }
 

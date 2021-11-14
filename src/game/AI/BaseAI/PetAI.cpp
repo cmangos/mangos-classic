@@ -96,7 +96,7 @@ void PetAI::AttackStart(Unit* who)
         // thus with the following clear the original TMG gets invalidated and crash, doh
         // hope it doesn't start to leak memory without this :-/
         // i_pet->Clear();
-        HandleMovementOnAttackStart(who);
+        HandleMovementOnAttackStart(who, false);
 
         inCombat = true;
     }

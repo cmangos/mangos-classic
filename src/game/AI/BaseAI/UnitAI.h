@@ -416,7 +416,7 @@ class UnitAI : public CombatActions
         void DetectOrAttack(Unit* who);
         bool CanTriggerStealthAlert(Unit* who, float attackRadius) const;
 
-        virtual void HandleMovementOnAttackStart(Unit* victim) const;
+        virtual void HandleMovementOnAttackStart(Unit* victim, bool targetChange) const;
 
 
         // TODO: Implement proper casterAI in EAI and remove this from Leotheras script
