@@ -311,6 +311,7 @@ class ChatHandler
         bool HandleDebugRespawnDynguid(char* args);
 
         bool HandleDebugPacketLog(char* args);
+        bool HandleDebugDbscript(char* args);
 
         bool HandleSD2HelpCommand(char* args);
         bool HandleSD2ScriptCommand(char* args);
