@@ -8468,7 +8468,7 @@ bool Unit::SelectHostileTarget()
         {
             if (!GetMotionMaster()->GetCurrent()->IsReachable())
             {
-                if (!AI()->IsRangedUnit() && getThreatManager().getThreatList().size() == 1 &&
+                if (!AI()->IsRangedUnit() && getThreatManager().getThreatList().size() == 1 && target->IsFlying() &&
                     GetDistanceZ(target) > CREATURE_Z_ATTACK_RANGE_MELEE)
                 {
                     getThreatManager().modifyThreatPercent(target, -101);
