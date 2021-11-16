@@ -151,7 +151,7 @@ enum ScriptInfoDataFlags
     SCRIPT_FLAG_ALL_ELIGIBLE_BUDDIES        = 0x200,        // multisource/multitarget - will execute for each eligible
     SCRIPT_FLAG_BUDDY_BY_GO                 = 0x400,        // take the buddy by GO (for commands which can target both creature and GO)
 };
-#define MAX_SCRIPT_FLAG_VALID               (2 * SCRIPT_FLAG_ALL_ELIGIBLE_BUDDIES - 1)
+#define MAX_SCRIPT_FLAG_VALID               (2 * SCRIPT_FLAG_BUDDY_BY_GO - 1)
 
 struct ScriptInfo
 {
@@ -491,6 +491,7 @@ struct ScriptInfo
         {
             case SCRIPT_COMMAND_MOVE_DYNAMIC:
             case SCRIPT_COMMAND_TERMINATE_SCRIPT:
+            case SCRIPT_COMMAND_SET_FACING:
                 return true;
             default:
                 return false;
