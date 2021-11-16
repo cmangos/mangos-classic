@@ -155,7 +155,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
         }
 
         // generic command args check
-        if (tmp.buddyEntry && !(tmp.data_flags & (SCRIPT_FLAG_BUDDY_BY_GUID | SCRIPT_FLAG_BUDDY_BY_GO_GUID)))
+        if (tmp.buddyEntry && !(tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_GUID))
         {
             if (tmp.IsCreatureBuddy() && !ObjectMgr::GetCreatureTemplate(tmp.buddyEntry))
             {
@@ -191,7 +191,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 sLog.outErrorDb("Table `%s` has buddy required in data_flags %u in command %u for script id %u, but no buddy defined, skipping.", tablename, tmp.data_flags, tmp.command, tmp.id);
                 continue;
             }
-            if (tmp.data_flags & (SCRIPT_FLAG_BUDDY_BY_GUID | SCRIPT_FLAG_BUDDY_BY_GO_GUID)) // Check guid
+            if (tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_GUID) // Check guid
             {
                 if (tmp.IsCreatureBuddy())
                 {
@@ -1127,9 +1127,9 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* originalSource, WorldObj
 {
     std::vector<WorldObject*> buddies;
 
-    if (m_script->buddyEntry || (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_POOL) != 0 || (m_script->data_flags & (SCRIPT_FLAG_BUDDY_BY_GUID | SCRIPT_FLAG_BUDDY_BY_GO_GUID)) != 0)
+    if (m_script->buddyEntry || (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_POOL) != 0 || (m_script->data_flags & (SCRIPT_FLAG_BUDDY_BY_GUID)) != 0)
     {
-        if (m_script->data_flags & (SCRIPT_FLAG_BUDDY_BY_GUID | SCRIPT_FLAG_BUDDY_BY_GO_GUID))
+        if (m_script->data_flags & (SCRIPT_FLAG_BUDDY_BY_GUID))
         {
             WorldObject* buddy = nullptr;
             if (m_script->IsCreatureBuddy())
@@ -2134,14 +2134,14 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
         }
         case SCRIPT_COMMAND_TERMINATE_SCRIPT:               // 31
         {
-            if (!pSource && (!pTarget && (m_script->data_flags & (SCRIPT_FLAG_BUDDY_BY_GUID | SCRIPT_FLAG_BUDDY_BY_GO_GUID)) == 0))
+            if (!pSource && (!pTarget && (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_GUID == 0)))
             {
                 sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u call for nullptr, skipping.", m_table, m_script->id, m_script->command);
                 return true;
             }
 
             bool result = false;
-            if (m_script->terminateScript.npcEntry || m_script->terminateScript.poolId || (m_script->data_flags & (SCRIPT_FLAG_BUDDY_BY_GUID | SCRIPT_FLAG_BUDDY_BY_GO_GUID)))
+            if (m_script->terminateScript.npcEntry || m_script->terminateScript.poolId || (m_script->data_flags & (SCRIPT_FLAG_BUDDY_BY_GUID)))
             {
                 WorldObject* terminationBuddy = nullptr;
                 WorldObject* pSearcher = pSource ? pSource : pTarget;
@@ -2154,7 +2154,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 if (pSearcher->GetTypeId() == TYPEID_PLAYER && pTarget && pTarget->GetTypeId() != TYPEID_PLAYER)
                     pSearcher = pTarget;
 
-                if (m_script->data_flags & (SCRIPT_FLAG_BUDDY_BY_GUID | SCRIPT_FLAG_BUDDY_BY_GO_GUID))
+                if (m_script->data_flags & (SCRIPT_FLAG_BUDDY_BY_GUID))
                 {
                     if (m_script->IsCreatureBuddy())
                     {
@@ -2169,12 +2169,23 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 }
                 else if (m_script->terminateScript.npcEntry)
                 {
-                    // npc entry is provided
-                    Creature* creatureBuddy = nullptr;
-                    MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*pSearcher, m_script->terminateScript.npcEntry, true, false, m_script->terminateScript.searchDist, true);
-                    MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(creatureBuddy, u_check);
-                    Cell::VisitGridObjects(pSearcher, searcher, m_script->terminateScript.searchDist);
-                    terminationBuddy = creatureBuddy;
+                    if (m_script->IsCreatureBuddy())
+                    {
+                        // npc entry is provided
+                        Creature* creatureBuddy = nullptr;
+                        MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*pSearcher, m_script->terminateScript.npcEntry, true, false, m_script->terminateScript.searchDist, true);
+                        MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(creatureBuddy, u_check);
+                        Cell::VisitGridObjects(pSearcher, searcher, m_script->terminateScript.searchDist);
+                        terminationBuddy = creatureBuddy;
+                    }
+                    else
+                    {
+                        GameObject* goBuddy = nullptr;
+                        MaNGOS::NearestGameObjectEntryInObjectRangeCheck u_check(*pSearcher, m_script->terminateScript.npcEntry, m_script->terminateScript.searchDist);
+                        MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck> searcher(goBuddy, u_check);
+                        Cell::VisitGridObjects(pSearcher, searcher, m_script->terminateScript.searchDist);
+                        terminationBuddy = goBuddy;
+                    }
                 }
                 else
                 {

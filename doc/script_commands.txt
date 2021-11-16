@@ -69,7 +69,7 @@ Field which holds a combination of these flags:
     SCRIPT_FLAG_BUDDY_BY_POOL               = 0x80      (buddy should be part of a pool)
     SCRIPT_FLAG_BUDDY_BY_SPAWN_GROUP        = 0x100,    (buddy is from spawn group - NYI - TODO:)
     SCRIPT_FLAG_ALL_ELIGIBLE_BUDDIES        = 0x200,    (multisource/multitarget - will execute for each eligible)
-    SCRIPT_FLAG_BUDDY_BY_GO_GUID            = 0x400,    (take the buddy by GO guid (for commands which can target both creature and GO))
+    SCRIPT_FLAG_BUDDY_BY_GO                 = 0x400,    (take the buddy by GO (for commands which can target both creature and GO))
 
 Detailed meaning described below!
 
@@ -315,7 +315,7 @@ Defining a buddy could be done in several way:
                                             * !(data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL): if npc not alive found, terminate script
                                                 data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL:  if npc alive found, terminate script
                                             * dataint  = change of waittime (MILLIESECONDS) of a current waypoint movement type (negative values will decrease time)
-                                            * when used with guid search, can also search for GO guid through SCRIPT_FLAG_BUDDY_BY_GO_GUID
+                                            * when used with guid or entry search, can also search for GO guid through SCRIPT_FLAG_BUDDY_BY_GO
 
 32 SCRIPT_COMMAND_PAUSE_WAYPOINTS           resultingSource must be Creature
                                             * datalong: 0/1 unpause/pause waypoint movement

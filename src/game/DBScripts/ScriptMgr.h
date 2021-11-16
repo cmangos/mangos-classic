@@ -149,7 +149,7 @@ enum ScriptInfoDataFlags
     SCRIPT_FLAG_BUDDY_BY_POOL               = 0x080,        // buddy should be part of a pool
     SCRIPT_FLAG_BUDDY_BY_SPAWN_GROUP        = 0x100,        // buddy is from spawn group - NYI - TODO:
     SCRIPT_FLAG_ALL_ELIGIBLE_BUDDIES        = 0x200,        // multisource/multitarget - will execute for each eligible
-    SCRIPT_FLAG_BUDDY_BY_GO_GUID            = 0x400,        // take the buddy by GO guid (for commands which can target both creature and GO)
+    SCRIPT_FLAG_BUDDY_BY_GO                 = 0x400,        // take the buddy by GO (for commands which can target both creature and GO)
 };
 #define MAX_SCRIPT_FLAG_VALID               (2 * SCRIPT_FLAG_ALL_ELIGIBLE_BUDDIES - 1)
 
@@ -499,12 +499,12 @@ struct ScriptInfo
 
     bool IsCreatureBuddy() const
     {
-        if (IsCreatureAndGOBuddy() && data_flags & (SCRIPT_FLAG_BUDDY_BY_GUID | SCRIPT_FLAG_BUDDY_BY_GO_GUID))
+        if (IsCreatureAndGOBuddy())
         {
-            if (data_flags & SCRIPT_FLAG_BUDDY_BY_GUID)
-                return true;
-            else if (data_flags & SCRIPT_FLAG_BUDDY_BY_GO_GUID)
+            if (data_flags & SCRIPT_FLAG_BUDDY_BY_GO)
                 return false;
+
+            return true;
         }
 
         switch (command)
