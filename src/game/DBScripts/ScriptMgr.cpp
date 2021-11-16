@@ -2338,10 +2338,13 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
         {
             if (LogIfNotCreature(pSource))
                 return false;
-            if (LogIfNotUnit(pTarget))
+            if (!pTarget)
+            {
+                sLog.outDebug(" DB-SCRIPTS: Process table `%s` id %u, SCRIPT_COMMAND_MOVE_DYNAMIC called but target doesnt exist: skipping.", m_table, m_script->id);
                 return false;
+            }
 
-            Creature* source = ((Creature*)pSource);
+            Creature* source = static_cast<Creature*>(pSource);
             if (source->IsInCombat())
             {
                 sLog.outDebug(" DB-SCRIPTS: Process table `%s` id %u, SCRIPT_COMMAND_MOVE_DYNAMIC called for source guid %s but source is in combat and may lead to wrong behaviour: skipping.", m_table, m_script->id, pSource->GetGuidStr().c_str());
@@ -2351,27 +2354,27 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
             float x, y, z;
             if (m_script->moveDynamic.maxDist == 0)         // Move to pTarget
             {
-                if (pTarget == pSource)
+                if (pTarget == source)
                 {
-                    sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, _MOVE_DYNAMIC called with maxDist == 0, but resultingSource == resultingTarget (== %s)", m_table, m_script->id, pSource->GetGuidStr().c_str());
+                    sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, _MOVE_DYNAMIC called with maxDist == 0, but resultingSource == resultingTarget (== %s)", m_table, m_script->id, source->GetGuidStr().c_str());
                     break;
                 }
-                pTarget->GetContactPoint(pSource, x, y, z, m_script->moveDynamic.fixedDist);
+                pTarget->GetContactPoint(source, x, y, z, m_script->moveDynamic.fixedDist);
             }
             else                                            // Calculate position
             {
                 float orientation;
                 if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
-                    orientation = pSource->GetOrientation() + m_script->o + 2 * M_PI_F;
+                    orientation = source->GetOrientation() + m_script->o + 2 * M_PI_F;
                 else
                     orientation = m_script->o;
 
-                pSource->GetRandomPoint(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), m_script->moveDynamic.maxDist, x, y, z,
+                source->GetRandomPoint(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), m_script->moveDynamic.maxDist, x, y, z,
                                         m_script->moveDynamic.minDist, (orientation == 0.0f ? nullptr : &orientation));
                 z = std::max(z, pTarget->GetPositionZ());
-                pSource->UpdateAllowedPositionZ(x, y, z);
+                source->UpdateAllowedPositionZ(x, y, z);
             }
-            ((Creature*)pSource)->GetMotionMaster()->MovePoint(1, x, y, z);
+            source->GetMotionMaster()->MovePoint(1, x, y, z);
             break;
         }
         case SCRIPT_COMMAND_SEND_MAIL:                      // 38
