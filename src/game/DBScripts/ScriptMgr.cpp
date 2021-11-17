@@ -2395,7 +2395,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 z = std::max(z, pTarget->GetPositionZ());
                 source->UpdateAllowedPositionZ(x, y, z);
             }
-            source->GetMotionMaster()->MovePoint(1, x, y, z);
+            source->GetMotionMaster()->MovePoint(1, Position(x, y, z, 0.f), ForcedMovement(m_script->textId[0]), 0.f, true, pTarget ? pTarget->GetObjectGuid() : ObjectGuid(), m_script->textId[1]);
             break;
         }
         case SCRIPT_COMMAND_SEND_MAIL:                      // 38

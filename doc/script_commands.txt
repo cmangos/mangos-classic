@@ -344,6 +344,8 @@ Defining a buddy could be done in several way:
                                             * datalong3 = Exact contact point distance, to be used when you want to stop moving as soon as you're within this distance of the target
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL Obtain a point in direction of resTarget->GetOrientation + orientation
                                               for resTarget == resSource and orientation == 0 this will mean resSource moving forward
+                                            * dataint1 = enum ForcedMovement
+                                            * dataint2 = dbscripts_on_relay id
 
 38 SCRIPT_COMMAND_SEND_MAIL                 Send a mail from resSource  to resTarget
                                             * resultingSource = Creature OR NULL, resTarget must be Player
