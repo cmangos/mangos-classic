@@ -230,6 +230,8 @@ Item::Item()
     mb_in_trade = false;
     m_lootState = ITEM_LOOT_NONE;
     m_enchantmentModifier = 0;
+
+    m_usedInSpell = false;
 }
 
 Item::~Item()
