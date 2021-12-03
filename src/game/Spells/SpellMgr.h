@@ -563,6 +563,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 11966:         // Fire Shield
         case 11984:         // Immolate
         case 12099:         // Shield Spike
+        case 12187:         // Disease Cloud
         case 12246:         // Infected Spine
         case 12529:         // Chilling Touch
         case 12539:         // Ghoul Rot
@@ -585,6 +586,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 15506:         // Immolate
         case 15876:         // Ice Blast
         case 16140:         // Exploding Cadaver (Exploding Cadaver)
+        case 16345:         // Disease Cloud
         case 16563:         // Drowning Death
         case 16577:         // Disease Cloud
         case 16592:         // Shadowform
@@ -618,10 +620,15 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 22856:         // Ice Lock (Guard Slip'kik ice trap in Dire Maul)
         case 23255:         // Deep Wounds
         case 24313:         // Shade Visual
+        case 25039:         // Green Ghost Visual
         case 25592:         // Hate to Zero (Hate to Zero)
         case 26341:         // Saurfang's Rage
+        case 27578:         // Battle Shout
+        case 27793:         // Disease Cloud
         case 27987:         // Unholy Aura
         case 28126:         // Spirit Particles (purple)
+        case 28156:         // Disease Cloud
+        case 28362:         // Disease Cloud
         case 28370:         // Toxic Gas
         case 29526:         // Hate to Zero (Hate to Zero)
         case 30074:         // Toxic Gas
