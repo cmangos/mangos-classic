@@ -36,6 +36,7 @@ enum
     SPELL_CAUSE_INSANITY        = 24327,
     SPELL_WILL_OF_HAKKAR        = 24178,
     SPELL_ENRAGE                = 24318,
+    SPELL_DOUBLE_ATTACK         = 19818,
 
     // The Aspects of all High Priests
     SPELL_ASPECT_OF_JEKLIK      = 24687,
@@ -80,6 +81,8 @@ struct boss_hakkarAI : public ScriptedAI
         m_uiAspectOfMarliTimer     = 12000;
         m_uiAspectOfThekalTimer    = 8000;
         m_uiAspectOfArlokkTimer    = 18000;
+
+        DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
 
         InitiateHakkarPowerStacks();
     }
