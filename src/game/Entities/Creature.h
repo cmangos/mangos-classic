@@ -224,6 +224,7 @@ struct CreatureSpawnTemplate
     uint32 curHealth;
     uint32 curMana;
     uint32 spawnFlags;
+    uint32 relayId;
 
     bool IsRunning() const { return (spawnFlags & SPAWN_FLAG_RUN_ON_SPAWN) != 0; }
     bool IsHovering() const { return (spawnFlags & SPAWN_FLAG_HOVER) != 0; }
