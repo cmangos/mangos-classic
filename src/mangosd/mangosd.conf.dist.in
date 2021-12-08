@@ -164,10 +164,6 @@ SD2ErrorLogFile = "SD2Errors.log"
 #        Default: 1 (enable)
 #                 0 (disable)
 #
-#    vmap.ignoreSpellIds
-#        These spells are ignored for LoS calculation
-#        List of ids with delimiter ','
-#
 #    vmap.enableIndoorCheck
 #        Enable/Disable VMap based indoor check to remove outdoor-only auras (mounts etc.).
 #        Requires VMaps enabled to work.
@@ -248,7 +244,6 @@ PlayerSave.Stats.MinLevel = 0
 PlayerSave.Stats.SaveOnlyOnLogout = 1
 vmap.enableLOS = 1
 vmap.enableHeight = 1
-vmap.ignoreSpellIds = "7720"
 vmap.enableIndoorCheck = 1
 DetectPosCollision = 1
 mmap.enabled = 1
