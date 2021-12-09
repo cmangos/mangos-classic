@@ -120,6 +120,19 @@ void MapPersistentState::SaveGORespawnTime(uint32 loguid, time_t t)
     CharacterDatabase.CommitTransaction();
 }
 
+time_t MapPersistentState::GetObjectRespawnTime(uint32 typeId, uint32 loguid) const
+{
+    return typeId == TYPEID_UNIT ? GetCreatureRespawnTime(loguid) : GetGORespawnTime(loguid);
+}
+
+void MapPersistentState::SaveObjectRespawnTime(uint32 typeId, uint32 loguid, time_t t)
+{
+    if (typeId == TYPEID_UNIT)
+        SaveCreatureRespawnTime(loguid, t);
+    else
+        SaveGORespawnTime(loguid, t);
+}
+
 void MapPersistentState::SetCreatureRespawnTime(uint32 loguid, time_t t)
 {
     if (t > sWorld.GetGameTime())
@@ -298,6 +311,9 @@ void DungeonPersistentState::UpdateEncounterState(EncounterCreditType type, uint
         if (iter->second->creditType == type && dbcEntry->mapId == GetMapId())
         {
             m_completedEncountersMask |= 1 << dbcEntry->encounterIndex;
+
+            if (Map* map = GetMap())
+                map->GetVariableManager().SetEncounterVariable(dbcEntry->Id, true);
 
             CharacterDatabase.PExecute("UPDATE instance SET encountersMask = '%u' WHERE id = '%u'", m_completedEncountersMask, GetInstanceId());
 

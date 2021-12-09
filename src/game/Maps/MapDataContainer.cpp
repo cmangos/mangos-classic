@@ -19,7 +19,8 @@
 #include "MapDataContainer.h"
 #include "Globals/ObjectMgr.h"
 
-MapDataContainer::MapDataContainer() : m_spellListContainer(sObjectMgr.GetCreatureSpellListContainer())
+MapDataContainer::MapDataContainer() : m_spellListContainer(sObjectMgr.GetCreatureSpellListContainer()),
+    m_spawnGroupContainer(sObjectMgr.GetSpawnGroupContainer())
 {
 }
 
@@ -35,4 +36,27 @@ CreatureSpellList* MapDataContainer::GetCreatureSpellList(uint32 Id) const
         return nullptr;
 
     return &(*itr).second;
+}
+
+SpawnGroupEntry* MapDataContainer::GetSpawnGroup(uint32 Id) const
+{
+    auto itr = m_spawnGroupContainer->spawnGroupMap.find(Id);
+    if (itr == m_spawnGroupContainer->spawnGroupMap.end())
+        return nullptr;
+
+    return &(*itr).second;
+}
+
+SpawnGroupEntry* MapDataContainer::GetSpawnGroupByGuid(uint32 dbGuid, uint32 high) const
+{
+    auto itr = m_spawnGroupContainer->spawnGroupByGuidMap.find(std::make_pair(dbGuid, uint32(high)));
+    if (itr == m_spawnGroupContainer->spawnGroupByGuidMap.end())
+        return nullptr;
+
+    return (*itr).second;
+}
+
+std::shared_ptr<SpawnGroupEntryContainer> MapDataContainer::GetSpawnGroups() const
+{
+    return m_spawnGroupContainer;
 }

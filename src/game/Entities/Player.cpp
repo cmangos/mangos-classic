@@ -7552,7 +7552,9 @@ void Player::SendInitWorldStates(uint32 zoneid) const
 
     sWorldState.FillInitialWorldStates(data, count, zoneid);
 
-    data.put<uint16>(count_pos, count);                 // set actual world state amount
+    GetMap()->GetVariableManager().FillInitialWorldStates(data, count, zoneid, 0); // Vanilla does not support areaid transition
+
+    data.put<uint16>(count_pos, count);                     // set actual world state amount
 
     GetSession()->SendPacket(data);
 }

@@ -38,6 +38,7 @@
 #include "Globals/GraveyardManager.h"
 #include "Maps/SpawnManager.h"
 #include "Maps/MapDataContainer.h"
+#include "World/WorldStateVariableManager.h"
 
 #include <bitset>
 #include <functional>
@@ -353,6 +354,8 @@ class Map : public GridRefManager<NGridType>
 
         MapDataContainer& GetMapDataContainer() { return m_dataContainer; }
         MapDataContainer const& GetMapDataContainer() const { return m_dataContainer; }
+        WorldStateVariableManager& GetVariableManager() { return m_variableManager; }
+        WorldStateVariableManager const& GetVariableManager() const { return m_variableManager; }
 
         // debug
         std::set<ObjectGuid> m_objRemoveList; // this will eventually eat up too much memory - only used for debugging VisibleNotifier::Notify() customlog leak
@@ -470,6 +473,8 @@ class Map : public GridRefManager<NGridType>
 
         MapDataContainer m_dataContainer;
         std::shared_ptr<CreatureSpellListContainer> m_spellListContainer;
+
+        WorldStateVariableManager m_variableManager;
 };
 
 class WorldMap : public Map

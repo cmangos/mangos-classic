@@ -24,6 +24,8 @@
 
 struct CreatureSpellListContainer;
 struct CreatureSpellList;
+struct SpawnGroupEntry;
+struct SpawnGroupEntryContainer;
 
 class MapDataContainer
 {
@@ -31,8 +33,12 @@ class MapDataContainer
         MapDataContainer();
         void SetCreatureSpellListContainer(std::shared_ptr<CreatureSpellListContainer> container);
         CreatureSpellList* GetCreatureSpellList(uint32 Id) const;
+        SpawnGroupEntry* GetSpawnGroup(uint32 Id) const;
+        SpawnGroupEntry* GetSpawnGroupByGuid(uint32 dbGuid, uint32 high) const;
+        std::shared_ptr<SpawnGroupEntryContainer> GetSpawnGroups() const;
     private:
         std::shared_ptr<CreatureSpellListContainer> m_spellListContainer;
+        std::shared_ptr<SpawnGroupEntryContainer> m_spawnGroupContainer;
 };
 
 #endif

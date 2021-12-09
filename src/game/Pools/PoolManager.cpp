@@ -450,7 +450,7 @@ void PoolGroup<Creature>::Spawn1Object(MapPersistentState& mapState, PoolObject*
         if (dataMap && dataMap->IsLoaded(data->posX, data->posY))
         {
             Creature* pCreature = new Creature;
-            if (!pCreature->LoadFromDB(obj->guid, dataMap, obj->guid))
+            if (!pCreature->LoadFromDB(obj->guid, dataMap, obj->guid, 0))
                 delete pCreature;
             else
             {
@@ -486,7 +486,7 @@ void PoolGroup<GameObject>::Spawn1Object(MapPersistentState& mapState, PoolObjec
             GameObjectData const* data = sObjectMgr.GetGOData(obj->guid);
             MANGOS_ASSERT(data);
             GameObject* pGameobject = GameObject::CreateGameObject(data->id);
-            if (!pGameobject->LoadFromDB(obj->guid, dataMap, obj->guid))
+            if (!pGameobject->LoadFromDB(obj->guid, dataMap, obj->guid, 0))
                 delete pGameobject;
             else
             {

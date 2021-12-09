@@ -39,6 +39,40 @@ bool SpawnInfo::ConstructForMap(Map& map)
     return result;
 }
 
+SpawnManager::~SpawnManager()
+{
+    for (auto& groupData : m_spawnGroups)
+        delete groupData.second;
+}
+
+void SpawnManager::Initialize()
+{
+    auto& spawnGroupData = m_map.GetMapDataContainer().GetSpawnGroups();
+    for (auto& groupData : spawnGroupData->spawnGroupMap)
+    {
+        SpawnGroupEntry const& entry = groupData.second;
+        if (entry.DbGuids.empty())
+            continue;
+        if (entry.Type == SPAWN_GROUP_CREATURE)
+        {
+            if (m_map.GetId() != sObjectMgr.GetCreatureData(entry.DbGuids[0].DbGuid)->mapid)
+                continue;
+        }
+        else
+        {
+            if (m_map.GetId() != sObjectMgr.GetGOData(entry.DbGuids[0].DbGuid)->mapid)
+                continue;
+        }
+
+        SpawnGroup* spawnGroup = nullptr;
+        if (entry.Type == SPAWN_GROUP_CREATURE)
+            spawnGroup = new CreatureGroup(entry, m_map);
+        else
+            spawnGroup = new GameObjectGroup(entry, m_map);
+        m_spawnGroups.emplace(entry.Id, spawnGroup);
+    }
+}
+
 void SpawnManager::AddCreature(uint32 respawnDelay, uint32 dbguid)
 {
     m_spawns.emplace_back(m_map.GetCurrentClockTime() + std::chrono::seconds(respawnDelay), dbguid, HIGHGUID_UNIT);
@@ -126,6 +160,9 @@ void SpawnManager::Update()
         else
             ++itr;
     }
+
+    for (auto& group : m_spawnGroups)
+        group.second->Update();
 }
 
 std::string SpawnManager::GetRespawnList()
@@ -152,4 +189,13 @@ std::string SpawnManager::GetRespawnList()
         }
     }
     return output;
+}
+
+SpawnGroup* SpawnManager::GetSpawnGroup(uint32 Id)
+{
+    auto itr = m_spawnGroups.find(Id);
+    if (itr == m_spawnGroups.end())
+        return nullptr;
+
+    return (*itr).second;
 }

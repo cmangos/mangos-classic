@@ -21,6 +21,7 @@
 
 #include "Common.h"
 #include "Entities/ObjectGuid.h"
+#include "Maps/SpawnGroup.h"
 
 #include <string>
 
@@ -32,7 +33,7 @@ class SpawnInfo
         SpawnInfo(TimePoint when, uint32 dbguid, HighGuid high) : m_respawnTime(when), m_dbguid(dbguid), m_high(high), m_used(false), m_inUse(false){}
         TimePoint const& GetRespawnTime() const { return m_respawnTime; }
         void SetRespawnTime(TimePoint const& time) { m_respawnTime = time; }
-        bool ConstructForMap(Map& map); // can fail due to linking, pooling not yet supported
+        bool ConstructForMap(Map& map); // can fail due to linking, pooling not supported
         uint32 GetDbGuid() const { return m_dbguid; }
         HighGuid GetHighGuid() const { return m_high; }
         void SetUsed() { m_used = true; }
@@ -51,6 +52,9 @@ class SpawnManager
 {
     public:
         SpawnManager(Map& map) : m_map(map) {}
+        ~SpawnManager();
+        void Initialize();
+
         void AddCreature(uint32 respawnDelay, uint32 dbguid);
         void AddGameObject(uint32 respawnDelay, uint32 dbguid);
 
@@ -62,10 +66,13 @@ class SpawnManager
         void Update();
 
         std::string GetRespawnList();
+
+        SpawnGroup* GetSpawnGroup(uint32 Id);
     private:
         Map& m_map;
 
         std::vector<SpawnInfo> m_spawns; // must only be erased from in Update
+        std::map<uint32, SpawnGroup*> m_spawnGroups;
 };
 
 #endif

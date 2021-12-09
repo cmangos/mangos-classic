@@ -147,7 +147,7 @@ enum ScriptInfoDataFlags
     SCRIPT_FLAG_BUDDY_IS_PET                = 0x020,        // buddy is a pet
     SCRIPT_FLAG_BUDDY_IS_DESPAWNED          = 0x040,        // buddy is dead or despawned
     SCRIPT_FLAG_BUDDY_BY_POOL               = 0x080,        // buddy should be part of a pool
-    SCRIPT_FLAG_BUDDY_BY_SPAWN_GROUP        = 0x100,        // buddy is from spawn group - NYI - TODO:
+    SCRIPT_FLAG_BUDDY_BY_SPAWN_GROUP        = 0x100,        // buddy is from spawn group
     SCRIPT_FLAG_ALL_ELIGIBLE_BUDDIES        = 0x200,        // multisource/multitarget - will execute for each eligible
     SCRIPT_FLAG_BUDDY_BY_GO                 = 0x400,        // take the buddy by GO (for commands which can target both creature and GO)
 };

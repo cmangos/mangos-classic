@@ -208,7 +208,15 @@ void MaNGOS::RespawnDo::operator()(Creature* u) const
             return;
     }
 
-    u->Respawn();
+    if (u->IsUsingNewSpawningSystem())
+    {
+        if (u->GetCreatureGroup())
+            u->GetMap()->GetPersistentState()->SaveCreatureRespawnTime(u->GetDbGuid(), time(nullptr));
+        else
+            u->GetMap()->GetSpawnManager().RespawnCreature(u->GetDbGuid(), 0);
+    }
+    else
+        u->Respawn();
 }
 
 void MaNGOS::RespawnDo::operator()(GameObject* u) const

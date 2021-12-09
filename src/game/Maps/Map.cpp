@@ -145,7 +145,8 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId)
       m_VisibleDistance(DEFAULT_VISIBILITY_DISTANCE), m_persistentState(nullptr),
       m_activeNonPlayersIter(m_activeNonPlayers.end()), m_onEventNotifiedIter(m_onEventNotifiedObjects.end()),
       i_gridExpiry(expiry), m_TerrainData(sTerrainMgr.LoadTerrain(id)),
-      i_data(nullptr), i_script_id(0), m_transportsIterator(m_transports.begin()), m_spawnManager(*this)
+      i_data(nullptr), i_script_id(0), m_transportsIterator(m_transports.begin()), m_spawnManager(*this),
+      m_variableManager(this)
 {
     m_weatherSystem = new WeatherSystem(this);
 }
@@ -181,6 +182,10 @@ void Map::Initialize(bool loadInstanceData /*= true*/)
     m_graveyardManager.Init(this);
 
     LoadTransports();
+
+    m_variableManager.Initialize();
+
+    m_spawnManager.Initialize();
 }
 
 void Map::InitVisibilityDistance()

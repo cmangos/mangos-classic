@@ -233,6 +233,15 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                     }
                 }
             }
+            else if (tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_SPAWN_GROUP)
+            {
+                uint32 groupEntry = tmp.searchRadiusOrGuid;
+                if (sObjectMgr.GetSpawnGroupContainer()->spawnGroupMap.find(groupEntry) == sObjectMgr.GetSpawnGroupContainer()->spawnGroupMap.end())
+                {
+                    sLog.outErrorDb("Table `%s` has go-buddy defined by group (SCRIPT_FLAG_BUDDY_BY_SPAWN_GROUP %u set) but group %u is empty, skipping.", tablename, tmp.data_flags, tmp.searchRadiusOrGuid);
+                    continue;
+                }
+            }
         }
 
         switch (tmp.command)
@@ -1205,6 +1214,57 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* originalSource, WorldObj
             }
             // this type can only have one buddy result
             buddies.push_back(buddy);
+        }
+        else if (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_SPAWN_GROUP) // Buddy by group
+        {
+            WorldObject* origin = originalSource ? originalSource : originalTarget;
+            if (origin->GetTypeId() == TYPEID_PLAYER && originalSource && originalSource->GetTypeId() != TYPEID_PLAYER)
+                origin = originalTarget;
+
+            SpawnGroupEntry* entry = m_map->GetMapDataContainer().GetSpawnGroup(m_script->searchRadiusOrGuid);
+            WorldObject* closest = nullptr;
+            if (entry->Type == SPAWN_GROUP_CREATURE)
+            {
+                for (auto& dbGuid : entry->DbGuids)
+                {
+                    if (Creature* creature = m_map->GetCreature(dbGuid.DbGuid))
+                    {
+                        if ((m_script->data_flags & SCRIPT_FLAG_ALL_ELIGIBLE_BUDDIES) != 0)
+                            buddies.push_back(creature);
+                        else
+                        {
+                            if (!closest)
+                                closest = creature;
+                            else if (origin->GetDistance(creature) < origin->GetDistance(closest))
+                                closest = creature;
+                        }
+                    }
+                }
+
+                if ((m_script->data_flags & SCRIPT_FLAG_ALL_ELIGIBLE_BUDDIES) == 0 && closest)
+                    buddies.push_back(closest);
+            }
+            else
+            {
+                for (auto& dbGuid : entry->DbGuids)
+                {
+                    if (GameObject* go = m_map->GetGameObject(dbGuid.DbGuid))
+                    {
+                        if ((m_script->data_flags & SCRIPT_FLAG_ALL_ELIGIBLE_BUDDIES) != 0)
+                            buddies.push_back(go);
+                        else
+                        {
+                            if (!closest)
+                                closest = go;
+                            else if (origin->GetDistance(go) < origin->GetDistance(closest))
+                                closest = go;
+                        }
+                    }
+                }
+
+                if ((m_script->data_flags & SCRIPT_FLAG_ALL_ELIGIBLE_BUDDIES) == 0 && closest)
+                    buddies.push_back(closest);
+            }
         }
         else                                                // Buddy by entry
         {

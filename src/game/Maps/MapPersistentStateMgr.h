@@ -93,6 +93,8 @@ class MapPersistentState
             return itr != m_goRespawnTimes.end() ? itr->second : 0;
         }
         void SaveGORespawnTime(uint32 loguid, time_t t);
+        time_t GetObjectRespawnTime(uint32 typeId, uint32 loguid) const;
+        void SaveObjectRespawnTime(uint32 typeId, uint32 loguid, time_t t);
 
         // pool system
         void InitPools();

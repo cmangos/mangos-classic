@@ -590,6 +590,7 @@ class ChatHandler
         bool HandleReloadExpectedSpamRecords(char* args);
         bool HandleReloadCreatureCooldownsCommand(char* args);
         bool HandleReloadCreatureSpellLists(char* args);
+        bool HandleReloadSpawnGroupsCommand(char* args);
 
         bool HandleResetAllCommand(char* args);
         bool HandleResetHonorCommand(char* args);
@@ -748,6 +749,7 @@ class ChatHandler
         bool HandleLinkCheckCommand(char* args);
 
         // worldstate
+        bool HandleVariablePrint(char* args);
         bool HandleWarEffortCommand(char* args);
         bool HandleWarEffortPhaseCommand(char* args);
         bool HandleWarEffortCounterCommand(char* args);
