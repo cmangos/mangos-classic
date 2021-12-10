@@ -47,7 +47,7 @@ SpawnManager::~SpawnManager()
 
 void SpawnManager::Initialize()
 {
-    auto& spawnGroupData = m_map.GetMapDataContainer().GetSpawnGroups();
+    auto spawnGroupData = m_map.GetMapDataContainer().GetSpawnGroups();
     for (auto& groupData : spawnGroupData->spawnGroupMap)
     {
         SpawnGroupEntry const& entry = groupData.second;
