@@ -261,4 +261,6 @@ UPDATE `spell_template` SET `MaxAffectedTargets` = 15 WHERE `Id` = 26052; -- Poi
 -- MaxAffectedTargets
 -- ==================
 
+-- Ritual of summoning - LOS attribute - spell actually cast without target but needs GO type 18 rework
+UPDATE `spell_template` SET `AttributesEx2`=AttributesEx2|4 WHERE `id` IN(7720);
 
