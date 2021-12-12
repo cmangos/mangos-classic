@@ -1499,13 +1499,8 @@ void ObjectMgr::LoadCreatures()
             CreatureConditionalSpawn const* cSpawn = GetCreatureConditionalSpawn(guid);
             if (!cSpawn)
             {
-                if (uint32 randomEntry = sObjectMgr.GetRandomCreatureEntry(guid))
+                if (uint32 randomEntry = GetRandomCreatureEntry(guid))
                     entry = randomEntry;
-                else
-                {
-                    sLog.outErrorDb("Table `creature` has creature (GUID: %u) with 0 id and no records in creature_conditional_spawn/creature_spawn_entry, skipped.", guid);
-                    continue;
-                }
             }
             else
             {
@@ -1515,11 +1510,15 @@ void ObjectMgr::LoadCreatures()
             }
         }
 
-        CreatureInfo const* cInfo = GetCreatureTemplate(entry);
-        if (!cInfo)
+        CreatureInfo const* cInfo = nullptr;
+        if (entry)
         {
-            sLog.outErrorDb("Table `creature` has creature (GUID: %u) with non existing creature entry %u, skipped.", guid, entry);
-            continue;
+            cInfo = GetCreatureTemplate(entry);
+            if (!cInfo)
+            {
+                sLog.outErrorDb("Table `creature` has creature (GUID: %u) with non existing creature entry %u, skipped.", guid, entry);
+                continue;
+            }
         }
 
         CreatureData& data = mCreatureDataMap[guid];
@@ -1580,20 +1579,28 @@ void ObjectMgr::LoadCreatures()
                 sLog.outErrorDb("Table `creature` have creature (Entry: %u) with equipment_id %u not found in table `creature_equip_template`, set to no equipment.", data.id, data.equipmentId);
                 data.equipmentId = -1;
             }
+            if (cInfo && data.equipmentId == cInfo->EquipmentTemplateId)
+            {
+                sLog.outErrorDb("Table `creature` has creature (GUID: %u, Entry: %u) with equipment_id %u already defined in creature_template table", guid, data.id, data.equipmentId); 
+                data.equipmentId = 0;
+            }
         }
 
-        if (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_INSTANCE_BIND)
+        if (cInfo)
         {
-            if (!mapEntry || !mapEntry->IsDungeon())
-                sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`ExtraFlags` including CREATURE_FLAG_EXTRA_INSTANCE_BIND (%u) but creature are not in instance.",
-                                guid, data.id, CREATURE_EXTRA_FLAG_INSTANCE_BIND);
-        }
+            if (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_INSTANCE_BIND)
+            {
+                if (!mapEntry || !mapEntry->IsDungeon())
+                    sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`ExtraFlags` including CREATURE_FLAG_EXTRA_INSTANCE_BIND (%u) but creature are not in instance.",
+                        guid, data.id, CREATURE_EXTRA_FLAG_INSTANCE_BIND);
+            }
 
-        if (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_AGGRO_ZONE)
-        {
-            if (!mapEntry || !mapEntry->IsDungeon())
-                sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`ExtraFlags` including CREATURE_FLAG_EXTRA_AGGRO_ZONE (%u) but creature are not in instance.",
-                                guid, data.id, CREATURE_EXTRA_FLAG_AGGRO_ZONE);
+            if (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_AGGRO_ZONE)
+            {
+                if (!mapEntry || !mapEntry->IsDungeon())
+                    sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`ExtraFlags` including CREATURE_FLAG_EXTRA_AGGRO_ZONE (%u) but creature are not in instance.",
+                        guid, data.id, CREATURE_EXTRA_FLAG_AGGRO_ZONE);
+            }
         }
 
         if (data.spawndist < 0.0f)
@@ -1638,7 +1645,7 @@ void ObjectMgr::LoadCreatures()
         {
             AddCreatureToGrid(guid, &data);
 
-            if (sWorld.getConfig(CONFIG_BOOL_AUTOLOAD_ACTIVE) && cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_ACTIVE)
+            if (sWorld.getConfig(CONFIG_BOOL_AUTOLOAD_ACTIVE) && cInfo && cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_ACTIVE)
                 m_activeCreatures.emplace(data.mapid, guid);
         }
 
@@ -1712,7 +1719,7 @@ void ObjectMgr::LoadGameObjects()
         uint32 entry        = fields[ 1].GetUInt32();
 
         if (entry == 0)
-            if (uint32 randomEntry = sObjectMgr.GetRandomGameObjectEntry(guid))
+            if (uint32 randomEntry = GetRandomGameObjectEntry(guid))
                 entry = randomEntry;
 
         GameObjectInfo const* gInfo = nullptr;
