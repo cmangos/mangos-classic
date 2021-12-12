@@ -5325,6 +5325,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_caster->HasCharm())
                     return SPELL_FAILED_ALREADY_HAVE_CHARM;
 
+                if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_DISMISS_PET))
+                    if (m_caster->FindGuardianWithEntry(m_spellInfo->EffectMiscValue[i]))
+                        return SPELL_FAILED_ALREADY_HAVE_SUMMON;
+
                 break;
             }
             case SPELL_EFFECT_SUMMON_PET:
