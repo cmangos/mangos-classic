@@ -27,6 +27,7 @@
 #include <map>
 
 #define SPEAK_IN_LOCALDEFENSE_RANK 0
+#define ENTER_HALL_RANK 6
 #define SPEAK_IN_WORLDDEFENSE_RANK 11
 
 enum ChatNotify : uint8

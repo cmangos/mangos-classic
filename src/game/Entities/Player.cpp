@@ -17816,6 +17816,7 @@ void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaTrigg
             case AREA_LOCKSTATUS_TOO_LOW_LEVEL:
             case AREA_LOCKSTATUS_QUEST_NOT_COMPLETED:
             case AREA_LOCKSTATUS_RAID_LOCKED:
+            case AREA_LOCKSTATUS_PVP_RANK:
             {
                 std::string message = at->status_failed_text;
                 sObjectMgr.GetAreaTriggerLocales(at->entry, GetSession()->GetSessionDbLocaleIndex(), &message);
@@ -19569,6 +19570,10 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, uint32& m
         miscRequirement = at->requiredQuest;
         return AREA_LOCKSTATUS_QUEST_NOT_COMPLETED;
     }
+
+    if (at->entry == 2532 || at->entry == 2527) // champions hall and hall of legends - need pvp rank
+        if (GetHonorRankInfo().rank < ENTER_HALL_RANK)
+            return AREA_LOCKSTATUS_PVP_RANK;
 
     // If the map is not created, assume it is possible to enter it.
     DungeonPersistentState* state = GetBoundInstanceSaveForSelfOrGroup(at->target_mapId);
