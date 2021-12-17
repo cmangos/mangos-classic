@@ -4842,50 +4842,90 @@ uint32 Player::GetShieldBlockValue() const
 
 float Player::GetMeleeCritFromAgility() const
 {
-    // from mangos 3462 for 1.12
-    float val = 0.0f, classrate = 0.0f;
+    float valLevel1 = 0.0f;
+    float valLevel60 = 0.0f;
     // critical
     switch (getClass())
     {
-        case CLASS_PALADIN: classrate = 19.77f; break;
-        case CLASS_SHAMAN:  classrate = 19.7f;  break;
-        case CLASS_MAGE:    classrate = 19.44f; break;
-        case CLASS_ROGUE:   classrate = 29.0f;  break;
-        case CLASS_HUNTER:  classrate = 53.0f;  break;      // in 2.0.x = 33
-        case CLASS_PRIEST:
-        case CLASS_WARLOCK:
+        case CLASS_PALADIN:
+        case CLASS_SHAMAN:
         case CLASS_DRUID:
+            valLevel1 = 4.6f;
+            valLevel60 = 20.0f;
+            break;
+        case CLASS_MAGE:
+            valLevel1 = 12.9f;
+            valLevel60 = 20.0f;
+            break;
+        case CLASS_ROGUE:
+            valLevel1 = 2.2f;
+            valLevel60 = 29.0f;
+            break;
+        case CLASS_HUNTER:
+            valLevel1 = 3.5f;
+            valLevel60 = 53.0f;
+            break;
+        case CLASS_PRIEST:
+            valLevel1 = 11.0f;
+            valLevel60 = 20.0f;
+            break;
+        case CLASS_WARLOCK:
+            valLevel1 = 8.4f;
+            valLevel60 = 20.0f;
+            break;
         case CLASS_WARRIOR:
-        default:            classrate = 20.0f; break;
+            valLevel1 = 3.9f;
+            valLevel60 = 20.0f;
+            break;
+        default:
+            return 0.0f;
     }
-
-    val = GetStat(STAT_AGILITY) / classrate;
-    return val;
+    float classrate = valLevel1 * float(60.0f - GetLevel()) / 59.0f + valLevel60 * float(GetLevel() - 1.0f) / 59.0f;
+    return GetStat(STAT_AGILITY) / classrate;
 }
-
-// Static multipliers for converting agi into dodge chance
-static const float PLAYER_AGI_TO_DODGE[MAX_CLASSES] =
-{
-    0.00000f, // [0]  <Unused>
-    0.05000f, // [1]  Warrior
-    0.05000f, // [2]  Paladin
-    0.03774f, // [3]  Hunter
-    0.06897f, // [4]  Rogue
-    0.05000f, // [5]  Priest
-    0.00000f, // [6]  <Unused>
-    0.05000f, // [7]  Shaman
-    0.05000f, // [8]  Mage
-    0.05000f, // [9]  Warlock
-    0.00000f, // [10] <Unused>
-    0.05000f, // [11] Druid
-};
 
 float Player::GetDodgeFromAgility(float amount) const
 {
-    const uint32 pclass = getClass();
-    if (pclass >= MAX_CLASSES)
-        return 0.0f;
-    return (amount * PLAYER_AGI_TO_DODGE[pclass]);
+    float valLevel1 = 0.0f;
+    float valLevel60 = 0.0f;
+    // critical
+    switch (getClass())
+    {
+        case CLASS_PALADIN:
+        case CLASS_SHAMAN:
+        case CLASS_DRUID:
+            valLevel1 = 4.6f;
+            valLevel60 = 20.0f;
+            break;
+        case CLASS_MAGE:
+            valLevel1 = 12.9f;
+            valLevel60 = 20.0f;
+            break;
+        case CLASS_ROGUE:
+            valLevel1 = 1.1f;
+            valLevel60 = 14.5f;
+            break;
+        case CLASS_HUNTER:
+            valLevel1 = 1.8f;
+            valLevel60 = 26.5f;
+            break;
+        case CLASS_PRIEST:
+            valLevel1 = 11.0f;
+            valLevel60 = 20.0f;
+            break;
+        case CLASS_WARLOCK:
+            valLevel1 = 8.4f;
+            valLevel60 = 20.0f;
+            break;
+        case CLASS_WARRIOR:
+            valLevel1 = 3.9f;
+            valLevel60 = 20.0f;
+            break;
+        default:
+            return 0.0f;
+    }
+    float classrate = valLevel1 * float(60.0f - GetLevel()) / 59.0f + valLevel60 * float(GetLevel() - 1.0f) / 59.0f;
+    return GetStat(STAT_AGILITY) / classrate;
 }
 
 float Player::GetSpellCritFromIntellect() const
