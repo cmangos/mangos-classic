@@ -1753,6 +1753,8 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
         // By default base stats cannot stack if they're similar
         case SPELL_AURA_MOD_STAT:
         {
+            if (entry->Id == 5320 || entry2->Id == 5320) // Echeyakee's Grace - stacks with everything
+                return true;
             if (entry->EffectMiscValue[i] != entry2->EffectMiscValue[similar])
                 break;
             if (positive)
