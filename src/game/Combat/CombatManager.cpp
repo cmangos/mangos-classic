@@ -22,7 +22,7 @@
 #include "Maps/Map.h"
 #include "World/World.h"
 
-CombatManager::CombatManager(Unit* owner) : m_owner(owner), m_evadeTimer(0), m_evadeState(EVADE_NONE), m_combatTimer(0), m_leashingDisabled(false), m_leashingCheck(nullptr)
+CombatManager::CombatManager(Unit* owner) : m_owner(owner), m_evadeTimer(0), m_evadeState(EVADE_NONE), m_combatTimer(0), m_leashingDisabled(false), m_leashingCheck(nullptr), m_forcedCombat(false)
 {
 
 }
@@ -74,7 +74,7 @@ void CombatManager::Update(const uint32 diff)
                             m_combatTimer -= diff;
                     }
                 }
-                else
+                else if (!m_forcedCombat)
                 {
                     bool check = !m_owner->HasMaster();
                     if (!check)

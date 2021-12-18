@@ -37,8 +37,19 @@ struct WarriorExecuteDamage : public SpellScript
     }
 };
 
+struct Bloodrage : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            aura->GetTarget()->SetInCombatState(false);
+        aura->GetTarget()->GetCombatManager().SetForcedCombat(apply);
+    }
+};
+
 void LoadWarriorScripts()
 {
     RegisterSpellScript<WarriorExecute>("spell_warrior_execute");
     RegisterSpellScript<WarriorExecuteDamage>("spell_warrior_execute_damage");
+    RegisterAuraScript<Bloodrage>("spell_bloodrage");
 }

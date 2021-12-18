@@ -106,6 +106,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28732,'spell_faerlina_widow_embrace'),
 (28749,'spell_check_gothik_side'),
 (28781,'spell_gothik_side_assault'),
+(29131,'spell_bloodrage'),
 (29201,'spell_loatheb_corrupted_mind'),
 (29330,'spell_sapphiron_despawn_buffet'),
 (29351,'spell_plague_wave_controller'),

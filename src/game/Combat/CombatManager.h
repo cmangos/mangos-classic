@@ -57,6 +57,7 @@ class CombatManager
         bool IsLeashingDisabled() { return m_leashingDisabled; }
         void SetLeashingDisable(bool apply) { m_leashingDisabled = apply; }
         void SetLeashingCheck(std::function<bool(Unit*, float x, float y, float z)> check) { m_leashingCheck = check; } // if check evals as true - evade
+        void SetForcedCombat(bool state) { m_forcedCombat = state; }
     private:
         Unit* m_owner;
 
@@ -69,6 +70,9 @@ class CombatManager
         Position m_lastRefreshPos;
         bool m_leashingDisabled;                            // disables leashing timer for script mobs
         std::function<bool(Unit*, float x, float y, float z)> m_leashingCheck;
+
+        // vanilla bloodrage
+        bool m_forcedCombat;
 };
 
 #endif
