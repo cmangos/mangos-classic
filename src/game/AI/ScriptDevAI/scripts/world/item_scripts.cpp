@@ -111,6 +111,35 @@ struct GDRPeriodicDamage : public AuraScript
     }
 };
 
+struct BanishExile : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        uint32 entry = 0;
+        switch (spell->m_spellInfo->Id)
+        {
+            case 4130: entry = 2760; break; // Burning Exile
+            case 4131: entry = 2761; break; // Cresting Exile
+            case 4132: entry = 2762; break; // Thundering Exile
+        }
+        if (ObjectGuid target = spell->m_targets.getUnitTargetGuid()) // can be cast only on this target
+            if (target.GetEntry() != entry)
+                return SPELL_FAILED_BAD_TARGETS;
+
+        return SPELL_CAST_OK;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        DoScriptText(-1010004, target, spell->GetCaster());
+        target->CastSpell(nullptr, 3617, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_item_scripts()
 {
     Script* pNewScript = new Script;
@@ -122,4 +151,5 @@ void AddSC_item_scripts()
 
     RegisterSpellScript<GDRChannel>("spell_gdr_channel");
     RegisterAuraScript<GDRPeriodicDamage>("spell_gdr_periodic");
+    RegisterAuraScript<BanishExile>("spell_banish_exile");
 }

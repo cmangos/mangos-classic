@@ -7671,13 +7671,6 @@ SpellCastResult Spell::OnCheckCast(bool strict)
                 return SPELL_FAILED_TOO_MANY_OF_ITEM;
             break;
         }
-        case 4131: // Banish Cresting Exile
-        {
-            if (ObjectGuid target = m_targets.getUnitTargetGuid()) // can be cast only on this target
-                if (target.GetEntry() != 2761)
-                    return SPELL_FAILED_BAD_TARGETS;
-            break;
-        }
         case 7914: // Capture Spirit
         {
             if (ObjectGuid target = m_targets.getUnitTargetGuid()) // can be cast only on these targets
