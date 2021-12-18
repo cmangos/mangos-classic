@@ -572,7 +572,8 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
     m_ArmorProficiency = 0;
     m_canParry = false;
     m_canBlock = false;
-    m_ammoDPS = 0.0f;
+    m_ammoDPSMin = 0.0f;
+    m_ammoDPSMax = 0.0f;
 
     m_temporaryUnsummonedPetNumber = 0;
     m_BGPetSpell = 0;
@@ -7445,18 +7446,26 @@ void Player::_ApplyAmmoBonuses()
     if (!ammo_id)
         return;
 
-    float currentAmmoDPS;
+    float currentAmmoDPSMin;
+    float currentAmmoDPSMax;
 
     ItemPrototype const* ammo_proto = ObjectMgr::GetItemPrototype(ammo_id);
     if (!ammo_proto || ammo_proto->Class != ITEM_CLASS_PROJECTILE || !CheckAmmoCompatibility(ammo_proto))
-        currentAmmoDPS = 0.0f;
+    {
+        currentAmmoDPSMin = 0.f;
+        currentAmmoDPSMax = 0.f;
+    }
     else
-        currentAmmoDPS = ammo_proto->Damage[0].DamageMin;
+    {
+        currentAmmoDPSMin = ammo_proto->Damage[0].DamageMin;
+        currentAmmoDPSMax = ammo_proto->Damage[0].DamageMax;
+    }
 
-    if (currentAmmoDPS == GetAmmoDPS())
+    if (std::make_pair(currentAmmoDPSMin, currentAmmoDPSMax) == GetAmmoDPS())
         return;
 
-    m_ammoDPS = currentAmmoDPS;
+    m_ammoDPSMin = currentAmmoDPSMin;
+    m_ammoDPSMax = currentAmmoDPSMax;
 
     if (CanModifyStats())
         UpdateDamagePhysical(RANGED_ATTACK);
@@ -9679,7 +9688,8 @@ void Player::RemoveAmmo()
 {
     SetUInt32Value(PLAYER_AMMO_ID, 0);
 
-    m_ammoDPS = 0.0f;
+    m_ammoDPSMin = 0.0f;
+    m_ammoDPSMax = 0.0f;
 
     if (CanModifyStats())
         UpdateDamagePhysical(RANGED_ATTACK);

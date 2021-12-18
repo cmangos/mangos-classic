@@ -329,8 +329,9 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, fl
         total_value += GetEnchantmentModifier(attType);
         if (attType == RANGED_ATTACK)                      // add ammo DPS to ranged damage
         {
-            weapon_mindamage += GetAmmoDPS() * att_speed;
-            weapon_maxdamage += GetAmmoDPS() * att_speed;
+            auto ammoDps = GetAmmoDPS();
+            weapon_mindamage += ammoDps.first * att_speed;
+            weapon_maxdamage += ammoDps.second * att_speed;
         }
 
         if (index != 0)
