@@ -52,6 +52,8 @@ class CreatureAI : public UnitAI
         void AddUnreachabilityCheck(); // use in constructor
 
         CreatureSpellList const& GetSpellList() const;
+
+        void TimedFleeingEnded() override;
     protected:
         Creature* m_creature;
         bool m_deathPrevention;

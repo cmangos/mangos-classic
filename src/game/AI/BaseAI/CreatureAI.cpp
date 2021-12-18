@@ -49,6 +49,9 @@ void CreatureAI::Reset()
 void CreatureAI::EnterCombat(Unit* enemy)
 {
     UnitAI::EnterCombat(enemy);
+    if (FactionTemplateEntry const* factionTemplate = m_creature->GetFactionTemplateEntry())
+        if (factionTemplate->factionFlags & FACTION_TEMPLATE_FLAG_ASSIST_PLAYERS)
+            m_creature->SetInPanic(30000);
     if (enemy && (m_creature->IsGuard() || m_creature->IsCivilian()))
     {
         // Send Zone Under Attack message to the LocalDefense and WorldDefense Channels
@@ -183,4 +186,12 @@ void CreatureAI::AddUnreachabilityCheck()
 CreatureSpellList const& CreatureAI::GetSpellList() const
 {
     return m_creature->GetSpellList();
+}
+
+void CreatureAI::TimedFleeingEnded()
+{
+    UnitAI::TimedFleeingEnded();
+    if (FactionTemplateEntry const* factionTemplate = m_creature->GetFactionTemplateEntry())
+        if (factionTemplate->factionFlags & FACTION_TEMPLATE_FLAG_ASSIST_PLAYERS)
+            EnterEvadeMode();
 }
