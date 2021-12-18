@@ -1376,9 +1376,9 @@ void BattleGround::UpdatePlayerScore(Player* player, uint32 type, uint32 value)
 
   @param    gameobject guid
 */
-void BattleGround::DoorClose(ObjectGuid guid)
+void BattleGround::DoorClose(uint32 dbGuid)
 {
-    GameObject* obj = GetBgMap()->GetGameObject(guid);
+    GameObject* obj = GetBgMap()->GetGameObject(dbGuid);
     if (obj)
     {
         // if doors are open, close it
@@ -1390,7 +1390,7 @@ void BattleGround::DoorClose(ObjectGuid guid)
         }
     }
     else
-        sLog.outError("BattleGround: Door %s not found (cannot close doors)", guid.GetString().c_str());
+        sLog.outError("BattleGround: Door %u not found (cannot close doors)", dbGuid);
 }
 
 /**
@@ -1398,9 +1398,9 @@ void BattleGround::DoorClose(ObjectGuid guid)
 
   @param    gameobject guid
 */
-void BattleGround::DoorOpen(ObjectGuid guid)
+void BattleGround::DoorOpen(uint32 dbGuid)
 {
-    GameObject* obj = GetBgMap()->GetGameObject(guid);
+    GameObject* obj = GetBgMap()->GetGameObject(dbGuid);
     if (obj)
     {
         // change state to be sure they will be opened
@@ -1408,7 +1408,7 @@ void BattleGround::DoorOpen(ObjectGuid guid)
         obj->UseDoorOrButton(RESPAWN_ONE_DAY);
     }
     else
-        sLog.outError("BattleGround: Door %s not found! - doors will be closed.", guid.GetString().c_str());
+        sLog.outError("BattleGround: Door %u not found! - doors will be closed.", dbGuid);
 }
 
 /**
@@ -1435,13 +1435,13 @@ Team BattleGround::GetPrematureWinner()
 */
 void BattleGround::OnObjectDBLoad(Creature* creature)
 {
-    const BattleGroundEventIdx eventId = sBattleGroundMgr.GetCreatureEventIndex(creature->GetGUIDLow());
+    const BattleGroundEventIdx eventId = sBattleGroundMgr.GetCreatureEventIndex(creature->GetDbGuid());
     if (eventId.event1 == BG_EVENT_NONE)
         return;
 
-    m_eventObjects[MAKE_PAIR32(eventId.event1, eventId.event2)].creatures.push_back(creature->GetObjectGuid());
+    m_eventObjects[MAKE_PAIR32(eventId.event1, eventId.event2)].creatures.push_back(creature->GetDbGuid());
     if (!IsActiveEvent(eventId.event1, eventId.event2))
-        ChangeBgCreatureSpawnState(creature->GetObjectGuid(), RESPAWN_ONE_DAY);
+        ChangeBgCreatureSpawnState(creature->GetDbGuid(), RESPAWN_ONE_DAY);
 }
 
 /**
@@ -1450,9 +1450,9 @@ void BattleGround::OnObjectDBLoad(Creature* creature)
   @param    event1
   @param    event2
 */
-ObjectGuid BattleGround::GetSingleCreatureGuid(uint8 event1, uint8 event2)
+uint32 BattleGround::GetSingleCreatureGuid(uint8 event1, uint8 event2)
 {
-    GuidVector::const_iterator itr = m_eventObjects[MAKE_PAIR32(event1, event2)].creatures.begin();
+    auto itr = m_eventObjects[MAKE_PAIR32(event1, event2)].creatures.begin();
     if (itr != m_eventObjects[MAKE_PAIR32(event1, event2)].creatures.end())
         return *itr;
 
@@ -1466,11 +1466,11 @@ ObjectGuid BattleGround::GetSingleCreatureGuid(uint8 event1, uint8 event2)
 */
 void BattleGround::OnObjectDBLoad(GameObject* obj)
 {
-    const BattleGroundEventIdx eventId = sBattleGroundMgr.GetGameObjectEventIndex(obj->GetGUIDLow());
+    const BattleGroundEventIdx eventId = sBattleGroundMgr.GetGameObjectEventIndex(obj->GetDbGuid());
     if (eventId.event1 == BG_EVENT_NONE)
         return;
 
-    m_eventObjects[MAKE_PAIR32(eventId.event1, eventId.event2)].gameobjects.push_back(obj->GetObjectGuid());
+    m_eventObjects[MAKE_PAIR32(eventId.event1, eventId.event2)].gameobjects.push_back(obj->GetDbGuid());
     if (!IsActiveEvent(eventId.event1, eventId.event2))
         ChangeBgObjectSpawnState(obj->GetObjectGuid(), RESPAWN_ONE_DAY);
     else
@@ -1520,7 +1520,7 @@ void BattleGround::OpenDoorEvent(uint8 event1, uint8 event2 /*=0*/)
         return;
     }
 
-    GuidVector::const_iterator itr = m_eventObjects[MAKE_PAIR32(event1, event2)].gameobjects.begin();
+    auto itr = m_eventObjects[MAKE_PAIR32(event1, event2)].gameobjects.begin();
     for (; itr != m_eventObjects[MAKE_PAIR32(event1, event2)].gameobjects.end(); ++itr)
         DoorOpen(*itr);
 }
@@ -1549,11 +1549,11 @@ void BattleGround::SpawnEvent(uint8 event1, uint8 event2, bool spawn)
     else
         m_activeEvents[event1] = BG_EVENT_NONE;             // no event active if event2 gets despawned
 
-    GuidVector::const_iterator itr = m_eventObjects[MAKE_PAIR32(event1, event2)].creatures.begin();
+    auto itr = m_eventObjects[MAKE_PAIR32(event1, event2)].creatures.begin();
     for (; itr != m_eventObjects[MAKE_PAIR32(event1, event2)].creatures.end(); ++itr)
         ChangeBgCreatureSpawnState(*itr, (spawn) ? RESPAWN_IMMEDIATELY : RESPAWN_ONE_DAY);
 
-    GuidVector::const_iterator itr2 = m_eventObjects[MAKE_PAIR32(event1, event2)].gameobjects.begin();
+    auto itr2 = m_eventObjects[MAKE_PAIR32(event1, event2)].gameobjects.begin();
     for (; itr2 != m_eventObjects[MAKE_PAIR32(event1, event2)].gameobjects.end(); ++itr2)
         ChangeBgObjectSpawnState(*itr2, (spawn) ? RESPAWN_IMMEDIATELY : RESPAWN_ONE_DAY);
 }
@@ -1564,11 +1564,11 @@ void BattleGround::SpawnEvent(uint8 event1, uint8 event2, bool spawn)
   @param    gameobject guid
   @param    respawn time (can be 0 or 1 day)
 */
-void BattleGround::ChangeBgObjectSpawnState(ObjectGuid guid, uint32 respawntime)
+void BattleGround::ChangeBgObjectSpawnState(uint32 dbGuid, uint32 respawntime)
 {
     Map* map = GetBgMap();
 
-    GameObject* obj = map->GetGameObject(guid);
+    GameObject* obj = map->GetGameObject(dbGuid);
     if (!obj)
         return;
 
@@ -1600,11 +1600,11 @@ void BattleGround::ChangeBgObjectSpawnState(ObjectGuid guid, uint32 respawntime)
   @param    gameobject guid
   @param    respawn time (can be 0 or 1 day)
 */
-void BattleGround::ChangeBgCreatureSpawnState(ObjectGuid guid, uint32 respawntime)
+void BattleGround::ChangeBgCreatureSpawnState(uint32 dbGuid, uint32 respawntime)
 {
     Map* map = GetBgMap();
 
-    Creature* obj = map->GetCreature(guid);
+    Creature* obj = map->GetCreature(dbGuid);
     if (!obj)
         return;
 

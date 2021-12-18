@@ -502,7 +502,7 @@ class BattleGround
         }
 
         // Get creature guid from event
-        ObjectGuid GetSingleCreatureGuid(uint8 /*event1*/, uint8 /*event2*/);
+        uint32 GetSingleCreatureGuid(uint8 /*event1*/, uint8 /*event2*/);
 
         // Handle door events
         void OpenDoorEvent(uint8 /*event1*/, uint8 event2 = 0);
@@ -512,12 +512,12 @@ class BattleGround
         void HandleTriggerBuff(ObjectGuid /*go_guid*/);
 
         // Handle the respawn or despawn of creatures or gameobjects
-        void ChangeBgObjectSpawnState(ObjectGuid /*guid*/, uint32 /*respawntime*/);
-        void ChangeBgCreatureSpawnState(ObjectGuid /*guid*/, uint32 /*respawntime*/);
+        void ChangeBgObjectSpawnState(uint32 dbGuid, uint32 /*respawntime*/);
+        void ChangeBgCreatureSpawnState(uint32 dbGuid, uint32 /*respawntime*/);
 
         // Handle door states
-        void DoorOpen(ObjectGuid /*guid*/);
-        void DoorClose(ObjectGuid /*guid*/);
+        void DoorOpen(uint32 dbGuid);
+        void DoorClose(uint32 dbGuid);
 
         // Get match premature winner
         virtual Team GetPrematureWinner();
@@ -545,8 +545,8 @@ class BattleGround
 
         struct EventObjects
         {
-            GuidVector gameobjects;
-            GuidVector creatures;
+            std::vector<uint32> gameobjects;
+            std::vector<uint32> creatures;
         };
 
         // cause we create it dynamicly i use a map - to avoid resizing when

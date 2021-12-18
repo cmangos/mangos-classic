@@ -151,5 +151,5 @@ void AddSC_item_scripts()
 
     RegisterSpellScript<GDRChannel>("spell_gdr_channel");
     RegisterAuraScript<GDRPeriodicDamage>("spell_gdr_periodic");
-    RegisterAuraScript<BanishExile>("spell_banish_exile");
+    RegisterSpellScript<BanishExile>("spell_banish_exile");
 }
