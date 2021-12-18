@@ -1755,6 +1755,8 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
         {
             if (entry->Id == 5320 || entry2->Id == 5320) // Echeyakee's Grace - stacks with everything
                 return true;
+            if (entry->Id == 15366 || entry2->Id == 15366) // Songflower Serenade - stacks with everything
+                return true;
             if (entry->EffectMiscValue[i] != entry2->EffectMiscValue[similar])
                 break;
             if (positive)
