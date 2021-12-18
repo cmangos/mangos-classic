@@ -1952,28 +1952,37 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             // nor try to find ground level, but randomly vary in angle
             float min_dis = GetSpellMinRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
             float max_dis = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
-            float dis = rand_norm_f() * (max_dis - min_dis) + min_dis;
-            // calculate angle variation for roughly equal dimensions of target area
-            float max_angle = (max_dis - min_dis) / (max_dis + m_caster->GetObjectBoundingRadius());
-            float angle_offset = max_angle * (rand_norm_f() - 0.5f);
-            m_caster->GetNearPoint2d(x, y, dis + m_caster->GetObjectBoundingRadius(), m_caster->GetOrientation() + angle_offset);
-
-            GridMapLiquidData liqData;
-            if (!m_caster->GetTerrain()->IsInWater(x, y, m_caster->GetTerrain()->GetWaterLevel(x, y, m_caster->GetPositionZ()) - 1.0f, &liqData))
+            SpellCastResult result = SPELL_CAST_OK;
+            for (uint32 i = 0; i < 10; ++i)
             {
-                SendCastResult(SPELL_FAILED_NOT_FISHABLE);
+                float dis = rand_norm_f() * (max_dis - min_dis) + min_dis;
+                // calculate angle variation for roughly equal dimensions of target area
+                float max_angle = (max_dis - min_dis) / (max_dis + m_caster->GetObjectBoundingRadius());
+                float angle_offset = max_angle * (rand_norm_f() - 0.5f);
+                m_caster->GetNearPoint2d(x, y, dis + m_caster->GetObjectBoundingRadius(), m_caster->GetOrientation() + angle_offset);
+
+                GridMapLiquidData liqData;
+                if (!m_caster->GetTerrain()->IsInWater(x, y, m_caster->GetTerrain()->GetWaterLevel(x, y, m_caster->GetPositionZ()) - 1.0f, &liqData))
+                {
+                    result = SPELL_FAILED_NOT_FISHABLE;
+                    continue;
+                }
+
+                z = liqData.level;
+                // finally, check LoS
+                if (!m_caster->IsWithinLOS(x, y, z + 1.f))
+                {
+                    result = SPELL_FAILED_LINE_OF_SIGHT;
+                    continue;
+                }
+            }
+            if (result != SPELL_CAST_OK)
+            {
+                SendCastResult(result);
                 finish(false);
                 return;
             }
 
-            z = liqData.level;
-            // finally, check LoS
-            if (!m_caster->IsWithinLOS(x, y, z))
-            {
-                SendCastResult(SPELL_FAILED_LINE_OF_SIGHT);
-                finish(false);
-                return;
-            }
             m_targets.setDestination(x, y, z);
             break;
         }
