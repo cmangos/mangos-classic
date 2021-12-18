@@ -94,6 +94,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28236,'spell_gluth_zombie_search'),
 (28238,'spell_gluth_zombie_search_heal'),
 (28374,'spell_gluth_decimate'),
+(28376,'spell_shadowguard'),
 (28408,'spell_chains_kel_thuzad'),
 (28415,'spell_trigger_KT_add'),
 (28416,'spell_trigger_KT_add'),

@@ -52,9 +52,34 @@ struct Blackout : public AuraScript
     }
 };
 
+struct Shadowguard : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        if (!spell->GetTriggeredByAuraSpellInfo())
+            return;
+
+        uint32 spellId = 0;
+        switch (spell->GetTriggeredByAuraSpellInfo()->Id)
+        {
+            default:
+            case 18137: spellId = 28377; break;   // Rank 1
+            case 19308: spellId = 28378; break;   // Rank 2
+            case 19309: spellId = 28379; break;   // Rank 3
+            case 19310: spellId = 28380; break;   // Rank 4
+            case 19311: spellId = 28381; break;   // Rank 5
+            case 19312: spellId = 28382; break;   // Rank 6
+        }
+
+        if (spellId)
+            spell->GetCaster()->CastSpell(spell->GetUnitTarget(), spellId, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
+    }
+};
+
 void LoadPriestScripts()
 {
     RegisterSpellScript<PowerInfusion>("spell_power_infusion");
     RegisterSpellScript<SpiritOfRedemptionHeal>("spell_spirit_of_redemption_heal");
     RegisterAuraScript<Blackout>("spell_blackout");
+    RegisterSpellScript<Shadowguard>("spell_shadowguard");
 }
