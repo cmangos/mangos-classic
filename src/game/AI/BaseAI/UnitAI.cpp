@@ -1248,7 +1248,7 @@ void UnitAI::AddInitialCooldowns()
         uint32 cooldown = urand(data.second.InitialMin, data.second.InitialMax);
         if (cooldown)
         {
-            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(m_mainSpellId);
+            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(data.second.SpellId);
             m_unit->AddCooldown(*spellInfo, nullptr, false, cooldown);
         }
     }
