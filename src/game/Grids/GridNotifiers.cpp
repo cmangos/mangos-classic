@@ -250,7 +250,7 @@ void MaNGOS::CallOfHelpCreatureInRangeDo::operator()(Creature* u)
         return;
 
     if (u->AI())
-        u->AI()->AttackStart(i_enemy);
+        u->AI()->OnCallForHelp(i_funit, i_enemy);
 }
 
 bool MaNGOS::AnyAssistCreatureInRangeCheck::operator()(Creature* u)
