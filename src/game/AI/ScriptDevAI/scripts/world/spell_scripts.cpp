@@ -233,6 +233,17 @@ struct spell_effect_summon_no_follow_movement : public SpellScript
     }
 };
 
+struct spell_scourge_strike : public SpellScript
+{
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (target->IsPlayer() || (target->IsPlayerControlled()))
+            return false;
+
+        return true;
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -247,4 +258,5 @@ void AddSC_spell_scripts()
     RegisterAuraScript<FoodAnimation>("spell_food_animation");
     RegisterAuraScript<DrinkAnimation>("spell_drink_animation");
     RegisterSpellScript<spell_effect_summon_no_follow_movement>("spell_effect_summon_no_follow_movement");
+    RegisterSpellScript<spell_scourge_strike>("spell_scourge_strike");
 }

@@ -96,6 +96,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28169,'spell_grobbulus_mutating_injection'),
 (28236,'spell_gluth_zombie_search'),
 (28238,'spell_gluth_zombie_search_heal'),
+(28265,'spell_scourge_strike'),
 (28374,'spell_gluth_decimate'),
 (28376,'spell_shadowguard'),
 (28408,'spell_chains_kel_thuzad'),
