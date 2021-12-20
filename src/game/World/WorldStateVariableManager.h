@@ -23,6 +23,7 @@
 #include <map>
 #include <functional>
 #include <string>
+#include <vector>
 
 class ByteBuffer;
 class Map;
