@@ -20,6 +20,7 @@
 #include "WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "Entities/UpdateData.h"
+#include "Maps/MapPersistentStateMgr.h"
 #include "Maps/Map.h"
 #include "Entities/Transports.h"
 #include "Globals/ObjectAccessor.h"
