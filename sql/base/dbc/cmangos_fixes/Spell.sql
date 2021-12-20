@@ -264,3 +264,10 @@ UPDATE `spell_template` SET `MaxAffectedTargets` = 15 WHERE `Id` = 26052; -- Poi
 -- Ritual of summoning - LOS attribute - spell actually cast without target but needs GO type 18 rework
 UPDATE `spell_template` SET `AttributesEx2`=AttributesEx2|4 WHERE `id` IN(7720);
 
+-- ==========================
+-- SPELL_ATTR_SS_IGNORE_EVADE
+-- ==========================
+UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|4 WHERE `Id` IN (
+28330 -- Flameshocker - Immolate Visual
+);
+
