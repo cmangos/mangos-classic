@@ -18,6 +18,7 @@
 
 #include "Maps/SpawnManager.h"
 #include "Maps/Map.h"
+#include "Maps/SpawnGroupDefines.h"
 #include "Maps/MapPersistentStateMgr.h"
 
 bool operator<(SpawnInfo const& lhs, SpawnInfo const& rhs)
