@@ -17,12 +17,14 @@
 //#include "scriptPCH.h"
 #include "scourge_invasion.h"
 //#include "CreatureGroups.h"
-#include "GameEvents/GameEventMgr.h"
-#include "Grids/GridNotifiers.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "Globals/ObjectMgr.h"
 #include "World/WorldStateDefines.h"
+#include "Grids/CellImpl.h"
+#include "GameEvents/GameEventMgr.h"
+#include "Grids/GridNotifiers.h"
+#include "Grids/GridNotifiersImpl.h"
 
 inline uint32 GetCampType(Creature* unit) { return unit->HasAura(SPELL_CAMP_TYPE_GHOST_SKELETON) || unit->HasAura(SPELL_CAMP_TYPE_GHOST_GHOUL) || unit->HasAura(SPELL_CAMP_TYPE_GHOUL_SKELETON); };
 
