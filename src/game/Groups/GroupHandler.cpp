@@ -103,7 +103,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
     }
 
     Group* initiatorGroup = initiator->GetGroup();
-    if (initiatorGroup && initiatorGroup->isBattleGroup())
+    if (initiatorGroup && initiatorGroup->IsBattleGroup())
         initiatorGroup = initiator->GetOriginalGroup();
     if (!initiatorGroup)
         initiatorGroup = initiator->GetGroupInvite();
@@ -116,7 +116,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
     }
 
     Group* recipientGroup = recipient->GetGroup();
-    if (recipientGroup && recipientGroup->isBattleGroup())
+    if (recipientGroup && recipientGroup->IsBattleGroup())
         recipientGroup = recipient->GetOriginalGroup();
 
     // player already in another group
@@ -913,7 +913,7 @@ void WorldSession::HandleGroupSwapSubGroupOpcode(WorldPacket& recv_data)
     Player* player = GetPlayer();
 
     Group* group = player->GetGroup();
-    if (!group || !group->isRaidGroup())
+    if (!group || !group->IsRaidGroup())
         return;
 
     ObjectGuid const& guid = player->GetObjectGuid();

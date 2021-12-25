@@ -396,7 +396,7 @@ void PetAI::UpdateAllies()
     if (m_AllySet.size() == 2 && !group)
         return;
     // owner is in group; group members filled in already (no raid -> subgroupcount = whole count)
-    if (group && !group->isRaidGroup() && m_AllySet.size() == (group->GetMembersCount() + 2))
+    if (group && !group->IsRaidGroup() && m_AllySet.size() == (group->GetMembersCount() + 2))
         return;
 
     m_AllySet.clear();
