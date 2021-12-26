@@ -27,6 +27,7 @@
 #include <map>
 #include <World/WorldStateDefines.h>
 #include "AI/ScriptDevAI/scripts/world/scourge_invasion.h"
+#include "Globals/ObjectAccessor.h"
 
 std::map<AQResources, WorldStateID> aqWorldstateMap =
 {
