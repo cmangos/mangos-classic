@@ -7446,8 +7446,10 @@ void PlayerbotAI::_HandleCommandPet(std::string& text, Player& fromPlayer)
             return;
         }
 
-        std::string state;
-        switch (pet->GetCharmInfo()->GetAI()->GetReactState())
+        if(!pet || !pet->AI())
+            return;
+
+        switch (pet->AI()->GetReactState())
         {
             case REACT_AGGRESSIVE:
                 SendWhisper("My pet is aggressive.", fromPlayer);
@@ -7466,6 +7468,9 @@ void PlayerbotAI::_HandleCommandPet(std::string& text, Player& fromPlayer)
             _HandleCommandHelp("pet cast", fromPlayer);
             return;
         }
+
+        if(!pet)
+            return;
 
         uint32 spellId = (uint32) atol(text.c_str());
 
@@ -7496,6 +7501,9 @@ void PlayerbotAI::_HandleCommandPet(std::string& text, Player& fromPlayer)
             _HandleCommandHelp("pet toggle", fromPlayer);
             return;
         }
+
+        if(!pet)
+            return;
 
         uint32 spellId = (uint32) atol(text.c_str());
 
@@ -7529,6 +7537,9 @@ void PlayerbotAI::_HandleCommandPet(std::string& text, Player& fromPlayer)
             SendWhisper("'pet spells' does not support subcommands.", fromPlayer);
             return;
         }
+
+        if(!pet)
+            return;
 
         int loc = GetMaster()->GetSession()->GetSessionDbcLocale();
 
