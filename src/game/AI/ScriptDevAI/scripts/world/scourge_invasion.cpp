@@ -146,7 +146,7 @@ void DespawnEventDoodads(Creature* shard)
         pDoodad->ForcedDespawn();
 
     std::list<Creature*> finderList;
-    GetCreatureListWithEntryInGrid(finderList, shard, { NPC_SCOURGE_INVASION_MINION_FINDER }, 60.0f);
+    GetCreatureListWithEntryInGrid(finderList, shard, NPC_SCOURGE_INVASION_MINION_FINDER, 60.0f);
     for (const auto pFinder : finderList)
         pFinder->ForcedDespawn();
 }
@@ -168,7 +168,7 @@ void SummonCultists(Unit* shard)
         return;
 
     std::list<GameObject*> summonerShieldList;
-    GetGameObjectListWithEntryInGrid(summonerShieldList, shard, { GOBJ_SUMMONER_SHIELD }, INSPECT_DISTANCE);
+    GetGameObjectListWithEntryInGrid(summonerShieldList, shard, GOBJ_SUMMONER_SHIELD, INSPECT_DISTANCE);
     for (const auto pSummonerShield : summonerShieldList)
         pSummonerShield->ForcedDespawn();
 
@@ -194,7 +194,7 @@ void DespawnCultists(Unit* despawner)
         return;
 
     std::list<Creature*> cultistList;
-    GetCreatureListWithEntryInGrid(cultistList, despawner, { NPC_CULTIST_ENGINEER }, INSPECT_DISTANCE);
+    GetCreatureListWithEntryInGrid(cultistList, despawner, NPC_CULTIST_ENGINEER, INSPECT_DISTANCE);
     for (const auto pCultist : cultistList)
         if (pCultist)
             pCultist->ForcedDespawn();
@@ -206,7 +206,7 @@ void DespawnShadowsOfDoom(Unit* despawner)
         return;
 
     std::list<Creature*> shadowList;
-    GetCreatureListWithEntryInGrid(shadowList, despawner, { NPC_SHADOW_OF_DOOM }, 200.0f);
+    GetCreatureListWithEntryInGrid(shadowList, despawner, NPC_SHADOW_OF_DOOM, 200.0f);
     for (const auto pShadow : shadowList)
         if (pShadow && pShadow->IsAlive() && !pShadow->IsInCombat())
             pShadow->ForcedDespawn();
@@ -253,7 +253,7 @@ uint32 GetFindersAmount(Creature* shard)
 {
     uint32 finderCounter = 0;
     std::list<Creature*> finderList;
-    GetCreatureListWithEntryInGrid(finderList, shard, { NPC_SCOURGE_INVASION_MINION_FINDER }, 60.0f);
+    GetCreatureListWithEntryInGrid(finderList, shard, NPC_SCOURGE_INVASION_MINION_FINDER, 60.0f);
     for (const auto pFinder : finderList)
         if (pFinder)
             finderCounter++;
@@ -677,7 +677,7 @@ struct NecroticShard : public ScriptedAI
         int finderAmount = urand(1, 3); // Up to 3 spawns.
 
         std::list<Creature*> finderList;
-        GetCreatureListWithEntryInGrid(finderList, m_creature, { NPC_SCOURGE_INVASION_MINION_FINDER }, 60.0f);
+        GetCreatureListWithEntryInGrid(finderList, m_creature, NPC_SCOURGE_INVASION_MINION_FINDER, 60.0f);
         if (finderList.empty())
             return;
 
@@ -774,7 +774,7 @@ struct npc_cultist_engineer : public ScriptedAI
             gameObject->Delete();
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* invoker, uint32 miscValue) override
+    void ReceiveAIEvent(uint32 eventType, Unit* /*sender*/, Unit* invoker, uint32 miscValue)
     {
         if (eventType == 7166 && miscValue == 0)
         {
