@@ -342,11 +342,11 @@ namespace MMAP
                         useLiquid = false;
                     }
                     else if ((liquidType & (MAP_LIQUID_TYPE_WATER | MAP_LIQUID_TYPE_OCEAN)) != 0)
-                        liquidType = NAV_WATER;
+                        liquidType = NAV_AREA_WATER;
                     else if (liquidType & MAP_LIQUID_TYPE_MAGMA)
-                        liquidType = NAV_MAGMA;
+                        liquidType = NAV_AREA_MAGMA_SLIME;
                     else if (liquidType & MAP_LIQUID_TYPE_SLIME)
-                        liquidType = NAV_SLIME;
+                        liquidType = NAV_AREA_MAGMA_SLIME;
                     else
                         useLiquid = false;
                 }
@@ -641,13 +641,11 @@ namespace MMAP
                         {
                             case 0:
                             case 1:
-                                type = NAV_WATER;
+                                type = NAV_AREA_WATER;
                                 break;
                             case 2:
-                                type = NAV_MAGMA;
-                                break;
                             case 3:
-                                type = NAV_SLIME;
+                                type = NAV_MAGMA_SLIME;
                                 break;
                         }
 
