@@ -39,6 +39,31 @@ struct world_map_eastern_kingdoms : public ScriptedMap
             case NPC_SHORT_JOHN_MITHRIL:
                 m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
                 break;
+            case EK_SINPC_NECROPOLIS_HEALTH:
+                m_npcEntryGuidCollection[pCreature->GetEntry()].push_back(pCreature->GetObjectGuid());
+                break;
+        }
+    }
+
+    void OnCreatureDeath(Creature* pCreature) override
+    {
+        switch (pCreature->GetEntry())
+        {
+            case EK_SINPC_NECROPOLIS_HEALTH:
+                m_npcEntryGuidCollection.erase(pCreature->GetObjectGuid());
+                break;
+            default:
+                break;
+        }
+    }
+
+    void OnObjectCreate(GameObject* pGo) override
+    {
+        switch (pGo->GetEntry())
+        {
+            case EK_SIGOBJ_SUMMON_CIRCLE:
+                m_goEntryGuidCollection[pGo->GetEntry()].push_back(pGo->GetObjectGuid());
+                break;
         }
     }
 
