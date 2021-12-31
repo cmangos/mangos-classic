@@ -1847,7 +1847,7 @@ void WorldObject::SendMessageToSetInRange(WorldPacket const& data, float dist, b
         GetMap()->MessageDistBroadcast(this, data, dist);
 }
 
-void WorldObject::SendMessageToSetExcept(WorldPacket& data, Player const* skipped_receiver) const
+void WorldObject::SendMessageToSetExcept(WorldPacket const& data, Player const* skipped_receiver) const
 {
     // if object is in world, map for it already created!
     if (IsInWorld())
@@ -1855,6 +1855,14 @@ void WorldObject::SendMessageToSetExcept(WorldPacket& data, Player const* skippe
         MaNGOS::MessageDelivererExcept notifier(data, skipped_receiver);
         Cell::VisitWorldObjects(this, notifier, GetMap()->GetVisibilityDistance());
     }
+}
+
+void WorldObject::SendMessageToAllWhoSeeMe(WorldPacket const& data, bool /*self*/) const
+{
+    if (IsInWorld())
+        for (ObjectGuid guid : m_clientGUIDsIAmAt)
+            if (Player* player = GetMap()->GetPlayer(guid))
+                player->GetSession()->SendPacket(data);
 }
 
 void WorldObject::SendObjectDeSpawnAnim(ObjectGuid guid) const

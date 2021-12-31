@@ -1011,7 +1011,8 @@ class WorldObject : public Object
 
         virtual void SendMessageToSet(WorldPacket const& data, bool self) const;
         virtual void SendMessageToSetInRange(WorldPacket const& data, float dist, bool self) const;
-        void SendMessageToSetExcept(WorldPacket& data, Player const* skipped_receiver) const;
+        void SendMessageToSetExcept(WorldPacket const& data, Player const* skipped_receiver) const;
+        virtual void SendMessageToAllWhoSeeMe(WorldPacket const& data, bool self) const;
 
         void MonsterSay(const char* text, uint32 language, Unit const* target = nullptr) const;
         void MonsterYell(const char* text, uint32 language, Unit const* target = nullptr) const;
