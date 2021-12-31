@@ -703,6 +703,11 @@ void Aura::ApplyModifier(bool apply, bool Real)
         OnApply(apply);
 }
 
+ClassFamilyMask Aura::GetAuraSpellClassMask() const
+{
+    return sSpellMgr.GetSpellAffectMask(GetId(), GetEffIndex());
+}
+
 bool Aura::isAffectedOnSpell(SpellEntry const* spell) const
 {
     if (m_spellmod)
@@ -718,8 +723,8 @@ bool Aura::isAffectedOnSpell(SpellEntry const* spell) const
 
 bool Aura::CanProcFrom(SpellEntry const* spell, uint32 EventProcEx, uint32 procEx, bool active, bool useClassMask) const
 {
-    // Check EffectClassMask (in pre-3.x stored in spell_affect in fact)
-    ClassFamilyMask mask = sSpellMgr.GetSpellAffectMask(GetId(), GetEffIndex());
+    // Check EffectClassMask
+    ClassFamilyMask mask = GetAuraSpellClassMask();
 
     // if no class mask defined, or spell_proc_event has SpellFamilyName=0 - allow proc
     if (!useClassMask || !mask)

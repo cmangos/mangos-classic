@@ -461,6 +461,7 @@ class Aura
         void TriggerSpell();
 
         // more limited that used in future versions (spell_affect table based only), so need be careful with backporting uses
+        ClassFamilyMask GetAuraSpellClassMask() const;
         bool isAffectedOnSpell(SpellEntry const* spell) const;
         bool CanProcFrom(SpellEntry const* spell, uint32 EventProcEx, uint32 procEx, bool active, bool useClassMask) const;
 
