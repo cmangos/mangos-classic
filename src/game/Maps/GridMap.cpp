@@ -541,7 +541,7 @@ uint8 GridMap::getTerrainType(float x, float y) const
 }
 
 // Get water state on map
-GridMapLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data)
+GridMapLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data, float collisionHeight)
 {
     // Check water type (if no water return)
     if (!m_liquidFlags && !m_liquidGlobalFlags)
@@ -623,10 +623,10 @@ GridMapLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 Re
     }
 
     // For speed check as int values
-    int delta = int((liquid_level - z) * 10);
+    float delta = liquid_level - z;
 
     // Get position delta
-    if (delta > 20)                                         // Under water
+    if (delta > collisionHeight)                            // Under water
         return LIQUID_MAP_UNDER_WATER;
 
     if (delta > 0)                                          // In water
@@ -970,7 +970,7 @@ void TerrainInfo::GetZoneAndAreaId(uint32& zoneid, uint32& areaid, float x, floa
     TerrainManager::GetZoneAndAreaIdByAreaFlag(zoneid, areaid, GetAreaFlag(x, y, z), m_mapId);
 }
 
-GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data) const
+GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data, float collisionHeight) const
 {
     GridMapLiquidStatus result = LIQUID_MAP_NO_WATER;
     VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
@@ -1019,10 +1019,10 @@ GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint
             }
 
             // For speed check as int values
-            int delta = int((liquid_level - z) * 10);
+            float delta = liquid_level - z;
 
             // Get position delta
-            if (delta > 20)                   // Under water
+            if (delta > collisionHeight)      // Under water
                 return LIQUID_MAP_UNDER_WATER;
             if (delta > 0)                    // In water
                 return LIQUID_MAP_IN_WATER;
@@ -1034,7 +1034,7 @@ GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint
     else if (GridMap* gmap = const_cast<TerrainInfo*>(this)->GetGrid(x, y))
     {
         GridMapLiquidData map_data;
-        GridMapLiquidStatus map_result = gmap->getLiquidStatus(x, y, z, ReqLiquidType, &map_data);
+        GridMapLiquidStatus map_result = gmap->getLiquidStatus(x, y, z, ReqLiquidType, &map_data, collisionHeight);
         // Not override LIQUID_MAP_ABOVE_WATER with LIQUID_MAP_NO_WATER:
         if (map_result != LIQUID_MAP_NO_WATER && (map_data.level > ground_level))
         {

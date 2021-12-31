@@ -111,7 +111,7 @@ class GridMap
         inline float getHeight(float x, float y) const { return (this->*m_gridGetHeight)(x, y); }
         float getLiquidLevel(float x, float y) const;
         uint8 getTerrainType(float x, float y) const;
-        GridMapLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data = nullptr);
+        GridMapLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data = nullptr, float collisionHeight = 2.03128f);
 };
 
 template<typename Countable>
@@ -149,7 +149,7 @@ class TerrainInfo : public Referencable<std::atomic_long>
         bool IsSwimmable(float x, float y, float z, float radius = 1.5f, GridMapLiquidData* data = nullptr) const;
         bool IsUnderWater(float x, float y, float z) const;
 
-        GridMapLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data = nullptr) const;
+        GridMapLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data = nullptr, float collisionHeight = 2.03128f) const;
 
         uint16 GetAreaFlag(float x, float y, float z, bool* isOutdoors = nullptr) const;
         uint8 GetTerrainType(float x, float y) const;
