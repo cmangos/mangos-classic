@@ -48,6 +48,7 @@ void from_json(const json& j, rcConfig& config)
     config.maxVertsPerPoly = DT_VERTS_PER_POLYGON;
     config.detailSampleDist = j["detailSampleDist"].get<float>();
     config.detailSampleMaxError = j["detailSampleMaxError"].get<float>();
+    config.liquidFlagMergeThreshold = j["liquidFlagMergeThreshold"].get<float>();
 }
 
 namespace MMAP
@@ -1167,6 +1168,7 @@ namespace MMAP
             {"walkableHeight", 3},
             {"walkableRadius", 2},
             {"walkableSlopeAngle", 60.0f},
+            {"liquidFlagMergeThreshold", 0.0f},
         };
     }
 
