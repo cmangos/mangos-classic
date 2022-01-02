@@ -106,9 +106,6 @@ namespace MMAP
             bool IsMapDone(uint32 mapId) const;
 
         private:
-            // builds list of maps, then builds all of mmap tiles (based on the skip settings)
-            void buildAllMaps();
-
             // builds all mmap tiles for the specified map id (ignores skip settings)
             void buildMap(uint32 mapID);
 
@@ -165,7 +162,7 @@ namespace MMAP
             typedef std::vector<TaskType> TaskVec;
 
         public:
-            TaskQueue::TaskQueue(MapBuilder* mapBuilder, uint32 maxSize)
+            TaskQueue(MapBuilder* mapBuilder, uint32 maxSize)
                 : m_mapBuilder(mapBuilder), m_maxSize(maxSize) {
                 m_taskList.reserve(maxSize);
             }
