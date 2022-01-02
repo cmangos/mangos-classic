@@ -11,16 +11,13 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 ## Syntax of this helper
-## First param must be number of to be used CPUs (only 1, 2, 3, 4 supported) or "offmesh" to recreate the special tiles from the OFFMESH_FILE
-## Second param can be an additional filename for storing log
-## Third param can be an addition filename for storing detailed log
+## 1st param must be "maps" to generate the maps and offmesh or "offmesh" to recreate the special tiles from the OFFMESH_FILE
+## 2nd param may be an additional filename for storing log
+## 3rd param may be an addition filename for storing detailed log
+## 4th param may be a number of threads to use for maps processing
 
 ## Additional Parameters to be forwarded to MoveMapGen, see mmaps/readme for instructions
 PARAMS="--silent --configInputPath config.json"
-
-## Already a few map extracted, and don't care anymore
-EXCLUDE_MAPS=""
-#EXCLUDE_MAPS="0 1 530 571" # example to exclude the continents
 
 ## Offmesh file
 OFFMESH_FILE="offmesh.txt"
@@ -30,39 +27,32 @@ LOG_FILE="MoveMapGen.log"
 ## Detailed log file
 DETAIL_LOG_FILE="MoveMapGen_detailed.log"
 
-## ! Use below only for finetuning or if you know what you are doing !
-
-## All maps
-LIST_A="1"
-LIST_B="0"
-LIST_C="169"
-LIST_D="269 533 35 44 389 129 109 450 34 249 48"
-LIST_E="531 37 309 369"
-LIST_F="229 409 43 70 90 189"
-LIST_G="36 33 209 451 47"
-LIST_H="509 30 289 230"
-LIST_I="42 449 25 529 489 329 429 349 469 13"
-
 badParam()
 {
  echo "ERROR! Bad arguments!"
  echo "You can (re)extract mmaps with this helper script,"
  echo "or recreate only the tiles from the offmash file"
  echo
- echo "Call with number of processes (1 - 4) to create mmaps"
+ echo "Call with 'maps' to create mmaps"
  echo "Call with 'offmesh' to reextract the tiles from offmash file"
- echo
- echo "For further fine-tuning edit this helper script"
  echo
 }
 
-if [ "$#" = "3" ]
+if [ "$#" = "4" ]
 then
- LOG_FILE=$2
- DETAIL_LOG_FILE=$3
+  LOG_FILE=$2
+  DETAIL_LOG_FILE=$3
+  if [ "$4" != "all" ]
+  then
+    PARAMS="${PARAMS} --threads $4"
+  fi
+elif [ "$#" = "3" ]
+then
+  LOG_FILE=$2
+  DETAIL_LOG_FILE=$3
 elif [ "$#" = "2" ]
 then
- LOG_FILE=$2
+  LOG_FILE=$2
 fi
 
 # Offmesh file provided?
@@ -79,23 +69,6 @@ then
  fi
 fi
 
-# Function to process a list
-createMMaps()
-{
- for i in $@
- do
-   for j in $EXCLUDE_MAPS
-   do
-     if [ "$i" = "$j" ]
-     then
-       continue 2
-     fi
-   done
-   ./MoveMapGen $PARAMS $OFFMESH $i | tee -a $DETAIL_LOG_FILE
-   echo "`date`: (Re)created map $i" | tee -a $LOG_FILE
- done
-}
-
 createHeader()
 {
  echo "`date`: Start creating MoveMaps" | tee -a $LOG_FILE
@@ -103,7 +76,7 @@ createHeader()
  echo "Detailed log can be found in $DETAIL_LOG_FILE" | tee -a $LOG_FILE
  echo "Start creating MoveMaps" | tee -a $DETAIL_LOG_FILE
  echo
- echo "Be PATIENT - This will take a long time and might also have gaps between visible changes on the console."
+ echo "Be PATIENT - This may take a long time with small number of threads and might also have gaps between visible changes on the console."
  echo "WAIT until you are informed that 'creating MoveMaps' is 'finished'!"
 }
 
@@ -115,40 +88,14 @@ fi
 
 # Param control
 case "$1" in
- "1" )
-   createHeader $1
-   createMMaps $LIST_A $LIST_B $LIST_C $LIST_D $LIST_F $LIST_G $LIST_H $LIST_I &
-   ./MoveMapGen $PARAMS $OFFMESH --onlyGO
-   ;;
- "2" )
-   createHeader $1
-   createMMaps $LIST_A $LIST_E $LIST_H $LIST_I &
-   createMMaps $LIST_B $LIST_C $LIST_D $LIST_F $LIST_G &
-   ./MoveMapGen $PARAMS $OFFMESH --onlyGO
-   ;;
- "4" )
-   createHeader $1
-   createMMaps $LIST_A &
-   createMMaps $LIST_B &
-   createMMaps $LIST_C $LIST_F $LIST_G &
-   createMMaps $LIST_D $LIST_E $LIST_H $LIST_I &
-   ./MoveMapGen $PARAMS $OFFMESH --onlyGO
-   ;;
- "8" )
-   createHeader $1
-   createMMaps $LIST_A &
-   createMMaps $LIST_B &
-   createMMaps $LIST_C &
-   createMMaps $LIST_D &
-   createMMaps $LIST_E &
-   createMMaps $LIST_F $LIST_H &
-   createMMaps $LIST_G &
-   createMMaps $LIST_I &
-   ./MoveMapGen $PARAMS $OFFMESH --onlyGO
+
+ "maps" )
+    createHeader
+    ./MoveMapGen $PARAMS $OFFMESH --buildGameObjects | tee -a $DETAIL_LOG_FILE
    ;;
  "offmesh" )
-   echo "`date`: Recreate offmeshs from file $OFFMESH_FILE" | tee -a $LOG_FILE
-   echo "Recreate offmeshs from file $OFFMESH_FILE" | tee -a $DETAIL_LOG_FILE
+   echo "`date`: Recreate offmeshes from file $OFFMESH_FILE" | tee -a $LOG_FILE
+   echo "Recreate offmeshes from file $OFFMESH_FILE" | tee -a $DETAIL_LOG_FILE
    while read map tile line
    do
      ./MoveMapGen $PARAMS $OFFMESH $map --tile $tile | tee -a $DETAIL_LOG_FILE

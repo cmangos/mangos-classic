@@ -27,6 +27,7 @@
 
 #include <climits>
 #include <fstream>
+#include <future>
 
 using namespace VMAP;
 
@@ -51,8 +52,28 @@ void from_json(const json& j, rcConfig& config)
 
 namespace MMAP
 {
-    MapBuilder::MapBuilder(const char* configInputPath, bool skipLiquid, bool skipContinents, bool skipJunkMaps,
+    inline char const* GetDTErrorReason(dtStatus status) {
+        if ((status & DT_WRONG_MAGIC) != 0)
+            return "Reason: 'Input data is not recognized'";
+        if ((status & DT_WRONG_VERSION) != 0)
+            return "Reason: 'Input data is in wrong version'";
+        if ((status & DT_OUT_OF_MEMORY) != 0)
+            return "Reason: 'Operation ran out of memory'";
+        if ((status & DT_INVALID_PARAM) != 0)
+            return "Reason: 'An input parameter was invalid'";
+        if ((status & DT_BUFFER_TOO_SMALL) != 0)
+            return "Reason: 'Result buffer for the query was too small to store all results'";
+        if ((status & DT_OUT_OF_NODES) != 0)
+            return "Reason: 'Query ran out of nodes during search'";
+        if ((status & DT_PARTIAL_RESULT) != 0)
+            return "Reason: 'Query did not reach the end location, returning best guess'";
+        if ((status & DT_ALREADY_OCCUPIED) != 0)
+            return "Reason: 'A tile has already been assigned to the given x,y coordinate'";
+    }
+
+    MapBuilder::MapBuilder(const char* configInputPath, int threads, bool skipLiquid, bool skipContinents, bool skipJunkMaps,
                            bool skipBattlegrounds, bool debug, const char* offMeshFilePath) :
+        m_taskQueue(new TaskQueue(this, threads)),
         m_debug(debug),
         m_skipContinents(skipContinents),
         m_skipJunkMaps(skipJunkMaps),
@@ -66,6 +87,7 @@ namespace MMAP
         m_terrainBuilder = new TerrainBuilder(skipLiquid);
         m_rcContext = new rcContext(false);
 
+        printf("Using %d thread(s) for processing.\n", threads);
         discoverTiles();
     }
 
@@ -80,6 +102,35 @@ namespace MMAP
 
         delete m_terrainBuilder;
         delete m_rcContext;
+    }
+
+    /**************************************************************************/
+    void MapBuilder::BuildMaps(std::vector<uint32>& ids)
+    {
+        if (ids.empty())
+        {
+            for (auto tileItr : m_tiles)
+            {
+                uint32 const& mapID = tileItr.first;
+                if (!shouldSkipMap(mapID))
+                    buildMap(mapID);
+
+                m_mapDone.insert(mapID);
+            }
+        }
+        else
+        {
+            for (auto& mapId : ids)
+            {
+                if (!shouldSkipMap(mapId))
+                    buildMap(mapId);
+
+                m_mapDone.insert(mapId);
+            }
+        }
+
+        // Wait all work to be done
+        m_taskQueue->WaitAll();
     }
 
     /**************************************************************************/
@@ -160,16 +211,13 @@ namespace MMAP
     }
 
     /**************************************************************************/
-    void MapBuilder::buildAllMaps()
+    bool MapBuilder::IsMapDone(uint32 mapId) const
     {
-        for (TileList::iterator it = m_tiles.begin(); it != m_tiles.end(); ++it)
-        {
-            uint32 mapID = (*it).first;
-            if (!shouldSkipMap(mapID))
-                buildMap(mapID);
-        }
+        auto itr = std::find(m_mapDone.begin(), m_mapDone.end(), mapId);
+        return itr != m_mapDone.end();
     }
 
+    /**************************************************************************/
     void MapBuilder::buildGameObject(std::string modelName, uint32 displayId)
     {
         printf("Building GameObject model %s\n", modelName.c_str());
@@ -513,12 +561,32 @@ namespace MMAP
             if (shouldSkipTile(mapID, tileX, tileY))
                 continue;
 
-            buildTile(mapID, tileX, tileY, navMesh, currentTile, uint32(tiles->size()));
+            // Make a copy of the original navMesh object to work on a separate
+            // thread since "the data should not be reused in other nav meshes"
+            // (see dtNavMesh::addTile description)
+            dtNavMesh* navMeshCopy = dtAllocNavMesh();
+            dtStatus dtResult = navMeshCopy->init(navMesh->getParams());
+            if (dtStatusFailed(dtResult))
+            {
+                printf("[Map %03i] Failed to copy navmesh!                   \n", mapID);
+                printf("%s\n", GetDTErrorReason(dtResult));
+                continue;
+            }
+
+            // passing by value
+            auto builder = [=]()
+            {
+                // build tile with copy version of the navmesh
+                buildTile(mapID, tileX, tileY, navMeshCopy, currentTile, uint32(tiles->size()));
+
+                // free this navmesh
+                dtFreeNavMesh(navMeshCopy);
+            };
+
+            m_taskQueue->PushWork(builder, mapID);
         }
 
         dtFreeNavMesh(navMesh);
-
-        printf("[Map %03i] Complete!                             \n\n", mapID);
     }
 
     /**************************************************************************/
@@ -611,9 +679,11 @@ namespace MMAP
 
         navMesh = dtAllocNavMesh();
         printf("[Map %03i] Creating navMesh...                        \r", mapID);
-        if (!navMesh->init(&navMeshParams))
+        dtStatus dtResult = navMesh->init(&navMeshParams);
+        if (dtStatusFailed(dtResult))
         {
             printf("[Map %03i] Failed creating navmesh!                   \n", mapID);
+            printf("%s\n", GetDTErrorReason(dtResult));
             return;
         }
 
@@ -689,12 +759,12 @@ namespace MMAP
                 tileCfg.bmin[2] = config.bmin[2] + float(y * config.tileSize - config.borderSize) * config.cs;
                 tileCfg.bmax[0] = config.bmin[0] + float((x + 1) * config.tileSize + config.borderSize) * config.cs;
                 tileCfg.bmax[2] = config.bmin[2] + float((y + 1) * config.tileSize + config.borderSize) * config.cs;
-
-                float tbmin[2], tbmax[2];
-                tbmin[0] = tileCfg.bmin[0];
-                tbmin[1] = tileCfg.bmin[2];
-                tbmax[0] = tileCfg.bmax[0];
-                tbmax[1] = tileCfg.bmax[2];
+// 
+//                 float tbmin[2], tbmax[2];
+//                 tbmin[0] = tileCfg.bmin[0];
+//                 tbmin[1] = tileCfg.bmin[2];
+//                 tbmax[0] = tileCfg.bmax[0];
+//                 tbmax[1] = tileCfg.bmax[2];
                 buildCommonTile(tileString, tile, tileCfg, tVerts, tVertCount, tTris, tTriCount, lVerts, lVertCount, lTris, lTriCount, lTriFlags);
             }
         }
@@ -844,6 +914,7 @@ namespace MMAP
             if (!tileRef || dtStatusFailed(dtResult))
             {
                 printf("%s Failed adding tile to navmesh!                     \n", tileString);
+                printf("%s\n", GetDTErrorReason(dtResult));
                 continue;
             }
 
