@@ -663,6 +663,7 @@ class Spell
         GameObject* GetGOTarget() { return gameObjTarget; }
         uint32 GetDamage() { return damage; }
         void SetDamage(uint32 newDamage) { damage = newDamage; }
+        SpellSchoolMask GetSchoolMask() { return m_spellSchoolMask; }
         // OnHit use only
         uint32 GetTotalTargetDamage() { return m_damage; }
         // script initialization hook only setters - use only if dynamic - else use appropriate helper
