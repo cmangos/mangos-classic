@@ -34,6 +34,7 @@
 #include "Mails/Mail.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Maps/InstanceData.h"
+#include "Entities/Object.h"
 
 ScriptMapMapName sQuestEndScripts;
 ScriptMapMapName sQuestStartScripts;
@@ -785,6 +786,65 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 break;
             case SCRIPT_COMMAND_ZONE_PULSE:                 // 50
                 break;
+
+            case SCRIPT_COMMAND_SPAWN_GROUP:                // 51
+            {
+                switch (tmp.formationData.command)
+                {
+//                     case 2: // SetFormation
+//                         break;
+//                     case 3: // Add buddy to formation
+//                     {
+//                         if (!tmp.buddyEntry)
+//                         {
+//                             sLog.outErrorDb("Table `%s` has no buddy entry defined in SCRIPT_COMMAND_FORMATION for script id %u", tablename, tmp.id);
+//                             continue;
+//                         }
+//                         break;
+//                     }
+// 
+//                     case 4: // remove buddy to formation
+//                     {
+//                         if (!tmp.buddyEntry)
+//                         {
+//                             sLog.outErrorDb("Table `%s` has no buddy entry defined in SCRIPT_COMMAND_FORMATION for script id %u", tablename, tmp.id);
+//                             continue;
+//                         }
+//                         break;
+//                     }
+
+                    case 100: // switch formation shape
+                    {
+                        if (tmp.formationData.data1 >= SpawnGroupFormationType::SPAWN_GROUP_FORMATION_TYPE_COUNT)
+                        {
+                            sLog.outErrorDb("Table `%s` uses invalid formation shape id(%u) for script id %u.", tablename, tmp.formationData.data1, tmp.id);
+                            continue;
+                        }
+                        break;
+                    }
+
+                    case 101: // change formation spread
+                    {
+                        if (tmp.x < 0.5f || tmp.x > 15.0f)
+                        {
+                            sLog.outErrorDb("Table `%s` uses invalid formation spread(%f) should be in 0.5 .. 15 range for script id %u.", tablename, tmp.x, tmp.id);
+                            continue;
+                        }
+                        break;
+                    }
+
+                    case 102: // change formation options
+                    {
+                        break;
+                    }
+
+                    default:
+                        sLog.outErrorDb("Table `%s` unknown formation command %u, skipping.", tablename, tmp.formationData.command);
+                        continue;
+                }
+
+                break;
+            }
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -1541,6 +1601,22 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
         {
             if (LogIfNotUnit(pSource))
                 break;
+
+            Creature* creature = static_cast<Creature*>(pSource);
+
+            if (m_script->textId[0])
+            {
+                if (m_script->textId[0] == 1 || m_script->textId[0] == 2 && !creature->GetCreatureGroup())
+                {
+                    Position const& respPos = creature->GetRespawnPosition();
+                    creature->GetMotionMaster()->MovePoint(0, respPos, ForcedMovement(m_script->moveTo.forcedMovement), 0.f, true);
+                }
+                else if (m_script->textId[0] == 2)
+                {
+                    creature->GetCreatureGroup()->MoveHome();
+                }
+                break;
+            }
 
             // Just turn around
             if ((m_script->x == 0.0f && m_script->y == 0.0f && m_script->z == 0.0f) ||
@@ -2621,8 +2697,164 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
             creature->AI()->AttackClosestEnemy();
             break;
         }
+        case SCRIPT_COMMAND_SPAWN_GROUP:                    // 51
+        {
+            if (LogIfNotCreature(pTarget))
+                return false;
+
+            Creature* leader = static_cast<Creature*>(pTarget);
+
+            CreatureGroup* leaderGroup = leader->GetCreatureGroup();
+            FormationSlotDataSPtr leaderSlot = leader->GetFormationSlot();
+            FormationData* leaderFormation = nullptr;
+            if (leaderSlot)
+                leaderFormation = leaderSlot->GetFormationData();
+
+            switch (m_script->formationData.command)
+            {
+//                 case 2:                         // set formation
+//                 {
+//                     if (LogIfNotCreature(pSource))
+//                         return false;
+// 
+//                     CreatureGroup* targetGroup = nullptr;
+//                     if (!m_script->formationData.data1)
+//                     {
+//                         if (!leaderGroup)
+//                         {
+//                             sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` script id %u, command %u and subcommand formation create(2) failed. Target group(%u) not found!",
+//                                 m_table, m_script->id, m_script->command, m_script->formationData.data1);
+//                             break;
+//                         }
+//                         leaderGroup->SetFormationData(nullptr);
+//                         break;
+//                     }
+//                     else
+//                     {
+//                         auto sgData = leader->GetMap()->GetSpawnManager().GetSpawnGroup(m_script->formationData.data1);
+//                         if (!sgData || !sgData->GetCreatureGroup())
+//                         {
+//                             sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` script id %u, command %u and subcommand formation create(2) failed. Target group(%u) not found!",
+//                                 m_table, m_script->id, m_script->command, m_script->formationData.data1);
+//                             break;
+//                         }
+//                         targetGroup = sgData->GetCreatureGroup();
+//                     }
+// 
+//                     if (targetGroup->GetFormationData())
+//                     {
+//                         //
+//                         break;
+//                     }
+// 
+//                     FormationEntrySPtr fEntry = std::make_shared<FormationEntry>();
+//                     fEntry->GroupId = targetGroup->GetGroupId();
+//                     fEntry->Type = static_cast<SpawnGroupFormationType>(m_script->textId[0]);
+//                     fEntry->Spread = m_script->x;
+//                     fEntry->Options = m_script->textId[1];
+//                     fEntry->MovementType = m_script->textId[2]; // todo need to check that data!!!
+//                     fEntry->MovementID = m_script->textId[3];
+//                     fEntry->Comment = "Dynamically created formation!";
+// 
+//                     targetGroup->SetFormationData(fEntry);
+//                     break;
+//                 }
+//                 case 3: // add creature to the formation
+//                 {
+//                     if (LogIfNotCreature(pSource))
+//                         return false;
+// 
+//                     if (!leaderFormation)
+//                     {
+//                         sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u failed. %s is not in formation!",
+//                             m_table, m_script->id, m_script->command, leader->GetGuidStr().c_str());
+//                         break;
+//                     }
+//                     leaderFormation->Add(static_cast<Creature*>(pSource));
+//                     break;
+//                 }
+//                 case 4: // remove creature from the formation
+//                 {
+//                     if (LogIfNotCreature(pSource))
+//                         return false;
+// 
+//                     if (!leaderFormation)
+//                     {
+//                         sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u failed. %s is not in formation!",
+//                             m_table, m_script->id, m_script->command, leader->GetGuidStr().c_str());
+//                         break;
+//                     }
+//                     leaderFormation->Remove(static_cast<Creature*>(pSource));
+//                     break;
+//                 }
+                case 100: // switch formation shape
+                {
+                    if (!leaderFormation)
+                    {
+                        sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u failed. %s is not in formation!",
+                            m_table, m_script->id, m_script->command, leader->GetGuidStr().c_str());
+                        break;
+                    }
+
+                    if (m_script->formationData.data1 < static_cast<uint32>(SpawnGroupFormationType::SPAWN_GROUP_FORMATION_TYPE_COUNT))
+                    {
+                        if (!leaderFormation->SwitchFormation(static_cast<SpawnGroupFormationType>(m_script->formationData.data1)))
+                            sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u subcommand changeShape(%u) failed.",
+                                m_table, m_script->id, m_script->command, m_script->formationData.command);
+                    }
+                    else
+                    {
+                        sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u subcommand switchShape(%u) failed, wrong shape id(%u).",
+                            m_table, m_script->id, m_script->command, m_script->formationData.command, m_script->formationData.data1);
+                        return true;
+                    }
+                    break;
+                }
+                case 101:  // set formation spread
+                {
+                    if (!leaderFormation)
+                    {
+                        sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u failed. %s is not in formation!",
+                            m_table, m_script->id, m_script->command, leader->GetGuidStr().c_str());
+                        break;
+                    }
+
+                    if (m_script->x <= 15)
+                    {
+                        leaderFormation->SetSpread(m_script->x);
+                    }
+                    else
+                    {
+                        sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u subcommand changeSpread(%u) failed, wrong shape id(%f).",
+                            m_table, m_script->id, m_script->command, m_script->formationData.command, m_script->x);
+                        return true;
+                    }
+                    break;
+                }
+                case 102:  // set formation options
+                {
+                    if (!leaderFormation)
+                    {
+                        sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u failed. %s is not in formation!",
+                            m_table, m_script->id, m_script->command, leader->GetGuidStr().c_str());
+                        break;
+                    }
+
+                    leaderFormation->SetOptions(m_script->formationData.data1);
+                    break;
+                }
+
+                default:
+                    sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u failed. Invalid value for formation command!",
+                        m_table, m_script->id, m_script->command, m_script->formationData.command);
+                    break;
+            }
+
+            break;
+        }
         default:
-            sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u unknown command used.", m_table, m_script->id, m_script->command);
+            sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u unknown command used.",
+                m_table, m_script->id, m_script->command);
             break;
     }
 

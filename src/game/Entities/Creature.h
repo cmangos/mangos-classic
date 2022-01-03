@@ -784,6 +784,7 @@ class Creature : public Unit
         void SetRespawnCoord(CreatureCreatePos const& pos) { m_respawnPos = pos.m_pos; }
         void SetRespawnCoord(float x, float y, float z, float ori) { m_respawnPos.x = x; m_respawnPos.y = y; m_respawnPos.z = z; m_respawnPos.o = ori; }
         void GetRespawnCoord(float& x, float& y, float& z, float* ori = nullptr, float* dist = nullptr) const;
+        Position const& GetRespawnPosition() const { return m_respawnPos; }
         void ResetRespawnCoord();
 
         void SetDeadByDefault(bool death_state) { m_isDeadByDefault = death_state; }

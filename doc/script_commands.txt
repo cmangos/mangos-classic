@@ -184,6 +184,8 @@ Defining a buddy could be done in several way:
                                             * datalong3 = enum ForcedMovement
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: teleport unit to position
                                             * x/y/z/o
+                                            * dataint = 1 to init move to respawn position, 2 to init creature group member each in their respawn position.
+                                                        no other data is needed. So ex: command 3 ... dataint=1 and creature should head to its respawn pos
 
  4 SCRIPT_COMMAND_FLAG_SET                  source = any
                                             * datalong = field_id
@@ -395,4 +397,16 @@ Defining a buddy could be done in several way:
                                             * datalong2 - param2
 
 50 SCRIPT_COMMAND_ZONE_PULSE                Pulses zone for combat and attacks closest enemy
+
+51 SCRIPT_COMMAND_SPAWN_GROUP               Set of commands for creature spawn group
+                                            * datalong = command
+                                                only formation command(staring from 100) supported right now
+                                                - 100: switch formation shape.
+                                                       datalong1 should have shape value
+                                                       Random(0), Queue(1), Side bu side(2), Geese(3), Fanned out behind(4), Fanned out in front(5), Circle leader(6)
+                                                - 101: Set formation spread
+                                                       Spread is set in x field as we need a float for it
+                                                - 102: Set formation options
+                                                       Set flag 0x1 for keep compact option (after a member death)
+                                                       Set flag 0x2 for disabling pathfinding (not impemented yet)
 

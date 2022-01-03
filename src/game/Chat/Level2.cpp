@@ -2301,6 +2301,165 @@ bool ChatHandler::HandleNpcShowLootCommand(char* /*args*/)
     return true;
 }
 
+// show detailed information of creature formation if exist
+bool ChatHandler::HandleNpcGroupInfoCommand(char* /*args*/)
+{
+    Creature* creature = getSelectedCreature();
+
+    if (!creature)
+    {
+        SendSysMessage(LANG_SELECT_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    auto gData = creature->GetCreatureGroup();
+    if (!gData)
+    {
+        SendSysMessage("Creature is not in group");
+        return true;
+    }
+
+    PSendSysMessage("Group id[%u]", gData->GetGroupId());
+    PSendSysMessage("Group name: %s", gData->GetGroupEntry().Name.c_str());
+
+    Unit* master = nullptr;
+    if (gData->GetFormationData())
+        master = gData->GetFormationData()->GetMaster();
+
+    if (master)
+    {
+        if (master == creature)
+            SendSysMessage("Creature is formation leader");
+        else if (creature->GetFormationSlot())
+            SendSysMessage("Creature is in formation slot");
+        else
+            SendSysMessage("Error: unable to retrieve the slot of the creature.");
+    }
+
+    PSendSysMessage("%s", gData->to_string().c_str());
+    return true;
+}
+
+// show detailed information of group behavior
+// bool ChatHandler::HandleNpcGroupBehaviorShowCommand(char* /*args*/)
+// {
+//     Creature* creature = getSelectedCreature();
+// 
+//     if (!creature)
+//     {
+//         SendSysMessage(LANG_SELECT_CREATURE);
+//         SetSentErrorMessage(true);
+//         return false;
+//     }
+// 
+// 
+//     return true;
+// }
+
+// set behavior of targeted group
+// bool ChatHandler::HandleNpcGroupBehaviorSetCommand(char* args)
+// {
+//     Creature* creature = getSelectedCreature();
+// 
+//     if (!creature)
+//     {
+//         SendSysMessage(LANG_SELECT_CREATURE);
+//         SetSentErrorMessage(true);
+//         return false;
+//     }
+// 
+//     return true;
+// }
+
+// reset creature formation template
+bool ChatHandler::HandleNpcFormationInfoCommand(char* /*args*/)
+{
+    Creature* creature = getSelectedCreature();
+
+    if (!creature)
+    {
+        SendSysMessage(LANG_SELECT_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    auto currSlot = creature->GetFormationSlot();
+    if (!currSlot)
+    {
+        SendSysMessage("Creature is not in formation");
+        return true;
+    }
+
+    PSendSysMessage("%s", currSlot->GetFormationData()->to_string().c_str());
+    return true;
+}
+
+// reset creature formation template
+bool ChatHandler::HandleNpcFormationResetCommand(char* /*args*/)
+{
+    Creature* creature = getSelectedCreature();
+
+    if (!creature)
+    {
+        SendSysMessage(LANG_SELECT_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    auto currSlot = creature->GetFormationSlot();
+    if (!currSlot)
+    {
+        SendSysMessage("Creature is not in formation");
+        return true;
+    }
+
+    currSlot->GetFormationData()->Reset();
+
+    // need implementation
+    SendSysMessage("Formation is reset to default!");
+    return true;
+}
+
+// change creature formation template
+bool ChatHandler::HandleNpcFormationSwitchCommand(char* args)
+{
+    Creature* creature = getSelectedCreature();
+
+    if (!creature)
+    {
+        SendSysMessage(LANG_SELECT_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    auto currSlot = creature->GetFormationSlot();
+    if (!currSlot)
+    {
+        SendSysMessage("Creature is not in formation");
+        return true;
+    }
+
+    uint32 formationId;
+    if (!ExtractUInt32(&args, formationId))
+    {
+        PSendSysMessage("Please provide a valid formation id!\n.npc formation switch #formationId");
+        return false;
+    }
+
+    if (formationId >= static_cast<uint32>(SpawnGroupFormationType::SPAWN_GROUP_FORMATION_TYPE_COUNT))
+    {
+        PSendSysMessage("Formation shape id should be in 0..%u range!", static_cast<uint32>(SpawnGroupFormationType::SPAWN_GROUP_FORMATION_TYPE_COUNT) - 1);
+        return true;
+    }
+
+    if (!currSlot->GetFormationData()->SwitchFormation(static_cast<SpawnGroupFormationType>(formationId)))
+        PSendSysMessage("Failed to switch formation template!");
+    else
+        SendSysMessage("Formation shape changed.");
+    return true;
+}
+
 // TODO: NpcCommands that need to be fixed :
 
 bool ChatHandler::HandleNpcNameCommand(char* /*args*/)

@@ -1084,9 +1084,15 @@ void Unit::Kill(Unit* killer, Unit* victim, DamageEffectType damagetype, SpellEn
     /*
     *  Actions for the victim
     */
-    if (victim->GetTypeId() == TYPEID_PLAYER)          // Killed player
+    if (victim->IsPlayer())          // Killed player
     {
-        Player* playerVictim = (Player*)victim;
+        Player* playerVictim = static_cast<Player*>(victim);
+
+        if (victim->GetFormationSlot())
+        {
+            // simply remove player from the formation on death event
+            victim->GetFormationSlot()->GetFormationData()->Remove(playerVictim);
+        }
 
         // remember victim PvP death for corpse type and corpse reclaim delay
         // at original death (not at SpiritOfRedemtionTalent timeout)
@@ -1329,6 +1335,13 @@ void Unit::JustKilledCreature(Unit* killer, Creature* victim, Player* responsibl
 
     if (victim->IsLinkingEventTrigger())
         victim->GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_DIE, victim);
+
+    if (victim->GetCreatureGroup())
+    {
+        auto fData = victim->GetCreatureGroup()->GetFormationData();
+        if (fData)
+            fData->OnDeath(victim);
+    }
 
     // Dungeon specific stuff
     if (victim->GetInstanceId())
@@ -11303,6 +11316,11 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
         charmed->SetTarget(nullptr);
 
         charmed->GetMotionMaster()->UnMarkFollowMovegens();
+    }
+
+    if (GetFormationSlot())
+    {
+        GetFormationSlot()->GetFormationData()->Remove(charmed);
     }
 
     // Update possessed's client control status after altering flags

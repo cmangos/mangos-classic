@@ -130,8 +130,10 @@ namespace Movement
             const Vector3 FinalDestination() const;
             const Vector3 CurrentDestination() const { return Initialized() ? spline.getPoint(point_Idx + 1) : Vector3();}
             int32 currentPathIdx() const;
+            int32 GetRawPathIndex() const { return point_Idx; }
 
             uint32 Duration() const { return spline.length();}
+            int32 ComputeTimeToIndex(uint32 idx) const { return spline.length(idx) - time_passed; }
 
             float Speed() const { return speed; }
 
