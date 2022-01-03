@@ -88,6 +88,18 @@ if (BUILD_EXTRACTORS)
     mmaplib
   )
 
+  set(EXECUTABLE_LINK_FLAGS "")
+  if(UNIX)
+    if (APPLE)
+      set(EXECUTABLE_LINK_FLAGS "-pthread -framework Carbon")
+    else()
+      set(EXECUTABLE_LINK_FLAGS "-pthread -rdynamic")
+    endif()
+  endif()
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES LINK_FLAGS
+    "${EXECUTABLE_LINK_FLAGS}"
+  )
+
   if(MSVC)
     # Define OutDir to source/bin/(platform)_(configuaration) folder.
     set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${DEV_BIN_DIR}/Extractors")
