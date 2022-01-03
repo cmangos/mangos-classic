@@ -1428,7 +1428,7 @@ bool Unit::CanAssistInCombatAgainst(Unit const* who, Unit const* enemy) const
     if (IsInCombat()) // if fighting something else, do not assist
         return false;
 
-    if (CanAssist(who) && CanAttackOnSight(enemy))
+    if (CanAssist(who, IsContestedGuard()) && CanJoinInAttacking(enemy))
         return true;
 
     return false;
