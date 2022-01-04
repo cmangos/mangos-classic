@@ -27,7 +27,7 @@ enum WaypointPathOrigin
     PATH_FROM_GUID              = 1,
     PATH_FROM_ENTRY             = 2,
     PATH_FROM_EXTERNAL          = 3,
-    PATH_FROM_MOVEMENT_TEMPLATE = 4,
+    PATH_FROM_WAYPOINT_PATH     = 4,
 };
 
 struct WaypointNode
@@ -82,7 +82,7 @@ class WaypointManager
                     // check movement_template
                     path = GetPathMovementTemplate(entry);
                     if (path)
-                        *wpOrigin = PATH_FROM_MOVEMENT_TEMPLATE;
+                        *wpOrigin = PATH_FROM_WAYPOINT_PATH;
                 }
             }
 
@@ -113,7 +113,7 @@ class WaypointManager
                     key = (entry << 8) + pathId;
                     wpMap = &m_externalPathTemplateMap;
                     break;
-                case PATH_FROM_MOVEMENT_TEMPLATE:
+                case PATH_FROM_WAYPOINT_PATH:
                     if (pathId >= 0xFF || pathId < 0)
                         return nullptr;
                     key = (entry << 8) + pathId;
@@ -188,7 +188,7 @@ class WaypointManager
                 case PATH_FROM_GUID                 : return &m_pathMap;
                 case PATH_FROM_ENTRY                : return &m_pathTemplateMap;
                 case PATH_FROM_EXTERNAL             : return &m_externalPathTemplateMap;
-                case PATH_FROM_MOVEMENT_TEMPLATE    : return &m_pathMovementTemplateMap;
+                case PATH_FROM_WAYPOINT_PATH    : return &m_pathMovementTemplateMap;
                 default:                    return nullptr;
             }
         }

@@ -66,14 +66,28 @@ void MotionMaster::Initialize()
     Clear(false, true);
 
     // set new default movement generator
-    if (m_owner->GetTypeId() == TYPEID_UNIT && !m_owner->hasUnitState(UNIT_STAT_POSSESSED))
+    if (m_owner->IsCreature() && !m_owner->hasUnitState(UNIT_STAT_POSSESSED))
     {
+        auto creature = static_cast<Creature*>(m_owner);
         m_currentPathId = m_defaultPathId;
-        MovementGenerator* movement = FactorySelector::selectMovementGenerator((Creature*)m_owner);
+        MovementGenerator* movement = FactorySelector::selectMovementGenerator(creature);
         push(movement == nullptr ? &si_idleMovement : movement);
         top()->Initialize(*m_owner);
+
         if (top()->GetMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
-            (static_cast<WaypointMovementGenerator<Creature>*>(top()))->InitializeWaypointPath(*((Creature*)(m_owner)), m_currentPathId, PATH_NO_PATH, 0);
+        {
+            // check if creature is part of formation and use waypoint path as path origin
+            WaypointPathOrigin pathOrigin = WaypointPathOrigin::PATH_NO_PATH;
+            uint32 pathEntry = 0;
+            auto creatureGroup = creature->GetCreatureGroup();
+            if (creatureGroup && creatureGroup->GetFormationEntry() && creatureGroup->GetGroupEntry().GetFormationSlotId(m_owner->GetDbGuid()) == 0)
+            {
+                pathEntry = creatureGroup->GetFormationEntry()->MovementID;
+                pathOrigin = WaypointPathOrigin::PATH_FROM_WAYPOINT_PATH;
+            }
+
+            (static_cast<WaypointMovementGenerator<Creature>*>(top()))->InitializeWaypointPath(*creature, m_currentPathId, pathOrigin, 0, pathEntry);
+        }
     }
     else
         push(&si_idleMovement);

@@ -41,10 +41,6 @@ void WaypointMovementGenerator<Creature>::LoadPath(Creature& creature, int32 pat
 
     //sLog.outErrorScriptLib("LoadPath: Assign creature guid(%u) and entry(%u) path %i", creature.GetDbGuid(), overwriteEntry, pathId);
 
-    // enforce movement_template table for creature group
-    if (creature.GetCreatureGroup())
-        wpOrigin = WaypointPathOrigin::PATH_FROM_MOVEMENT_TEMPLATE;
-
     if (wpOrigin == PATH_NO_PATH && pathId == 0)
         i_path = sWaypointMgr.GetDefaultPath(overwriteEntry, creature.GetDbGuid(), &m_PathOrigin);
     else
