@@ -20,6 +20,7 @@
 
 #include "Entities/Creature.h"
 #include "Entities/GameObject.h"
+#include "Entities/Player.h"
 #include "Maps/Map.h"
 #include "Maps/SpawnGroupDefines.h"
 #include "Maps/MapPersistentStateMgr.h"
@@ -476,12 +477,13 @@ void FormationData::SetMasterMovement()
         m_wpPathId = 0;
         m_lastWP = 0;
     }
-//     else if (m_masterMotionType == MasterMotionType::FORMATION_TYPE_MASTER_LINEAR_WP)
-//     {
-//         newMaster->GetMotionMaster()->MoveLinearWP(m_wpPathId, 0, 0, 0, m_realMasterGuid, m_lastWP);
-//         m_wpPathId = 0;
-//         m_lastWP = 0;
-//     }
+    else if (m_masterMotionType == LINEAR_WP_MOTION_TYPE)
+    {
+        newMaster->GetMotionMaster()->MoveLinearWP(m_wpPathId, 4, 0, m_fEntry->MovementID);
+        newMaster->GetMotionMaster()->SetNextWaypoint(m_lastWP + 1);
+        m_wpPathId = 0;
+        m_lastWP = 0;
+    }
     else if (m_masterMotionType == RANDOM_MOTION_TYPE)
     {
         newMaster->GetMotionMaster()->MoveRandomAroundPoint(m_spawnPos.x, m_spawnPos.y, m_spawnPos.z, m_spawnPos.radius);
@@ -972,9 +974,9 @@ FormationSlotDataSPtr FormationData::SetFormationSlot(Creature* creature, SpawnG
             case WAYPOINT_MOTION_TYPE:
                 m_masterMotionType = WAYPOINT_MOTION_TYPE;
                 break;
-                //case LINEAR_WP_MOTION_TYPE:
-                //    m_masterMotionType = MasterMotionType::FORMATION_TYPE_MASTER_LINEAR_WP;
-                //    break;
+            case LINEAR_WP_MOTION_TYPE:
+                m_masterMotionType = LINEAR_WP_MOTION_TYPE;
+                break;
             default:
                 sLog.outError("FormationData::FillSlot> Master have not recognized default movement type for formation! Forced to random.");
                 m_masterMotionType = RANDOM_MOTION_TYPE;
@@ -1203,8 +1205,8 @@ void FormationData::FixSlotsPositions()
                     continue;
     
                 slot->SetAngle(M_PI_F + (M_PI_F / 2.0f) + (M_PI_F / totalMembers) * (membCount - 1));
-                if (slot->GetAngle() > M_PI_F * 2.0f)
-                    slot->SetAngle(slot->GetAngle() - M_PI_F * 2.0f);
+                if (slot->GetRealAngle() > M_PI_F * 2.0f)
+                    slot->SetAngle(slot->GetRealAngle() - M_PI_F * 2.0f);
                 slot->SetDistance(defaultDist);
                 slot->GetRecomputePosition() = true;
                 ++membCount;
@@ -1254,10 +1256,11 @@ bool FormationSlotData::IsFormationMaster()
 
 float FormationSlotData::GetAngle()
 {
+#ifdef ENABLE_SPAWNGROUP_FORMATION_MIRRORING
+    if (!GetFormationData()->GetMirrorState())
+        return m_angle;
+    return (2 * M_PI_F) - m_angle;
+#else
     return m_angle;
-}
-
-float FormationSlotData::GetDistance()
-{
-    return m_distance;
+#endif // ENABLE_SPAWNGROUP_FORMATION_MIRRORING
 }

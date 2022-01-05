@@ -74,7 +74,7 @@ void MotionMaster::Initialize()
         push(movement == nullptr ? &si_idleMovement : movement);
         top()->Initialize(*m_owner);
 
-        if (top()->GetMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+        if (top()->GetMovementGeneratorType() == WAYPOINT_MOTION_TYPE || top()->GetMovementGeneratorType() == LINEAR_WP_MOTION_TYPE)
         {
             // check if creature is part of formation and use waypoint path as path origin
             WaypointPathOrigin pathOrigin = WaypointPathOrigin::PATH_NO_PATH;
@@ -481,6 +481,32 @@ void MotionMaster::MoveWaypoint(uint32 pathId /*= 0*/, uint32 source /*= 0*/, ui
     else
     {
         sLog.outError("Non-creature %s attempt to MoveWaypoint()", m_owner->GetGuidStr().c_str());
+    }
+}
+
+void MotionMaster::MoveLinearWP(uint32 pathId /*= 0*/, uint32 source /*= 0*/, uint32 initialDelay /*= 0*/, uint32 overwriteEntry /*= 0*/, ForcedMovement forcedMovement /*= FORCED_MOVEMENT_NONE*/, ObjectGuid guid /*= ObjectGuid()*/)
+{
+    if (m_owner->GetTypeId() == TYPEID_UNIT)
+    {
+        if (GetCurrentMovementGeneratorType() == LINEAR_WP_MOTION_TYPE)
+        {
+            sLog.outError("%s attempt to MoveWaypoint() but is already using waypoint", m_owner->GetGuidStr().c_str());
+            return;
+        }
+
+        Creature* creature = (Creature*)m_owner;
+        m_currentPathId = pathId;
+
+        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s start MoveWaypoint()", m_owner->GetGuidStr().c_str());
+        LinearWPMovementGenerator<Creature>* newWPMMgen = new LinearWPMovementGenerator<Creature>(*creature);
+        newWPMMgen->SetForcedMovement(forcedMovement);
+        newWPMMgen->SetGuid(guid);
+        Mutate(newWPMMgen);
+        newWPMMgen->InitializeWaypointPath(*creature, pathId, (WaypointPathOrigin)source, initialDelay, overwriteEntry);
+    }
+    else
+    {
+        sLog.outError("Non-creature %s attempt to MoveLinearWP()", m_owner->GetGuidStr().c_str());
     }
 }
 

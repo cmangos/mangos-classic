@@ -2055,6 +2055,14 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                     else
                         source->GetMotionMaster()->MovePath(m_script->movement.wanderORpathId, PATH_NO_PATH, ForcedMovement(m_script->textId[0]), false, 0.f, false, pTarget->GetObjectGuid());
                     break;
+                case LINEAR_WP_MOTION_TYPE:
+                    source->StopMoving();
+                    source->GetMotionMaster()->Clear(false, true);
+                    if (!m_script->movement.timerOrPassTarget)
+                        source->GetMotionMaster()->MoveLinearWP(m_script->movement.wanderORpathId);
+                    else
+                        source->GetMotionMaster()->MoveLinearWP(m_script->movement.wanderORpathId, 0, 0, 0, ForcedMovement(m_script->textId[0]), pTarget->GetObjectGuid());
+                    break;
             }
 
             break;

@@ -45,6 +45,7 @@ namespace AIRegistry
         (new MovementGeneratorFactory<WanderMovementGenerator>(RANDOM_MOTION_TYPE))->RegisterSelf();
         (new MovementGeneratorFactory<WaypointMovementGenerator<Creature> >(WAYPOINT_MOTION_TYPE))->RegisterSelf();
         (new MovementGeneratorFactory<FixedPathMovementGenerator>(PATH_MOTION_TYPE))->RegisterSelf();
+        (new MovementGeneratorFactory<LinearWPMovementGenerator<Creature>>(LINEAR_WP_MOTION_TYPE))->RegisterSelf();
     }
 }
 

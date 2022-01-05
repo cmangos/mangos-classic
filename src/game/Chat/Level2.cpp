@@ -2007,6 +2007,8 @@ bool ChatHandler::HandleNpcSetMoveTypeCommand(char* args)
         move_type = RANDOM_MOTION_TYPE;
     else if (strncmp(type_str, "way", strlen(type_str)) == 0)
         move_type = WAYPOINT_MOTION_TYPE;
+    else if (strncmp(type_str, "lin", strlen(type_str)) == 0)
+        move_type = LINEAR_WP_MOTION_TYPE;
     else
         return false;
 

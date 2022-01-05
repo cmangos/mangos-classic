@@ -25,6 +25,10 @@
 #include <map>
 #include <memory>
 
+
+ // uncomment this if you want mirroring at start and end of the LINEAR_WP_MOTION_TYPE movement
+ //#define ENABLE_SPAWNGROUP_FORMATION_MIRRORING
+
 struct FormationEntry;
 class FormationData;
 class FormationSlotData;

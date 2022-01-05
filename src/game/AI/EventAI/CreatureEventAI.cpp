@@ -1168,6 +1168,11 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                     m_creature->GetMotionMaster()->Clear(false, true);
                     m_creature->GetMotionMaster()->MoveWaypoint(action.changeMovement.wanderORpathID);
                     break;
+                case LINEAR_WP_MOTION_TYPE:
+                    m_creature->StopMoving();
+                    m_creature->GetMotionMaster()->Clear(false, true);
+                    m_creature->GetMotionMaster()->MoveLinearWP(action.changeMovement.wanderORpathID);
+                    break;
             }
             break;
         }

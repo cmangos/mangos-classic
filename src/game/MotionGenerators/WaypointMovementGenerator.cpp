@@ -160,6 +160,16 @@ void WaypointMovementGenerator<Creature>::Reset(Creature& creature)
     SendNextWayPointPath(creature);
 }
 
+void WaypointMovementGenerator<Creature>::SwitchToNextNode(Creature& creature, WaypointPath::const_iterator& nodeItr)
+{
+    // switch to next node
+    ++nodeItr;
+    if (nodeItr == i_path->end())
+    {
+        nodeItr = i_path->begin();
+    }
+}
+
 void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
 {
     // already arrived?
@@ -192,11 +202,7 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
     int32 newWaitTime = node.delay + m_scriptTime;
 
     // switch to next node
-    ++m_currentWaypointNode;
-    if (m_currentWaypointNode == i_path->end())
-    {
-        m_currentWaypointNode = i_path->begin();
-    }
+    SwitchToNextNode(creature, m_currentWaypointNode);
 
     // Wait delay ms
     if (newWaitTime > 0)
@@ -260,6 +266,16 @@ uint32 WaypointMovementGenerator<Creature>::BuildIntPath(PointsArray& path, Crea
     travelTime = distance / creatureSpeed * 1000;
 
     return travelTime;
+}
+
+
+bool WaypointMovementGenerator<Creature>::GetNodeAfter(WaypointPath::const_iterator& nodeItr)
+{
+    ++nodeItr;
+    if (nodeItr == i_path->end())
+        nodeItr = i_path->begin();
+
+    return true;
 }
 
 // minimum time that will take the unit to travel the path (much higher value have been seen in sniff)
@@ -327,15 +343,8 @@ void WaypointMovementGenerator<Creature>::SendNextWayPointPath(Creature& creatur
     {
         // we'll add path to node after this one too to make animation more smoother
         auto nodeAfterItr = currPointItr;
-        ++nodeAfterItr;
-        if (nodeAfterItr == i_path->end())
-            nodeAfterItr = i_path->begin();
-
-        if (nodeAfterItr == m_currentWaypointNode)
-        {
-            // did all the path and not reached MinimumPathTime?
-            break;
-        }
+        if (!GetNodeAfter(nodeAfterItr))
+            break; // did all the path and not reached MinimumPathTime?
 
         auto const nodeAfter = nodeAfterItr->second;
 
@@ -587,5 +596,60 @@ bool WaypointMovementGenerator<Creature>::SetNextWaypoint(uint32 pointId)
         m_lastReachedWaypoint = pointId - 1;
     else
         m_lastReachedWaypoint = i_path->rbegin()->first;
+    return true;
+}
+
+void LinearWPMovementGenerator<Creature>::SwitchToNextNode(Creature& creature, WaypointPath::const_iterator& nodeItr)
+{
+    // switch to next node
+    if (!m_driveWayBack)
+    {
+        if (std::next(nodeItr) == i_path->end())
+        {
+            --nodeItr;
+
+            m_driveWayBack = true;
+#ifdef ENABLE_SPAWNGROUP_FORMATION_MIRRORING
+            // call end of path hook
+            if (creature.GetFormationSlot())
+                creature.GetFormationSlot()->GetFormationData()->OnWPEndNode();
+#endif
+        }
+        else
+            ++nodeItr;
+    }
+    else
+    {
+        if (nodeItr == i_path->begin())
+        {
+            m_driveWayBack = false;
+            ++nodeItr;
+#ifdef ENABLE_SPAWNGROUP_FORMATION_MIRRORING
+            // call start of path hook
+            if (creature.GetFormationSlot())
+                creature.GetFormationSlot()->GetFormationData()->OnWPStartNode();
+#endif
+        }
+        else
+            --nodeItr;
+    }
+}
+
+bool LinearWPMovementGenerator<Creature>::GetNodeAfter(WaypointPath::const_iterator& nodeItr)
+{
+    if (!m_driveWayBack)
+    {
+        if (std::next(nodeItr) == i_path->end())
+            return false;
+        else
+            ++nodeItr;
+    }
+    else
+    {
+        if (nodeItr == i_path->begin())
+            return false;
+        else
+            --nodeItr;
+    }
     return true;
 }

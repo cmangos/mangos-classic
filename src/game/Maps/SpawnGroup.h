@@ -30,10 +30,11 @@
 class WorldObject;
 class Creature;
 class GameObject;
-struct SpawnGroupEntry;
+class Player;
 class Map;
 class Unit;
 class CreatureGroup;
+struct SpawnGroupEntry;
 
 class SpawnGroup
 {
@@ -109,7 +110,8 @@ class FormationSlotData
         bool IsFormationMaster();
 
         float GetAngle();
-        float GetDistance();
+        float GetRealAngle() const { return m_angle; }
+        float GetDistance() const { return m_distance; }
 
         void SetAngle(float angle) { m_angle = angle; }
         void SetDistance(float distance) { m_distance = distance; }
@@ -165,6 +167,9 @@ class FormationData
         void Disband();
         void OnDeath(Creature* creature);
         void OnDelete(Creature* creature);
+        void OnWPStartNode() { m_mirrorState = false; };
+        void OnWPEndNode() { m_mirrorState = true; };
+        bool GetMirrorState() const { return m_mirrorState; }
         void Compact(bool set = true);
         bool SwitchFormation(SpawnGroupFormationType newShape);
         void SetSpread(float spread) { m_currentSpread = spread; FixSlotsPositions(); }
