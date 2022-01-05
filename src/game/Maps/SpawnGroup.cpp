@@ -959,15 +959,13 @@ FormationSlotDataSPtr FormationData::SetFormationSlot(Creature* creature, SpawnG
     //creature->SetActiveObjectState(true); // maybe not needed?
 
     auto slot = creature->GetFormationSlot();
-    if (!m_realMasterDBGuid)
+    if (slot->GetSlotId() == 0)
     {
-        if (slot->GetSlotId() == 0)
-        {
-            m_realMasterDBGuid = dbGuid;
-            creature->GetRespawnCoord(m_spawnPos.x, m_spawnPos.y, m_spawnPos.z, nullptr, &m_spawnPos.radius);
+        m_realMasterDBGuid = dbGuid;
+        creature->GetRespawnCoord(m_spawnPos.x, m_spawnPos.y, m_spawnPos.z, nullptr, &m_spawnPos.radius);
 
-            switch (creature->GetDefaultMovementType())
-            {
+        switch (creature->GetDefaultMovementType())
+        {
             case RANDOM_MOTION_TYPE:
                 m_masterMotionType = RANDOM_MOTION_TYPE;
                 break;
@@ -981,20 +979,18 @@ FormationSlotDataSPtr FormationData::SetFormationSlot(Creature* creature, SpawnG
                 sLog.outError("FormationData::FillSlot> Master have not recognized default movement type for formation! Forced to random.");
                 m_masterMotionType = RANDOM_MOTION_TYPE;
                 break;
-            }
         }
+
+        // spawned/respawned master
+        SetMasterMovement();
+
+        // reset formation shape as it will restart from node 0 in respawn case
+        SwitchFormation(m_fEntry->Type);
+
     }
 
     if (GetMaster())
     {
-        if (slot->GetSlotId() == 0)
-        {
-            // spawned/respawned master
-            SetMasterMovement();
-
-            // reset formation shape as it will restart from node 0 in respawn case
-            SwitchFormation(m_fEntry->Type);
-        }
         FixSlotsPositions();
         SetFollowersMaster();
     }
