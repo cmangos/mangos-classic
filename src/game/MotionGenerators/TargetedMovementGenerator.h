@@ -249,11 +249,7 @@ class FollowMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Fol
 class FormationMovementGenerator : public FollowMovementGenerator
 {
     public:
-        FormationMovementGenerator(FormationSlotDataSPtr& sData, bool main) :
-            FollowMovementGenerator(*sData->GetMaster(), sData->GetDistance(), sData->GetDistance(), main, false, false),
-            m_slot(sData), m_headingToMaster(false)
-        {
-        }
+        FormationMovementGenerator(FormationSlotDataSPtr& sData, bool main);
         ~FormationMovementGenerator();
 
         MovementGeneratorType GetMovementGeneratorType() const override { return FORMATION_MOTION_TYPE; }

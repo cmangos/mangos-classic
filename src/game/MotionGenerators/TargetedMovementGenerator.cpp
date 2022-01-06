@@ -27,6 +27,7 @@
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
 #include "Entities/Transports.h"
+#include "Maps/SpawnGroup.h"
 
 #define IGNORE_M2 true // simple define for avoiding bugs due to different setting across movechase
 
@@ -1131,6 +1132,12 @@ void FollowMovementGenerator::HandleFinalizedMovement(Unit& owner)
 {
     i_targetReached = true;
     _reachTarget(owner);
+}
+
+FormationMovementGenerator::FormationMovementGenerator(FormationSlotDataSPtr& sData, bool main) :
+    FollowMovementGenerator(*sData->GetMaster(), sData->GetDistance(), sData->GetDistance(), main, false, false),
+    m_slot(sData), m_headingToMaster(false)
+{
 }
 
 FormationMovementGenerator::~FormationMovementGenerator()
