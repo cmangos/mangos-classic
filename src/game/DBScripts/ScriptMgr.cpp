@@ -2853,7 +2853,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 }
 
                 default:
-                    sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u failed. Invalid value for formation command!",
+                    sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u failed. Invalid value for formation command(%u)!",
                         m_table, m_script->id, m_script->command, m_script->formationData.command);
                     break;
             }

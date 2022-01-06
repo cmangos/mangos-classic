@@ -1733,7 +1733,7 @@ void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
 
     if (m_triggerSpellChance[effIndex] != -1)
     {
-        if (m_triggerSpellChance[effIndex] == 0 || urand(1, 100) > m_triggerSpellChance[effIndex])
+        if (m_triggerSpellChance[effIndex] == 0 || irand(1, 100) > m_triggerSpellChance[effIndex])
             return;
     }
 

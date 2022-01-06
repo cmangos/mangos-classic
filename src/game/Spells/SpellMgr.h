@@ -1356,12 +1356,12 @@ inline void GetChainJumpRange(SpellEntry const* spellInfo, SpellEffectIndex effI
     if (range->ID == 114)   // Hunter Search range
         minSearchRangeCaster = 5;
 
-    switch (spellInfo->Id)
-    {
-            break;
-        default:   // default jump radius
-            break;
-    }
+//     switch (spellInfo->Id)
+//     {
+//             break;
+//         default:   // default jump radius
+//             break;
+//     }
 }
 
 inline bool IsDispelSpell(SpellEntry const* spellInfo)

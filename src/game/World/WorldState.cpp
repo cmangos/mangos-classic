@@ -720,14 +720,14 @@ void WorldState::SpawnWarEffortGos()
         ChangeWarEffortGoSpawns(AQResources(i), m_aqData.m_phase == PHASE_2_TRANSPORTING_RESOURCES ? m_aqData.m_phase2Tier : -1);
 }
 
-enum AQResourceTier
+enum AQResourceTier : uint32
 {
-    RESOURCE_TIER_0,
-    RESOURCE_TIER_1,
-    RESOURCE_TIER_2,
-    RESOURCE_TIER_3,
-    RESOURCE_TIER_4,
-    RESOURCE_TIER_5,
+    RESOURCE_TIER_0 = 0,
+    RESOURCE_TIER_1 = 1,
+    RESOURCE_TIER_2 = 2,
+    RESOURCE_TIER_3 = 3,
+    RESOURCE_TIER_4 = 4,
+    RESOURCE_TIER_5 = 5,
 };
 
 struct WarEffortSpawn

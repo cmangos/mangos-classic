@@ -201,7 +201,6 @@ bool WorldSocket::ProcessIncomingData()
         return false;
     }
 
-    OpcodeHandler x;
     const Opcodes opcode = static_cast<Opcodes>(header.cmd);
 
     if (IsClosed())
@@ -483,7 +482,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     else
     {
         sLog.outError("WorldSocket::HandleAuthSession: Unrecognized OS '%s' for account '%s' from %s", os.c_str(), account.c_str(), address.c_str());
-        return -1;
+        return false;
     }
 
     // Update the last_ip in the database
@@ -527,7 +526,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         {
             sLog.outBasic("WorldSocket::HandleAuthSession: Account %s (id %u) IP %s sent bad addon info.  Kicking.",
                 account.c_str(), id, address.c_str());
-            return -1;
+            return false;
         }
         else
             SendPacket(addonPacket);
@@ -555,7 +554,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         {
             sLog.outBasic("WorldSocket::HandleAuthSession: Account %s (id %u) IP %s sent bad addon info.  Kicking.",
                 account.c_str(), id, address.c_str());
-            return -1;
+            return false;
         }
         else
             SendPacket(addonPacket);

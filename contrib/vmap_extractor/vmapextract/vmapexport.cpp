@@ -211,7 +211,11 @@ bool ExtractSingleWmo(std::string& fname)
             strcpy(temp, fname.c_str());
             temp[fname.length() - 4] = 0;
             char groupFileName[1024];
-            sprintf(groupFileName, "%s_%03d.wmo", temp, i);
+            if (snprintf(groupFileName, sizeof(groupFileName), "%s_%03d.wmo", temp, i))
+            {
+                printf("ERROR: WMO Path is too long!\n");
+                return(false);
+            }
             //printf("Trying to open groupfile %s\n",groupFileName);
 
             string s = groupFileName;
@@ -340,7 +344,7 @@ bool fillArchiveNameVector(std::vector<std::string>& pArchiveNames)
 
     printf("\nGame path: %s\n", input_path);
 
-    char path[512];
+    char path[1024];
 
     // open expansion and common files
     printf("Opening data files from data directory.\n");
@@ -358,7 +362,12 @@ bool fillArchiveNameVector(std::vector<std::string>& pArchiveNames)
 
     // now, scan for the patch levels in the core dir
     printf("Scanning patch levels from data directory.\n");
-    sprintf(path, "%spatch", input_path);
+    if (snprintf(path, sizeof(path), "%spatch", input_path))
+    {
+        printf("ERROR: Path is too long!\n");
+        return(false);
+    }
+        
     if (!scan_patches(path, pArchiveNames))
         return (false);
 
