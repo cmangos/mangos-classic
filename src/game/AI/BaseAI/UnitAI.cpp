@@ -532,9 +532,7 @@ void UnitAI::DetectOrAttack(Unit* who)
         AttackStart(who);
     }
     else if (m_unit->GetMap()->IsDungeon())
-    {
         m_unit->EngageInCombatWith(who);
-    }
 }
 
 bool UnitAI::CanTriggerStealthAlert(Unit* who, float /*attackRadius*/) const

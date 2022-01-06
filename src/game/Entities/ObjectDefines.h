@@ -47,6 +47,7 @@ static constexpr float const DEFAULT_OBJECT_SCALE           = 1.0f;             
 static constexpr float const DEFAULT_TAUREN_MALE_SCALE      = 1.35f;                        // Tauren male player scale by default
 static constexpr float const DEFAULT_TAUREN_FEMALE_SCALE    = 1.25f;                        // Tauren female player scale by default
 static constexpr float const DEFAULT_COLLISION_HEIGHT       = 2.03128f;                     // Most common value in dbc
+static constexpr float const DEFAULT_COLLISION_WIDTH        = 0.5097f;                      // Most common value in dbc
 
 static constexpr float const MAX_STEALTH_DETECT_RANGE       = 45.0f;
 static constexpr float const GRID_ACTIVATION_RANGE          = 45.0f;

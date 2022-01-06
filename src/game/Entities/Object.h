@@ -916,6 +916,7 @@ class WorldObject : public Object
         bool GetFanningPoint(const Unit* mover, float& x, float& y, float& z, float dist, float angle) const;
 
         virtual float GetCollisionHeight() const { return 0.f; }
+        virtual float GetCollisionWidth() const { return 0.f; }
         virtual float GetObjectBoundingRadius() const { return DEFAULT_WORLD_OBJECT_SIZE; }
         virtual float GetCombatReach() const { return 0.f; }
         float GetCombinedCombatReach(WorldObject const* pVictim, bool forMeleeRange = true, float flat_mod = 0.0f) const;

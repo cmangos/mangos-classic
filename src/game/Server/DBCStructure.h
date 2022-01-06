@@ -274,7 +274,7 @@ struct CreatureModelDataEntry
     //float Unk8
     //uint32 Unk9
     //uint32 Unk10
-    //float CollisionWidth;
+    float CollisionWidth;
     float CollisionHeight;
     //float MountHeight;                                       // Used in calculation of unit collision data when mounted - missing in classic - backport if needed from tbc
     //float Unks[7] wotlk has 11
