@@ -344,7 +344,7 @@ bool fillArchiveNameVector(std::vector<std::string>& pArchiveNames)
 
     printf("\nGame path: %s\n", input_path);
 
-    char path[1024];
+    char path[1500];
 
     // open expansion and common files
     printf("Opening data files from data directory.\n");
@@ -362,7 +362,8 @@ bool fillArchiveNameVector(std::vector<std::string>& pArchiveNames)
 
     // now, scan for the patch levels in the core dir
     printf("Scanning patch levels from data directory.\n");
-    if (snprintf(path, sizeof(path), "%spatch", input_path))
+    int snRes = snprintf(path, sizeof(path), "%spatch", input_path);
+    if (snRes < 0 || snRes >= sizeof(path))
     {
         printf("ERROR: Path is too long!\n");
         return(false);

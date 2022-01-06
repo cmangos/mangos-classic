@@ -615,7 +615,7 @@ void WardenWin::LoadScriptedScans()
         // if any required flags are missing, or prohibited flags are present
         if ((val & Required) != Required || !!(val & Prohibited))
         {
-            sLog.outBasic("CWorld::enables expected 0x%lx prohibited 0x%lx received 0x%lx",
+            sLog.outBasic("CWorld::enables expected 0x%ux prohibited 0x%ux received 0x%ux",
                 Required, Prohibited, val);
 
             return true;
