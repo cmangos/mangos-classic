@@ -217,7 +217,7 @@ void WaypointManager::Load()
                 continue;
             }
 
-            if (cData->movementType != WAYPOINT_MOTION_TYPE || cData->movementType != LINEAR_WP_MOTION_TYPE)
+            if (cData->movementType != WAYPOINT_MOTION_TYPE && cData->movementType != LINEAR_WP_MOTION_TYPE)
                 creatureNoMoveType.insert(id);
 
             WaypointPath& path  = m_pathMap[id];
@@ -268,6 +268,12 @@ void WaypointManager::Load()
             {
                 const CreatureData* cData = sObjectMgr.GetCreatureData(itr);
                 const CreatureInfo* cInfo = ObjectMgr::GetCreatureTemplate(cData->id);
+
+                if (!cInfo)
+                {
+                    sLog.outErrorDb("Table creature_template for this entry(%u) guid(%u) was not found!", cData->id, itr);
+                    continue;
+                }
 
                 ERROR_DB_STRICT_LOG("Table creature_movement has waypoint for creature guid %u (entry %u), but MovementType is not WAYPOINT_MOTION_TYPE(2) or LINEAR_WP_MOTION_TYPE(4). Make sure that this is actually used in a script!", itr, cData->id);
 
