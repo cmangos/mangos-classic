@@ -43,6 +43,7 @@ const char EmotesEntryfmt[] = "nxxiiix";
 const char EmotesTextEntryfmt[] = "nxixxxxxxxxxxxxxxxx";
 const char FactionEntryfmt[] = "niiiiiiiiiiiiiiiiiissssssssxxxxxxxxxx";
 const char FactionTemplateEntryfmt[] = "niiiiiiiiiiiii";
+const char GameObjectArtKitfmt[] = "nxxxxxxx";
 const char GameObjectDisplayInfofmt[] = "nsxxxxxxxxxx";
 const char GMSurveyCurrentSurveyfmt[] = "ni";
 const char GMSurveySurveysfmt[] = "niiiiiiiiii";
