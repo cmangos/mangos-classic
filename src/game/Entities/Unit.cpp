@@ -1228,10 +1228,13 @@ void Unit::InterruptOrDelaySpell(Unit* pVictim, DamageEffectType damagetype, Spe
         {
             if (!dotDamage && spell->getState() == SPELL_STATE_CASTING)
             {
-                if (spell->m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_ABORT_ON_DMG)
-                    pVictim->InterruptSpell(CurrentSpellTypes(i));
-                else
-                    spell->Delayed();
+                if (pVictim->IsPlayer())
+                {
+                    if (spell->m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_DAMAGE_CANCELS)
+                        pVictim->InterruptSpell(CurrentSpellTypes(i));
+                    else
+                        spell->Delayed();
+                }
             }
 
             if (CurrentSpellTypes(i) == CURRENT_CHANNELED_SPELL)
