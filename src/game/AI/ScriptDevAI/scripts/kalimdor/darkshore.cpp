@@ -776,23 +776,24 @@ UnitAI* GetAI_npc_rabid_bear(Creature* pCreature)
 ######*/
 
 enum {
-    NPC_BLACKWOOD_WARRIOR = 2168,
-    NPC_BLACKWOOD_TOTEMIC = 2169,
+    NPC_BLACKWOOD_WARRIOR    = 2168,
+    NPC_BLACKWOOD_TOTEMIC    = 2169,
 
-    GO_PURIFIED_FOOD      = 175336,
+    GO_PURIFIED_FOOD         = 175336,
 
-    FACTION_BLACKWOOD     = 35,         // Faction guessed
+    FACTION_BLACKWOOD        = 35,         // Faction guessed
 
-    EMOTE_LURED           = -1010027,
-    EMOTE_PURIFIED        = -1010028,
-    EMOTE_GENERIC_FLEE    = -1000007,
+    EMOTE_LURED              = -1010027,
+    EMOTE_PURIFIED           = -1010028,
+    EMOTE_GENERIC_FLEE       = -1000007,
 
-    SPELL_BATTLE_STANCE   = 7165,
-    SPELL_THUNDERCLAP     = 8078,
-    SPELL_HEALING_WARD    = 5605,
-    EVENT_BECOME_PURIFIED = 1,
-    EVENT_FURBOLG_RESET   = 2,
-    BOWL_DISTANCE         = 5,
+    SPELL_BATTLE_STANCE      = 7165,
+    SPELL_THUNDERCLAP        = 8078,
+    SPELL_HEALING_WARD       = 5605,
+    EVENT_BECOME_PURIFIED    = 1,
+    EVENT_FURBOLG_RESET      = 2,
+    EVENT_START_PURIFICATION = 3,
+    BOWL_DISTANCE            = 5,
 };
 
 std::vector<uint32> furbolgList = { NPC_BLACKWOOD_WARRIOR, NPC_BLACKWOOD_TOTEMIC };
@@ -821,6 +822,25 @@ struct npc_corrupted_furbolgAI : public ScriptedAI
             if (m_creature->GetDefaultMovementType() == IDLE_MOTION_TYPE)
                 m_creature->GetMotionMaster()->MoveTargetedHome(false);
         });
+        AddCustomAction(EVENT_START_PURIFICATION, true, [&]()
+        {
+            if (!bowlCoords.IsEmpty() && sqrt(bowlCoords.GetDistance(m_creature->GetPosition())) <= 60.f)
+            {
+                if (m_isFirst)
+                    DoScriptText(EMOTE_LURED, m_creature);
+                SetCombatScriptStatus(true);
+                SetReactState(REACT_PASSIVE);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+                m_creature->CombatStop();
+
+                float x, y, z, angle;
+                angle = m_creature->GetAngle(bowlCoords.GetPositionX(), bowlCoords.GetPositionY());
+                m_creature->GetNearPointAt(bowlCoords.GetPositionX(), bowlCoords.GetPositionY(), bowlCoords.GetPositionZ(),
+                    m_creature, x, y, z, m_creature->GetObjectBoundingRadius(), CONTACT_DISTANCE * 2.f, angle + M_PI);
+                m_creature->SetWalk(false);
+                m_creature->GetMotionMaster()->MovePoint(1, x, y, z);
+            }
+        });
         Reset();
     }
 
@@ -833,25 +853,13 @@ struct npc_corrupted_furbolgAI : public ScriptedAI
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
     }
 
-    void SeekPurification(bool numberOne)
+    void SeekPurification(bool isFirst)
     {
-        m_isFirst = numberOne;
-        if (!bowlCoords.IsEmpty() && sqrt(bowlCoords.GetDistance(m_creature->GetPosition())) <= 60.f)
-        {
-            if (m_isFirst)
-                DoScriptText(EMOTE_LURED, m_creature);
-            SetCombatScriptStatus(true);
-            SetReactState(REACT_PASSIVE);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-            m_creature->CombatStop();
-
-            float x, y, z, angle;
-            angle = m_creature->GetAngle(bowlCoords.GetPositionX(), bowlCoords.GetPositionY());
-            m_creature->GetNearPointAt(bowlCoords.GetPositionX(), bowlCoords.GetPositionY(), bowlCoords.GetPositionZ(),
-                m_creature, x, y, z, m_creature->GetObjectBoundingRadius(), CONTACT_DISTANCE * 2.f, angle + M_PI);
-            m_creature->SetWalk(false);
-            m_creature->GetMotionMaster()->MovePoint(1, x, y, z);
-        }
+        m_isFirst = isFirst;
+        if(m_isFirst)
+            ResetTimer(EVENT_START_PURIFICATION, 0);
+        else
+            ResetTimer(EVENT_START_PURIFICATION, urand(0, 5 * IN_MILLISECONDS));
     }
 
     void MovementInform(uint32 moveType, uint32 pointId) override
