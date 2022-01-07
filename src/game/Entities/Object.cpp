@@ -1599,6 +1599,7 @@ void WorldObject::MovePositionToFirstCollision(Position& pos, float dist, float 
             transport->CalculatePassengerOffset(src.x, src.y, src.z);
             transport->CalculatePassengerOffset(dest.x, dest.y, dest.z);
         }
+        UpdateAllowedPositionZ(dest.x, dest.y, dest.z);
         path.calculate(src, dest, false, true);
         if (path.getPathType())
         {
@@ -2025,7 +2026,11 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map)
             if (templateData->IsRunning())
                 creature->SetWalk(false);
             if (templateData->IsHovering())
+            {
                 creature->SetHover(true);
+                //make hover stuff dont fall @killerwife probably dont need all those flags
+                //creature->m_movementInfo.AddMovementFlag(MovementFlags(MOVEFLAG_FLYING | MOVEFLAG_SWIMMING | MOVEFLAG_CAN_FLY | MOVEFLAG_ROOT));
+            }
             relayId = templateData->relayId;
         }
     }
