@@ -289,7 +289,7 @@ void BattleGroundAB::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
 
     ABNodes node = ABNodes(event);
 
-    player->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
+    player->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_PVP_ACTIVE_CANCELS);
 
     // Node is NEUTRAL -> change to CONTESTED
     if (m_nodeStatus[node] == ABNodeStatus(BG_AB_NODE_TYPE_NEUTRAL))

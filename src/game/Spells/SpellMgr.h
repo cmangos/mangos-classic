@@ -2294,7 +2294,7 @@ class SpellMgr
             if (!entry)
                 return SPELL_NORMAL;
             // Food / Drinks (mostly)
-            if (entry->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED)
+            if (entry->AuraInterruptFlags & AURA_INTERRUPT_FLAG_STANDING_CANCELS)
             {
                 if (entry->SpellFamilyName == SPELLFAMILY_GENERIC)
                 {

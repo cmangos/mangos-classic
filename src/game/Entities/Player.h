@@ -999,7 +999,8 @@ class Player : public Unit
         * \brief: player is interacting with something.
         * \param: ObjectGuid interactObj > object that interact with this player
         **/
-        void DoInteraction(ObjectGuid const& interactObjGuid);
+        void DoInteraction();
+        void DoLoot();
         RestType GetRestType() const { return m_restType; }
         void SetRestType(RestType n_r_type, uint32 areaTriggerId = 0);
 

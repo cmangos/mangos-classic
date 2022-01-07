@@ -2936,7 +2936,7 @@ void Spell::EffectPickPocket(SpellEffectIndex /*eff_idx*/)
         //BASIC_LOG("Failed pickpocket result %i for chance %i", result, chance);
 
         // Reveal action + get attack
-        m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TALK);
+        m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_LOOTING);
         unitTarget->AttackedBy(m_caster);
     }
 }

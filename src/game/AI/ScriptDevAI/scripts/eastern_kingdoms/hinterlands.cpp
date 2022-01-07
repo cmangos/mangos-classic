@@ -372,7 +372,7 @@ bool ProcessEventId_WildhammerMessage(uint32 /*eventId*/, Object* source, Object
 
     Player* player = static_cast<Player*>(source);
     player->UpdatePvP(true);
-    player->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
+    player->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_PVP_ACTIVE_CANCELS);
     if (Creature* falstad = static_cast<ScriptedInstance*>(player->GetInstanceData())->GetSingleCreatureFromStorage(NPC_FALSTAD_WILDHAMMER))
         DoScriptText(YELL_FALSTAD_INVADERS, falstad, player);
     return true;
