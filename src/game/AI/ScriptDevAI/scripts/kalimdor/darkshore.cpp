@@ -796,7 +796,7 @@ enum {
     BOWL_DISTANCE            = 5,
 };
 
-std::vector<uint32> furbolgList = { NPC_BLACKWOOD_WARRIOR, NPC_BLACKWOOD_TOTEMIC };
+static const std::vector<uint32> furbolgList = { NPC_BLACKWOOD_WARRIOR, NPC_BLACKWOOD_TOTEMIC };
 Position bowlCoords;
 
 struct npc_corrupted_furbolgAI : public ScriptedAI
@@ -868,9 +868,6 @@ struct npc_corrupted_furbolgAI : public ScriptedAI
             return;
 
         m_creature->GetMotionMaster()->MoveIdle();
-        float angle = m_creature->GetAngle(bowlCoords.GetPositionX(), bowlCoords.GetPositionY());
-        m_creature->SetOrientation(angle);
-        m_creature->SendHeartBeat();
         ResetTimer(EVENT_BECOME_PURIFIED, 5 * IN_MILLISECONDS);
     }
 
@@ -999,7 +996,7 @@ bool ProcessEventId_event_purify_food(uint32 /*eventId*/, Object* source, Object
         for (int8 i = 0; i < 2; ++i)
         {
             bonfire->GetRandomPoint(bonfire->GetPositionX(), bonfire->GetPositionY(), bonfire->GetPositionZ(), 30.0f, x, y, z);
-            if (Creature* warrior = bonfire->SummonCreature(NPC_BLACKWOOD_WARRIOR, x, y, z, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000))
+            if (Creature* warrior = bonfire->SummonCreature(NPC_BLACKWOOD_WARRIOR, x, y, z, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000))
                 furbolgs.push_back(warrior);
         }
 
@@ -1010,7 +1007,7 @@ bool ProcessEventId_event_purify_food(uint32 /*eventId*/, Object* source, Object
                 continue;
 
             if (auto* furbolgAI = dynamic_cast<npc_corrupted_furbolgAI*>(furbolg->AI()))
-                furbolgAI->SeekPurification(furbolg == furbolgs.front());
+                furbolgAI->SeekPurification(furbolg == furbolgs.back());
         }
 
         return false;
