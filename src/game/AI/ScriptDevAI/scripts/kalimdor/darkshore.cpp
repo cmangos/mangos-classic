@@ -1003,7 +1003,7 @@ bool ProcessEventId_event_purify_food(uint32 /*eventId*/, Object* source, Object
         // Activate the purification sequence for all hostile furbolgs (prevent attracting already purified ones)
         for (auto& furbolg : furbolgs)
         {
-            if (furbolg->IsInCombat() || !furbolg->IsAlive() || !((Unit*)source)->IsEnemy(furbolg))
+            if (furbolg->IsInCombat() || !furbolg->IsAlive() || !furbolg->CanAttack((Unit*)source))
                 continue;
 
             if (auto* furbolgAI = dynamic_cast<npc_corrupted_furbolgAI*>(furbolg->AI()))
@@ -1025,7 +1025,7 @@ bool GOUse_go_furbolg_food(Player* player, GameObject* go)
     // Search for a nearby Blackwood Warrior and make it attack
     if (Creature* warrior = GetClosestCreatureWithEntry(go, NPC_BLACKWOOD_WARRIOR, 20.0f))
     {
-        if (!warrior->IsInCombat() && warrior->IsAlive() && player->IsEnemy(warrior))
+        if (!warrior->IsInCombat() && warrior->IsAlive() && warrior->CanAttack(player))
             warrior->AI()->AttackStart(player);
     }
     // Else spawn a new one (and make it attack)
