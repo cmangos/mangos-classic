@@ -966,29 +966,11 @@ FormationSlotDataSPtr FormationData::SetFormationSlot(Creature* creature, SpawnG
         m_realMasterDBGuid = dbGuid;
         creature->GetRespawnCoord(m_spawnPos.x, m_spawnPos.y, m_spawnPos.z, nullptr, &m_spawnPos.radius);
 
-        switch (creature->GetDefaultMovementType())
-        {
-            case RANDOM_MOTION_TYPE:
-                m_masterMotionType = RANDOM_MOTION_TYPE;
-                break;
-            case WAYPOINT_MOTION_TYPE:
-                m_masterMotionType = WAYPOINT_MOTION_TYPE;
-                break;
-            case LINEAR_WP_MOTION_TYPE:
-                m_masterMotionType = LINEAR_WP_MOTION_TYPE;
-                break;
-            default:
-                sLog.outError("FormationData::FillSlot> Master have not recognized default movement type for formation! Forced to random.");
-                m_masterMotionType = RANDOM_MOTION_TYPE;
-                break;
-        }
-
         // spawned/respawned master
         SetMasterMovement();
 
         // reset formation shape as it will restart from node 0 in respawn case
         SwitchFormation(m_fEntry->Type);
-
     }
 
     if (GetMaster())
