@@ -69,13 +69,41 @@ enum WarriorSpells
     SHOOT_GUN_1                     = 7918,
     SHOOT_XBOW_1                    = 7919,
     SLAM_1                          = 1464,
+    SPELL_REFLECTION_1              = 23920,
+    STANCE_MASTERY                  = 12678,
     SUNDER_ARMOR_1                  = 7386,
     SWEEPING_STRIKES_1              = 12328,
     TAUNT_1                         = 355,
     THUNDER_CLAP_1                  = 6343,
     WHIRLWIND_1                     = 1680
 
-                                      //Procs
+    //Procs
+};
+
+enum WarriorTalents
+{
+    IMPROVED_DEMORALIZING_SHOUT_1 = 12324,
+    IMPROVED_DEMORALIZING_SHOUT_2 = 12876,
+    IMPROVED_DEMORALIZING_SHOUT_3 = 12877,
+    IMPROVED_DEMORALIZING_SHOUT_4 = 12878,
+    IMPROVED_DEMORALIZING_SHOUT_5 = 12879,
+    IMPROVED_SLAM_1               = 12330,
+    IMPROVED_SLAM_2               = 12862
+};
+
+static const uint32 uiImprovedDemoralizingShout[5] =
+{
+    IMPROVED_DEMORALIZING_SHOUT_1,
+    IMPROVED_DEMORALIZING_SHOUT_2,
+    IMPROVED_DEMORALIZING_SHOUT_3,
+    IMPROVED_DEMORALIZING_SHOUT_4,
+    IMPROVED_DEMORALIZING_SHOUT_5
+};
+
+static const uint32 uiImprovedSlam[2] =
+{
+    IMPROVED_SLAM_1,
+    IMPROVED_SLAM_2
 };
 
 //class Player;
@@ -128,6 +156,7 @@ class PlayerbotWarriorAI : PlayerbotClassAI
                SHIELD_WALL,
                SHIELD_SLAM,
                CONCUSSION_BLOW,
+               STANCE_MASTERY,
                LAST_STAND;
 
         // FURY
@@ -148,6 +177,10 @@ class PlayerbotWarriorAI : PlayerbotClassAI
                BLOODTHIRST,
                RECKLESSNESS,
                PIERCING_HOWL;
+
+        // Talents
+        uint32 IMPROVED_DEMORALIZING_SHOUT,
+               IMPROVED_SLAM;
 
         // racial
         uint32 STONEFORM,

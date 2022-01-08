@@ -66,6 +66,20 @@ PlayerbotWarriorAI::PlayerbotWarriorAI(Player& master, Player& bot, PlayerbotAI&
     RECKLESSNESS            = m_ai.initSpell(RECKLESSNESS_1); //FURY
     PIERCING_HOWL           = m_ai.initSpell(PIERCING_HOWL_1); //FURY
 
+    // Talents
+    IMPROVED_DEMORALIZING_SHOUT = 0;
+    for (unsigned int i : uiImprovedDemoralizingShout)
+    {
+        if (m_ai.initSpell(i))
+            IMPROVED_DEMORALIZING_SHOUT = m_ai.initSpell(i);
+    }
+    IMPROVED_SLAM = 0;
+    for (unsigned int i : uiImprovedSlam)
+    {
+        if (m_ai.initSpell(i))
+            IMPROVED_SLAM = m_ai.initSpell(i);
+    }
+
     RECENTLY_BANDAGED       = 11196; // first aid check
 
     // racial
@@ -320,8 +334,19 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuverPVE(Unit* pTarget)
             return RETURN_CONTINUE;
         if (WHIRLWIND > 0 && m_bot.IsSpellReady(WHIRLWIND) && m_ai.CastSpell(WHIRLWIND, *pTarget) == SPELL_CAST_OK)
             return RETURN_CONTINUE;
-        if (HEROIC_STRIKE > 0 && m_ai.CastSpell(HEROIC_STRIKE, *pTarget) == SPELL_CAST_OK)
+        if (SWEEPING_STRIKES > 0 && m_ai.GetAttackerCount() > 1 && !m_bot.HasAura(SWEEPING_STRIKES, EFFECT_INDEX_0) && m_bot.IsSpellReady(SWEEPING_STRIKES) && m_ai.CastSpell(SWEEPING_STRIKES) == SPELL_CAST_OK)
             return RETURN_CONTINUE;
+        if (IMPROVED_DEMORALIZING_SHOUT > 0 && DEMORALIZING_SHOUT > 0 && !pTarget->HasAura(DEMORALIZING_SHOUT, EFFECT_INDEX_0) && m_ai.CastSpell(DEMORALIZING_SHOUT) == SPELL_CAST_OK)
+            return RETURN_CONTINUE;
+        if (SLAM > 0 && IMPROVED_SLAM > 0 && m_ai.CastSpell(SLAM, *pTarget) == SPELL_CAST_OK)
+            return RETURN_CONTINUE;
+        if (m_bot.GetPowerPercent() > 60.f)
+        {
+            if (CLEAVE > 0 && m_ai.GetAttackerCount() > 1 && m_bot.IsSpellReady(CLEAVE) && m_ai.CastSpell(CLEAVE, *pTarget) == SPELL_CAST_OK)
+                return RETURN_CONTINUE;
+            if (HEROIC_STRIKE > 0 && m_ai.CastSpell(HEROIC_STRIKE, *pTarget) == SPELL_CAST_OK)
+                return RETURN_CONTINUE;
+        }
     }
     else if (spec == WARRIOR_SPEC_ARMS || (m_ai.GetCombatOrder() & PlayerbotAI::ORDERS_ASSIST))
     {
