@@ -1988,7 +1988,7 @@ enum ProcFlags : uint32
     PROC_FLAG_TAKE_HARMFUL_PERIODIC         = 0x00080000,   // 19 Taken spell periodic (damage / healing, determined by PROC_EX_PERIODIC_POSITIVE or negative if no procEx)
 
     PROC_FLAG_TAKE_ANY_DAMAGE               = 0x00100000,   // 20 Taken any damage
-    PROC_FLAG_DEAL_HELPFUL_PERIODIC         = 0x00200000,   // 21 On trap activation - TODO: change meaning
+    PROC_FLAG_ON_TRAP_ACTIVATION            = 0x00200000,   // 21 On trap activation - different from enumerated strings - likely reuse
 
     PROC_FLAG_MAIN_HAND_WEAPON_SWING        = 0x00400000,   // 22 Successful main-hand melee attacks
     PROC_FLAG_OFF_HAND_WEAPON_SWING         = 0x00800000,   // 23 Successful off-hand melee attacks
