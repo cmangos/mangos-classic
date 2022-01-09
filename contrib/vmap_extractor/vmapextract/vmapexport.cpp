@@ -210,8 +210,9 @@ bool ExtractSingleWmo(std::string& fname)
             char temp[1024];
             strcpy(temp, fname.c_str());
             temp[fname.length() - 4] = 0;
-            char groupFileName[1024];
-            if (snprintf(groupFileName, sizeof(groupFileName), "%s_%03d.wmo", temp, i))
+            char groupFileName[1500];
+            int snRes = snprintf(groupFileName, sizeof(groupFileName), "%s_%03d.wmo", temp, i);
+            if (snRes < 0 || snRes >= sizeof(groupFileName))
             {
                 printf("ERROR: WMO Path is too long!\n");
                 return(false);
