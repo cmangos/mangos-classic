@@ -1816,9 +1816,6 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     Powers PowerType = POWER_MANA;
     Unit* target = GetTarget();
 
-    // remove SPELL_AURA_EMPATHY
-    target->RemoveSpellsCausingAura(SPELL_AURA_EMPATHY);
-
     switch (form)
     {
         case FORM_CAT:
