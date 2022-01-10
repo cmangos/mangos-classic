@@ -892,7 +892,7 @@ struct SpellItemEnchantmentEntry
     char*       description[8];                             // 13-20    m_name_lang[8]
     // 21 string flags
     uint32      aura_id;                                    // 22       m_itemVisual
-    uint32      slot;                                       // 23       m_flags
+    uint32      flags;                                      // 23       m_flags
 };
 
 struct StableSlotPricesEntry

@@ -862,7 +862,7 @@ bool Item::IsBoundByEnchant() const
         if (!enchantEntry)
             continue;
 
-        if (enchantEntry->slot & ENCHANTMENT_CAN_SOULBOUND)
+        if (enchantEntry->flags & ENCHANTMENT_SOULBOUND)
             return true;
     }
     return false;
