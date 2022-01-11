@@ -9970,6 +9970,9 @@ void Unit::RestoreDisplayId()
     // transform aura was found
     if (handledAura)
     {
+        CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(handledAura->GetModifier()->m_miscvalue);
+        if (ci && ci->Scale != 1.f)
+            SetObjectScale(ci->Scale * GetObjectScaleMod());
         SetDisplayId(handledAura->GetModifier()->m_amount);
         return;
     }
@@ -9979,12 +9982,14 @@ void Unit::RestoreDisplayId()
     {
         if (uint32 displayId = shapeshiftAura.front()->GetModifier()->m_amount) // can be zero
         {
+            SetObjectScale(GetNativeScale() * GetObjectScaleMod());
             SetDisplayId(displayId);
             return;
         }
     }
 
     // no auras found - set modelid to default
+    SetObjectScale(GetNativeScale() * GetObjectScaleMod());
     SetDisplayId(GetNativeDisplayId());
 }
 
