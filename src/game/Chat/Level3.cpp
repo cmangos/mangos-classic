@@ -2879,6 +2879,7 @@ bool ChatHandler::HandleGetLosCommand(char* /*args*/)
 
     float x, y, z;
     target->GetPosition(x, y, z);
+    z += target->GetCollisionHeight();
     bool normalLos = player->IsWithinLOS(x, y, z, false);
     bool m2Los = player->IsWithinLOS(x, y, z, true);
     PSendSysMessage("Los check: Normal: %s M2: %s", normalLos ? "true" : "false", m2Los ? "true" : "false");

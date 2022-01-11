@@ -1951,10 +1951,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         target->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT, GetHolder());
 
         if (m_modifier.m_amount > 0)
-        {
-            target->SetObjectScale(DEFAULT_OBJECT_SCALE * target->GetObjectScaleMod());
             target->SetDisplayId(m_modifier.m_amount);
-        }
 
         if (PowerType != POWER_MANA)
         {
@@ -2014,18 +2011,6 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     }
     else
     {
-        if (m_modifier.m_amount > 0)
-        {
-            // workaround for tauren scale appear too big
-            if (target->getRace() == RACE_TAUREN)
-            {
-                if (target->getGender() == GENDER_MALE)
-                    target->SetObjectScale(DEFAULT_TAUREN_MALE_SCALE * target->GetObjectScaleMod());
-                else
-                    target->SetObjectScale(DEFAULT_TAUREN_FEMALE_SCALE * target->GetObjectScaleMod());
-            }
-        }
-
         target->RestoreDisplayId();
 
         if (target->getClass() == CLASS_DRUID)

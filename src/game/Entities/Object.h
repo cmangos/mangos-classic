@@ -375,6 +375,7 @@ class Object
         {
             return m_floatValues[OBJECT_FIELD_SCALE_X] ? m_floatValues[OBJECT_FIELD_SCALE_X] : DEFAULT_OBJECT_SCALE;
         }
+        virtual float GetNativeScale() const { return DEFAULT_OBJECT_SCALE; } // vanilla only helper for scaling
 
         void SetObjectScale(float newScale);
 

@@ -44,8 +44,6 @@ static constexpr float const DEFAULT_WORLD_OBJECT_SIZE      = 0.388999998569489f
                                                                                             // creature_model_data
 
 static constexpr float const DEFAULT_OBJECT_SCALE           = 1.0f;                         // player/item scale as default, npc/go from database, pets from dbc
-static constexpr float const DEFAULT_TAUREN_MALE_SCALE      = 1.35f;                        // Tauren male player scale by default
-static constexpr float const DEFAULT_TAUREN_FEMALE_SCALE    = 1.25f;                        // Tauren female player scale by default
 static constexpr float const DEFAULT_COLLISION_HEIGHT       = 2.03128f;                     // Most common value in dbc
 static constexpr float const DEFAULT_COLLISION_WIDTH        = 0.5097f;                      // Most common value in dbc
 

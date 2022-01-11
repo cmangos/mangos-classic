@@ -9992,10 +9992,13 @@ void Unit::UpdateModelData()
 {
     if (CreatureModelInfo const* modelInfo = sObjectMgr.GetCreatureModelInfo(GetDisplayId()))
     {
-        // we expect values in database to be relative to scale = 1.0
-        SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, GetObjectScale() * modelInfo->bounding_radius);
+        float nativeScale = GetNativeScale();
+        float currentScale = GetObjectScale();
+        float normalizedScale = currentScale / nativeScale;
+        // vanilla only - values need to be relative to either DBC scale for players or DB scale for creatures
+        SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, normalizedScale * modelInfo->bounding_radius);
 
-        SetFloatValue(UNIT_FIELD_COMBATREACH, GetObjectScale() * modelInfo->combat_reach);
+        SetFloatValue(UNIT_FIELD_COMBATREACH, normalizedScale * modelInfo->combat_reach);
 
         SetBaseWalkSpeed(modelInfo->SpeedWalk);
         SetBaseRunSpeed(modelInfo->SpeedRun, false);
@@ -11596,7 +11599,7 @@ float Unit::GetCollisionHeight() const
     CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
     MANGOS_ASSERT(modelData);
 
-    float const collisionHeight = scaleMod * modelData->CollisionHeight * modelData->Scale * displayInfo->scale;
+    float const collisionHeight = scaleMod * modelData->CollisionHeight * modelData->Scale;
     return collisionHeight == 0.0f ? DEFAULT_COLLISION_HEIGHT : collisionHeight;
 }
 
