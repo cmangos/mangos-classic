@@ -41,6 +41,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (16380,'spell_greater_invisibility_mob'),
 (17016,'spell_placing_beacon_torch'),
 (17244,'spell_anastari_possess'),
+(16739,'spell_orb_of_deception'),
 (19832,'spell_possess_razorgore'),
 (19872,'spell_calm_dragonkin'),
 (19873,'spell_destroy_egg'),
