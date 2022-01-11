@@ -2184,7 +2184,8 @@ void Player::RemoveFromWorld()
 float Player::GetNativeScale() const
 {
     CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(GetNativeDisplayId());
-    return displayInfo->scale;
+    CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
+    return displayInfo->scale * modelData->Scale;
 }
 
 void Player::RewardRage(uint32 damage, bool attacker)
@@ -17236,8 +17237,10 @@ void Player::InitDisplayIds()
         {
             CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(info->displayId_f);
             MANGOS_ASSERT(displayInfo);
+            CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
+            MANGOS_ASSERT(modelData);
 
-            SetObjectScale(displayInfo->scale);
+            SetObjectScale(displayInfo->scale * modelData->Scale);
 
             SetNativeDisplayId(info->displayId_f);
             SetDisplayId(info->displayId_f);
@@ -17247,8 +17250,10 @@ void Player::InitDisplayIds()
         {
             CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(info->displayId_m);
             MANGOS_ASSERT(displayInfo);
+            CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
+            MANGOS_ASSERT(modelData);
 
-            SetObjectScale(displayInfo->scale);
+            SetObjectScale(displayInfo->scale * modelData->Scale);
 
             SetNativeDisplayId(info->displayId_m);
             SetDisplayId(info->displayId_m);

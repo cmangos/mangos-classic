@@ -11599,7 +11599,7 @@ float Unit::GetCollisionHeight() const
     CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
     MANGOS_ASSERT(modelData);
 
-    float const collisionHeight = scaleMod * modelData->CollisionHeight * modelData->Scale;
+    float const collisionHeight = scaleMod * modelData->CollisionHeight;
     return collisionHeight == 0.0f ? DEFAULT_COLLISION_HEIGHT : collisionHeight;
 }
 
@@ -11629,7 +11629,7 @@ float Unit::GetCollisionWidth() const
     CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
     MANGOS_ASSERT(modelData);
 
-    float const collisionWidth = scaleMod * modelData->CollisionWidth * modelData->Scale * displayInfo->scale;
+    float const collisionWidth = scaleMod * modelData->CollisionWidth;
     return collisionWidth == 0.0f ? DEFAULT_COLLISION_WIDTH : collisionWidth;
 }
 
