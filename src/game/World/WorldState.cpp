@@ -995,6 +995,8 @@ void WorldState::SetScourgeInvasionState(SIState state)
         StartScourgeInvasion();
     else if (state == STATE_0_DISABLED)
         StopScourgeInvasion();
+
+    Save(SAVE_ID_SCOURGE_INVASION);
 }
 
 void WorldState::StartScourgeInvasion()
@@ -1177,6 +1179,7 @@ void WorldState::SetSIRemaining(SIRemaining remaining, uint32 value)
 {
     std::lock_guard<std::mutex> guard(m_siData.m_siMutex);
     m_siData.m_remaining[remaining] = value;
+    Save(SAVE_ID_SCOURGE_INVASION);
 }
 
 TimePoint WorldState::GetSITimer(SITimers timer)
@@ -1200,6 +1203,7 @@ void WorldState::AddBattlesWon(int32 count)
     std::lock_guard<std::mutex> guard(m_siData.m_siMutex);
     m_siData.m_battlesWon += count;
     HandleDefendedZones();
+    Save(SAVE_ID_SCOURGE_INVASION);
 }
 
 uint32 WorldState::GetLastAttackZone()
