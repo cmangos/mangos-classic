@@ -1461,8 +1461,8 @@ void Spell::DoAllTargetlessEffects(bool dest)
     uint32 effectMask;
     if (dest) // can have delay
     {
-        effectMask = m_destTargetInfo.effectMask;
-        m_destTargetInfo.processed = true;
+        effectMask = m_destTargetInfo.effectMask &~ m_destTargetInfo.effectMaskProcessed;
+        m_destTargetInfo.effectMaskProcessed = m_destTargetInfo.effectMask;
         for (uint32 j = 0; j < MAX_EFFECT_INDEX; ++j)
         {
             if ((effectMask & (1 << j)) != 0)
@@ -1477,6 +1477,19 @@ void Spell::DoAllTargetlessEffects(bool dest)
             if ((effectMask & (1 << j)) != 0)
                 HandleEffect(nullptr, nullptr, nullptr, SpellEffectIndex(j));
         }
+
+        // dest effects that are immediate
+        uint32 destMaskImmediate = m_destTargetInfo.effectMask;
+        for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+            if (!IsEffectHandledImmediatelySpellLaunch(m_spellInfo, SpellEffectIndex(i)))
+                destMaskImmediate &= ~(destMaskImmediate & (1 << i));
+
+        for (uint32 j = 0; j < MAX_EFFECT_INDEX; ++j)
+        {
+            if ((destMaskImmediate & (1 << j)) != 0)
+                HandleEffect(nullptr, nullptr, nullptr, SpellEffectIndex(j));
+        }
+        m_destTargetInfo.effectMaskProcessed = destMaskImmediate;
     }
 
     if (effectMask)
@@ -3137,7 +3150,7 @@ uint64 Spell::handle_delayed(uint64 t_offset)
 
     uint64 next_time = 0;
 
-    if (!m_destTargetInfo.processed)
+    if (m_destTargetInfo.effectMaskProcessed != m_destTargetInfo.effectMask)
     {
         if (m_destTargetInfo.timeDelay <= t_offset)
             DoAllTargetlessEffects(true);

@@ -615,8 +615,8 @@ class Spell
         {
             uint32 effectMask;
             uint64 timeDelay;
-            bool processed;
-            DestTargetInfo() : effectMask(0), timeDelay(0), processed(false) {}
+            uint32 effectMaskProcessed;
+            DestTargetInfo() : effectMask(0), timeDelay(0), effectMaskProcessed(0) {}
         };
 
         typedef std::list<TargetInfo>     TargetList;
