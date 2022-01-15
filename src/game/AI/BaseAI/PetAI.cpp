@@ -295,14 +295,7 @@ void PetAI::UpdateAI(const uint32 diff)
                 targets.setUnitTarget(target);
 
                 if (!m_unit->HasInArc(target))
-                {
-                    m_unit->SetInFront(target);
-                    if (target->GetTypeId() == TYPEID_PLAYER)
-                        m_unit->SendCreateUpdateToPlayer((Player*)target);
-
-                    if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-                        m_unit->SendCreateUpdateToPlayer((Player*)owner);
-                }
+                    m_unit->SetFacingToObject(target);
             }
 
             if (pet)

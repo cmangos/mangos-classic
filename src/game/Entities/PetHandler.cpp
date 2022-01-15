@@ -351,8 +351,6 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                         return;
                     }
 
-                    petUnit->GetMotionMaster()->Clear();
-
                     petUnit->AI()->AttackStart(unit_target);
                     // 10% chance to play special warlock pet attack talk, else growl
                     if (pet && pet->getPetType() == SUMMON_PET && pet != unit_target && roll_chance_i(10))
@@ -364,22 +362,6 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     petUnit->Attack(unit_target, true);
 
                 return;
-            }
-
-            // auto turn to target unless possessed
-            if (result == SPELL_FAILED_UNIT_NOT_INFRONT && !petUnit->hasUnitState(UNIT_STAT_POSSESSED))
-            {
-                if (unit_target)
-                {
-                    petUnit->SetInFront(unit_target);
-                    if (unit_target->GetTypeId() == TYPEID_PLAYER)
-                        petUnit->SendCreateUpdateToPlayer((Player*)unit_target);
-                }
-
-                if (Unit* powner = petUnit->GetMaster())
-                    if (powner->GetTypeId() == TYPEID_PLAYER)
-                        petUnit->SendCreateUpdateToPlayer((Player*)powner);
-                result = SPELL_CAST_OK;
             }
 
             if (result == SPELL_CAST_OK)
