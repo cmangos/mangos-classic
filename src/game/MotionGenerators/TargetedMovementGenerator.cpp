@@ -1201,8 +1201,8 @@ float FormationMovementGenerator::BuildPath(Unit& owner, PointsArray& path)
     else
     {
         // guessed values from sniff and ingame check
-        float distAhead = (masterSpline->Speed() / 3.0f) * 4.0f;
-        float distGood = distAhead - (distAhead / 5);
+        float distAhead = (masterSpline->Speed() / 3.0f) * 10.0f;
+        float distGood = distAhead - (distAhead / 5.0f);
 
         float slaveTravelDistance = 0;
         path.emplace_back(ownerPos);
