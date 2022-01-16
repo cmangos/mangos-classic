@@ -1168,9 +1168,22 @@ float FormationMovementGenerator::BuildPath(Unit& owner, PointsArray& path)
     float angle = i_target->GetOrientation();
     bool isOnGround = !owner.IsFlying() && !owner.IsInWater() && !owner.HasHoverAura();
 
+    // set owner position
+    Vector3 ownerPos;
+    if (!owner.movespline->Finalized())
+    {
+        // if on movement owner(follower) position should be computed to increase the precision
+        // up to 1 yard difference from GetPosition()
+        ownerPos = owner.movespline->ComputePosition();
+    }
+    else
+        ownerPos = Vector3(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ());
+
+    // set leader position
+    Vector3 masterPos(i_target->GetPositionX(), i_target->GetPositionY(), i_target->GetPositionZ());
+
     if (masterSpline->Finalized())
     {
-        Vector3 masterPos(i_target->GetPositionX(), i_target->GetPositionY(), i_target->GetPositionZ());
         bool done = false;
         angle += slotAngle;
         Position bestPos(masterPos.x, masterPos.y, masterPos.z, 0);
@@ -1180,7 +1193,7 @@ float FormationMovementGenerator::BuildPath(Unit& owner, PointsArray& path)
         float lenght = (masterPos - nextPos).magnitude();
         if (lenght > 0.1f)
         {
-            path.emplace_back(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ());
+            path.emplace_back(ownerPos);
             path.push_back(nextPos);
             speed = owner.GetSpeed(MOVE_WALK);
         }
@@ -1192,11 +1205,10 @@ float FormationMovementGenerator::BuildPath(Unit& owner, PointsArray& path)
         float distGood = distAhead - (distAhead / 5);
 
         float slaveTravelDistance = 0;
-        Vector3 ownerPos(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ());
         path.emplace_back(ownerPos);
 
         int32 masterTravelTime = 0;
-        Vector3 masterPrevPoint(i_target->GetPositionX(), i_target->GetPositionY(), i_target->GetPositionZ());
+        Vector3 masterPrevPoint(masterPos);
 
         float pathLen = 0;
         for (int32 pathIdx = masterSpline->GetRawPathIndex() + 1; pathIdx <= masterSpline->_Spline().last(); ++pathIdx)
