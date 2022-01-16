@@ -1266,19 +1266,12 @@ float FormationMovementGenerator::BuildPath(Unit& owner, PointsArray& path)
         // compute slave speed
         if (slaveTravelDistance > 0.1f)
         {
-            // Speed computation
-            float masterSpeed = masterSpline->Speed();
-
-            // define some factor that will influence slave speed to smooth its movement
-            static const float speedFactor = 2.0f;
-
-            // compute the slave factor of speed that will be added/removed from master speed
-            speed = ((slaveTravelDistance / (masterTravelTime / 1000.0f)) - masterSpeed) / speedFactor;
-            speed = masterSpeed + speed;
+            // compute the slave speed using yard/sec formulas
+            speed = (slaveTravelDistance / (masterTravelTime / 1000.0f));
 
             // clamp the speed to some limit
             speed = std::max(0.5f, speed);
-            speed = std::min(masterSpeed * 2, speed);
+            speed = std::min(masterSpline->Speed() * 2, speed);
         }
     }
     return speed;
