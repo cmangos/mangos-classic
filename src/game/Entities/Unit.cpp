@@ -10005,7 +10005,7 @@ void Unit::UpdateModelData()
     {
         float nativeScale = GetNativeScale();
         float currentScale = GetObjectScale();
-        float normalizedScale = currentScale / nativeScale;
+        float normalizedScale = nativeScale != 0 ? currentScale / nativeScale : 1;
         // vanilla only - values need to be relative to either DBC scale for players or DB scale for creatures
         SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, normalizedScale * modelInfo->bounding_radius);
 
