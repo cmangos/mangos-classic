@@ -356,28 +356,6 @@ void WaypointMovementGenerator<Creature>::SendNextWayPointPath(Creature& creatur
         nextNode = &nodeAfterItr->second;
     }
 
-    // show path in the client if need
-    if (creature.HaveDebugFlag(CMDEBUGFLAG_WP_PATH))
-    {
-        for (uint32 ptIdx = 0; ptIdx < genPath.size(); ++ptIdx)
-        {
-            auto pt = genPath[ptIdx];
-            TempSpawnSettings settings;
-            settings.spawner = &creature;
-            settings.entry = VISUAL_WAYPOINT;
-            settings.x = pt.x; settings.y = pt.y; settings.z = pt.z; settings.ori = 0.0f;
-            settings.activeObject = true;
-            settings.despawnTime = 10 * IN_MILLISECONDS;
-
-            settings.tempSpawnMovegen = true;
-            settings.waypointId = i_currentNode;
-            settings.spawnPathId = m_pathId;
-            settings.pathOrigin = uint32(m_PathOrigin);
-
-            WorldObject::SummonCreature(settings, creature.GetMap());
-        }
-    }
-
     Movement::MoveSplineInit init(creature);
     init.MovebyPath(genPath);
     if (nextNode->orientation != 100 && nextNode->delay != 0)

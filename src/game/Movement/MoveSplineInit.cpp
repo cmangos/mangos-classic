@@ -28,6 +28,27 @@ namespace Movement
 
     int32 MoveSplineInit::Launch()
     {
+        // show path in the client if need
+        if (unit.HaveDebugFlag(CMDEBUGFLAG_WP_PATH))
+        {
+            uint32 counter = 0;
+            for (auto pt : args.path)
+            {
+                TempSpawnSettings settings;
+                settings.spawner = &unit;
+                settings.entry = VISUAL_WAYPOINT;
+                settings.x = pt.x; settings.y = pt.y; settings.z = pt.z; settings.ori = 0.0f;
+                settings.activeObject = true;
+                settings.despawnTime = 30 * IN_MILLISECONDS;
+                settings.spawnType = TEMPSPAWN_TIMED_DESPAWN;
+                settings.spawnDataEntry = 2;
+
+                settings.tempSpawnMovegen = true;
+                settings.waypointId = counter++;
+
+                WorldObject::SummonCreature(settings, unit.GetMap());
+            }
+        }
         MoveSpline& move_spline = *unit.movespline;
         GenericTransport* transport = unit.GetTransport();
 
