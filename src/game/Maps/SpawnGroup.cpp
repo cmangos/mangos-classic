@@ -165,7 +165,27 @@ void SpawnGroup::Spawn(bool force)
     for (auto itr = eligibleGuids.begin(); itr != eligibleGuids.end() && !eligibleGuids.empty() && m_objects.size() < m_entry.MaxCount; ++itr)
     {
         uint32 dbGuid = *itr;
-        uint32 entry = GetEligibleEntry(validEntries, minEntries);
+        uint32 entry = 0;
+        // creatures pick random entry on first spawn in dungeons - else always pick random entry
+        if (GetObjectTypeId() == TYPEID_UNIT)
+        {
+            if (m_map.IsDungeon())
+            {
+                // only held in memory - implement saving to db if it becomes a major issue
+                if (m_chosenEntries.find(dbGuid) == m_chosenEntries.end())
+                {
+                    entry = GetEligibleEntry(validEntries, minEntries);
+                    m_chosenEntries[dbGuid] = entry;
+                }
+                else
+                    entry = m_chosenEntries[dbGuid];
+            }
+            else
+                entry = GetEligibleEntry(validEntries, minEntries);
+        }
+        else // GOs always pick random entry
+            entry = GetEligibleEntry(validEntries, minEntries);
+
         float x, y;
         if (GetObjectTypeId() == TYPEID_UNIT)
         {
