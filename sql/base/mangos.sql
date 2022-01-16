@@ -1453,7 +1453,8 @@ UNLOCK TABLES;
 -- Table structure for table `creature_immunities`
 --
 
-CREATE TABLE creature_immunities(
+DROP TABLE IF EXISTS `creature_immunities`;
+CREATE TABLE `creature_immunities`(
 `Entry` INT UNSIGNED NOT NULL COMMENT 'creature_template entry',
 `SetId` INT UNSIGNED NOT NULL DEFAULT '0' COMMENT 'immunity set ID',
 `Type` TINYINT UNSIGNED NOT NULL COMMENT 'enum SpellImmunity',
@@ -8351,6 +8352,7 @@ UNLOCK TABLES;
 -- Table structure for table `playercreateinfo_skills`
 --
 
+DROP TABLE IF EXISTS `playercreateinfo_skills`;
 CREATE TABLE `playercreateinfo_skills` (
   `raceMask` int unsigned NOT NULL,
   `classMask` int unsigned NOT NULL,
