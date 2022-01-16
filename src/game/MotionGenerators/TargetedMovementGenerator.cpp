@@ -1136,7 +1136,7 @@ void FollowMovementGenerator::HandleFinalizedMovement(Unit& owner)
 
 FormationMovementGenerator::FormationMovementGenerator(FormationSlotDataSPtr& sData, bool main) :
     FollowMovementGenerator(*sData->GetMaster(), sData->GetDistance(), sData->GetDistance(), main, false, false),
-    m_slot(sData), m_headingToMaster(false)
+    m_slot(sData), m_headingToMaster(false), m_lastAngle(0)
 {
 }
 
@@ -1228,6 +1228,12 @@ float FormationMovementGenerator::BuildPath(Unit& owner, PointsArray& path)
             // we have to compute new angle between two intermediate points
             Vector3 direction = nextMasterDest - masterPrevPoint;
             angle = atan2(direction.y, direction.x) + slotAngle;
+
+            // make direction change more soft for angle under 45deg
+            float diff = angle - m_lastAngle;
+            if (fabs(diff) < M_PI_F / 4.0f && fabs(diff) > M_PI_F / 36.0f) // angle should be under 45deg but over 5deg
+                angle = m_lastAngle + diff / 5.0f;
+            m_lastAngle = angle;
 
             // get best possible point near the slot position
             Position bestPos(nextMasterDest.x, nextMasterDest.y, nextMasterDest.z, 0);
