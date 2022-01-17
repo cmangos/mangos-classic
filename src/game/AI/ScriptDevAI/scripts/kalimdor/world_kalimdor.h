@@ -14,7 +14,7 @@ enum
     // Quest 6134
     GO_GHOST_MAGNET             = 177746,
     NPC_MAGRAMI_SPECTRE         = 11560,
-    SPELL_SPIRIT_SPAWN_OUT      = 17680,
+    // SPELL_SPIRIT_SPAWN_OUT      = 17680,
 
     // Quest 8868
     NPC_MINION_OMEN             = 15466,
@@ -37,10 +37,6 @@ enum
     NPC_COLOSSUS_RESEARCHER_SOPHIA = 15797,
     NPC_COLOSSUS_RESEARCHER_NESTOR = 15798,
     NPC_COLOSSUS_RESEARCHER_EAZEL  = 15799,
-
-    // Scourge Invasion
-    KA_SINPC_NECROPOLIS_HEALTH       = 16421,
-    KA_SIGOBJ_SUMMON_CIRCLE          = 181136,
 };
 
 enum Encounters

@@ -25,6 +25,7 @@
 #include "GameEvents/GameEventMgr.h"
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
+#include "World/World.h"
 
 #include <cmath>
 
@@ -134,7 +135,10 @@ void ChangeZoneEventStatus(Creature* mouth, bool on)
             break;
     }
 
-    sWorldState.Save(SAVE_ID_SCOURGE_INVASION);
+    sWorld.GetMessager().AddMessage([](World* /*world*/)
+    {
+        sWorldState.Save(SAVE_ID_SCOURGE_INVASION);
+    });
 }
 
 void DespawnEventDoodads(Creature* shard)
@@ -143,7 +147,7 @@ void DespawnEventDoodads(Creature* shard)
         return;
 
     GameObjectList doodadList;
-    GetGameObjectListWithEntryInGrid(doodadList, shard, { GOBJ_SUMMON_CIRCLE, GOBJ_UNDEAD_FIRE, GOBJ_UNDEAD_FIRE_AURA, GOBJ_SKULLPILE_01, GOBJ_SKULLPILE_02, GOBJ_SKULLPILE_03, GOBJ_SKULLPILE_04, GOBJ_SUMMONER_SHIELD }, 60.0f);
+    GetGameObjectListWithEntryInGrid(doodadList, shard, { GO_SUMMON_CIRCLE, GO_UNDEAD_FIRE, GO_UNDEAD_FIRE_AURA, GO_SKULLPILE_01, GO_SKULLPILE_02, GO_SKULLPILE_03, GO_SKULLPILE_04, GO_SUMMONER_SHIELD }, 60.0f);
     for (const auto pDoodad : doodadList)
     {
         pDoodad->SetRespawnDelay(-1);
@@ -162,7 +166,7 @@ void DespawnNecropolis(Unit* despawner)
         return;
 
     GameObjectList necropolisList;
-    GetGameObjectListWithEntryInGrid(necropolisList, despawner, { GOBJ_NECROPOLIS_TINY, GOBJ_NECROPOLIS_SMALL, GOBJ_NECROPOLIS_MEDIUM, GOBJ_NECROPOLIS_BIG, GOBJ_NECROPOLIS_HUGE }, ATTACK_DISTANCE);
+    GetGameObjectListWithEntryInGrid(necropolisList, despawner, { GO_NECROPOLIS_TINY, GO_NECROPOLIS_SMALL, GO_NECROPOLIS_MEDIUM, GO_NECROPOLIS_BIG, GO_NECROPOLIS_HUGE }, ATTACK_DISTANCE);
     for (const auto pNecropolis : necropolisList)
         pNecropolis->ForcedDespawn();
 }
@@ -173,12 +177,12 @@ void SummonCultists(Unit* shard)
         return;
 
     GameObjectList summonerShieldList;
-    GetGameObjectListWithEntryInGrid(summonerShieldList, shard, GOBJ_SUMMONER_SHIELD, INSPECT_DISTANCE);
+    GetGameObjectListWithEntryInGrid(summonerShieldList, shard, GO_SUMMONER_SHIELD, INSPECT_DISTANCE);
     for (const auto pSummonerShield : summonerShieldList)
         pSummonerShield->ForcedDespawn();
 
     // We don't have all positions sniffed from the Cultists, so why not using this code which placing them almost perfectly into the circle while blizzards positions are sometimes way off?
-    if (GameObject* gameObject = GetClosestGameObjectWithEntry(shard, GOBJ_SUMMON_CIRCLE, CONTACT_DISTANCE))
+    if (GameObject* gameObject = GetClosestGameObjectWithEntry(shard, GO_SUMMON_CIRCLE, CONTACT_DISTANCE))
     {
         for (int i = 0; i < 4; ++i)
         {
@@ -397,7 +401,7 @@ struct NecropolisHealthAI : public ScriptedAI
                 std::vector<ObjectGuid> circles;
 
                 if (auto* continent = dynamic_cast<ScriptedInstance*>(m_creature->GetMap()->GetInstanceData()))
-                    continent->GetGameObjectGuidVectorFromStorage(GOBJ_SUMMON_CIRCLE, circles);
+                    continent->GetGameObjectGuidVectorFromStorage(GO_SUMMON_CIRCLE, circles);
 
                 if (ownedCircles.size() < 3)
                 {
@@ -441,7 +445,7 @@ struct NecropolisHealthAI : public ScriptedAI
                     }
                 }
 
-                for (ScourgeInvasionMisc t_necId : {GOBJ_NECROPOLIS_BIG, GOBJ_NECROPOLIS_HUGE, GOBJ_NECROPOLIS_MEDIUM, GOBJ_NECROPOLIS_SMALL, GOBJ_NECROPOLIS_TINY})
+                for (ScourgeInvasionMisc t_necId : {GO_NECROPOLIS_BIG, GO_NECROPOLIS_HUGE, GO_NECROPOLIS_MEDIUM, GO_NECROPOLIS_SMALL, GO_NECROPOLIS_TINY})
                 {
                     if (GameObject* t_necGo = GetClosestGameObjectWithEntry(m_creature, t_necId, 20.f))
                     {
@@ -509,7 +513,6 @@ struct NecropolisHealthAI : public ScriptedAI
         uint32 remaining = sWorldState.GetSIRemaining(remainingID);
         if (remaining > 0)
             sWorldState.SetSIRemaining(remainingID, (remaining - 1));
-        sWorldState.Save(SAVE_ID_SCOURGE_INVASION);
     }
 
     void SpellHitTarget(Unit* target, SpellEntry const* spellInfo) override
@@ -648,7 +651,7 @@ struct NecroticShard : public ScriptedAI
 
             bool despawnMe = false;
 
-            if (!GetClosestGameObjectWithEntry(m_creature, GOBJ_SUMMON_CIRCLE, 2.f))
+            if (!GetClosestGameObjectWithEntry(m_creature, GO_SUMMON_CIRCLE, 2.f))
             {
                 despawnMe = true;
             }
@@ -716,7 +719,7 @@ struct NecroticShard : public ScriptedAI
             AddCustomAction(10, 5000u, [&]() // Check if Doodads are spawned 5 seconds after spawn. If not: spawn them
             {
                 GameObjectList objectList;
-                GetGameObjectListWithEntryInGrid(objectList, m_creature, {GOBJ_UNDEAD_FIRE, GOBJ_UNDEAD_FIRE_AURA, GOBJ_SKULLPILE_01, GOBJ_SKULLPILE_02, GOBJ_SKULLPILE_03, GOBJ_SKULLPILE_04}, 50.f);
+                GetGameObjectListWithEntryInGrid(objectList, m_creature, {GO_UNDEAD_FIRE, GO_UNDEAD_FIRE_AURA, GO_SKULLPILE_01, GO_SKULLPILE_02, GO_SKULLPILE_03, GO_SKULLPILE_04}, 50.f);
 
                 for (GameObject* object : objectList)
                 {
@@ -835,7 +838,10 @@ struct NecroticShard : public ScriptedAI
                 DespawnCultists(m_creature);
                 // Remove Objects from the event around the Shard (Yes this is Blizzlike).
                 DespawnEventDoodads(m_creature);
-                sWorldState.Save(SAVE_ID_SCOURGE_INVASION);
+                sWorld.GetMessager().AddMessage([](World* /*world*/)
+                {
+                    sWorldState.Save(SAVE_ID_SCOURGE_INVASION);
+                });
                 break;
         }
     }
@@ -943,7 +949,7 @@ struct npc_cultist_engineer : public ScriptedAI
         if (Creature* shard = GetClosestCreatureWithEntry(m_creature, NPC_DAMAGED_NECROTIC_SHARD, 15.0f))
             shard->CastSpell(shard, SPELL_DAMAGE_CRYSTAL, TRIGGERED_OLD_TRIGGERED);
 
-        if (GameObject* gameObject = GetClosestGameObjectWithEntry(m_creature, GOBJ_SUMMONER_SHIELD, CONTACT_DISTANCE))
+        if (GameObject* gameObject = GetClosestGameObjectWithEntry(m_creature, GO_SUMMONER_SHIELD, CONTACT_DISTANCE))
             gameObject->Delete();
     }
 

@@ -14,10 +14,6 @@ enum
     NPC_FALSTAD_WILDHAMMER      = 5635,
 
     NPC_SHORT_JOHN_MITHRIL      = 14508,
-
-    // Scourge Invasion
-    EK_SINPC_NECROPOLIS_HEALTH     = 16421,
-    EK_SIGOBJ_SUMMON_CIRCLE        = 181136,
 };
 
 #endif
