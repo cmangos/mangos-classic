@@ -2078,13 +2078,13 @@ void Aura::HandleAuraTransform(bool apply, bool /*Real*/)
         // special case (spell specific functionality)
         if (m_modifier.m_miscvalue == 0)
         {
-            switch (GetId())
-            {
-                default:
+//             switch (GetId())
+//             {
+//                 default:
                     if (!m_modifier.m_amount) // can be set through script
                         sLog.outError("Aura::HandleAuraTransform, spell %u does not have creature entry defined, need custom defined model.", GetId());
-                    break;
-            }
+//                    break;
+//             }
         }
         else                                                // m_modifier.m_miscvalue != 0
         {
@@ -5313,11 +5313,7 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, Wor
     if (!caster)
         m_casterGuid = target->GetObjectGuid();
     else
-    {
-        // remove this assert when not unit casters will be supported
-        MANGOS_ASSERT(caster->isType(TYPEMASK_UNIT))
         m_casterGuid = caster->GetObjectGuid();
-    }
 
     m_applyTime      = time(nullptr);
     m_applyMSTime    = target->GetMap()->GetCurrentMSTime();
