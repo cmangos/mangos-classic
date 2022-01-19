@@ -3548,7 +3548,7 @@ void Spell::finish(bool ok)
     if (!m_TriggerSpells.empty())
         CastTriggerSpells();
 
-    if (m_caster)
+    if (!m_IsTriggeredSpell && !m_trueCaster->IsGameObject())
         m_caster->RemoveAurasOnCast(AURA_INTERRUPT_FLAG_ACTION_LATE, m_spellInfo);
 
     // Stop Attack for some spells
