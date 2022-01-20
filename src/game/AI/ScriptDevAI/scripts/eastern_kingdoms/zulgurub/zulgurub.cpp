@@ -26,7 +26,7 @@ EndScriptData
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "zulgurub.h"
 
-instance_zulgurub::instance_zulgurub(Map* pMap) : ScriptedInstance(pMap),
+instance_zulgurub::instance_zulgurub(Map* map) : ScriptedInstance(map),
     m_bHasIntroYelled(false),
     m_bHasAltarYelled(false)
 {
@@ -38,23 +38,23 @@ void instance_zulgurub::Initialize()
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 }
 
-void instance_zulgurub::DoYellAtTriggerIfCan(uint32 uiTriggerId)
+void instance_zulgurub::DoYellAtTriggerIfCan(uint32 triggerId)
 {
-    if (uiTriggerId == AREATRIGGER_ENTER && !m_bHasIntroYelled)
+    if (triggerId == AREATRIGGER_ENTER && !m_bHasIntroYelled)
     {
         DoOrSimulateScriptTextForThisInstance(SAY_HAKKAR_PROTECT, NPC_HAKKAR);
         m_bHasIntroYelled = true;
     }
-    else if (uiTriggerId == AREATRIGGER_ALTAR && !m_bHasAltarYelled)
+    else if (triggerId == AREATRIGGER_ALTAR && !m_bHasAltarYelled)
     {
         DoOrSimulateScriptTextForThisInstance(SAY_MINION_DESTROY, NPC_HAKKAR);
         m_bHasAltarYelled = true;
     }
 }
 
-void instance_zulgurub::OnCreatureCreate(Creature* pCreature)
+void instance_zulgurub::OnCreatureCreate(Creature* creature)
 {
-    switch (pCreature->GetEntry())
+    switch (creature->GetEntry())
     {
         case NPC_LORKHAN:
         case NPC_ZATH:
@@ -63,48 +63,48 @@ void instance_zulgurub::OnCreatureCreate(Creature* pCreature)
         case NPC_HAKKAR:
         case NPC_BLOODLORD_MANDOKIR:
         case NPC_MARLI:
-            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
             break;
         case NPC_PANTHER_TRIGGER:
-            if (pCreature->GetPositionY() < -1626)
-                m_lLeftPantherTriggerGUIDList.push_back(pCreature->GetObjectGuid());
+            if (creature->GetPositionY() < -1626)
+                m_lLeftPantherTriggerGUIDList.push_back(creature->GetObjectGuid());
             else
-                m_lRightPantherTriggerGUIDList.push_back(pCreature->GetObjectGuid());
+                m_lRightPantherTriggerGUIDList.push_back(creature->GetObjectGuid());
             break;
     }
 }
 
-void instance_zulgurub::OnObjectCreate(GameObject* pGo)
+void instance_zulgurub::OnObjectCreate(GameObject* go)
 {
-    switch (pGo->GetEntry())
+    switch (go->GetEntry())
     {
         case GO_GONG_OF_BETHEKK:
         case GO_FORCEFIELD:
             break;
         case GO_SPIDER_EGG:
-            m_lSpiderEggGUIDList.push_back(pGo->GetObjectGuid());
+            m_lSpiderEggGUIDList.push_back(go->GetObjectGuid());
             return;
     }
 
-    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[go->GetEntry()] = go->GetObjectGuid();
 }
 
-void instance_zulgurub::SetData(uint32 uiType, uint32 uiData)
+void instance_zulgurub::SetData(uint32 type, uint32 data)
 {
-    switch (uiType)
+    switch (type)
     {
         case TYPE_JEKLIK:
         case TYPE_VENOXIS:
         case TYPE_THEKAL:
-            m_auiEncounter[uiType] = uiData;
-            if (uiData == DONE)
+            m_auiEncounter[type] = data;
+            if (data == DONE)
                 RemoveHakkarPowerStack();
             break;
         case TYPE_MARLI:
-            m_auiEncounter[uiType] = uiData;
-            if (uiData == DONE)
+            m_auiEncounter[type] = data;
+            if (data == DONE)
                 RemoveHakkarPowerStack();
-            if (uiData == FAIL)
+            if (data == FAIL)
             {
                 for (GuidList::const_iterator itr = m_lSpiderEggGUIDList.begin(); itr != m_lSpiderEggGUIDList.end(); ++itr)
                 {
@@ -118,14 +118,14 @@ void instance_zulgurub::SetData(uint32 uiType, uint32 uiData)
             }
             break;
         case TYPE_ARLOKK:
-            m_auiEncounter[uiType] = uiData;
-            if (uiData == IN_PROGRESS)
+            m_auiEncounter[type] = data;
+            if (data == IN_PROGRESS)
                 DoUseDoorOrButton(GO_FORCEFIELD);
             else if (GameObject* pForcefield = GetSingleGameObjectFromStorage(GO_FORCEFIELD))
                 pForcefield->ResetDoorOrButton();
-            if (uiData == DONE)
+            if (data == DONE)
                 RemoveHakkarPowerStack();
-            if (uiData == FAIL)
+            if (data == FAIL)
             {
                 // Note: this gameobject should change flags - currently it despawns which isn't correct
                 if (GameObject* pGong = GetSingleGameObjectFromStorage(GO_GONG_OF_BETHEKK))
@@ -137,7 +137,7 @@ void instance_zulgurub::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_OHGAN:
             // Note: SPECIAL instance data is set via ACID!
-            if (uiData == SPECIAL)
+            if (data == SPECIAL)
             {
                 if (Creature* pMandokir = GetSingleCreatureFromStorage(NPC_BLOODLORD_MANDOKIR))
                 {
@@ -145,15 +145,15 @@ void instance_zulgurub::SetData(uint32 uiType, uint32 uiData)
                     pMandokir->GetMotionMaster()->MovePoint(1, aMandokirDownstairsPos[0], aMandokirDownstairsPos[1], aMandokirDownstairsPos[2]);
                 }
             }
-            m_auiEncounter[uiType] = uiData;
+            m_auiEncounter[type] = data;
             break;
         case TYPE_LORKHAN:
         case TYPE_ZATH:
-            m_auiEncounter[uiType] = uiData;
+            m_auiEncounter[type] = data;
             break;
     }
 
-    if (uiData == DONE)
+    if (data == DONE)
     {
         OUT_SAVE_INST_DATA;
 
@@ -212,9 +212,9 @@ uint32 instance_zulgurub::GetData(uint32 uiType) const
     return 0;
 }
 
-Creature* instance_zulgurub::SelectRandomPantherTrigger(bool bIsLeft)
+Creature* instance_zulgurub::SelectRandomPantherTrigger(bool isLeft)
 {
-    GuidList* plTempList = bIsLeft ? &m_lLeftPantherTriggerGUIDList : &m_lRightPantherTriggerGUIDList;
+    GuidList* plTempList = isLeft ? &m_lLeftPantherTriggerGUIDList : &m_lRightPantherTriggerGUIDList;
     std::vector<Creature*> vTriggers;
     vTriggers.reserve(plTempList->size());
 
@@ -228,11 +228,6 @@ Creature* instance_zulgurub::SelectRandomPantherTrigger(bool bIsLeft)
         return nullptr;
 
     return vTriggers[urand(0, vTriggers.size() - 1)];
-}
-
-InstanceData* GetInstanceData_instance_zulgurub(Map* pMap)
-{
-    return new instance_zulgurub(pMap);
 }
 
 bool AreaTrigger_at_zulgurub(Player* pPlayer, AreaTriggerEntry const* pAt)
@@ -253,7 +248,7 @@ void AddSC_instance_zulgurub()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_zulgurub";
-    pNewScript->GetInstanceData = &GetInstanceData_instance_zulgurub;
+    pNewScript->GetInstanceData = &GetNewInstanceScript<instance_zulgurub>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
