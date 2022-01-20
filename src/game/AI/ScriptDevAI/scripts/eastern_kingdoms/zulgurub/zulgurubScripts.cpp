@@ -133,10 +133,35 @@ UnitAI* GetAI_npc_soulflayer(Creature* pCreature)
     return new npc_soulflayerAI(pCreature);
 }
 
+enum // leftover hazzarah enum for future docu
+{
+    SPELL_CHAIN_BURN            = 24684,
+    SPELL_SLEEP                 = 24664,
+    SPELL_EARTH_SHOCK           = 24685,
+    SPELL_SUMMON_ILLUSION_1     = 24681,
+    SPELL_SUMMON_ILLUSION_2     = 24728, // main spell with script effect
+    SPELL_SUMMON_ILLUSION_3     = 24729,
+};
+
+struct SummonNightmareIllusion : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_1)
+        {
+            Unit* caster = spell->GetCaster();
+            caster->CastSpell(nullptr, SPELL_SUMMON_ILLUSION_1, TRIGGERED_OLD_TRIGGERED);
+            caster->CastSpell(nullptr, SPELL_SUMMON_ILLUSION_3, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void AddSC_zulgurub()
 {
     Script* pNewScript = new Script();
     pNewScript->Name = "npc_soulflayer";
     pNewScript->GetAI = &GetAI_npc_soulflayer;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<SummonNightmareIllusion>("spell_summon_nightmare_illusion_hazzarah");
 }

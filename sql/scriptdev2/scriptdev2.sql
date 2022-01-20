@@ -688,7 +688,6 @@ UPDATE creature_template SET ScriptName='boss_hakkar' WHERE entry=14834;
 UPDATE creature_template SET ScriptName='boss_thekal' WHERE entry=14509;
 UPDATE creature_template SET ScriptName='boss_arlokk' WHERE entry=14515;
 UPDATE gameobject_template SET ScriptName='go_gong_of_bethekk' WHERE entry=180526;
-UPDATE creature_template SET ScriptName='boss_hazzarah' WHERE entry=15083;
 UPDATE creature_template SET ScriptName='boss_renataki' WHERE entry=15084;
 UPDATE creature_template SET ScriptName='mob_zealot_lorkhan' WHERE entry=11347;
 UPDATE creature_template SET ScriptName='mob_zealot_zath' WHERE entry=11348;

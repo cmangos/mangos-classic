@@ -51,7 +51,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (24314,'spell_threatening_gaze'),
 (24342,'spell_despawn_chained_spirits'),
 (24693,'spell_hakkar_power_down'),
-(25228,'spell_soul_link'),
+(24728,'spell_summon_nightmare_illusion_hazzarah'),
 (25684,'spell_summon_mana_fiends_moam'),
 (25813,'spell_conjure_dream_rift'),
 (25885,'spell_viscidus_summon_globs'),
@@ -172,7 +172,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (19505,'spell_devour_magic'),
 (19731,'spell_devour_magic'),
 (19734,'spell_devour_magic'),
-(19736,'spell_devour_magic');
+(19736,'spell_devour_magic'),
+(25228,'spell_soul_link');
 
 -- Warrior
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

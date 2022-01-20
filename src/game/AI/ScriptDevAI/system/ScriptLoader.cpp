@@ -107,7 +107,6 @@ extern void AddSC_instance_uldaman();
 extern void AddSC_uldaman();
 extern void AddSC_boss_arlokk();                            // zulgurub
 extern void AddSC_boss_hakkar();
-extern void AddSC_boss_hazzarah();
 extern void AddSC_boss_jeklik();
 extern void AddSC_boss_jindo();
 extern void AddSC_boss_mandokir();
@@ -313,7 +312,6 @@ void AddScripts()
     AddSC_uldaman();
     AddSC_boss_arlokk();                                    // zulgurub
     AddSC_boss_hakkar();
-    AddSC_boss_hazzarah();
     AddSC_boss_jeklik();
     AddSC_boss_jindo();
     AddSC_boss_mandokir();
