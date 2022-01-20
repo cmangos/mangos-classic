@@ -376,7 +376,7 @@ void MotionMaster::MoveInFormation(FormationSlotDataSPtr& sData, bool asMain /*=
         return;
 
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s is in formation with %s", m_owner->GetGuidStr().c_str(), master->GetGuidStr().c_str());
-    sLog.outString("%s is in formation with %s", m_owner->GetGuidStr().c_str(), master->GetGuidStr().c_str());
+    //sLog.outString("%s is in formation with %s", m_owner->GetGuidStr().c_str(), master->GetGuidStr().c_str());
 
     Mutate(new FormationMovementGenerator(sData, asMain));
 }

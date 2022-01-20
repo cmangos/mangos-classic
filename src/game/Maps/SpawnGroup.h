@@ -104,20 +104,29 @@ class FormationSlotData
     public:
         FormationSlotData(uint32 slotId, uint32 _ownerDBGuid, CreatureGroup* creatureGrp, SpawnGroupFormationSlotType type = SpawnGroupFormationSlotType::SPAWN_GROUP_FORMATION_SLOT_TYPE_STATIC)
             : m_slotId(slotId), m_realOwnerGuid(_ownerDBGuid), m_creatureGroup(creatureGrp), m_slotType(type), m_owner(nullptr),
-            m_angle(0), m_distance(1), m_recomputePosition(true) {}
+            m_realAngle(0), m_realDistance(1), m_recomputePosition(true), m_angleVariation(0), m_distanceVariation(0),
+            m_maxAngleVariation(0), m_maxDistanceVariation(0), m_angleVariationDest(0), m_distanceVariationDest(0),
+            m_canFollow(true)
+        {}
 
         uint32 GetSlotId() const { return m_slotId; }
         Unit* GetMaster();
         bool IsFormationMaster();
 
         float GetAngle();
-        float GetRealAngle() const { return m_angle; }
-        float GetDistance() const { return m_distance; }
+        float GetDistance() const;
+        float GetRealAngle() const { return m_realAngle; }
+        float GetRealDistance() const { return m_realDistance; }
 
-        void SetAngle(float angle) { m_angle = angle; }
-        void SetDistance(float distance) { m_distance = distance; }
-
+        void SetAngle(float angle) { m_realAngle = angle; m_angleVariation = angle; }
+        void SetDistance(float distance) { m_realDistance = distance; m_distanceVariation = distance; }
+        void ResetVariation() { m_angleVariation = m_realAngle; m_distanceVariation = m_realDistance; }
+        void SetMaxVariation(float angleMax, float distMax) { m_maxAngleVariation = angleMax; m_maxDistanceVariation = distMax; }
+        void AddPositionVariation(bool now = false);
+        void Update();
         bool& GetRecomputePosition() { return m_recomputePosition; }
+        bool CanFollow() const { return m_canFollow; }
+        void SetCanFollow(bool canFollow) { m_canFollow = canFollow; }
 
         CreatureGroup* GetCreatureGroup() { return m_creatureGroup; }
         FormationData* GetFormationData() { return m_creatureGroup->GetFormationData(); }
@@ -145,9 +154,17 @@ class FormationSlotData
         uint32 m_realOwnerGuid;
         CreatureGroup* m_creatureGroup;
         Unit* m_owner;
-        float m_angle;
-        float m_distance;
+        float m_realAngle;
+        float m_realDistance;
+        float m_angleVariation;
+        float m_distanceVariation;
+        float m_maxAngleVariation;
+        float m_maxDistanceVariation;
+        float m_angleVariationDest;
+        float m_distanceVariationDest;
         bool m_recomputePosition;
+        bool m_canFollow;
+
         SpawnGroupFormationSlotType m_slotType;
 };
 
@@ -173,8 +190,11 @@ class FormationData
         bool GetMirrorState() const { return m_mirrorState; }
         void Compact(bool set = true);
         bool SwitchFormation(SpawnGroupFormationType newShape);
+        SpawnGroupFormationType GetCurrentShape() const { return m_currentFormationShape; }
         void SetSpread(float spread) { m_currentSpread = spread; FixSlotsPositions(); }
         void SetOptions(uint32 options);
+        bool CanUseMMap() const { return !HaveOption(SPAWN_GROUP_FORMATION_OPTION_FOLLOWERS_WILL_NOT_PATHFIND_TO_LOCATION); }
+        void Update();
 
         FormationSlotDataSPtr SetFormationSlot(Creature* creature, SpawnGroupFormationSlotType slotType = SPAWN_GROUP_FORMATION_SLOT_TYPE_STATIC);
         std::string to_string() const;
@@ -192,6 +212,8 @@ class FormationData
         void ClearMoveGen();
         bool FreeSlot(FormationSlotDataSPtr slot);
         bool AddInFormationSlot(Unit* newUnit, SpawnGroupFormationSlotType slotType = SPAWN_GROUP_FORMATION_SLOT_TYPE_STATIC);
+        void StartFollower();
+        void StopFollower();
         bool HaveOption(SpawGroupFormationOptions const& option, uint32 const& options) const { return (static_cast<uint32>(options) & option) != 0; }
         bool HaveOption(SpawGroupFormationOptions const& option) const { return (static_cast<uint32>(m_currentOptions) & option) != 0; }
 
@@ -203,12 +225,16 @@ class FormationData
         RespawnPosistion m_spawnPos;
 
         bool m_mirrorState;
+        bool m_followerStopped;
 
         uint32 m_realMasterDBGuid;
         uint32 m_slotGuid;
         uint32 m_lastWP;
         uint32 m_wpPathId;
         uint32 m_currentOptions;
+        TimePoint m_nextVariation;
+        TimePoint m_nextVariationUpdate;
+        TimePoint m_followerStartTime;
 
         float m_currentSpread;
 };
