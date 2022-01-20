@@ -48,6 +48,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (20038,'spell_explosion_razorgore'),
 (21651,'spell_opening_capping'),
 (23226,'spell_ritual_candle_aura'),
+(24314,'spell_threatening_gaze'),
+(24342,'spell_despawn_chained_spirits'),
 (24693,'spell_hakkar_power_down'),
 (25228,'spell_soul_link'),
 (25684,'spell_summon_mana_fiends_moam'),
