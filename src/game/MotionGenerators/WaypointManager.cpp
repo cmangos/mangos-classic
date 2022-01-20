@@ -160,7 +160,7 @@ void WaypointManager::Load()
     // creature_movement
     // /////////////////////////////////////////////////////
 
-    QueryResult* result = WorldDatabase.Query("SELECT id, COUNT(point) FROM creature_movement GROUP BY id");
+    QueryResult* result = WorldDatabase.Query("SELECT Id, COUNT(Point) FROM creature_movement GROUP BY Id");
 
     if (!result)
     {
@@ -185,8 +185,8 @@ void WaypointManager::Load()
         while (result->NextRow());
         delete result;
 
-        //                                   0   1      2           3           4           5            6         7
-        result = WorldDatabase.Query("SELECT id, point, position_x, position_y, position_z, orientation, waittime, script_id FROM creature_movement");
+        //                                   0   1      2          3          4          5            6         7
+        result = WorldDatabase.Query("SELECT Id, Point, PositionX, PositionY, PositionZ, Orientation, WaitTime, ScriptId FROM creature_movement");
 
         BarGoLink bar(result->GetRowCount());
 
@@ -250,7 +250,7 @@ void WaypointManager::Load()
                     delete result1;
                 }
 
-                WorldDatabase.PExecute("UPDATE creature_movement SET position_x = '%f', position_y = '%f', position_z = '%f' WHERE id = '%u' AND point = '%u'", node.x, node.y, node.z, id, point);
+                WorldDatabase.PExecute("UPDATE creature_movement SET PositionX = '%f', PositionY = '%f', PositionZ = '%f' WHERE Id = '%u' AND Point = '%u'", node.x, node.y, node.z, id, point);
             }
 
             if (node.script_id)
@@ -292,7 +292,7 @@ void WaypointManager::Load()
     // creature_movement_template
     // /////////////////////////////////////////////////////
 
-    result = WorldDatabase.Query("SELECT entry, COUNT(point) FROM creature_movement_template GROUP BY entry");
+    result = WorldDatabase.Query("SELECT Entry, COUNT(Point) FROM creature_movement_template GROUP BY Entry");
 
     if (!result)
     {
@@ -319,8 +319,8 @@ void WaypointManager::Load()
         while (result->NextRow());
         delete result;
 
-        //                                   0      1       2      3           4           5           6            7
-        result = WorldDatabase.Query("SELECT entry, pathId, point, position_x, position_y, position_z, orientation, waittime, script_id FROM creature_movement_template");
+        //                                   0      1       2      3          4          5          6            7         8
+        result = WorldDatabase.Query("SELECT Entry, PathId, Point, PositionX, PositionY, PositionZ, Orientation, WaitTime, ScriptId FROM creature_movement_template");
 
         BarGoLink bar(result->GetRowCount());
         std::set<uint32> blacklistWaypoints;
@@ -370,7 +370,7 @@ void WaypointManager::Load()
                 sLog.outErrorDb("Table creature_movement_template for entry %u (point %u) are auto corrected to normalized position_x=%f, position_y=%f",
                                 entry, point, node.x, node.y);
 
-                WorldDatabase.PExecute("UPDATE creature_movement_template SET position_x = '%f', position_y = '%f' WHERE entry = %u AND point = %u AND pathId = %u", node.x, node.y, entry, point, pathId);
+                WorldDatabase.PExecute("UPDATE creature_movement_template SET PositionX = '%f', PositionY = '%f' WHERE Entry = %u AND Point = %u AND PathId = %u", node.x, node.y, entry, point, pathId);
             }
 
             if (node.script_id)
@@ -392,7 +392,7 @@ void WaypointManager::Load()
     // waypoint_path
     // /////////////////////////////////////////////////////
 
-    result = WorldDatabase.Query("SELECT entry, COUNT(point) FROM waypoint_path GROUP BY entry");
+    result = WorldDatabase.Query("SELECT PathId, COUNT(Point) FROM waypoint_path GROUP BY PathId");
 
     if (!result)
     {
@@ -418,8 +418,8 @@ void WaypointManager::Load()
         } while (result->NextRow());
         delete result;
 
-        //                                   0      1       2      3           4           5           6            7
-        result = WorldDatabase.Query("SELECT entry, pathId, point, position_x, position_y, position_z, orientation, waittime, script_id FROM waypoint_path");
+        //                                   0       1      2          3          4          5            6         7
+        result = WorldDatabase.Query("SELECT PathId, Point, PositionX, PositionY, PositionZ, Orientation, WaitTime, ScriptId FROM waypoint_path");
 
         BarGoLink bar(result->GetRowCount());
         std::set<uint32> blacklistWaypoints;
@@ -429,43 +429,42 @@ void WaypointManager::Load()
             bar.step();
             Field* fields = result->Fetch();
 
-            uint32 entry = fields[0].GetUInt32();
-            uint32 pathId = fields[1].GetUInt32();
-            uint32 point = fields[2].GetUInt32();
+            uint32 pathId = fields[0].GetUInt32();
+            uint32 point = fields[1].GetUInt32();
 
             if (point == 0)
             {
-                blacklistWaypoints.insert((entry << 8) + pathId);
-                sLog.outErrorDb("Table `waypoint_path` has invalid point 0 for entry %u in path %u. Skipping.`", entry, pathId);
+                blacklistWaypoints.insert(pathId);
+                sLog.outErrorDb("Table `waypoint_path` has invalid point 0 for path %u. Skipping.`", pathId);
             }
 
-            WaypointPath& path = m_pathMovementTemplateMap[(entry << 8) + pathId];
+            WaypointPath& path = m_pathMovementTemplateMap[pathId];
             WaypointNode& node = path[point];
 
-            node.x = fields[3].GetFloat();
-            node.y = fields[4].GetFloat();
-            node.z = fields[5].GetFloat();
-            node.orientation = fields[6].GetFloat();
-            node.delay = fields[7].GetUInt32();
-            node.script_id = fields[8].GetUInt32();
+            node.x = fields[2].GetFloat();
+            node.y = fields[3].GetFloat();
+            node.z = fields[4].GetFloat();
+            node.orientation = fields[5].GetFloat();
+            node.delay = fields[6].GetUInt32();
+            node.script_id = fields[7].GetUInt32();
 
             // prevent using invalid coordinates
             if (!MaNGOS::IsValidMapCoord(node.x, node.y, node.z, node.orientation))
             {
-                sLog.outErrorDb("Table waypoint_path for entry %u (point %u) are using invalid coordinates position_x: %f, position_y: %f)",
-                    entry, point, node.x, node.y);
+                sLog.outErrorDb("Table waypoint_path for PathId %u (Point %u) are using invalid coordinates PositionX: %f, PositionY: %f)",
+                    pathId, point, node.x, node.y);
 
                 MaNGOS::NormalizeMapCoord(node.x);
                 MaNGOS::NormalizeMapCoord(node.y);
 
-                sLog.outErrorDb("Table waypoint_path for entry %u (point %u) are auto corrected to normalized position_x=%f, position_y=%f",
-                    entry, point, node.x, node.y);
+                sLog.outErrorDb("Table waypoint_path for PathId %u (Point %u) are auto corrected to normalized PositionX=%f, PositionY=%f",
+                    pathId, point, node.x, node.y);
 
-                WorldDatabase.PExecute("UPDATE waypoint_path SET position_x = '%f', position_y = '%f' WHERE entry = %u AND point = %u AND pathId = %u", node.x, node.y, entry, point, pathId);
+                WorldDatabase.PExecute("UPDATE waypoint_path SET PositionX = '%f', PositionY = '%f' WHERE PathId = %u AND Point = %u", node.x, node.y, pathId, point);
             }
 
             if (node.script_id)
-                CheckDbscript(node, entry, point, movementScriptSet, "waypoint_path");
+                CheckDbscript(node, pathId, point, movementScriptSet, "waypoint_path");
         } while (result->NextRow());
 
         delete result;
@@ -551,16 +550,16 @@ WaypointNode const* WaypointManager::AddNode(uint32 entry, uint32 dbGuid, uint32
         if (rItr->first <= nextPoint)
         {
             if (wpDest == PATH_FROM_ENTRY)
-                WorldDatabase.PExecuteLog("UPDATE %s SET point=point+1 WHERE %s=%u AND point=%u AND pathId=%u", table, key_field, key, rItr->first - 1, pathId);
+                WorldDatabase.PExecuteLog("UPDATE %s SET Point=Point+1 WHERE %s=%u AND Point=%u AND PathId=%u", table, key_field, key, rItr->first - 1, pathId);
             else
-                WorldDatabase.PExecuteLog("UPDATE %s SET point=point+1 WHERE %s=%u AND point=%u", table, key_field, key, rItr->first - 1);
+                WorldDatabase.PExecuteLog("UPDATE %s SET Point=Point+1 WHERE %s=%u AND Point=%u", table, key_field, key, rItr->first - 1);
         }
     }
     // Insert new Point to database
     if (wpDest == PATH_FROM_ENTRY)
-        WorldDatabase.PExecuteLog("INSERT INTO %s (%s,pathId,point,position_x,position_y,position_z,orientation) VALUES (%u,%u,%u, %f,%f,%f, %f)", table, key_field, key, pathId, pointId, x, y, z, orientation);
+        WorldDatabase.PExecuteLog("INSERT INTO %s (%s,PathId,Point,PositionX,PositionY,PositionZ,Orientation) VALUES (%u,%u,%u, %f,%f,%f, %f)", table, key_field, key, pathId, pointId, x, y, z, orientation);
     else
-        WorldDatabase.PExecuteLog("INSERT INTO %s (%s,point,position_x,position_y,position_z,orientation) VALUES (%u,%u, %f,%f,%f, %f)", table, key_field, key, pointId, x, y, z, orientation);
+        WorldDatabase.PExecuteLog("INSERT INTO %s (%s,Point,PositionX,PositionY,PositionZ,Orientation) VALUES (%u,%u, %f,%f,%f, %f)", table, key_field, key, pointId, x, y, z, orientation);
 
     return &path[pointId];
 }
@@ -579,16 +578,16 @@ void WaypointManager::DeleteNode(uint32 entry, uint32 dbGuid, uint32 point, uint
     char const* const key_field = waypointKeyColumn[wpOrigin];
     uint32 const key            = wpOrigin == PATH_FROM_GUID ? dbGuid : entry;
     if (wpOrigin == PATH_FROM_ENTRY)
-        WorldDatabase.PExecuteLog("DELETE FROM %s WHERE %s=%u AND point=%u AND pathId=%u", table, key_field, key, point, pathId);
+        WorldDatabase.PExecuteLog("DELETE FROM %s WHERE %s=%u AND Point=%u AND PathId=%u", table, key_field, key, point, pathId);
     else
-        WorldDatabase.PExecuteLog("DELETE FROM %s WHERE %s=%u AND point=%u", table, key_field, key, point);
+        WorldDatabase.PExecuteLog("DELETE FROM %s WHERE %s=%u AND Point=%u", table, key_field, key, point);
 
     path->erase(point);
 }
 
 void WaypointManager::DeletePath(uint32 id)
 {
-    WorldDatabase.PExecuteLog("DELETE FROM creature_movement WHERE id=%u", id);
+    WorldDatabase.PExecuteLog("DELETE FROM creature_movement WHERE Id=%u", id);
     WaypointPathMap::iterator itr = m_pathMap.find(id);
     if (itr != m_pathMap.end())
         itr->second.clear();
@@ -612,9 +611,9 @@ void WaypointManager::SetNodePosition(uint32 entry, uint32 dbGuid, uint32 point,
     char const* const key_field = waypointKeyColumn[wpOrigin];
     uint32 const key            = wpOrigin == PATH_FROM_GUID ? dbGuid : entry;
     if (wpOrigin == PATH_FROM_ENTRY)
-        WorldDatabase.PExecuteLog("UPDATE %s SET position_x=%f, position_y=%f, position_z=%f WHERE %s=%u AND point=%u AND pathId=%u", table, x, y, z, key_field, key, point, pathId);
+        WorldDatabase.PExecuteLog("UPDATE %s SET PositionX=%f, PositionY=%f, PositionZ=%f WHERE %s=%u AND Point=%u AND PathId=%u", table, x, y, z, key_field, key, point, pathId);
     else
-        WorldDatabase.PExecuteLog("UPDATE %s SET position_x=%f, position_y=%f, position_z=%f WHERE %s=%u AND point=%u", table, x, y, z, key_field, key, point);
+        WorldDatabase.PExecuteLog("UPDATE %s SET PositionX=%f, PositionY=%f, PositionZ=%f WHERE %s=%u AND Point=%u", table, x, y, z, key_field, key, point);
 
     WaypointPath::iterator find = path->find(point);
     if (find != path->end())
@@ -639,9 +638,9 @@ void WaypointManager::SetNodeWaittime(uint32 entry, uint32 dbGuid, uint32 point,
     char const* const key_field = waypointKeyColumn[wpOrigin];
     uint32 const key            = wpOrigin == PATH_FROM_GUID ? dbGuid : entry;
     if (wpOrigin == PATH_FROM_ENTRY)
-        WorldDatabase.PExecuteLog("UPDATE %s SET waittime=%u WHERE %s=%u AND point=%u AND pathId=%u", table, waittime, key_field, key, point, pathId);
+        WorldDatabase.PExecuteLog("UPDATE %s SET WaitTime=%u WHERE %s=%u AND Point=%u AND PathId=%u", table, waittime, key_field, key, point, pathId);
     else
-        WorldDatabase.PExecuteLog("UPDATE %s SET waittime=%u WHERE %s=%u AND point=%u", table, waittime, key_field, key, point);
+        WorldDatabase.PExecuteLog("UPDATE %s SET WaitTime=%u WHERE %s=%u AND Point=%u", table, waittime, key_field, key, point);
 
     WaypointPath::iterator find = path->find(point);
     if (find != path->end())
@@ -662,9 +661,9 @@ void WaypointManager::SetNodeOrientation(uint32 entry, uint32 dbGuid, uint32 poi
     char const* const key_field = waypointKeyColumn[wpOrigin];
     uint32 const key            = wpOrigin == PATH_FROM_GUID ? dbGuid : entry;
     if (wpOrigin == PATH_FROM_ENTRY)
-        WorldDatabase.PExecuteLog("UPDATE %s SET orientation=%f WHERE %s=%u AND point=%u AND pathId=%u", table, orientation, key_field, key, point, pathId);
+        WorldDatabase.PExecuteLog("UPDATE %s SET Orientation=%f WHERE %s=%u AND Point=%u AND PathId=%u", table, orientation, key_field, key, point, pathId);
     else
-        WorldDatabase.PExecuteLog("UPDATE %s SET orientation=%f WHERE %s=%u AND point=%u", table, orientation, key_field, key, point);
+        WorldDatabase.PExecuteLog("UPDATE %s SET Orientation=%f WHERE %s=%u AND Point=%u", table, orientation, key_field, key, point);
 
     WaypointPath::iterator find = path->find(point);
     if (find != path->end())
@@ -686,9 +685,9 @@ bool WaypointManager::SetNodeScriptId(uint32 entry, uint32 dbGuid, uint32 point,
     char const* const key_field = waypointKeyColumn[wpOrigin];
     uint32 const key            = wpOrigin == PATH_FROM_GUID ? dbGuid : ((entry << 8) + pathId);
     if (wpOrigin == PATH_FROM_ENTRY)
-        WorldDatabase.PExecuteLog("UPDATE %s SET script_id=%u WHERE %s=%u AND point=%u AND pathId=%u", table, scriptId, key_field, key, point, pathId);
+        WorldDatabase.PExecuteLog("UPDATE %s SET ScriptId=%u WHERE %s=%u AND Point=%u AND PathId=%u", table, scriptId, key_field, key, point, pathId);
     else
-        WorldDatabase.PExecuteLog("UPDATE %s SET script_id=%u WHERE %s=%u AND point=%u", table, scriptId, key_field, key, point);
+        WorldDatabase.PExecuteLog("UPDATE %s SET ScriptId=%u WHERE %s=%u AND Point=%u", table, scriptId, key_field, key, point);
 
     WaypointPath::iterator find = path->find(point);
     if (find != path->end())

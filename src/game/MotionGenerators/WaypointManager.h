@@ -114,9 +114,7 @@ class WaypointManager
                     wpMap = &m_externalPathTemplateMap;
                     break;
                 case PATH_FROM_WAYPOINT_PATH:
-                    if (pathId >= 0xFF || pathId < 0)
-                        return nullptr;
-                    key = (entry << 8) + pathId;
+                    key = entry;
                     wpMap = &m_pathMovementTemplateMap;
                     break;
                 case PATH_NO_PATH:

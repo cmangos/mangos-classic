@@ -1741,7 +1741,7 @@ void Creature::DeleteFromDB(uint32 lowguid, CreatureData const* data)
     WorldDatabase.BeginTransaction();
     WorldDatabase.PExecuteLog("DELETE FROM creature WHERE guid=%u", lowguid);
     WorldDatabase.PExecuteLog("DELETE FROM creature_addon WHERE guid=%u", lowguid);
-    WorldDatabase.PExecuteLog("DELETE FROM creature_movement WHERE id=%u", lowguid);
+    WorldDatabase.PExecuteLog("DELETE FROM creature_movement WHERE Id=%u", lowguid);
     WorldDatabase.PExecuteLog("DELETE FROM game_event_creature WHERE guid=%u", lowguid);
     WorldDatabase.PExecuteLog("DELETE FROM game_event_creature_data WHERE guid=%u", lowguid);
     WorldDatabase.PExecuteLog("DELETE FROM creature_battleground WHERE guid=%u", lowguid);

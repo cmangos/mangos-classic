@@ -66,7 +66,7 @@ void SystemMgr::LoadScriptWaypoints()
     uint64 creatureCount = 0;
 
     // Load Waypoints
-    QueryResult* result = WorldDatabase.PQuery("SELECT COUNT(entry) FROM script_waypoint GROUP BY entry");
+    QueryResult* result = WorldDatabase.PQuery("SELECT COUNT(Entry) FROM script_waypoint GROUP BY Entry");
     if (result)
     {
         creatureCount = result->GetRowCount();
@@ -75,7 +75,8 @@ void SystemMgr::LoadScriptWaypoints()
 
     outstring_log("SD2: Loading Script Waypoints for " UI64FMTD " creature(s)...", creatureCount);
 
-    result = WorldDatabase.PQuery("SELECT entry, pathId, pointid, position_x, position_y, position_z, orientation, waittime, script_id FROM script_waypoint ORDER BY entry, pathId, pointid");
+    //                                    0      1       2      3          4          5          6            7         8
+    result = WorldDatabase.PQuery("SELECT Entry, PathId, Point, PositionX, PositionY, PositionZ, Orientation, WaitTime, ScriptId FROM script_waypoint ORDER BY Entry, PathId, Point");
 
     if (result)
     {

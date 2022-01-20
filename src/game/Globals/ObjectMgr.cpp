@@ -966,7 +966,7 @@ void ObjectMgr::LoadSpawnGroups()
         } while (result->NextRow());
     }
 
-    result.reset(WorldDatabase.Query("SELECT SpawnGroupID, FormationType, FormationSpread, FormationOptions, MovementID, MovementType, Comment FROM spawn_group_formation"));
+    result.reset(WorldDatabase.Query("SELECT Id, FormationType, FormationSpread, FormationOptions, PathId, MovementType, Comment FROM spawn_group_formation"));
     if (result)
     {
         do

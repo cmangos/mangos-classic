@@ -3532,18 +3532,18 @@ bool ChatHandler::HandleWpExportCommand(char* args)
     uint32 key;
     switch (wpOrigin)
     {
-        case PATH_FROM_ENTRY: key = wpOwner->GetEntry();    key_field = "entry";    table = "creature_movement_template"; break;
-        case PATH_FROM_GUID: key = wpOwner->GetGUIDLow();   key_field = "id";       table = "creature_movement"; break;
-        case PATH_FROM_EXTERNAL: key = wpOwner->GetEntry(); key_field = "entry";    table = sWaypointMgr.GetExternalWPTable(); break;
+        case PATH_FROM_ENTRY: key = wpOwner->GetEntry();    key_field = "Entry";    table = "creature_movement_template"; break;
+        case PATH_FROM_GUID: key = wpOwner->GetGUIDLow();   key_field = "Id";       table = "creature_movement"; break;
+        case PATH_FROM_EXTERNAL: key = wpOwner->GetEntry(); key_field = "Entry";    table = sWaypointMgr.GetExternalWPTable(); break;
         default:
             return false;
     }
 
     outfile << "DELETE FROM " << table << " WHERE " << key_field << "=" << key << ";\n";
     if (wpOrigin != PATH_FROM_EXTERNAL)
-        outfile << "INSERT INTO " << table << " (" << key_field << ", point, position_x, position_y, position_z, orientation, waittime, script_id) VALUES\n";
+        outfile << "INSERT INTO " << table << " (" << key_field << ", Point, PositionX, PositionY, PositionZ, Orientation, WaitTime, ScriptId) VALUES\n";
     else
-        outfile << "INSERT INTO " << table << " (" << key_field << ", point, position_x, position_y, position_z, orientation, waittime) VALUES\n";
+        outfile << "INSERT INTO " << table << " (" << key_field << ", Point, PositionX, PositionY, positionZ, Orientation, WaitTime) VALUES\n";
 
     WaypointPath::const_iterator itr = wpPath->begin();
     uint32 countDown = wpPath->size();
