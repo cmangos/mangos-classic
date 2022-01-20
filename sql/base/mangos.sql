@@ -10598,7 +10598,7 @@ CREATE TABLE `spawn_group_formation`  (
   `PathId` int(11) NOT NULL DEFAULT 0 COMMENT 'PathId from waypoint_path path',
   `MovementType` tinyint(11) NOT NULL COMMENT 'Same as creature table',
   `Comment` varchar(255) NULL DEFAULT NULL,
-  PRIMARY KEY (`SpawnGroupID`)
+  PRIMARY KEY (`Id`)
 );
 
 -- ----------------------------
