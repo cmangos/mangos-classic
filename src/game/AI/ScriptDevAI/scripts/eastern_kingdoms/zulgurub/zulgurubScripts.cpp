@@ -156,6 +156,37 @@ struct SummonNightmareIllusion : public SpellScript
     }
 };
 
+struct DelusionsOfJindo : public SpellScript
+{
+    void OnHit(Spell* spell, SpellMissInfo /*missInfo*/) const
+    {
+        Unit* caster = spell->GetCaster();
+        caster->CastSpell(nullptr, 24308, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct SummonShadeOfJindo : public SpellScript
+{
+    void OnSummon(Spell* /*spell*/, Creature* summon) const
+    {
+        summon->CastSpell(nullptr, 24307, TRIGGERED_NONE);
+        summon->CastSpell(nullptr, 23878, TRIGGERED_NONE);
+        summon->CastSpell(nullptr, 24313, TRIGGERED_NONE);
+    }
+};
+
+struct RandomAggro : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (effIdx != EFFECT_INDEX_0 || !caster->AI())
+            return;
+
+        spell->GetCaster()->AI()->AttackStart(spell->GetUnitTarget());
+    }
+};
+
 void AddSC_zulgurub()
 {
     Script* pNewScript = new Script();
@@ -164,4 +195,7 @@ void AddSC_zulgurub()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<SummonNightmareIllusion>("spell_summon_nightmare_illusion_hazzarah");
+    RegisterSpellScript<DelusionsOfJindo>("spell_delusions_of_jindo");
+    RegisterSpellScript<SummonShadeOfJindo>("spell_summon_shade_of_jindo");
+    RegisterSpellScript<RandomAggro>("spell_random_aggro");
 }

@@ -691,7 +691,6 @@ UPDATE gameobject_template SET ScriptName='go_gong_of_bethekk' WHERE entry=18052
 UPDATE creature_template SET ScriptName='boss_renataki' WHERE entry=15084;
 UPDATE creature_template SET ScriptName='mob_zealot_lorkhan' WHERE entry=11347;
 UPDATE creature_template SET ScriptName='mob_zealot_zath' WHERE entry=11348;
-UPDATE creature_template SET ScriptName='mob_healing_ward' WHERE entry=14987;
 UPDATE creature_template SET ScriptName='npc_gurubashi_bat_rider' WHERE entry=14750;
 UPDATE creature_template SET ScriptName='npc_zulian_prowler' WHERE entry=15101;
 UPDATE creature_template SET ScriptName='npc_soulflayer' WHERE entry=11359;
@@ -2132,8 +2131,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1309011','Bethekk, your priestess calls upon your might!','8416','1','0','0','10461','arlokk SAY_AGGRO'),
 ('-1309012','Feast on $N, my pretties!','0','1','0','0','10472','arlokk SAY_FEAST_PANTHER'),
 ('-1309013','At last, I am free of the Soulflayer!','8412','1','0','0','10450','arlokk SAY_DEATH'),
-
-('-1309014','Welcome to da great show friends! Step right up to die!','8425','1','0','0','0','jindo SAY_AGGRO'),
 
 ('-1309015','I''ll feed your souls to Hakkar himself!','8413','1','0','0','10446','mandokir SAY_AGGRO'),
 ('-1309016','DING!','0','1','0','0','10505','mandokir SAY_DING_KILL'),
