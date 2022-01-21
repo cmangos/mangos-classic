@@ -395,7 +395,7 @@ class UnitAI : public CombatActions
         /*
          * Notifies AI on successful spelllist spell cast
          */
-        virtual void OnSpellCast(SpellEntry const* spellInfo) {}
+        virtual void OnSpellCast(SpellEntry const* spellInfo, Unit* target) {}
 
         /*
          * Notifies AI on stealth alert for player nearby

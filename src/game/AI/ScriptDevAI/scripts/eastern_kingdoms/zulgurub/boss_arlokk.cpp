@@ -25,6 +25,7 @@ EndScriptData
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "zulgurub.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 /* ContentData
 boss_arlokk
@@ -38,38 +39,58 @@ enum
     SAY_FEAST_PANTHER           = -1309012,
     SAY_DEATH                   = -1309013,
 
-    SPELL_SHADOW_WORD_PAIN      = 23952,
-    SPELL_GOUGE                 = 24698,
+    SPELL_SHADOW_WORD_PAIN      = 24212,
+    SPELL_GOUGE                 = 12540,
     SPELL_MARK_ARLOKK           = 24210,
     SPELL_RAVAGE                = 24213,
     SPELL_TRASH                 = 3391,
     SPELL_WHIRLWIND             = 24236,
     SPELL_PANTHER_TRANSFORM     = 24190,
     SPELL_SUMMON_ZULIAN_PROWLERS = 24247,
+    SPELL_HATE_TO_ZERO          = 20538,
 
-    SPELL_SNEAK                  = 22766,
+    SPELL_VANISH_TELEPORT       = 24228,
+    SPELL_VANISH                = 24223,
+    SPELL_SUPER_INVIS           = 24235,
+
+    SPELL_TRANSFORM_VISUAL      = 24085,
+
+    SPELL_SNEAK                 = 22766,
+
+    SPELL_LIST_PHASE_1 = 1451501,
+    SPELL_LIST_PHASE_2 = 1451502,
 };
 
-struct boss_arlokkAI : public ScriptedAI
+enum ArlokkActions
 {
-    boss_arlokkAI(Creature* pCreature) : ScriptedAI(pCreature)
+    ARLOKK_PHASE_TRANSITION,
+    ARLOKK_ACTION_MAX,
+    ARLOKK_INVIS_SELECT,
+    ARLOKK_INVIS_TIMER,
+};
+
+struct boss_arlokkAI : public CombatAI
+{
+    boss_arlokkAI(Creature* creature) : CombatAI(creature, ARLOKK_ACTION_MAX), m_instance(static_cast<instance_zulgurub*>(creature->GetInstanceData()))
     {
-        m_pInstance = (instance_zulgurub*)pCreature->GetInstanceData();
-        Reset();
+        AddCombatAction(ARLOKK_PHASE_TRANSITION, 30000u);
+        AddCustomAction(ARLOKK_INVIS_SELECT, true, [&]()
+        {
+            if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                AttackStart(target);
+            SetCombatMovement(false, true);
+        });
+        AddCustomAction(ARLOKK_INVIS_TIMER, true, [&]()
+        {
+            m_creature->RemoveAurasDueToSpell(SPELL_SUPER_INVIS);
+            SetCombatScriptStatus(false);
+            SetCombatMovement(true, true);
+            SetMeleeEnabled(true);
+        });
     }
 
-    instance_zulgurub* m_pInstance;
+    instance_zulgurub* m_instance;
 
-    uint32 m_uiShadowWordPainTimer;
-    uint32 m_uiGougeTimer;
-    uint32 m_uiMarkTimer;
-    uint32 m_uiRavageTimer;
-    uint32 m_uiTrashTimer;
-    uint32 m_uiWhirlwindTimer;
-    uint32 m_uiVanishTimer;
-    uint32 m_uiVisibleTimer;
-    uint32 m_uiTransformTimer;
-    uint32 m_uiSummonTimer;
     Creature* m_pTrigger1;
     Creature* m_pTrigger2;
 
@@ -79,45 +100,39 @@ struct boss_arlokkAI : public ScriptedAI
 
     void Reset() override
     {
-        m_uiShadowWordPainTimer = 8000;
-        m_uiGougeTimer      = 14000;
-        m_uiMarkTimer       = 5000;
-        m_uiRavageTimer     = 12000;
-        m_uiTrashTimer      = 20000;
-        m_uiWhirlwindTimer  = 15000;
-        m_uiTransformTimer  = 30000;
-        m_uiVanishTimer     = 5000;
-        m_uiVisibleTimer    = 0;
+        CombatAI::Reset();
 
         m_bIsPhaseTwo = false;
 
-        // Restore visibility
-        if (m_creature->GetVisibility() != VISIBILITY_ON)
-            m_creature->SetVisibility(VISIBILITY_ON);
+        SetCombatScriptStatus(false);
+        SetCombatMovement(true);
+        SetMeleeEnabled(true);
     }
 
     void Aggro(Unit* /*pWho*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        m_pTrigger1 = m_pInstance->SelectRandomPantherTrigger(true);
+        m_pTrigger1 = m_instance->SelectRandomPantherTrigger(true);
         if (m_pTrigger1)
             m_pTrigger1->CastSpell(m_pTrigger1, SPELL_SUMMON_ZULIAN_PROWLERS, TRIGGERED_NONE);
 
-        m_pTrigger2 = m_pInstance->SelectRandomPantherTrigger(false);
+        m_pTrigger2 = m_instance->SelectRandomPantherTrigger(false);
         if (m_pTrigger2)
             m_pTrigger2->CastSpell(m_pTrigger2, SPELL_SUMMON_ZULIAN_PROWLERS, TRIGGERED_NONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ARLOKK, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_ARLOKK, FAIL);
 
         // we should be summoned, so despawn
         m_creature->ForcedDespawn();
 
         DoStopZulianProwlers();
+
+        m_creature->SetSpellList(SPELL_LIST_PHASE_1);
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -129,14 +144,14 @@ struct boss_arlokkAI : public ScriptedAI
 
         DoStopZulianProwlers();
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ARLOKK, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_ARLOKK, DONE);
     }
 
     // Wrapper to despawn the zulian panthers on evade / death
     void DoStopZulianProwlers()
     {
-        if (m_pInstance)
+        if (m_instance)
         {
             // Stop summoning Zulian prowlers
             if (m_pTrigger1)
@@ -146,142 +161,58 @@ struct boss_arlokkAI : public ScriptedAI
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiVisibleTimer)
+        if (eventType == AI_EVENT_CUSTOM_A)
         {
-            if (m_uiVisibleTimer <= uiDiff)
-            {
-                // Restore visibility
-                m_creature->SetVisibility(VISIBILITY_ON);
-
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                    AttackStart(pTarget);
-
-                m_uiVisibleTimer = 0;
-            }
-            else
-                m_uiVisibleTimer -= uiDiff;
-
-            // Do nothing while vanished
-            return;
+            DoResetThreat();
+            SetCombatScriptStatus(true);
+            SetMeleeEnabled(false);
+            ResetTimer(ARLOKK_INVIS_SELECT, 10000);
+            ResetTimer(ARLOKK_INVIS_TIMER, 50000);
         }
+    }
 
-        // Troll phase
-        if (!m_bIsPhaseTwo)
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
         {
-            if (m_uiShadowWordPainTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            case ARLOKK_PHASE_TRANSITION:
+                if (m_bIsPhaseTwo)
                 {
-                    if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_WORD_PAIN) == CAST_OK)
-                        m_uiShadowWordPainTimer = 15000;
-                }
-            }
-            else
-                m_uiShadowWordPainTimer -= uiDiff;
-
-            if (m_uiMarkTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_MARK_ARLOKK, SELECT_FLAG_PLAYER))
-                {
-                    if (DoCastSpellIfCan(pTarget, SPELL_MARK_ARLOKK) == CAST_OK)
+                    if (DoCastSpellIfCan(nullptr, SPELL_TRANSFORM_VISUAL) == CAST_OK)
                     {
-                        DoScriptText(SAY_FEAST_PANTHER, m_creature, pTarget);
-                        m_uiMarkTimer = 30000;
+                        m_creature->RemoveAurasDueToSpell(SPELL_PANTHER_TRANSFORM);
+                        ResetCombatAction(action, 30000);
+                        m_bIsPhaseTwo = false;
+                        m_creature->SetSpellList(SPELL_LIST_PHASE_1);
                     }
                 }
-            }
-            else
-                m_uiMarkTimer -= uiDiff;
-
-            if (m_uiGougeTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_GOUGE) == CAST_OK)
+                else
                 {
-                    if (m_creature->getThreatManager().getThreat(m_creature->GetVictim()))
-                        m_creature->getThreatManager().modifyThreatPercent(m_creature->GetVictim(), -80);
-
-                    m_uiGougeTimer = urand(17000, 27000);
+                    if (DoCastSpellIfCan(nullptr, SPELL_PANTHER_TRANSFORM) == CAST_OK)
+                    {
+                        m_creature->CastSpell(nullptr, SPELL_HATE_TO_ZERO, TRIGGERED_NONE);
+                        ResetCombatAction(action, 120000);
+                        m_bIsPhaseTwo = true;
+                        m_creature->SetSpellList(SPELL_LIST_PHASE_2);
+                    }
                 }
-            }
-            else
-                m_uiGougeTimer -= uiDiff;
-
-            // Transform to Panther
-            if (m_uiTransformTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_PANTHER_TRANSFORM) == CAST_OK)
-                {
-                    m_uiTransformTimer = 80000;
-                    m_bIsPhaseTwo = true;
-                }
-            }
-            else
-                m_uiTransformTimer -= uiDiff;
+                break;
         }
-        // Panther phase
-        else
-        {
-            if (m_uiRavageTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_RAVAGE) == CAST_OK)
-                    m_uiRavageTimer = urand(10000, 15000);
-            }
-            else
-                m_uiRavageTimer -= uiDiff;
+    }
 
-            if (m_uiTrashTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_TRASH) == CAST_OK)
-                    m_uiTrashTimer = urand(13000, 15000);
-            }
-            else
-                m_uiTrashTimer -= uiDiff;
-
-            if (m_uiWhirlwindTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_WHIRLWIND) == CAST_OK)
-                    m_uiWhirlwindTimer = 15000;
-            }
-            else
-                m_uiWhirlwindTimer -= uiDiff;
-
-            if (m_uiVanishTimer < uiDiff)
-            {
-                // Note: this is a workaround because we do not know the real vanish spell
-                m_creature->SetVisibility(VISIBILITY_OFF);
-                DoResetThreat();
-
-                m_uiVanishTimer = 85000;
-                m_uiVisibleTimer = 45000;
-            }
-            else
-                m_uiVanishTimer -= uiDiff;
-
-            // Transform back
-            if (m_uiTransformTimer < uiDiff)
-            {
-                m_creature->RemoveAurasDueToSpell(SPELL_PANTHER_TRANSFORM);
-                m_uiTransformTimer = 30000;
-                m_bIsPhaseTwo = false;
-            }
-            else
-                m_uiTransformTimer -= uiDiff;
-        }
-
-        DoMeleeAttackIfReady();
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
+    {
+        if (spellInfo->Id == SPELL_MARK_ARLOKK)
+            DoScriptText(SAY_FEAST_PANTHER, m_creature, target);
     }
 };
 
 struct npc_zulian_prowlerAI : public ScriptedAI
 {
-    npc_zulian_prowlerAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_zulian_prowlerAI(Creature* creature) : ScriptedAI(creature), m_bMoveToAid(creature->IsTemporarySummon())
     {
-        m_bMoveToAid = m_creature->IsTemporarySummon();
         Reset();
     }
 
@@ -289,9 +220,12 @@ struct npc_zulian_prowlerAI : public ScriptedAI
 
     bool m_bMoveToAid;
 
-    void Reset() override
+    void Reset() override {}
+
+    void JustRespawned() override
     {
-        DoCastSpellIfCan(m_creature, SPELL_SNEAK);
+        ScriptedAI::JustRespawned();
+        DoCastSpellIfCan(nullptr, SPELL_SNEAK);
 
         // Do only once, and only for those summoned by Arlokk
         if (m_bMoveToAid)
@@ -323,16 +257,6 @@ struct npc_zulian_prowlerAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_arlokk(Creature* pCreature)
-{
-    return new boss_arlokkAI(pCreature);
-}
-
-UnitAI* GetAI_npc_zulian_prowler(Creature* pCreature)
-{
-    return new npc_zulian_prowlerAI(pCreature);
-}
-
 bool GOUse_go_gong_of_bethekk(Player* /*pPlayer*/, GameObject* pGo)
 {
     if (ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData())
@@ -346,20 +270,38 @@ bool GOUse_go_gong_of_bethekk(Player* /*pPlayer*/, GameObject* pGo)
     return false;
 }
 
+struct ArlokkVanish : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_1)
+            return;
+
+        Unit* caster = spell->GetCaster();
+        caster->CastSpell(nullptr, SPELL_VANISH_TELEPORT, TRIGGERED_OLD_TRIGGERED);
+        caster->CastSpell(nullptr, SPELL_SUPER_INVIS, TRIGGERED_OLD_TRIGGERED);
+
+        if (caster->AI())
+            caster->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, caster, caster);
+    }
+};
+
 void AddSC_boss_arlokk()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_arlokk";
-    pNewScript->GetAI = &GetAI_boss_arlokk;
+    pNewScript->GetAI = &GetNewAIInstance<boss_arlokkAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_zulian_prowler";
-    pNewScript->GetAI = &GetAI_npc_zulian_prowler;
+    pNewScript->GetAI = &GetNewAIInstance<npc_zulian_prowlerAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "go_gong_of_bethekk";
     pNewScript->pGOUse = &GOUse_go_gong_of_bethekk;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<ArlokkVanish>("spell_arlokk_vanish");
 }
