@@ -24,109 +24,123 @@ EndScriptData
 */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
     SPELL_THOUSAND_BLADES   = 24649,
     SPELL_VANISH            = 24699,
     SPELL_GOUGE             = 24698,
-    SPELL_TRASH             = 3391
+    SPELL_TRASH             = 3391,
+
+    SPELL_VANISH_TELEPORT   = 24700,
+
+    SPELL_SPIRIT_PARTICLES      = 18951,
+    SPELL_SPAWN_RED_LIGHTNING   = 24240,
 };
 
-struct boss_renatakiAI : public ScriptedAI
+enum RenatakiActions
 {
-    boss_renatakiAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    RENATAKI_ACTION_MAX,
+    RENATAKI_VANISH_DELAY,
+};
 
-    uint32 m_uiVanishTimer;
-    uint32 m_uiAmbushTimer;
-    uint32 m_uiGougeTimer;
-    uint32 m_uiThousandBladesTimer;
+struct boss_renatakiAI : public CombatAI
+{
+    boss_renatakiAI(Creature* creature) : CombatAI(creature, RENATAKI_ACTION_MAX)
+    {
+        AddCustomAction(RENATAKI_VANISH_DELAY, true, [&]()
+        {
+            if (Unit* target = m_creature->GetMap()->GetUnit(m_vanishTarget))
+                target->CastSpell(m_creature, SPELL_VANISH_TELEPORT, TRIGGERED_OLD_TRIGGERED);
+            SetCombatScriptStatus(false);
+            SetMeleeEnabled(true);
+            SetCombatMovement(true);
+        });
+    }
+
+    ObjectGuid m_vanishTarget;
 
     void Reset() override
     {
-        m_uiVanishTimer         = urand(25000, 30000);
-        m_uiAmbushTimer         = 0;
-        m_uiGougeTimer          = urand(15000, 25000);
-        m_uiThousandBladesTimer = urand(4000, 8000);
+        CombatAI::Reset();
+
+        SetCombatScriptStatus(false);
+        SetMeleeEnabled(true);
+        SetCombatMovement(true);
     }
 
-    void EnterEvadeMode() override
+    void JustRespawned() override
     {
-        // If is vanished, don't evade
-        if (m_uiAmbushTimer)
-            return;
+        CombatAI::JustRespawned();
 
-        ScriptedAI::EnterEvadeMode();
+        DoCastSpellIfCan(nullptr, SPELL_SPIRIT_PARTICLES);
+        DoCastSpellIfCan(nullptr, SPELL_SPAWN_RED_LIGHTNING);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* invoker, uint32 /*miscValue*/) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // Note: because the Vanish spell adds invisibility effect on the target, the timers won't be decreased during the vanish phase
-        if (m_uiAmbushTimer)
+        if (eventType == AI_EVENT_CUSTOM_A)
         {
-            if (m_uiAmbushTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_TRASH) == CAST_OK)
-                    m_uiAmbushTimer = 0;
-            }
-            else
-                m_uiAmbushTimer -= uiDiff;
-
-            // don't do anything else while vanished
-            return;
+            m_vanishTarget = invoker->GetObjectGuid();
+            SetCombatScriptStatus(true);
+            SetMeleeEnabled(false);
+            SetCombatMovement(false);
         }
-
-        // Invisible_Timer
-        if (m_uiVanishTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_VANISH) == CAST_OK)
-            {
-                m_uiVanishTimer = urand(25000, 40000);
-                m_uiAmbushTimer = 2000;
-            }
-        }
-        else
-            m_uiVanishTimer -= uiDiff;
-
-        // Resetting some aggro so he attacks other gamers
-        if (m_uiGougeTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_GOUGE) == CAST_OK)
-            {
-                if (m_creature->getThreatManager().getThreat(m_creature->GetVictim()))
-                    m_creature->getThreatManager().modifyThreatPercent(m_creature->GetVictim(), -50);
-
-                m_uiGougeTimer = urand(7000, 20000);
-            }
-        }
-        else
-            m_uiGougeTimer -= uiDiff;
-
-        // Thausand Blades
-        if (m_uiThousandBladesTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_THOUSAND_BLADES) == CAST_OK)
-                m_uiThousandBladesTimer = urand(7000, 12000);
-        }
-        else
-            m_uiThousandBladesTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_renataki(Creature* pCreature)
+struct ThousandBladesRenataki : public SpellScript
 {
-    return new boss_renatakiAI(pCreature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_1)
+            return;
+
+        std::vector<Unit*> selectedTargets;
+        Unit* caster = spell->GetCaster();
+        caster->SelectAttackingTargets(selectedTargets, ATTACKING_TARGET_ALL_SUITABLE, 0, SPELL_THOUSAND_BLADES, SELECT_FLAG_PLAYER);
+        // remove current target
+        selectedTargets.erase(std::remove(selectedTargets.begin(), selectedTargets.end(), spell->m_targets.getUnitTarget()), selectedTargets.end());
+        std::shuffle(selectedTargets.begin(), selectedTargets.end(), *GetRandomGenerator());
+        selectedTargets.resize(9);
+        for (Unit* target : selectedTargets)
+            caster->CastSpell(target, SPELL_THOUSAND_BLADES, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct RenatakiVanish : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (effIdx != EFFECT_INDEX_0 || !caster->AI())
+            return;
+
+        caster->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, spell->GetUnitTarget(), caster);
+    }
+};
+
+struct RenatakiVanishTeleport : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+        {
+            aura->GetTarget()->CastSpell(aura->GetCaster(), SPELL_TRASH, TRIGGERED_OLD_TRIGGERED);
+            aura->GetTarget()->RemoveAurasDueToSpell(SPELL_VANISH);
+        }
+    }
+};
 
 void AddSC_boss_renataki()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_renataki";
-    pNewScript->GetAI = &GetAI_boss_renataki;
+    pNewScript->GetAI = &GetNewAIInstance<boss_renatakiAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<ThousandBladesRenataki>("spell_thousand_blades_renataki");
+    RegisterSpellScript<RenatakiVanish>("spell_renataki_vanish");
+    RegisterAuraScript<RenatakiVanishTeleport>("spell_renataki_vanish_teleport");
 }
