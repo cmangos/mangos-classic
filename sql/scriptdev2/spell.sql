@@ -54,6 +54,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (24306,'spell_delusions_of_jindo'),
 (24308,'spell_summon_shade_of_jindo'),
 (23878,'spell_random_aggro'),
+(24173,'spell_thekal_resurrect'),
 (24649,'spell_thousand_blades_renataki'),
 (24699,'spell_renataki_vanish'),
 (24700,'spell_renataki_vanish_teleport'),
