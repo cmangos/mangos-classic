@@ -58,6 +58,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (24649,'spell_thousand_blades_renataki'),
 (24699,'spell_renataki_vanish'),
 (24700,'spell_renataki_vanish_teleport'),
+(24324,'spell_hakkar_blood_siphon'),
 (24693,'spell_hakkar_power_down'),
 (24728,'spell_summon_nightmare_illusion_hazzarah'),
 (25684,'spell_summon_mana_fiends_moam'),

@@ -2250,7 +2250,12 @@ void Creature::UpdateSpell(int32 index, int32 newSpellId)
 {
     auto itr = m_spellList.Spells.find(index);
     if (itr != m_spellList.Spells.end())
-        (*itr).second.SpellId = newSpellId;
+    {
+        if (newSpellId == 0)
+            m_spellList.Spells.erase(itr);
+        else
+            (*itr).second.SpellId = newSpellId;
+    }
 }
 
 void Creature::SetSpellList(uint32 spellSet)
