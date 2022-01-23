@@ -640,6 +640,10 @@ void Pet::SetDeathState(DeathState s)                       // overwrite virtual
         CastPetAuras(true);
     }
     CastOwnerTalentAuras();
+
+    if (getPetType() == GUARDIAN_PET)
+        if (Unit* owner = GetOwner())
+            owner->RemoveGuardian(this);
 }
 
 void Pet::Update(const uint32 diff)
