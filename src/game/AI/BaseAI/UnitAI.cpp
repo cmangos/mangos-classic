@@ -967,6 +967,7 @@ void UnitAI::SetCurrentRangedMode(bool state)
     {
         m_currentRangedMode = true;
         m_attackDistance = m_chaseDistance;
+        m_unit->SetIgnoreRangedTargets(false);
         DoStartMovement(m_unit->GetVictim());
     }
     else
@@ -976,6 +977,7 @@ void UnitAI::SetCurrentRangedMode(bool state)
 
         m_currentRangedMode = false;
         m_attackDistance = 0.f;
+        m_unit->SetIgnoreRangedTargets(m_unit->hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_ROOT));
         DoStartMovement(m_unit->GetVictim());
         if (m_meleeEnabled && !m_unit->hasUnitState(UNIT_STAT_MELEE_ATTACKING))
             m_unit->MeleeAttackStart(m_unit->GetVictim());
