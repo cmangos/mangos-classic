@@ -1163,8 +1163,11 @@ void FormationData::FixSlotsPositions()
                 {
                     case 1:
                     {
-                        finalAngle = M_PI_F;
-                        finalDist = m_currentSpread + testInterSpread;
+                        float distBack = m_currentSpread + testInterSpread;
+                        float hyp = std::sqrt(distBack * distBack + testInterSpread * testInterSpread);
+
+                        finalAngle = M_PI_F - std::asin(testInterSpread / hyp);
+                        finalDist = hyp;
                         break;
                     }
                     case 2:
@@ -1172,30 +1175,30 @@ void FormationData::FixSlotsPositions()
                         float distBack = m_currentSpread + testInterSpread;
                         float hyp = std::sqrt(distBack * distBack + testInterSpread * testInterSpread);
 
-                        finalAngle = M_PI_F - std::asin(testInterSpread / hyp);
-                        finalDist = hyp;
-                        break;
-                    }
-                    case 3:
-                    {
-                        float distBack = m_currentSpread + testInterSpread;
-                        float hyp = std::sqrt(distBack * distBack + testInterSpread * testInterSpread);
-
                         finalAngle = M_PI_F + std::asin(testInterSpread / hyp);
                         finalDist = hyp;
                         break;
                     }
-                    case 4:
+                    case 3:
                     {
                         finalAngle = M_PI_F;
                         finalDist = m_currentSpread + (testInterSpread * 2.0f);
                         break;
 
                     }
-                    case 5:
+                    case 4:
                     {
                         finalAngle = M_PI_F;
                         finalDist = m_currentSpread + (testInterSpread * 3.0f);
+                        break;
+                    }
+                    case 5:
+                    {
+                        float distBack = m_currentSpread + (testInterSpread * 2.0f);
+                        float hyp = std::sqrt(distBack * distBack + testInterSpread * testInterSpread);
+
+                        finalAngle = M_PI_F - std::asin(testInterSpread / hyp);
+                        finalDist = hyp;
                         break;
                     }
                     case 6:
@@ -1203,16 +1206,16 @@ void FormationData::FixSlotsPositions()
                         float distBack = m_currentSpread + (testInterSpread * 2.0f);
                         float hyp = std::sqrt(distBack * distBack + testInterSpread * testInterSpread);
 
-                        finalAngle = M_PI_F - std::asin(testInterSpread / hyp);
+                        finalAngle = M_PI_F + std::asin(testInterSpread / hyp);
                         finalDist = hyp;
                         break;
                     }
                     case 7:
                     {
-                        float distBack = m_currentSpread + (testInterSpread * 2.0f);
+                        float distBack = m_currentSpread + (testInterSpread * 3.0f);
                         float hyp = std::sqrt(distBack * distBack + testInterSpread * testInterSpread);
 
-                        finalAngle = M_PI_F + std::asin(testInterSpread / hyp);
+                        finalAngle = M_PI_F - std::asin(testInterSpread / hyp);
                         finalDist = hyp;
                         break;
                     }
@@ -1221,17 +1224,14 @@ void FormationData::FixSlotsPositions()
                         float distBack = m_currentSpread + (testInterSpread * 3.0f);
                         float hyp = std::sqrt(distBack * distBack + testInterSpread * testInterSpread);
 
-                        finalAngle = M_PI_F - std::asin(testInterSpread / hyp);
+                        finalAngle = M_PI_F + std::asin(testInterSpread / hyp);
                         finalDist = hyp;
                         break;
                     }
                     case 9:
                     {
-                        float distBack = m_currentSpread + (testInterSpread * 3.0f);
-                        float hyp = std::sqrt(distBack * distBack + testInterSpread * testInterSpread);
-
-                        finalAngle = M_PI_F + std::asin(testInterSpread / hyp);
-                        finalDist = hyp;
+                        finalAngle = M_PI_F;
+                        finalDist = m_currentSpread + testInterSpread;
                         break;
                     }
 
