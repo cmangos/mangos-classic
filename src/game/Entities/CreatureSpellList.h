@@ -51,6 +51,7 @@ struct CreatureSpellListTargeting
     uint32 Param1;
     uint32 Param2;
     uint32 Param3;
+    std::string Comment;
 };
 
 enum SpellListFlags
