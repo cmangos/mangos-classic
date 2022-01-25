@@ -683,7 +683,6 @@ UPDATE creature_template SET ScriptName='boss_venoxis' WHERE entry=14507;
 UPDATE creature_template SET ScriptName='boss_marli' WHERE entry=14510;
 UPDATE creature_template SET ScriptName='boss_mandokir' WHERE entry=11382;
 UPDATE creature_template SET ScriptName='mob_ohgan' WHERE entry=14988;
-UPDATE creature_template SET ScriptName='boss_jindo' WHERE entry=11380;
 UPDATE creature_template SET ScriptName='boss_hakkar' WHERE entry=14834;
 UPDATE creature_template SET ScriptName='boss_thekal' WHERE entry=14509;
 UPDATE creature_template SET ScriptName='boss_arlokk' WHERE entry=14515;
