@@ -901,6 +901,12 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
                 continue;
             }
 
+            if (newContainer->spellLists[spell.Id].Spells.find(spell.SpellId) != newContainer->spellLists[spell.Id].Spells.end())
+            {
+                sLog.outErrorDb("LoadCreatureSpellLists: Invalid creature_spell_list %u contains duplicate position %u. Skipping.", spell.Id, spell.Position);
+                continue;
+            }
+
             uint32 targetId = fields[4].GetUInt32();
             auto itr = newContainer->targeting.find(targetId);
             if (itr == newContainer->targeting.end())
