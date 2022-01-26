@@ -29,7 +29,7 @@
 
 namespace MMAP
 {
-    TerrainBuilder::TerrainBuilder(bool skipLiquid, const char* workdir) : m_skipLiquid(skipLiquid), m_workdir(workdir) { }
+    TerrainBuilder::TerrainBuilder(bool skipLiquid, const char* workdir /*= "./"*/) : m_skipLiquid(skipLiquid), m_workdir(workdir) { }
     TerrainBuilder::~TerrainBuilder() { }
 
     /**************************************************************************/

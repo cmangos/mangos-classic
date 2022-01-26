@@ -82,7 +82,7 @@ namespace MMAP
     class TerrainBuilder
     {
         public:
-            TerrainBuilder(bool skipLiquid, const char* workdir = nullptr);
+            TerrainBuilder(bool skipLiquid, const char* workdir = "./");
             ~TerrainBuilder();
 
             void loadMap(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData);
