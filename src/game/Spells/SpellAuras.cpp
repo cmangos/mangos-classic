@@ -655,7 +655,7 @@ void PersistentAreaAura::Update(uint32 diff)
     // or if the target moves too far from the dynamic object
     if (Unit* caster = GetCaster())
     {
-        if (DynamicObject* dynObj = caster->GetDynObject(GetId()))
+        if (DynamicObject* dynObj = caster->GetDynObject(GetId(), GetEffIndex(), GetTarget()))
         {
             if (GetTarget()->GetDistance(dynObj, true, DIST_CALC_COMBAT_REACH) > dynObj->GetRadius())
             {

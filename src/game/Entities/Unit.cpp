@@ -5410,7 +5410,7 @@ void Unit::RemoveAllDynObjects()
     }
 }
 
-DynamicObject* Unit::GetDynObject(uint32 spellId, SpellEffectIndex effIndex)
+DynamicObject* Unit::GetDynObject(uint32 spellId, SpellEffectIndex effIndex, Unit* target)
 {
     for (GuidList::iterator i = m_dynObjGUIDs.begin(); i != m_dynObjGUIDs.end();)
     {
@@ -5421,8 +5421,17 @@ DynamicObject* Unit::GetDynObject(uint32 spellId, SpellEffectIndex effIndex)
             continue;
         }
 
-        if (dynObj->GetSpellId() == spellId && dynObj->GetEffIndex() == effIndex)
-            return dynObj;
+        if (target)
+        {
+            if (dynObj->GetSpellId() == spellId && dynObj->GetEffIndex() == effIndex && dynObj->IsAffecting(target))
+                return dynObj;
+        }
+        else
+        {
+            if (dynObj->GetSpellId() == spellId && dynObj->GetEffIndex() == effIndex)
+                return dynObj;
+        }
+
         ++i;
     }
     return nullptr;
