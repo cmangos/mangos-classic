@@ -123,7 +123,7 @@ void SpawnGroup::Spawn(bool force)
 
     for (auto& data : m_objects)
     {
-        eligibleGuids.erase(std::remove(eligibleGuids.begin(), eligibleGuids.end(), data.first), eligibleGuids.end());
+        eligibleGuids.erase(std::remove_if(eligibleGuids.begin(), eligibleGuids.end(), [dbGuid = data.first](SpawnGroupDbGuids const* entry) { return entry->DbGuid == dbGuid; }), eligibleGuids.end());
         if (validEntries.size() > 0)
         {
             uint32 curCount = validEntries[data.second];
