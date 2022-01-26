@@ -55,6 +55,8 @@ struct SpawnGroupDbGuids
     uint32 Id;
     uint32 DbGuid;
     int32 SlotId;
+    uint32 OwnEntry;
+    bool RandomEntry;
 };
 
 enum SpawnGroupType

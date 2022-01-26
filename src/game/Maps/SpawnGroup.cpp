@@ -107,7 +107,7 @@ void SpawnGroup::Spawn(bool force)
     if (m_objects.size() >= m_entry.MaxCount || (m_entry.WorldStateId && m_map.GetVariableManager().GetVariable(m_entry.WorldStateId) == 0))
         return;
 
-    std::vector<uint32> eligibleGuids;
+    std::vector<SpawnGroupDbGuids const*> eligibleGuids;
     std::map<uint32, uint32> validEntries;
     std::map<uint32, uint32> minEntries;
 
@@ -119,7 +119,7 @@ void SpawnGroup::Spawn(bool force)
     }
 
     for (auto& guid : m_entry.DbGuids)
-        eligibleGuids.push_back(guid.DbGuid);
+        eligibleGuids.push_back(&guid);
 
     for (auto& data : m_objects)
     {
@@ -144,7 +144,7 @@ void SpawnGroup::Spawn(bool force)
     time_t now = time(nullptr);
     for (auto itr = eligibleGuids.begin(); itr != eligibleGuids.end();)
     {
-        if (m_map.GetPersistentState()->GetObjectRespawnTime(GetObjectTypeId(), *itr) > now)
+        if (m_map.GetPersistentState()->GetObjectRespawnTime(GetObjectTypeId(), (*itr)->DbGuid) > now)
         {
             if (!force)
             {
@@ -154,7 +154,7 @@ void SpawnGroup::Spawn(bool force)
                 continue;
             }
             else
-                m_map.GetPersistentState()->SaveObjectRespawnTime(GetObjectTypeId(), *itr, now);
+                m_map.GetPersistentState()->SaveObjectRespawnTime(GetObjectTypeId(), (*itr)->DbGuid, now);
         }
         ++itr;
     }
@@ -165,7 +165,7 @@ void SpawnGroup::Spawn(bool force)
 
     for (auto itr = eligibleGuids.begin(); itr != eligibleGuids.end() && !eligibleGuids.empty() && m_objects.size() < m_entry.MaxCount; ++itr)
     {
-        uint32 dbGuid = *itr;
+        uint32 dbGuid = (*itr)->DbGuid;
         uint32 entry = 0;
         // creatures pick random entry on first spawn in dungeons - else always pick random entry
         if (GetObjectTypeId() == TYPEID_UNIT)
@@ -175,7 +175,13 @@ void SpawnGroup::Spawn(bool force)
                 // only held in memory - implement saving to db if it becomes a major issue
                 if (m_chosenEntries.find(dbGuid) == m_chosenEntries.end())
                 {
-                    entry = GetEligibleEntry(validEntries, minEntries);
+                    // some group members can have static entry, or selfcontained random entry
+                    if ((*itr)->RandomEntry)
+                        entry = sObjectMgr.GetRandomCreatureEntry(dbGuid);
+                    else if ((*itr)->OwnEntry)
+                        entry = (*itr)->OwnEntry;
+                    else
+                        entry = GetEligibleEntry(validEntries, minEntries);
                     m_chosenEntries[dbGuid] = entry;
                 }
                 else
@@ -185,18 +191,25 @@ void SpawnGroup::Spawn(bool force)
                 entry = GetEligibleEntry(validEntries, minEntries);
         }
         else // GOs always pick random entry
-            entry = GetEligibleEntry(validEntries, minEntries);
+        {
+            if ((*itr)->RandomEntry)
+                entry = sObjectMgr.GetRandomGameObjectEntry(dbGuid);
+            else if ((*itr)->OwnEntry)
+                entry = (*itr)->OwnEntry;
+            else
+                entry = GetEligibleEntry(validEntries, minEntries);
+        }
 
         float x, y;
         if (GetObjectTypeId() == TYPEID_UNIT)
         {
-            auto data = sObjectMgr.GetCreatureData(*itr);
+            auto data = sObjectMgr.GetCreatureData(dbGuid);
             x = data->posX; y = data->posY;
             m_map.GetPersistentState()->AddCreatureToGrid(dbGuid, data);
         }
         else
         {
-            auto data = sObjectMgr.GetGOData(*itr);
+            auto data = sObjectMgr.GetGOData(dbGuid);
             x = data->posX; y = data->posY;
             m_map.GetPersistentState()->AddGameobjectToGrid(dbGuid, data);
         }
