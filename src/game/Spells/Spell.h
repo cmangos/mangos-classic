@@ -556,8 +556,6 @@ class Spell
 
         bool CanBeInterrupted() const { return m_spellState <= SPELL_STATE_DELAYED || m_spellState == SPELL_STATE_CHANNELING; }
 
-        uint64 GetScriptValue() const { return m_scriptValue; }
-        void SetScriptValue(uint64 value) { m_scriptValue = value; }
         void RegisterAuraProc(Aura* aura);
         bool IsAuraProcced(Aura* aura);
         // setting 0 disables the trigger
@@ -642,6 +640,9 @@ class Spell
 
         // Scripting system
         SpellScript* GetSpellScript() const { return m_spellScript; }
+        // Variable storage
+        uint64 GetScriptValue() const { return m_scriptValue; }
+        void SetScriptValue(uint64 value) { m_scriptValue = value; }
         // hooks
         void OnInit();
         void OnSuccessfulStart();
