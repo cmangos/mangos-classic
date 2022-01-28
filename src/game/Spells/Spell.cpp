@@ -6049,6 +6049,9 @@ SpellCastResult Spell::CheckRange(bool strict)
     if (!target && m_spellInfo->Targets & (TARGET_FLAG_LOCKED | TARGET_FLAG_GAMEOBJECT))
         target = m_targets.getGOTarget();
 
+    if (!target && m_clientCast && HasSpellTarget(m_spellInfo, TARGET_UNIT_CASTER_PET))
+        target = m_caster->GetPet();
+
     if (target && target != m_trueCaster)
     {
         // distance from target in checks
