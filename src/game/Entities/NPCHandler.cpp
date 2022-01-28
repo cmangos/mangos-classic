@@ -539,7 +539,7 @@ void WorldSession::SendStablePet(ObjectGuid guid) const
                     data << uint32(fields[3].GetUInt32());          // level
                     data << fields[4].GetString();                  // name
                     data << uint32(fields[5].GetUInt32());          // loyalty
-                    data << uint8(0x01);       // slot
+                    data << uint8(0x03);                            // slot
 
                     ++num;
                 } while (result->NextRow());
