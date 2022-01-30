@@ -77,6 +77,16 @@ if(WIN32)
   add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/game/Anticheat/module/warden_modules/ $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>/warden_modules
     DEPENDS ${EXECUTABLE_NAME})
+	
+  if(BUILD_PLAYERBOT)
+    add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+	  COMMAND ${CMAKE_COMMAND} -E copy_if_different \"${CMAKE_SOURCE_DIR}/src/game/PlayerBot/playerbot.conf.dist.in\" \"$<TARGET_FILE_DIR:${EXECUTABLE_NAME}>/playerbot.conf.dist\")
+  endif()
+
+  if(BUILD_AHBOT)
+    add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+	  COMMAND ${CMAKE_COMMAND} -E copy_if_different \"${CMAKE_SOURCE_DIR}/src/game/AuctionHouseBot/ahbot.conf.dist.in\" \"$<TARGET_FILE_DIR:${EXECUTABLE_NAME}>/ahbot.conf.dist\")
+  endif()
 endif()
 
 set(EXECUTABLE_LINK_FLAGS "")
@@ -103,6 +113,13 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/mangosd.conf.dist DESTINATION ${CONF_D
 # Define BUILD_PLAYERBOT if need
 if (BUILD_PLAYERBOT)
   add_definitions(-DBUILD_PLAYERBOT)
+  configure_file(${CMAKE_SOURCE_DIR}/src/game/PlayerBot/playerbot.conf.dist.in ${CMAKE_CURRENT_BINARY_DIR}/playerbot.conf.dist)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/playerbot.conf.dist DESTINATION ${CONF_DIR})
+endif()
+
+if (BUILD_AHBOT)
+  configure_file(${CMAKE_SOURCE_DIR}/src/game/AuctionHouseBot/ahbot.conf.dist.in ${CMAKE_CURRENT_BINARY_DIR}/ahbot.conf.dist)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ahbot.conf.dist DESTINATION ${CONF_DIR})
 endif()
 
 if(MSVC)
