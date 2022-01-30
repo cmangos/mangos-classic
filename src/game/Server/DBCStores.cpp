@@ -28,6 +28,7 @@
 #include "DBCfmt.h"
 
 #include <map>
+#include <filesystem>
 
 typedef std::map<uint32, uint32> AreaIDByAreaFlag;
 typedef std::map<uint32, uint32> AreaFlagByMapID;
@@ -224,6 +225,13 @@ inline void LoadDBC(uint32& availableDbcLocales, BarGoLink& bar, StoreProblemLis
 void LoadDBCStores(const std::string& dataPath)
 {
     std::string dbcPath = dataPath + "dbc/";
+
+    if (!std::filesystem::exists(dbcPath))
+    {
+        sLog.outError("DBC directory does not exist", dataPath.c_str());
+        Log::WaitBeforeContinueIfNeed();
+        exit(1);
+    }
 
     const uint32 DBCFilesCount = 52;
 
