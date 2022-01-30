@@ -244,6 +244,55 @@ struct spell_scourge_strike : public SpellScript
     }
 };
 
+enum
+{
+    SPELL_THISTLEFUR_DEATH = 8603,
+    SPELL_RIVERPAW_DEATH   = 8655,
+    SPELL_STROMGARDE_DEATH = 8894,
+    SPELL_CRUSHRIDGE_DEATH = 9144,
+
+    SAY_RAGE_FALLEN        = 1151,
+};
+
+struct TribalDeath : public SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        uint32 entry = 0;
+        switch (spell->m_spellInfo->Id)
+        {
+            case SPELL_THISTLEFUR_DEATH: entry = 3925; break; // Thistlefur Avenger
+            case SPELL_RIVERPAW_DEATH: entry = 0; break; // Unk
+            case SPELL_STROMGARDE_DEATH: entry = 2585; break; // Stromgarde Vindicator
+            case SPELL_CRUSHRIDGE_DEATH: entry = 2287; break; // Crushridge Warmonger
+        }
+        if (target->GetEntry() != entry)
+            return false;
+        return true;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        uint32 spellId = 0;
+        switch (spell->m_spellInfo->Id)
+        {
+            case SPELL_THISTLEFUR_DEATH: spellId = 8602; break;
+            case SPELL_RIVERPAW_DEATH: spellId = 0; break; // Unk
+            case SPELL_STROMGARDE_DEATH: spellId = 8602; break;
+            case SPELL_CRUSHRIDGE_DEATH: spellId = 8269; break;
+        }
+        Unit* target = spell->GetUnitTarget();
+        Unit* caster = spell->GetCaster();
+        target->CastSpell(nullptr, spellId, TRIGGERED_OLD_TRIGGERED);
+        if (!target->IsInCombat())
+            if (Unit* killer = target->GetMap()->GetUnit(static_cast<Creature*>(target)->GetKillerGuid()))
+                target->AI()->AttackStart(killer);
+
+        if (spell->m_spellInfo->Id == SPELL_CRUSHRIDGE_DEATH)
+            DoBroadcastText(SAY_RAGE_FALLEN, target, caster);
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -259,4 +308,5 @@ void AddSC_spell_scripts()
     RegisterAuraScript<DrinkAnimation>("spell_drink_animation");
     RegisterSpellScript<spell_effect_summon_no_follow_movement>("spell_effect_summon_no_follow_movement");
     RegisterSpellScript<spell_scourge_strike>("spell_scourge_strike");
+    RegisterSpellScript<TribalDeath>("spell_tribal_death");
 }
