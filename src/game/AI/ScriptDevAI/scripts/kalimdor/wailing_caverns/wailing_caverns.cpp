@@ -53,6 +53,8 @@ void instance_wailing_caverns::OnCreatureCreate(Creature* pCreature)
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }
+    if (!pCreature->IsClientControlled())
+        m_spawns.push_back(pCreature->GetObjectGuid());
 }
 
 void instance_wailing_caverns::OnObjectCreate(GameObject* pGo)
@@ -136,6 +138,18 @@ void instance_wailing_caverns::Load(const char* chrIn)
     OUT_LOAD_INST_DATA_COMPLETE;
 }
 
+void instance_wailing_caverns::DespawnAll()
+{
+    for (ObjectGuid guid : m_spawns)
+    {
+        if (Creature* creature = instance->GetCreature(guid))
+        {
+            creature->SetRespawnDelay(1 * DAY);
+            creature->ForcedDespawn(1000);
+        }
+    }
+}
+
 uint32 instance_wailing_caverns::GetData(uint32 uiType) const
 {
     if (uiType < MAX_ENCOUNTER)
@@ -144,15 +158,10 @@ uint32 instance_wailing_caverns::GetData(uint32 uiType) const
     return 0;
 }
 
-InstanceData* GetInstanceData_instance_wailing_caverns(Map* pMap)
-{
-    return new instance_wailing_caverns(pMap);
-}
-
 void AddSC_instance_wailing_caverns()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_wailing_caverns";
-    pNewScript->GetInstanceData = &GetInstanceData_instance_wailing_caverns;
+    pNewScript->GetInstanceData = &GetNewInstanceScript<instance_wailing_caverns>;
     pNewScript->RegisterSelf();
 }

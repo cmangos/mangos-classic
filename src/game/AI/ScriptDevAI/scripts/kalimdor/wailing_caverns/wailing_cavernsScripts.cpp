@@ -387,24 +387,26 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
                             case 11:
                                 SetEscortPaused(false);
                                 m_creature->SetLevitate(true);
+                                m_creature->SetHover(true);
                                 SetRun();
                                 // Send them flying somewhere outside of the room
                                 if (Creature* pNaralex = m_pInstance->GetSingleCreatureFromStorage(NPC_NARALEX))
                                 {
-                                    // ToDo: Make Naralex fly
-                                    // sort of a hack, compare to boss_onyxia
-                                    // pNaralex->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND); // wotlk+
-
                                     // Set to flying
                                     pNaralex->SetLevitate(true);
+                                    pNaralex->SetHover(true);
                                     pNaralex->SetWalk(false);
 
                                     // Set following
                                     pNaralex->GetMotionMaster()->MoveFollow(m_creature, 5.0f, 0);
-                                    // Despawn after some time
-                                    pNaralex->ForcedDespawn(30000);
                                 }
-                                m_uiEventTimer = 0;
+                                m_uiEventTimer = 30000;
+                                break;
+                            case 12:
+                                if (Creature* pNaralex = m_pInstance->GetSingleCreatureFromStorage(NPC_NARALEX))
+                                    pNaralex->ForcedDespawn(1000); // Despawn after some time
+                                m_creature->ForcedDespawn(1000);
+                                m_pInstance->DespawnAll(); // whole instance despawns
                                 break;
                         }
                         break;
