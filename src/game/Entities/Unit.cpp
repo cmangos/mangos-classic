@@ -1368,6 +1368,8 @@ void Unit::JustKilledCreature(Unit* killer, Creature* victim, Player* responsibl
     DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "SET JUST_DIED");
     victim->SetDeathState(JUST_DIED);                       // if !spiritOfRedemtionTalentReady always true for unit
 
+    victim->SetKillerGuid(killer ? killer->GetObjectGuid() : ObjectGuid());
+
     if (isPet)
         return;                                             // Pets might have been unsummoned at this place, do not handle them further!
 
