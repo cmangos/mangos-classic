@@ -15894,6 +15894,10 @@ void Player::_SaveQuestStatus()
             break;
             case QUEST_CHANGED :
             {
+                Quest const* quest = sObjectMgr.GetQuestTemplate(mQuestStatu.first);
+                if (quest->IsAutoComplete())
+                    continue;
+
                 SqlStatement stmt = CharacterDatabase.CreateStatement(updateQuestStatus, "UPDATE character_queststatus SET status = ?,rewarded = ?,explored = ?,timer = ?,"
                                     "mobcount1 = ?,mobcount2 = ?,mobcount3 = ?,mobcount4 = ?,itemcount1 = ?,itemcount2 = ?,itemcount3 = ?,itemcount4 = ?  WHERE guid = ? AND quest = ?");
 
