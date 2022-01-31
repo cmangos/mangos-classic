@@ -186,6 +186,9 @@ struct boss_thekalAI : public boss_thekalBaseAI
             m_uiPhase = PHASE_TIGER;
             SetDeathPrevention(false);
             SetCombatScriptStatus(false);
+            SetMeleeEnabled(true);
+            SetCombatMovement(true, true);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             m_creature->SetSpellList(SPELL_LIST_PHASE_2);
             SetActionReadyStatus(THEKAL_TIGER_ENRAGE, true);
         });
@@ -199,6 +202,8 @@ struct boss_thekalAI : public boss_thekalBaseAI
 
         // remove fake death
         Revive(true);
+
+        SetMeleeEnabled(true);
 
         m_creature->SetSpellList(SPELL_LIST_PHASE_1);
     }
@@ -281,7 +286,9 @@ struct boss_thekalAI : public boss_thekalBaseAI
         if (CanPreventAddsResurrect())
         {
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            SetMeleeEnabled(false);
             DoCastSpellIfCan(nullptr, SPELL_RESSURECTION_IMPACT_VISUAL);
+            m_creature->SetTarget(nullptr);
             ResetTimer(THEKAL_RESS_PHASE_2_DELAY, 5000);
             return true;
         }
