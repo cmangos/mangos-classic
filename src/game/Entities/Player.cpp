@@ -18425,16 +18425,24 @@ void Player::AutoUnequipOffhandIfNeed(uint8 bag)
     }
 }
 
-bool Player::HasItemFitToSpellReqirements(SpellEntry const* spellInfo, Item const* ignoreItem) const
+bool Player::HasItemFitToSpellReqirements(SpellEntry const* spellInfo, Item const* ignoreItem, uint32* error) const
 {
     if (spellInfo->EquippedItemClass < 0)
         return true;
 
     if (spellInfo->HasAttribute(SPELL_ATTR_EX3_MAIN_HAND) && !hasMainhandWeaponForAttack())
+    {
+        if (error)
+            *error = SPELL_FAILED_EQUIPPED_ITEM_CLASS_MAINHAND;
         return false;
+    }
 
     if (spellInfo->HasAttribute(SPELL_ATTR_EX3_REQ_OFFHAND) && !hasOffhandWeaponForAttack())
+    {
+        if (error)
+            *error = SPELL_FAILED_EQUIPPED_ITEM_CLASS_OFFHAND;
         return false;
+    }
 
     // scan other equipped items for same requirements (mostly 2 daggers/etc)
     // for optimize check 2 used cases only

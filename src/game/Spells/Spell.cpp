@@ -6337,8 +6337,9 @@ SpellCastResult Spell::CheckItems()
     // if not item target then required item must be equipped (for triggered case not report error)
     else
     {
-        if (m_caster->IsPlayer() && !static_cast<Player*>(m_caster)->HasItemFitToSpellReqirements(m_spellInfo))
-            return m_IsTriggeredSpell ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_EQUIPPED_ITEM_CLASS;
+        uint32 error = SPELL_FAILED_EQUIPPED_ITEM_CLASS;
+        if (m_caster->IsPlayer() && !static_cast<Player*>(m_caster)->HasItemFitToSpellReqirements(m_spellInfo, nullptr, &error))
+            return m_IsTriggeredSpell ? SPELL_FAILED_DONT_REPORT : SpellCastResult(error);
     }
 
     // check spell focus object
