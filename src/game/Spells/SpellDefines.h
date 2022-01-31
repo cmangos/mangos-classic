@@ -306,7 +306,7 @@ enum SpellCastResult
     SPELL_FAILED_OUT_OF_RANGE                   = 0x59, // Out of range.
     SPELL_FAILED_PACIFIED                       = 0x5A, // Can't use that ability while pacified
     SPELL_FAILED_POSSESSED                      = 0x5B, // You are possessed
-    // SPELL_FAILED_REAGENTS                    = 0x5C, // Message is hidden/unused, supposedly implemented client-side only
+    SPELL_FAILED_REAGENTS                       = 0x5C, // 
     SPELL_FAILED_REQUIRES_AREA                  = 0x5D, // You need to be in %s
     SPELL_FAILED_REQUIRES_SPELL_FOCUS           = 0x5E, // Requires %s
     SPELL_FAILED_ROOTED                         = 0x5F, // You are unable to move
@@ -334,7 +334,7 @@ enum SpellCastResult
     SPELL_FAILED_THIRST_SATIATED                = 0x75, // Message is hidden/unused
     SPELL_FAILED_TOO_CLOSE                      = 0x76, // Target too close
     SPELL_FAILED_TOO_MANY_OF_ITEM               = 0x77, // You have too many of that item already
-    // SPELL_FAILED_TOTEMS                      = 0x78, // Message is hidden/unused, supposedly implemented client-side only
+    SPELL_FAILED_TOTEMS                         = 0x78, //
     SPELL_FAILED_TRAINING_POINTS                = 0x79, // Not enough training points
     SPELL_FAILED_TRY_AGAIN                      = 0x7A, // Failed attempt
     SPELL_FAILED_UNIT_NOT_BEHIND                = 0x7B, // Target needs to be behind you
@@ -346,7 +346,7 @@ enum SpellCastResult
     SPELL_FAILED_TARGET_NOT_IN_RAID             = 0x81, // Target is not in your party or raid group
     SPELL_FAILED_DISENCHANT_WHILE_LOOTING       = 0x82, // Cannot disenchant while looting
     SPELL_FAILED_PROSPECT_WHILE_LOOTING         = 0x83, // Cannot prospect while looting
-    // SPELL_FAILED_PROSPECT_NEED_MORE          = 0x84, // Message is hidden/unused, supposedly implemented client-side only
+    SPELL_FAILED_NEED_MORE_ITEMS                = 0x84, //
     SPELL_FAILED_TARGET_FREEFORALL              = 0x85, // Target is currently in free-for-all PvP combat
     SPELL_FAILED_NO_EDIBLE_CORPSES              = 0x86, // There are no nearby corpses to eat
     SPELL_FAILED_ONLY_BATTLEGROUNDS             = 0x87, // Can only use in battlegrounds
