@@ -624,7 +624,10 @@ SpellAuraProcResult Unit::TriggerProccedSpell(Unit* target, std::array<int32, MA
 SpellAuraProcResult Unit::TriggerProccedSpell(Unit* target, std::array<int32, MAX_EFFECT_INDEX>& basepoints, SpellEntry const* spellInfo, Item* castItem, Aura* triggeredByAura, uint32 cooldown)
 {
     // default case
-    if (!target || (target != this && !target->IsAlive()))
+    if (!target && IsSpellRequireTarget(spellInfo))
+        return SPELL_AURA_PROC_FAILED;
+
+    if (target && (target != this && !target->IsAlive()))
         return SPELL_AURA_PROC_FAILED;
 
     if (!IsSpellReady(*spellInfo))
