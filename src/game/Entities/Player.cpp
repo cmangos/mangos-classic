@@ -5639,8 +5639,24 @@ void Player::UpdateSpellTrainedSkills(uint32 spellId, bool apply)
                         SetSkill(skillId, 300, 300);
                         break;
                     case SKILL_RANGE_LEVEL:
-                        SetSkill(skillId, 1, GetSkillMaxForLevel());
+                    {
+                        uint16 newSkillValue = 1;
+
+                        // World of Warcraft Client Patch 1.11.0 (2006-06-20)
+                        // - Two-Handed Axes/Maces (Enhancement Talent) - Skill levels gained 
+                        //   with these two weapons will now be retained if you decide to unspend
+                        //   this talent point and return to it later.
+                        if (pSkill->categoryId == SKILL_CATEGORY_WEAPON)
+                        {
+                            const auto savedValue = m_forgottenSkills.find(pSkill->id);
+
+                            if (savedValue != m_forgottenSkills.end())
+                                if (savedValue->second <= GetSkillMaxForLevel())
+                                    newSkillValue = savedValue->second;
+                        }
+                        SetSkill(skillId, newSkillValue, GetSkillMaxForLevel());
                         break;
+                    }
                     case SKILL_RANGE_MONO:
                         if (entry->flags & SKILL_FLAG_MAXIMIZED)
                             SetSkill(skillId, GetSkillMaxForLevel(), GetSkillMaxForLevel());
@@ -5666,7 +5682,16 @@ void Player::UpdateSpellTrainedSkills(uint32 spellId, bool apply)
                         break;
 
                     default:
+                        // World of Warcraft Client Patch 1.11.0 (2006-06-20)
+                        // - Two-Handed Axes/Maces (Enhancement Talent) - Skill levels gained 
+                        //   with these two weapons will now be retained if you decide to unspend
+                        //   this talent point and return to it later.
+                        if (pSkill->categoryId == SKILL_CATEGORY_WEAPON)
+                            if (GetSkillValuePure(pSkill->id) > m_forgottenSkills[pSkill->id])
+                                m_forgottenSkills[pSkill->id] = GetSkillValuePure(pSkill->id);
+
                         SetSkill(skillId, 0, 0);
+                        break;
                 }
             }
         }
@@ -13786,6 +13811,38 @@ void Player::_LoadBGData(QueryResult* result)
     delete result;
 }
 
+void Player::_LoadForgottenSkills(QueryResult* result)
+{
+    //                                                                 0      1
+    // SetPQuery(PLAYER_LOGIN_QUERY_FORGOTTEN_SKILLS,          "SELECT skill, value FROM character_forgotten_skills WHERE guid = '%u'", GUID_LOPART(m_guid));
+
+    if (result)
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+
+            uint16 skill = fields[0].GetUInt16();
+            uint16 value = fields[1].GetUInt16();
+
+            SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(skill);
+            if (!pSkill)
+            {
+                sLog.outError("Character %u has saved value for forgotten skill %u that does not exist.", GetGUIDLow(), skill);
+                continue;
+            }
+
+            if (pSkill->categoryId != SKILL_CATEGORY_WEAPON)
+            {
+                sLog.outError("Character %u has saved value for forgotten skill %u that is not a weapon skill.", GetGUIDLow(), skill);
+                continue;
+            }
+
+            m_forgottenSkills.insert(std::make_pair(skill, value));
+        } while (result->NextRow());
+    }
+}
+
 bool Player::LoadPositionFromDB(ObjectGuid guid, uint32& mapid, float& x, float& y, float& z, float& o, bool& in_flight)
 {
     QueryResult* result = CharacterDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map,taxi_path FROM characters WHERE guid = '%u'", guid.GetCounter());
@@ -14246,6 +14303,8 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     }
 
     _LoadActions(holder->GetResult(PLAYER_LOGIN_QUERY_LOADACTIONS));
+
+    _LoadForgottenSkills(holder->GetResult(PLAYER_LOGIN_QUERY_FORGOTTEN_SKILLS));
 
     m_social = sSocialMgr.LoadFromDB(holder->GetResult(PLAYER_LOGIN_QUERY_LOADSOCIALLIST), GetObjectGuid());
 
@@ -15990,6 +16049,18 @@ void Player::_SaveSkills()
         itr->second.uState = SKILL_UNCHANGED;
 
         ++itr;
+    }
+
+    // Forgotten weapon skills.
+    static SqlStatementID forSkills;
+
+    for (const auto itr : m_forgottenSkills)
+    {
+        if (itr.second > 1)
+        {
+            SqlStatement stmt = CharacterDatabase.CreateStatement(forSkills, "REPLACE INTO character_forgotten_skills (guid, skill, value) VALUES (?, ?, ?)");
+            stmt.PExecute(GetGUIDLow(), itr.first, itr.second);
+        }
     }
 }
 

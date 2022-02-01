@@ -694,6 +694,7 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES,
     PLAYER_LOGIN_QUERY_LOADAURAS,
     PLAYER_LOGIN_QUERY_LOADSPELLS,
+    PLAYER_LOGIN_QUERY_FORGOTTEN_SKILLS,
     PLAYER_LOGIN_QUERY_LOADQUESTSTATUS,
     PLAYER_LOGIN_QUERY_LOADHONORCP,
     PLAYER_LOGIN_QUERY_LOADREPUTATION,
@@ -2249,6 +2250,7 @@ class Player : public Unit
         void _LoadSpells(QueryResult* result);
         bool _LoadHomeBind(QueryResult* result);
         void _LoadBGData(QueryResult* result);
+        void _LoadForgottenSkills(QueryResult* result);
         void _LoadIntoDataField(const char* data, uint32 startOffset, uint32 count);
         void _LoadCreatedInstanceTimers();
         void _SaveNewInstanceIdTimer();
@@ -2404,6 +2406,8 @@ class Player : public Unit
         float  m_summon_y;
         float  m_summon_z;
         ObjectGuid m_summoner;
+
+        std::map<uint32, uint32> m_forgottenSkills;
 
     private:
         // internal common parts for CanStore/StoreItem functions
