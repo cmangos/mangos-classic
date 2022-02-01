@@ -29,7 +29,47 @@ EndContentData */
 
 
 
+enum
+{
+    GO_HEAD_OF_NEFARIAN_OG = 179881,
+    GO_HEAD_OF_ONYXIA_OG = 179556,
+
+    GOSSIP_HEAD_OG = 6024,
+};
+
+bool GossipHello_npc_overlord_runthalak(Player* player, Creature* creature)
+{
+    uint32 gossipId = creature->GetCreatureInfo()->GossipMenuId;
+    if (GameObject* go = GetClosestGameObjectWithEntry(creature, GO_HEAD_OF_NEFARIAN_OG, 100.f))
+        if (go->IsSpawned())
+            gossipId = GOSSIP_HEAD_OG;
+
+    player->PrepareGossipMenu(creature, gossipId);
+    player->SendPreparedGossip(creature);
+    return true;
+}
+
+bool GossipHello_npc_high_overlord_saurfang(Player* player, Creature* creature)
+{
+    uint32 gossipId = creature->GetCreatureInfo()->GossipMenuId;
+    if (GameObject* go = GetClosestGameObjectWithEntry(creature, GO_HEAD_OF_ONYXIA_OG, 100.f))
+        if (go->IsSpawned())
+            gossipId = GOSSIP_HEAD_OG;
+
+    player->PrepareGossipMenu(creature, gossipId);
+    player->SendPreparedGossip(creature);
+    return true;
+}
 
 void AddSC_orgrimmar()
 {
+    Script* pNewScript = new Script;
+    pNewScript->Name = "npc_overlord_runthalak";
+    pNewScript->pGossipHello = &GossipHello_npc_overlord_runthalak;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_high_overlord_saurfang";
+    pNewScript->pGossipHello = &GossipHello_npc_high_overlord_saurfang;
+    pNewScript->RegisterSelf();
 }

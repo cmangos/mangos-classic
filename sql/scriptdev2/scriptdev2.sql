@@ -457,6 +457,10 @@ INSERT INTO scripted_event_id VALUES
 UPDATE instance_template SET ScriptName='instance_onyxias_lair' WHERE map=249;
 UPDATE creature_template SET ScriptName='boss_onyxia' WHERE entry=10184;
 
+/* ORGRIMMAR */
+UPDATE creature_template SET ScriptName='npc_overlord_runthalak' WHERE entry=14392;
+UPDATE creature_template SET ScriptName='npc_high_overlord_saurfang' WHERE entry=14720;
+
 /* RAGEFIRE CHASM */
 
 /* RAZORFEN DOWNS */
@@ -539,6 +543,8 @@ UPDATE creature_template SET ScriptName='npc_dashel_stonefist' WHERE entry=4961;
 UPDATE creature_template SET ScriptName='npc_lady_katrana_prestor' WHERE entry=1749;
 UPDATE creature_template SET ScriptName='npc_squire_rowe' WHERE entry=17804;
 UPDATE creature_template SET ScriptName='npc_reginald_windsor' WHERE entry =12580;
+UPDATE creature_template SET ScriptName='npc_major_mattingly' WHERE entry=14394;
+UPDATE creature_template SET ScriptName='npc_field_marshal_afrasiabi' WHERE entry=14721;
 
 /* STRANGLETHORN VALE */
 UPDATE creature_template SET ScriptName='mob_yenniku' WHERE entry=2530;
