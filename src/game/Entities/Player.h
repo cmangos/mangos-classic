@@ -1447,6 +1447,8 @@ class Player : public Unit
         void PossessSpellInitialize();
         void CharmCooldownInitialize(WorldPacket& data) const;
         void RemovePetActionBar() const;
+        std::pair<float, float> RequestFollowData(ObjectGuid guid);
+        void RelinquishFollowData(ObjectGuid guid);
 
         bool HasSpell(uint32 spell) const override;
         bool HasActiveSpell(uint32 spell) const;            // show in spellbook
@@ -2202,6 +2204,8 @@ class Player : public Unit
 
         Spell* GetSpellModSpell() { return m_modsSpell; }
         void SetSpellModSpell(Spell* spell);
+
+        uint32 LookupHighestLearnedRank(uint32 spellId);
     protected:
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
@@ -2506,6 +2510,8 @@ class Player : public Unit
 
         std::unordered_map<uint32, TimePoint> m_enteredInstances;
         uint32 m_createdInstanceClearTimer;
+
+        std::map<uint32, ObjectGuid> m_followAngles;
 };
 
 void AddItemsSetItem(Player* player, Item* item);

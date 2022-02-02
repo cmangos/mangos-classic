@@ -33,21 +33,6 @@ PlayerAI::PlayerAI(Player* player) : UnitAI(player), m_player(player), m_spellsD
     AddCustomAction(GENERIC_THREAT_CHANGE, true, [&]() { m_executeTargetChange = true; });
 }
 
-uint32 PlayerAI::LookupHighestLearnedRank(uint32 spellId)
-{
-    uint32 ownedRank = 0;
-    uint32 higherRank = spellId;
-    do
-    {
-        if (m_player->HasSpell(higherRank))
-            ownedRank = higherRank;
-        else
-            break;
-    }
-    while ((higherRank = sSpellMgr.GetNextSpellInChain(ownedRank)));
-    return ownedRank;
-}
-
 void PlayerAI::AddPlayerSpellAction(uint32 spellId, std::function<Unit*()> selector)
 {
     if (!selector)

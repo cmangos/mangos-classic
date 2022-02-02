@@ -29,11 +29,11 @@ struct PriestAI : public PlayerAI
 {
     PriestAI(Player* player) : PlayerAI(player)
     {
-        if (uint32 mindBlast = LookupHighestLearnedRank(SPELL_MIND_BLAST))
+        if (uint32 mindBlast = m_player->LookupHighestLearnedRank(SPELL_MIND_BLAST))
             AddPlayerSpellAction(mindBlast);
-        if (uint32 spell = LookupHighestLearnedRank(SPELL_SHADOW_WORD_PAIN))
+        if (uint32 spell = m_player->LookupHighestLearnedRank(SPELL_SHADOW_WORD_PAIN))
             AddPlayerSpellAction(spell);
-        if (uint32 spell = LookupHighestLearnedRank(SPELL_PSYCHIC_SCREAM))
+        if (uint32 spell = m_player->LookupHighestLearnedRank(SPELL_PSYCHIC_SCREAM))
             AddPlayerSpellAction(spell);
     }
 };
@@ -49,11 +49,11 @@ struct MageAI : public PlayerAI
 {
     MageAI(Player* player) : PlayerAI(player)
     {
-        if (uint32 fireball = LookupHighestLearnedRank(SPELL_FIREBALL))
+        if (uint32 fireball = m_player->LookupHighestLearnedRank(SPELL_FIREBALL))
             AddPlayerSpellAction(fireball);
-        if (uint32 spell = LookupHighestLearnedRank(SPELL_BLIZZARD))
+        if (uint32 spell = m_player->LookupHighestLearnedRank(SPELL_BLIZZARD))
             AddPlayerSpellAction(spell);
-        if (uint32 spell = LookupHighestLearnedRank(SPELL_FROSTBOLT))
+        if (uint32 spell = m_player->LookupHighestLearnedRank(SPELL_FROSTBOLT))
             AddPlayerSpellAction(spell);
     }
 };
@@ -69,11 +69,11 @@ struct WarlockAI : public PlayerAI
 {
     WarlockAI(Player* player) : PlayerAI(player)
     {
-        if (uint32 shadowBolt = LookupHighestLearnedRank(SPELL_SHADOW_BOLT))
+        if (uint32 shadowBolt = m_player->LookupHighestLearnedRank(SPELL_SHADOW_BOLT))
             AddPlayerSpellAction(shadowBolt);
-        if (uint32 spell = LookupHighestLearnedRank(SPELL_RAIN_OF_FIRE))
+        if (uint32 spell = m_player->LookupHighestLearnedRank(SPELL_RAIN_OF_FIRE))
             AddPlayerSpellAction(spell);
-        if (uint32 spell = LookupHighestLearnedRank(SPELL_FEAR))
+        if (uint32 spell = m_player->LookupHighestLearnedRank(SPELL_FEAR))
             AddPlayerSpellAction(spell);
     }
 };
@@ -89,11 +89,11 @@ struct RogueAI : public PlayerAI
 {
     RogueAI(Player* player) : PlayerAI(player)
     {
-        if (uint32 sinisterStrike = LookupHighestLearnedRank(SPELL_SINISTER_STRIKE))
+        if (uint32 sinisterStrike = m_player->LookupHighestLearnedRank(SPELL_SINISTER_STRIKE))
             AddPlayerSpellAction(sinisterStrike);
-        if (uint32 spell = LookupHighestLearnedRank(SPELL_BLIND))
+        if (uint32 spell = m_player->LookupHighestLearnedRank(SPELL_BLIND))
             AddPlayerSpellAction(spell);
-        if (uint32 spell = LookupHighestLearnedRank(SPELL_EVISCERATE))
+        if (uint32 spell = m_player->LookupHighestLearnedRank(SPELL_EVISCERATE))
             AddPlayerSpellAction(spell);
     }
 };
@@ -109,11 +109,11 @@ struct DruidAI : public PlayerAI
 {
     DruidAI(Player* player) : PlayerAI(player)
     {
-        if (uint32 moonfire = LookupHighestLearnedRank(SPELL_MOONFIRE))
+        if (uint32 moonfire = m_player->LookupHighestLearnedRank(SPELL_MOONFIRE))
             AddPlayerSpellAction(moonfire);
-        if (uint32 spell = LookupHighestLearnedRank(SPELL_WRATH))
+        if (uint32 spell = m_player->LookupHighestLearnedRank(SPELL_WRATH))
             AddPlayerSpellAction(spell);
-        if (uint32 spell = LookupHighestLearnedRank(SPELL_HURRICANE))
+        if (uint32 spell = m_player->LookupHighestLearnedRank(SPELL_HURRICANE))
             AddPlayerSpellAction(spell);
     }
 };
@@ -130,13 +130,13 @@ struct ShamanAI : public PlayerAI
 {
     ShamanAI(Player* player) : PlayerAI(player)
     {
-        if (uint32 flameShock = LookupHighestLearnedRank(SPELL_FLAME_SHOCK))
+        if (uint32 flameShock = m_player->LookupHighestLearnedRank(SPELL_FLAME_SHOCK))
             AddPlayerSpellAction(flameShock);
-        if (uint32 spell = LookupHighestLearnedRank(SPELL_HEROISM))
+        if (uint32 spell = m_player->LookupHighestLearnedRank(SPELL_HEROISM))
             AddPlayerSpellAction(spell);
-        if (uint32 spell = LookupHighestLearnedRank(SPELL_BLOODLUST))
+        if (uint32 spell = m_player->LookupHighestLearnedRank(SPELL_BLOODLUST))
             AddPlayerSpellAction(spell);
-        if (uint32 spell = LookupHighestLearnedRank(SPELL_LIGHTNING_BOLT))
+        if (uint32 spell = m_player->LookupHighestLearnedRank(SPELL_LIGHTNING_BOLT))
             AddPlayerSpellAction(spell);
     }
 };
@@ -152,11 +152,11 @@ struct HunterAI : public PlayerAI
 {
     HunterAI(Player* player) : PlayerAI(player)
     {
-        if (uint32 raptorStrike = LookupHighestLearnedRank(SPELL_RAPTOR_STRIKE))
+        if (uint32 raptorStrike = m_player->LookupHighestLearnedRank(SPELL_RAPTOR_STRIKE))
             AddPlayerSpellAction(raptorStrike);
-        if (uint32 spell = LookupHighestLearnedRank(SPELL_VOLLEY))
+        if (uint32 spell = m_player->LookupHighestLearnedRank(SPELL_VOLLEY))
             AddPlayerSpellAction(spell);
-        if (uint32 spell = LookupHighestLearnedRank(SPELL_EXPLOSIVE_TRAP))
+        if (uint32 spell = m_player->LookupHighestLearnedRank(SPELL_EXPLOSIVE_TRAP))
             AddPlayerSpellAction(spell);
     }
 };
@@ -172,11 +172,11 @@ struct WarriorAI : public PlayerAI
 {
     WarriorAI(Player* player) : PlayerAI(player)
     {
-        if (uint32 heroicStrike = LookupHighestLearnedRank(SPELL_HEROIC_STRIKE))
+        if (uint32 heroicStrike = m_player->LookupHighestLearnedRank(SPELL_HEROIC_STRIKE))
             AddPlayerSpellAction(heroicStrike);
-        if (uint32 spell = LookupHighestLearnedRank(SPELL_INTIMIDATING_SHOUT))
+        if (uint32 spell = m_player->LookupHighestLearnedRank(SPELL_INTIMIDATING_SHOUT))
             AddPlayerSpellAction(spell);
-        if (uint32 spell = LookupHighestLearnedRank(SPELL_HAMSTRING))
+        if (uint32 spell = m_player->LookupHighestLearnedRank(SPELL_HAMSTRING))
             AddPlayerSpellAction(spell);
     }
 };
@@ -192,11 +192,11 @@ struct PaladinAI : public PlayerAI
 {
     PaladinAI(Player* player) : PlayerAI(player)
     {
-        if (uint32 spell = LookupHighestLearnedRank(SPELL_FLASH_OF_LIGHT))
+        if (uint32 spell = m_player->LookupHighestLearnedRank(SPELL_FLASH_OF_LIGHT))
             AddPlayerSpellAction(spell);
-        if (uint32 spell = LookupHighestLearnedRank(SPELL_HAMMER_OF_JUSTICE))
+        if (uint32 spell = m_player->LookupHighestLearnedRank(SPELL_HAMMER_OF_JUSTICE))
             AddPlayerSpellAction(spell);
-        if (uint32 spell = LookupHighestLearnedRank(SPELL_CONSECRATION))
+        if (uint32 spell = m_player->LookupHighestLearnedRank(SPELL_CONSECRATION))
             AddPlayerSpellAction(spell);
     }
 };
