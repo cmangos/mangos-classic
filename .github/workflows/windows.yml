@@ -81,13 +81,10 @@ jobs:
     if: failure()
 
     steps:
-      - name: Notify
-        uses: rjstone/discord-webhook-notify@v1.0.4
+      - name: Run Discord Webhook
+        uses: johnnyhuy/discord-webhook@main
         with:
-          severity: error
-          description: Windows build failed
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
-          avatarUrl: https://github.githubassets.com/images/modules/logos_page/Octocat.png
+          webhook_url: ${{secrets.DISCORD_WEBHOOK}}
 
 
 
