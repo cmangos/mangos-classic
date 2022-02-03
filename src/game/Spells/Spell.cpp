@@ -463,6 +463,7 @@ Spell::Spell(WorldObject* caster, SpellEntry const* info, uint32 triggeredFlags,
     m_scriptValue = 0;
 
     memset(m_triggerSpellChance, -1, sizeof(m_triggerSpellChance));
+    memset(damagePerEffect, 0, sizeof(damagePerEffect));
 
     CleanupTargetList();
 
@@ -1233,14 +1234,14 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 
         Unit::DealDamageMods(affectiveCaster, spellDamageInfo.target, spellDamageInfo.damage, &spellDamageInfo.absorb, SPELL_DIRECT_DAMAGE, m_spellInfo);
 
+        m_damage = spellDamageInfo.damage; // update value so that script handler has access
+        OnHit(missInfo); // TODO: After spell damage calc is moved to proper handler - move this before the first if
+
         // Send log damage message to client
         Unit::SendSpellNonMeleeDamageLog(&spellDamageInfo);
 
         procEx |= createProcExtendMask(&spellDamageInfo, missInfo);
         procVictim |= PROC_FLAG_TAKE_ANY_DAMAGE;
-
-        m_damage = spellDamageInfo.damage; // update value so that script handler has access
-        OnHit(missInfo); // TODO: After spell damage calc is moved to proper handler - move this before the first if
 
         if (reflectTarget)
             Unit::DealSpellDamage(affectiveCaster, &spellDamageInfo, true, m_resetLeash);
@@ -4339,6 +4340,7 @@ void Spell::HandleEffect(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOTa
     if (eff < MAX_SPELL_EFFECTS)
     {
         OnEffectExecute(i);
+        damagePerEffect[i] = damage;
         (*this.*SpellEffects[eff])(i);
     }
     else
@@ -7880,6 +7882,11 @@ void Spell::OnSummon(Creature* summon)
 {
     if (SpellScript* script = GetSpellScript())
         return script->OnSummon(this, summon);
+}
+
+void Spell::SetTotalTargetValueModifier(float modifier)
+{
+    m_damage = float(m_damage) * modifier;
 }
 
 SpellModRAII::SpellModRAII(Spell* spell, Player* modOwner, bool success, bool onlySave) : m_spell(spell), m_modOwner(modOwner), m_success(success), m_onlySave(onlySave)
