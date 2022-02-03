@@ -143,7 +143,7 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_isDeadByDefault(false),
     m_temporaryFactionFlags(TEMPFACTION_NONE),
     m_originalEntry(0), m_dbGuid(0), m_ai(nullptr),
-    m_isInvisible(false), m_ignoreMMAP(false), m_forceAttackingCapability(false), m_countSpawns(false),
+    m_isInvisible(false), m_ignoreMMAP(false), m_forceAttackingCapability(false), m_countSpawns(false), m_noWeaponSkillGain(false),
     m_creatureInfo(nullptr),
     m_noXP(false), m_noLoot(false), m_noReputation(false), m_ignoringFeignDeath(false),
     m_immunitySet(UINT32_MAX),
@@ -439,6 +439,7 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
     SetNoLoot(false);
     SetNoReputation(false);
     SetIgnoreFeignDeath((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_IGNORE_FEIGN_DEATH) != 0);
+    SetNoWeaponSkillGain((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_SKILL_GAINS) != 0);
 
     SetDetectionRange(cinfo->Detection);
 

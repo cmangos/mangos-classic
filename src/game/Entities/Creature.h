@@ -66,7 +66,7 @@ enum CreatureFlagsExtra
     CREATURE_EXTRA_FLAG_COUNT_SPAWNS           = 0x00200000,       // 2097152 count creature spawns in Map*
     CREATURE_EXTRA_FLAG_IGNORE_FEIGN_DEATH     = 0x00400000,       // 4194304 Ignores Feign Death
     CREATURE_EXTRA_FLAG_DUAL_WIELD_FORCED      = 0x00800000,       // 8388606 creature is alwyas dual wielding (even if unarmed)
-    // CREATURE_EXTRA_FLAG_REUSE               = 0x01000000,       // 16777216
+    CREATURE_EXTRA_FLAG_NO_SKILL_GAINS         = 0x01000000,       // 16777216 Does not give weapon skill gains to attacker
 };
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
@@ -862,6 +862,9 @@ class Creature : public Unit
         ObjectGuid GetKillerGuid() const { return m_killer; }
         void SetKillerGuid(ObjectGuid guid) { m_killer = guid; }
 
+        void SetNoWeaponSkillGain(bool state) { m_noWeaponSkillGain = state; }
+        bool IsNoWeaponSkillGain() const override { return m_noWeaponSkillGain; }
+
     protected:
         bool CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
         bool InitEntry(uint32 Entry, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
@@ -924,6 +927,7 @@ class Creature : public Unit
         bool m_noLoot;
         bool m_noReputation;
         bool m_ignoringFeignDeath;
+        bool m_noWeaponSkillGain;
 
         // Script logic
         bool m_countSpawns;
