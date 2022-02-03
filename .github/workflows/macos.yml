@@ -34,19 +34,30 @@ jobs:
 
   notify:
     name: Discord Notification
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: # make sure the notification is sent AFTER the jobs you want included have completed
       - build
     if: failure()
 
     steps:
+      - name: Env
+        run: |
+          echo "GIT_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+          echo "GIT_SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
+
       - name: Notify
         uses: rjstone/discord-webhook-notify@v1.0.4
         with:
           severity: error
-          description: MacOS build failed
+          username: ${{ github.event.repository.name }}
+          description: |
+            **MacOS buid failed**
+          details: |
+            - **Branch:** ${{env.GIT_BRANCH}}
+            - **Pusher:** ${{github.event.pusher.name}}
+            - **Author:** ${{github.event.head_commit.author.name}}
+            - **Commit:** [${{github.repository}}/${{env.GIT_SHORT_SHA}}](${{github.server_url}}/${{ github.repository }}/commit/${{github.sha}})
+            - **Build log:** [actions/runs/${{github.run_id}}](${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}})
+          footer: Next time ${{github.event.pusher.name}}!
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
           avatarUrl: https://github.githubassets.com/images/modules/logos_page/Octocat.png
-
-
-
