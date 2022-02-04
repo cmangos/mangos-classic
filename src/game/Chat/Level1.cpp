@@ -1659,7 +1659,7 @@ bool ChatHandler::HandleGoHelper(Player* player, uint32 mapid, float x, float y,
     }
     else
     {
-        // we need check x,y before ask Z or can crash at invalide coordinates
+        // we need check x,y before ask Z or can crash at invalid coordinates
         if (!MapManager::IsValidMapCoord(mapid, x, y))
         {
             PSendSysMessage(LANG_INVALID_TARGET_COORD, x, y, mapid);
@@ -1676,6 +1676,8 @@ bool ChatHandler::HandleGoHelper(Player* player, uint32 mapid, float x, float y,
     if (!player->TaxiFlightInterrupt())
         player->SaveRecallPosition();
 
+    player->UpdateAllowedPositionZ(x, y, z);
+    z += 1;
     player->TeleportTo(mapid, x, y, z, ort);
 
     return true;
