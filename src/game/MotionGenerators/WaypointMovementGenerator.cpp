@@ -269,7 +269,7 @@ uint32 WaypointMovementGenerator<Creature>::BuildIntPath(PointsArray& path, Crea
 }
 
 
-bool WaypointMovementGenerator<Creature>::GetNodeAfter(WaypointPath::const_iterator& nodeItr)
+bool WaypointMovementGenerator<Creature>::GetNodeAfter(WaypointPath::const_iterator& nodeItr, bool)
 {
     ++nodeItr;
     if (nodeItr == i_path->end())
@@ -337,14 +337,24 @@ void WaypointMovementGenerator<Creature>::SendNextWayPointPath(Creature& creatur
     // compute path to next node and put it in the path
     uint32 travelTime = BuildIntPath(genPath, creature, Vector3(nextNode->x, nextNode->y, nextNode->z));
 
+    bool looped = false;
     auto currPointItr = m_currentWaypointNode;
     // add more node until travel time is big enough
     while (!nextNode->delay && travelTime < MinimumPathTime)
     {
         // we'll add path to node after this one too to make animation more smoother
         auto nodeAfterItr = currPointItr;
-        if (!GetNodeAfter(nodeAfterItr))
-            break; // did all the path and not reached MinimumPathTime?
+
+        if (!GetNodeAfter(nodeAfterItr, looped))
+        {
+            if (looped) //that should never happen. (Well can but with abnormally short path)
+                break;
+
+            // we reach the end of the path better is to retry in the opposite direction
+            looped = true;
+            if (!GetNodeAfter(nodeAfterItr, true))
+                break; // did all the path and not reached MinimumPathTime?
+        }
 
         auto const nodeAfter = nodeAfterItr->second;
 
@@ -613,9 +623,11 @@ void LinearWPMovementGenerator<Creature>::SwitchToNextNode(Creature& creature, W
     }
 }
 
-bool LinearWPMovementGenerator<Creature>::GetNodeAfter(WaypointPath::const_iterator& nodeItr)
+bool LinearWPMovementGenerator<Creature>::GetNodeAfter(WaypointPath::const_iterator& nodeItr, bool looped /*= false*/)
 {
-    if (!m_driveWayBack)
+    bool movingToLastNode = looped ? m_driveWayBack : !m_driveWayBack;
+
+    if (!movingToLastNode)
     {
         if (std::next(nodeItr) == i_path->end())
             return false;
