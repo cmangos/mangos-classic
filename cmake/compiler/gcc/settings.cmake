@@ -7,6 +7,16 @@ if(CMAKE_SYSTEM_PROCESSOR MATCHES "^arm")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ARM_FLAGS}")
 endif()
 
+# Additional compaitibility checks and flags for commonly found LTS GCC versions
+if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0 AND NOT MINGW)
+  # Enable C++17 std::filesystem linking for older GCC versions
+  link_libraries(stdc++fs)
+  # std::filesystem is no longer experimental as of GCC 8.0, set the minimum version
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0)
+    message(SEND_ERROR "GCC: This project requires GCC version 8.0 or higher")
+  endif()
+endif()
+
 add_definitions(-DHAVE_SSE2)
 message(STATUS "GCC: SFMT enabled, SSE2 flags forced")
 
