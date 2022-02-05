@@ -22,34 +22,20 @@
 HMACSHA1::HMACSHA1(uint32 len, uint8 const* seed)
 {
     memcpy(&m_key, seed, len);
-#if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
     m_ctx = HMAC_CTX_new();
     HMAC_Init_ex(m_ctx, &m_key, len, EVP_sha1(), nullptr);
-#else
-    HMAC_CTX_init(&m_ctx);
-    HMAC_Init_ex(&m_ctx, &m_key, len, EVP_sha1(), nullptr);
-#endif
 }
 
 HMACSHA1::HMACSHA1(uint32 len, uint8 const* seed, bool) // to get over the default constructor
 {
-#if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
     m_ctx = HMAC_CTX_new();
     HMAC_Init_ex(m_ctx, seed, len, EVP_sha1(), nullptr);
-#else
-    HMAC_CTX_init(&m_ctx);
-    HMAC_Init_ex(&m_ctx, seed, len, EVP_sha1(), nullptr);
-#endif
 }
 
 HMACSHA1::~HMACSHA1()
 {
     memset(&m_key, 0x00, SEED_KEY_SIZE);
-#if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
     HMAC_CTX_free(m_ctx);
-#else
-    HMAC_CTX_cleanup(&m_ctx);
-#endif
 }
 
 void HMACSHA1::UpdateBigNumber(BigNumber* bn)
@@ -59,11 +45,7 @@ void HMACSHA1::UpdateBigNumber(BigNumber* bn)
 
 void HMACSHA1::UpdateData(const uint8* data, int length)
 {
-#if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
     HMAC_Update(m_ctx, data, length);
-#else
-    HMAC_Update(&m_ctx, data, length);
-#endif
 }
 
 void HMACSHA1::UpdateData(const std::string& str)
@@ -73,20 +55,12 @@ void HMACSHA1::UpdateData(const std::string& str)
 
 void HMACSHA1::Initialize()
 {
-#if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
     HMAC_Init_ex(m_ctx, &m_key, SEED_KEY_SIZE, EVP_sha1(), NULL);
-#else
-    HMAC_Init_ex(&m_ctx, &m_key, SEED_KEY_SIZE, EVP_sha1(), NULL);
-#endif
 }
 
 void HMACSHA1::Finalize()
 {
     uint32 length = 0;
-#if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
     HMAC_Final(m_ctx, (uint8*)m_digest, &length);
-#else
-    HMAC_Final(&m_ctx, m_digest, &length);
-#endif
     MANGOS_ASSERT(length == SHA_DIGEST_LENGTH);
 }
