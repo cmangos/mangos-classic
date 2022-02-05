@@ -821,14 +821,14 @@ enum
     SAY_HEAL_HENZE_NARM_FAULK   = 2283,
 
     SPELL_SYMBOL_OF_LIFE        = 8593,
-    SPELL_QUEST_SELF_HEALING    = 25155,        // unused
-    SPELL_SHIMMERING_VESSEL     = 31225,
-    SPELL_REVIVE_SELF           = 32343,
+    SPELL_QUEST_SELF_HEALING    = 25155,
+    SPELL_SHIMMERING_VESSEL     = 31225,        // Not used until TBC
+    SPELL_REVIVE_SELF           = 32343,        // Not used until TBC
 
     NPC_HENZE_FAULK             = 6172,
     NPC_NARM_FAULK              = 6177,
-    NPC_FURBOLG_SHAMAN          = 17542,        // draenei side
-    NPC_BLOOD_KNIGHT            = 17768,        // blood elf side
+    NPC_FURBOLG_SHAMAN          = 17542,        // Draenei side
+    NPC_BLOOD_KNIGHT            = 17768,        // Blood Elf side
 };
 
 struct npc_redemption_targetAI : public ScriptedAI
@@ -861,7 +861,7 @@ struct npc_redemption_targetAI : public ScriptedAI
         if (m_uiEvadeTimer)
             return;
 
-        DoCastSpellIfCan(m_creature, SPELL_REVIVE_SELF);
+        DoCastSpellIfCan(m_creature, SPELL_QUEST_SELF_HEALING);
         m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
         m_uiEvadeTimer = 2 * MINUTE * IN_MILLISECONDS;
