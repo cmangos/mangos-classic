@@ -17,6 +17,7 @@
 */
 
 #include "PlayerAI.h"
+#include "Entities/Player.h"
 
 enum PriestSpells
 {
