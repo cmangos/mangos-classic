@@ -346,7 +346,7 @@ struct ScriptInfo
 
         struct                                              // SCRIPT_COMMAND_TERMINATE_SCRIPT (31)
         {
-            uint32 npcEntry;                                // datalong
+            uint32 npcOrGOEntry;                                // datalong
             uint32 searchDist;                              // datalong2
             uint32 poolId;                                  // datalong3
             // changeWaypointWaitTime                       // dataint
