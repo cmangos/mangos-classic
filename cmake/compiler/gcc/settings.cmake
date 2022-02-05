@@ -9,8 +9,6 @@ endif()
 
 # Additional compaitibility checks and flags for commonly found LTS GCC versions
 if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0 AND NOT MINGW)
-  # Enable C++17 std::filesystem linking for older GCC versions
-  link_libraries(stdc++fs)
   # Set minimum C++17 compliant GCC version target to 7.0
   if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0)
     message(SEND_ERROR "GCC: This project requires GCC version 7.0 or higher")

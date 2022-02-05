@@ -5,9 +5,6 @@ add_definitions(-D_BUILD_DIRECTIVE='"$(CONFIGURATION)"')
 if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0)
   # Set minimum C++17 compliant Clang version target to 7.0
   message(SEND_ERROR "Clang: This project requires Clang version 7.0 or higher")
-elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0 OR (APPLE AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.0))
-  # Enable C++17 std::filesystem for older Clang versions
-  link_libraries(stdc++fs)
 endif()
 
 if(WARNINGS)
