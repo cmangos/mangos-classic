@@ -61,13 +61,13 @@ enum
     // Spell for globs
     SPELL_REJOIN_VISCIDUS       = 25896,
     SPELL_SUMMON_GLOBS          = 25885,                    // summons npc 15667 using spells from 25865 to 25884; All spells have target coords
-    SPELL_VISCIDUS_SHRINKS      = 25893,
-    SPELL_VISCIDUS_SHRINKS_HP   = 27934,
+    SPELL_VISCIDUS_SHRINKS_1    = 25893,
+    SPELL_VISCIDUS_SHRINKS_2    = 27934,
     SPELL_DESPAWN_GLOBS         = 26608,
     SPELL_VISCIDUS_GROWS        = 25897,
 
 //    SPELL_VISCIDUS_TELEPORT     = 25904,                    // Unknown usage
-    SPELL_SUMMONT_TRIGGER       = 26564,                    // summons 15992
+    SPELL_SUMMON_TRIGGER        = 26564,                    // summons 15992
 
     // Spell for Toxic Slime (green poisonous clouds)
     SPELL_SUMMON_TOXIC_SLIME    = 26584,
@@ -97,6 +97,8 @@ enum
     PHASE_SLOWED_MORE           = 3,
     PHASE_FROZEN                = 4,
     PHASE_EXPLODED              = 5,
+    PHASE_REJOIN                = 6,
+    PHASE_SUICIDE               = 7,
 };
 
 static const uint32 auiGlobSummonSpells[MAX_VISCIDUS_GLOBS] = { 25865, 25866, 25867, 25868, 25869, 25870, 25871, 25872, 25873, 25874, 25875, 25876, 25877, 25878, 25879, 25880, 25881, 25882, 25883, 25884 };
@@ -115,6 +117,7 @@ enum ViscidusActions
     VISCIDUS_POISON_BOLT_VOLLEY,
     VISCIDUS_ACTION_MAX,
     VISCIDUS_EXPLODE,
+    VISCIDUS_REJOIN,
 };
 
 struct boss_viscidusAI : public CombatAI
@@ -125,6 +128,7 @@ struct boss_viscidusAI : public CombatAI
         AddCombatAction(VISCIDUS_POISON_SHOCK, 7000, 12000);
         AddCombatAction(VISCIDUS_POISON_BOLT_VOLLEY, 10000, 15000);
         AddCustomAction(VISCIDUS_EXPLODE, true, [&]() { HandleExplode(); });
+        AddCustomAction(VISCIDUS_REJOIN, true, [&]() { HandleRejoin(); });
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit* unit, float x, float y, float z) -> bool
         {
             return m_creature->GetDistance(resetPoint.m_fX, resetPoint.m_fY, resetPoint.m_fZ, DIST_CALC_COMBAT_REACH) < 10.0f;
@@ -138,12 +142,14 @@ struct boss_viscidusAI : public CombatAI
     uint32 m_hitCount;
 
     GuidList m_lGlobesGuidList;
+    uint8 m_aliveGlobs;
 
     void Reset() override
     {
         CombatAI::Reset();
         m_phase    = PHASE_NORMAL;
         m_hitCount = 0;
+        m_aliveGlobs = 0;
 
         SetDeathPrevention(true);
     }
@@ -153,8 +159,8 @@ struct boss_viscidusAI : public CombatAI
         if (m_instance)
             m_instance->SetData(TYPE_VISCIDUS, IN_PROGRESS);
 
-        DoCastSpellIfCan(nullptr, SPELL_MEMBRANE_VISCIDUS, CAST_TRIGGERED);
-        DoCastSpellIfCan(nullptr, SPELL_VISCIDUS_WEAKNESS, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_MEMBRANE_VISCIDUS, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(nullptr, SPELL_VISCIDUS_WEAKNESS, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void EnterEvadeMode() override
@@ -182,7 +188,12 @@ struct boss_viscidusAI : public CombatAI
             float x, y, z;
             m_creature->GetRespawnCoord(x, y, z);
             summoned->GetMotionMaster()->MovePoint(1, x, y, z);
-            m_lGlobesGuidList.push_back(summoned->GetObjectGuid());
+            // Check if Glob already counted/added to list to prevent dual count due to hook being sometimes called twice
+            if (std::find(std::begin(m_lGlobesGuidList), std::end(m_lGlobesGuidList), summoned->GetObjectGuid()) == std::end(m_lGlobesGuidList))
+            {
+                ++m_aliveGlobs;
+                m_lGlobesGuidList.push_back(summoned->GetObjectGuid());
+            }
         }
     }
 
@@ -190,16 +201,11 @@ struct boss_viscidusAI : public CombatAI
     {
         if (summoned->GetEntry() == NPC_GLOB_OF_VISCIDUS)
         {
-            // shrink - modify scale
-            DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_SHRINKS, CAST_TRIGGERED);
-
-            if (DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_SHRINKS_HP, CAST_TRIGGERED) == CAST_OK)
-                m_creature->SetHealth(m_creature->GetHealth() - (m_creature->GetMaxHealth() * 0.05f));
-
             m_lGlobesGuidList.remove(summoned->GetObjectGuid());
-
-            if (m_lGlobesGuidList.empty())
-                SetPhase(PHASE_NORMAL);
+            --m_aliveGlobs;
+            // Start rejoin phase for Viscidus if all Globs are dead/have reached center but check that phase is not already started due to some hooks being called twice
+            if (m_lGlobesGuidList.empty() && m_phase != PHASE_REJOIN)
+                SetPhase(PHASE_REJOIN);
         }
     }
 
@@ -208,14 +214,13 @@ struct boss_viscidusAI : public CombatAI
         if (summoned->GetEntry() != NPC_GLOB_OF_VISCIDUS || motionType != POINT_MOTION_TYPE || !pointId)
             return;
 
-        DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_GROWS, CAST_TRIGGERED);
-
         m_lGlobesGuidList.remove(summoned->GetObjectGuid());
         summoned->CastSpell(m_creature, SPELL_REJOIN_VISCIDUS, TRIGGERED_OLD_TRIGGERED);
         summoned->ForcedDespawn(1000);
 
-        if (m_lGlobesGuidList.empty())
-            SetPhase(PHASE_NORMAL);
+        // Start rejoin phase for Viscidus if all Globs are dead/have reached center but check that phase is not already started due to some hooks being called twice
+        if (m_lGlobesGuidList.empty() && m_phase != PHASE_REJOIN)
+            SetPhase(PHASE_REJOIN);
     }
 
     void SetPhase(uint8 phase)
@@ -228,9 +233,7 @@ struct boss_viscidusAI : public CombatAI
         switch (phase)
         {
             case PHASE_NORMAL:
-                m_creature->RemoveAurasDueToSpell(SPELL_INVIS_STALKER);
-                m_creature->RemoveAurasDueToSpell(SPELL_STUN_SELF);
-                m_creature->RemoveAurasDueToSpell(SPELL_INVIS_SELF);
+                m_hitCount = 0;
                 DoCastSpellIfCan(nullptr, SPELL_MEMBRANE_VISCIDUS, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
                 DoCastSpellIfCan(nullptr, SPELL_VISCIDUS_WEAKNESS, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
                 DoCastSpellIfCan(m_creature, SPELL_HATE_TO_ZERO);
@@ -263,10 +266,23 @@ struct boss_viscidusAI : public CombatAI
                     DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_SUICIDE_TRIGGER, CAST_TRIGGERED);
                 // Else, he explodes in small globs that must be destroyed
                 else if (DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_EXPLODE, CAST_TRIGGERED|CAST_INTERRUPT_PREVIOUS) == CAST_OK)
-                {
-                    DoScriptText(EMOTE_EXPLODE, m_creature);
                     ResetTimer(VISCIDUS_EXPLODE, 2 * IN_MILLISECONDS);
-                }
+                break;
+            }
+            case PHASE_REJOIN:
+            {
+                m_creature->RemoveAurasDueToSpell(SPELL_INVIS_STALKER);
+                m_creature->RemoveAurasDueToSpell(SPELL_STUN_SELF);
+                m_creature->RemoveAurasDueToSpell(SPELL_INVIS_SELF);
+
+                auto heal = (int32)((float)m_creature->GetMaxHealth() * 0.05f * (float)(m_aliveGlobs));
+                m_creature->CastCustomSpell(m_creature, SPELL_VISCIDUS_GROWS, &heal, nullptr, nullptr, TRIGGERED_IGNORE_UNSELECTABLE_FLAG|TRIGGERED_IGNORE_UNATTACKABLE_FLAG);
+                ResetTimer(VISCIDUS_REJOIN, 1 * IN_MILLISECONDS);
+                break;
+            }
+            case PHASE_SUICIDE:
+            {
+                DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_SUICIDE_TRIGGER, CAST_TRIGGERED);
                 break;
             }
             // Unexpected phase requested : return before setting
@@ -365,6 +381,17 @@ struct boss_viscidusAI : public CombatAI
 
     void HandleExplode()
     {
+        // At this point, Viscidus should play an emote like dying or exploding but this does not appear clearly in sniff (maybe a spell visual or stand state change?)
+
+        // Summon globs
+        DoCastSpellIfCan(m_creature, SPELL_SUMMON_GLOBS, CAST_TRIGGERED);
+        m_aliveGlobs = 0;
+
+        // Make invisible and stun self
+        DoCastSpellIfCan(nullptr, SPELL_INVIS_SELF, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_INVIS_STALKER, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_STUN_SELF, CAST_TRIGGERED);
+
         // Reset hit count for normal and freezing phase
         m_hitCount = 0;
         m_creature->RemoveAurasDueToSpell(SPELL_MEMBRANE_VISCIDUS);
@@ -372,6 +399,14 @@ struct boss_viscidusAI : public CombatAI
         m_lGlobesGuidList.clear();
 
         DoCastSpellIfCan(m_creature, SPELL_SUMMON_GLOBS, TRIGGERED_IGNORE_GCD);
+    }
+
+    void HandleRejoin()
+    {
+        if (m_aliveGlobs)
+            SetPhase(PHASE_NORMAL);
+        else
+            SetPhase(PHASE_SUICIDE);
     }
 };
 
@@ -392,6 +427,19 @@ struct ViscidusFreeze : public AuraScript
                 target->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, target, target);
         }
         return SPELL_AURA_PROC_OK;
+    }
+};
+
+struct ViscidusExplode : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            Unit* caster = spell->GetCaster();
+            if (caster)
+                DoScriptText(EMOTE_EXPLODE, caster);
+        }
     }
 };
 
@@ -437,19 +485,67 @@ struct ViscidusSummonGlobs : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        if (!spell->GetUnitTarget())
-            return;
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (!spell->GetUnitTarget())
+                return;
 
-        uint8 globeCount = floor(spell->GetUnitTarget()->GetHealthPercent() / 5.0f);
+            Unit* target = spell->GetUnitTarget();
+            uint8 globeCount = floor(target->GetHealthPercent() / 5.0f);
 
-        for (uint8 i = 0; i <= globeCount; ++i)
-            spell->GetUnitTarget()->CastSpell(spell->GetUnitTarget(), auiGlobSummonSpells[i], TRIGGERED_IGNORE_GCD);
+            for (uint8 i = 0; i <= globeCount; ++i)
+            {
+                if (target->CastSpell(target, auiGlobSummonSpells[i], TRIGGERED_IGNORE_GCD) == SPELL_CAST_OK)
+                    target->CastSpell(target, SPELL_VISCIDUS_SHRINKS_2, TRIGGERED_IGNORE_GCD);
+            }
+        }
+    }
+};
 
-        // Make invisible and stun self
-        spell->GetUnitTarget()->CastSpell(nullptr, SPELL_INVIS_SELF, TRIGGERED_OLD_TRIGGERED);
-        spell->GetUnitTarget()->CastSpell(nullptr, SPELL_INVIS_STALKER, TRIGGERED_OLD_TRIGGERED);
-        spell->GetUnitTarget()->CastSpell(nullptr, SPELL_STUN_SELF, TRIGGERED_OLD_TRIGGERED);
+struct ViscidusShrinks : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (!spell->GetUnitTarget())
+                return;
 
+            Unit* target = spell->GetUnitTarget();
+            target->CastSpell(target, SPELL_VISCIDUS_SHRINKS_1, TRIGGERED_IGNORE_GCD);
+            auto hpLose = uint32(0.05f * target->GetMaxHealth());
+            if (target->IsAlive() && target->GetHealth() > 1 + hpLose)
+                target->SetHealth(target->GetHealth() - hpLose);
+        }
+    }
+};
+
+struct RejoinViscidus : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (!spell->GetUnitTarget())
+                return;
+        }
+    }
+};
+
+struct ViscidusGrows : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_1)
+        {
+            if (!spell->GetUnitTarget())
+                return;
+
+            Unit* target = spell->GetUnitTarget();
+            int8 stacksToRemove = (int8)((float)spell->m_currentBasePoints[0] / ((float)target->GetMaxHealth() * 0.05f));
+            for (int8 i = 0; i < stacksToRemove; ++i)
+                target->RemoveAuraStack(SPELL_VISCIDUS_SHRINKS_1);
+        }
     }
 };
 
@@ -477,9 +573,13 @@ void AddSC_boss_viscidus()
     pNewScript->RegisterSelf();
 
     RegisterAuraScript<ViscidusFreeze>("spell_viscidus_freeze");
+    RegisterSpellScript<ViscidusExplode>("spell_viscidus_explode");
     RegisterSpellScript<SummonToxicSlime>("spell_summon_toxic_slime");
     RegisterSpellScript<ViscidusDespawnAdds>("spell_viscidus_despawn_adds");
     RegisterSpellScript<ViscidusSuicideTrigger>("spell_viscidus_suicide");
     RegisterSpellScript<ViscidusSummonGlobs>("spell_viscidus_summon_globs");
+    RegisterSpellScript<ViscidusShrinks>("spell_viscidus_shrinks");
+    RegisterSpellScript<RejoinViscidus>("spell_rejoin_viscidus");
+    RegisterSpellScript<ViscidusGrows>("spell_viscidus_grows");
     RegisterAuraScript<ViscidusFrostWeakness>("spell_viscidus_frost_weakness");
 }
