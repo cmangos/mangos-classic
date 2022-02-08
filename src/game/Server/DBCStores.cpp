@@ -227,7 +227,7 @@ void LoadDBCStores(const std::string& dataPath)
 
     if (!MaNGOS::Filesystem::exists(dbcPath))
     {
-        sLog.outError("DBC directory does not exist", dataPath.c_str());
+        sLog.outError("DBC directory does not exist: %s", dataPath.c_str());
         Log::WaitBeforeContinueIfNeed();
         exit(1);
     }
