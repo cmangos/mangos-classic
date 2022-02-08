@@ -135,6 +135,11 @@ class CooldownData
             return true;
         }
 
+        void SetCatCDExpireTime(TimePoint expireTime)
+        {
+            m_catExpireTime = expireTime;
+        }
+
         // return false if permanent
         bool GetCatCDExpireTime(TimePoint& expireTime) const
         {
@@ -217,10 +222,24 @@ class CooldownContainer
         {
             RemoveBySpellId(spellId);
             auto resultItr = m_spellIdMap.emplace(spellId, std::move(std::unique_ptr<CooldownData>(new CooldownData(clockNow, spellId, duration, spellCategory, categoryDuration, itemId, onHold))));
+            // do not overwrite one permanent category cooldown with another permanent category cooldown
             if (resultItr.second && spellCategory && categoryDuration)
             {
-                RemoveByCategory(spellCategory);
-                m_categoryMap.emplace(spellCategory, resultItr.first);
+                auto catItr = FindByCategory(spellCategory);
+                if (!onHold || catItr == m_spellIdMap.end() || !catItr->second->IsPermanent())
+                {
+                    // we must keep original category cd owner for sake of client sync
+                    if (catItr != m_spellIdMap.end())
+                    {
+                        catItr->second->SetCatCDExpireTime(std::chrono::milliseconds(categoryDuration) + clockNow);
+                        catItr->second->m_typePermanent = false;
+                        resultItr.first->second->m_category = 0;
+                    }
+                    else
+                        m_categoryMap.emplace(spellCategory, resultItr.first);
+                }
+                else
+                    resultItr.first->second->m_category = 0;
             }
 
             return resultItr.second;
