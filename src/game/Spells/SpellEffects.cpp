@@ -4469,7 +4469,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     return;
                 int32 heal = damage;
                 int32 spellid = m_spellInfo->Id;            // send main spell id as basepoints for not used effect
-                m_caster->CastCustomSpell(unitTarget, 19968, &heal, &spellid, nullptr, TRIGGERED_OLD_TRIGGERED);
+                m_caster->CastCustomSpell(unitTarget, 19968, &heal, &spellid, nullptr, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_INSTANT_CAST);
             }
             // Flash of Light
             else if (m_spellInfo->SpellIconID  == 242)
@@ -4478,7 +4478,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     return;
                 int32 heal = damage;
                 int32 spellid = m_spellInfo->Id;            // send main spell id as basepoints for not used effect
-                m_caster->CastCustomSpell(unitTarget, 19993, &heal, &spellid, nullptr, TRIGGERED_OLD_TRIGGERED);
+                m_caster->CastCustomSpell(unitTarget, 19993, &heal, &spellid, nullptr, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_INSTANT_CAST);
             }
             break;
         }

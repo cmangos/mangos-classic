@@ -1392,6 +1392,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
                 // spellInfo is triggered spell but we need mana cost of original casted spell
                 uint32 originalSpellId = spellInfo->Id;
                 // Holy Shock
+                uint32 manaCost = data.spell ? data.spell->m_currentBasePoints[1] : 0;
                 if (spellInfo->SpellFamilyFlags & uint64(0x0000000000200000))
                 {
                     switch (spellInfo->Id)
@@ -1404,6 +1405,8 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
                             return SPELL_AURA_PROC_FAILED;
                     }
                 }
+                else
+                    originalSpellId = data.spell ? data.spell->m_currentBasePoints[1] : 0;
                 SpellEntry const* originalSpell = sSpellTemplate.LookupEntry<SpellEntry>(originalSpellId);
                 if (!originalSpell)
                 {
