@@ -56,7 +56,7 @@ UPDATE spell_template SET EffectImplicitTargetA1=1 WHERE Id IN(11095,12872,12873
 -- Improved Wing Clip - talent aura which is meant to be cast on self
 UPDATE spell_template SET EffectImplicitTargetA1=1 WHERE Id IN(19228,19232,19233);
 -- Entrapment - talent aura which is meant to be cast on self
-UPDATE spell_template SET EffectImplicitTargetA1=1 WHERE Id IN(19184,19387,19388);
+UPDATE spell_template SET EffectImplicitTargetA1=1 WHERE Id IN(19184,19387,19388,19389,19390);
 -- Improved Hamstring - talent aura which is meant to be cast on self
 UPDATE spell_template SET EffectImplicitTargetA1=1 WHERE Id IN(12289,12668,23695);
 -- Celestial Focus - talent aura which is meant to be cast on self
