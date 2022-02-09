@@ -934,20 +934,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
             }
             break;
         }
-        case SPELLFAMILY_WARRIOR:
-        {
-            // Retaliation
-            if (dummySpell->IsFitToFamilyMask(uint64(0x0000000800000000)))
-            {
-                // check attack comes not from behind
-                if (pVictim->IsFacingTargetsBack(this))
-                    return SPELL_AURA_PROC_FAILED;
-
-                triggered_spell_id = 22858;
-                break;
-            }
-            break;
-        }
         case SPELLFAMILY_WARLOCK:
         {
             break;
