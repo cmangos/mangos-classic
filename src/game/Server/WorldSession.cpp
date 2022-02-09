@@ -754,7 +754,7 @@ void WorldSession::LogoutPlayer()
 
     SetInCharSelection();
 
-    LogoutRequest(0);
+    LogoutRequest(0, true, m_kickSession);
 
     if (m_kickSession)
     {
