@@ -11828,7 +11828,7 @@ uint32 Player::GetGossipTextId(uint32 menuId, WorldObject* pSource)
 uint32 Player::GetDefaultGossipMenuForSource(WorldObject* pSource) const
 {
     if (pSource->GetTypeId() == TYPEID_UNIT)
-        return ((Creature*)pSource)->GetCreatureInfo()->GossipMenuId;
+        return ((Creature*)pSource)->GetDefaultGossipMenuId();
     if (pSource->GetTypeId() == TYPEID_GAMEOBJECT)
         return ((GameObject*)pSource)->GetGOInfo()->GetGossipMenuId();
 
