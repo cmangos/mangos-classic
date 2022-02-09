@@ -1081,6 +1081,10 @@ class ObjectMgr
         // check if an entry on some map have is an encounter
         bool IsEncounter(uint32 creditEntry, uint32 mapId) const;
 
+        bool IsExistingGossipMenuId(uint32 menuId)
+        {
+            return m_mGossipMenusMap.find(menuId) != m_mGossipMenusMap.end();
+        }
         GossipMenusMapBounds GetGossipMenusMapBounds(uint32 uiMenuId) const
         {
             return m_mGossipMenusMap.equal_range(uiMenuId);

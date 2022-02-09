@@ -845,6 +845,16 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
 
                 break;
             }
+            case SCRIPT_COMMAND_SET_GOSSIP_MENU:
+            {
+                if (!sObjectMgr.IsExistingGossipMenuId(tmp.setGossipMenu.gossipMenuId))
+                {
+                    sLog.outErrorDb("Table `%s` using nonexistent gossip menu (id: %u) in SCRIPT_COMMAND_SET_GOSSIP_MENU for script id %u",
+                        tablename, tmp.setGossipMenu.gossipMenuId, tmp.id);
+                    continue;
+                }
+                break;
+            }
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -2860,6 +2870,14 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                     break;
             }
 
+            break;
+        }
+        case SCRIPT_COMMAND_SET_GOSSIP_MENU:                // 52
+        {
+            if (LogIfNotCreature(pTarget))
+                break;
+
+            ((Creature*)pTarget)->SetDefaultGossipMenuId(m_script->setGossipMenu.gossipMenuId);
             break;
         }
         default:
