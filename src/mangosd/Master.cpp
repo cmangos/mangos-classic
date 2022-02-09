@@ -235,6 +235,8 @@ int Master::Run()
         // wait for shut down and then let things go out of scope to close them down
         while (!World::IsStopped())
             std::this_thread::sleep_for(std::chrono::seconds(1));
+
+        world_thread.wait();
     }
 
     ///- Stop freeze protection before shutdown tasks
