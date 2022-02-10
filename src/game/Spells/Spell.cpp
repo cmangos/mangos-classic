@@ -750,6 +750,8 @@ void Spell::PrepareMasksForProcSystem(uint8 effectMask, uint32& procAttacker, ui
     {
         case SPELL_DAMAGE_CLASS_MELEE:
             procAttacker = PROC_FLAG_DEAL_MELEE_ABILITY;
+            if (m_attackType == BASE_ATTACK)
+                procAttacker |= PROC_FLAG_MAIN_HAND_WEAPON_SWING;
             if (m_attackType == OFF_ATTACK)
                 procAttacker |= PROC_FLAG_OFF_HAND_WEAPON_SWING;
             procVictim = PROC_FLAG_TAKE_MELEE_ABILITY;
@@ -770,7 +772,7 @@ void Spell::PrepareMasksForProcSystem(uint8 effectMask, uint32& procAttacker, ui
         default:
             if (IsPositiveEffectMask(m_spellInfo, effectMask, caster, target))           // Check for positive spell
             {
-                if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE) // if dmg class none
+                if (m_spellInfo->HasAttribute(SPELL_ATTR_ABILITY))
                 {
                     procAttacker = PROC_FLAG_DEAL_HELPFUL_ABILITY;
                     procVictim = PROC_FLAG_TAKE_HELPFUL_ABILITY;
@@ -788,7 +790,7 @@ void Spell::PrepareMasksForProcSystem(uint8 effectMask, uint32& procAttacker, ui
             }
             else                                           // Negative spell
             {
-                if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE) // if dmg class none
+                if (m_spellInfo->HasAttribute(SPELL_ATTR_ABILITY))
                 {
                     procAttacker = PROC_FLAG_DEAL_HARMFUL_ABILITY;
                     procVictim = PROC_FLAG_TAKE_HARMFUL_ABILITY;
