@@ -198,10 +198,10 @@ void AddSC_item_scripts()
     pNewScript->pItemUse = &ItemUse_item_orb_of_draconic_energy;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<AshbringerItemAura>("spell_ashbringer_item");
+    RegisterSpellScript<AshbringerItemAura>("spell_ashbringer_item");
 
     RegisterSpellScript<GDRChannel>("spell_gdr_channel");
-    RegisterAuraScript<GDRPeriodicDamage>("spell_gdr_periodic");
+    RegisterSpellScript<GDRPeriodicDamage>("spell_gdr_periodic");
     RegisterSpellScript<BanishExile>("spell_banish_exile");
-    RegisterAuraScript<OrbOfDeception>("spell_orb_of_deception");
+    RegisterSpellScript<OrbOfDeception>("spell_orb_of_deception");
 }

@@ -65,6 +65,6 @@ void LoadWarriorScripts()
 {
     RegisterSpellScript<WarriorExecute>("spell_warrior_execute");
     RegisterSpellScript<WarriorExecuteDamage>("spell_warrior_execute_damage");
-    RegisterAuraScript<Bloodrage>("spell_bloodrage");
-    RegisterAuraScript<RetaliationWarrior>("spell_retaliation_warrior");
+    RegisterSpellScript<Bloodrage>("spell_bloodrage");
+    RegisterSpellScript<RetaliationWarrior>("spell_retaliation_warrior");
 }

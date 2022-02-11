@@ -732,5 +732,5 @@ void AddSC_boss_thaddius()
 
     RegisterSpellScript<PolarityShift>("spell_thaddius_polarity_shift");
     RegisterSpellScript<ThaddiusChargeDamage>("spell_thaddius_charge_damage");
-    RegisterAuraScript<ThaddiusCharge>("spell_thaddius_charge_buff");
+    RegisterSpellScript<ThaddiusCharge>("spell_thaddius_charge_buff");
 }

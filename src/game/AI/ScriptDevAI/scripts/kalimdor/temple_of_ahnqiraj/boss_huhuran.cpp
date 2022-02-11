@@ -156,5 +156,5 @@ void AddSC_boss_huhuran()
     pNewScript->GetAI = &GetNewAIInstance<boss_huhuranAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<HuhuranWyvernSting>("spell_huhuran_wyvern_string");
+    RegisterSpellScript<HuhuranWyvernSting>("spell_huhuran_wyvern_string");
 }

@@ -48,5 +48,5 @@ struct ArcaneConcentration : public AuraScript
 
 void LoadMageScripts()
 {
-    RegisterAuraScript<ArcaneConcentration>("spell_arcane_concentration");
+    RegisterSpellScript<ArcaneConcentration>("spell_arcane_concentration");
 }

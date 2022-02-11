@@ -63,5 +63,5 @@ void AddSC_deadmines()
     pNewScript->pGOUse = &GOUse_go_defias_cannon;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<UnarmedWoodcutter>("spell_unarmed_woodcutter");
+    RegisterSpellScript<UnarmedWoodcutter>("spell_unarmed_woodcutter");
 }

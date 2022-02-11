@@ -152,10 +152,10 @@ struct DevourMagic : public SpellScript
 
 void LoadWarlockScripts()
 {
-    RegisterAuraScript<CurseOfAgony>("spell_curse_of_agony");
+    RegisterSpellScript<CurseOfAgony>("spell_curse_of_agony");
     RegisterSpellScript<LifeTap>("spell_life_tap");
-    RegisterAuraScript<SoulLink>("spell_soul_link");
+    RegisterSpellScript<SoulLink>("spell_soul_link");
     RegisterSpellScript<DevourMagic>("spell_devour_magic");
-    RegisterScript<CurseOfDoom>("spell_curse_of_doom");
+    RegisterSpellScript<CurseOfDoom>("spell_curse_of_doom");
     RegisterSpellScript<CurseOfDoomEffect>("spell_curse_of_doom_effect");
 }

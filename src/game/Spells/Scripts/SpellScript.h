@@ -143,26 +143,12 @@ class SpellScriptMgr
 // note - linux name mangling bugs out if two script templates have same class name - avoid it
 
 template <class T>
-void RegisterScript(std::string stringName)
-{
-    static_assert(std::is_base_of<SpellScript, T>::value, "T not derived from SpellScript");
-    static_assert(std::is_base_of<AuraScript, T>::value, "T not derived from AuraScript");
-    SpellScriptMgr::SetSpellScript(stringName, new T());
-    SpellScriptMgr::SetAuraScript(stringName, new T());
-}
-
-template <class T>
 void RegisterSpellScript(std::string stringName)
 {
-    static_assert(std::is_base_of<SpellScript, T>::value, "T not derived from SpellScript");
-    SpellScriptMgr::SetSpellScript(stringName, new T());
-}
-
-template <class U>
-void RegisterAuraScript(std::string stringName)
-{
-    static_assert(std::is_base_of<AuraScript, U>::value, "T not derived from AuraScript");
-    SpellScriptMgr::SetAuraScript(stringName, new U());
+    if constexpr (std::is_base_of<SpellScript, T>::value)
+        SpellScriptMgr::SetSpellScript(stringName, new T());
+    if constexpr (std::is_base_of<AuraScript, T>::value)
+        SpellScriptMgr::SetAuraScript(stringName, new T());
 }
 
 #endif // SPELLSCRIPT_H

@@ -660,5 +660,5 @@ void AddSC_shadowfang_keep()
     newScript->GetAI = &GetNewAIInstance<npc_deathstalker_vincentAI>;
     newScript->RegisterSelf();
 
-    RegisterAuraScript<ForsakenSkill>("spell_forsaken_skill");
+    RegisterSpellScript<ForsakenSkill>("spell_forsaken_skill");
 }

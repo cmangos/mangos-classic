@@ -314,9 +314,9 @@ void AddSC_spell_scripts()
 
     RegisterSpellScript<WondervoltTrap>("spell_wondervolt_trap");
     RegisterSpellScript<ArcaneCloaking>("spell_arcane_cloaking");
-    RegisterAuraScript<GreaterInvisibilityMob>("spell_greater_invisibility_mob");
-    RegisterAuraScript<FoodAnimation>("spell_food_animation");
-    RegisterAuraScript<DrinkAnimation>("spell_drink_animation");
+    RegisterSpellScript<GreaterInvisibilityMob>("spell_greater_invisibility_mob");
+    RegisterSpellScript<FoodAnimation>("spell_food_animation");
+    RegisterSpellScript<DrinkAnimation>("spell_drink_animation");
     RegisterSpellScript<spell_effect_summon_no_follow_movement>("spell_effect_summon_no_follow_movement");
     RegisterSpellScript<spell_scourge_strike>("spell_scourge_strike");
     RegisterSpellScript<TribalDeath>("spell_tribal_death");

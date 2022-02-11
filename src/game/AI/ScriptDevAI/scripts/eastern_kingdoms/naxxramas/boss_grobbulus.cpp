@@ -184,5 +184,5 @@ void AddSC_boss_grobbulus()
     newScript->GetAI = &GetNewAIInstance<boss_grobbulusAI>;
     newScript->RegisterSelf();
 
-    RegisterAuraScript<MutatingInjection>("spell_grobbulus_mutating_injection");
+    RegisterSpellScript<MutatingInjection>("spell_grobbulus_mutating_injection");
 }

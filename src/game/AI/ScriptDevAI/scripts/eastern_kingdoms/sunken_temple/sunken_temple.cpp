@@ -313,5 +313,5 @@ void AddSC_sunken_temple()
 
     RegisterSpellScript<SummonHakkar>("spell_summon_hakkar");
     RegisterSpellScript<HakkarSummoned>("spell_hakkar_summoned");
-    RegisterAuraScript<HexOfJammalanAura>("spell_hex_of_jammalan");
+    RegisterSpellScript<HexOfJammalanAura>("spell_hex_of_jammalan");
 }

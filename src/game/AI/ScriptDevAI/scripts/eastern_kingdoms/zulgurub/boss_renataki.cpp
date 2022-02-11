@@ -142,5 +142,5 @@ void AddSC_boss_renataki()
 
     RegisterSpellScript<ThousandBladesRenataki>("spell_thousand_blades_renataki");
     RegisterSpellScript<RenatakiVanish>("spell_renataki_vanish");
-    RegisterAuraScript<RenatakiVanishTeleport>("spell_renataki_vanish_teleport");
+    RegisterSpellScript<RenatakiVanishTeleport>("spell_renataki_vanish_teleport");
 }
