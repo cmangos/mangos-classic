@@ -380,7 +380,7 @@ bool TaxiMovementGenerator::Resume(Unit& unit)
     {
         Player& player = static_cast<Player&>(unit);
 
-        if (player.IsMounted())
+        if (player.GetMountID())
             player.OnTaxiFlightSplineEnd();
 
         if (!player.OnTaxiFlightSplineUpdate())
