@@ -1376,7 +1376,7 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
             case POWER_MANA:        maxValue = mana; break;
             case POWER_RAGE:        maxValue = 0; break;
             case POWER_FOCUS:       maxValue = POWER_FOCUS_DEFAULT; break;
-            case POWER_ENERGY:      maxValue = POWER_ENERGY_DEFAULT * cinfo->PowerMultiplier; break;
+            case POWER_ENERGY:      maxValue = 0; break;
             case POWER_HAPPINESS:   maxValue = POWER_HAPPINESS_DEFAULT; break;
         }
 
