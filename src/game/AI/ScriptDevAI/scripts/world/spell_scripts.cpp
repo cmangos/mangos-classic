@@ -304,6 +304,36 @@ struct RetaliationCreature : public SpellScript
     }
 };
 
+struct Stoned : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (apply)
+        {
+            if (target->GetTypeId() != TYPEID_UNIT)
+                return;
+
+            if (target->GetEntry() == 25507)
+                return;
+
+            target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NOT_SELECTABLE);
+            target->addUnitState(UNIT_STAT_ROOT);
+        }
+        else
+        {
+            if (target->GetTypeId() != TYPEID_UNIT)
+                return;
+
+            if (target->GetEntry() == 25507)
+                return;
+
+            // see dummy effect of spell 10254 for removal of flags etc
+            target->CastSpell(nullptr, 10254, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -321,4 +351,5 @@ void AddSC_spell_scripts()
     RegisterSpellScript<spell_scourge_strike>("spell_scourge_strike");
     RegisterSpellScript<TribalDeath>("spell_tribal_death");
     RegisterSpellScript<RetaliationCreature>("spell_retaliation_creature");
+    RegisterSpellScript<Stoned>("spell_stoned");
 }
