@@ -4828,7 +4828,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     }
 
     // not let players cast spells at mount (and let do it to creatures)
-    if (m_trueCaster->IsPlayer() && m_caster->IsMounted() && !m_IsTriggeredSpell &&
+    if (m_trueCaster->IsPlayer() && m_caster->GetMountID() && !m_IsTriggeredSpell &&
             !IsPassiveSpell(m_spellInfo) && !m_spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_MOUNTED))
     {
         if (m_caster->IsTaxiFlying())

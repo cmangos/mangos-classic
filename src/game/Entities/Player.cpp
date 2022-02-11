@@ -16925,7 +16925,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     if (npc)
     {
         // not let cheating with start flight mounted
-        if (IsMounted())
+        if (GetMountID())
         {
             GetSession()->SendActivateTaxiReply(ERR_TAXIPLAYERALREADYMOUNTED);
             return false;

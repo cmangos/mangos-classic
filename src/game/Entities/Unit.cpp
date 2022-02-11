@@ -8145,7 +8145,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
             break;
         case MOVE_RUN:
         {
-            if (IsMounted() && !IsTaxiFlying()) // Use on mount auras
+            if (IsMounted()) // Use on mount auras
             {
                 main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED);
                 stack_bonus     = GetTotalAuraMultiplier(SPELL_AURA_MOD_MOUNTED_SPEED_ALWAYS);
@@ -11622,7 +11622,7 @@ float Unit::GetCollisionHeight() const
 {
     float scaleMod = GetObjectScale(); // 99% sure about this
 
-    //if (IsMounted()) - backport mounted from tbc if needed in future
+    //if (GetMountID()) - backport mounted from tbc if needed in future
     //{
     //    if (CreatureDisplayInfoEntry const* mountDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID)))
     //    {
@@ -11652,7 +11652,7 @@ float Unit::GetCollisionWidth() const
 {
     float scaleMod = GetObjectScale(); // 99% sure about this
 
-    //if (IsMounted()) - backport mounted from tbc if needed in future
+    //if (GetMountID()) - backport mounted from tbc if needed in future
     //{
     //    if (CreatureDisplayInfoEntry const* mountDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID)))
     //    {
