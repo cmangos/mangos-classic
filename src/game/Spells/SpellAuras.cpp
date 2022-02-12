@@ -6241,10 +6241,10 @@ SpellAuraProcResult Aura::OnProc(ProcExecutionData& data)
     return SPELL_AURA_PROC_OK;
 }
 
-void Aura::OnAbsorb(int32& currentAbsorb, uint32& reflectedSpellId, int32& reflectDamage, bool& preventedDeath)
+void Aura::OnAbsorb(int32& currentAbsorb, int32& remainingDamage, uint32& reflectedSpellId, int32& reflectDamage, bool& preventedDeath)
 {
     if (AuraScript* script = GetAuraScript())
-        script->OnAbsorb(this, currentAbsorb, reflectedSpellId, reflectDamage, preventedDeath);
+        script->OnAbsorb(this, currentAbsorb, remainingDamage, reflectedSpellId, reflectDamage, preventedDeath);
 }
 
 void Aura::OnManaAbsorb(int32& currentAbsorb)
