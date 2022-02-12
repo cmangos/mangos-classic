@@ -710,6 +710,8 @@ void Unit::SendMoveRoot(bool state, bool broadcastOnly)
         }
         else
             m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
+
+        m_movementInfo.stime = World::GetCurrentMSTime(); // mark latest root change
     }
 
     if (!IsInWorld())
