@@ -165,7 +165,7 @@ ModelInstance::ModelInstance(MPQFile& f, const char* ModelInstName, uint32 mapID
     // scale factor - divide by 1024. game devs must be on crack, why not just use a float?
     sc = scale / 1024.0f;
 
-    char tempname[512];
+    char tempname[512 + (sizeof(szWorkDirWmo) / sizeof(szWorkDirWmo[0]))];
     sprintf(tempname, "%s/%s", szWorkDirWmo, ModelInstName);
 
     FILE* input = fopen(tempname, "r+b");
@@ -253,7 +253,7 @@ void Doodad::ExtractSet(WMODoodadData const& doodadData, ADT::MODF const& wmo, u
             }
         }
 
-        char tempname[1036];
+        char tempname[1036 + (sizeof(szWorkDirWmo) / sizeof(szWorkDirWmo[0]))];
         sprintf(tempname, "%s/%s", szWorkDirWmo, ModelInstName);
         FILE* input = fopen(tempname, "r+b");
         if (!input)
