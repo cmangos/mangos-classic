@@ -6223,7 +6223,7 @@ SpellCastResult Spell::CheckPower(bool strict)
 
 bool Spell::IgnoreItemRequirements() const
 {
-    if (m_channelOnly)
+    if (m_channelOnly || m_ignoreCosts)
         return true;
 
     // Workaround for double shard problem
