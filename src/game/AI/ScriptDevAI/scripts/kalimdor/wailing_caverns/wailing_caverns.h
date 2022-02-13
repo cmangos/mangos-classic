@@ -44,8 +44,12 @@ class instance_wailing_caverns : public ScriptedInstance
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
 
+        void DespawnAll(); // after naralex leaves
+
     protected:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
+
+        GuidVector m_spawns;
 };
 #endif

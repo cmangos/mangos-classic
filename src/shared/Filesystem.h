@@ -16,33 +16,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _AUTH_HMACSHA1_H
-#define _AUTH_HMACSHA1_H
+#ifndef MANGOSSERVER_FILESYSTEM_H
+#define MANGOSSERVER_FILESYSTEM_H
 
-#include "Common.h"
-#include <openssl/hmac.h>
-#include <openssl/sha.h>
+#include <boost/filesystem.hpp>
 
-class BigNumber;
-
-#define SEED_KEY_SIZE 16
-
-class HMACSHA1
+namespace MaNGOS
 {
-    public:
-        HMACSHA1(uint32 len, const uint8* seed);
-        HMACSHA1(uint32 len, const uint8* seed, bool);
-        ~HMACSHA1();
-        void UpdateBigNumber(BigNumber* bn);
-        void UpdateData(const uint8* data, int length);
-        void UpdateData(const std::string& str);
-        void Initialize();
-        void Finalize();
-        uint8* GetDigest() { return m_digest; };
-        static int GetLength() { return SHA_DIGEST_LENGTH; };
-    private:
-        HMAC_CTX* m_ctx;
-        uint8 m_key[SEED_KEY_SIZE];
-        uint8 m_digest[SHA_DIGEST_LENGTH];
-};
+    namespace Filesystem = boost::filesystem;
+}
+
 #endif

@@ -1656,10 +1656,19 @@ bool ChatHandler::HandleGoHelper(Player* player, uint32 mapid, float x, float y,
             SetSentErrorMessage(true);
             return false;
         }
+
+        if (mapid == player->GetMap()->GetId())
+            player->UpdateAllowedPositionZ(x, y, z);
+        else
+        {
+            TerrainInfo const* map = sTerrainMgr.LoadTerrain(mapid);
+            float groundZ = map->GetHeightStatic(x, y, z);
+            z = map->GetWaterOrGroundLevel(x, y, MAX_HEIGHT, groundZ);
+        }
     }
     else
     {
-        // we need check x,y before ask Z or can crash at invalide coordinates
+        // we need check x,y before ask Z or can crash at invalid coordinates
         if (!MapManager::IsValidMapCoord(mapid, x, y))
         {
             PSendSysMessage(LANG_INVALID_TARGET_COORD, x, y, mapid);

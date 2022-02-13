@@ -710,7 +710,7 @@ void BattleGround::EndBattleGround(Team winner)
     if (winner == ALLIANCE)
     {
         winmsg_id = LANG_BG_A_WINS;
-        PlaySoundToAll(SOUND_ALLIANCE_WINS);                // alliance wins sound
+        PlaySoundToTeam(SOUND_ALLIANCE_WINS, winner);
 
         SetWinner(WINNER_ALLIANCE);
 
@@ -720,7 +720,7 @@ void BattleGround::EndBattleGround(Team winner)
     else if (winner == HORDE)
     {
         winmsg_id = LANG_BG_H_WINS;
-        PlaySoundToAll(SOUND_HORDE_WINS);                   // horde wins sound
+        PlaySoundToTeam(SOUND_HORDE_WINS, winner);
 
         SetWinner(WINNER_HORDE);
 
@@ -1472,7 +1472,7 @@ void BattleGround::OnObjectDBLoad(GameObject* obj)
 
     m_eventObjects[MAKE_PAIR32(eventId.event1, eventId.event2)].gameobjects.push_back(obj->GetDbGuid());
     if (!IsActiveEvent(eventId.event1, eventId.event2))
-        ChangeBgObjectSpawnState(obj->GetObjectGuid(), RESPAWN_ONE_DAY);
+        ChangeBgObjectSpawnState(obj->GetDbGuid(), RESPAWN_ONE_DAY);
     else
     {
         // it's possible, that doors aren't spawned anymore (wsg)
@@ -1570,7 +1570,10 @@ void BattleGround::ChangeBgObjectSpawnState(uint32 dbGuid, uint32 respawntime)
 
     GameObject* obj = map->GetGameObject(dbGuid);
     if (!obj)
+    {
+        map->GetSpawnManager().RespawnGameObject(dbGuid, respawntime);
         return;
+    }
 
     if (respawntime == 0)
     {

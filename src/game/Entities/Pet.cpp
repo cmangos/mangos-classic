@@ -83,6 +83,17 @@ void Pet::RemoveFromWorld()
     if (IsInWorld())
         GetMap()->GetObjectsStore().erase<Pet>(GetObjectGuid(), (Pet*)nullptr);
 
+    if (isControlled())
+    {
+        if (Unit* owner = GetOwner())
+        {
+            if (owner->IsPlayer())
+            {
+                static_cast<Player*>(owner)->RelinquishFollowData(this->GetObjectGuid());
+            }
+        }
+    }
+
     ///- Don't call the function for Creature, normal mobs + totems go in a different storage
     Unit::RemoveFromWorld();
 }
@@ -936,14 +947,11 @@ int32 Pet::GetTPForSpell(uint32 spellid) const
     uint32 basetrainp = 0;
 
     SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBoundsBySpellId(spellid);
-
-    for (SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
+    if (bounds.first != bounds.second)
     {
-        if (!_spell_idx->second->reqtrainpoints)
+        basetrainp = bounds.first->second->reqtrainpoints;
+        if (basetrainp == 0)
             return 0;
-
-        basetrainp = _spell_idx->second->reqtrainpoints;
-        break;
     }
 
     uint32 spenttrainp = 0;

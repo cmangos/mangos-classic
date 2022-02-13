@@ -128,7 +128,16 @@ ObjectAccessor::SaveAllPlayers() const
     HashMapHolder<Player>::ReadGuard g(HashMapHolder<Player>::GetLock());
     HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();
     for (auto& itr : m)
-        itr.second->SaveToDB();
+    {
+        if (itr.second->IsInWorld())
+            itr.second->GetMap()->GetMessager().AddMessage([guid = itr.second->GetObjectGuid()](Map* map)
+            {
+                if (Player* player = map->GetPlayer(guid))
+                    player->SaveToDB();
+            });
+        else
+            itr.second->SaveToDB();
+    }
 }
 
 void ObjectAccessor::KickPlayer(ObjectGuid guid)

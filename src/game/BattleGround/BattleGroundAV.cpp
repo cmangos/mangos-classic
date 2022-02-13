@@ -585,12 +585,12 @@ void BattleGroundAV::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
 
     DEBUG_LOG("BattleGroundAV: Player from team %u clicked on gameobject entry %u", player->GetTeam(), go->GetEntry());
 
-    uint8 event = (sBattleGroundMgr.GetGameObjectEventIndex(go->GetGUIDLow())).event1;
+    uint8 event = (sBattleGroundMgr.GetGameObjectEventIndex(go->GetDbGuid())).event1;
     if (event >= BG_AV_MAX_NODES)                           // not a node
         return;
     AVNodeIds node = AVNodeIds(event);
 
-    switch ((sBattleGroundMgr.GetGameObjectEventIndex(go->GetGUIDLow())).event2 % BG_AV_MAX_STATES)
+    switch ((sBattleGroundMgr.GetGameObjectEventIndex(go->GetDbGuid())).event2 % BG_AV_MAX_STATES)
     {
         case POINT_CONTROLLED:
             ProcessPlayerAssaultsPoint(player, node);

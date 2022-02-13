@@ -39,7 +39,6 @@ class PlayerAI : public UnitAI
 
         CreatureSpellList const& GetSpellList() const override { return m_spellList; }
     protected:
-        uint32 LookupHighestLearnedRank(uint32 spellId);
         void AddPlayerSpellAction(uint32 spellId, std::function<Unit*()> selector = nullptr);
         Player* m_player;
 

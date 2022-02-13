@@ -183,13 +183,16 @@ void AntispamMgr::WorkerLoop()
             _temporaryCache.clear();
         }
 
-        auto const stop = std::chrono::high_resolution_clock::now();
-
-        auto const runTime = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count();
+        auto stop = std::chrono::high_resolution_clock::now();
+        auto runTime = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count();
 
         // if we completed sooner than expected, sleep for the remaining time
-        if (duration > runTime)
-            std::this_thread::sleep_for(std::chrono::milliseconds(duration - runTime));
+        while (duration > runTime && !_shutdownRequested)
+        {
+            stop = std::chrono::high_resolution_clock::now();
+            runTime = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count();
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        }
     }
 }
 

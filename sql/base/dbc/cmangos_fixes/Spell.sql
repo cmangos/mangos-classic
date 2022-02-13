@@ -54,9 +54,9 @@ UPDATE spell_template SET EffectImplicitTargetA1=26 WHERE Id IN(18952);
 -- It is possible talents are supposed to bypass normal casting, but evidenced by wotlk, the rest are all caster targeted, so assuming copypaste wrong data possibility as well
 UPDATE spell_template SET EffectImplicitTargetA1=1 WHERE Id IN(11095,12872,12873,15257,15331,15332,15333,15334);
 -- Improved Wing Clip - talent aura which is meant to be cast on self
-UPDATE spell_template SET EffectImplicitTargetA1=1 WHERE Id IN(19228,19232,19233);
+UPDATE spell_template SET EffectImplicitTargetA1=1 WHERE Id IN(19228,19232,19233,19234,19235);
 -- Entrapment - talent aura which is meant to be cast on self
-UPDATE spell_template SET EffectImplicitTargetA1=1 WHERE Id IN(19184,19387,19388);
+UPDATE spell_template SET EffectImplicitTargetA1=1 WHERE Id IN(19184,19387,19388,19389,19390);
 -- Improved Hamstring - talent aura which is meant to be cast on self
 UPDATE spell_template SET EffectImplicitTargetA1=1 WHERE Id IN(12289,12668,23695);
 -- Celestial Focus - talent aura which is meant to be cast on self
