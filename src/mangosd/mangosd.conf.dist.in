@@ -590,6 +590,12 @@ LogColors = ""
 #        Enable or disable Waterbreathing
 #        Default: 4 (Console as noneone)
 #
+#    AlwaysShowQuestGreeting
+#        Controls whether quest greetings (used when NPC is a quest giver but does not have UNIT_NPC_FLAG_GOSSIP) is always
+#        shown, or is shown only if there are more than one menu items available to the player.
+#        Default: 0 (disabled, original behavior)
+#                 1 (enabled)
+#
 #    TaxiFlightChatFix
 #        Workaround for client bug: resuming taxi flight on login causes missing chat channels until the flight ends.
 #        When enabled allows clients to join local channels of the zone they are flying over on login and all custom channels.
@@ -814,6 +820,8 @@ StartHonorPoints = 0
 MinHonorKills = 15
 MaintenanceDay = 3
 InstantLogout = 1
+DisableWaterBreath = 4
+AlwaysShowQuestGreeting = 0
 TaxiFlightChatFix = 0
 LongFlightPathsPersistence = 0
 AllFlightPaths = 0
