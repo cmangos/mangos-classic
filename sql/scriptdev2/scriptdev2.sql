@@ -447,7 +447,6 @@ UPDATE creature_template SET ScriptName='npc_invible_man' WHERE entry=17286;
 UPDATE creature_template SET ScriptName='npc_icecrown_guardian' WHERE entry=16441;
 UPDATE creature_template SET ScriptName='npc_stoneskin_gargoyle' WHERE entry=16168;
 UPDATE creature_template SET ScriptName='npc_living_poison' WHERE entry=16027;
-UPDATE creature_template SET ScriptName='npc_archmage_tarsis' WHERE entry=16381;
 INSERT INTO scripted_event_id VALUES
 (10495,'event_naxxramas'),
 (10536,'event_naxxramas'),

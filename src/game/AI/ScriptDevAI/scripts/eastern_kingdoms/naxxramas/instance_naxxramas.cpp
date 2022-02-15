@@ -1251,24 +1251,6 @@ bool ProcessEventId_naxxramas(uint32 eventId, Object* source, Object* /*target*/
     return false;
 }
 
-enum
-{
-    GOSSIP_ARCHMAGE_TARSIS_INITIAL  = 7229,
-    GOSSIP_ARCHMAGE_TARSIS_NEXT     = 7228,
-};
-
-bool GossipHello_npc_archmage_tarsis(Player* player, Creature* creature)
-{
-    uint32 gossipId = GOSSIP_ARCHMAGE_TARSIS_INITIAL;
-
-    if (creature->getStandState() == UNIT_STAND_STATE_SIT)
-        gossipId = GOSSIP_ARCHMAGE_TARSIS_NEXT;
-
-    player->PrepareGossipMenu(creature, gossipId);
-    player->SendPreparedGossip(creature);
-    return true;
-}
-
 void AddSC_instance_naxxramas()
 {
     Script* newScript = new Script;
@@ -1294,10 +1276,5 @@ void AddSC_instance_naxxramas()
     newScript = new Script;
     newScript->Name = "event_naxxramas";
     newScript->pProcessEventId = &ProcessEventId_naxxramas;
-    newScript->RegisterSelf();
-
-    newScript = new Script;
-    newScript->Name = "npc_archmage_tarsis";
-    newScript->pGossipHello = &GossipHello_npc_archmage_tarsis;
     newScript->RegisterSelf();
 }
