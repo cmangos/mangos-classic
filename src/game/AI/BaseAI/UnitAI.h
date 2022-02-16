@@ -418,6 +418,11 @@ class UnitAI : public CombatActions
          */
         virtual void OnCallForHelp(Unit* caller, Unit* enemy) {}
 
+        /*
+         * Notifies AI on pet/totem unsummon - warning: works only for pets/totems
+         */
+        virtual void OnUnsummon() {}
+
         void CheckForHelp(Unit* /*who*/, Unit* /*me*/, float /*dist*/);
         void DetectOrAttack(Unit* who);
         bool CanTriggerStealthAlert(Unit* who, float attackRadius) const;

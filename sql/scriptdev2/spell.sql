@@ -243,7 +243,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (14185,'spell_preparation');
 
 -- Shaman
--- INSERT INTO spell_scripts(Id, ScriptName) VALUES
+INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(6495,'spell_sentry_totem');
 
 -- Food and Drink
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
