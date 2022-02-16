@@ -11537,6 +11537,9 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId, bool forceQu
         }
     }
 
+    if (pSource->IsCreature() && canSeeQuests && !static_cast<Unit*>(pSource)->isQuestGiver())
+        canSeeQuests = false;
+
     if (canSeeQuests)
         PrepareQuestMenu(pSource->GetObjectGuid());
 
