@@ -79,7 +79,7 @@ class PrioritizeHealthUnitWraper
     public:
     explicit PrioritizeHealthUnitWraper(Unit* unit) : i_unit(unit)
     {
-        i_percent = unit->GetHealth() * 100 / unit->GetMaxHealth();
+        i_percent = unit->GetHealthPercent();
     }
     Unit* getUnit() const { return i_unit; }
     uint32 getPercent() const { return i_percent; }
