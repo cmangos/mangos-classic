@@ -387,11 +387,12 @@ enum
 
 bool AreaTrigger_at_stormwind_recruiter(Player* player, AreaTriggerEntry const* /*at*/)
 {
-    if (player->IsGameMaster() || player->GetLevel() < 56 || player->GetQuestRewardStatus(QUEST_THE_FIRST_AND_THE_LAST))
+    if (player->IsGameMaster() || player->GetTeam() != ALLIANCE || player->GetLevel() < 56 || player->GetQuestRewardStatus(QUEST_THE_FIRST_AND_THE_LAST))
         return false;
 
     if (Creature* justineDemalier = GetClosestCreatureWithEntry(player, NPC_JUSTINE_DEMALIER, 20.0f))
-        justineDemalier->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_A, player, justineDemalier);
+        if (!justineDemalier->IsInCombat())
+            justineDemalier->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_A, player, justineDemalier);
 
     return false;
 }
