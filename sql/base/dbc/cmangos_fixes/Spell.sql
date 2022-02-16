@@ -141,9 +141,6 @@ UPDATE spell_template SET AttributesEx=(AttributesEx&~0x00000040) WHERE id=29422
 -- Remove incorrect interrupt flag for Bellowing Roar spells used in various dragon encounters
 UPDATE spell_template SET InterruptFlags=0 WHERE Id IN (18431, 22686);
 
-UPDATE spell_template SET Attributes=320 WHERE id=28282; -- This makes Ashbringer passive aura icon invisible
-UPDATE spell_template SET AttributesEx=32, AttributesEx3=131072 WHERE id=28441; -- AB Effect 000, critters/neutral no longer attack
-
 UPDATE `spell_template` SET `EffectImplicitTargetA1` = 6 WHERE `Id` IN (25744,25787);
 
 -- Cantation of Manifestation 9095 - insane radius 12 - 100y reduced to 13-10y
