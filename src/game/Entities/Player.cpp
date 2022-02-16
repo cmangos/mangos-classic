@@ -16748,6 +16748,8 @@ void Player::RemoveSpellMods(std::set<SpellModifierPair>& usedAuraCharges)
             }
         }
     }
+
+    usedAuraCharges.clear();
 }
 
 void Player::ResetSpellModsDueToCanceledSpell(std::set<SpellModifierPair>& usedAuraCharges)
