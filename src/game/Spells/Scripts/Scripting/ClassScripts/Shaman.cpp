@@ -20,6 +20,7 @@
 #include "Spells/SpellAuras.h"
 #include "Entities/Totem.h"
 #include "AI/BaseAI/TotemAI.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 
 struct SentryTotem : public SpellScript, public AuraScript
 {
