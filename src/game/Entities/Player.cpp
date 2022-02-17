@@ -16891,7 +16891,7 @@ void Player::HandleStealthedUnitsDetection()
             {
                 ObjectGuid i_guid = (*i)->GetObjectGuid();
                 target->SendCreateUpdateToPlayer(this);
-                m_clientGUIDs.insert(i_guid);
+                AddAtClient((*i));
 
                 DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "%s is detected in stealth by player %u. Distance = %f", i_guid.GetString().c_str(), GetGUIDLow(), GetDistance(*i));
             }
