@@ -40,6 +40,8 @@ class PetAI : public CreatureAI
         void UpdateAI(const uint32 diff) override;
         static int Permissible(const Creature* creature);
 
+        void OnUnsummon() override;
+
     protected:
         std::string GetAIName() override { return "PetAI"; }
 
