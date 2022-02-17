@@ -82,7 +82,7 @@ struct AuraScript
     // called during any event that calculates aura modifier amount - caster can be nullptr
     virtual int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const { return value; }
     // called during done/taken damage calculation
-    virtual void OnDamageCalculate(Aura* /*aura*/, int32& /*advertisedBenefit*/, float& /*totalMod*/) const {}
+    virtual void OnDamageCalculate(Aura* /*aura*/, Unit* /*victim*/, int32& /*advertisedBenefit*/, float& /*totalMod*/) const {}
     // the following two hooks are done in an alternative fashion due to how they are usually used
     // if an aura is applied before, its removed after, and if some aura needs to do something after aura effect is applied, need to revert that change before its removed
     // called before aura apply and after aura unapply
