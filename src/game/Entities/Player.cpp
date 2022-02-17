@@ -16646,6 +16646,47 @@ void Player::RemovePetActionBar() const
     SendDirectMessage(data);
 }
 
+std::pair<float, float> Player::RequestFollowData(ObjectGuid guid)
+{
+    uint32 slotId = 0;
+    for (uint32 i = 0; i < 10; ++i)
+    {
+        if (m_followAngles.find(i) == m_followAngles.end())
+        {
+            slotId = i;
+            break;
+        }
+    }
+    m_followAngles.emplace(slotId, guid);
+    switch (slotId)
+    {
+        case 0: return { 3 * M_PI_F / 6, 1.5f }; // left
+        case 1: return { 9 * M_PI_F / 6, 1.5f }; // right
+        case 2: return { 7 * M_PI_F / 6, 1.5f };
+        case 3: return { 5 * M_PI_F / 6, 1.5f };
+        case 4: return { 6 * M_PI_F / 6, 1.5f };
+        case 5: return { 4 * M_PI_F / 6, 1.5f };
+        case 6: return { 8 * M_PI_F / 6, 1.5f };
+        case 7: return { 5.5f * M_PI_F / 6, 1.5f };
+        case 8: return { 6.5f * M_PI_F / 6, 1.5f };
+        case 9: return { 4.5f * M_PI_F / 6, 1.5f };
+        default:
+        case 10: return { 7.5f * M_PI_F / 6, 1.5f };
+    }
+}
+
+void Player::RelinquishFollowData(ObjectGuid guid)
+{
+    for (auto itr = m_followAngles.begin(); itr != m_followAngles.end(); ++itr)
+    {
+        if (itr->second == guid)
+        {
+            m_followAngles.erase(itr);
+            return;
+        }
+    }
+}
+
 bool Player::IsAffectedBySpellmod(SpellEntry const* spellInfo, SpellModifier* mod, std::set<SpellModifierPair>* consumedMods)
 {
     if (!mod || !spellInfo)
@@ -20220,41 +20261,6 @@ void Player::SetSpellModSpell(Spell* spell)
     }
     m_modsSpell = spell;
     m_consumedMods = &spell->m_usedAuraCharges;
-}
-
-std::pair<float, float> Player::RequestFollowData(ObjectGuid guid)
-{
-    uint32 slotId = 0;
-    for (uint32 i = 0; i < 10; ++i)
-    {
-        if (m_followAngles.find(i) == m_followAngles.end())
-        {
-            slotId = i;
-            break;
-        }
-    }
-    m_followAngles.emplace(slotId, guid);
-    switch (slotId)
-    {
-        case 0: return { M_PI_F / 2, 1.5f }; // left
-        case 1: return { 3 * M_PI_F / 2, 1.5f }; // right
-        case 2: return { 7 * M_PI_F / 6, 1.5f }; // behind right
-        case 3: return { 5 * M_PI_F / 6, 1.5f }; // behind left
-        default: return { M_PI_F, 3.0f }; // behind
-        // TODO: Army of the dead angles
-    }
-}
-
-void Player::RelinquishFollowData(ObjectGuid guid)
-{
-    for (auto itr = m_followAngles.begin(); itr != m_followAngles.end(); ++itr)
-    {
-        if (itr->second == guid)
-        {
-            m_followAngles.erase(itr);
-            return;
-        }
-    }
 }
 
 uint32 Player::LookupHighestLearnedRank(uint32 spellId)
