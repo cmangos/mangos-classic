@@ -168,12 +168,6 @@ void instance_naxxramas::OnCreatureCreate(Creature* creature)
         case NPC_ZOMBIE_CHOW:
         {
             m_zombieChowList.push_back(creature->GetObjectGuid());
-            creature->SetInCombatWithZone();
-            break;
-        }
-        case NPC_CORPSE_SCARAB:
-        {
-            creature->SetInCombatWithZone();
             break;
         }
         case NPC_NAXXRAMAS_CULTIST:
@@ -208,12 +202,10 @@ void instance_naxxramas::OnCreatureCreate(Creature* creature)
                             return;
                     }
                 }
-                creature->SetInCombatWithZone();
             }
             break;
         case NPC_GUARDIAN:
             m_icrecrownGuardianList.push_back(creature->GetObjectGuid());
-            creature->SetInCombatWithZone();
             break;
     }
 }
@@ -394,6 +386,24 @@ void instance_naxxramas::OnCreatureDeath(Creature* creature)
             creature->ForcedDespawn(2000);
             break;
         default:
+            break;
+    }
+}
+
+void instance_naxxramas::OnCreatureRespawn(Creature* creature)
+{
+    switch (creature->GetEntry())
+    {
+        case NPC_SOUL_WEAVER:
+        case NPC_UNSTOPPABLE_ABOM:
+        case NPC_SOLDIER_FROZEN:
+            if (!creature->IsTemporarySummon())
+                break;
+            [[fallthrough]];
+        case NPC_ZOMBIE_CHOW:
+        case NPC_GUARDIAN:
+        case NPC_CORPSE_SCARAB:
+            creature->SetInCombatWithZone();
             break;
     }
 }
