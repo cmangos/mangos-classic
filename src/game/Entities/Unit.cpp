@@ -8511,9 +8511,9 @@ bool Unit::SelectHostileTarget()
 
         // do not evade during combat script running
         // some scripts start in combat and disengage all attackers but npc is still locked in combat
-        if (getThreatManager().isThreatListEmpty() && IsStunned() && !AI()->GetCombatScriptStatus())
+        if (getThreatManager().isThreatListEmpty() && IsCrowdControlled() && !AI()->GetCombatScriptStatus())
             evadeFunc();
-        return !((AI()->GetCombatScriptStatus() || IsStunned()) && getThreatManager().isThreatListEmpty());
+        return !((AI()->GetCombatScriptStatus() || IsCrowdControlled()) && getThreatManager().isThreatListEmpty());
     }
 
     Unit* target = nullptr;
