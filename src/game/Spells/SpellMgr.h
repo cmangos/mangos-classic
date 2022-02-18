@@ -1790,6 +1790,10 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
         case SPELL_AURA_MOD_PERCENT_STAT:
             nonmui = true;
             break;
+        case SPELL_AURA_MOD_INCREASE_HEALTH:
+            if (entry->Id == 26522 && entry2->Id == 26522) // Lunar Fortune
+                return false;
+            break;
         case SPELL_AURA_MOD_HEALING_DONE:
         case SPELL_AURA_MOD_HEALING_PCT:
             // Do not stack similar debuffs: Mortal Strike, Aimed Shot, Hex of Weakness
