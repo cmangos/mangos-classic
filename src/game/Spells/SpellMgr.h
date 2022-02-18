@@ -1791,7 +1791,7 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
             nonmui = true;
             break;
         case SPELL_AURA_MOD_INCREASE_HEALTH:
-            if (entry->Id == 26522) // Lunar Fortune
+            if (entry->Id == 26522 && entry2->Id == 26522) // Lunar Fortune
                 return false;
             break;
         case SPELL_AURA_MOD_HEALING_DONE:
