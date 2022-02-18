@@ -8496,12 +8496,23 @@ bool Unit::SelectHostileTarget()
     if (!AI())
         return false;
 
+    auto evadeFunc = [&]()
+    {
+        // enter in evade mode in other case
+        FixateTarget(nullptr);
+        AI()->EnterEvadeMode();
+    };
+
     if (!AI()->CanExecuteCombatAction())
     {
         if (Unit* target = GetMap()->GetUnit(GetTargetGuid()))
             if (target != this)
                 SetInFront(target);
 
+        // do not evade during combat script running
+        // some scripts start in combat and disengage all attackers but npc is still locked in combat
+        if (getThreatManager().isThreatListEmpty() && IsStunned() && !AI()->GetCombatScriptStatus())
+            evadeFunc();
         return !((AI()->GetCombatScriptStatus() || IsStunned()) && getThreatManager().isThreatListEmpty());
     }
 
@@ -8585,9 +8596,7 @@ bool Unit::SelectHostileTarget()
         }
     }
 
-    // enter in evade mode in other case
-    FixateTarget(nullptr);
-    AI()->EnterEvadeMode();
+    evadeFunc();
 
     return false;
 }
