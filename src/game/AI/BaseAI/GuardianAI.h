@@ -41,9 +41,13 @@ class GuardianAI : public CreatureEventAI
         virtual void UpdateAI(const uint32 diff) override;
         virtual void CombatStop() override;
 
+        void JustDied(Unit* killer) override;
+
         void OnUnsummon() override;
     protected:
         std::string GetAIName() override { return "GuardianAI"; }
+
+        void RelinquishFollowData();
 
         float m_followAngle;
         float m_followDist;

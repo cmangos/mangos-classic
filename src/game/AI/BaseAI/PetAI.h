@@ -41,12 +41,15 @@ class PetAI : public CreatureAI
         static int Permissible(const Creature* creature);
 
         void OnUnsummon() override;
+        void JustDied(Unit* killer) override;
 
     protected:
         std::string GetAIName() override { return "PetAI"; }
 
     private:
         void UpdateAllies();
+
+        void RelinquishFollowData();
 
         bool inCombat;
 

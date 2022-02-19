@@ -95,7 +95,19 @@ void GuardianAI::CombatStop()
         m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
 }
 
+void GuardianAI::JustDied(Unit* killer)
+{
+    CreatureEventAI::JustDied(killer);
+    RelinquishFollowData();
+}
+
 void GuardianAI::OnUnsummon()
+{
+    CreatureEventAI::OnUnsummon();
+    RelinquishFollowData();
+}
+
+void GuardianAI::RelinquishFollowData()
 {
     if (Unit* owner = m_creature->GetOwner())
         if (owner->IsPlayer())
