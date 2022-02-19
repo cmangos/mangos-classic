@@ -4701,8 +4701,14 @@ void Spell::EffectActivateObject(SpellEffectIndex effIdx)
         case GameObjectActions::ANIMATE_CUSTOM_1:
         case GameObjectActions::ANIMATE_CUSTOM_2:
         case GameObjectActions::ANIMATE_CUSTOM_3:
+        {
             gameObjTarget->SendGameObjectCustomAnim(gameObjTarget->GetObjectGuid(), uint32(action) - uint32(GameObjectActions::ANIMATE_CUSTOM_0));
+            
+            bool scriptReturnValue = m_caster->GetTypeId() == TYPEID_PLAYER && sScriptDevAIMgr.OnGameObjectUse((Player*)m_caster, gameObjTarget);
+            if (!scriptReturnValue)
+                m_caster->GetMap()->ScriptsStart(sGameObjectTemplateScripts, gameObjTarget->GetEntry(), m_caster, gameObjTarget);
             break;
+        }
         case GameObjectActions::DISTURB: // What's the difference with Open?
         case GameObjectActions::OPEN:
             switch (m_spellInfo->Id)
