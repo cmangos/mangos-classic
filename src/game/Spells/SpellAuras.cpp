@@ -1930,38 +1930,37 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                 case FORM_BERSERKERSTANCE:
                 {
                     ShapeshiftForm previousForm = target->GetShapeshiftForm();
-                    uint32 ragePercent = 0;
+                    uint32 remainingRage = 0;
                     if (previousForm == FORM_DEFENSIVESTANCE)
                         if (Aura* aura = target->GetOverrideScript(831))
-                            ragePercent = aura->GetModifier()->m_amount;
-                    uint32 Rage_val = 0;
+                            remainingRage += aura->GetModifier()->m_amount * 10;
+
                     // Tactical mastery
-                    if (target->GetTypeId() == TYPEID_PLAYER)
+                    if (target->IsPlayer())
                     {
                         Unit::AuraList const& aurasOverrideClassScripts = target->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
                         for (Unit::AuraList::const_iterator iter = aurasOverrideClassScripts.begin(); iter != aurasOverrideClassScripts.end(); ++iter)
                         {
+                            uint32 rageVal = 0;
                             // select by script id
                             switch ((*iter)->GetModifier()->m_miscvalue)
                             {
-                                case 831: Rage_val =  50; break;
-                                case 832: Rage_val = 100; break;
-                                case 833: Rage_val = 150; break;
-                                case 834: Rage_val = 200; break;
-                                case 835: Rage_val = 250; break;
+                                case 831: rageVal =  50; break;
+                                case 832: rageVal = 100; break;
+                                case 833: rageVal = 150; break;
+                                case 834: rageVal = 200; break;
+                                case 835: rageVal = 250; break;
                             }
-                            if (Rage_val != 0)
+                            if (rageVal != 0)
+                            {
+                                remainingRage += rageVal;
                                 break;
+                            }
                         }
                     }
 
-                    if (ragePercent) // not zero
-                    {
-                        if (ragePercent != 100) // optimization
-                            target->SetPower(POWER_RAGE, (target->GetPower(POWER_RAGE) * ragePercent) / 100);
-                    }
-                    else if (target->GetPower(POWER_RAGE) > Rage_val)
-                        target->SetPower(POWER_RAGE, Rage_val);
+                    if (target->GetPower(POWER_RAGE) > remainingRage)
+                        target->SetPower(POWER_RAGE, remainingRage);
                     break;
                 }
                 default:
