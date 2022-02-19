@@ -849,6 +849,7 @@ class GameObject : public WorldObject
         float GetCapturePointSliderValue() const { return m_captureSlider; }
 
         float GetInteractionDistance() const;
+        float GetCollisionHeight() const override { return 1.f; } // to get away with ground collision
 
         GridReference<GameObject>& GetGridRef() { return m_gridRef; }
 
