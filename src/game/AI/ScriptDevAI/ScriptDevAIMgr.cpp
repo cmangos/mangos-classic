@@ -468,7 +468,7 @@ ScriptDevAIMgr::~ScriptDevAIMgr()
 
     m_scripts.clear();
 
-    num_sc_scripts = 0;
+    m_scriptCount = 0;
 
     setScriptLibraryErrorFile(nullptr, nullptr);
 }
@@ -479,7 +479,7 @@ void ScriptDevAIMgr::AddScript(uint32 id, Script* script)
         return;
 
     m_scripts[id] = script;
-    ++num_sc_scripts;
+    ++m_scriptCount;
 }
 
 Script* ScriptDevAIMgr::GetScript(uint32 id) const
@@ -519,15 +519,6 @@ void ScriptDevAIMgr::Initialize()
     FillSpellSummary();
 
     AddScripts();
-
-    // Check existence scripts for all registered by core script names
-    for (uint32 i = 1; i < GetScriptIdsCount(); ++i)
-    {
-        if (!m_scripts[i])
-            script_error_log("No script found for ScriptName '%s'.", GetScriptName(i));
-    }
-
-    outstring_log(">> Loaded %i C++ Scripts.", num_sc_scripts);
 #else
     outstring_log(">> ScriptDev is disabled!\n");
 #endif
@@ -576,6 +567,17 @@ void ScriptDevAIMgr::LoadScriptNames()
 
     sLog.outString(">> Loaded %d Script Names", count);
     sLog.outString();
+}
+
+void ScriptDevAIMgr::CheckScriptNames()
+{
+    // Check existence scripts for all registered by core script names
+    for (uint32 i = 1; i < GetScriptIdsCount(); ++i)
+    {
+        if (!m_scripts[i])
+            script_error_log("No script found for ScriptName '%s'.", GetScriptName(i));
+    }
+    outstring_log(">> Loaded %i C++ Scripts.", m_scriptCount);
 }
 
 uint32 ScriptDevAIMgr::GetScriptId(const char* name) const

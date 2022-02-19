@@ -1264,6 +1264,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading spell scripts...");
     SpellScriptMgr::LoadScripts();
 
+    // after spellscripts
+    sScriptDevAIMgr.CheckScriptNames();
+
     ///- Initialize game time and timers
     sLog.outString("Initialize game time and timers");
     m_gameTime = time(nullptr);
