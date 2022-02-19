@@ -5009,6 +5009,20 @@ void Unit::RemoveAurasWithInterruptFlags(uint32 flags)
     }
 }
 
+void Unit::RemoveAurasWithInterruptFlags(uint32 flags, SpellAuraHolder* except)
+{
+    for (SpellAuraHolderMap::iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end();)
+    {
+        if (iter->second->GetSpellProto()->AuraInterruptFlags & flags && iter->second != except)
+        {
+            RemoveSpellAuraHolder(iter->second);
+            iter = m_spellAuraHolders.begin();
+        }
+        else
+            ++iter;
+    }
+}
+
 void Unit::RemoveAurasWithAttribute(uint32 flags)
 {
     for (SpellAuraHolderMap::iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end();)
