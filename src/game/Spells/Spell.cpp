@@ -2853,6 +2853,12 @@ void Spell::Prepare()
 
     OnSuccessfulStart();
 
+    // Unsummon active Warlock demons when trying to summon a new one
+    if (Unit* unitCaster = dynamic_cast<Unit*>(m_trueCaster))
+        if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_DISMISS_PET))
+            if (Pet* pet = unitCaster->GetPet())
+                pet->Unsummon(PET_SAVE_NOT_IN_SLOT, unitCaster);
+
     // add non-triggered (with cast time and without)
     if (!m_IsTriggeredSpell)
     {
@@ -3056,11 +3062,6 @@ SpellCastResult Spell::cast(bool skipCheck)
     }
 
     spellModController.SetSuccess();
-
-    if (Unit* unitCaster = dynamic_cast<Unit*>(m_trueCaster))
-        if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_DISMISS_PET))
-            if (Pet* pet = unitCaster->GetPet())
-                pet->Unsummon(PET_SAVE_NOT_IN_SLOT, unitCaster);
 
     // CAST SPELL
     SendSpellCooldown();
