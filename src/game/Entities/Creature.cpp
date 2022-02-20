@@ -757,13 +757,6 @@ void Creature::Update(const uint32 diff)
 void Creature::RegenerateAll(uint32 diff)
 {
     m_regenTimer += diff;
-    if (m_regenTimer > 0)
-    {
-        if (diff >= m_regenTimer)
-            m_regenTimer = 0;
-        else
-            m_regenTimer -= diff;
-    }
     if (m_regenTimer < REGEN_TIME_FULL)
         return;
 
