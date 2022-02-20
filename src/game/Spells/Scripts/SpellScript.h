@@ -117,6 +117,12 @@ struct AuraScript
     virtual void OnHeartbeat(Aura* /*aura*/) const {}
 };
 
+class ScriptStorage
+{
+    public:
+        virtual ~ScriptStorage() {}
+};
+
 class SpellScriptMgr
 {
     public:
