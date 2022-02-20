@@ -3081,6 +3081,9 @@ SpellCastResult Spell::cast(bool skipCheck)
 
     OnCast();
 
+    if (!m_IsTriggeredSpell && !m_trueCaster->IsGameObject())
+        m_caster->RemoveAurasOnCast(AURA_INTERRUPT_FLAG_ACTION_LATE, m_spellInfo);
+
     // process immediate effects (items, ground, etc.) also initialize some variables
     _handle_immediate_phase();
 
@@ -3569,9 +3572,6 @@ void Spell::finish(bool ok)
     // call triggered spell only at successful cast (after clear combo points -> for add some if need)
     if (!m_TriggerSpells.empty())
         CastTriggerSpells();
-
-    if (!m_IsTriggeredSpell && !m_trueCaster->IsGameObject())
-        m_caster->RemoveAurasOnCast(AURA_INTERRUPT_FLAG_ACTION_LATE, m_spellInfo);
 
     // Stop Attack for some spells
     if (m_caster && m_spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET))
