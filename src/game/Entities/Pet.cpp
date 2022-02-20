@@ -1361,8 +1361,8 @@ void Pet::InitStatsForLevel(uint32 petlevel)
             sLog.outError("Pet have incorrect type (%u) for level handling.", getPetType());
     }
 
-    // Hunter's pets' should NOT use creature's original modifiers/multipliers
-    if (getPetType() != HUNTER_PET)
+    // Hunter and Warlock pets should NOT use creature's original modifiers/multipliers
+    if (getPetType() != HUNTER_PET && getPetType() != SUMMON_PET)
     {
         health *= cInfo->HealthMultiplier;
 
