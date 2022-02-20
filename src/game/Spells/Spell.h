@@ -492,6 +492,9 @@ class Spell
         // Not a trigger flag but same type of information
         bool m_clientCast;
 
+        // scriptable conditionals
+        bool m_ignoreRoot; //
+
         int32 GetCastTime() const { return m_casttime; }
         uint32 GetCastedTime() const { return m_timer; }
         bool IsAutoRepeat() const { return m_autoRepeat; }
@@ -687,8 +690,9 @@ class Spell
         WorldObject* GetTrueCaster() const { return m_trueCaster; }
         Unit* GetAffectiveCasterOrOwner() const;
 
-        // speed override
+        // overrides
         void SetOverridenSpeed(float newSpeed);
+        void SetIgnoreRoot(bool state) { m_ignoreRoot = state; }
     protected:
         void SendLoot(ObjectGuid guid, LootType loottype, LockType lockType);
         bool IgnoreItemRequirements() const;                // some item use spells have unexpected reagent data

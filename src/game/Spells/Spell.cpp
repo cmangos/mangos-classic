@@ -476,6 +476,8 @@ Spell::Spell(WorldObject* caster, SpellEntry const* info, uint32 triggeredFlags,
 
     m_overrideSpeed = false;
 
+    m_ignoreRoot = IsIgnoreRootSpell(m_spellInfo);
+
     OnInit();
 }
 
@@ -5201,7 +5203,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
             case SPELL_EFFECT_CHARGE:
             {
-                if (m_caster->hasUnitState(UNIT_STAT_ROOT))
+                if (!m_ignoreRoot && m_caster->hasUnitState(UNIT_STAT_ROOT))
                     return SPELL_FAILED_ROOTED;
 
                 if (Unit* target = m_targets.getUnitTarget())
@@ -5464,13 +5466,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (!m_caster || m_caster->IsTaxiFlying())
                     return SPELL_FAILED_NOT_ON_TAXI;
 
-                // Blink has leap first and then removing of auras with root effect
-                // need further research with this
-                if (m_spellInfo->Effect[i] != SPELL_EFFECT_LEAP)
-                {
-                    if (m_caster->hasUnitState(UNIT_STAT_ROOT))
-                        return SPELL_FAILED_ROOTED;
-                }
+                if (!m_ignoreRoot && m_caster->hasUnitState(UNIT_STAT_ROOT))
+                    return SPELL_FAILED_ROOTED;
 
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
                 {
