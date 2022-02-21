@@ -860,8 +860,8 @@ bool Creature::AIM_Initialize()
     m_ai.reset(FactorySelector::selectAI(this));
 
     // Handle Spawned Events, also calls Reset()
-    m_ai->JustRespawned();
     m_ai->SpellListChanged();
+    m_ai->JustRespawned();
 
     if (InstanceData* mapInstance = GetInstanceData())
         mapInstance->OnCreatureRespawn(this);
