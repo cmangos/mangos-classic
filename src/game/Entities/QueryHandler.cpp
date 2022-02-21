@@ -150,8 +150,8 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recv_data)
 
     Creature* unit = _player->GetMap()->GetAnyTypeCreature(guid);
 
-    // if (unit == nullptr)
-    //    sLog.outDebug( "WORLD: HandleCreatureQueryOpcode - (%u) NO SUCH UNIT! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );
+    if (!unit || (unit->GetEntry() != entry && unit->GetObjectGuid().GetEntry() != entry))
+        return;
 
     CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(entry);
     if (ci)
@@ -175,10 +175,7 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recv_data)
         data << uint32(ci->Rank);                           // Creature Rank (elite, boss, etc)
         data << uint32(0);                                  // unknown        wdbFeild11
         data << uint32(ci->PetSpellDataId);                 // Id from CreatureSpellData.dbc    wdbField12
-        if (unit)
-            data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID); // DisplayID      wdbFeild13
-        else
-            data << uint32(Creature::ChooseDisplayId(ci));  // workaround, way to manage models must be fixed
+        data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID); // DisplayID      wdbFeild13
 
         data << uint16(ci->Civilian);                       // wdbFeild14
         SendPacket(data);
