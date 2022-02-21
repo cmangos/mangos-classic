@@ -1477,13 +1477,6 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
             target = pVictim;
             break;
         }
-        // Combo points add triggers (need add combopoint only for main target, and after possible combopoints reset)
-        case 15250: // Rogue Setup
-        {
-            if (!pVictim || pVictim != GetVictim())  // applied only for main target
-                return SPELL_AURA_PROC_FAILED;
-            break;                                   // continue normal case
-        }
         // Finishing moves that add combo points
         case 14189: // Seal Fate (Netherblade set)
         case 14157: // Ruthlessness

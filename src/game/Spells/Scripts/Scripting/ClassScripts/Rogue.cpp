@@ -107,10 +107,20 @@ struct ImprovedSap : public SpellScript
     }
 };
 
+// 13983 - Setup
+struct SetupRogue : public AuraScript
+{
+    bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& data) const override
+    {
+        return data.victim->GetTarget() == data.attacker;
+    }
+}
+
 void LoadRogueScripts()
 {
     RegisterSpellScript<spell_preparation>("spell_preparation");
     RegisterSpellScript<Stealth>("spell_stealth");
     RegisterSpellScript<VanishRogue>("spell_vanish");
     RegisterSpellScript<ImprovedSap>("spell_improved_sap");
+    RegisterSpellScript<SetupRogue>("spell_setup_rogue");
 }
