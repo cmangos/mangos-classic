@@ -3081,6 +3081,10 @@ SpellCastResult Spell::cast(bool skipCheck)
     // process immediate effects (items, ground, etc.) also initialize some variables
     _handle_immediate_phase();
 
+    Unit* procTarget = m_targets.getUnitTarget();
+    if (!procTarget)
+        procTarget = m_caster;
+
     // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
     if (GetSpellSpeed() > 0.0f && !IsChanneledSpell(m_spellInfo))
     {
@@ -3119,9 +3123,19 @@ SpellCastResult Spell::cast(bool skipCheck)
                 }
             }
         }
+
+        // on spell cast end proc,
+        // critical hit related part is currently done on hit so proc there,
+        // 0 damage since any damage based procs should be on hit
+        // 0 victim proc since there is no victim proc dependent on successfull cast for caster
+        Unit::ProcDamageAndSpell(ProcSystemArguments(m_caster, procTarget, PROC_EX_NORMAL_HIT, 0, PROC_EX_CAST_END, 0, m_attackType, m_spellInfo));
     }
     else // Immediate spell, no big deal
+    {
+
+        Unit::ProcDamageAndSpell(ProcSystemArguments(m_caster, procTarget, PROC_EX_NORMAL_HIT, 0, PROC_EX_CAST_END, 0, m_attackType, m_spellInfo));
         handle_immediate();
+    }
 
     m_trueCaster->DecreaseCastCounter();
     SetExecutedCurrently(false);
