@@ -269,6 +269,8 @@ class instance_naxxramas : public ScriptedInstance, private DialogueHelper
 
         void OnCreatureDeath(Creature* creature) override;
 
+        void OnCreatureRespawn(Creature* creature) override;
+
         void SetData(uint32 type, uint32 data) override;
         uint32 GetData(uint32 type) const override;
 

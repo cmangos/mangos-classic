@@ -729,6 +729,6 @@ void AddSC_boss_kelthuzad()
 
     RegisterSpellScript<TriggerKTAdd>("spell_trigger_KT_add");
     RegisterSpellScript<ChainsKelThuzad>("spell_chains_kel_thuzad");
-    RegisterAuraScript<FrostBlast>("spell_kel_thuzad_frost_blast");
-    RegisterAuraScript<GuardianPeriodic>("spell_icecrown_guardian_periodic");
+    RegisterSpellScript<FrostBlast>("spell_kel_thuzad_frost_blast");
+    RegisterSpellScript<GuardianPeriodic>("spell_icecrown_guardian_periodic");
 }

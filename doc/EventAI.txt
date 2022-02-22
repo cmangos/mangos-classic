@@ -177,6 +177,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 61  ACTION_T_SET_IMMOBILIZED_STATE          Apply, CombatOnly                   CombatOnly is autoremoved on combat stop (death, evade, despawn)
 62  ACTION_T_SET_DESPAWN_AGGREGATION        Mask, Entry1, Entry2                Enable aggregation of guids for despawn on event (death, evade). To be used mostly on spawn.
 63  ACTION_T_SET_IMMUNITY_SET               SetId                               Immunity Set ID - creature_immunities
+64  ACTION_T_SET_FOLLOW_MOVEMENT            State                               0 Off, 1 On
 
 * = Use -1 where the param is expected to do nothing. Random constant is generated for each event, so if you have a random yell and a random sound, they will be linked up with each other (ie. param2 with param2).
 
@@ -1129,6 +1130,11 @@ Parameter 2 and 3: Creature Entry - in case only specific entries should be desp
 63 - ACTION_T_SET_IMMUNITY_SET
 ------------------------------
 Parameter 1: Set ID - creature_immunities
+
+---------------------------------
+64 - ACTION_T_SET_FOLLOW_MOVEMENT
+---------------------------------
+Parameter 1: State - 0 off, 1 on
 
 =========================================
 Target Types

@@ -1027,6 +1027,7 @@ struct ScourgeMinion : public CombatAI
                     else
                         ResetCombatAction(EVENT_MINION_FLAMESHOCKERS_DESPAWN, 60000);
                 });
+                m_creature->CastSpell(m_creature, SPELL_FLAMESHOCKER_IMMOLATE_VISUAL, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
     }

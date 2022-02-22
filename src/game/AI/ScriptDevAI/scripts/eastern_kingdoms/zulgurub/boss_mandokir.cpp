@@ -302,6 +302,6 @@ void AddSC_boss_mandokir()
     pNewScript->GetAI = &GetNewAIInstance<mob_ohganAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<ThreateningGaze>("spell_threatening_gaze");
+    RegisterSpellScript<ThreateningGaze>("spell_threatening_gaze");
     RegisterSpellScript<DespawnChainedSpirits>("spell_despawn_chained_spirits");
 }

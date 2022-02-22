@@ -173,7 +173,8 @@ void CreatureAI::OnCallForHelp(Unit* caller, Unit* enemy)
     {
         if (factionTemplate->factionFlags & FACTION_TEMPLATE_FLEE_FROM_CALL_FOR_HELP)
         {
-            m_creature->SetInPanic(10000);
+            if (m_creature->SetInPanic(10000))
+                SetAIOrder(ORDER_FLEE_FROM_CALL_FOR_HELP);
             return;
         }
     }
@@ -204,7 +205,10 @@ CreatureSpellList const& CreatureAI::GetSpellList() const
 void CreatureAI::TimedFleeingEnded()
 {
     UnitAI::TimedFleeingEnded();
-    if (FactionTemplateEntry const* factionTemplate = m_creature->GetFactionTemplateEntry())
-        if (factionTemplate->factionFlags & FACTION_TEMPLATE_FLEE_FROM_CALL_FOR_HELP)
-            EnterEvadeMode();
+    if (GetAIOrder() == ORDER_FLEE_FROM_CALL_FOR_HELP && m_creature->IsAlive())
+    {
+        if (FactionTemplateEntry const* factionTemplate = m_creature->GetFactionTemplateEntry())
+            if (factionTemplate->factionFlags & FACTION_TEMPLATE_FLEE_FROM_CALL_FOR_HELP)
+                EnterEvadeMode();
+    }
 }

@@ -141,9 +141,6 @@ UPDATE spell_template SET AttributesEx=(AttributesEx&~0x00000040) WHERE id=29422
 -- Remove incorrect interrupt flag for Bellowing Roar spells used in various dragon encounters
 UPDATE spell_template SET InterruptFlags=0 WHERE Id IN (18431, 22686);
 
-UPDATE spell_template SET Attributes=320 WHERE id=28282; -- This makes Ashbringer passive aura icon invisible
-UPDATE spell_template SET AttributesEx=32, AttributesEx3=131072 WHERE id=28441; -- AB Effect 000, critters/neutral no longer attack
-
 UPDATE `spell_template` SET `EffectImplicitTargetA1` = 6 WHERE `Id` IN (25744,25787);
 
 -- Cantation of Manifestation 9095 - insane radius 12 - 100y reduced to 13-10y
@@ -209,6 +206,12 @@ UPDATE `spell_template` SET `RangeIndex` = 0 WHERE `Id` IN (16613,16619,16630,16
 
 -- Toxic Gas - used by Garden Gas in Naxx, remove SPELL_ATTR_EX_CHANNELED_1 and CHANNEL_FLAG_MOVEMENT to prevent aura being removed
 UPDATE spell_template SET AttributesEx=0, ChannelInterruptFlags=0 WHERE Id=30074;
+
+-- Lunar Festival fireworks spells have no missile speed serverside
+UPDATE `spell_template` SET `speed`=0 WHERE `Id` IN (26286, 26291, 26292, 26294, 26295, 26333, 26334, 26336, 26337, 26338, 26304, 26325, 26327, 26328, 26329, 26488, 26490, 26517, 26519, 26518, 26521);
+
+-- Gameobjects summoned by Lunar Festival fireworks only last one second
+UPDATE `spell_template` SET `DurationIndex`=36 WHERE `Id` IN (26300, 26301, 26302, 26303, 26305, 26306, 26307, 26308, 26309, 26310, 26311, 26312, 26313, 26314, 26315, 26316, 26317, 26318, 26319, 26320, 26321, 26322, 26323, 26324, 26344, 26345, 26346, 26347, 26348, 26349, 26351, 26352, 26353, 26354, 26355, 26356, 26357, 26358, 26359, 26360, 26361, 26362, 26483, 26484, 26485, 26486, 26487, 26491, 26492, 26493, 26494, 26495, 26496, 26497, 26498, 26499, 26500, 26501, 26502, 26503, 26504, 26505, 26506, 26507, 26508, 26509, 26510, 26511, 26512, 26513, 26514, 26515);
 
 -- ==================
 -- MaxAffectedTargets

@@ -57,6 +57,6 @@ struct FormScalingAttackPowerAuras : public AuraScript
 
 void LoadDruidScripts()
 {
-    RegisterAuraScript<Regrowth>("spell_regrowth");
-    RegisterAuraScript<FormScalingAttackPowerAuras>("spell_druid_form_scaling_ap_auras");
+    RegisterSpellScript<Regrowth>("spell_regrowth");
+    RegisterSpellScript<FormScalingAttackPowerAuras>("spell_druid_form_scaling_ap_auras");
 }

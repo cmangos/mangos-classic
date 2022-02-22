@@ -293,6 +293,47 @@ struct TribalDeath : public SpellScript
     }
 };
 
+struct RetaliationCreature : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        if (!spell->m_targets.getUnitTarget() || !spell->GetCaster()->HasInArc(spell->m_targets.getUnitTarget()))
+            return SPELL_FAILED_CASTER_AURASTATE;
+
+        return SPELL_CAST_OK;
+    }
+};
+
+struct Stoned : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (apply)
+        {
+            if (target->GetTypeId() != TYPEID_UNIT)
+                return;
+
+            if (target->GetEntry() == 25507)
+                return;
+
+            target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NOT_SELECTABLE);
+            target->addUnitState(UNIT_STAT_ROOT);
+        }
+        else
+        {
+            if (target->GetTypeId() != TYPEID_UNIT)
+                return;
+
+            if (target->GetEntry() == 25507)
+                return;
+
+            // see dummy effect of spell 10254 for removal of flags etc
+            target->CastSpell(nullptr, 10254, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -303,10 +344,12 @@ void AddSC_spell_scripts()
 
     RegisterSpellScript<WondervoltTrap>("spell_wondervolt_trap");
     RegisterSpellScript<ArcaneCloaking>("spell_arcane_cloaking");
-    RegisterAuraScript<GreaterInvisibilityMob>("spell_greater_invisibility_mob");
-    RegisterAuraScript<FoodAnimation>("spell_food_animation");
-    RegisterAuraScript<DrinkAnimation>("spell_drink_animation");
+    RegisterSpellScript<GreaterInvisibilityMob>("spell_greater_invisibility_mob");
+    RegisterSpellScript<FoodAnimation>("spell_food_animation");
+    RegisterSpellScript<DrinkAnimation>("spell_drink_animation");
     RegisterSpellScript<spell_effect_summon_no_follow_movement>("spell_effect_summon_no_follow_movement");
     RegisterSpellScript<spell_scourge_strike>("spell_scourge_strike");
     RegisterSpellScript<TribalDeath>("spell_tribal_death");
+    RegisterSpellScript<RetaliationCreature>("spell_retaliation_creature");
+    RegisterSpellScript<Stoned>("spell_stoned");
 }

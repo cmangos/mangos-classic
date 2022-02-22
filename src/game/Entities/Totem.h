@@ -65,6 +65,8 @@ class Totem : public Creature
 
         bool IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const override;
 
+        ObjectGuid const GetSpawnerGuid() const override { return GetOwnerGuid(); }
+
     protected:
         TotemType m_type;
         uint32 m_duration;

@@ -923,6 +923,11 @@ struct ConjureDreamRift : public SpellScript
 
 bool GOUse_go_omen_cluster(Player* /*player*/, GameObject* pGo)
 {
+    // The Cluster Launcher gameobject used to summon Omen is the same as the one that can be summoned from the Engineering-crafted launcher
+    // So we need to make sure we are called from the statically spawned ones only
+    if (pGo->GetSpawner())
+        return false;
+
     ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
 
     if (!pInstance)

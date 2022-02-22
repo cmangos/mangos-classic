@@ -316,6 +316,6 @@ void AddSC_boss_razorgore()
 
     RegisterSpellScript<DestroyEgg>("spell_destroy_egg");
     RegisterSpellScript<ExplosionRazorgore>("spell_explosion_razorgore");
-    RegisterAuraScript<PossessRazorgore>("spell_possess_razorgore");
+    RegisterSpellScript<PossessRazorgore>("spell_possess_razorgore");
     RegisterSpellScript<CalmDragonkin>("spell_calm_dragonkin");
 }

@@ -34,10 +34,10 @@ class ScriptedInstance : public InstanceData
         ~ScriptedInstance() {}
 
         // Default accessor functions
-        GameObject* GetSingleGameObjectFromStorage(uint32 entry);
-        Creature* GetSingleCreatureFromStorage(uint32 entry, bool skipDebugLog = false);
-        void GetCreatureGuidVectorFromStorage(uint32 entry, GuidVector& entryGuidVector, bool skipDebugLog = false);
-        void GetGameObjectGuidVectorFromStorage(uint32 entry, GuidVector& entryGuidVector, bool skipDebugLog = false);
+        GameObject* GetSingleGameObjectFromStorage(uint32 entry, bool skipDebugLog = false) const;
+        Creature* GetSingleCreatureFromStorage(uint32 entry, bool skipDebugLog = false) const;
+        void GetCreatureGuidVectorFromStorage(uint32 entry, GuidVector& entryGuidVector, bool skipDebugLog = false) const;
+        void GetGameObjectGuidVectorFromStorage(uint32 entry, GuidVector& entryGuidVector, bool skipDebugLog = false) const;
 
         // Change active state of doors or buttons
         void DoUseDoorOrButton(ObjectGuid guid, uint32 withRestoreTime = 0, bool useAlternativeState = false);

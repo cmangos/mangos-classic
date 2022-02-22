@@ -157,7 +157,7 @@ bool ExtractSingleWmo(std::string& fname)
 {
     // Copy files from archive
 
-    char szLocalFile[path_l + 512];
+    char szLocalFile[(sizeof(szWorkDirWmo) / sizeof(szWorkDirWmo[0])) + 512];
     char* plain_name = GetPlainName(&fname[0]);
     fixnamen(plain_name, strlen(plain_name));
     fixname2(plain_name, strlen(plain_name));

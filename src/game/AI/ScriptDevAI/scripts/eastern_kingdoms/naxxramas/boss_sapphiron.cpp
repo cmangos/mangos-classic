@@ -380,9 +380,9 @@ void AddSC_boss_sapphiron()
     newScript->pGOUse = &GOUse_go_sapphiron_birth;
     newScript->RegisterSelf();
 
-    RegisterAuraScript<PeriodicIceBolt>("spell_sapphiron_icebolt_aura");
+    RegisterSpellScript<PeriodicIceBolt>("spell_sapphiron_icebolt_aura");
     RegisterSpellScript<IceBolt>("spell_sapphiron_icebolt");
     RegisterSpellScript<SummonBlizzard>("spell_sapphiron_blizzard");
     RegisterSpellScript<DespawnIceBlock>("spell_sapphiron_iceblock");
-    RegisterAuraScript<DespawnBuffet>("spell_sapphiron_despawn_buffet");
+    RegisterSpellScript<DespawnBuffet>("spell_sapphiron_despawn_buffet");
 }

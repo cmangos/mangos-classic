@@ -82,7 +82,7 @@ struct AuraScript
     // called during any event that calculates aura modifier amount - caster can be nullptr
     virtual int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const { return value; }
     // called during done/taken damage calculation
-    virtual void OnDamageCalculate(Aura* /*aura*/, int32& /*advertisedBenefit*/, float& /*totalMod*/) const {}
+    virtual void OnDamageCalculate(Aura* /*aura*/, Unit* /*victim*/, int32& /*advertisedBenefit*/, float& /*totalMod*/) const {}
     // the following two hooks are done in an alternative fashion due to how they are usually used
     // if an aura is applied before, its removed after, and if some aura needs to do something after aura effect is applied, need to revert that change before its removed
     // called before aura apply and after aura unapply
@@ -143,26 +143,12 @@ class SpellScriptMgr
 // note - linux name mangling bugs out if two script templates have same class name - avoid it
 
 template <class T>
-void RegisterScript(std::string stringName)
-{
-    static_assert(std::is_base_of<SpellScript, T>::value, "T not derived from SpellScript");
-    static_assert(std::is_base_of<AuraScript, T>::value, "T not derived from AuraScript");
-    SpellScriptMgr::SetSpellScript(stringName, new T());
-    SpellScriptMgr::SetAuraScript(stringName, new T());
-}
-
-template <class T>
 void RegisterSpellScript(std::string stringName)
 {
-    static_assert(std::is_base_of<SpellScript, T>::value, "T not derived from SpellScript");
-    SpellScriptMgr::SetSpellScript(stringName, new T());
-}
-
-template <class U>
-void RegisterAuraScript(std::string stringName)
-{
-    static_assert(std::is_base_of<AuraScript, U>::value, "T not derived from AuraScript");
-    SpellScriptMgr::SetAuraScript(stringName, new U());
+    if constexpr (std::is_base_of<SpellScript, T>::value)
+        SpellScriptMgr::SetSpellScript(stringName, new T());
+    if constexpr (std::is_base_of<AuraScript, T>::value)
+        SpellScriptMgr::SetAuraScript(stringName, new T());
 }
 
 #endif // SPELLSCRIPT_H

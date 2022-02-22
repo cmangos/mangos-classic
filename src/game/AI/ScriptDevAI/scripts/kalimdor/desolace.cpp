@@ -54,7 +54,9 @@ enum
     SPELL_KODO_KOMBO_ITEM           = 18153,
     SPELL_KODO_KOMBO_PLAYER_BUFF    = 18172,                // spells here have unclear function, but using them at least for visual parts and checks
     SPELL_KODO_KOMBO_DESPAWN_BUFF   = 18377,
-    SPELL_KODO_KOMBO_GOSSIP         = 18362
+    SPELL_KODO_KOMBO_GOSSIP         = 18362,
+    SPELL_KODO_KOMBOBULATOR         = 18793,                // spell only exists in classic dbc, used by kodo on player after gossip menu is used
+    SPELL_KODO_DESPAWN              = 22970,                // spell only exists in classic dbc, used by kodo during following?
 };
 
 struct npc_aged_dying_ancient_kodoAI : public ScriptedAI
@@ -94,6 +96,7 @@ struct npc_aged_dying_ancient_kodoAI : public ScriptedAI
     {
         if (pSpell->Id == SPELL_KODO_KOMBO_GOSSIP)
         {
+            m_creature->GetMotionMaster()->MoveIdle();
             m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             m_uiDespawnTimer = 60000;
         }
@@ -164,10 +167,11 @@ bool GossipHello_npc_aged_dying_ancient_kodo(Player* pPlayer, Creature* pCreatur
         pPlayer->TalkedToCreature(pCreature->GetEntry(), pCreature->GetObjectGuid());
 
         pPlayer->RemoveAurasDueToSpell(SPELL_KODO_KOMBO_PLAYER_BUFF);
-        pCreature->GetMotionMaster()->MoveIdle();
+        pCreature->ForcedDespawn(10000);
     }
 
-    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
+    pPlayer->PrepareGossipMenu(pCreature, pPlayer->GetDefaultGossipMenuForSource(pCreature));
+    pPlayer->SendPreparedGossip(pCreature);
     return true;
 }
 

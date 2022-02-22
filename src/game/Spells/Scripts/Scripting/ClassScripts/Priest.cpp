@@ -80,6 +80,6 @@ void LoadPriestScripts()
 {
     RegisterSpellScript<PowerInfusion>("spell_power_infusion");
     RegisterSpellScript<SpiritOfRedemptionHeal>("spell_spirit_of_redemption_heal");
-    RegisterAuraScript<Blackout>("spell_blackout");
+    RegisterSpellScript<Blackout>("spell_blackout");
     RegisterSpellScript<Shadowguard>("spell_shadowguard");
 }

@@ -3038,7 +3038,7 @@ void Spell::EffectSummonWild(SpellEffectIndex eff_idx)
 
         if (Creature* summon = WorldObject::SummonCreature(
             TempSpawnSettings(m_trueCaster, creature_entry, px, py, pz, m_trueCaster->GetOrientation(), summonType, m_duration, false,
-                IsSpellSetRun(m_spellInfo), 0, 0, 0, false, false, m_spellInfo->Id), m_trueCaster->GetMap()))
+                IsSpellSetRun(m_spellInfo), 0, 0, 0, false, false, m_spellInfo->Id, -1, level), m_trueCaster->GetMap()))
         {
             // UNIT_FIELD_CREATEDBY are not set for these kind of spells.
             // Does exceptions exist? If so, what are they?

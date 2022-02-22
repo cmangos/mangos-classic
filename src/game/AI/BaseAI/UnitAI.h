@@ -92,6 +92,7 @@ enum AIOrders
     ORDER_FLEEING,
     ORDER_RETREATING,
     ORDER_EVADE,
+    ORDER_FLEE_FROM_CALL_FOR_HELP,
     ORDER_CUSTOM,
 };
 
@@ -416,6 +417,11 @@ class UnitAI : public CombatActions
          * Notifies AI on being called for help
          */
         virtual void OnCallForHelp(Unit* caller, Unit* enemy) {}
+
+        /*
+         * Notifies AI on pet/totem unsummon - warning: works only for pets/totems
+         */
+        virtual void OnUnsummon() {}
 
         void CheckForHelp(Unit* /*who*/, Unit* /*me*/, float /*dist*/);
         void DetectOrAttack(Unit* who);

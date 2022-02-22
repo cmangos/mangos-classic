@@ -157,6 +157,9 @@ UPDATE creature_template SET ScriptName='npc_pallid_horror' WHERE entry IN (1639
 UPDATE gameobject_template SET ScriptName='scourge_invasion_go_circle' WHERE entry=181136;
 UPDATE gameobject_template SET ScriptName='scourge_invasion_go_necropolis' WHERE entry IN (181154,181215,181223,181374,181373);
 
+/* Shaman */
+UPDATE creature_template SET ScriptName='npc_sentry_totem' WHERE entry=3968;
+
 /*  */
 /* ZONE */
 /* */
@@ -447,7 +450,6 @@ UPDATE creature_template SET ScriptName='npc_invible_man' WHERE entry=17286;
 UPDATE creature_template SET ScriptName='npc_icecrown_guardian' WHERE entry=16441;
 UPDATE creature_template SET ScriptName='npc_stoneskin_gargoyle' WHERE entry=16168;
 UPDATE creature_template SET ScriptName='npc_living_poison' WHERE entry=16027;
-UPDATE creature_template SET ScriptName='npc_archmage_tarsis' WHERE entry=16381;
 INSERT INTO scripted_event_id VALUES
 (10495,'event_naxxramas'),
 (10536,'event_naxxramas'),

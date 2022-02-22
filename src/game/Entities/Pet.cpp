@@ -83,17 +83,6 @@ void Pet::RemoveFromWorld()
     if (IsInWorld())
         GetMap()->GetObjectsStore().erase<Pet>(GetObjectGuid(), (Pet*)nullptr);
 
-    if (isControlled())
-    {
-        if (Unit* owner = GetOwner())
-        {
-            if (owner->IsPlayer())
-            {
-                static_cast<Player*>(owner)->RelinquishFollowData(this->GetObjectGuid());
-            }
-        }
-    }
-
     ///- Don't call the function for Creature, normal mobs + totems go in a different storage
     Unit::RemoveFromWorld();
 }
@@ -1018,6 +1007,8 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= nullptr*/)
     if (IsInCombat())
         CombatStop(true);
 
+    AI()->OnUnsummon();
+
     if (owner)
     {
         Player* p_owner = nullptr;
@@ -1370,8 +1361,8 @@ void Pet::InitStatsForLevel(uint32 petlevel)
             sLog.outError("Pet have incorrect type (%u) for level handling.", getPetType());
     }
 
-    // Hunter's pets' should NOT use creature's original modifiers/multipliers
-    if (getPetType() != HUNTER_PET)
+    // Hunter and Warlock pets should NOT use creature's original modifiers/multipliers
+    if (getPetType() != HUNTER_PET && getPetType() != SUMMON_PET)
     {
         health *= cInfo->HealthMultiplier;
 

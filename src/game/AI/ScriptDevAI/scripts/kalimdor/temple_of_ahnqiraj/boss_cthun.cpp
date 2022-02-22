@@ -791,8 +791,8 @@ void AddSC_boss_cthun()
     RegisterSpellScript<HookTentacleTrigger>("spell_hook_tentacle_trigger");
     RegisterSpellScript<ExitStomach>("spell_cthun_exit_stomach");
     RegisterSpellScript<CheckReset>("spell_cthun_check_reset");
-    RegisterAuraScript<PeriodicSummonEyeTrigger>("spell_cthun_periodic_eye_trigger");
-    RegisterAuraScript<PeriodicRotate>("spell_cthun_periodic_rotate");
-    RegisterAuraScript<CThunMouthTentacle>("spell_cthun_mouth_tentacle");
-    RegisterAuraScript<DigestiveAcidPeriodic>("spell_cthun_digestive_acid_periodic");
+    RegisterSpellScript<PeriodicSummonEyeTrigger>("spell_cthun_periodic_eye_trigger");
+    RegisterSpellScript<PeriodicRotate>("spell_cthun_periodic_rotate");
+    RegisterSpellScript<CThunMouthTentacle>("spell_cthun_mouth_tentacle");
+    RegisterSpellScript<DigestiveAcidPeriodic>("spell_cthun_digestive_acid_periodic");
 }

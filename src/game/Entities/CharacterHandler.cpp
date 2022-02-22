@@ -806,6 +806,11 @@ void WorldSession::HandlePlayerReconnect()
     m_playerLoading = true;
 
     // reset all visible objects to be able to resend them
+    for (auto guid : _player->m_clientGUIDs)
+    {
+        if (WorldObject* object = _player->GetMap()->GetWorldObject(guid))
+            object->RemoveClientIAmAt(_player);
+    }
     _player->m_clientGUIDs.clear();
 
     m_initialZoneUpdated = false;

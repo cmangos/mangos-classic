@@ -183,11 +183,6 @@ void instance_temple_of_ahnqiraj::OnCreatureCreate(Creature* creature)
                 creature->AI()->SetCombatMovement(false);
             creature->CastSpell(creature, SPELL_SUMMON_GIANT_PORTAL, TRIGGERED_OLD_TRIGGERED);
             break;
-        case NPC_EXIT_TRIGGER:
-            creature->SetInCombatWithZone(false);
-            if (creature->AI())
-                creature->AI()->SetCombatMovement(false);
-            break;
         case NPC_EYE_OF_CTHUN:
             // Safeguard for C'Thun encounter in case of fight abruptly ended during phase 2
             if (GetData(TYPE_CTHUN) != DONE)
@@ -233,6 +228,11 @@ void instance_temple_of_ahnqiraj::OnCreatureRespawn(Creature* creature)
         case NPC_QIRAJI_SCARAB:
         case NPC_QIRAJI_SCORPION:
             creature->SetCorpseDelay(5);
+            break;
+        case NPC_EXIT_TRIGGER:
+            creature->SetInCombatWithZone(false);
+            if (creature->AI())
+                creature->AI()->SetCombatMovement(false);
             break;
     }   
 }

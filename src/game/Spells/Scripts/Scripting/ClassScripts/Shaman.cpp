@@ -17,8 +17,83 @@
 */
 
 #include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
+#include "Entities/Totem.h"
+#include "AI/BaseAI/TotemAI.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
+
+struct SentryTotem : public SpellScript, public AuraScript
+{
+    void OnRadiusCalculate(Spell* spell, SpellEffectIndex effIdx, bool targetB, float& radius) const override
+    {
+        if (!targetB && effIdx == EFFECT_INDEX_0)
+            radius = 2.f;
+    }
+
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        if (Player* player = dynamic_cast<Player*>(spell->GetCaster()))
+            player->GetCamera().SetView(summon);
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target->IsPlayer())
+            return;
+
+        Totem* totem = target->GetTotem(TOTEM_SLOT_AIR);
+
+        if (totem && apply)
+            static_cast<Player*>(target)->GetCamera().SetView(totem);
+        else
+            static_cast<Player*>(target)->GetCamera().ResetView();
+    }
+};
+
+struct SentryTotemAI : public TotemAI
+{
+    using TotemAI::TotemAI;
+
+    void AttackStart(Unit* who) override
+    {
+        TotemAI::AttackStart(who);
+        // Sentry totem sends ping on attack
+        if (Player* owner = dynamic_cast<Player*>(m_creature->GetSpawner()))
+        {
+            WorldPacket data(MSG_MINIMAP_PING, (8 + 4 + 4));
+            data << m_creature->GetObjectGuid();
+            data << m_creature->GetPositionX();
+            data << m_creature->GetPositionY();
+            owner->SendDirectMessage(data);
+        }
+    }
+
+    void RemoveAura()
+    {
+        if (Unit* spawner = m_creature->GetSpawner())
+            spawner->RemoveAurasDueToSpell(m_creature->GetUInt32Value(UNIT_CREATED_BY_SPELL));
+    }
+
+    void JustDied(Unit* killer) override
+    {
+        TotemAI::JustDied(killer);
+        RemoveAura();
+    }
+
+    void OnUnsummon() override
+    {
+        TotemAI::OnUnsummon();
+        RemoveAura();
+    }
+};
 
 void LoadShamanScripts()
 {
+    Script* pNewScript = new Script;
+    pNewScript->Name = "npc_sentry_totem";
+    pNewScript->GetAI = &GetNewAIInstance<SentryTotemAI>;
+    pNewScript->RegisterSelf();
 
+    RegisterSpellScript<SentryTotem>("spell_sentry_totem");
 }

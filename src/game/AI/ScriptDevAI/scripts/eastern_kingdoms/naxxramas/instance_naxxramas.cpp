@@ -168,12 +168,6 @@ void instance_naxxramas::OnCreatureCreate(Creature* creature)
         case NPC_ZOMBIE_CHOW:
         {
             m_zombieChowList.push_back(creature->GetObjectGuid());
-            creature->SetInCombatWithZone();
-            break;
-        }
-        case NPC_CORPSE_SCARAB:
-        {
-            creature->SetInCombatWithZone();
             break;
         }
         case NPC_NAXXRAMAS_CULTIST:
@@ -208,12 +202,10 @@ void instance_naxxramas::OnCreatureCreate(Creature* creature)
                             return;
                     }
                 }
-                creature->SetInCombatWithZone();
             }
             break;
         case NPC_GUARDIAN:
             m_icrecrownGuardianList.push_back(creature->GetObjectGuid());
-            creature->SetInCombatWithZone();
             break;
     }
 }
@@ -394,6 +386,24 @@ void instance_naxxramas::OnCreatureDeath(Creature* creature)
             creature->ForcedDespawn(2000);
             break;
         default:
+            break;
+    }
+}
+
+void instance_naxxramas::OnCreatureRespawn(Creature* creature)
+{
+    switch (creature->GetEntry())
+    {
+        case NPC_SOUL_WEAVER:
+        case NPC_UNSTOPPABLE_ABOM:
+        case NPC_SOLDIER_FROZEN:
+            if (!creature->IsTemporarySummon())
+                break;
+            [[fallthrough]];
+        case NPC_ZOMBIE_CHOW:
+        case NPC_GUARDIAN:
+        case NPC_CORPSE_SCARAB:
+            creature->SetInCombatWithZone();
             break;
     }
 }
@@ -1251,24 +1261,6 @@ bool ProcessEventId_naxxramas(uint32 eventId, Object* source, Object* /*target*/
     return false;
 }
 
-enum
-{
-    GOSSIP_ARCHMAGE_TARSIS_INITIAL  = 7229,
-    GOSSIP_ARCHMAGE_TARSIS_NEXT     = 7228,
-};
-
-bool GossipHello_npc_archmage_tarsis(Player* player, Creature* creature)
-{
-    uint32 gossipId = GOSSIP_ARCHMAGE_TARSIS_INITIAL;
-
-    if (creature->getStandState() == UNIT_STAND_STATE_SIT)
-        gossipId = GOSSIP_ARCHMAGE_TARSIS_NEXT;
-
-    player->PrepareGossipMenu(creature, gossipId);
-    player->SendPreparedGossip(creature);
-    return true;
-}
-
 void AddSC_instance_naxxramas()
 {
     Script* newScript = new Script;
@@ -1294,10 +1286,5 @@ void AddSC_instance_naxxramas()
     newScript = new Script;
     newScript->Name = "event_naxxramas";
     newScript->pProcessEventId = &ProcessEventId_naxxramas;
-    newScript->RegisterSelf();
-
-    newScript = new Script;
-    newScript->Name = "npc_archmage_tarsis";
-    newScript->pGossipHello = &GossipHello_npc_archmage_tarsis;
     newScript->RegisterSelf();
 }

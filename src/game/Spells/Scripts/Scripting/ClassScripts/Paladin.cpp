@@ -78,5 +78,5 @@ struct spell_judgement : public SpellScript
 void LoadPaladinScripts()
 {
     RegisterSpellScript<spell_judgement>("spell_judgement");
-    RegisterAuraScript<SealOfTheCrusader>("spell_seal_of_the_crusader");
+    RegisterSpellScript<SealOfTheCrusader>("spell_seal_of_the_crusader");
 }

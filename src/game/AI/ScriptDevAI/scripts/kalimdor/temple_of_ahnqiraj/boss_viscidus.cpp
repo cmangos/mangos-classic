@@ -572,7 +572,7 @@ void AddSC_boss_viscidus()
     pNewScript->GetAI = &GetNewAIInstance<boss_viscidusAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<ViscidusFreeze>("spell_viscidus_freeze");
+    RegisterSpellScript<ViscidusFreeze>("spell_viscidus_freeze");
     RegisterSpellScript<ViscidusExplode>("spell_viscidus_explode");
     RegisterSpellScript<SummonToxicSlime>("spell_summon_toxic_slime");
     RegisterSpellScript<ViscidusDespawnAdds>("spell_viscidus_despawn_adds");
@@ -581,5 +581,5 @@ void AddSC_boss_viscidus()
     RegisterSpellScript<ViscidusShrinks>("spell_viscidus_shrinks");
     RegisterSpellScript<RejoinViscidus>("spell_rejoin_viscidus");
     RegisterSpellScript<ViscidusGrows>("spell_viscidus_grows");
-    RegisterAuraScript<ViscidusFrostWeakness>("spell_viscidus_frost_weakness");
+    RegisterSpellScript<ViscidusFrostWeakness>("spell_viscidus_frost_weakness");
 }

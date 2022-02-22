@@ -146,6 +146,7 @@ enum EventAI_ActionType
     ACTION_T_SET_IMMOBILIZED_STATE      = 61,               // state (true - rooted), combatonly (true - autoremoved on combat stop)
     ACTION_T_SET_DESPAWN_AGGREGATION    = 62,               // mask, entry, entry2
     ACTION_T_SET_IMMUNITY_SET           = 63,               // SetId - creature_immunities
+    ACTION_T_SET_FOLLOW_MOVEMENT        = 64,               // state - 0 off, 1 on
 
     ACTION_T_END,
 };
@@ -576,6 +577,11 @@ struct CreatureEventAI_Action
         {
             uint32 setId;
         } immunitySet;
+        // ACTION_T_SET_FOLLOW_MOVEMENT
+        struct
+        {
+            uint32 state;
+        } followMovement;
         // RAW
         struct
         {

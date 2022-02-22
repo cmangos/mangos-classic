@@ -1,5 +1,5 @@
 # Set build-directive (used in core to tell which buildtype we used)
-add_definitions(-D_BUILD_DIRECTIVE='"$(CONFIGURATION)"')
+add_definitions(-D_BUILD_DIRECTIVE='"${CMAKE_BUILD_TYPE}"')
 
 # Additional compaitibility checks and flags for commonly found LTS Clang versions
 if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0)

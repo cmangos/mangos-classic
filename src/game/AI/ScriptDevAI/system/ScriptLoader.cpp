@@ -28,6 +28,7 @@ extern void AddSC_spell_scripts();
 extern void AddSC_world_map_scripts();
 extern void AddSC_war_effort();
 extern void AddSC_scourge_invasion();
+extern void AddSC_lunar_festival();
 
 // eastern kingdoms
 extern void AddSC_blackrock_depths();                       // blackrock_depths
@@ -232,6 +233,7 @@ void AddScripts()
     AddSC_world_map_scripts();
     AddSC_war_effort();
     AddSC_scourge_invasion();
+    AddSC_lunar_festival();
 
     // eastern kingdoms
     AddSC_blackrock_depths();                               // blackrock_depths

@@ -388,7 +388,7 @@ void AddSC_boss_skeram()
     newScript->GetAI = &GetNewAIInstance<boss_skeramAI>;
     newScript->RegisterSelf();
 
-    RegisterAuraScript<TrueFulfillment>("spell_true_fulfillment");
+    RegisterSpellScript<TrueFulfillment>("spell_true_fulfillment");
     RegisterSpellScript<InitializeImages>("spell_initialize_images");
     RegisterSpellScript<TeleportImage>("spell_teleport_image");
     RegisterSpellScript<InitializeImage>("spell_initialize_image");

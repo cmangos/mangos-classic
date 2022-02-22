@@ -353,5 +353,5 @@ void AddSC_boss_heigan()
     newScript->GetAI = &GetAI_npc_diseased_maggot;
     newScript->RegisterSelf();
 
-    RegisterAuraScript<PlagueWaveController>("spell_plague_wave_controller");
+    RegisterSpellScript<PlagueWaveController>("spell_plague_wave_controller");
 }
