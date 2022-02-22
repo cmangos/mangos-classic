@@ -3974,7 +3974,8 @@ void Spell::SendChannelStart(uint32 duration)
                     diminishLevel = itr->diminishLevel;
                 }
                 target = ObjectAccessor::GetUnit(*m_caster, itr->targetGUID);
-                if (m_spellInfo->EffectRadiusIndex[EFFECT_INDEX_0] != 0 && m_spellInfo->EffectApplyAuraName[EFFECT_INDEX_0] == SPELL_AURA_MOD_POSSESS)
+                if (m_spellInfo->EffectRadiusIndex[EFFECT_INDEX_0] != 0 &&
+                    (m_spellInfo->EffectApplyAuraName[EFFECT_INDEX_0] == SPELL_AURA_MOD_POSSESS || m_spellInfo->EffectApplyAuraName[EFFECT_INDEX_0] == SPELL_AURA_BIND_SIGHT))
                     m_maxRange = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[EFFECT_INDEX_0]));
                 break;
             }
