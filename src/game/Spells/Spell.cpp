@@ -3086,7 +3086,7 @@ SpellCastResult Spell::cast(bool skipCheck)
         procTarget = m_caster;
 
     // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
-    if (GetSpellSpeed() > 0.0f && !IsChanneledSpell(m_spellInfo))
+    if (!IsDelayedSpell())
     {
         // For channels, delay starts at channel end
         if (m_spellState != SPELL_STATE_CHANNELING)
@@ -3144,8 +3144,6 @@ SpellCastResult Spell::cast(bool skipCheck)
 
 void Spell::handle_immediate()
 {
-    DoAllTargetlessEffects(true);
-
     for (auto& ihit : m_UniqueTargetInfo)
         DoAllEffectOnTarget(&ihit);
 
@@ -3244,6 +3242,9 @@ void Spell::_handle_immediate_phase()
 
     // handle none targeted effects
     DoAllTargetlessEffects(false);
+
+    if (!IsDelayedSpell())
+        DoAllTargetlessEffects(true);
 
     // process items
     for (auto& ihit : m_UniqueItemInfo)
@@ -7227,6 +7228,11 @@ float Spell::GetSpellSpeed() const
         return m_overridenSpeed;
     
     return m_spellInfo->speed;
+}
+
+bool Spell::IsDelayedSpell() const
+{
+    return GetSpellSpeed() > 0.0f && !IsChanneledSpell(m_spellInfo);
 }
 
 void Spell::ResetEffectDamageAndHeal()
