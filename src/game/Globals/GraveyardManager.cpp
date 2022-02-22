@@ -65,7 +65,7 @@ WorldSafeLocsEntry const* GraveyardManager::GetClosestGraveyardHelper(GraveYardM
             continue;
 
         // find now nearest graveyard at other (continent) map
-        if (mapId != entry->map_id)
+        if (mapId != entry->map_id && tempEntry)
         {
             // if find graveyard at different map from where entrance placed (or no entrance data), use any first
             if (!mapEntry ||
