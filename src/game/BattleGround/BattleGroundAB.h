@@ -153,6 +153,8 @@ enum ABGraveyards
 
     AB_GRAVEYARD_ALLIANCE               = 898,
     AB_GRAVEYARD_HORDE                  = 899,
+    AB_GRAVEYARD_ALLIANCE_BASE = 890,
+    AB_GRAVEYARD_HORDE_BASE = 889,
 
     BG_AB_ZONE_MAIN                     = 3358,
 };
