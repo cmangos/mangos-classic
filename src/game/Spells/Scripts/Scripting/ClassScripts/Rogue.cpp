@@ -102,7 +102,7 @@ struct SetupRogue : public AuraScript
     {
         return data.victim->GetTarget() == data.attacker;
     }
-}
+};
 
 void LoadRogueScripts()
 {
