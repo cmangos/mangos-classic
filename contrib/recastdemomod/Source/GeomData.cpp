@@ -146,7 +146,7 @@ void MeshObjects::LoadMap()
     if ((m_TileX == m_TileY) && m_TileX == 64)
         return;
 
-    TerrainBuilder* terrainBuilder = new TerrainBuilder(false);
+    TerrainBuilder* terrainBuilder = new TerrainBuilder(false, m_Ctx->getDataDir());
 
     terrainBuilder->loadMap(m_MapId, m_TileY, m_TileX, m_MapMesh);
 
@@ -197,7 +197,7 @@ void MeshObjects::LoadMap()
 
 void MeshObjects::LoadVMap()
 {
-    TerrainBuilder* terrainBuilder = new TerrainBuilder(false);
+    TerrainBuilder* terrainBuilder = new TerrainBuilder(false, m_Ctx->getDataDir());
 
     terrainBuilder->loadVMap(m_MapId, m_TileX, m_TileY, m_VMapMesh);
 

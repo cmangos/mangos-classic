@@ -144,6 +144,7 @@ protected:
     float m_vertsPerPoly;
     float m_detailSampleDist;
     float m_detailSampleMaxError;
+
     SamplePartitionType m_partitionType;
     SampleTool* m_tool;
     SampleToolState* m_toolStates[MAX_TOOLS];

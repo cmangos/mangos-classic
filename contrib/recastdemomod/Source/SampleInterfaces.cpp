@@ -16,10 +16,17 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-BuildContext::BuildContext() :
+BuildContext::BuildContext(const char* dataDir) :
 	m_messageCount(0),
 	m_textPoolSize(0)
 {
+	m_dataDir = dataDir;
+    m_mapsFolder = dataDir;
+    m_vMapsFolder = dataDir;
+    m_mMapsFolder = dataDir;
+    m_mapsFolder += "/maps";
+    m_vMapsFolder += "/vmaps";
+    m_mMapsFolder += "/mmaps";
 	resetTimers();
 }
 

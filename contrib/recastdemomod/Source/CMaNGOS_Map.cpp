@@ -268,8 +268,6 @@ void CMaNGOS_Map::Init()
     m_MapInfos->Init(m_mapID, m_ctx);
     m_navMesh = m_MapInfos->GetNavMesh();
     m_navQuery = m_MapInfos->GetNavMeshQuery();
-
-
 }
 
 void CMaNGOS_Map::ClearAllGeoms()
@@ -530,8 +528,8 @@ void CMaNGOS_Map::handleExtraSettings()
 
 void CMaNGOS_Map::ScanFoldersForMaps()
 {
-    scanDirectory("maps", "*.map", m_MapFiles);
-    scanDirectory("vmaps", "*.vmtree", m_VMapFiles);
+    scanDirectory(m_ctx->getMapFolder(), "*.map", m_MapFiles);
+    scanDirectory(m_ctx->getVMapFolder(), "*.vmtree", m_VMapFiles);
 
     m_MapsFound.clear();
     for (FileList::const_iterator itr = m_MapFiles.begin(); itr != m_MapFiles.end(); itr++)
@@ -568,11 +566,11 @@ void CMaNGOS_Map::scanFoldersForTiles()
 
     char buff[20];
     snprintf(buff, sizeof(buff), "%03d*.map", m_mapID);
-    scanDirectory("maps", buff, m_MapFiles);
+    scanDirectory(m_ctx->getMapFolder(), buff, m_MapFiles);
     snprintf(buff, sizeof(buff), "%03d*.vmtile", m_mapID);
-    scanDirectory("vmaps", buff, m_VMapFiles);
+    scanDirectory(m_ctx->getVMapFolder(), buff, m_VMapFiles);
     snprintf(buff, sizeof(buff), "%03d*.mmtile", m_mapID);
-    scanDirectory("mmaps", buff, m_MMapFiles);
+    scanDirectory(m_ctx->getMMapFolder(), buff, m_MMapFiles);
 
     for (FileList::const_iterator itr = m_MapFiles.begin(); itr != m_MapFiles.end(); itr++)
     {

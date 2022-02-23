@@ -45,7 +45,7 @@ MMapData::~MMapData()
 dtNavMesh* MMapData::Init(unsigned int mapId, BuildContext* ctx)
 {
     char mmapFilename[256];
-    snprintf(mmapFilename, sizeof(mmapFilename), "mmaps/%03d.mmap", mapId);
+    snprintf(mmapFilename, sizeof(mmapFilename), "%s/mmaps/%03d.mmap", ctx->getDataDir(), mapId);
 
     FILE* fp = fopen(mmapFilename, "rb");
     if (!fp)
@@ -85,7 +85,7 @@ bool MMapData::LoadTile(unsigned int tx, unsigned int ty)
         return false;
 
     char tileFilename[256];
-    snprintf(tileFilename, sizeof(tileFilename), "mmaps/%03d%02d%02d.mmtile", m_MapId, tx, ty); // Todo: check X,Y swap reason and get ride of it
+    snprintf(tileFilename, sizeof(tileFilename), "%s/mmaps/%03d%02d%02d.mmtile", m_Ctx->getDataDir(), m_MapId, tx, ty); // Todo: check X,Y swap reason and get ride of it
 
     FILE* fp = fopen(tileFilename, "rb");
     if (!fp)
