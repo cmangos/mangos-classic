@@ -997,7 +997,8 @@ enum ReactiveType
 #define MAX_CREATURE_ATTACK_RADIUS 45.0f                    // max distance for creature aggro (use with CONFIG_FLOAT_RATE_CREATURE_AGGRO)
 
 // Regeneration defines
-#define REGEN_TIME_FULL     2000                            // For this time difference is computed regen value
+#define REGEN_TIME_FULL         2000                            // For this time difference is computed regen value
+#define REGEN_TIME_FULL_UNIT    5000                            // For npcs
 
 // Power type values defines
 enum PowerDefaults

@@ -757,7 +757,7 @@ void Creature::Update(const uint32 diff)
 void Creature::RegenerateAll(uint32 diff)
 {
     m_regenTimer += diff;
-    if (m_regenTimer < REGEN_TIME_FULL)
+    if (m_regenTimer < REGEN_TIME_FULL_UNIT)
         return;
 
     if (!IsInCombat() || GetCombatManager().IsEvadeRegen())
@@ -765,7 +765,7 @@ void Creature::RegenerateAll(uint32 diff)
 
     RegeneratePower(2.f);
 
-    m_regenTimer -= REGEN_TIME_FULL;
+    m_regenTimer -= REGEN_TIME_FULL_UNIT;
 }
 
 void Creature::RegeneratePower(float timerMultiplier)
@@ -842,7 +842,8 @@ void Creature::RegenerateHealth()
     if (curValue >= maxValue)
         return;
 
-    uint32 addvalue = maxValue / 3;
+    // regenerate 33% for npc and ~13% for player controlled npc (enslave etc) ToDo: Find Regenvalue based on Spirit, might differ due to mob types
+    uint32 addvalue = IsPlayerControlled() ? maxValue * 0.13 : maxValue / 3;
 
     ModifyHealth(addvalue);
 }
