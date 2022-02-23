@@ -3086,7 +3086,7 @@ SpellCastResult Spell::cast(bool skipCheck)
         procTarget = m_caster;
 
     // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
-    if (!IsDelayedSpell())
+    if (IsDelayedSpell())
     {
         // For channels, delay starts at channel end
         if (m_spellState != SPELL_STATE_CHANNELING)
