@@ -97,7 +97,7 @@ enum
     NPC_GUARD_FENGUS            = 14321,
     NPC_GUARD_SLIPKIK           = 14323,
     NPC_CAPTAIN_KROMCRUSH       = 14325,
-    NPC_CHORUSH                 = 14324,
+    NPC_CHO_RUSH_THE_OBSERVER   = 14324,
     NPC_KING_GORDOK             = 11501,
     NPC_MIZZLE_THE_CRAFTY       = 14353,
 
