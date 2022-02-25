@@ -2853,7 +2853,7 @@ void Spell::Prepare()
 
     OnSuccessfulStart();
 
-    // Unsummon active Warlock demons when trying to summon a new one
+    // Unsummon active Warlock demons when trying to summon a new one - vanilla only location
     if (Unit* unitCaster = dynamic_cast<Unit*>(m_trueCaster))
         if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_DISMISS_PET))
             if (Pet* pet = unitCaster->GetPet())
