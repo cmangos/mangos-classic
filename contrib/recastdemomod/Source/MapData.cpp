@@ -49,6 +49,21 @@ bool MapInfos::LoadTile(unsigned int tx, unsigned int ty, bool loadGeom /*= true
     return false;
 }
 
+bool MapInfos::LoadModel(const std::string modelName, const std::string objId)
+{
+    if (!m_Initilized)
+        return false;
+
+    MeshObjects const* newObj = m_GeomData.LoadModel(modelName);
+
+    std::string filename = "go" + objId;
+
+
+    m_MMapData.LoadObjectNavMesh(filename);
+
+    return true;
+}
+
 void MapInfos::RemoveTile(unsigned int tx, unsigned int ty)
 {
     m_GeomData.RemoveTile(tx, ty);
