@@ -1216,7 +1216,7 @@ void Creature::SaveToDB(uint32 mapid)
        << GetGUIDLow() << ","
        << data.id << ","
        << data.mapid << ","
-       << data.spawnMask << ","
+       << static_cast<uint32>(data.spawnMask) << ","
        << data.modelid_override << ","
        << data.equipmentId << ","
        << data.posX << ","
@@ -1225,12 +1225,12 @@ void Creature::SaveToDB(uint32 mapid)
        << data.orientation << ","
        << data.spawntimesecsmin << ","                     // respawn time minimum
        << data.spawntimesecsmax << ","                     // respawn time maximum
-       << (float) data.spawndist << ","                    // spawn distance (float)
+       << static_cast<float>(data.spawndist) << ","        // spawn distance (float)
        << data.currentwaypoint << ","                      // currentwaypoint
        << data.curhealth << ","                            // curhealth
        << data.curmana << ","                              // curmana
        << (data.is_dead  ? 1 : 0) << ","                   // is_dead
-       << uint32(data.movementType) << ")";                // default movement generator type, cast to prevent save as symbol
+       << static_cast<uint32>(data.movementType) << ")";   // default movement generator type, cast to prevent save as symbol
 
     WorldDatabase.PExecuteLog("%s", ss.str().c_str());
 
