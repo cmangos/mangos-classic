@@ -5046,6 +5046,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (!target->IsPlayer() && m_spellInfo->EffectImplicitTargetA[i] != TARGET_UNIT_CASTER && m_spellInfo->EffectImplicitTargetB[i] != TARGET_UNIT_CASTER)
                         return SPELL_FAILED_BAD_TARGETS;
 
+                    if (!target->IsPlayer())
+                        target = m_caster;
+
                     if (i != EFFECT_INDEX_0) // TODO: Partial application
                         break;
 
