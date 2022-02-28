@@ -550,7 +550,7 @@ void WorldSession::UpdateMap(uint32 diff)
         std::swap(recvQueueMapCopy, m_recvQueueMap);
     }
 
-    for (size_t i = 0; m_Socket && !m_Socket->IsClosed() && i < recvQueueMapCopy.size(); ++i)
+    while (m_Socket && !m_Socket->IsClosed() && recvQueueMapCopy.size())
     {
         auto const packet = std::move(recvQueueMapCopy.front());
         recvQueueMapCopy.pop_front();
