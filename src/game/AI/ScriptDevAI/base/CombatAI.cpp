@@ -68,6 +68,12 @@ bool CombatAI::IsTargetingRestricted()
     return m_stopTargeting || m_storedTarget || ScriptedAI::IsTargetingRestricted();
 }
 
+void CombatAI::OnTaunt()
+{
+    if (m_storedTarget)
+        ResetTimer(ACTION_CASTING_RESTORE, 1); // clear on next update
+}
+
 void CombatAI::AddOnKillText(int32 text)
 {
     m_onDeathTexts.push_back(text);

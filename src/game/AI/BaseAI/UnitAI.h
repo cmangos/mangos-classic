@@ -490,6 +490,8 @@ class UnitAI : public CombatActions
         virtual void HandleDelayedInstantAnimation(SpellEntry const* spellInfo) {}
         virtual bool IsTargetingRestricted() { return GetCombatScriptStatus(); }
 
+        virtual void OnTaunt() {}
+
         virtual void HandleAssistanceCall(Unit* sender, Unit* invoker) {} // implemented for creatures
 
         virtual bool IsPreventingDeath() const { return false; }
