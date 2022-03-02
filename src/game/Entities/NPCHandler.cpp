@@ -325,7 +325,9 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket& recv_data)
         return;
     }
 
-    pCreature->GetMotionMaster()->PauseWaypoints();
+    // Stop the npc if moving
+    if (uint32 pauseTimer = pCreature->GetInteractionPauseTimer())
+        pCreature->GetMotionMaster()->PauseWaypoints(pauseTimer);
 
     if (pCreature->isSpiritGuide())
         pCreature->SendAreaSpiritHealerQueryOpcode(_player);

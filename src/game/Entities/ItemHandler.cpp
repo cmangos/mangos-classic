@@ -709,7 +709,8 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid) const
     }
 
     // Stop the npc if moving
-    pCreature->GetMotionMaster()->PauseWaypoints();
+    if (uint32 pauseTimer = pCreature->GetInteractionPauseTimer())
+        pCreature->GetMotionMaster()->PauseWaypoints(pauseTimer);
 
     VendorItemData const* vItems = pCreature->GetVendorItems();
     VendorItemData const* tItems = pCreature->GetVendorTemplateItems();

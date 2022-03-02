@@ -2168,6 +2168,11 @@ bool Creature::LoadCreatureAddon(bool reload)
     if (cainfo->emote != 0)
         SetUInt32Value(UNIT_NPC_EMOTESTATE, cainfo->emote);
 
+    if (cainfo->interaction_pause_timer != -1)
+        m_interactionPauseTimer = cainfo->interaction_pause_timer;
+    else
+        m_interactionPauseTimer = sWorld.getConfig(CONFIG_UINT32_INTERACTION_PAUSE_TIMER);
+
     if (cainfo->auras)
     {
         for (uint32 const* cAura = cainfo->auras; *cAura; ++cAura)

@@ -281,6 +281,7 @@ struct CreatureDataAddon
     uint8  flags;                                           // UnitBytes2_Flags
     uint32 emote;
     uint32 move_flags;
+    int32  interaction_pause_timer;
     uint32 const* auras;                                    // loaded as char* "spell1 spell2 ... "
 };
 
@@ -770,6 +771,7 @@ class Creature : public Unit
 
         void SetDefaultGossipMenuId(uint32 menuId) { m_gossipMenuId = menuId; }
         uint32 GetDefaultGossipMenuId() const { return m_gossipMenuId; }
+        uint32 GetInteractionPauseTimer() const { return m_interactionPauseTimer; }
 
         GridReference<Creature>& GetGridRef() { return m_gridRef; }
         bool IsRegeneratingHealth() const { return (GetCreatureInfo()->RegenerateStats & REGEN_FLAG_HEALTH) != 0; }
@@ -899,6 +901,7 @@ class Creature : public Unit
         bool m_canAggro;                                    // controls response of creature to attacks
         bool m_checkForHelp;                                // controls checkforhelp in ai
         float m_respawnradius;
+        uint32 m_interactionPauseTimer;                      // (msecs) waypoint pause time when interacted with
 
         CreatureSubtype m_subtype;                          // set in Creatures subclasses for fast it detect without dynamic_cast use
         void RegeneratePower(float timerMultiplier);
