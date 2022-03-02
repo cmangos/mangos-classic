@@ -629,6 +629,8 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
 
     m_consumedMods = nullptr;
     m_modsSpell = nullptr;
+
+    m_isDebuggingAreaTriggers = false;
 }
 
 Player::~Player()

@@ -188,7 +188,11 @@ enum MangosStrings
 
     LANG_COMMAND_CHANNELS_NO_CHANNELS   = 181,              // "There are no matching custom channels at the moment"
     LANG_COMMAND_CHANNELS_LIST_HEADER   = 182,              // "Listing up to %u custom channels matching criterea:"
-    // Room for more level 1              183-199 not used
+
+    LANG_DEBUG_AREATRIGGER_ON           = 183,
+    LANG_DEBUG_AREATRIGGER_OFF          = 184,
+    LANG_DEBUG_AREATRIGGER_REACHED      = 185,
+    // Room for more level 1              186-199 not used
 
     // level 2 chat
     LANG_NO_SELECTION                   = 200,
