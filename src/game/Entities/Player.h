@@ -951,6 +951,8 @@ class Player : public Unit
         bool isGMVisible() const { return !(m_ExtraFlags & PLAYER_EXTRA_GM_INVISIBLE); }
         void SetGMVisible(bool on);
         void SetPvPDeath(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH; else m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH; }
+        bool isDebuggingAreaTriggers() { return m_isDebuggingAreaTriggers; }
+        void SetDebuggingAreaTriggers(bool on) { m_isDebuggingAreaTriggers = on; }
 
         // Cannot be detected by creature (Should be tested in AI::MoveInLineOfSight)
         void SetCannotBeDetectedTimer(uint32 milliseconds) { m_cannotBeDetectedTimer = milliseconds; };
@@ -2411,6 +2413,8 @@ class Player : public Unit
         ObjectGuid m_summoner;
 
         std::map<uint32, uint32> m_forgottenSkills;
+
+        bool m_isDebuggingAreaTriggers;
 
     private:
         // internal common parts for CanStore/StoreItem functions

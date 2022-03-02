@@ -321,6 +321,22 @@ bool ChatHandler::HandleDebugPetDismissSound(char* args)
     return true;
 }
 
+bool ChatHandler::HandleDebugAreaTriggersCommand(char* /*args*/)
+{
+    Player* player = m_session->GetPlayer();
+    if (!player->isDebuggingAreaTriggers())
+    {
+        PSendSysMessage(LANG_DEBUG_AREATRIGGER_ON);
+        player->SetDebuggingAreaTriggers(true);
+    }
+    else
+    {
+        PSendSysMessage(LANG_DEBUG_AREATRIGGER_OFF);
+        player->SetDebuggingAreaTriggers(false);
+    }
+    return true;
+}
+
 // Send notification in channel
 bool ChatHandler::HandleDebugSendChannelNotifyCommand(char* args)
 {

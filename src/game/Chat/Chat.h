@@ -289,6 +289,8 @@ class ChatHandler
 
         bool HandleDebugPetDismissSound(char* args);
 
+        bool HandleDebugAreaTriggersCommand(char* args);
+
         bool HandleDebugSendBuyErrorCommand(char* args);
         bool HandleDebugSendChannelNotifyCommand(char* args);
         bool HandleDebugSendChatMsgCommand(char* args);
