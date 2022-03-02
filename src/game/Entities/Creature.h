@@ -154,6 +154,7 @@ struct CreatureInfo
     uint32  TrainerTemplateId;
     uint32  VendorTemplateId;
     uint32  GossipMenuId;
+    uint32  InteractionPauseTimer;
     VisibilityDistanceType visibilityDistanceType;
     uint32  CorpseDelay;
     uint32  SpellList;
@@ -281,7 +282,6 @@ struct CreatureDataAddon
     uint8  flags;                                           // UnitBytes2_Flags
     uint32 emote;
     uint32 move_flags;
-    int32  interaction_pause_timer;
     uint32 const* auras;                                    // loaded as char* "spell1 spell2 ... "
 };
 
@@ -901,7 +901,7 @@ class Creature : public Unit
         bool m_canAggro;                                    // controls response of creature to attacks
         bool m_checkForHelp;                                // controls checkforhelp in ai
         float m_respawnradius;
-        uint32 m_interactionPauseTimer;                      // (msecs) waypoint pause time when interacted with
+        uint32 m_interactionPauseTimer;                     // (msecs) waypoint pause time when interacted with
 
         CreatureSubtype m_subtype;                          // set in Creatures subclasses for fast it detect without dynamic_cast use
         void RegeneratePower(float timerMultiplier);
