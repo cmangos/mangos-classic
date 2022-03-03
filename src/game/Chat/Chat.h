@@ -635,6 +635,7 @@ class ChatHandler
         bool HandleTeleDelCommand(char* args);
         bool HandleTeleGroupCommand(char* args);
         bool HandleTeleNameCommand(char* args);
+        bool HandleTeleWarpCommand(char* args);
 
         bool HandleTriggerActiveCommand(char* args);
         bool HandleTriggerNearCommand(char* args);

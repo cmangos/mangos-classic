@@ -1249,6 +1249,62 @@ bool ChatHandler::HandleTeleCommand(char* args)
     return HandleGoHelper(_player, tele->mapId, tele->position_x, tele->position_y, &tele->position_z, &tele->orientation);
 }
 
+bool ChatHandler::HandleTeleWarpCommand(char* args)
+{
+    if (!*args)
+        return false;
+
+    Player* player = m_session->GetPlayer();
+
+    char* arg1 = strtok((char*)args, " ");
+    char* arg2 = strtok(NULL, " ");
+
+    if (!arg1 || !arg2)
+        return false;
+
+    char dir = arg1[0];
+    int32 value = (int32)atoi(arg2);
+    float x = player->GetPositionX();
+    float y = player->GetPositionY();
+    float z = player->GetPositionZ();
+    float o = player->GetOrientation();
+
+    switch (dir)
+    {
+        case 'x':
+        {
+            x = x + cosf(o) * value;
+            y = y + sinf(o) * value;
+            break;
+        }
+        case 'y':
+        {
+            x = x + cos(o - (M_PI / 2)) * value;
+            y = y + sin(o - (M_PI / 2)) * value;
+            break;
+        }
+        case 'z':
+        {
+            z = z + value;
+            break;
+        }
+        case 'o':
+        {
+            o = o - (value * M_PI / 180.0f);
+            if (o < 0.0f)
+                o += value * M_PI;
+            else if (o > 2 * M_PI)
+                o -= value * M_PI;
+            break;
+        }
+        default:
+            return false;
+    }
+
+    player->NearTeleportTo(x, y, z, o);
+    return true;
+}
+
 bool ChatHandler::HandleLookupAreaCommand(char* args)
 {
     if (!*args)
