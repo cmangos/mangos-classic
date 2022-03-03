@@ -348,6 +348,7 @@ class ChatHandler
         bool HandleGoObjectCommand(char* args);
         bool HandleGoTaxinodeCommand(char* args);
         bool HandleGoTriggerCommand(char* args);
+        bool HandleGoWarpCommand(char* args);
         bool HandleGoXYCommand(char* args);
         bool HandleGoXYZCommand(char* args);
         bool HandleGoZoneXYCommand(char* args);
@@ -635,7 +636,6 @@ class ChatHandler
         bool HandleTeleDelCommand(char* args);
         bool HandleTeleGroupCommand(char* args);
         bool HandleTeleNameCommand(char* args);
-        bool HandleTeleWarpCommand(char* args);
 
         bool HandleTriggerActiveCommand(char* args);
         bool HandleTriggerNearCommand(char* args);
