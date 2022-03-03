@@ -378,6 +378,7 @@ ChatCommand* ChatHandler::getCommandTable()
 
     static ChatCommand listCommandTable[] =
     {
+        { "areatriggers",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleListAreaTriggerCommand,     "", nullptr },
         { "auras",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleListAurasCommand,           "", nullptr },
         { "creature",       SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleListCreatureCommand,        "", nullptr },
         { "item",           SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleListItemCommand,            "", nullptr },

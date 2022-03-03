@@ -3931,6 +3931,63 @@ bool ChatHandler::HandleTeleDelCommand(char* args)
     return true;
 }
 
+bool ChatHandler::HandleListAreaTriggerCommand(char* args)
+{
+    Player* player = m_session->GetPlayer();
+    if (!player)
+        return false;
+
+    uint32 counter = 0;
+    uint32 playerMap = player->GetMap()->GetId();
+
+    if (player->GetMap()->IsContinent())
+    {
+        // Get areatriggers in the same area as the player
+        uint32 playerArea = player->GetAreaId();
+        AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(playerArea);
+        PSendSysMessage(LANG_AREATRIGGER_LIST, "area", areaEntry ? areaEntry->area_name[GetSessionDbcLocale()] : "<unknown>");
+
+        for (uint32 id = 0; id < sAreaTriggerStore.GetNumRows(); ++id)
+        {
+            AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(id);
+            if (!atEntry)
+                continue;
+
+            if (atEntry->mapid != playerMap)
+                continue;
+
+            uint32 areaTriggerArea = player->GetTerrain()->GetAreaId(atEntry->x, atEntry->y, atEntry->z);
+            if (areaTriggerArea != playerArea)
+                continue;
+
+            ShowTriggerListHelper(atEntry);
+            ++counter;
+        }
+    }
+    else
+    {
+        // Get areatriggers in the same map as the player
+        PSendSysMessage(LANG_AREATRIGGER_LIST, "map", player->GetMap()->GetMapName());
+
+        for (uint32 id = 0; id < sAreaTriggerStore.GetNumRows(); ++id)
+        {
+            AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(id);
+            if (!atEntry)
+                continue;
+
+            if (atEntry->mapid != playerMap)
+                continue;
+
+            ShowTriggerListHelper(atEntry);
+            ++counter;
+        }
+    }
+
+    if (counter == 0)
+        SendSysMessage(LANG_COMMAND_NOTRIGGERFOUND);
+    return true;
+}
+
 bool ChatHandler::HandleListAurasCommand(char* args)
 {
     Unit* unit = getSelectedUnit();
