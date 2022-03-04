@@ -27,6 +27,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (4132,'spell_banish_exile'),
 (6467,'spell_unarmed_woodcutter'),
 (7054,'spell_forsaken_skill'),
+(8555,'spell_left_for_dead'),
 (8603,'spell_tribal_death'),
 (8655,'spell_tribal_death'),
 (8894,'spell_tribal_death'),
