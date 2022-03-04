@@ -1338,7 +1338,8 @@ bool logChildren)
             ULONG64 length;
             SymGetTypeInfo(m_hProcess, modBase, typeId, TI_GET_LENGTH, &length);
 
-            char buffer[50];
+            char buffer[200];
+            memset(buffer, '\0', sizeof(buffer));
             FormatOutputValue(buffer, basicType, length, (PVOID)dwFinalOffset, sizeof(buffer));
             symbolDetails.top().Value = buffer;
         }
