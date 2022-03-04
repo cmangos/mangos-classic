@@ -266,12 +266,24 @@ BOOL WheatyExceptionReport::_GetWindowsVersion(TCHAR* szVersion, DWORD cntMax)
         #endif                                          // WINVER < 0x0500
 
             // Test for the specific product family.
-            if (osvi.dwMajorVersion == 10)
+            if (osvi.dwMajorVersion >= 10)
             {
                 if (productType == VER_NT_WORKSTATION)
-                    _tcsncat(szVersion, _T("Windows 10 "), cntMax);
+                {
+                    if (osvi.dwBuildNumber >= 22000)
+                        _tcsncat(szVersion, _T("Windows 11 "), cntMax);
+                    else
+                        _tcsncat(szVersion, _T("Windows 10 "), cntMax);
+                }
                 else
-                    _tcsncat(szVersion, _T("Windows Server 2016 "), cntMax);
+                {
+                    if (osvi.dwBuildNumber >= 19551)
+                        _tcsncat(szVersion, _T("Windows Server 2022 "), cntMax);
+                    else if (osvi.dwBuildNumber >= 17763)
+                        _tcsncat(szVersion, _T("Windows Server 2019 "), cntMax);
+                    else
+                        _tcsncat(szVersion, _T("Windows Server 2016 "), cntMax);
+                }
             }
             else if (osvi.dwMajorVersion == 6)
             {
