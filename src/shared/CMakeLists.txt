@@ -196,13 +196,6 @@ if(WIN32)
       ServiceWin32.cpp
       ServiceWin32.h
      )
-  if(MSVC)
-    set(LIBRARY_SRCS
-      ${LIBRARY_SRCS}
-      WheatyExceptionReport.cpp
-      WheatyExceptionReport.h
-     )
-  endif()
 else()
   set(LIBRARY_SRCS
       ${LIBRARY_SRCS}
