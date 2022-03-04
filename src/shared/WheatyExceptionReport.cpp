@@ -5,7 +5,7 @@
 //==========================================
 #include "WheatyExceptionReport.h"
 #include "Errors.h"
-//#include "GitRevision.h"
+#include "revision.h"
 #include <algorithm>
 
 #ifdef __clang__
@@ -128,13 +128,16 @@ PEXCEPTION_POINTERS pExceptionInfo)
             return 0;
     }
 
+    TCHAR shortHash[9];
+    memset(shortHash, '\0', sizeof(shortHash));
+    sprintf(shortHash, _T("%.8s"), REVISION_ID);
     SYSTEMTIME systime;
     GetLocalTime(&systime);
     sprintf(m_szDumpFileName, "%s\\%s_%s_[%u-%u_%u-%u-%u].dmp",
-        crash_folder_path, 0/*GitRevision::GetHash()*/, pos, systime.wDay, systime.wMonth, systime.wHour, systime.wMinute, systime.wSecond);
+        crash_folder_path, shortHash, pos, systime.wDay, systime.wMonth, systime.wHour, systime.wMinute, systime.wSecond);
 
     _stprintf(m_szLogFileName, _T("%s\\%s_%s_[%u-%u_%u-%u-%u].txt"),
-        crash_folder_path, 0/*GitRevision::GetHash()*/, pos, systime.wDay, systime.wMonth, systime.wHour, systime.wMinute, systime.wSecond);
+        crash_folder_path, shortHash, pos, systime.wDay, systime.wMonth, systime.wHour, systime.wMinute, systime.wSecond);
 
     m_hDumpFile = CreateFile(m_szDumpFileName,
         GENERIC_WRITE,
@@ -488,8 +491,9 @@ PEXCEPTION_POINTERS pExceptionInfo)
         GetLocalTime(&systime);
 
         // Start out with a banner
-        Log(_T("Revision: %s\r\n"), 0/*GitRevision::GetFullVersion()*/);
-        Log(_T("Date %u:%u:%u. Time %u:%u \r\n"), systime.wDay, systime.wMonth, systime.wYear, systime.wHour, systime.wMinute);
+        Log(_T("Revision: %s\r\n"), REVISION_ID);
+        Log(_T("Build: %s\r\n"), REVISION_DATE);
+        Log(_T("Crash date %02u:%02u:%02u. Time %02u:%02u \r\n"), systime.wDay, systime.wMonth, systime.wYear, systime.wHour, systime.wMinute);
         PEXCEPTION_RECORD pExceptionRecord = pExceptionInfo->ExceptionRecord;
 
         PrintSystemInfo();
