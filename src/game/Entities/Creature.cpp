@@ -529,7 +529,7 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
     uint32 attackTimer = GetCreatureInfo()->MeleeBaseAttackTime;
 
     SetAttackTime(BASE_ATTACK,  attackTimer);
-    SetAttackTime(OFF_ATTACK,   attackTimer - attackTimer / 4);
+    SetAttackTime(OFF_ATTACK,   attackTimer);
     SetAttackTime(RANGED_ATTACK, GetCreatureInfo()->RangedBaseAttackTime);
 
     uint32 unitFlags = GetCreatureInfo()->UnitFlags;
