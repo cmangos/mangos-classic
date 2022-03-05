@@ -424,17 +424,18 @@ void WheatyExceptionReport::PrintSystemInfo()
     SYSTEM_INFO SystemInfo;
     ::GetSystemInfo(&SystemInfo);
 
-    MEMORYSTATUS MemoryStatus;
-    MemoryStatus.dwLength = sizeof (MEMORYSTATUS);
-    ::GlobalMemoryStatus(&MemoryStatus);
+    MEMORYSTATUSEX  MemoryStatus;
+    MemoryStatus.dwLength = sizeof (MEMORYSTATUSEX);
+    ::GlobalMemoryStatusEx(&MemoryStatus);
+    int div = 0x100000;
     TCHAR sString[1024];
     Log(_T("//=====================================================\r\n"));
     if (_GetProcessorName(sString, std::size(sString)))
-        Log(_T("*** Hardware ***\r\nProcessor: %s\r\nNumber Of Processors: %d\r\nPhysical Memory: %d KB (Available: %d KB)\r\nCommit Charge Limit: %d KB\r\n"),
-            sString, SystemInfo.dwNumberOfProcessors, MemoryStatus.dwTotalPhys/0x400, MemoryStatus.dwAvailPhys/0x400, MemoryStatus.dwTotalPageFile/0x400);
+        Log(_T("*** Hardware ***\r\nProcessor: %s\r\nNumber Of Processors: %d\r\nPhysical Memory: %d MB (Available: %d MB)\r\nCommit Charge Limit: %d MB\r\n"),
+            sString, SystemInfo.dwNumberOfProcessors, int(MemoryStatus.ullTotalPhys/div), int(MemoryStatus.ullAvailPhys/div), int(MemoryStatus.ullTotalPageFile/div));
     else
-        Log(_T("*** Hardware ***\r\nProcessor: <unknown>\r\nNumber Of Processors: %d\r\nPhysical Memory: %d KB (Available: %d KB)\r\nCommit Charge Limit: %d KB\r\n"),
-            SystemInfo.dwNumberOfProcessors, MemoryStatus.dwTotalPhys/0x400, MemoryStatus.dwAvailPhys/0x400, MemoryStatus.dwTotalPageFile/0x400);
+        Log(_T("*** Hardware ***\r\nProcessor: <unknown>\r\nNumber Of Processors: %d\r\nPhysical Memory: %d MB (Available: %d MB)\r\nCommit Charge Limit: %d MB\r\n"),
+            SystemInfo.dwNumberOfProcessors, int(MemoryStatus.ullTotalPhys/div), int(MemoryStatus.ullAvailPhys/div), int(MemoryStatus.ullTotalPageFile/div));
 
     if (_GetWindowsVersion(sString, std::size(sString)))
         Log(_T("\r\n*** Operation System ***\r\n%s\r\n"), sString);
