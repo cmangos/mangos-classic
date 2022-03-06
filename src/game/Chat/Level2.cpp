@@ -1195,6 +1195,8 @@ bool ChatHandler::HandleGameObjectNearCommand(char* args)
     if (!ExtractOptFloat(&args, distance, 10.0f))
         return false;
 
+    SendSysMessage("Database spawns around:");
+
     uint32 count = 0;
 
     Player* pl = m_session->GetPlayer();
