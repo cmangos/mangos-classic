@@ -815,7 +815,7 @@ void GameObject::SaveToDB(uint32 mapid) const
        << GetGUIDLow() << ", "
        << GetEntry() << ", "
        << mapid << ", "
-       << data.spawnMask << ", "
+       << uint32(data.spawnMask) << ", "
        << GetFloatValue(GAMEOBJECT_POS_X) << ", "
        << GetFloatValue(GAMEOBJECT_POS_Y) << ", "
        << GetFloatValue(GAMEOBJECT_POS_Z) << ", "
