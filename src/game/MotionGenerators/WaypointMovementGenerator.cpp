@@ -627,7 +627,7 @@ bool LinearWPMovementGenerator<Creature>::GetNodeAfter(WaypointPath::const_itera
 {
     bool movingToLastNode = looped ? m_driveWayBack : !m_driveWayBack;
 
-    if (!movingToLastNode)
+    if (movingToLastNode)
     {
         if (std::next(nodeItr) == i_path->end())
             return false;
