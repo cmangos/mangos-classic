@@ -665,6 +665,7 @@ UPDATE creature_template SET ScriptName='npc_tirion_fordring' WHERE entry=12126;
 /* WESTFALL */
 UPDATE creature_template SET ScriptName='npc_daphne_stilwell' WHERE entry=6182;
 UPDATE creature_template SET ScriptName='npc_defias_traitor' WHERE entry=467;
+UPDATE creature_template SET ScriptName='npc_foreman_klaven_mortwake' WHERE entry=7053;
 
 /* WETLANDS */
 UPDATE creature_template SET ScriptName='npc_tapoke_slim_jahn' WHERE entry=4962;
