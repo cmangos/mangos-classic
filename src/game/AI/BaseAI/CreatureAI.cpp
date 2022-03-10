@@ -50,8 +50,8 @@ void CreatureAI::EnterCombat(Unit* enemy)
 {
     UnitAI::EnterCombat(enemy);
     // TODO: Monitor this condition to see if it conflicts with any pets
-    if (m_creature->IsCritter() && !m_creature->IsPet())
-        m_creature->SetInPanic(30000);
+    if (m_creature->IsCritter() && !m_creature->IsPet() && !m_creature->IsInPanic() && enemy && enemy->IsPlayerControlled())
+        DoFlee(30000);
     if (enemy && (m_creature->IsGuard() || m_creature->IsCivilian()))
     {
         // Send Zone Under Attack message to the LocalDefense and WorldDefense Channels
