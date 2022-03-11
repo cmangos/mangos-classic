@@ -5495,7 +5495,8 @@ void Player::UpdateSkillsForLevel(bool maximize/* = false*/)
         if (!pSkill)
             continue;
 
-        if (GetSkillRangeType(pSkill, false) != SKILL_RANGE_LEVEL)
+        SkillRangeType skillType = GetSkillRangeType(pSkill, false);
+        if (skillType != SKILL_RANGE_LEVEL && skillType != SKILL_RANGE_MONO)
             continue;
 
         bool maxed = maximize;
