@@ -524,7 +524,11 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
     setFaction(faction);
 
     SetDefaultGossipMenuId(GetCreatureInfo()->GossipMenuId);
-    SetUInt32Value(UNIT_NPC_FLAGS, GetCreatureInfo()->NpcFlags);
+
+    uint32 npcFlags = GetCreatureInfo()->NpcFlags;
+    if (data && data->spawnTemplate->npcFlags != -1)
+        npcFlags = uint32(data->spawnTemplate->npcFlags);
+    SetUInt32Value(UNIT_NPC_FLAGS, npcFlags);
 
     uint32 attackTimer = GetCreatureInfo()->MeleeBaseAttackTime;
 

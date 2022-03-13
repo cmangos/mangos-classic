@@ -219,6 +219,7 @@ enum SpawnFlags
 struct CreatureSpawnTemplate
 {
     uint32 entry;
+    int32 npcFlags;
     int64 unitFlags;
     uint32 faction;
     uint32 modelId;

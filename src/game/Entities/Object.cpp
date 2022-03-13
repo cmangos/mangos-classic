@@ -2011,6 +2011,8 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map)
     {
         if (CreatureSpawnTemplate const* templateData = sObjectMgr.GetCreatureSpawnTemplate(settings.spawnDataEntry))
         {
+            if (templateData->npcFlags != -1)
+                creature->SetUInt32Value(UNIT_NPC_FLAGS, uint32(templateData->npcFlags));
             if (templateData->unitFlags != -1)
                 creature->SetUInt32Value(UNIT_FIELD_FLAGS, uint32(templateData->unitFlags));
             if (templateData->faction > 0)

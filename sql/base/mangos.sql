@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2788_01_mangos_creature_addon` bit(1) DEFAULT NULL
+  `required_z2789_01_mangos_creature_spawn_data_template` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -940,6 +940,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `creature_spawn_data_template`;
 CREATE TABLE `creature_spawn_data_template` (
   `Entry` int unsigned NOT NULL COMMENT 'ID of template',
+  `NpcFlags` int unsigned NOT NULL DEFAULT '-1',
   `UnitFlags` bigint NOT NULL DEFAULT '-1',
   `Faction` int unsigned NOT NULL DEFAULT '0',
   `ModelId` mediumint unsigned NOT NULL DEFAULT '0',
