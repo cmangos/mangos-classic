@@ -274,3 +274,6 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|4 WH
 28330 -- Flameshocker - Immolate Visual
 );
 
+-- Hate to Half
+UPDATE spell_template SET AttributesServerside=AttributesServerside|0x4 WHERE Id IN(21789); -- not removed on evade
+
