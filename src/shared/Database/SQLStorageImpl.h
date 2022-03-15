@@ -27,14 +27,6 @@ template<class DerivedLoader, class StorageClass>
 template<class S, class D>                                  // S source-type, D destination-type
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert(uint32 /*field_pos*/, S src, D& dst)
 {
-#if defined(__arm__)
-    if (((unsigned) &dst) % sizeof(D)) {
-       //The address is not aligned. Use memcpy to avoid ARM unaligned trap
-       D converted(src);
-       memcpy((void*) &dst, (void*) &converted, sizeof(D));
-    }
-    else
-#endif
     dst = D(src);
 }
 
@@ -74,14 +66,6 @@ template<class DerivedLoader, class StorageClass>
 template<class D>                                           // D destination-type
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert_from_str(uint32 /*field_pos*/, char const* /*src*/, D& dst)
 {
-#if defined(__arm__)
-    if (((unsigned) &dst) % sizeof(D)) {
-       //The address is not aligned. Use memcpy to avoid ARM unaligned trap
-       D converted(0);
-       memcpy((void*) &dst, (void*) &converted, sizeof(D));
-    }
-    else
-#endif
     dst = 0;
 }
 
@@ -95,14 +79,6 @@ template<class DerivedLoader, class StorageClass>
 template<class S, class D>                                  // S source-type, D destination-type
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::default_fill(uint32 /*field_pos*/, S src, D& dst)
 {
-#if defined(__arm__)
-    if (((unsigned) &dst) % sizeof(D)) {
-       //The address is not aligned. Use memcpy to avoid ARM unaligned trap
-       D converted(src);
-       memcpy((void*) &dst, (void*) &converted, sizeof(D));
-    }
-    else
-#endif
     dst = D(src);
 }
 
@@ -117,9 +93,71 @@ template<class DerivedLoader, class StorageClass>
 template<class V>                                           // V value-type
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::storeValue(V value, StorageClass& store, char* p, uint32 x, uint32& offset)
 {
+#if defined(__arm__)
+    bool tmpbool;
+    char tmpchar;
+    uint32 tmpint;
+    float tmpfloat;
+    char* tmpstr = new char[1];
+    uint64 tmpbigint;
+#endif
     DerivedLoader* subclass = (static_cast<DerivedLoader*>(this));
     switch (store.GetDstFormat(x))
     {
+#if defined(__arm__)
+        case FT_LOGIC:
+            subclass->convert_to_bool(x, value, tmpbool);
+            memcpy(&(p[offset]), &tmpbool, sizeof(bool));
+            offset += sizeof(bool);
+            break;
+        case FT_BYTE:
+            subclass->convert(x, value, tmpchar);
+            memcpy(&(p[offset]), &tmpchar, sizeof(char));
+            offset += sizeof(char);
+            break;
+        case FT_INT:
+            subclass->convert(x, value, tmpint);
+            memcpy(&(p[offset]), &tmpint, sizeof(uint32));
+            offset += sizeof(uint32);
+            break;
+        case FT_FLOAT:
+            subclass->convert(x, value, tmpfloat);
+            memcpy(&(p[offset]), &tmpfloat, sizeof(float));
+            offset += sizeof(float);
+            break;
+        case FT_STRING:
+            subclass->convert_to_str(x, value, tmpstr);
+            memcpy(&(p[offset]), &tmpstr, sizeof(char*));
+            offset += sizeof(char*);
+            break;
+        case FT_NA:
+            subclass->default_fill(x, value, tmpint);
+            memcpy(&(p[offset]), &tmpint, sizeof(uint32));
+            offset += sizeof(uint32);
+            break;
+        case FT_NA_BYTE:
+            subclass->default_fill(x, value, tmpchar);
+            memcpy(&(p[offset]), &tmpchar, sizeof(char));
+            offset += sizeof(char);
+            break;
+        case FT_NA_FLOAT:
+            subclass->default_fill(x, value, tmpfloat);
+            memcpy(&(p[offset]), &tmpfloat, sizeof(float));
+            offset += sizeof(float);
+            break;
+        case FT_64BITINT:
+            subclass->default_fill(x, value, tmpbigint);
+            memcpy(&(p[offset]), &tmpbigint, sizeof(uint64));
+            offset += sizeof(uint64);
+            break;
+        case FT_IND:
+        case FT_SORT:
+            assert(false && "SQL storage not have sort field types");
+            break;
+        default:
+            assert(false && "unknown format character");
+            break;
+#else
         case FT_LOGIC:
             subclass->convert_to_bool(x, value, *((bool*)(&p[offset])));
             offset += sizeof(bool);
@@ -163,15 +201,68 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::storeValue(V value, Stor
         default:
             assert(false && "unknown format character");
             break;
+#endif
     }
 }
 
 template<class DerivedLoader, class StorageClass>
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::storeValue(char const* value, StorageClass& store, char* p, uint32 x, uint32& offset)
 {
+#if defined(__arm__)
+    bool tmpbool;
+    char tmpchar;
+    uint32 tmpint;
+    float tmpfloat;
+    char* tmpstr = new char[1];
+    uint64 tmpbigint;
+#endif
     DerivedLoader* subclass = (static_cast<DerivedLoader*>(this));
     switch (store.GetDstFormat(x))
     {
+#if defined(__arm__)
+        case FT_LOGIC:
+            subclass->convert_str_to_bool(x, value, tmpbool);
+            memcpy(&(p[offset]), &tmpbool, sizeof(bool));
+            offset += sizeof(bool);
+            break;
+        case FT_BYTE:
+            subclass->convert_from_str(x, value, tmpchar);
+            memcpy(&(p[offset]), &tmpchar, sizeof(char));
+            offset += sizeof(char);
+            break;
+        case FT_INT:
+            subclass->convert_from_str(x, value, tmpint);
+            memcpy(&(p[offset]), &tmpint, sizeof(uint32));
+            offset += sizeof(uint32);
+            break;
+        case FT_FLOAT:
+            subclass->convert_from_str(x, value, tmpfloat);
+            memcpy(&(p[offset]), &tmpfloat, sizeof(float));
+            offset += sizeof(float);
+            break;
+        case FT_STRING:
+            subclass->convert_str_to_str(x, value, tmpstr);
+            memcpy(&(p[offset]), &tmpstr, sizeof(char*));
+            offset += sizeof(char*);
+            break;
+        case FT_NA_POINTER:
+            subclass->default_fill_to_str(x, value, tmpstr);
+            memcpy(&(p[offset]), &tmpstr, sizeof(char*));
+            offset += sizeof(char*);
+            break;
+        case FT_64BITINT:
+            subclass->convert_from_str(x, value, tmpbigint);
+            memcpy(&(p[offset]), &tmpbigint, sizeof(uint64));
+            offset += sizeof(uint64);
+            break;
+        case FT_IND:
+        case FT_SORT:
+            assert(false && "SQL storage not have sort field types");
+            break;
+        default:
+            assert(false && "unknown format character");
+            break;
+#else
         case FT_LOGIC:
             subclass->convert_str_to_bool(x, value, *((bool*)(&p[offset])));
             offset += sizeof(bool);
@@ -207,6 +298,7 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::storeValue(char const* v
         default:
             assert(false && "unknown format character");
             break;
+#endif
     }
 }
 
@@ -333,7 +425,7 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::Load(StorageClass& store
                 case FT_INT:    storeValue((uint32)fields[y].GetUInt32(), store, record, x, offset);      ++x; break;
                 case FT_FLOAT:  storeValue((float)fields[y].GetFloat(), store, record, x, offset);        ++x; break;
                 case FT_STRING: storeValue((char const*)fields[y].GetString(), store, record, x, offset); ++x; break;
-                case FT_64BITINT: storeValue(fields[y].GetUInt64(), store, record, x, offset);            ++x; break;
+                case FT_64BITINT: storeValue((uint64)fields[y].GetUInt64(), store, record, x, offset);            ++x; break;
                 case FT_NA:
                 case FT_NA_BYTE:
                 case FT_NA_FLOAT:

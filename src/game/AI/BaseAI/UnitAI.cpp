@@ -334,7 +334,7 @@ void UnitAI::HandleMovementOnAttackStart(Unit* victim, bool targetChange) const
 
         MotionMaster* creatureMotion = m_unit->GetMotionMaster();
 
-        if (!m_unit->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT))
+        if (!m_unit->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT) && !m_unit->hasUnitState(UNIT_STAT_PROPELLED))
             creatureMotion->MoveChase(victim, m_attackDistance, m_attackAngle, m_moveFurther, false, true, targetChange);
         // TODO - adapt this to only stop OOC-MMGens when MotionMaster rewrite is finished
         else if (creatureMotion->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE || creatureMotion->GetCurrentMovementGeneratorType() == RANDOM_MOTION_TYPE)
@@ -798,14 +798,17 @@ void UnitAI::TimedFleeingEnded()
     DoStartMovement(m_unit->GetVictim());
 }
 
-bool UnitAI::DoFlee()
+bool UnitAI::DoFlee(uint32 duration)
 {
     Unit* victim = m_unit->GetVictim();
     if (!victim)
         return false;
 
+    if (!duration)
+        duration = sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_FLEE_DELAY);
+
     // call the fear method and check if fear method succeed
-    if (!m_unit->SetInPanic(sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_FLEE_DELAY)))
+    if (!m_unit->SetInPanic(duration))
         return false;
 
     // set the ai state to feared so it can reset movegen and ai state at the end of the fear

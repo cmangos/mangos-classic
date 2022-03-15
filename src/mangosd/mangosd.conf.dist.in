@@ -694,6 +694,10 @@ LogColors = ""
 #        Generic environmental (lava/slime/etc) damage taken on tick
 #        Default:  605-610
 #
+#    InteractionPauseTimer
+#        Creatures will pause waypoint movement for the specified time (in milliseconds) when a player interacts with them
+#        Default: 180000 (3 minutes)
+#
 #    MaxPrimaryTradeSkill
 #        Max count that player can learn the primary trade skill.
 #        Default: 2
@@ -818,6 +822,7 @@ MirrorTimer.Breath.Max = 60
 MirrorTimer.Environmental.Max = 1
 EnvironmentalDamage.Min = 605
 EnvironmentalDamage.Max = 610
+InteractionPauseTimer = 180000
 MaxPrimaryTradeSkill = 2
 TradeSkill.GMIgnore.MaxPrimarySkillsCount = 4
 TradeSkill.GMIgnore.Level = 4

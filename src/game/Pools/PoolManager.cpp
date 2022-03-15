@@ -1035,14 +1035,19 @@ void PoolManager::LoadFromDB()
     // check chances integrity
     for (uint16 pool_entry = 0; pool_entry < mPoolTemplate.size(); ++pool_entry)
     {
-        if (mPoolTemplate[pool_entry].AutoSpawn)
+        auto& poolTemplate = mPoolTemplate[pool_entry];
+        if (poolTemplate.AutoSpawn)
         {
             if (!CheckPool(pool_entry))
             {
                 sLog.outErrorDb("Pool Id (%u) has all creatures or gameobjects with explicit chance sum <>100 and no equal chance defined. The pool system cannot pick one to spawn.", pool_entry);
-                mPoolTemplate[pool_entry].AutoSpawn = false;
+                poolTemplate.AutoSpawn = false;
             }
         }
+        if (poolTemplate.mapEntry != nullptr || poolTemplate.MaxLimit > 0 || poolTemplate.description != "")
+            if (pool_entry <= max_pool_id)
+                if (mPoolGameobjectGroups[pool_entry].isEmpty() && mPoolCreatureGroups[pool_entry].isEmpty() && mPoolPoolGroups[pool_entry].isEmpty())
+                    sLog.outErrorDb("Pool Template Id (%u) is empty.", pool_entry);
     }
 
     sLog.outString();

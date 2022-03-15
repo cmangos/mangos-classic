@@ -54,10 +54,9 @@ Pet::Pet(PetType type) :
     m_removed(false), m_happinessTimer(7500), m_loyaltyTimer(12000), m_petType(type), m_duration(0),
     m_loyaltyPoints(0), m_bonusdamage(0), m_loading(false),
     m_xpRequiredForNextLoyaltyLevel(0),
-    m_petModeFlags(PET_MODE_DEFAULT), m_originalCharminfo(nullptr)
+    m_petModeFlags(PET_MODE_DEFAULT), m_originalCharminfo(nullptr), m_imposedCooldown(false)
 {
     m_name = "Pet";
-    m_regenTimer = 4000;
 
     // pets always have a charminfo, even if they are not actually charmed
     InitCharmInfo(this);
@@ -633,6 +632,13 @@ void Pet::SetDeathState(DeathState s)                       // overwrite virtual
         }
 
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+
+        if (Unit* owner = GetOwner())
+        {
+            StartCooldown(owner);
+            if (getPetType() == GUARDIAN_PET)
+                owner->RemoveGuardian(this);
+        }
     }
     else if (GetDeathState() == ALIVE)
     {
@@ -703,39 +709,37 @@ void Pet::Update(const uint32 diff)
     Creature::Update(diff);
 }
 
-void Pet::RegenerateAll(uint32 update_diff)
+void Pet::RegenerateAll(uint32 diff)
 {
-    // regenerate focus
-    if (m_regenTimer <= update_diff)
+    // regenerate focus for hunter pets
+    m_regenTimer += diff;
+    if (m_regenTimer >= 4000)
     {
         if (!IsInCombat())
             RegenerateHealth();
 
-        RegeneratePower();
-
-        m_regenTimer = 4000;
+        RegeneratePower(4.f);
+        m_regenTimer -= 4000;
     }
-    else
-        m_regenTimer -= update_diff;
 
     if (getPetType() != HUNTER_PET)
         return;
 
-    if (m_happinessTimer <= update_diff)
+    if (m_happinessTimer <= diff)
     {
         LooseHappiness();
         m_happinessTimer = 7500;
     }
     else
-        m_happinessTimer -= update_diff;
+        m_happinessTimer -= diff;
 
-    if (m_loyaltyTimer <= update_diff)
+    if (m_loyaltyTimer <= diff)
     {
         TickLoyaltyChange();
         m_loyaltyTimer = 12000;
     }
     else
-        m_loyaltyTimer -= update_diff;
+        m_loyaltyTimer -= diff;
 }
 
 void Pet::LooseHappiness()
@@ -1064,6 +1068,9 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= nullptr*/)
                     p_owner->SetGroupUpdateFlag(GROUP_UPDATE_PET);
             }
         }
+
+        if (p_owner)
+            StartCooldown(p_owner);
 
         // only if current pet in slot
         switch (getPetType())
@@ -2305,4 +2312,16 @@ void Pet::ForcedDespawn(uint32 timeMSToDespawn, bool onlyAlive)
     RemoveCorpse(true);                                     // force corpse removal in the same grid
 
     Unsummon(PET_SAVE_NOT_IN_SLOT);
+}
+
+void Pet::StartCooldown(Unit* owner)
+{
+    if (!m_imposedCooldown)
+    {
+        m_imposedCooldown = true;
+        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(GetUInt32Value(UNIT_CREATED_BY_SPELL));
+        // Remove infinity cooldown
+        if (spellInfo && spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
+            owner->AddCooldown(*spellInfo);
+    }
 }

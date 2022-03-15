@@ -34,6 +34,7 @@ class CombatAI : public ScriptedAI
         void HandleTargetRestoration();
         bool IsTargetingRestricted();
         void StopTargeting(bool state) { m_stopTargeting = state; }
+        void OnTaunt() override;
 
         void AddOnKillText(int32 text);
         template<typename... Targs>

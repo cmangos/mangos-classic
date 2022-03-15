@@ -45,7 +45,7 @@ MMapData::~MMapData()
 dtNavMesh* MMapData::Init(unsigned int mapId, BuildContext* ctx)
 {
     char mmapFilename[256];
-    snprintf(mmapFilename, sizeof(mmapFilename), "mmaps/%03d.mmap", mapId);
+    snprintf(mmapFilename, sizeof(mmapFilename), "%s/mmaps/%03d.mmap", ctx->getDataDir(), mapId);
 
     FILE* fp = fopen(mmapFilename, "rb");
     if (!fp)
@@ -79,18 +79,12 @@ dtNavMesh* MMapData::Init(unsigned int mapId, BuildContext* ctx)
     return m_NavMesh;
 }
 
-bool MMapData::LoadTile(unsigned int tx, unsigned int ty)
+bool MMapData::LoadNavmesh(const char* fileName, TileInfos& tInfos)
 {
-    if (!m_Initialized)
-        return false;
-
-    char tileFilename[256];
-    snprintf(tileFilename, sizeof(tileFilename), "mmaps/%03d%02d%02d.mmtile", m_MapId, tx, ty); // Todo: check X,Y swap reason and get ride of it
-
-    FILE* fp = fopen(tileFilename, "rb");
+    FILE* fp = fopen(fileName, "rb");
     if (!fp)
     {
-        m_Ctx->log(RC_LOG_ERROR, "LoadMMapTile: '%s' not found!", tileFilename);
+        m_Ctx->log(RC_LOG_ERROR, "LoadMMapTile: '%s' not found!", fileName);
         return false;
     }
 
@@ -115,26 +109,54 @@ bool MMapData::LoadTile(unsigned int tx, unsigned int ty)
     size_t result = fread(data, header.size, 1, fp);
     if (!result)
     {
-        m_Ctx->log(RC_LOG_ERROR, "LoadMMapTile: Problem to read '%s'!", tileFilename);
+        m_Ctx->log(RC_LOG_ERROR, "LoadMMapTile: Problem to read '%s'!", fileName);
         return false;
     }
     fclose(fp);
 
-    TileInfos tinfos;
     dtMeshHeader* meshHeader = (dtMeshHeader*)data;
-    rcVcopy(tinfos.bMin, meshHeader->bmin);
-    rcVcopy(tinfos.bMax, meshHeader->bmax);
-    rcVmin(m_BMin, tinfos.bMin);
-    rcVmax(m_BMax, tinfos.bMax);
-    dtStatus dtRes = m_NavMesh->addTile(data, header.size, DT_TILE_FREE_DATA, dtTileRef(0), &tinfos.tileRef);
+    rcVcopy(tInfos.bMin, meshHeader->bmin);
+    rcVcopy(tInfos.bMax, meshHeader->bmax);
+    rcVmin(m_BMin, tInfos.bMin);
+    rcVmax(m_BMax, tInfos.bMax);
+    dtStatus dtRes = m_NavMesh->addTile(data, header.size, DT_TILE_FREE_DATA, dtTileRef(0), &tInfos.tileRef);
     if (dtStatusFailed(dtRes))
     {
         m_Ctx->log(RC_LOG_ERROR, "LoadMMapTile: add tile failed!");
         return false;
     }
+    return true;
+}
+
+bool MMapData::LoadObjectNavMesh(const std::string fileName)
+{
+    if (!m_Initialized)
+        return false;
+
+    char tileFilename[256];
+    snprintf(tileFilename, sizeof(tileFilename), "%s/mmaps/%s.mmtile", m_Ctx->getDataDir(), fileName.c_str()); // Todo: check X,Y swap reason and get ride of it
+
+    TileInfos tInfos;
+    if (!LoadNavmesh(tileFilename, tInfos))
+        return false;
+    m_TilesInfos.insert(std::make_pair(0, tInfos));
+    return true;
+}
+
+bool MMapData::LoadTile(unsigned int tx, unsigned int ty)
+{
+    if (!m_Initialized)
+        return false;
+
+    char tileFilename[256];
+    snprintf(tileFilename, sizeof(tileFilename), "%s/mmaps/%03d%02d%02d.mmtile", m_Ctx->getDataDir(), m_MapId, tx, ty); // Todo: check X,Y swap reason and get ride of it
+
+    TileInfos tInfos;
+    if (!LoadNavmesh(tileFilename, tInfos))
+        return false;
 
     unsigned int pxy = StaticMapTree::packTileID(tx, ty);
-    m_TilesInfos.insert(std::make_pair(pxy, tinfos));
+    m_TilesInfos.insert(std::make_pair(pxy, tInfos));
     return true;
 }
 

@@ -43,6 +43,9 @@ enum GameEventScheduleType
     GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_1 = 8,
     GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_2 = 9,
     // GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_3 = 10, // unused in vanilla
+    GAME_EVENT_SCHEDULE_YEARLY      = 11,
+    GAME_EVENT_SCHEDULE_LUNAR_NEW_YEAR  = 12,
+    GAME_EVENT_SCHEDULE_EASTER          = 13,
 };
 
 struct GameEventData
@@ -119,7 +122,7 @@ class GameEventMgr
         void UpdateEventQuests(uint16 event_id, bool Activate);
         void SendEventMails(int16 event_id);
         void OnEventHappened(uint16 event_id, bool activate, bool resume);
-        void ComputeEventStartAndEndTime(GameEventData& data);
+        void ComputeEventStartAndEndTime(GameEventData& data, time_t today);
     protected:
         typedef std::list<uint32> GuidList;
         typedef std::list<uint16> IdList;

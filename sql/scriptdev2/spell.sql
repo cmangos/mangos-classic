@@ -27,10 +27,15 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (4132,'spell_banish_exile'),
 (6467,'spell_unarmed_woodcutter'),
 (7054,'spell_forsaken_skill'),
+(8555,'spell_left_for_dead'),
 (8603,'spell_tribal_death'),
 (8655,'spell_tribal_death'),
 (8894,'spell_tribal_death'),
 (9144,'spell_tribal_death'),
+(9204,'spell_hate_to_zero'),
+(20538,'spell_hate_to_zero'),
+(26569,'spell_hate_to_zero'),
+(26637,'spell_hate_to_zero'),
 (10255,'spell_stoned'),
 (12639,'spell_summon_hakkar'),
 (12948,'spell_hakkar_summoned'),
@@ -47,6 +52,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (17016,'spell_placing_beacon_torch'),
 (17244,'spell_anastari_possess'),
 (16739,'spell_orb_of_deception'),
+(19707,'spell_hate_to_half'),
 (19832,'spell_possess_razorgore'),
 (19872,'spell_calm_dragonkin'),
 (19873,'spell_destroy_egg'),
@@ -240,7 +246,10 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (1856,'spell_vanish'),
 (1857,'spell_vanish'),
 (14093,'spell_improved_sap'),
-(14185,'spell_preparation');
+(14185,'spell_preparation'),
+(13983,'spell_setup_rogue'),
+(14070,'spell_setup_rogue'),
+(14071,'spell_setup_rogue');
 
 -- Shaman
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

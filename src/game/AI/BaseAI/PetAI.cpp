@@ -35,13 +35,6 @@ int PetAI::Permissible(const Creature* creature)
     return PERMIT_BASE_NO;
 }
 
-void PetAI::OnUnsummon()
-{
-    if (Unit* owner = m_creature->GetOwner())
-        if (owner->IsPlayer())
-            static_cast<Player*>(owner)->RelinquishFollowData(m_creature->GetObjectGuid());
-}
-
 PetAI::PetAI(Creature* creature) : CreatureAI(creature), inCombat(false), m_followAngle(M_PI_F / 2), m_followDist(1.5f)
 {
     m_AllySet.clear();
@@ -433,6 +426,25 @@ void PetAI::UpdateAllies()
             m_AllySet.insert(target->GetObjectGuid());
         }
     }
+}
+
+void PetAI::OnUnsummon()
+{
+    CreatureAI::OnUnsummon();
+    RelinquishFollowData();
+}
+
+void PetAI::JustDied(Unit* killer)
+{
+    CreatureAI::JustDied(killer);
+    RelinquishFollowData();
+}
+
+void PetAI::RelinquishFollowData()
+{
+    if (Unit* owner = m_creature->GetOwner())
+        if (owner->IsPlayer())
+            static_cast<Player*>(owner)->RelinquishFollowData(m_creature->GetObjectGuid());
 }
 
 void PetAI::AttackedBy(Unit* attacker)

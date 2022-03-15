@@ -102,7 +102,8 @@ void WorldSession::HandleQuestgiverHelloOpcode(WorldPacket& recv_data)
     }
 
     // Stop the npc if moving
-    pCreature->StopMoving();
+    if (uint32 pauseTimer = pCreature->GetInteractionPauseTimer())
+        pCreature->GetMotionMaster()->PauseWaypoints(pauseTimer);
 
     if (sScriptDevAIMgr.OnGossipHello(_player, pCreature))
         return;

@@ -29,6 +29,7 @@ EndScriptData
 /* ContentData
 npc_daphne_stilwell
 npc_defias_traitor
+npc_foreman_klaven_mortwake
 EndContentData */
 
 /*######
@@ -397,6 +398,30 @@ UnitAI* GetAI_npc_defias_traitor(Creature* creature)
     return new npc_defias_traitorAI(creature);
 }
 
+/*######
+## npc_foreman_klaven_mortwake
+######*/
+
+enum KlavenMortwake
+{
+    SAY_STEALTH_ALERT_MORTWAKE = 3092
+};
+
+struct npc_foreman_klaven_mortwakeAI : public ScriptedAI
+{
+    npc_foreman_klaven_mortwakeAI(Creature* creature) : ScriptedAI(creature)
+    {
+        Reset();
+    }
+
+    void Reset() override {}
+
+    void OnStealthAlert(Unit* who) override
+    {
+        DoBroadcastText(SAY_STEALTH_ALERT_MORTWAKE, m_creature, who);
+    }
+};
+
 void AddSC_westfall()
 {
     Script* pNewScript = new Script;
@@ -409,5 +434,10 @@ void AddSC_westfall()
     pNewScript->Name = "npc_defias_traitor";
     pNewScript->GetAI = &GetAI_npc_defias_traitor;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_defias_traitor;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_foreman_klaven_mortwake";
+    pNewScript->GetAI = &GetNewAIInstance<npc_foreman_klaven_mortwakeAI>;
     pNewScript->RegisterSelf();
 }

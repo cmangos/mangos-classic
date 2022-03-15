@@ -260,6 +260,7 @@ void CMaNGOS_Map::Init()
     memset(m_tileBmax, 0, sizeof(m_tileBmax));
     memset(m_tileFileName, 0, sizeof(m_tileFileName));
     m_TileButtonStr = "Click to choose a tile";
+    m_transportButtonStr = "Click to choose a transport";
     ScanFoldersForMaps();
     if (m_mapID < 0)
         return;
@@ -268,8 +269,6 @@ void CMaNGOS_Map::Init()
     m_MapInfos->Init(m_mapID, m_ctx);
     m_navMesh = m_MapInfos->GetNavMesh();
     m_navQuery = m_MapInfos->GetNavMeshQuery();
-
-
 }
 
 void CMaNGOS_Map::ClearAllGeoms()
@@ -442,6 +441,41 @@ bool CMaNGOS_Map::ShowTilesLevel(int height, int width)
     return mouseOverMenu;
 }
 
+bool CMaNGOS_Map::ShowTransportLevel(int height, int width)
+{
+    bool mouseOverMenu = false;
+    static int levelScroll = 0;
+    unsigned int winHSize = height - 20;
+    const unsigned int winWSize = 300;
+    if (imguiBeginScrollArea("Choose transport", width - 10 - 250 - 10 - winWSize, height - 10 - winHSize, winWSize, winHSize, &levelScroll))
+        mouseOverMenu = true;
+
+    for (auto transportData : TransportMap)
+    {
+        if (imguiItem(transportData.second.c_str()))
+        {
+            if (!m_MapInfos->IsEmpty())
+            {
+                ClearAllGeoms();
+                m_MapInfos = new MapInfos();
+                m_MapInfos->Init(m_mapID, m_ctx);
+                m_navMesh = m_MapInfos->GetNavMesh();
+                m_navQuery = m_MapInfos->GetNavMeshQuery();
+            }
+
+            if (m_MapInfos->LoadModel(transportData.second, transportData.first))
+                m_showLevel = SHOW_LEVEL_NONE;
+
+            if (m_MapInfos->IsEmpty())
+                m_transportButtonStr = "Click to choose a transport";
+            else
+                m_transportButtonStr = transportData.second;
+        }
+    }
+    imguiEndScrollArea();
+    return mouseOverMenu;
+}
+
 bool CMaNGOS_Map::ShowLevel(int height, int width)
 {
     char text[80];
@@ -458,13 +492,14 @@ bool CMaNGOS_Map::ShowLevel(int height, int width)
         case SHOW_LEVEL_MAP: return ShowMapLevel(height, width); break;
         case SHOW_LEVEL_NEIGHBOR_TILES: return ShowNeighborTiles(height, width); break;
         case SHOW_LEVEL_TILES: return ShowTilesLevel(height, width); break;
+        case SHOW_LEVEL_TRANSPORT: return ShowTransportLevel(height, width); break;
         default: return false; break;
     }
 }
 
 void CMaNGOS_Map::handleExtraSettings()
 {
-    imguiLabel("Map Id");
+    imguiLabel("Map Id:");
     char buff[4];
     memset(buff, 0, sizeof(buff));
     itoa(m_mapID, buff, 10);
@@ -480,10 +515,10 @@ void CMaNGOS_Map::handleExtraSettings()
         }
     }
 
-    imguiLabel("Tile");
+    imguiLabel("Tile:");
     if (imguiButton(m_TileButtonStr.c_str()))
     {
-        if (m_showLevel == SHOW_LEVEL_TILES || m_showLevel == SHOW_LEVEL_NEIGHBOR_TILES)
+        if (m_showLevel != SHOW_LEVEL_NONE)
         {
             m_showLevel = SHOW_LEVEL_NONE;
         }
@@ -494,6 +529,17 @@ void CMaNGOS_Map::handleExtraSettings()
             else if (!m_NeighborTiles.empty())
                     m_showLevel = SHOW_LEVEL_NEIGHBOR_TILES;
         }
+    }
+
+    imguiLabel("Transport objects:");
+    if (imguiButton(m_transportButtonStr.c_str()))
+    {
+        if (m_showLevel != SHOW_LEVEL_NONE)
+        {
+            m_showLevel = SHOW_LEVEL_NONE;
+        }
+        else
+            m_showLevel = SHOW_LEVEL_TRANSPORT;
     }
 
     if (!m_MapInfos->IsEmpty())
@@ -530,8 +576,8 @@ void CMaNGOS_Map::handleExtraSettings()
 
 void CMaNGOS_Map::ScanFoldersForMaps()
 {
-    scanDirectory("maps", "*.map", m_MapFiles);
-    scanDirectory("vmaps", "*.vmtree", m_VMapFiles);
+    scanDirectory(m_ctx->getMapFolder(), "*.map", m_MapFiles);
+    scanDirectory(m_ctx->getVMapFolder(), "*.vmtree", m_VMapFiles);
 
     m_MapsFound.clear();
     for (FileList::const_iterator itr = m_MapFiles.begin(); itr != m_MapFiles.end(); itr++)
@@ -568,11 +614,11 @@ void CMaNGOS_Map::scanFoldersForTiles()
 
     char buff[20];
     snprintf(buff, sizeof(buff), "%03d*.map", m_mapID);
-    scanDirectory("maps", buff, m_MapFiles);
+    scanDirectory(m_ctx->getMapFolder(), buff, m_MapFiles);
     snprintf(buff, sizeof(buff), "%03d*.vmtile", m_mapID);
-    scanDirectory("vmaps", buff, m_VMapFiles);
+    scanDirectory(m_ctx->getVMapFolder(), buff, m_VMapFiles);
     snprintf(buff, sizeof(buff), "%03d*.mmtile", m_mapID);
-    scanDirectory("mmaps", buff, m_MMapFiles);
+    scanDirectory(m_ctx->getMMapFolder(), buff, m_MMapFiles);
 
     for (FileList::const_iterator itr = m_MapFiles.begin(); itr != m_MapFiles.end(); itr++)
     {
@@ -1206,10 +1252,10 @@ void CMaNGOS_Map::handleRender()
         {
             MeshInfos const* mmi = itr->second->GetMap();
             MeshInfos const* vmi = itr->second->GetVMap();
+            MeshInfos const* gmi = itr->second->GetModel();
 
             if (m_DrawMapMesh && mmi)
             {
-
                 MeshDetails const* mmd = mmi->GetSolidMesh();
                 MeshDetails const* mlmi = mmi->GetLiquidMesh();
                 if (mmd)
@@ -1232,6 +1278,17 @@ void CMaNGOS_Map::handleRender()
                 }
                 if (vlmi)
                     duDebugDrawLiquidTriMesh(&dd, vlmi->Verts(), vlmi->VertCount(), vlmi->Tris(), vlmi->Normals(), vlmi->TrisCount(), texScale);
+            }
+
+            if (m_DrawMapMesh && gmi)
+            {
+                MeshDetails const* mmd = gmi->GetSolidMesh();
+                //MeshDetails const* mlmi = mmi->GetLiquidMesh();
+                if (mmd)
+                {
+                    duDebugDrawTriMeshSlope(&dd, mmd->Verts(), mmd->VertCount(), mmd->Tris(), mmd->Normals(), mmd->TrisCount(),
+                        m_agentMaxSlope, texScale);
+                }
             }
         }
     }

@@ -29,6 +29,7 @@
 #include "Mails/MassMailMgr.h"
 #include "Server/SQLStorages.h"
 #include "Policies/Singleton.h"
+#include "GameEvents/moon.h"
 
 INSTANTIATE_SINGLETON_1(GameEventMgr);
 
@@ -143,6 +144,7 @@ void GameEventMgr::LoadFromDB()
                     gameEvent.start = time_t(FAR_FUTURE);
                     gameEvent.end = time_t(FAR_FUTURE);
                     break;
+                case GAME_EVENT_SCHEDULE_YEARLY:
                 case GAME_EVENT_SCHEDULE_DATE: break; // loaded from table
                 case GAME_EVENT_SCHEDULE_DMF_1:
                 case GAME_EVENT_SCHEDULE_DMF_2:
@@ -150,7 +152,9 @@ void GameEventMgr::LoadFromDB()
                 case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_2:
                 case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_1:
                 case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_2:
-                    ComputeEventStartAndEndTime(gameEvent);
+                case GAME_EVENT_SCHEDULE_LUNAR_NEW_YEAR:
+                case GAME_EVENT_SCHEDULE_EASTER:
+                    ComputeEventStartAndEndTime(gameEvent, time(nullptr));
                     break;
             }
 
@@ -203,7 +207,7 @@ void GameEventMgr::LoadFromDB()
             uint16 event_id = fields[0].GetUInt16();
             GameEventData& gameEvent = m_gameEvents[event_id];
 
-            if (gameEvent.scheduleType != GAME_EVENT_SCHEDULE_DATE)
+            if (gameEvent.scheduleType != GAME_EVENT_SCHEDULE_DATE && gameEvent.scheduleType != GAME_EVENT_SCHEDULE_YEARLY)
             {
                 sLog.outErrorDb("`game_event` game event id (%i) has game_event_time but is not date scheduled - ignoring", event_id);
                 continue;
@@ -214,6 +218,9 @@ void GameEventMgr::LoadFromDB()
 
             gameEvent.start = fields[1].GetTime();
             gameEvent.end = fields[2].GetTime();
+
+            if (gameEvent.scheduleType == GAME_EVENT_SCHEDULE_YEARLY)
+                ComputeEventStartAndEndTime(gameEvent, time(nullptr));
         }
         while (result->NextRow());
     }
@@ -1062,53 +1069,165 @@ void GameEventMgr::OnEventHappened(uint16 event_id, bool activate, bool resume)
     });
 }
 
-void GameEventMgr::ComputeEventStartAndEndTime(GameEventData& data)
+std::tuple<int, int, int> gaussEaster(int Y)
 {
-    time_t curTime = time(nullptr);
+    float A, B, C, P, Q,
+        M, N, D, E;
+
+    // All calculations done
+    // on the basis of
+    // Gauss Easter Algorithm
+    A = Y % 19;
+    B = Y % 4;
+    C = Y % 7;
+    P = (float)floor(Y / 100);
+    Q = (float)floor((13 + 8 * P) / 25);
+    M = (int)(15 - Q + P - P / 4) % 30;
+    N = (int)(4 + P - P / 4) % 7;
+    D = (int)(19 * A + M) % 30;
+    E = (int)(2 * B + 4 * C + 6 * D + N) % 7;
+    int days = (int)(22 + D + E);
+
+    // A corner case,
+    // when D is 29
+    if ((D == 29) && (E == 6))
+    {
+        return { Y, 4, 19 };
+    }
+    // Another corner case,
+    // when D is 28
+    else if ((D == 28) && (E == 6))
+    {
+        return { Y, 4, 18 };
+    }
+    else
+    {
+        // If days > 31, move to April
+        // April = 4th Month
+        if (days > 31)
+        {
+            return { Y, 4, days - 31 };
+        }
+        else
+        {
+            // Otherwise, stay on March
+            // March = 3rd Month
+            return { Y, 3, days };
+        }
+    }
+}
+
+void GameEventMgr::ComputeEventStartAndEndTime(GameEventData& data, time_t today)
+{
+    time_t curTime = today;
     const tm* t = localtime(&curTime);
-    tm firstMonday = *t;
-    firstMonday.tm_sec = 0;
-    firstMonday.tm_min = 0;
-    firstMonday.tm_hour = 0;
-    int monthRemainder = firstMonday.tm_mon % 2;
-    switch (data.scheduleType)
-    {
-        case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_1:
-        case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_1:
-        case GAME_EVENT_SCHEDULE_DMF_1: firstMonday.tm_mon += (2 - monthRemainder) % 2; break;
-        case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_2:
-        case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_2:
-        case GAME_EVENT_SCHEDULE_DMF_2: firstMonday.tm_mon += (2 - monthRemainder + 1) % 2; break;
-        default: break;
-    }
-    mktime(&firstMonday);
-    firstMonday.tm_mday = (firstMonday.tm_mday - 1 - (firstMonday.tm_wday - 1) + 7) % 7 + 1; // get this weeks monday
-    switch(data.scheduleType)
-    {
-        case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_1:
-        case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_2:
-            firstMonday.tm_mday -= 2; break;
-        case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_1:
-        case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_2:
-            firstMonday.tm_mday -= 1; break;
-        default:
-            break;
-    }
-    data.start = mktime(&firstMonday);
     switch (data.scheduleType)
     {
         case GAME_EVENT_SCHEDULE_DMF_1:
         case GAME_EVENT_SCHEDULE_DMF_2:
-            firstMonday.tm_mday += 7; break;
         case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_1:
         case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_2:
         case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_1:
         case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_2:
-            firstMonday.tm_mday += 1; break;
-        default:
+        {
+            tm firstMonday = *t;
+            firstMonday.tm_sec = 0;
+            firstMonday.tm_min = 0;
+            firstMonday.tm_hour = 0;
+            int monthRemainder = firstMonday.tm_mon % 3;
+            switch (data.scheduleType)
+            {
+                case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_1:
+                case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_1:
+                case GAME_EVENT_SCHEDULE_DMF_1: firstMonday.tm_mon += (3 - monthRemainder) % 3; break; // 0 2 1 - x + 3 - 3
+                case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_2:
+                case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_2:
+                case GAME_EVENT_SCHEDULE_DMF_2: firstMonday.tm_mon += (3 - monthRemainder + 1) % 3; break; // 1 0 2 - x + 3 - 2
+                default: break;
+            }
+            mktime(&firstMonday);
+            firstMonday.tm_mday = (firstMonday.tm_mday - 1 - (firstMonday.tm_wday - 1) + 7) % 7 + 1; // get this weeks monday
+            switch (data.scheduleType)
+            {
+                case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_1:
+                case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_2: firstMonday.tm_mday -= 2; break;
+                case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_1:
+                case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_2: firstMonday.tm_mday -= 1; break;
+                default: break;
+            }
+            data.start = mktime(&firstMonday);
+            switch (data.scheduleType)
+            {
+                case GAME_EVENT_SCHEDULE_DMF_1:
+                case GAME_EVENT_SCHEDULE_DMF_2: firstMonday.tm_mday += 7; break;
+                case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_1:
+                case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_2:
+                case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_1:
+                case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_2: firstMonday.tm_mday += 1; break;
+                default: break;
+            }
+            data.end = mktime(&firstMonday);
             break;
+        }
+        case GAME_EVENT_SCHEDULE_YEARLY:
+        {
+            tm startT = *localtime(&data.start); // get date it starts
+            tm endT = *localtime(&data.end); // get date it starts
+            // transform it to same date this year
+            tm todayT = *localtime(&today); // take year from today
+            startT.tm_year = todayT.tm_year;
+            endT.tm_year = todayT.tm_year;
+            data.start = mktime(&startT);
+            data.end = mktime(&endT);
+            break;
+        }
+        case GAME_EVENT_SCHEDULE_LUNAR_NEW_YEAR:
+        {
+            Moon moon;
+            tm todayT = *localtime(&today); // take year from today
+            --todayT.tm_year; // need to start at winter solstice - 21st Dec of previous year
+            todayT.tm_year += 1900;
+            todayT.tm_mday = 21;
+            todayT.tm_mon = 12; // I know
+            todayT.tm_hour = 0;
+            todayT.tm_min = 0;
+            moon.nextphase(todayT.tm_mon, todayT.tm_mday, todayT.tm_year, todayT.tm_hour, todayT.tm_min, 0);
+            ++todayT.tm_mday;
+            todayT.tm_year -= 1900;
+            time_t temp = mktime(&todayT);
+            todayT = *localtime(&temp);
+            todayT.tm_year += 1900;
+            moon.nextphase(todayT.tm_mon, todayT.tm_mday, todayT.tm_year, todayT.tm_hour, todayT.tm_min, 0);
+            --todayT.tm_mon;
+            todayT.tm_year -= 1900;
+            // china is gmt + 8
+            todayT.tm_hour += 8;
+            todayT.tm_min = 0;
+            time_t lunarNewYearInChina = mktime(&todayT);
+            todayT = *localtime(&lunarNewYearInChina);
+            todayT.tm_hour = 0;
+            time_t lunarNewYear = mktime(&todayT);
+            data.start = lunarNewYear;
+            todayT.tm_mday += 21;
+            data.end = mktime(&todayT);
+            break;
+        }
+        case GAME_EVENT_SCHEDULE_EASTER:
+        {
+            tm todayT = *gmtime(&today); // take year from today
+            int year, month, day;
+            std::tie(year, month, day) = gaussEaster(todayT.tm_year + 1900);
+            todayT.tm_sec = 0;
+            todayT.tm_min = 0;
+            todayT.tm_hour = 0;
+            todayT.tm_mday = day;
+            todayT.tm_mon = month - 1;
+            data.start = mktime(&todayT);
+            todayT.tm_mday += 7;
+            data.end = mktime(&todayT);
+            break;
+        }
     }
-    data.end = mktime(&firstMonday);
 }
 
 void GameEventMgr::WeeklyEventTimerRecalculation()
@@ -1123,7 +1242,10 @@ void GameEventMgr::WeeklyEventTimerRecalculation()
             case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_2:
             case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_1:
             case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_2:
-                ComputeEventStartAndEndTime(gameEvent);
+            case GAME_EVENT_SCHEDULE_YEARLY:
+            case GAME_EVENT_SCHEDULE_LUNAR_NEW_YEAR:
+            case GAME_EVENT_SCHEDULE_EASTER:
+                ComputeEventStartAndEndTime(gameEvent, time(nullptr));
                 break;
             default: break;
         }

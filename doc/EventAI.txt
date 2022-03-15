@@ -81,7 +81,7 @@ Some events such as EVENT_T_AGGRO, EVENT_T_DEATH, EVENT_T_SPAWNED, and EVENT_T_E
 11  EVENT_T_SPAWNED                     Condition, CondValue1, unused, unused                                   Expires on initial spawn and respawn of the NPC if Condition is met (Useful for setting Ranged Movement/Summoning Pets/Applying Buffs).
 12  EVENT_T_TARGET_HP                   HPMax%, HPMin%, RepeatMin, RepeatMax                                    Expires when current target's HP% is between (Param1) and (Param2). Will repeat every (Param3) and (Param4)If Event Conditions Are Still Met.
 13  EVENT_T_TARGET_CASTING              RepeatMin, RepeatatMax, unused, unused                                  Expires when the current target is casting a spell. Will repeat every (Param1) and (Param2) If Event Conditions Are Still Met.
-14  EVENT_T_FRIENDLY_HP                 HPDeficit, Radius, RepeatMin, RepeatMax                                 Expires when a friendly unit in (Radius) has at least (Param1) HP points missing. Will repeat every (Param3) and (Param4) If Event Conditions Are Still Met.
+14  EVENT_T_FRIENDLY_HP                 HPDeficit, Radius, RepeatMin, RepeatMax, IsPercent                      Expires when a friendly unit in (Radius) has at least (Param1) HP points missing. Will repeat every (Param3) and (Param4) If Event Conditions Are Still Met. If Param5=1 deficit is percentage of hp.
 15  EVENT_T_FRIENDLY_IS_CC              DispelType, Radius, RepeatMin, RepeatMax                                Expires when a friendly unit is crowd controlled within the given Radius (Param2). Will repeat every (Param3) and (Param4).
 16  EVENT_T_FRIENDLY_MISSING_BUFF       SpellId, Radius, RepeatMin, RepeatMax, InCombat                         Expires when a friendly unit is missing aura(s) given by a spell (Param1) within Radius (Param2). Will repeat every (Param3) and (Param4) If Event Conditions Are Still Met.
 17  EVENT_T_SUMMONED_UNIT               CreatureId, RepeatMin, RepeatMax, unused                                Expires after creature with entry = (Param1) is spawned (Param1 = 0 means all spawns). Will repeat every (Param2) and (Param3).
@@ -352,6 +352,7 @@ Parameter 1: HPDeficit - This is the Amount of HP Missing from Full HP to trigge
 Parameter 2: Radius    - This is the Range in Yards the NPC will scan for nearby Friendlies (Faction is Friendly To) for the missing amount of HP in Param1.
 Parameter 3: RepeatMin - Minimum Time used to calculate Random Repeat Expire
 Parameter 4: RepeatMax - Maximum Time used to calculate Random Repeat Expire
+Parameter 5: IsPercent - Deficit is handled as percentage
 
 COMBAT ONLY - Expires when a friendly unit in radius(param2) has at least (param1) hp missing. Will repeat every (Param3) and (Param4).
 This is commonly used when an NPC in Combat will heal a nearby Friendly NPC in Combat with a Heal/Renew Spell.

@@ -951,6 +951,8 @@ class Player : public Unit
         bool isGMVisible() const { return !(m_ExtraFlags & PLAYER_EXTRA_GM_INVISIBLE); }
         void SetGMVisible(bool on);
         void SetPvPDeath(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH; else m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH; }
+        bool isDebuggingAreaTriggers() { return m_isDebuggingAreaTriggers; }
+        void SetDebuggingAreaTriggers(bool on) { m_isDebuggingAreaTriggers = on; }
 
         // Cannot be detected by creature (Should be tested in AI::MoveInLineOfSight)
         void SetCannotBeDetectedTimer(uint32 milliseconds) { m_cannotBeDetectedTimer = milliseconds; };
@@ -1372,10 +1374,9 @@ class Player : public Unit
         void SendTalentWipeConfirm(ObjectGuid guid) const;
         void RewardRage(uint32 damage, bool attacker);
         void SendPetSkillWipeConfirm() const;
-        void RegenerateAll();
-        void Regenerate(Powers power);
-        void RegenerateHealth();
-        void setRegenTimer(uint32 time) {m_regenTimer = time;}
+        void RegenerateAll(uint32 diff = REGEN_TIME_FULL);
+        void Regenerate(Powers power, uint32 diff);
+        void RegenerateHealth(uint32 diff);
 
         uint32 GetMoney() const { return GetUInt32Value(PLAYER_FIELD_COINAGE); }
         void ModifyMoney(int32 d)
@@ -2412,6 +2413,8 @@ class Player : public Unit
         ObjectGuid m_summoner;
 
         std::map<uint32, uint32> m_forgottenSkills;
+
+        bool m_isDebuggingAreaTriggers;
 
     private:
         // internal common parts for CanStore/StoreItem functions

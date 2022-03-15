@@ -127,11 +127,12 @@ struct Script
 class ScriptDevAIMgr
 {
     public:
-        ScriptDevAIMgr() : num_sc_scripts(0) {}
+        ScriptDevAIMgr() : m_scriptCount(0) {}
         ~ScriptDevAIMgr();
 
         void Initialize();
         void LoadScriptNames();
+        void CheckScriptNames();
         void LoadAreaTriggerScripts();
         void LoadEventIdScripts();
 
@@ -177,7 +178,7 @@ class ScriptDevAIMgr
         typedef std::unordered_map<uint32, uint32> AreaTriggerScriptMap;
         typedef std::unordered_map<uint32, uint32> EventIdScriptMap;
 
-        int num_sc_scripts;
+        int m_scriptCount;
         SDScriptVec m_scripts;
 
         AreaTriggerScriptMap    m_AreaTriggerScripts;
