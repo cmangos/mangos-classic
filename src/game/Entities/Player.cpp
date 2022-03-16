@@ -19924,7 +19924,7 @@ void Player::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* item
     uint32 categoryRecTime = spellEntry.CategoryRecoveryTime; // int because of spellmod calculations
     uint32 itemId = 0;
 
-    if (itemProto)
+    auto& pickCooldowns = [&](ItemPrototype const* itemProto)
     {
         for (const auto& Spell : itemProto->Spells)
         {
@@ -19940,9 +19940,14 @@ void Player::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* item
                 break;
             }
         }
-    }
+    };
+
+    if (itemProto)
+        pickCooldowns(itemProto);
 
     bool haveToSendEvent = false;
+    bool wasPermanent = false;
+    uint32 oldItemId = 0;
     auto cdDataItr = m_cooldownMap.FindBySpellId(spellEntry.Id);
     if (cdDataItr != m_cooldownMap.end())
     {
@@ -19952,6 +19957,8 @@ void Player::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* item
             sLog.outError("Player::AddCooldown> Spell(%u) try to add and already existing cooldown %u?", spellEntry.Id, forcedDuration);
             return;
         }
+        wasPermanent = cdData->IsPermanent();
+        oldItemId = cdData->GetItemId();
         m_cooldownMap.erase(cdDataItr);
         haveToSendEvent = true;
     }
@@ -19978,10 +19985,15 @@ void Player::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* item
     else if (spellCategory && categoryRecTime)
         ApplySpellMod(spellEntry.Id, SPELLMOD_COOLDOWN, categoryRecTime);
 
-    if (recTime || categoryRecTime)
+    if (recTime || categoryRecTime || wasPermanent)
     {
+        if (wasPermanent && oldItemId && !itemProto)
+            if (ItemPrototype const* itemProto = sObjectMgr.GetItemPrototype(oldItemId))
+                pickCooldowns(itemProto);
+
         // ready to add the cooldown
-        m_cooldownMap.AddCooldown(GetMap()->GetCurrentClockTime(), spellEntry.Id, recTime, spellCategory, categoryRecTime, itemId);
+        if (recTime || categoryRecTime) // only send event if was permanent but no cds
+            m_cooldownMap.AddCooldown(GetMap()->GetCurrentClockTime(), spellEntry.Id, recTime, spellCategory, categoryRecTime, itemId);
 
         // after some aura fade or potion activation we have to send cooldown event to start cd client side
         if (haveToSendEvent)
