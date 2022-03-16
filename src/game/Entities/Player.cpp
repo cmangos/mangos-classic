@@ -19924,7 +19924,7 @@ void Player::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* item
     uint32 categoryRecTime = spellEntry.CategoryRecoveryTime; // int because of spellmod calculations
     uint32 itemId = 0;
 
-    auto& pickCooldowns = [&](ItemPrototype const* itemProto)
+    auto pickCooldowns = [&](ItemPrototype const* itemProto)
     {
         for (const auto& Spell : itemProto->Spells)
         {
