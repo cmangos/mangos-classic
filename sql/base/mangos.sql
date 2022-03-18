@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2789_01_mangos_creature_spawn_data_template` bit(1) DEFAULT NULL
+  `required_z2790_01_mangos_quest_template` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -10193,6 +10193,7 @@ CREATE TABLE `quest_template` (
   `PrevQuestId` mediumint(9) NOT NULL DEFAULT '0',
   `NextQuestId` mediumint(9) NOT NULL DEFAULT '0',
   `ExclusiveGroup` mediumint(9) NOT NULL DEFAULT '0',
+  `BreadcrumbForQuestId` MEDIUMINT(9) UNSIGNED NOT NULL DEFAULT '0',
   `NextQuestInChain` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `SrcItemId` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `SrcItemCount` tinyint(3) unsigned NOT NULL DEFAULT '0',

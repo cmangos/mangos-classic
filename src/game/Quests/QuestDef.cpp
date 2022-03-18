@@ -46,6 +46,7 @@ Quest::Quest(Field* questRecord)
     PrevQuestId = questRecord[21].GetInt32();
     NextQuestId = questRecord[22].GetInt32();
     ExclusiveGroup = questRecord[23].GetInt32();
+    BreadcrumbForQuestId = questRecord[129].GetInt32();
     NextQuestInChain = questRecord[24].GetUInt32();
     SrcItemId = questRecord[25].GetUInt32();
     SrcItemCount = questRecord[26].GetUInt32();
