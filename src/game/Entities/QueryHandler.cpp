@@ -146,12 +146,12 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recv_data)
     ObjectGuid guid;
 
     recv_data >> entry;
-    recv_data >> guid;
+    recv_data >> guid; // not checking guid for optimization purposes - when adding quest, guid is sent as 0 so its useless anyway
 
-    Creature* unit = _player->GetMap()->GetAnyTypeCreature(guid);
+    //Creature* unit = _player->GetMap()->GetAnyTypeCreature(guid);
 
-    if (!unit || (unit->GetEntry() != entry && unit->GetObjectGuid().GetEntry() != entry))
-        return;
+    //if (!unit || (unit->GetEntry() != entry && unit->GetObjectGuid().GetEntry() != entry))
+    //    return;
 
     CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(entry);
     if (ci)
@@ -175,7 +175,7 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recv_data)
         data << uint32(ci->Rank);                           // Creature Rank (elite, boss, etc)
         data << uint32(0);                                  // unknown        wdbFeild11
         data << uint32(ci->PetSpellDataId);                 // Id from CreatureSpellData.dbc    wdbField12
-        data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID); // DisplayID      wdbFeild13
+        data << uint32(ci->ModelId[0]);                     // DisplayID      wdbFeild13
 
         data << uint16(ci->Civilian);                       // wdbFeild14
         SendPacket(data);

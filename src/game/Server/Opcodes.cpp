@@ -146,7 +146,7 @@ void OpcodeStore::BuildOpcodeList()
     /*0x05D*/  StoreOpcode(SMSG_QUEST_QUERY_RESPONSE,         "SMSG_QUEST_QUERY_RESPONSE",        STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     /*0x05E*/  StoreOpcode(CMSG_GAMEOBJECT_QUERY,             "CMSG_GAMEOBJECT_QUERY",            STATUS_LOGGEDIN,  PROCESS_IMMEDIATE,    &WorldSession::HandleGameObjectQueryOpcode);
     /*0x05F*/  StoreOpcode(SMSG_GAMEOBJECT_QUERY_RESPONSE,    "SMSG_GAMEOBJECT_QUERY_RESPONSE",   STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
-    /*0x060*/  StoreOpcode(CMSG_CREATURE_QUERY,               "CMSG_CREATURE_QUERY",              STATUS_LOGGEDIN,  PROCESS_MAP_THREAD,    &WorldSession::HandleCreatureQueryOpcode);
+    /*0x060*/  StoreOpcode(CMSG_CREATURE_QUERY,               "CMSG_CREATURE_QUERY",              STATUS_LOGGEDIN,  PROCESS_IMMEDIATE,    &WorldSession::HandleCreatureQueryOpcode);
     /*0x061*/  StoreOpcode(SMSG_CREATURE_QUERY_RESPONSE,      "SMSG_CREATURE_QUERY_RESPONSE",     STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     /*0x062*/  StoreOpcode(CMSG_WHO,                          "CMSG_WHO",                         STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleWhoOpcode);
     /*0x063*/  StoreOpcode(SMSG_WHO,                          "SMSG_WHO",                         STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
