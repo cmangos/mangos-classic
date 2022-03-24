@@ -115,6 +115,8 @@ struct AuraScript
     virtual void OnPersistentAreaAuraEnd(DynamicObject* /*dynGo*/) const {}
     // called on unit heartbeat
     virtual void OnHeartbeat(Aura* /*aura*/) const {}
+    // used to override SPELL_AURA_TRANSFORM display id - more uses in future
+    virtual uint32 GetAuraScriptCustomizationValue(Aura* /*aura*/) const { return 0; }
 };
 
 class ScriptStorage

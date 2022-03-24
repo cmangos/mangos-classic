@@ -2052,24 +2052,27 @@ void Aura::HandleAuraTransform(bool apply, bool /*Real*/)
         }
         else                                                // m_modifier.m_miscvalue != 0
         {
-            CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(m_modifier.m_miscvalue);
-            if (!ci)
+            uint32 overrideDisplayId = GetAuraScriptCustomizationValue(); // from script
+            CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(m_modifier.m_miscvalue);
+            if (!cInfo)
             {
                 m_modifier.m_amount = 16358;                           // pig pink ^_^
                 sLog.outError("Auras: unknown creature id = %d (only need its modelid) Form Spell Aura Transform in Spell ID = %d", m_modifier.m_miscvalue, GetId());
             }
-            else if (!m_modifier.m_amount) // can be overriden by script
-                m_modifier.m_amount = Creature::ChooseDisplayId(ci);   // Will use the default model here
+            else if (overrideDisplayId)
+                m_modifier.m_amount = overrideDisplayId;
+            else
+                m_modifier.m_amount = Creature::ChooseDisplayId(cInfo);   // Will use the default model here
 
             // creature case, need to update equipment if additional provided
-            if (ci && target->GetTypeId() == TYPEID_UNIT)
+            if (cInfo && target->GetTypeId() == TYPEID_UNIT)
             {
                 skipDisplayUpdate = ((Creature*)target)->IsTotem();
-                ((Creature*)target)->LoadEquipment(ci->EquipmentTemplateId, false);
+                ((Creature*)target)->LoadEquipment(cInfo->EquipmentTemplateId, false);
             }
 
-            if (ci && ci->Scale != 1.f)
-                target->SetObjectScale(ci->Scale * target->GetObjectScaleMod());
+            if (cInfo && cInfo->Scale != 1.f)
+                target->SetObjectScale(cInfo->Scale * target->GetObjectScaleMod());
         }
 
         if (!skipDisplayUpdate)
@@ -6238,6 +6241,13 @@ void Aura::OnHeartbeat()
     // TODO: move HB resist here
     if (AuraScript* script = GetAuraScript())
         script->OnHeartbeat(this);
+}
+
+uint32 Aura::GetAuraScriptCustomizationValue()
+{
+    if (AuraScript* script = GetAuraScript())
+       return script->GetAuraScriptCustomizationValue(this);
+    return 0;
 }
 
 void Aura::ForcePeriodicity(uint32 periodicTime)

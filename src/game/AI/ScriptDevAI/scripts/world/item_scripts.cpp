@@ -142,52 +142,48 @@ struct BanishExile : public SpellScript
 
 struct OrbOfDeception : public AuraScript
 {
-    void OnApply(Aura* aura, bool apply) const override
+    uint32 GetAuraScriptCustomizationValue(Aura* aura) const override
     {
-        if (apply)
+        uint32 orbModel = aura->GetTarget()->GetNativeDisplayId();
+        uint32 resultingModel = 0; // keeping this for future research
+        uint32 resultingTemplate = 0;
+        switch (orbModel)
         {
-            uint32 orbModel = aura->GetTarget()->GetNativeDisplayId();
-            uint32 resultingModel = 0; // keeping this for future research
-            uint32 resultingTemplate = 0;
-            switch (orbModel)
-            {
-                // Troll Female
-                case 1479: resultingModel = 10134; resultingTemplate = 10792; break;
-                // Troll Male
-                case 1478: resultingModel = 10135; resultingTemplate = 10791; break;
-                // Tauren Male
-                case 59:   resultingModel = 10136; resultingTemplate = 10793; break;
-                // Human Male
-                case 49:   resultingModel = 10137; resultingTemplate = 10783; break;
-                // Human Female
-                case 50:   resultingModel = 10138; resultingTemplate = 10784; break;
-                // Orc Male
-                case 51:   resultingModel = 10139; resultingTemplate = 10795; break;
-                // Orc Female
-                case 52:   resultingModel = 10140; resultingTemplate = 10796; break;
-                // Dwarf Male
-                case 53:   resultingModel = 10141; resultingTemplate = 10787; break;
-                // Dwarf Female
-                case 54:   resultingModel = 10142; resultingTemplate = 10788; break;
-                // NightElf Male
-                case 55:   resultingModel = 10143; resultingTemplate = 10789; break;
-                // NightElf Female
-                case 56:   resultingModel = 10144; resultingTemplate = 10790; break;
-                // Undead Female
-                case 58:   resultingModel = 10145; resultingTemplate = 10798; break;
-                // Undead Male
-                case 57:   resultingModel = 10146; resultingTemplate = 10797; break;
-                // Tauren Female
-                case 60:   resultingModel = 10147; resultingTemplate = 10794; break;
-                // Gnome Male
-                case 1563: resultingModel = 10148; resultingTemplate = 10785; break;
-                // Gnome Female
-                case 1564: resultingModel = 10149; resultingTemplate = 10786; break;
-                default: break;
-            }
-            aura->GetModifier()->m_amount = resultingModel;
-            aura->GetModifier()->m_miscvalue = resultingTemplate;
+            // Troll Female
+            case 1479: resultingModel = 10134; resultingTemplate = 10792; break;
+            // Troll Male
+            case 1478: resultingModel = 10135; resultingTemplate = 10791; break;
+            // Tauren Male
+            case 59:   resultingModel = 10136; resultingTemplate = 10793; break;
+            // Human Male
+            case 49:   resultingModel = 10137; resultingTemplate = 10783; break;
+            // Human Female
+            case 50:   resultingModel = 10138; resultingTemplate = 10784; break;
+            // Orc Male
+            case 51:   resultingModel = 10139; resultingTemplate = 10795; break;
+            // Orc Female
+            case 52:   resultingModel = 10140; resultingTemplate = 10796; break;
+            // Dwarf Male
+            case 53:   resultingModel = 10141; resultingTemplate = 10787; break;
+            // Dwarf Female
+            case 54:   resultingModel = 10142; resultingTemplate = 10788; break;
+            // NightElf Male
+            case 55:   resultingModel = 10143; resultingTemplate = 10789; break;
+            // NightElf Female
+            case 56:   resultingModel = 10144; resultingTemplate = 10790; break;
+            // Undead Female
+            case 58:   resultingModel = 10145; resultingTemplate = 10798; break;
+            // Undead Male
+            case 57:   resultingModel = 10146; resultingTemplate = 10797; break;
+            // Tauren Female
+            case 60:   resultingModel = 10147; resultingTemplate = 10794; break;
+            // Gnome Male
+            case 1563: resultingModel = 10148; resultingTemplate = 10785; break;
+            // Gnome Female
+            case 1564: resultingModel = 10149; resultingTemplate = 10786; break;
+            default: break;
         }
+        return resultingModel;
     }
 };
 
