@@ -12,6 +12,7 @@ option(BUILD_METRICS        "Build Metrics, generate data for Grafana" OFF)
 option(BUILD_RECASTDEMOMOD  "Build map/vmap/mmap viewer"            OFF)
 option(BUILD_GIT_ID         "Build git_id"                          OFF)
 option(BUILD_DOCS           "Build documentation with doxygen"      OFF)
+option(CMAKE_INTERPROCEDURAL_OPTIMIZATION "Enable link-time optimizations" OFF)
 
 # TODO: options that should be checked/created:
 #option(CLI                  "With CLI"                              ON)
