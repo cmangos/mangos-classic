@@ -940,7 +940,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `creature_spawn_data_template`;
 CREATE TABLE `creature_spawn_data_template` (
   `Entry` int unsigned NOT NULL COMMENT 'ID of template',
-  `NpcFlags` int unsigned NOT NULL DEFAULT '-1',
+  `NpcFlags` int NOT NULL DEFAULT '-1',
   `UnitFlags` bigint NOT NULL DEFAULT '-1',
   `Faction` int unsigned NOT NULL DEFAULT '0',
   `ModelId` mediumint unsigned NOT NULL DEFAULT '0',
