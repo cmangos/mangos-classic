@@ -2039,8 +2039,10 @@ void Aura::HandleAuraTransform(bool apply, bool /*Real*/)
     bool skipDisplayUpdate = false;
     if (apply)
     {
+        if (uint32 overrideDisplayId = GetAuraScriptCustomizationValue()) // from script
+            m_modifier.m_amount = overrideDisplayId;
         // special case (spell specific functionality)
-        if (m_modifier.m_miscvalue == 0)
+        else if (m_modifier.m_miscvalue == 0)
         {
 //             switch (GetId())
 //             {
@@ -2052,15 +2054,12 @@ void Aura::HandleAuraTransform(bool apply, bool /*Real*/)
         }
         else                                                // m_modifier.m_miscvalue != 0
         {
-            uint32 overrideDisplayId = GetAuraScriptCustomizationValue(); // from script
             CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(m_modifier.m_miscvalue);
             if (!cInfo)
             {
                 m_modifier.m_amount = 16358;                           // pig pink ^_^
                 sLog.outError("Auras: unknown creature id = %d (only need its modelid) Form Spell Aura Transform in Spell ID = %d", m_modifier.m_miscvalue, GetId());
             }
-            else if (overrideDisplayId)
-                m_modifier.m_amount = overrideDisplayId;
             else
                 m_modifier.m_amount = Creature::ChooseDisplayId(cInfo);   // Will use the default model here
 
