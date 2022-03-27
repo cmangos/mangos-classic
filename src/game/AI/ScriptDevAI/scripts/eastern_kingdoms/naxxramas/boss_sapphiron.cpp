@@ -101,7 +101,7 @@ struct boss_sapphironAI : public CombatAI
     ScriptedInstance* m_instance;
 
     uint32 m_iceboltCount;
-    Phases m_phase;
+    SapphironPhases m_phase;
 
     void Reset() override
     {
