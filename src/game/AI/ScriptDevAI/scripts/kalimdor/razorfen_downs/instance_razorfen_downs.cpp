@@ -158,10 +158,10 @@ void instance_razorfen_downs::DoSpawnWaveIfCan(GameObject* pGo)
         float fPosX, fPosY, fPosZ;
         float fTargetPosX, fTargetPosY, fTargetPosZ;
 
-        pGo->GetRandomPoint(aSpawnLocations[uiPos].m_fX, aSpawnLocations[uiPos].m_fY, aSpawnLocations[uiPos].m_fZ, 5.0f, fPosX, fPosY, fPosZ);
+        pGo->GetRandomPoint(aSpawnLocations[uiPos].x, aSpawnLocations[uiPos].y, aSpawnLocations[uiPos].z, 5.0f, fPosX, fPosY, fPosZ);
 
         // move the summoned NPC toward the gong
-        if (Creature* pSummoned = pGo->SummonCreature(aWaveSummonInformation[m_uiWaveCounter].m_uiNpcEntry, fPosX, fPosY, fPosZ, aSpawnLocations[uiPos].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0))
+        if (Creature* pSummoned = pGo->SummonCreature(aWaveSummonInformation[m_uiWaveCounter].m_uiNpcEntry, fPosX, fPosY, fPosZ, aSpawnLocations[uiPos].o, TEMPSPAWN_DEAD_DESPAWN, 0))
         {
             pSummoned->SetWalk(false);
             pGo->GetContactPoint(pSummoned, fTargetPosX, fTargetPosY, fTargetPosZ);

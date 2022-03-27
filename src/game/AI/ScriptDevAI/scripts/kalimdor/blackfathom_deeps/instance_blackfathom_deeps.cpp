@@ -91,10 +91,10 @@ void instance_blackfathom_deeps::DoSpawnMobs(uint8 uiWaveIndex)
             for (uint8 k = 0; k < i.m_aCountAndPos[j].m_uiCount; ++k)
             {
                 uint8 uiPos = i.m_aCountAndPos[j].m_uiSummonPosition;
-                float fPosX = aSpawnLocations[uiPos].m_fX;
-                float fPosY = aSpawnLocations[uiPos].m_fY;
-                float fPosZ = aSpawnLocations[uiPos].m_fZ;
-                float fPosO = aSpawnLocations[uiPos].m_fO;
+                float fPosX = aSpawnLocations[uiPos].x;
+                float fPosY = aSpawnLocations[uiPos].y;
+                float fPosZ = aSpawnLocations[uiPos].z;
+                float fPosO = aSpawnLocations[uiPos].o;
 
                 // Adapt fPosY slightly in case of higher summon-counts
                 if (i.m_aCountAndPos[j].m_uiCount > 1)

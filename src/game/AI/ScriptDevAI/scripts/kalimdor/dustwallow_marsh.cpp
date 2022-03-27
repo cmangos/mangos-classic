@@ -482,14 +482,14 @@ enum
     SPELL_TELEPORT              = 7079
 };
 
-struct Location
+struct OutroSpawnLocation
 {
     float fX, fY, fZ, fO;
     float fDestX, fDestY, fDestZ;
     uint32 uiEntry;
 };
 
-const Location lOutroSpawns[] =
+const OutroSpawnLocation lOutroSpawns[] =
 {
     {
         -2857.604492f, -3354.784912f, 35.369640f, 3.16604f,
