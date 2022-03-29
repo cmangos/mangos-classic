@@ -67,6 +67,9 @@ Field which holds a combination of these flags:
     SCRIPT_FLAG_BUDDY_IS_PET                = 0x20      (Do not search for an npc, but for a pet)
     SCRIPT_FLAG_BUDDY_IS_DESPAWNED          = 0X40      (Search for a buddy that is dead or despawned)
     SCRIPT_FLAG_BUDDY_BY_POOL               = 0x80      (buddy should be part of a pool)
+    SCRIPT_FLAG_BUDDY_BY_SPAWN_GROUP        = 0x100,    (buddy is from spawn group - NYI - TODO:)
+    SCRIPT_FLAG_ALL_ELIGIBLE_BUDDIES        = 0x200,    (multisource/multitarget - will execute for each eligible)
+    SCRIPT_FLAG_BUDDY_BY_GO                 = 0x400,    (take the buddy by GO (for commands which can target both creature and GO))
 
 Detailed meaning described below!
 
@@ -163,7 +166,7 @@ Defining a buddy could be done in several way:
 -- --------------------------
 
  0 SCRIPT_COMMAND_TALK                      resultingSource = WorldObject, resultingTarget = Unit/none
-                                            * datalong = dbscript_string_template ID - will randomize between all db_script_strings in given template, ids from template are checked against dbscript_string table
+                                            * datalong = dbscript_string_template ID - will randomize between all dbscript_strings in given template, ids from template are checked against dbscript_string table
                                             * dataint = text entry from dbscript_string -table. dataint2-dataint4 optionally, for random selection of text
 
  1 SCRIPT_COMMAND_EMOTE                     resultingSource = Unit, resultingTarget = Unit/none
@@ -176,9 +179,13 @@ Defining a buddy could be done in several way:
 
  3 SCRIPT_COMMAND_MOVE_TO                   resultingSource = Creature
                                             If position is very near to current position, or x=y=z=0, then only orientation is changed
+                                            * datalong = dbscripts_on_relay id - executed for source and target same as this script
                                             * datalong2 = travel_speed*100 (use 0 for creature default movement)
+                                            * datalong3 = enum ForcedMovement
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: teleport unit to position
                                             * x/y/z/o
+                                            * dataint = 1 to init move to respawn position, 2 to init creature group member each in their respawn position.
+                                                        no other data is needed. So ex: command 3 ... dataint=1 and creature should head to its respawn pos
 
  4 SCRIPT_COMMAND_FLAG_SET                  source = any
                                             * datalong = field_id
@@ -210,21 +217,25 @@ Defining a buddy could be done in several way:
                                             * datalong3 = pathId - creature_movement_template
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: summon as active object
                                             * dataint = (bool) setRun; 0 = off (default), 1 = on
-                                            * dataint2 = factionId - if 0 is set, faction is from DB entry
-                                            * dataint3 = modelId - if 0 is set, model is from DB entry
+                                              (note, migrated from old where faction and modelid were 2 and 3 and now are in spawndatatemplate)
+                                            * dataint4 = spawndatatemplate - if > 0 uses settings from creature_spawn_data_template
 
 11 SCRIPT_COMMAND_OPEN_DOOR                 source = any
                                             * datalong = db_guid (can be skipped for buddy)
                                             * datalong2 = reset_delay
+                                            * datalong3 = alternate state - bool 0 or 1
 
 12 SCRIPT_COMMAND_CLOSE_DOOR                source = any
                                             * datalong = db_guid (can be skipped for buddy)
                                             * datalong2 = reset_delay
 
 13 SCRIPT_COMMAND_ACTIVATE_OBJECT           source = unit, target=GO
+                                            * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: send gameobject custom anim instead of Use()
+                                            * datalong = anim Id
 
 14 SCRIPT_COMMAND_REMOVE_AURA               resultingSource = Unit
                                             * datalong = spell_id
+                                            warning - if used with a channeled spell will not interrupt channel
 
 15 SCRIPT_COMMAND_CAST_SPELL                resultingSource = Unit, cast spell at resultingTarget = Unit
                                             * datalong = spell id
@@ -248,9 +259,11 @@ Defining a buddy could be done in several way:
                                             * datalog = movie id
 
 20 SCRIPT_COMMAND_MOVEMENT                  resultingSource = Creature
-                                            * datalong = MovementType (0:idle, 1:random or 2:waypoint)
+                                            * datalong = MovementType (0:idle, 1:random, 2:waypoint, 3:path)
                                             * datalong2 = wanderDistance (for random movement), pathId (for waypoint movement)
+                                            * datalong3 = timer for timed random movement or pass target to waypoint and path movegen (by default, source targets self)
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: RandomMovement around current position
+                                            * dataint = enum ForcedMovement
 
 21 SCRIPT_COMMAND_SET_ACTIVEOBJECT          resultingSource = Creature
                                             * datalong=bool 0=off, 1=on
@@ -275,6 +288,7 @@ Defining a buddy could be done in several way:
 
 24 SCRIPT_COMMAND_MOUNT_TO_ENTRY_OR_MODEL   resultingSource = Creature
                                             * datalong=creature entry/modelid (depend on data_flags) OR 0 to dismount
+                                            * datalong2=bool 0=no, 1=yes, change speed to creature entry run speed in DB
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: use datalong value as modelid explicit
 
 25 SCRIPT_COMMAND_SET_RUN                   resultingSource = Creature
@@ -291,7 +305,7 @@ Defining a buddy could be done in several way:
 
 29 SCRIPT_COMMAND_MODIFY_NPC_FLAGS          resultingSource = Creature
                                             * datalong=NPCFlags
-                                            * datalong2= 0x00=toggle, 0x01=add, 0x02=remove
+                                            * datalong2 => 0=remove, 1=add, 2=toggle
 
 30 SCRIPT_COMMAND_SEND_TAXI_PATH            resultingTarget or Source must be Player
                                             * datalong = taxi path id
@@ -302,6 +316,7 @@ Defining a buddy could be done in several way:
                                             * !(data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL): if npc not alive found, terminate script
                                                 data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL:  if npc alive found, terminate script
                                             * dataint  = change of waittime (MILLIESECONDS) of a current waypoint movement type (negative values will decrease time)
+                                            * when used with guid or entry search, can also search for GO guid through SCRIPT_FLAG_BUDDY_BY_GO
 
 32 SCRIPT_COMMAND_PAUSE_WAYPOINTS           resultingSource must be Creature
                                             * datalong: 0/1 unpause/pause waypoint movement
@@ -315,6 +330,7 @@ Defining a buddy could be done in several way:
 35 SCRIPT_COMMAND_SEND_AI_EVENT             * resultingSource = Creature, resultingTarget = Unit
                                             * datalong = AIEventType - limited only to EventAI supported events
                                             * datalong2 = radius. If radius isn't provided and the target is a creature, then send AIEvent to target
+                                            * datalong3 = miscvalue - uint32 - for use in ReceiveAIEvent handler
 
 36 SCRIPT_COMMAND_SET_FACING                Turn resultingSource towards resultingTarget
                                             * resultingSource = Creature, resultingTarget WorldObject
@@ -330,6 +346,8 @@ Defining a buddy could be done in several way:
                                             * datalong3 = Exact contact point distance, to be used when you want to stop moving as soon as you're within this distance of the target
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL Obtain a point in direction of resTarget->GetOrientation + orientation
                                               for resTarget == resSource and orientation == 0 this will mean resSource moving forward
+                                            * dataint1 = enum ForcedMovement
+                                            * dataint2 = dbscripts_on_relay id
 
 38 SCRIPT_COMMAND_SEND_MAIL                 Send a mail from resSource  to resTarget
                                             * resultingSource = Creature OR NULL, resTarget must be Player
@@ -369,3 +387,26 @@ Defining a buddy could be done in several way:
 47 SCRIPT_COMMAND_INTERRUPT_SPELL           Interrupt spell in specific slot
                                             * source must be unit
                                             * datalong = SpellType enum CurrentSpellTypes
+
+48 SCRIPT_COMMAND_MODIFY_UNIT_FLAGS         resultingSource = Creature
+                                            * datalong = UnitFlags
+                                            * datalong2 => 0=remove, 1=add, 2=toggle
+
+49 SCRIPT_COMMAND_SET_DATA_64               Set instance data if it exists
+                                            * datalong - param1
+                                            * datalong2 - param2
+
+50 SCRIPT_COMMAND_ZONE_PULSE                Pulses zone for combat and attacks closest enemy
+
+51 SCRIPT_COMMAND_SPAWN_GROUP               Set of commands for creature spawn group
+                                            * datalong = command
+                                                only formation command(staring from 100) supported right now
+                                                - 100: switch formation shape.
+                                                       datalong1 should have shape value
+                                                       Random(0), Queue(1), Side bu side(2), Geese(3), Fanned out behind(4), Fanned out in front(5), Circle leader(6)
+                                                - 101: Set formation spread
+                                                       Spread is set in x field as we need a float for it
+                                                - 102: Set formation options
+                                                       Set flag 0x1 for keep compact option (after a member death)
+                                                       Set flag 0x2 for disabling pathfinding (not impemented yet)
+

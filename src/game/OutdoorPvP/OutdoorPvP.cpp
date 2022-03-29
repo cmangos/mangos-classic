@@ -21,6 +21,7 @@
 #include "Entities/GameObject.h"
 #include "Entities/Player.h"
 #include "Globals/ObjectMgr.h"
+#include "World/World.h"
 
 /**
    Function that adds a player to the players of the affected outdoor pvp zones
@@ -28,6 +29,12 @@
    @param   player to add
    @param   whether zone is main outdoor pvp zone or a affected zone
  */
+void OutdoorPvP::SetGraveYardLinkTeam(uint32 id, uint32 locKey, Team team, uint32 mapId)
+{
+    sWorld.GetMessager().AddMessage([=](World* world) { world->GetGraveyardManager().SetGraveYardLinkTeam(id, locKey, team); });
+    sMapMgr.DoForAllMapsWithMapId(mapId, [=](Map* map) { map->GetMessager().AddMessage([=](Map* map) {map->GetGraveyardManager().SetGraveYardLinkTeam(id, locKey, team); }); });
+}
+
 void OutdoorPvP::HandlePlayerEnterZone(Player* player, bool isMainZone)
 {
     m_zonePlayers[player->GetObjectGuid()] = isMainZone;
@@ -115,6 +122,9 @@ void OutdoorPvP::HandlePlayerKill(Player* killer, Player* victim)
             if (!groupMember->IsAtGroupRewardDistance(victim))
                 continue;
 
+            if (victim->IsTrivialForTarget(groupMember))
+                continue;
+
             // creature kills must be notified, even if not inside objective / not outdoor pvp active
             // player kills only count if active and inside objective
             if (groupMember->CanUseCapturePoint())
@@ -124,7 +134,7 @@ void OutdoorPvP::HandlePlayerKill(Player* killer, Player* victim)
     else
     {
         // creature kills must be notified, even if not inside objective / not outdoor pvp active
-        if (killer && killer->CanUseCapturePoint())
+        if (killer && killer->CanUseCapturePoint() && !victim->IsTrivialForTarget(killer))
             HandlePlayerKillInsideArea(killer);
     }
 }
@@ -140,7 +150,7 @@ void OutdoorPvP::BuffTeam(Team team, uint32 spellId, bool remove /*= false*/)
             if (remove)
             {
                 ObjectGuid guid = player->GetObjectGuid();
-                player->GetMap()->AddMessage([guid, spellId](Map* map) -> void
+                player->GetMap()->GetMessager().AddMessage([guid, spellId](Map* map) -> void
                 {
                     if (Player* player = map->GetPlayer(guid))
                         player->RemoveAurasDueToSpell(spellId);
@@ -149,7 +159,7 @@ void OutdoorPvP::BuffTeam(Team team, uint32 spellId, bool remove /*= false*/)
             else
             {
                 ObjectGuid guid = player->GetObjectGuid();
-                player->GetMap()->AddMessage([guid, spellId](Map* map) -> void
+                player->GetMap()->GetMessager().AddMessage([guid, spellId](Map* map) -> void
                 {
                     if(Player* player = map->GetPlayer(guid))
                         player->CastSpell(player, spellId, TRIGGERED_OLD_TRIGGERED);

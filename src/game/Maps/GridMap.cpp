@@ -18,6 +18,7 @@
 
 #include "Log.h"
 #include "Grids/CellImpl.h"
+#include "GridDefines.h"
 #include "Maps/Map.h"
 #include "Server/DBCEnums.h"
 #include "Server/DBCStores.h"
@@ -540,7 +541,7 @@ uint8 GridMap::getTerrainType(float x, float y) const
 }
 
 // Get water state on map
-GridMapLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data)
+GridMapLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data, float collisionHeight)
 {
     // Check water type (if no water return)
     if (!m_liquidFlags && !m_liquidGlobalFlags)
@@ -622,10 +623,10 @@ GridMapLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 Re
     }
 
     // For speed check as int values
-    int delta = int((liquid_level - z) * 10);
+    float delta = liquid_level - z;
 
     // Get position delta
-    if (delta > 20)                                         // Under water
+    if (delta > collisionHeight)                            // Under water
         return LIQUID_MAP_UNDER_WATER;
 
     if (delta > 0)                                          // In water
@@ -837,6 +838,10 @@ float TerrainInfo::GetHeightStatic(float x, float y, float z, bool useVmaps/*=tr
             if (vmapHeight <= INVALID_HEIGHT)
                 vmapHeight = vmgr->getHeight(GetMapId(), x, y, z2, 10000.0f);
 
+            // look upwards
+            if (vmapHeight <= INVALID_HEIGHT && mapHeight > z2 && std::abs(z2 - mapHeight) > 30.f)
+                vmapHeight = vmgr->getHeight(GetMapId(), x, y, z2, -maxSearchDist);
+
             // still not found, look near terrain height
             if (vmapHeight <= INVALID_HEIGHT && mapHeight > INVALID_HEIGHT && z2 < mapHeight)
                 vmapHeight = vmgr->getHeight(GetMapId(), x, y, mapHeight + 2.0f, DEFAULT_HEIGHT_SEARCH);
@@ -904,16 +909,21 @@ uint16 TerrainInfo::GetAreaFlag(float x, float y, float z, bool* isOutdoors) con
 {
     uint32 mogpFlags;
     int32 adtId, rootId, groupId;
-    WMOAreaTableEntry const* wmoEntry = nullptr;
     AreaTableEntry const* atEntry = nullptr;
     bool haveAreaInfo = false;
 
     if (GetAreaInfo(x, y, z, mogpFlags, adtId, rootId, groupId))
     {
         haveAreaInfo = true;
-        wmoEntry = GetWMOAreaTableEntryByTripple(rootId, adtId, groupId);
-        if (wmoEntry)
-            atEntry = GetAreaEntryByAreaID(wmoEntry->areaId);
+        auto wmoEntries = GetWMOAreaTableEntriesByTripple(rootId, adtId, groupId);
+        for (auto wmoEntry : wmoEntries)
+        {
+            auto areaEntry = GetAreaEntryByAreaID(wmoEntry->areaId);
+            if (areaEntry && areaEntry->mapid == GetMapId())
+            {
+                atEntry = areaEntry;
+            }
+        }
     }
 
     uint16 areaflag;
@@ -960,7 +970,7 @@ void TerrainInfo::GetZoneAndAreaId(uint32& zoneid, uint32& areaid, float x, floa
     TerrainManager::GetZoneAndAreaIdByAreaFlag(zoneid, areaid, GetAreaFlag(x, y, z), m_mapId);
 }
 
-GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data) const
+GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data, float collisionHeight) const
 {
     GridMapLiquidStatus result = LIQUID_MAP_NO_WATER;
     VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
@@ -1009,10 +1019,10 @@ GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint
             }
 
             // For speed check as int values
-            int delta = int((liquid_level - z) * 10);
+            float delta = liquid_level - z;
 
             // Get position delta
-            if (delta > 20)                   // Under water
+            if (delta > collisionHeight)      // Under water
                 return LIQUID_MAP_UNDER_WATER;
             if (delta > 0)                    // In water
                 return LIQUID_MAP_IN_WATER;
@@ -1024,7 +1034,7 @@ GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint
     else if (GridMap* gmap = const_cast<TerrainInfo*>(this)->GetGrid(x, y))
     {
         GridMapLiquidData map_data;
-        GridMapLiquidStatus map_result = gmap->getLiquidStatus(x, y, z, ReqLiquidType, &map_data);
+        GridMapLiquidStatus map_result = gmap->getLiquidStatus(x, y, z, ReqLiquidType, &map_data, collisionHeight);
         // Not override LIQUID_MAP_ABOVE_WATER with LIQUID_MAP_NO_WATER:
         if (map_result != LIQUID_MAP_NO_WATER && (map_data.level > ground_level))
         {
@@ -1085,26 +1095,38 @@ bool TerrainInfo::IsUnderWater(float x, float y, float z) const
  *
  * @param x, y, z    Coordinates original point at floor level
  *
- * @param pGround    optional arg for retrun calculated by function work ground height, it let avoid in caller code recalculate height for point if it need
+ * @param groundZ    precalculated Z through getHeight
  *
  * @param swim       z coordinate can be calculated for select above/at or under z coordinate (for fly or swim/walking by bottom)
- *                   in last cases for in water returned under water height for avoid client set swimming unit as saty at water.
+ *                   in last cases for in water returned under water height for avoid client set swimming unit as stay at water.
+ *
+ * @param minWaterDeep Default is DEFAULT_COLLISION_HEIGHT. Define minimum height of water to be able to be in water.
  *
  * @return           calculated z coordinate
  */
-float TerrainInfo::GetWaterOrGroundLevel(float x, float y, float z, float* pGround /*= nullptr*/, bool swim /*= false*/) const
+float TerrainInfo::GetWaterOrGroundLevel(float x, float y, float z, float& groundZ, bool swim /*= false*/, float minWaterDeep /*= DEFAULT_COLLISION_HEIGHT*/) const
 {
     if (const_cast<TerrainInfo*>(this)->GetGrid(x, y))
     {
-        // we need ground level (including grid height version) for proper return water level in point
-        float ground_z = GetHeightStatic(x, y, z, true, DEFAULT_WATER_SEARCH);
-        if (pGround)
-            *pGround = ground_z;
-
         GridMapLiquidData liquid_status;
 
-        GridMapLiquidStatus res = getLiquidStatus(x, y, ground_z, MAP_ALL_LIQUIDS, &liquid_status);
-        return res ? (swim ? liquid_status.level - 2.0f : liquid_status.level) : ground_z;
+        GridMapLiquidStatus res = getLiquidStatus(x, y, groundZ, MAP_ALL_LIQUIDS, &liquid_status);
+
+        if (res)
+        {
+            if (swim)
+            {
+                if (liquid_status.level - groundZ > minWaterDeep)  // check if its shallow water
+                    return liquid_status.level - minWaterDeep;
+
+                // its shallow water so return ground under it
+                return groundZ;
+            }
+
+            return liquid_status.level;
+        }
+
+        return groundZ;
     }
 
     return VMAP_INVALID_HEIGHT_VALUE;

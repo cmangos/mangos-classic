@@ -31,7 +31,7 @@ npc_stinky_ignatz
 at_nats_landing
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 /*######
@@ -85,7 +85,7 @@ struct npc_morokkAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 SetEscortPaused(true);
                 break;
         }
@@ -93,13 +93,13 @@ struct npc_morokkAI : public npc_escortAI
 
     void UpdateEscortAI(const uint32 /*uiDiff*/) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         {
             if (HasEscortState(STATE_ESCORT_PAUSED))
             {
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
-                    if (pPlayer->isAlive() && pPlayer->IsInRange(m_creature, 0, 70))
+                    if (pPlayer->IsAlive() && pPlayer->IsInRange(m_creature, 0, 70))
                     {
                         m_bIsSuccess = false;
                         DoScriptText(SAY_MOR_CHALLENGE, m_creature, pPlayer);
@@ -251,7 +251,7 @@ struct npc_ogronAI : public npc_escortAI
         {
             for (auto& itr : lCreatureList)
             {
-                if (itr->GetEntry() == uiCreatureEntry && itr->isAlive())
+                if (itr->GetEntry() == uiCreatureEntry && itr->IsAlive())
                     return itr;
             }
         }
@@ -263,14 +263,14 @@ struct npc_ogronAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 9:
+            case 10:
                 DoScriptText(SAY_OGR_SPOT, m_creature);
                 break;
-            case 10:
+            case 11:
                 if (Creature* pReethe = GetCreature(NPC_REETHE))
                     DoScriptText(SAY_OGR_RET_WHAT, pReethe);
                 break;
-            case 11:
+            case 12:
                 SetEscortPaused(true);
                 break;
         }
@@ -304,7 +304,7 @@ struct npc_ogronAI : public npc_escortAI
                 if (itr->GetEntry() == NPC_REETHE)
                     continue;
 
-                if (itr->isAlive())
+                if (itr->IsAlive())
                 {
                     itr->setFaction(FACTION_THER_HOSTILE);
                     itr->AI()->AttackStart(m_creature);
@@ -315,7 +315,7 @@ struct npc_ogronAI : public npc_escortAI
 
     void UpdateEscortAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         {
             if (HasEscortState(STATE_ESCORT_PAUSED))
             {
@@ -482,14 +482,14 @@ enum
     SPELL_TELEPORT              = 7079
 };
 
-struct Location
+struct OutroSpawnLocation
 {
     float fX, fY, fZ, fO;
     float fDestX, fDestY, fDestZ;
     uint32 uiEntry;
 };
 
-const Location lOutroSpawns[] =
+const OutroSpawnLocation lOutroSpawns[] =
 {
     {
         -2857.604492f, -3354.784912f, 35.369640f, 3.16604f,
@@ -520,7 +520,7 @@ struct npc_private_hendelAI : public ScriptedAI
 
     void AttackedBy(Unit* pAttacker) override
     {
-        if (m_creature->getVictim())
+        if (m_creature->GetVictim())
             return;
 
         if (!m_creature->CanAttackNow(pAttacker))
@@ -561,7 +561,7 @@ struct npc_private_hendelAI : public ScriptedAI
 
             for (CreatureList::const_iterator itr = lSentryList.begin(); itr != lSentryList.end(); ++itr)
             {
-                if ((*itr)->isAlive())
+                if ((*itr)->IsAlive())
                 {
                     (*itr)->RemoveAllAurasOnEvade();
                     (*itr)->CombatStop(true);
@@ -609,7 +609,7 @@ bool QuestAccept_npc_private_hendel(Player* pPlayer, Creature* pCreature, const 
 
         for (CreatureList::const_iterator itr = lSentryList.begin(); itr != lSentryList.end(); ++itr)
         {
-            if ((*itr)->isAlive())
+            if ((*itr)->IsAlive())
             {
                 (*itr)->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_RESPAWN);
                 (*itr)->AI()->AttackStart(pPlayer);
@@ -643,6 +643,7 @@ enum
     SAY_STINKY_THIRD_STOP_3             = -1001144,
     SAY_STINKY_PLANT_GATHERED           = -1001145,
     SAY_STINKY_END                      = -1000962,
+    SAY_STINKY_END_EMOTE                = -1010032,
     SAY_STINKY_AGGRO_1                  = -1000960,
     SAY_STINKY_AGGRO_2                  = -1000961,
     SAY_STINKY_AGGRO_3                  = -1001146,
@@ -653,7 +654,11 @@ enum
 
 struct npc_stinky_ignatzAI : public npc_escortAI
 {
-    npc_stinky_ignatzAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    npc_stinky_ignatzAI(Creature* pCreature) : npc_escortAI(pCreature)
+    {
+        SetReactState(REACT_DEFENSIVE);
+        Reset();
+    }
 
     ObjectGuid m_bogbeanPlantGuid;
 
@@ -685,16 +690,16 @@ struct npc_stinky_ignatzAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 5:
+            case 6:
                 DoScriptText(SAY_STINKY_FIRST_STOP, m_creature);
                 break;
-            case 10:
+            case 11:
                 DoScriptText(SAY_STINKY_SECOND_STOP, m_creature);
                 break;
-            case 24:
+            case 25:
                 DoScriptText(SAY_STINKY_THIRD_STOP_1, m_creature);
                 break;
-            case 25:
+            case 26:
                 DoScriptText(SAY_STINKY_THIRD_STOP_2, m_creature);
                 if (GameObject* pBogbeanPlant = GetClosestGameObjectWithEntry(m_creature, GO_BOGBEAN_PLANT, DEFAULT_VISIBILITY_DISTANCE))
                 {
@@ -702,29 +707,32 @@ struct npc_stinky_ignatzAI : public npc_escortAI
                     m_creature->SetFacingToObject(pBogbeanPlant);
                 }
                 break;
-            case 26:
+            case 27:
                 if (Player* pPlayer = GetPlayerForEscort())
                     DoScriptText(SAY_STINKY_THIRD_STOP_3, m_creature, pPlayer);
                 break;
-            case 29:
+            case 30:
                 m_creature->HandleEmote(EMOTE_STATE_USESTANDING);
                 break;
-            case 30:
+            case 31:
                 DoScriptText(SAY_STINKY_PLANT_GATHERED, m_creature);
                 break;
-            case 39:
+            case 40:
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
                     pPlayer->RewardPlayerAndGroupAtEventExplored(pPlayer->GetTeam() == ALLIANCE ? QUEST_ID_STINKYS_ESCAPE_ALLIANCE : QUEST_ID_STINKYS_ESCAPE_HORDE, m_creature);
                     DoScriptText(SAY_STINKY_END, m_creature, pPlayer);
                 }
                 break;
+            case 41:
+                DoScriptText(SAY_STINKY_END_EMOTE, m_creature);
+                break;
         }
     }
 
     void WaypointStart(uint32 uiPointId)
     {
-        if (uiPointId == 30)
+        if (uiPointId == 31)
         {
             if (GameObject* pBogbeanPlant = m_creature->GetMap()->GetGameObject(m_bogbeanPlantGuid))
                 pBogbeanPlant->Use(m_creature);
@@ -761,7 +769,7 @@ enum SentryPoint
 bool AreaTrigger_at_sentry_point(Player* pPlayer, const AreaTriggerEntry* /*pAt*/)
 {
     QuestStatus quest_status = pPlayer->GetQuestStatus(QUEST_MISSING_DIPLO_PT14);
-    if (pPlayer->isDead() || quest_status == QUEST_STATUS_NONE || quest_status == QUEST_STATUS_COMPLETE)
+    if (pPlayer->IsDead() || quest_status == QUEST_STATUS_NONE || quest_status == QUEST_STATUS_COMPLETE)
         return false;
 
     if (!GetClosestCreatureWithEntry(pPlayer, NPC_TERVOSH, 100.0f))

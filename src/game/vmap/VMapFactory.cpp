@@ -53,7 +53,6 @@ namespace VMAP
 
     std::mutex m_vmapMutex;
     IVMapManager* gVMapManager = nullptr;
-    Table<unsigned int, bool>* iIgnoreSpellIds = nullptr;
 
     //===============================================
     // result false, if no more id are found
@@ -81,35 +80,6 @@ namespace VMAP
     }
 
     //===============================================
-    /**
-    parameter: String of map ids. Delimiter = ","
-    */
-
-    void VMapFactory::preventSpellsFromBeingTestedForLoS(const char* pSpellIdString)
-    {
-        if (!iIgnoreSpellIds)
-            iIgnoreSpellIds = new Table<unsigned int, bool>();
-        if (pSpellIdString != nullptr)
-        {
-            unsigned int pos = 0;
-            unsigned int id;
-            std::string confString(pSpellIdString);
-            chompAndTrim(confString);
-            while (getNextId(confString, pos, id))
-            {
-                iIgnoreSpellIds->set(id, true);
-            }
-        }
-    }
-
-    //===============================================
-
-    bool VMapFactory::checkSpellForLoS(unsigned int pSpellId)
-    {
-        return !iIgnoreSpellIds->containsKey(pSpellId);
-    }
-
-    //===============================================
     // just return the instance
     IVMapManager* VMapFactory::createOrGetVMapManager()
     {
@@ -127,10 +97,8 @@ namespace VMAP
     void VMapFactory::clear()
     {
         std::lock_guard<std::mutex> lock(m_vmapMutex);
-        delete iIgnoreSpellIds;
-        delete gVMapManager;
 
-        iIgnoreSpellIds = nullptr;
+        delete gVMapManager;
         gVMapManager = nullptr;
     }
 }

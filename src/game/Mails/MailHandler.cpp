@@ -37,6 +37,9 @@
 #include "Server/WorldSession.h"
 #include "Server/Opcodes.h"
 #include "Chat/Chat.h"
+#include "Anticheat/Anticheat.hpp"
+
+#define MAX_INBOX_CLIENT_UI_CAPACITY 50
 
 bool WorldSession::CheckMailBox(ObjectGuid guid) const
 {
@@ -207,11 +210,14 @@ void WorldSession::HandleSendMail(WorldPacket& recv_data)
         }
     }
 
+    m_anticheat->Mail(subject, body, rc);
+
     pl->SendMailResult(0, MAIL_SEND, MAIL_OK);
 
+    if (GetAnticheat()->IsSilenced())
+        return pl->ModifyMoney(-int32(30));
+    
     pl->ModifyMoney(-int32(reqmoney));
-
-    bool needItemDelay = false;
 
     MailDraft draft(subject, body);
 
@@ -240,9 +246,6 @@ void WorldSession::HandleSendMail(WorldPacket& recv_data)
             CharacterDatabase.CommitTransaction();
 
             draft.AddItem(item);
-
-            // if item send to character at another account, then apply item delivery delay
-            needItemDelay = pl->GetSession()->GetAccountId() != rc_account;
         }
 
         if (money > 0 &&  GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_BOOL_GM_LOG_TRADE))
@@ -252,8 +255,8 @@ void WorldSession::HandleSendMail(WorldPacket& recv_data)
         }
     }
 
-    // If theres is an item, there is a one hour delivery delay if sent to another account's character.
-    uint32 deliver_delay = needItemDelay ? sWorld.getConfig(CONFIG_UINT32_MAIL_DELIVERY_DELAY) : 0;
+    // Delivery delay is always applied, even if we're sending mails to our own characters
+    uint32 deliver_delay = sWorld.getConfig(CONFIG_UINT32_MAIL_DELIVERY_DELAY);
 
     // will delete item or place to receiver mail list
     draft
@@ -458,7 +461,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recv_data)
                     sender_accId = sObjectMgr.GetPlayerAccountIdByGUID(sender_guid);
 
                     if (!sObjectMgr.GetPlayerNameByGUID(sender_guid, sender_name))
-                        sender_name = sObjectMgr.GetMangosStringForDBCLocale(LANG_UNKNOWN);
+                        sender_name = sObjectMgr.GetMangosStringForDbcLocale(LANG_UNKNOWN);
                 }
                 sLog.outCommand(GetAccountId(), "GM %s (Account: %u) receive mail item: %s (Entry: %u Count: %u) and send COD money: %u to player: %s (Account: %u)",
                                 GetPlayerName(), GetAccountId(), it->GetProto()->Name1, it->GetEntry(), it->GetCount(), m->COD, sender_name.c_str(), sender_accId);
@@ -542,9 +545,6 @@ void WorldSession::HandleGetMailList(WorldPacket& recv_data)
     if (!CheckMailBox(mailboxGuid))
         return;
 
-    // client can't work with packets > max int16 value
-    const uint32 maxPacketSize = 32767;
-
     uint32 mailsCount = 0;                                  // send to client mails amount
 
     WorldPacket data(SMSG_MAIL_LIST_RESULT, (200));         // guess size
@@ -553,8 +553,8 @@ void WorldSession::HandleGetMailList(WorldPacket& recv_data)
 
     for (PlayerMails::iterator itr = _player->GetMailBegin(); itr != _player->GetMailEnd(); ++itr)
     {
-        // packet send mail count as uint8, prevent overflow
-        if (mailsCount >= 254)
+        // prevent client storage overflow
+        if (mailsCount >= MAX_INBOX_CLIENT_UI_CAPACITY)
             break;
 
         // skip deleted or not delivered (deliver delay not expired) mails
@@ -564,7 +564,7 @@ void WorldSession::HandleGetMailList(WorldPacket& recv_data)
         /*[-ZERO] TODO recheck this
         size_t next_mail_size = 4+1+8+((*itr)->subject.size()+1)+4*7+1+item_count*(1+4+4+6*3*4+4+4+1+4+4+4);
 
-        if(data.wpos()+next_mail_size > maxPacketSize)
+        if (data.wpos() + next_mail_size > MAX_NETCLIENT_PACKET_SIZE)
             break;
         */
 
@@ -614,7 +614,7 @@ void WorldSession::HandleGetMailList(WorldPacket& recv_data)
         mailsCount += 1;
     }
 
-    data.put<uint8>(0, mailsCount);                         // set real send mails to client
+    data.put<uint8>(0, uint8(mailsCount));                  // set real send mails to client
     SendPacket(data);
 
     // recalculate m_nextMailDelivereTime and unReadMails
@@ -711,53 +711,10 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket& recv_data)
 void WorldSession::HandleQueryNextMailTime(WorldPacket& /**recv_data*/)
 {
     WorldPacket data(MSG_QUERY_NEXT_MAIL_TIME, 8);
-
-    if (_player->unReadMails > 0)
-    {
-        data << uint32(0);                                  // float
-        data << uint32(0);                                  // count
-
-        uint32 count = 0;
-        time_t now = time(nullptr);
-        for (PlayerMails::iterator itr = _player->GetMailBegin(); itr != _player->GetMailEnd(); ++itr)
-        {
-            Mail* m = (*itr);
-            // must be not checked yet
-            if (m->checked & MAIL_CHECK_MASK_READ)
-                continue;
-
-            // and already delivered
-            if (now < m->deliver_time)
-                continue;
-
-            data << ObjectGuid(HIGHGUID_PLAYER, m->sender); // sender guid
-
-            switch (m->messageType)
-            {
-                case MAIL_AUCTION:
-                    data << uint32(m->sender);              // auction house id
-                    data << uint32(MAIL_AUCTION);           // message type
-                    break;
-                default:
-                    data << uint32(0);
-                    data << uint32(0);
-                    break;
-            }
-
-            data << uint32(m->stationery);
-            data << uint32(0xC6000000);                     // float unk, time or something
-
-            ++count;
-            if (count == 2)                                 // do not display more than 2 mails
-                break;
-        }
-        data.put<uint32>(4, count);
-    }
+    if (_player->unReadMails)
+        data << float(0);
     else
-    {
-        data << uint32(0xC7A8C000);
-        data << uint32(0x00000000);
-    }
+        data << float(-86400.0f);
     SendPacket(data);
 }
 

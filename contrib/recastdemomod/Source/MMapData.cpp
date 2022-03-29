@@ -45,7 +45,7 @@ MMapData::~MMapData()
 dtNavMesh* MMapData::Init(unsigned int mapId, BuildContext* ctx)
 {
     char mmapFilename[256];
-    snprintf(mmapFilename, sizeof(mmapFilename), "mmaps/%03d.mmap", mapId);
+    snprintf(mmapFilename, sizeof(mmapFilename), "%s/mmaps/%03d.mmap", ctx->getDataDir(), mapId);
 
     FILE* fp = fopen(mmapFilename, "rb");
     if (!fp)
@@ -79,18 +79,12 @@ dtNavMesh* MMapData::Init(unsigned int mapId, BuildContext* ctx)
     return m_NavMesh;
 }
 
-bool MMapData::LoadTile(unsigned int tx, unsigned int ty)
+bool MMapData::LoadNavmesh(const char* fileName, TileInfos& tInfos)
 {
-    if (!m_Initialized)
-        return false;
-
-    char tileFilename[256];
-    snprintf(tileFilename, sizeof(tileFilename), "mmaps/%03d%02d%02d.mmtile", m_MapId, tx, ty); // Todo: check X,Y swap reason and get ride of it
-
-    FILE* fp = fopen(tileFilename, "rb");
+    FILE* fp = fopen(fileName, "rb");
     if (!fp)
     {
-        m_Ctx->log(RC_LOG_ERROR, "LoadMMapTile: '%s' not found!", tileFilename);
+        m_Ctx->log(RC_LOG_ERROR, "LoadMMapTile: '%s' not found!", fileName);
         return false;
     }
 
@@ -115,26 +109,54 @@ bool MMapData::LoadTile(unsigned int tx, unsigned int ty)
     size_t result = fread(data, header.size, 1, fp);
     if (!result)
     {
-        m_Ctx->log(RC_LOG_ERROR, "LoadMMapTile: Problem to read '%s'!", tileFilename);
+        m_Ctx->log(RC_LOG_ERROR, "LoadMMapTile: Problem to read '%s'!", fileName);
         return false;
     }
     fclose(fp);
 
-    TileInfos tinfos;
     dtMeshHeader* meshHeader = (dtMeshHeader*)data;
-    rcVcopy(tinfos.bMin, meshHeader->bmin);
-    rcVcopy(tinfos.bMax, meshHeader->bmax);
-    rcVmin(m_BMin, tinfos.bMin);
-    rcVmax(m_BMax, tinfos.bMax);
-    dtStatus dtRes = m_NavMesh->addTile(data, header.size, DT_TILE_FREE_DATA, dtTileRef(0), &tinfos.tileRef);
+    rcVcopy(tInfos.bMin, meshHeader->bmin);
+    rcVcopy(tInfos.bMax, meshHeader->bmax);
+    rcVmin(m_BMin, tInfos.bMin);
+    rcVmax(m_BMax, tInfos.bMax);
+    dtStatus dtRes = m_NavMesh->addTile(data, header.size, DT_TILE_FREE_DATA, dtTileRef(0), &tInfos.tileRef);
     if (dtStatusFailed(dtRes))
     {
         m_Ctx->log(RC_LOG_ERROR, "LoadMMapTile: add tile failed!");
         return false;
     }
+    return true;
+}
+
+bool MMapData::LoadObjectNavMesh(const std::string fileName)
+{
+    if (!m_Initialized)
+        return false;
+
+    char tileFilename[256];
+    snprintf(tileFilename, sizeof(tileFilename), "%s/mmaps/%s.mmtile", m_Ctx->getDataDir(), fileName.c_str()); // Todo: check X,Y swap reason and get ride of it
+
+    TileInfos tInfos;
+    if (!LoadNavmesh(tileFilename, tInfos))
+        return false;
+    m_TilesInfos.insert(std::make_pair(0, tInfos));
+    return true;
+}
+
+bool MMapData::LoadTile(unsigned int tx, unsigned int ty)
+{
+    if (!m_Initialized)
+        return false;
+
+    char tileFilename[256];
+    snprintf(tileFilename, sizeof(tileFilename), "%s/mmaps/%03d%02d%02d.mmtile", m_Ctx->getDataDir(), m_MapId, tx, ty); // Todo: check X,Y swap reason and get ride of it
+
+    TileInfos tInfos;
+    if (!LoadNavmesh(tileFilename, tInfos))
+        return false;
 
     unsigned int pxy = StaticMapTree::packTileID(tx, ty);
-    m_TilesInfos.insert(std::make_pair(pxy, tinfos));
+    m_TilesInfos.insert(std::make_pair(pxy, tInfos));
     return true;
 }
 
@@ -148,10 +170,10 @@ bool MMapData::LoadTile(float const* bmin, float const* bmax)
 
     // convert coord bounds to grid bounds
     unsigned int minX, minY, maxX, maxY;
-    maxX = 32 - bmin[0] / BLOCK_SIZE;
-    maxY = 32 - bmin[2] / BLOCK_SIZE;
-    minX = 32 - bmax[0] / BLOCK_SIZE;
-    minY = 32 - bmax[2] / BLOCK_SIZE;
+    maxX = 32 - bmin[0] / RecastDemo::BLOCK_SIZE;
+    maxY = 32 - bmin[2] / RecastDemo::BLOCK_SIZE;
+    minX = 32 - bmax[0] / RecastDemo::BLOCK_SIZE;
+    minY = 32 - bmax[2] / RecastDemo::BLOCK_SIZE;
 
     // add all tiles within bounds to tile list.
     for (unsigned int i = minX; i <= maxX; ++i)
@@ -599,7 +621,7 @@ void MMapData::BuildMoveMapTile(unsigned int tileX, unsigned int tileY, MeshObje
     const static int TILES_PER_MAP = VERTEX_PER_MAP / VERTEX_PER_TILE;*/
 
     // allocate subregions : tiles
-    Tile* tiles = new Tile[TILES_PER_MAP * TILES_PER_MAP];
+    Tile* tiles = new Tile[RecastDemo::TILES_PER_MAP * RecastDemo::TILES_PER_MAP];
 
     // this sets the dimensions of the heightfield - should maybe happen before border padding
     MeshObjects::GetTileBounds(tileY, tileX, tVerts, tVertCount, cfg->bmin, cfg->bmax);
@@ -612,11 +634,11 @@ void MMapData::BuildMoveMapTile(unsigned int tileX, unsigned int tileY, MeshObje
     tileCfg.height = cfg->tileSize + cfg->borderSize * 2;
 
     // build all tiles
-    for (int y = 0; y < TILES_PER_MAP; ++y)
+    for (int y = 0; y < RecastDemo::TILES_PER_MAP; ++y)
     {
-        for (int x = 0; x < TILES_PER_MAP; ++x)
+        for (int x = 0; x < RecastDemo::TILES_PER_MAP; ++x)
         {
-            Tile& tile = tiles[x + y * TILES_PER_MAP];
+            Tile& tile = tiles[x + y * RecastDemo::TILES_PER_MAP];
 
             // Calculate the per tile bounding box.
             tileCfg.bmin[0] = cfg->bmin[0] + (x * cfg->tileSize - cfg->borderSize) * cfg->cs;
@@ -713,14 +735,14 @@ void MMapData::BuildMoveMapTile(unsigned int tileX, unsigned int tileY, MeshObje
     }
 
     // merge per tile poly and detail meshes
-    rcPolyMesh** pmmerge = new rcPolyMesh*[TILES_PER_MAP * TILES_PER_MAP];
+    rcPolyMesh** pmmerge = new rcPolyMesh*[RecastDemo::TILES_PER_MAP * RecastDemo::TILES_PER_MAP];
     if (!pmmerge)
     {
         m_Ctx->log(RC_LOG_ERROR, "Alloc pmmerge FIALED!");
         return;
     }
 
-    rcPolyMeshDetail** dmmerge = new rcPolyMeshDetail*[TILES_PER_MAP * TILES_PER_MAP];
+    rcPolyMeshDetail** dmmerge = new rcPolyMeshDetail*[RecastDemo::TILES_PER_MAP * RecastDemo::TILES_PER_MAP];
     if (!dmmerge)
     {
         m_Ctx->log(RC_LOG_ERROR, "Alloc dmmerge FIALED!");
@@ -728,11 +750,11 @@ void MMapData::BuildMoveMapTile(unsigned int tileX, unsigned int tileY, MeshObje
     }
 
     int nmerge = 0;
-    for (int y = 0; y < TILES_PER_MAP; ++y)
+    for (int y = 0; y < RecastDemo::TILES_PER_MAP; ++y)
     {
-        for (int x = 0; x < TILES_PER_MAP; ++x)
+        for (int x = 0; x < RecastDemo::TILES_PER_MAP; ++x)
         {
-            Tile& tile = tiles[x + y * TILES_PER_MAP];
+            Tile& tile = tiles[x + y * RecastDemo::TILES_PER_MAP];
             if (tile.pmesh)
             {
                 pmmerge[nmerge] = tile.pmesh;
@@ -793,9 +815,9 @@ void MMapData::BuildMoveMapTile(unsigned int tileX, unsigned int tileY, MeshObje
     params.offMeshConAreas = meshData.offMeshConnectionsAreas.getCArray();
     params.offMeshConFlags = meshData.offMeshConnectionsFlags.getCArray();*/
 
-    params.walkableHeight = BASE_UNIT_DIM * cfg->walkableHeight;  // agent height
-    params.walkableRadius = BASE_UNIT_DIM * cfg->walkableRadius;  // agent radius
-    params.walkableClimb = BASE_UNIT_DIM * cfg->walkableClimb;    // keep less that walkableHeight (aka agent height)!
+    params.walkableHeight = RecastDemo::BASE_UNIT_DIM * cfg->walkableHeight;  // agent height
+    params.walkableRadius = RecastDemo::BASE_UNIT_DIM * cfg->walkableRadius;  // agent radius
+    params.walkableClimb = RecastDemo::BASE_UNIT_DIM * cfg->walkableClimb;    // keep less that walkableHeight (aka agent height)!
     params.tileX = (((cfg->bmin[0] + cfg->bmax[0]) / 2) - m_NavMesh->getParams()->orig[0]) / GRID_SIZE;
     params.tileY = (((cfg->bmin[2] + cfg->bmax[2]) / 2) - m_NavMesh->getParams()->orig[2]) / GRID_SIZE;
     rcVcopy(params.bmin, cfg->bmin);
@@ -833,7 +855,7 @@ void MMapData::BuildMoveMapTile(unsigned int tileX, unsigned int tileY, MeshObje
             continue;
         }
         if (!params.polyCount || !params.polys ||
-            TILES_PER_MAP * TILES_PER_MAP == params.polyCount)
+            RecastDemo::TILES_PER_MAP * RecastDemo::TILES_PER_MAP == params.polyCount)
         {
             // we have flat tiles with no actual geometry - don't build those, its useless
             // keep in mind that we do output those into debug info

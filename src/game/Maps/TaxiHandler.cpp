@@ -183,10 +183,13 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
     DEBUG_LOG("WORLD: Received opcode CMSG_MOVE_SPLINE_DONE");
 
     MovementInfo movementInfo;                              // used only for proper packet read
+    uint32 movementCounter;                                 // spline counter
 
     recv_data >> movementInfo;
-    recv_data >> Unused<uint32>();                          // unk
+    recv_data >> movementCounter;
     recv_data >> Unused<uint32>();                          // unk2
+
+    // TODO: Add checking for correct point end for correct spline
 }
 
 void WorldSession::HandleActivateTaxiOpcode(WorldPacket& recv_data)

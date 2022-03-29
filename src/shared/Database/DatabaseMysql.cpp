@@ -302,7 +302,6 @@ SqlPreparedStatement* MySQLConnection::CreateStatement(const std::string& fmt)
     return new MySqlPreparedStatement(fmt, *this, mMysql);
 }
 
-
 //////////////////////////////////////////////////////////////////////////
 MySqlPreparedStatement::MySqlPreparedStatement(const std::string& fmt, SqlConnection& conn, MYSQL* mysql) : SqlPreparedStatement(fmt, conn),
     m_pMySQLConn(mysql), m_stmt(nullptr), m_pInputArgs(nullptr), m_pResult(nullptr), m_pResultMetadata(nullptr)
@@ -417,7 +416,7 @@ void MySqlPreparedStatement::addParam(unsigned int nIndex, const SqlStmtFieldDat
 
     MYSQL_BIND& pData = m_pInputArgs[nIndex];
 
-    my_bool bUnsigned = 0;
+    bool bUnsigned = 0;
     enum_field_types dataType = ToMySQLType(data, bUnsigned);
 
     // setup MYSQL_BIND structure
@@ -462,7 +461,7 @@ bool MySqlPreparedStatement::execute()
     return true;
 }
 
-enum_field_types MySqlPreparedStatement::ToMySQLType(const SqlStmtFieldData& data, my_bool& bUnsigned)
+enum_field_types MySqlPreparedStatement::ToMySQLType(const SqlStmtFieldData& data, bool& bUnsigned)
 {
     bUnsigned = 0;
     enum_field_types dataType = MYSQL_TYPE_NULL;

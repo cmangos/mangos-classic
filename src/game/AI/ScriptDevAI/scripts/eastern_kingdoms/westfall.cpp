@@ -20,16 +20,17 @@ SD%Complete: 90
 SDComment: Quest support: 155, 1651
 SDCategory: Westfall
 EndScriptData
-
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
+#include "AI/ScriptDevAI/base/escort_ai.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
+
+/* ContentData
 npc_daphne_stilwell
 npc_defias_traitor
+npc_foreman_klaven_mortwake
 EndContentData */
-
-
-#include "AI/ScriptDevAI/base/escort_ai.h"
 
 /*######
 ## npc_daphne_stilwell
@@ -37,9 +38,12 @@ EndContentData */
 
 enum
 {
+    YELL_DEFIAS_START   = -1000412,
+    YELL_DAPHNE_START   = -1000413,
     SAY_DS_START        = -1000293,
-    SAY_DS_DOWN_1       = -1000294,
-    SAY_DS_DOWN_2       = -1000295,
+    SAY_WAVE_DOWN_1     = -1000294,
+    SAY_WAVE_DOWN_2     = -1000295,
+    SAY_WAVE_DOWN_3     = -1000414,
     SAY_DS_DOWN_3       = -1000296,
     SAY_DS_PROLOGUE     = -1000297,
 
@@ -81,140 +85,145 @@ float RaiderCoords[15][3] =
 
 struct npc_daphne_stilwellAI : public npc_escortAI
 {
-    npc_daphne_stilwellAI(Creature* pCreature) : npc_escortAI(pCreature)
+    npc_daphne_stilwellAI(Creature* creature) : npc_escortAI(creature)
     {
-        m_uiWPHolder = 0;
+        AddCustomAction(1, true, [&]() { DoSendWave(); });
         Reset();
     }
 
-    uint32 m_uiWPHolder;
-    uint32 m_uiShootTimer;
+    uint32 m_shootTimer;
+    uint8 m_wave;
 
-    GuidList m_lSummonedRaidersGUIDs;
+    bool m_introIsDone;
+
+    GuidList m_summonedRaidersGUIDs;
 
     void Reset() override
     {
+        // Don't reset while escorting
         if (HasEscortState(STATE_ESCORT_ESCORTING))
-        {
-            if (m_uiWPHolder >= 5)
-                m_creature->SetSheath(SHEATH_STATE_RANGED);
+            return;
 
-            switch (m_uiWPHolder)
-            {
-                case 7: DoScriptText(SAY_DS_DOWN_1, m_creature); break;
-                case 8: DoScriptText(SAY_DS_DOWN_2, m_creature); break;
-                case 9:
-                    if (m_lSummonedRaidersGUIDs.empty())
-                        DoScriptText(SAY_DS_DOWN_3, m_creature);
-                    break;
-            }
-        }
-        else
-            m_uiWPHolder = 0;
-
-        m_uiShootTimer = 0;
+        m_introIsDone = false;
+        m_shootTimer = 0;
     }
 
-    void WaypointReached(uint32 uiPointId) override
+    void WaypointReached(uint32 pointId) override
     {
-        m_uiWPHolder = uiPointId;
-
-        switch (uiPointId)
+        switch (pointId)
         {
             case 4:
+            {
+                // Start summoning the three waves (everything else is handled in DoSendWave())
+                m_wave = 0;
+                ResetTimer(1, 1 * IN_MILLISECONDS);
                 m_creature->HandleEmote(EMOTE_STATE_USESTANDING_NOSHEATHE);
                 break;
+            }
             case 5:
+            {
+                // Take her gun
                 SetEquipmentSlots(false, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE, EQUIP_ID_RIFLE);
                 m_creature->SetSheath(SHEATH_STATE_RANGED);
                 m_creature->HandleEmote(EMOTE_STATE_STAND);
                 break;
+            }
             case 7:
-                DoSendWave(Wave::FIRST);
-                break;
-            case 8:
-                DoSendWave(Wave::SECOND);
-                break;
-            case 9:
-                DoSendWave(Wave::THIRD);
+            {
+                // Stay put and wait for the Defias to come down
+                SetRun(false);
+                DoScriptText(YELL_DAPHNE_START, m_creature);
+                SetCombatMovement(false);
                 SetEscortPaused(true);
                 break;
-            case 10:
-                SetRun(false);
+            }
+            case 8:
+            {
+                // Cheer after defeating the Defias
+                DoScriptText(SAY_DS_DOWN_3, m_creature);
+                m_creature->HandleEmote(EMOTE_ONESHOT_CHEER);
                 break;
-            case 11:
+            }
+            case 9:
+            {
                 DoScriptText(SAY_DS_PROLOGUE, m_creature);
+                SetCombatMovement(true);
                 break;
-            case 13:
+            }
+            case 12:
+            {
                 SetEquipmentSlots(true);
                 m_creature->SetSheath(SHEATH_STATE_UNARMED);
                 m_creature->HandleEmote(EMOTE_STATE_USESTANDING);
                 break;
-            case 14:
+            }
+            case 13:
+            {
                 m_creature->HandleEmote(EMOTE_STATE_STAND);
                 break;
-            case 17:
-                if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_TOME_VALOR, m_creature);
+            }
+            case 16:
+            {
+                if (Player* player = GetPlayerForEscort())
+                    player->RewardPlayerAndGroupAtEventExplored(QUEST_TOME_VALOR, m_creature);
                 break;
-            case 18:
+            }
+            case 17:
+            {
                 DoEndEscort();
                 break;
-        }
-    }
-
-    void DoSendWave(uint32 wave)
-    {
-        uint8 uiFirstWPOffset = 5;
-
-        switch (wave)
-        {
-            case Wave::FIRST:
-                for (int counter = 0; counter < 3; counter++)
-                    if (Creature* pAdd = m_creature->SummonCreature(NPC_DEFIAS_RAIDER, RaiderCoords[counter][0], RaiderCoords[counter][1], RaiderCoords[counter][2], 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000, false, true))
-                        pAdd->GetMotionMaster()->MovePoint(counter, RaiderCoords[uiFirstWPOffset + counter][0], RaiderCoords[uiFirstWPOffset + counter][1], RaiderCoords[uiFirstWPOffset + counter][2]);
-                break;
-            case Wave::SECOND:
-                for (int counter = 0; counter < 4; counter++)
-                    if (Creature* pAdd = m_creature->SummonCreature(NPC_DEFIAS_RAIDER, RaiderCoords[counter][0], RaiderCoords[counter][1], RaiderCoords[counter][2], 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000, false, true))
-                        pAdd->GetMotionMaster()->MovePoint(counter, RaiderCoords[uiFirstWPOffset + counter][0], RaiderCoords[uiFirstWPOffset + counter][1], RaiderCoords[uiFirstWPOffset + counter][2]);
-                break;
-            case Wave::THIRD:
-                for (int counter = 0; counter < 5; counter++)
-                    if (Creature* pAdd = m_creature->SummonCreature(NPC_DEFIAS_RAIDER, RaiderCoords[counter][0], RaiderCoords[counter][1], RaiderCoords[counter][2], 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000, false, true))
-                        pAdd->GetMotionMaster()->MovePoint(counter, RaiderCoords[uiFirstWPOffset + counter][0], RaiderCoords[uiFirstWPOffset + counter][1], RaiderCoords[uiFirstWPOffset + counter][2]);
+            }
+            default:
                 break;
         }
     }
 
-    void SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiData) override
+    void DoSendWave()
     {
-        uint8 uiSecondWPOffset = 10;
+        if (m_wave < 0 || m_wave > 2)
+            return;
 
-        if (pSummoned->GetEntry() == NPC_DEFIAS_RAIDER && uiMotionType == POINT_MOTION_TYPE) // sanity check
+        ++m_wave;
+
+        uint8 firstWpOffset = 5;
+        uint8 numberOfAdds = m_wave + 2;
+
+        for (int counter = 0; counter < numberOfAdds; counter++)
         {
-            switch (uiData)
+            if (Creature* add = m_creature->SummonCreature(NPC_DEFIAS_RAIDER, RaiderCoords[counter][0], RaiderCoords[counter][1], RaiderCoords[counter][2], 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000, false, true))
             {
-                case 0:
-                    pSummoned->GetMotionMaster()->MovePoint(5, RaiderCoords[uiSecondWPOffset][0], RaiderCoords[uiSecondWPOffset][1], RaiderCoords[uiSecondWPOffset][2]);
-                    break;
-                case 1:
-                    pSummoned->GetMotionMaster()->MovePoint(5, RaiderCoords[uiSecondWPOffset + 1][0], RaiderCoords[uiSecondWPOffset + 1][1], RaiderCoords[uiSecondWPOffset + 1][2]);
-                    break;
-                case 2:
-                    pSummoned->GetMotionMaster()->MovePoint(5, RaiderCoords[uiSecondWPOffset + 2][0], RaiderCoords[uiSecondWPOffset + 2][1], RaiderCoords[uiSecondWPOffset + 2][2]);
-                    break;
-                case 3:
-                    pSummoned->GetMotionMaster()->MovePoint(5, RaiderCoords[uiSecondWPOffset + 3][0], RaiderCoords[uiSecondWPOffset + 3][1], RaiderCoords[uiSecondWPOffset + 3][2]);
-                    break;
-                case 4:
-                    pSummoned->GetMotionMaster()->MovePoint(5, RaiderCoords[uiSecondWPOffset + 4][0], RaiderCoords[uiSecondWPOffset + 4][1], RaiderCoords[uiSecondWPOffset + 4][2]);
-                    break;
-                default:
-                    pSummoned->GetMotionMaster()->MoveIdle();
-                    break;
+                add->GetMotionMaster()->MovePoint(counter, RaiderCoords[firstWpOffset + counter][0], RaiderCoords[firstWpOffset + counter][1], RaiderCoords[firstWpOffset + counter][2]);
+                if (!m_introIsDone)
+                {
+                    DoScriptText(YELL_DEFIAS_START, add);
+                    m_introIsDone = true;
+                }
+                // Leader of each wave does roar emote on spawn
+                if (counter == 0)
+                    add->HandleEmote(EMOTE_ONESHOT_ROAR);
             }
         }
+
+        // Keep summoning waves on a timer
+        if (m_wave < 3)
+            ResetTimer(1, 50 * IN_MILLISECONDS);
+        else
+            DisableTimer(1);
+    }
+
+    void SummonedMovementInform(Creature* summoned, uint32 motionType, uint32 data) override
+    {
+        if (summoned->GetEntry() != NPC_DEFIAS_RAIDER || motionType != POINT_MOTION_TYPE) // sanity check
+            return;
+
+        if (data >= 0 && data <= 4)
+        {
+            uint8 secondWpOffset = 10;
+            summoned->GetMotionMaster()->MovePoint(5, RaiderCoords[secondWpOffset + data][0], RaiderCoords[secondWpOffset + data][1], RaiderCoords[secondWpOffset + data][2]);
+            return;
+        }
+
+        summoned->GetMotionMaster()->MoveIdle();
     }
 
     void Aggro(Unit* /*who*/) override
@@ -224,37 +233,58 @@ struct npc_daphne_stilwellAI : public npc_escortAI
 
     void JustReachedHome() override
     {
-        if (HasEscortState(STATE_ESCORT_ESCORTING) && m_uiWPHolder >= 5)
+        if (HasEscortState(STATE_ESCORT_ESCORTING))
             m_creature->SetSheath(SHEATH_STATE_RANGED);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (pSummoned->GetEntry() == NPC_DEFIAS_RAIDER)
+        if (summoned->GetEntry() == NPC_DEFIAS_RAIDER)
+            m_summonedRaidersGUIDs.push_back(summoned->GetObjectGuid());
+    }
+
+    void SummonedCreatureJustDied(Creature* summoned) override
+    {
+        m_summonedRaidersGUIDs.remove(summoned->GetObjectGuid());
+
+        if (m_summonedRaidersGUIDs.empty())
         {
-            m_lSummonedRaidersGUIDs.push_back(pSummoned->GetObjectGuid());
+            if (m_wave == 3)
+            {
+                SetEscortPaused(false);
+                m_wave = 0;
+            }
+            else
+            {
+                int32 textId;
+                switch (urand(0, 2))
+                {
+                    case 0:
+                        textId = SAY_WAVE_DOWN_1;
+                        break;
+                    case 1:
+                        textId = SAY_WAVE_DOWN_2;
+                        break;
+                    case 2:
+                        textId = SAY_WAVE_DOWN_3;
+                        break;
+                }
+                DoScriptText(textId, m_creature);
+            }
         }
     }
 
-    void SummonedCreatureJustDied(Creature* pSummoned) override
+    void SummonedCreatureDespawn(Creature* summoned) override // just in case this happens somehow
     {
-        m_lSummonedRaidersGUIDs.remove(pSummoned->GetObjectGuid());
-
-        if (m_uiWPHolder >= 9 && m_lSummonedRaidersGUIDs.empty())
-            SetEscortPaused(false);
+        if (summoned->IsAlive())
+            m_summonedRaidersGUIDs.remove(summoned->GetObjectGuid());
     }
 
-    void SummonedCreatureDespawn(Creature* pSummoned) override // just in case this happens somehow
+    void JustDied(Unit* killer) override
     {
-        if (pSummoned->isAlive())
-            m_lSummonedRaidersGUIDs.remove(pSummoned->GetObjectGuid());
-    }
+        m_summonedRaidersGUIDs.clear();
 
-    void JustDied(Unit* pKiller) override
-    {
-        m_lSummonedRaidersGUIDs.clear();
-
-        npc_escortAI::JustDied(pKiller);
+        npc_escortAI::JustDied(killer);
     }
 
     void DoEndEscort()
@@ -263,44 +293,39 @@ struct npc_daphne_stilwellAI : public npc_escortAI
         m_creature->Respawn();
     }
 
-    void UpdateEscortAI(const uint32 uiDiff) override
+    void UpdateEscortAI(const uint32 diff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
-        if (m_uiShootTimer < uiDiff)
+        if (m_shootTimer < diff)
         {
-            m_uiShootTimer = DAPHNE_SHOOT_CD;
-
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHOOT) != CanCastResult::CAST_OK && !IsCombatMovement())
-            {
-                SetCombatMovement(true);
-                DoStartMovement(m_creature->getVictim());
-            }
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHOOT) == CAST_OK)
+                m_shootTimer = DAPHNE_SHOOT_CD;
         }
         else
-            m_uiShootTimer -= uiDiff;
+            m_shootTimer -= diff;
 
         DoMeleeAttackIfReady();
     }
 };
 
-bool QuestAccept_npc_daphne_stilwell(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+bool QuestAccept_npc_daphne_stilwell(Player* player, Creature* creature, const Quest* quest)
 {
-    if (pQuest->GetQuestId() == QUEST_TOME_VALOR)
+    if (quest->GetQuestId() == QUEST_TOME_VALOR)
     {
-        DoScriptText(SAY_DS_START, pCreature);
+        DoScriptText(SAY_DS_START, creature);
 
-        if (npc_daphne_stilwellAI* pEscortAI = dynamic_cast<npc_daphne_stilwellAI*>(pCreature->AI()))
-            pEscortAI->Start(true, pPlayer, pQuest);
+        if (npc_daphne_stilwellAI* daphne = dynamic_cast<npc_daphne_stilwellAI*>(creature->AI()))
+            daphne->Start(true, player, quest);
     }
 
     return true;
 }
 
-UnitAI* GetAI_npc_daphne_stilwell(Creature* pCreature)
+UnitAI* GetAI_npc_daphne_stilwell(Creature* creature)
 {
-    return new npc_daphne_stilwellAI(pCreature);
+    return new npc_daphne_stilwellAI(creature);
 }
 
 /*######
@@ -330,14 +355,14 @@ struct npc_defias_traitorAI : public npc_escortAI
     {
         switch (pointId)
         {
-            case 35:
+            case 36:
                 SetRun(false);
                 break;
-            case 36:
+            case 37:
                 if (Player* pPlayer = GetPlayerForEscort())
                     DoScriptText(SAY_PROGRESS, m_creature, pPlayer);
                 break;
-            case 44:
+            case 45:
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
                     DoScriptText(SAY_END, m_creature, pPlayer);
@@ -373,6 +398,30 @@ UnitAI* GetAI_npc_defias_traitor(Creature* creature)
     return new npc_defias_traitorAI(creature);
 }
 
+/*######
+## npc_foreman_klaven_mortwake
+######*/
+
+enum KlavenMortwake
+{
+    SAY_STEALTH_ALERT_MORTWAKE = 3092
+};
+
+struct npc_foreman_klaven_mortwakeAI : public ScriptedAI
+{
+    npc_foreman_klaven_mortwakeAI(Creature* creature) : ScriptedAI(creature)
+    {
+        Reset();
+    }
+
+    void Reset() override {}
+
+    void OnStealthAlert(Unit* who) override
+    {
+        DoBroadcastText(SAY_STEALTH_ALERT_MORTWAKE, m_creature, who);
+    }
+};
+
 void AddSC_westfall()
 {
     Script* pNewScript = new Script;
@@ -385,5 +434,10 @@ void AddSC_westfall()
     pNewScript->Name = "npc_defias_traitor";
     pNewScript->GetAI = &GetAI_npc_defias_traitor;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_defias_traitor;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_foreman_klaven_mortwake";
+    pNewScript->GetAI = &GetNewAIInstance<npc_foreman_klaven_mortwakeAI>;
     pNewScript->RegisterSelf();
 }

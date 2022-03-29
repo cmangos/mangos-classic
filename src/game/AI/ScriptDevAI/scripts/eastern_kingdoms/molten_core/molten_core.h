@@ -89,8 +89,8 @@ struct sSpawnLocation
 
 static sSpawnLocation m_aMajordomoLocations[2] =
 {
-    {NPC_MAJORDOMO, 758.089f, -1176.71f, -118.640f, 3.12414f},  // Summon fight position
-    {NPC_MAJORDOMO, 847.103f, -816.153f, -229.775f, 4.344f} // Summon and teleport location (near Ragnaros)
+    {NPC_MAJORDOMO, 758.0892f, -1176.712f, -118.6403f, 3.124139f},  // Summon fight position
+    {NPC_MAJORDOMO, 848.933f, -812.875f, -229.601f, 4.046f}     // Summon and teleport location (near Ragnaros)
 };
 
 class instance_molten_core : public ScriptedInstance
@@ -112,8 +112,12 @@ class instance_molten_core : public ScriptedInstance
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
 
+        void ShowChatCommands(ChatHandler* handler) override;
+        void ExecuteChatCommand(ChatHandler* handler, char* args) override;
+
     protected:
         void DoSpawnMajordomoIfCan(bool bByPlayerEnter);
+        void SpawnMajordomo(Unit* summoner, bool initialSummon, uint8 summonPos);
 
         std::string m_strInstData;
         uint32 m_auiEncounter[MAX_ENCOUNTER];

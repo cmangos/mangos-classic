@@ -9,14 +9,11 @@ you can dig in at any place you want to!
 
 *Work for any part is appreciated!*
 
-See our linklist at [CMaNGOS Links](http://cmangos.net/thread-26.html) for other places.
-
 This guide however is only for contributing to the CMaNGOS core part -
 which is hosted at https://github.com/cmangos
 
 ## Getting Started
 
-* Make sure you have a [Forum account](http://cmangos.net)
 * Make sure you have a [GitHub account](https://github.com/signup/free)
 * Watch the CMaNGOS repository on GitHub (This way you will get informed about changes by GitHub)
 * Optionally: Fork the CMaNGOS repository on GitHub in order to be able to publish own changes and create pull requests with them (see below for details)
@@ -33,16 +30,16 @@ Before you do so, please consider the following points:
 
 * The bug happens on a clean core
 * You can reproduce the bug
-* The bug is not already reported. If it is you are however very welcome to add a "for me too" comment to the existing issue
+* The bug is not already reported. If it is, you are however very welcome to add a "for me too" comment to the existing issue or give additional feedback.
 
 When you decide to create a new bug report, please make sure that this report includes:
 
 * Revision on which you encountered this bug (if known, also the revision or timeframe where it first appeared) - you can also post the link to the commit on the upstream repository
-* Revisions of additional parts of the CMaNGOS familiy (SD2 version, database name and version, and such)
+* Revisions of additional parts of the CMaNGOS familiy (database name and version, and such)
 * A detailed step-by-step report how this bug can be reproduced
 * A detailed explanation of what DOES happen
-* A detailed explanation of what SHOULD happen  - if possible also add a source why you think this should happen
-* When reporting spell-related bugs, please use spell-IDs in your description, and try to use .cast commands to reproduce your bug. This makes reproducing much easier!
+* A detailed explanation of what SHOULD happen - if possible also add a source why you think this should happen
+* When reporting spell-related bugs, please use spell-IDs in your description and try to use .cast commands to reproduce your bug. This makes reproducing much easier!
 * When reporting crashes, please include a crash-log (as detailed as possible - we like GDB logs from debug builds!)
 * Only report one bug per issue/thread
 
@@ -130,4 +127,4 @@ more than 20 lines should most definitely be posted as a pull request instead of
 
 * [General GitHub documentation](http://help.github.com/)
 * [GitHub pull request documentation](http://help.github.com/send-pull-requests/)
-* #cmangos IRC channel on irc.rizon.net
+* [CMaNGOS Discord](https://discord.gg/Dgzerzb)

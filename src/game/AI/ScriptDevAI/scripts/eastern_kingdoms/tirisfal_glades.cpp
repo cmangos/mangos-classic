@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
+#include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
 go_mausoleum_door
 go_mausoleum_trigger
 npc_calvin_montague
@@ -106,7 +106,7 @@ struct npc_calvin_montagueAI : public ScriptedAI
         m_playerGuid.Clear();
     }
 
-    void DamageTaken(Unit* pDoneBy, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         if (damage > m_creature->GetHealth() || ((m_creature->GetHealth() - damage) * 100 / m_creature->GetMaxHealth() < 15))
         {
@@ -117,8 +117,8 @@ struct npc_calvin_montagueAI : public ScriptedAI
 
             m_uiPhase = 1;
 
-            if (pDoneBy->GetTypeId() == TYPEID_PLAYER)
-                m_playerGuid = pDoneBy->GetObjectGuid();
+            if (dealer && dealer->GetTypeId() == TYPEID_PLAYER)
+                m_playerGuid = dealer->GetObjectGuid();
         }
     }
 
@@ -155,7 +155,7 @@ struct npc_calvin_montagueAI : public ScriptedAI
             return;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();

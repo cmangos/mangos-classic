@@ -16,15 +16,18 @@
 
 /* ScriptData
 SDName: Boss_Ayamiss
-SD%Complete: 80
-SDComment: Timers and summon coords need adjustments
+SD%Complete: 95
+SDComment: Swarmers need movement added for RP before they attack
 SDCategory: Ruins of Ahn'Qiraj
 EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "ruins_of_ahnqiraj.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
+#include "MotionGenerators/WaypointManager.h"
+#include <G3D/Vector3.h>
 
 enum
 {
@@ -32,20 +35,32 @@ enum
 
     SPELL_STINGER_SPRAY     = 25749,
     SPELL_POISON_STINGER    = 25748,                // only used in phase1
-    // SPELL_SUMMON_SWARMER  = 25844,                // might be 25708    - spells were removed since 2.0.1
+    SPELL_SUMMON_SWARMER    = 25708,
     SPELL_PARALYZE          = 25725,
     SPELL_LASH              = 25852,
     SPELL_FRENZY            = 8269,
-    SPELL_TRASH             = 3391,
+    SPELL_THRASH            = 3391,
 
     SPELL_FEED              = 25721,                // cast by the Larva when reaches the player on the altar
+
+    SPELL_SWARMER_TELEPORT_1 = 25709,
+    SPELL_SWARMER_TELEPORT_2 = 25825,
+    SPELL_SWARMER_TELEPORT_3 = 25826,
+    SPELL_SWARMER_TELEPORT_4 = 25827,
+    SPELL_SWARMER_TELEPORT_5 = 25828,
+
+    SPELL_SUMMON_LARVA_1     = 26538,
+    SPELL_SUMMON_LARVA_2     = 26539,
 
     NPC_LARVA               = 15555,
     NPC_SWARMER             = 15546,
     NPC_HORNET              = 15934,
 
     PHASE_AIR               = 0,
-    PHASE_GROUND            = 1
+    PHASE_GROUND            = 1,
+
+    POINT_AIR               = 2,
+    POINT_GROUND            = 3,
 };
 
 struct SummonLocation
@@ -56,273 +71,298 @@ struct SummonLocation
 // Spawn locations
 static const SummonLocation aAyamissSpawnLocs[] =
 {
-    { -9674.4707f, 1528.4133f, 22.457f},        // larva
-    { -9701.6005f, 1566.9993f, 24.118f},        // larva
     { -9647.352f, 1578.062f, 55.32f},           // anchor point for swarmers
     { -9717.18f, 1517.72f, 27.4677f},           // teleport location - need to be hardcoded because the player is teleported after the larva is summoned
 };
 
-struct boss_ayamissAI : public ScriptedAI
+enum AyamissActions
 {
-    boss_ayamissAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+    AYAMISS_FLY_UP,
+    AYAMISS_PHASE_2,
+    AYAMISS_FRENZY,
+    AYAMISS_PARALYZE,
+    AYAMISS_STINGER_SPRAY,
+    AYAMISS_POISON_STINGER,
+    AYAMISS_SWARMER_ATTACK,
+    AYAMISS_SUMMON_SWARMER,
+    AYAMISS_LASH,
+    AYAMISS_THRASH,
+    AYAMISS_ACTION_MAX,
+};
 
-    uint32 m_uiStingerSprayTimer;
-    uint32 m_uiPoisonStingerTimer;
-    uint32 m_uiSummonSwarmerTimer;
-    uint32 m_uiSwarmerAttackTimer;
-    uint32 m_uiParalyzeTimer;
-    uint32 m_uiLashTimer;
-    uint32 m_uiTrashTimer;
-    uint8 m_uiPhase;
+struct boss_ayamissAI : public CombatAI
+{
+    boss_ayamissAI(Creature* creature) :
+        CombatAI(creature, AYAMISS_ACTION_MAX),
+        m_phase(0)
+    {
+        AddTimerlessCombatAction(AYAMISS_FLY_UP, true);
+        AddTimerlessCombatAction(AYAMISS_PHASE_2, true);
+        AddTimerlessCombatAction(AYAMISS_FRENZY, true);
+        AddCombatAction(AYAMISS_PARALYZE, 15000u);
+        AddCombatAction(AYAMISS_STINGER_SPRAY, 20000, 30000);
+        AddCombatAction(AYAMISS_POISON_STINGER, 5000u);
+        AddCombatAction(AYAMISS_SUMMON_SWARMER, 5000u);
+        AddCombatAction(AYAMISS_SWARMER_ATTACK, 60000u);
+        AddCombatAction(AYAMISS_LASH, true);
+        AddCombatAction(AYAMISS_THRASH, true);
+        m_creature->SetWalk(false);
+    }
 
-    bool m_bHasFrenzy;
+    uint8 m_phase;
 
     ObjectGuid m_paralyzeTarget;
-    GuidList m_lSwarmersGuidList;
+    GuidList m_swarmersGuidList;
+    GuidVector m_spawns;
 
     void Reset() override
     {
-        m_uiStingerSprayTimer   = urand(20000, 30000);
-        m_uiPoisonStingerTimer  = 5000;
-        m_uiSummonSwarmerTimer  = 5000;
-        m_uiSwarmerAttackTimer  = 60000;
-        m_uiParalyzeTimer       = 15000;
-        m_uiLashTimer           = urand(5000, 8000);
-        m_uiTrashTimer          = urand(3000, 6000);
+        CombatAI::Reset();
+        m_phase = PHASE_AIR;
 
-        m_bHasFrenzy            = false;
-
-        m_uiPhase = PHASE_AIR;
         SetCombatMovement(false);
+        SetMeleeEnabled(false);
+        SetCombatScriptStatus(false);
+
+        DespawnGuids(m_spawns);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void EnterEvadeMode() override
     {
-        m_creature->SetLevitate(true);
-        m_creature->GetMotionMaster()->MovePoint(0, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + 15.0f);
+        m_creature->SetImmobilizedState(false);
+        CombatAI::EnterEvadeMode();
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
         // store the swarmers for a future attack
-        if (pSummoned->GetEntry() == NPC_SWARMER)
-            m_lSwarmersGuidList.push_back(pSummoned->GetObjectGuid());
+        if (summoned->GetEntry() == NPC_SWARMER)
+        {
+            m_swarmersGuidList.push_back(summoned->GetObjectGuid());
+            uint32 spellId = 0;
+            switch (urand(0, 4))
+            {
+                case 0: spellId = SPELL_SWARMER_TELEPORT_1; break;
+                case 1: spellId = SPELL_SWARMER_TELEPORT_2; break;
+                case 2: spellId = SPELL_SWARMER_TELEPORT_3; break;
+                case 3: spellId = SPELL_SWARMER_TELEPORT_4; break;
+                case 4: spellId = SPELL_SWARMER_TELEPORT_5; break;
+                default: break;
+            }
+            summoned->CastSpell(nullptr, spellId, TRIGGERED_OLD_TRIGGERED);
+        }
         // move the larva to paralyze target position
-        else if (pSummoned->GetEntry() == NPC_LARVA)
+        else if (summoned->GetEntry() == NPC_LARVA)
         {
-            pSummoned->SetWalk(false);
-            pSummoned->GetMotionMaster()->MovePoint(1, aAyamissSpawnLocs[3].m_fX, aAyamissSpawnLocs[3].m_fY, aAyamissSpawnLocs[3].m_fZ);
+            summoned->SetCorpseDelay(5);
+            summoned->SetWalk(false);
+            if (Unit* target = m_creature->GetMap()->GetUnit(m_paralyzeTarget))
+            {
+                summoned->AI()->AttackStart(target);
+                summoned->FixateTarget(target);
+            }
         }
-        else if (pSummoned->GetEntry() == NPC_HORNET)
+        else if (summoned->GetEntry() == NPC_HORNET)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                pSummoned->AI()->AttackStart(pTarget);
+            if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                summoned->AI()->AttackStart(target);
         }
+        m_spawns.push_back(summoned->GetObjectGuid());
     }
 
-    void SummonedMovementInform(Creature* pSummoned, uint32 /*uiMotionType*/, uint32 uiPointId) override
+    void MovementInform(uint32 motionType, uint32 pointId) override
     {
-        if (uiPointId != 1 || pSummoned->GetEntry() != NPC_LARVA)
-            return;
-
-        // Cast feed on target
-        if (Unit* pTarget = m_creature->GetMap()->GetUnit(m_paralyzeTarget))
-            pSummoned->CastSpell(pTarget, SPELL_FEED, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (!m_bHasFrenzy && m_creature->GetHealthPercent() < 20.0f)
+        if (motionType != POINT_MOTION_TYPE)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
+            if (motionType == WAYPOINT_MOTION_TYPE)
             {
-                DoScriptText(EMOTE_GENERIC_FRENZY, m_creature);
-                m_bHasFrenzy = true;
-            }
-        }
-
-        // Stinger Spray
-        if (m_uiStingerSprayTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_STINGER_SPRAY) == CAST_OK)
-                m_uiStingerSprayTimer = urand(15000, 20000);
-        }
-        else
-            m_uiStingerSprayTimer -= uiDiff;
-
-        // Paralyze
-        if (m_uiParalyzeTimer < uiDiff)
-        {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_PARALYZE, SELECT_FLAG_PLAYER);
-            if (!pTarget)
-                pTarget = m_creature->getVictim();
-
-            if (DoCastSpellIfCan(pTarget, SPELL_PARALYZE) == CAST_OK)
-            {
-                m_paralyzeTarget = pTarget->GetObjectGuid();
-                m_uiParalyzeTimer = 15000;
-
-                // Summon a larva
-                uint8 uiLoc = urand(0, 1);
-                m_creature->SummonCreature(NPC_LARVA, aAyamissSpawnLocs[uiLoc].m_fX, aAyamissSpawnLocs[uiLoc].m_fY, aAyamissSpawnLocs[uiLoc].m_fZ, 0, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 30000);
-            }
-        }
-        else
-            m_uiParalyzeTimer -= uiDiff;
-
-        // Summon Swarmer
-        if (m_uiSummonSwarmerTimer < uiDiff)
-        {
-            // The spell which summons these guys was removed in 2.0.1 -> therefore we need to summon them manually at a random location around the area
-            // The summon locations is guesswork - the real location is supposed to be handled by world triggers
-            // There should be about 24 swarmers per min
-            float fX, fY, fZ;
-            for (uint8 i = 0; i < 2; ++i)
-            {
-                m_creature->GetRandomPoint(aAyamissSpawnLocs[2].m_fX, aAyamissSpawnLocs[2].m_fY, aAyamissSpawnLocs[2].m_fZ, 80.0f, fX, fY, fZ);
-                m_creature->SummonCreature(NPC_SWARMER, fX, fY, aAyamissSpawnLocs[2].m_fZ, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 0);
-            }
-            m_uiSummonSwarmerTimer = 5000;
-        }
-        else
-            m_uiSummonSwarmerTimer -= uiDiff;
-
-        // All the swarmers attack at a certain period of time
-        if (m_uiSwarmerAttackTimer < uiDiff)
-        {
-            for (GuidList::const_iterator itr = m_lSwarmersGuidList.begin(); itr != m_lSwarmersGuidList.end(); ++itr)
-            {
-                if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
+                if (pointId == POINT_GROUND)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                        pTemp->AI()->AttackStart(pTarget);
+                    SetCombatScriptStatus(false);
+                    SetCombatMovement(true, true);
                 }
             }
-            m_lSwarmersGuidList.clear();
-            m_uiSwarmerAttackTimer = 60000;
+            return;
         }
-        else
-            m_uiSwarmerAttackTimer -= uiDiff;
 
-        if (m_uiPhase == PHASE_AIR)
+        if (pointId == POINT_AIR)
         {
-            // Start ground phase at 70% of HP
-            if (m_creature->GetHealthPercent() <= 70.0f)
-            {
-                m_uiPhase = PHASE_GROUND;
-                SetCombatMovement(true);
-                m_creature->SetLevitate(false);
-                DoResetThreat();
-
-                if (m_creature->getVictim())
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
-            }
-
-            // Poison Stinger
-            if (m_uiPoisonStingerTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_POISON_STINGER) == CAST_OK)
-                    m_uiPoisonStingerTimer = urand(2000, 3000);
-            }
-            else
-                m_uiPoisonStingerTimer -= uiDiff;
+            SetCombatScriptStatus(false);
+            m_creature->SetImmobilizedState(true);
         }
-        else
+    }
+
+    void StartLanding()
+    {
+        m_creature->GetMotionMaster()->MovePath(1, PATH_FROM_ENTRY, FORCED_MOVEMENT_NONE, true);
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
         {
-            if (m_uiLashTimer < uiDiff)
+            case AYAMISS_FLY_UP:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_LASH) == CAST_OK)
-                    m_uiLashTimer = urand(8000, 15000);
+                m_creature->SetLevitate(true);
+                m_creature->SetHover(true);
+                SetCombatScriptStatus(true);
+                m_creature->GetMotionMaster()->MovePoint(POINT_AIR, -9689.292f, 1547.912f, 48.02729f);
+                SetActionReadyStatus(action, false);
+                break;
             }
-            else
-                m_uiLashTimer -= uiDiff;
-
-            if (m_uiTrashTimer < uiDiff)
+            case AYAMISS_PHASE_2:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_TRASH) == CAST_OK)
-                    m_uiTrashTimer = urand(5000, 7000);
-            }
-            else
-                m_uiTrashTimer -= uiDiff;
+                if (m_creature->GetHealthPercent() <= 70.0f)
+                {
+                    m_phase = PHASE_GROUND;
+                    m_creature->SetImmobilizedState(false);
+                    SetMeleeEnabled(true);
+                    m_creature->SetLevitate(false);
+                    m_creature->SetHover(false);
+                    DoResetThreat();
+                    StartLanding();
+                    SetCombatScriptStatus(true);
+                    SetActionReadyStatus(action, false);
 
-            DoMeleeAttackIfReady();
+                    DisableCombatAction(AYAMISS_POISON_STINGER);
+                    ResetCombatAction(AYAMISS_LASH, urand(5000, 8000));
+                    ResetCombatAction(AYAMISS_THRASH, urand(3000, 6000));
+                }
+                break;
+            }
+            case AYAMISS_FRENZY:
+            {
+                if (m_creature->GetHealthPercent() < 20.0f)
+                {
+                    if (DoCastSpellIfCan(nullptr, SPELL_FRENZY) == CAST_OK)
+                    {
+                        DoScriptText(EMOTE_GENERIC_FRENZY, m_creature);
+                        SetActionReadyStatus(action, false);
+                    }
+                }
+                break;
+            }
+            case AYAMISS_PARALYZE:
+            {
+                Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_PARALYZE, SELECT_FLAG_PLAYER);
+                if (!target)
+                    target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_PARALYZE, SELECT_FLAG_PLAYER);
+
+                if (DoCastSpellIfCan(target, SPELL_PARALYZE) == CAST_OK)
+                {
+                    m_paralyzeTarget = target->GetObjectGuid();
+                    ResetCombatAction(action, 15000);
+
+                    // Summon a larva
+                    uint32 spellId = urand(0, 1) ? SPELL_SUMMON_LARVA_1 : SPELL_SUMMON_LARVA_2;
+                    m_creature->CastSpell(nullptr, spellId, TRIGGERED_OLD_TRIGGERED);
+                }
+                break;
+            }
+            case AYAMISS_STINGER_SPRAY:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_STINGER_SPRAY) == CAST_OK)
+                    ResetCombatAction(action, urand(15000, 20000));
+                break;
+            }
+            case AYAMISS_POISON_STINGER:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, SPELL_POISON_STINGER, SELECT_FLAG_PLAYER))
+                    if (DoCastSpellIfCan(target, SPELL_POISON_STINGER) == CAST_OK)
+                        ResetCombatAction(action, m_phase == PHASE_AIR ? urand(2000, 3000) : urand(6000, 12000));
+                break;
+            }
+            case AYAMISS_SUMMON_SWARMER:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_SUMMON_SWARMER) == CAST_OK)
+                    ResetCombatAction(action, 5000);
+                break;
+            }
+            case AYAMISS_SWARMER_ATTACK:
+            {
+                for (auto guid : m_swarmersGuidList)
+                {
+                    if (Creature* temp = m_creature->GetMap()->GetCreature(guid))
+                    {
+                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                            temp->AI()->AttackStart(target);
+                    }
+                }
+                m_swarmersGuidList.clear();
+                ResetCombatAction(action, 60000);
+                break;
+            }
+            case AYAMISS_LASH:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_LASH) == CAST_OK)
+                    ResetCombatAction(action, urand(8000, 15000));
+                break;
+            }
+            case AYAMISS_THRASH:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_THRASH) == CAST_OK)
+                    ResetCombatAction(action, urand(5000, 7000));
+                break;
+            }
         }
     }
 };
 
-UnitAI* GetAI_boss_ayamiss(Creature* pCreature)
-{
-    return new boss_ayamissAI(pCreature);
-}
-
 struct npc_hive_zara_larvaAI : public ScriptedAI
 {
-    npc_hive_zara_larvaAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_hive_zara_larvaAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<instance_ruins_of_ahnqiraj*>(m_creature->GetInstanceData()))
     {
-        m_pInstance = (instance_ruins_of_ahnqiraj*)m_creature->GetInstanceData();
-        Reset();
+        if (m_instance)
+            if (m_instance->GetData(TYPE_AYAMISS) == IN_PROGRESS)
+                SetReactState(REACT_DEFENSIVE);
     }
 
-    instance_ruins_of_ahnqiraj* m_pInstance;
+    instance_ruins_of_ahnqiraj* m_instance;
 
     void Reset() override { }
 
-    void AttackStart(Unit* pWho) override
+    void MoveInLineOfSight(Unit* who) override
     {
         // don't attack anything during the Ayamiss encounter
-        if (m_pInstance)
+        if (m_instance)
         {
-            if (m_pInstance->GetData(TYPE_AYAMISS) == IN_PROGRESS)
+            if (m_instance->GetData(TYPE_AYAMISS) == IN_PROGRESS)
+            {
+                if (m_creature->CanReachWithMeleeAttack(who) && who == m_creature->GetVictim())
+                {
+                    m_creature->CastSpell(who, SPELL_FEED, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
+                }
                 return;
+            }
         }
 
-        ScriptedAI::AttackStart(pWho);
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        // don't attack anything during the Ayamiss encounter
-        if (m_pInstance)
-        {
-            if (m_pInstance->GetData(TYPE_AYAMISS) == IN_PROGRESS)
-                return;
-        }
-
-        ScriptedAI::MoveInLineOfSight(pWho);
+        ScriptedAI::MoveInLineOfSight(who);
     }
 
     void UpdateAI(const uint32 /*uiDiff*/) override
     {
-        if (m_pInstance)
+        if (m_instance)
         {
-            if (m_pInstance->GetData(TYPE_AYAMISS) == IN_PROGRESS)
+            if (m_instance->GetData(TYPE_AYAMISS) == IN_PROGRESS)
                 return;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_npc_hive_zara_larva(Creature* pCreature)
-{
-    return new npc_hive_zara_larvaAI(pCreature);
-}
-
 void AddSC_boss_ayamiss()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_ayamiss";
-    pNewScript->GetAI = &GetAI_boss_ayamiss;
+    pNewScript->GetAI = &GetNewAIInstance<boss_ayamissAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_hive_zara_larva";
-    pNewScript->GetAI = &GetAI_npc_hive_zara_larva;
+    pNewScript->GetAI = &GetNewAIInstance<npc_hive_zara_larvaAI>;
     pNewScript->RegisterSelf();
 }

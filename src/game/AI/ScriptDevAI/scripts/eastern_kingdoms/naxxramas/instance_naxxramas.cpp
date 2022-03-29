@@ -16,51 +16,52 @@
 
 /* ScriptData
 SDName: Instance_Naxxramas
-SD%Complete: 90%
+SD%Complete: 100
 SDComment:
 SDCategory: Naxxramas
 EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "naxxramas.h"
 
-static const DialogueEntry aNaxxDialogue[] =
+static const DialogueEntry naxxDialogue[] =
 {
-    {NPC_KELTHUZAD,         0,                  10000},
-    {SAY_SAPP_DIALOG1,      NPC_KELTHUZAD,      5000},
-    {SAY_SAPP_DIALOG2_LICH, NPC_THE_LICHKING,   17000},
-    {SAY_SAPP_DIALOG3,      NPC_KELTHUZAD,      6000},
-    {SAY_SAPP_DIALOG4_LICH, NPC_THE_LICHKING,   8000},
-    {SAY_SAPP_DIALOG5,      NPC_KELTHUZAD,      0},
-    {NPC_THANE,             0,                  10000},
-    {SAY_KORT_TAUNT1,       NPC_THANE,          5000},
-    {SAY_ZELI_TAUNT1,       NPC_ZELIEK,         6000},
-    {SAY_BLAU_TAUNT1,       NPC_BLAUMEUX,       6000},
-    {SAY_MORG_TAUNT1,       NPC_MOGRAINE,       7000},
-    {SAY_BLAU_TAUNT2,       NPC_BLAUMEUX,       6000},
-    {SAY_ZELI_TAUNT2,       NPC_ZELIEK,         5000},
-    {SAY_KORT_TAUNT2,       NPC_THANE,          7000},
-    {SAY_MORG_TAUNT2,       NPC_MOGRAINE,       0},
-    {SAY_FAERLINA_INTRO,    NPC_FAERLINA,       10000},
-    {FOLLOWERS_STAND,       0,                  3000},
-    {FOLLOWERS_AURA,        0,                  30000},
-    {FOLLOWERS_KNEEL,       0,                  0}, 
-    {0, 0, 0}
+    {NPC_KELTHUZAD,         0,                10000},
+    {SAY_SAPP_DIALOG1,      NPC_KELTHUZAD,    5000},
+    {SAY_SAPP_DIALOG2_LICH, NPC_THE_LICHKING, 17000},
+    {SAY_SAPP_DIALOG3,      NPC_KELTHUZAD,    6000},
+    {SAY_SAPP_DIALOG4_LICH, NPC_THE_LICHKING, 8000},
+    {SAY_SAPP_DIALOG5,      NPC_KELTHUZAD,    0},
+    {NPC_THANE,             0,                10000},
+    {SAY_KORT_TAUNT1,       NPC_THANE,        5000},
+    {SAY_ZELI_TAUNT1,       NPC_ZELIEK,       6000},
+    {SAY_BLAU_TAUNT1,       NPC_BLAUMEUX,     6000},
+    {SAY_MORG_TAUNT1,       NPC_MOGRAINE,     7000},
+    {SAY_BLAU_TAUNT2,       NPC_BLAUMEUX,     6000},
+    {SAY_ZELI_TAUNT2,       NPC_ZELIEK,       5000},
+    {SAY_KORT_TAUNT2,       NPC_THANE,        7000},
+    {SAY_MORG_TAUNT2,       NPC_MOGRAINE,     0},
+    {SAY_FAERLINA_INTRO,    NPC_FAERLINA,     10000},
+    {FOLLOWERS_STAND,       0,                3000},
+    {FOLLOWERS_AURA,        0,                30000},
+    {FOLLOWERS_KNEEL,       0,                0},
+    {0,                     0,                0}
 };
 
 instance_naxxramas::instance_naxxramas(Map* pMap) : ScriptedInstance(pMap),
-    m_fChamberCenterX(0.0f),
-    m_fChamberCenterY(0.0f),
-    m_fChamberCenterZ(0.0f),
-    m_uiSapphSpawnTimer(0),
-    m_uiTauntTimer(0),
-    m_uiHorseMenKilled(0),
-    m_uiLivingPoisonTimer(5000),
-    m_uiScreamsTimer(2 * MINUTE * IN_MILLISECONDS),
+    m_sapphironSpawnTimer(0),
+    m_tauntTimer(0),
+    m_horsemenKilled(0),
+    m_horsemenTauntTimer(30 * MINUTE * IN_MILLISECONDS),
+    m_livingPoisonTimer(0),
+    m_despawnKTTriggerTimer(0),
+    m_screamsTimer(2 * MINUTE * IN_MILLISECONDS),
     isFaerlinaIntroDone(false),
-    DialogueHelper(aNaxxDialogue)
+    m_shackledGuardians(0),
+    m_checkGuardiansTimer(0),
+    DialogueHelper(naxxDialogue)
 {
     Initialize();
 }
@@ -79,11 +80,11 @@ void instance_naxxramas::JustDidDialogueStep(int32 entry)
         case FOLLOWERS_STAND:
         {
             isFaerlinaIntroDone = true;
-            for (auto& followerGuid : m_lFaerlinaFollowersList)
+            for (auto& followerGuid : m_faerlinaFollowersList)
             {
                 if (Creature* follower = instance->GetCreature(followerGuid))
                 {
-                    if (follower->isAlive() && !follower->isInCombat())
+                    if (follower->IsAlive() && !follower->IsInCombat())
                         follower->SetStandState(UNIT_STAND_STATE_STAND);
                 }
             }
@@ -91,11 +92,11 @@ void instance_naxxramas::JustDidDialogueStep(int32 entry)
         }
         case FOLLOWERS_AURA:
         {
-            for (auto& followerGuid : m_lFaerlinaFollowersList)
+            for (auto& followerGuid : m_faerlinaFollowersList)
             {
                 if (Creature* follower = instance->GetCreature(followerGuid))
                 {
-                    if (follower->isAlive() && !follower->isInCombat())
+                    if (follower->IsAlive() && !follower->IsInCombat())
                         follower->CastSpell(follower, SPELL_DARK_CHANNELING, TRIGGERED_OLD_TRIGGERED);
                 }
             }
@@ -103,11 +104,11 @@ void instance_naxxramas::JustDidDialogueStep(int32 entry)
         }
         case FOLLOWERS_KNEEL:
         {
-            for (auto& followerGuid : m_lFaerlinaFollowersList)
+            for (auto& followerGuid : m_faerlinaFollowersList)
             {
                 if (Creature* follower = instance->GetCreature(followerGuid))
                 {
-                    if (follower->isAlive() && !follower->isInCombat())
+                    if (follower->IsAlive() && !follower->IsInCombat())
                     {
                         follower->RemoveAurasDueToSpell(SPELL_DARK_CHANNELING);
                         follower->SetStandState(UNIT_STAND_STATE_KNEEL);
@@ -121,7 +122,7 @@ void instance_naxxramas::JustDidDialogueStep(int32 entry)
     }
 }
 
-void instance_naxxramas::OnPlayerEnter(Player* pPlayer)
+void instance_naxxramas::OnPlayerEnter(Player* player)
 {
     // Function only used to summon Sapphiron in case of server reload
     if (GetData(TYPE_SAPPHIRON) != SPECIAL)
@@ -131,12 +132,12 @@ void instance_naxxramas::OnPlayerEnter(Player* pPlayer)
     if (GetSingleCreatureFromStorage(NPC_SAPPHIRON, true))
         return;
 
-    pPlayer->SummonCreature(NPC_SAPPHIRON, aSapphPositions[0], aSapphPositions[1], aSapphPositions[2], aSapphPositions[3], TEMPSPAWN_DEAD_DESPAWN, 0);
+    player->SummonCreature(NPC_SAPPHIRON, sapphironPositions[0], sapphironPositions[1], sapphironPositions[2], sapphironPositions[3], TEMPSPAWN_DEAD_DESPAWN, 0);
 }
 
-void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
+void instance_naxxramas::OnCreatureCreate(Creature* creature)
 {
-    switch (pCreature->GetEntry())
+    switch (creature->GetEntry())
     {
         case NPC_ANUB_REKHAN:
         case NPC_FAERLINA:
@@ -156,69 +157,94 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
         case NPC_SAPPHIRON:
         case NPC_KELTHUZAD:
         case NPC_THE_LICHKING:
-        case NPC_NAXXRAMAS_TRIGGER:
-            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
             break;
-        case NPC_ZOMBIE_CHOW:
+        case NPC_NAXXRAMAS_TRIGGER:
         {
-            m_lZombieChowList.push_back(pCreature->GetObjectGuid());
-            pCreature->SetInCombatWithZone();
+            m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
+            m_livingPoisonTimer = 5 * IN_MILLISECONDS;
             break;
         }
-        case NPC_CORPSE_SCARAB:
+        case NPC_ZOMBIE_CHOW:
         {
-            pCreature->SetInCombatWithZone();
+            m_zombieChowList.push_back(creature->GetObjectGuid());
             break;
         }
         case NPC_NAXXRAMAS_CULTIST:
         case NPC_NAXXRAMAS_ACOLYTE:
         {
-            m_lFaerlinaFollowersList.push_back(pCreature->GetObjectGuid());
+            m_faerlinaFollowersList.push_back(creature->GetObjectGuid());
             break;
         }
-        case NPC_SUB_BOSS_TRIGGER:  m_lGothTriggerList.push_back(pCreature->GetObjectGuid()); break;
-        case NPC_TESLA_COIL:        m_lThadTeslaCoilList.push_back(pCreature->GetObjectGuid()); break;
+        case NPC_SUB_BOSS_TRIGGER:  m_gothikTriggerList.push_back(creature->GetObjectGuid()); break;
+        case NPC_TESLA_COIL:        m_thaddiusTeslaCoilList.push_back(creature->GetObjectGuid()); break;
+        case NPC_UNREL_TRAINEE:
+        case NPC_UNREL_DEATH_KNIGHT:
+        case NPC_UNREL_RIDER:
+            m_unrelentingSideList.push_back(creature->GetObjectGuid());
+            break;
+        case NPC_SPECT_TRAINEE:
+        case NPC_SPECT_DEATH_KNIGHT:
+        case NPC_SPECT_RIDER:
+        case NPC_SPECT_HORSE:
+            m_spectralSideList.push_back(creature->GetObjectGuid());
+            break;
+        case NPC_SOUL_WEAVER:
+        case NPC_UNSTOPPABLE_ABOM:
+        case NPC_SOLDIER_FROZEN:
+            if (creature->IsTemporarySummon())
+            {
+                if (creature->GetSpawnerGuid().IsCreature())
+                {
+                    if (Creature* summoner = creature->GetMap()->GetCreature(creature->GetSpawnerGuid()))
+                    {
+                        if (summoner->GetEntry() == NPC_KELTHUZAD)
+                            return;
+                    }
+                }
+            }
+            break;
+        case NPC_GUARDIAN:
+            m_icrecrownGuardianList.push_back(creature->GetObjectGuid());
+            break;
     }
 }
 
-void instance_naxxramas::OnObjectCreate(GameObject* pGo)
+void instance_naxxramas::OnObjectCreate(GameObject* gameObject)
 {
-    switch (pGo->GetEntry())
+    switch (gameObject->GetEntry())
     {
         // Arachnid Quarter
         case GO_ARAC_ANUB_DOOR:
             break;
         case GO_ARAC_ANUB_GATE:
             if (m_auiEncounter[TYPE_ANUB_REKHAN] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+                gameObject->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_ARAC_FAER_WEB:
             break;
         case GO_ARAC_FAER_DOOR:
             if (m_auiEncounter[TYPE_FAERLINA] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+                gameObject->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_ARAC_MAEX_INNER_DOOR:
             break;
         case GO_ARAC_MAEX_OUTER_DOOR:
             if (m_auiEncounter[TYPE_FAERLINA] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+                gameObject->SetGoState(GO_STATE_ACTIVE);
             break;
 
         // Plague Quarter
         case GO_PLAG_NOTH_ENTRY_DOOR:
             break;
         case GO_PLAG_NOTH_EXIT_DOOR:
-            if (m_auiEncounter[TYPE_NOTH] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
-            break;
         case GO_PLAG_HEIG_ENTRY_DOOR:
             if (m_auiEncounter[TYPE_NOTH] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+                gameObject->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_PLAG_HEIG_EXIT_HALLWAY:
             if (m_auiEncounter[TYPE_HEIGAN] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+                gameObject->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_PLAG_LOAT_DOOR:
             break;
@@ -228,13 +254,13 @@ void instance_naxxramas::OnObjectCreate(GameObject* pGo)
             break;
         case GO_MILI_GOTH_EXIT_GATE:
             if (m_auiEncounter[TYPE_GOTHIK] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+                gameObject->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_MILI_GOTH_COMBAT_GATE:
             break;
         case GO_MILI_HORSEMEN_DOOR:
             if (m_auiEncounter[TYPE_GOTHIK] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+                gameObject->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_CHEST_HORSEMEN_NORM:
             break;
@@ -242,29 +268,23 @@ void instance_naxxramas::OnObjectCreate(GameObject* pGo)
         // Construct Quarter
         case GO_CONS_PATH_EXIT_DOOR:
             if (m_auiEncounter[TYPE_PATCHWERK] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+                gameObject->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_CONS_GLUT_EXIT_DOOR:
-            if (m_auiEncounter[TYPE_GLUTH] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
-            break;
         case GO_CONS_THAD_DOOR:
             if (m_auiEncounter[TYPE_GLUTH] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+                gameObject->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_CONS_NOX_TESLA_FEUGEN:
-            if (m_auiEncounter[TYPE_THADDIUS] == DONE)
-                pGo->SetGoState(GO_STATE_READY);
-            break;
         case GO_CONS_NOX_TESLA_STALAGG:
             if (m_auiEncounter[TYPE_THADDIUS] == DONE)
-                pGo->SetGoState(GO_STATE_READY);
+                gameObject->SetGoState(GO_STATE_READY);
             break;
 
         // Frostwyrm Lair
         case GO_KELTHUZAD_WATERFALL_DOOR:
             if (m_auiEncounter[TYPE_SAPPHIRON] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+                gameObject->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_KELTHUZAD_EXIT_DOOR:
         case GO_KELTHUZAD_WINDOW_1:
@@ -272,61 +292,119 @@ void instance_naxxramas::OnObjectCreate(GameObject* pGo)
         case GO_KELTHUZAD_WINDOW_3:
         case GO_KELTHUZAD_WINDOW_4:
             break;
+        case GO_KELTHUZAD_TRIGGER:
+            if (m_auiEncounter[TYPE_KELTHUZAD] != NOT_STARTED) // Only spawn the visual trigger for Kel'Thuzad when encounter is not started
+                gameObject->SetLootState(GO_JUST_DEACTIVATED);
+            break;
 
         // Eyes
         case GO_ARAC_EYE_RAMP:
         case GO_ARAC_EYE_BOSS:
             if (m_auiEncounter[TYPE_MAEXXNA] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+                gameObject->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_PLAG_EYE_RAMP:
         case GO_PLAG_EYE_BOSS:
             if (m_auiEncounter[TYPE_LOATHEB] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+                gameObject->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_MILI_EYE_RAMP:
         case GO_MILI_EYE_BOSS:
             if (m_auiEncounter[TYPE_FOUR_HORSEMEN] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+                gameObject->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_CONS_EYE_RAMP:
         case GO_CONS_EYE_BOSS:
             if (m_auiEncounter[TYPE_THADDIUS] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+                gameObject->SetGoState(GO_STATE_ACTIVE);
             break;
 
         // Portals
         case GO_ARAC_PORTAL:
             if (m_auiEncounter[TYPE_MAEXXNA] == DONE)
-                pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+                gameObject->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
             break;
         case GO_PLAG_PORTAL:
             if (m_auiEncounter[TYPE_LOATHEB] == DONE)
-                pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+                gameObject->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
             break;
         case GO_MILI_PORTAL:
             if (m_auiEncounter[TYPE_FOUR_HORSEMEN] == DONE)
-                pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+                gameObject->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
             break;
         case GO_CONS_PORTAL:
             if (m_auiEncounter[TYPE_THADDIUS] == DONE)
-                pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+                gameObject->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
             break;
 
         default:
             return;
     }
-    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[gameObject->GetEntry()] = gameObject->GetObjectGuid();
 }
 
-void instance_naxxramas::OnCreatureDeath(Creature* pCreature)
+void instance_naxxramas::OnCreatureDeath(Creature* creature)
 {
-    if (pCreature->GetEntry() == NPC_MR_BIGGLESWORTH && m_auiEncounter[TYPE_KELTHUZAD] != DONE)
-        DoOrSimulateScriptTextForThisInstance(SAY_KELTHUZAD_CAT_DIED, NPC_KELTHUZAD);
-    else if (pCreature->GetEntry() == NPC_ZOMBIE_CHOW)
+    switch (creature->GetEntry())
     {
-        pCreature->ForcedDespawn(2000);
-        m_lZombieChowList.remove(pCreature->GetObjectGuid());
+        case NPC_MR_BIGGLESWORTH:
+            if (m_auiEncounter[TYPE_KELTHUZAD] != DONE)
+                DoOrSimulateScriptTextForThisInstance(SAY_KELTHUZAD_CAT_DIED, NPC_KELTHUZAD);
+            break;
+        case NPC_ZOMBIE_CHOW:
+            creature->ForcedDespawn(2000);
+            m_zombieChowList.remove(creature->GetObjectGuid());
+            break;
+        case NPC_UNREL_TRAINEE:
+            if (Creature* anchor = GetClosestAnchorForGothik(creature, true))
+                creature->CastSpell(anchor, SPELL_A_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, creature->GetObjectGuid());
+            m_unrelentingSideList.remove(creature->GetObjectGuid());
+            creature->ForcedDespawn(4000);
+            break;
+        case NPC_UNREL_DEATH_KNIGHT:
+            if (Creature* anchor = GetClosestAnchorForGothik(creature, true))
+                creature->CastSpell(anchor, SPELL_B_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, creature->GetObjectGuid());
+            m_unrelentingSideList.remove(creature->GetObjectGuid());
+            creature->ForcedDespawn(4000);
+            break;
+        case NPC_UNREL_RIDER:
+            if (Creature* anchor = GetClosestAnchorForGothik(creature, true))
+                creature->CastSpell(anchor, SPELL_C_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, creature->GetObjectGuid());
+            m_unrelentingSideList.remove(creature->GetObjectGuid());
+            creature->ForcedDespawn(4000);
+            break;
+        case NPC_SPECT_TRAINEE:
+        case NPC_SPECT_DEATH_KNIGHT:
+        case NPC_SPECT_RIDER:
+        case NPC_SPECT_HORSE:
+            m_spectralSideList.remove(creature->GetObjectGuid());
+            creature->ForcedDespawn(4000);
+            break;
+        case NPC_SOLDIER_FROZEN:
+        case NPC_UNSTOPPABLE_ABOM:
+        case NPC_SOUL_WEAVER:
+            creature->ForcedDespawn(2000);
+            break;
+        default:
+            break;
+    }
+}
+
+void instance_naxxramas::OnCreatureRespawn(Creature* creature)
+{
+    switch (creature->GetEntry())
+    {
+        case NPC_SOUL_WEAVER:
+        case NPC_UNSTOPPABLE_ABOM:
+        case NPC_SOLDIER_FROZEN:
+            if (!creature->IsTemporarySummon())
+                break;
+            [[fallthrough]];
+        case NPC_ZOMBIE_CHOW:
+        case NPC_GUARDIAN:
+        case NPC_CORPSE_SCARAB:
+            creature->SetInCombatWithZone();
+            break;
     }
 }
 
@@ -342,147 +420,170 @@ bool instance_naxxramas::IsEncounterInProgress() const
     return m_auiEncounter[TYPE_GOTHIK] == SPECIAL;
 }
 
-void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
+void instance_naxxramas::SetData(uint32 type, uint32 data)
 {
-    switch (uiType)
+    switch (type)
     {
         case TYPE_ANUB_REKHAN:
-            m_auiEncounter[uiType] = uiData;
+            m_auiEncounter[type] = data;
             DoUseDoorOrButton(GO_ARAC_ANUB_DOOR);
-            if (uiData == DONE)
+            if (data == DONE)
                 DoUseDoorOrButton(GO_ARAC_ANUB_GATE);
             break;
         case TYPE_FAERLINA:
             DoUseDoorOrButton(GO_ARAC_FAER_WEB);
-            if (uiData == DONE)
+            if (data == DONE)
             {
                 DoUseDoorOrButton(GO_ARAC_FAER_DOOR);
                 DoUseDoorOrButton(GO_ARAC_MAEX_OUTER_DOOR);
             }
-            m_auiEncounter[uiType] = uiData;
+            m_auiEncounter[type] = data;
             break;
         case TYPE_MAEXXNA:
-            m_auiEncounter[uiType] = uiData;
-            DoUseDoorOrButton(GO_ARAC_MAEX_INNER_DOOR, uiData);
-            if (uiData == DONE)
+            m_auiEncounter[type] = data;
+            DoUseDoorOrButton(GO_ARAC_MAEX_INNER_DOOR, data);
+            if (data == DONE)
             {
                 DoUseDoorOrButton(GO_ARAC_EYE_RAMP);
                 DoUseDoorOrButton(GO_ARAC_EYE_BOSS);
                 DoRespawnGameObject(GO_ARAC_PORTAL, 30 * MINUTE);
                 DoToggleGameObjectFlags(GO_ARAC_PORTAL, GO_FLAG_NO_INTERACT, false);
-                m_uiTauntTimer = 5000;
+                m_tauntTimer = 5000;
             }
             break;
         case TYPE_NOTH:
-            m_auiEncounter[uiType] = uiData;
+            m_auiEncounter[type] = data;
             DoUseDoorOrButton(GO_PLAG_NOTH_ENTRY_DOOR);
-            if (uiData == DONE)
+            if (data == DONE)
             {
                 DoUseDoorOrButton(GO_PLAG_NOTH_EXIT_DOOR);
                 DoUseDoorOrButton(GO_PLAG_HEIG_ENTRY_DOOR);
             }
             break;
         case TYPE_HEIGAN:
-            m_auiEncounter[uiType] = uiData;
+            m_auiEncounter[type] = data;
             // Open the entrance door on encounter win or failure (we specifically set the GOState to avoid issue in case encounter is reset before gate is closed in Heigan script)
-            if (uiData == DONE || uiData == FAIL)
+            if (data == DONE || data == FAIL)
             {
                 if (GameObject* door = GetSingleGameObjectFromStorage(GO_PLAG_HEIG_ENTRY_DOOR))
                     door->SetGoState(GO_STATE_ACTIVE);
             }
-            if (uiData == DONE)
+            if (data == DONE)
                 DoUseDoorOrButton(GO_PLAG_HEIG_EXIT_HALLWAY);
             break;
         case TYPE_LOATHEB:
-            m_auiEncounter[uiType] = uiData;
+            m_auiEncounter[type] = data;
             DoUseDoorOrButton(GO_PLAG_LOAT_DOOR);
-            if (uiData == DONE)
+            if (data == DONE)
             {
                 DoUseDoorOrButton(GO_PLAG_EYE_RAMP);
                 DoUseDoorOrButton(GO_PLAG_EYE_BOSS);
                 DoRespawnGameObject(GO_PLAG_PORTAL, 30 * MINUTE);
                 DoToggleGameObjectFlags(GO_PLAG_PORTAL, GO_FLAG_NO_INTERACT, false);
-                m_uiTauntTimer = 5000;
+                m_tauntTimer = 5000;
             }
             break;
         case TYPE_RAZUVIOUS:
-            m_auiEncounter[uiType] = uiData;
+            m_auiEncounter[type] = data;
             break;
         case TYPE_GOTHIK:
-            switch (uiData)
+            m_auiEncounter[type] = data;
+            switch (data)
             {
                 case IN_PROGRESS:
+                    // Encounter begins: close the gate and start timer to summon unrelenting trainees
                     DoUseDoorOrButton(GO_MILI_GOTH_ENTRY_GATE);
                     DoUseDoorOrButton(GO_MILI_GOTH_COMBAT_GATE);
+                    InitializeGothikTriggers();
                     break;
                 case SPECIAL:
                     DoUseDoorOrButton(GO_MILI_GOTH_COMBAT_GATE);
+                    for (auto& spectralGuid : m_spectralSideList)
+                    {
+                        if (Creature* spectral = instance->GetCreature(spectralGuid))
+                            spectral->CastSpell(spectral, SPELL_SPECTRAL_ASSAULT, TRIGGERED_OLD_TRIGGERED);
+                    }
+                    for (auto& unrelentingGuid : m_unrelentingSideList)
+                    {
+                        if (Creature* unrelenting = instance->GetCreature(unrelentingGuid))
+                            unrelenting->CastSpell(unrelenting, SPELL_UNRELENTING_ASSAULT, TRIGGERED_OLD_TRIGGERED);
+                    }
                     break;
                 case FAIL:
-                    if (m_auiEncounter[uiType] == IN_PROGRESS)
+                    if (m_auiEncounter[type] == IN_PROGRESS)
                         DoUseDoorOrButton(GO_MILI_GOTH_COMBAT_GATE);
-
                     DoUseDoorOrButton(GO_MILI_GOTH_ENTRY_GATE);
                     break;
                 case DONE:
                     DoUseDoorOrButton(GO_MILI_GOTH_ENTRY_GATE);
                     DoUseDoorOrButton(GO_MILI_GOTH_EXIT_GATE);
                     DoUseDoorOrButton(GO_MILI_HORSEMEN_DOOR);
-
+                    // Open the central gate if Gothik is defeated before doing so
+                    if (m_auiEncounter[type] == IN_PROGRESS)
+                        DoUseDoorOrButton(GO_MILI_GOTH_COMBAT_GATE);
                     StartNextDialogueText(NPC_THANE);
                     break;
             }
-            m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_FOUR_HORSEMEN:
+        {
             // Skip if already set
-            if (m_auiEncounter[uiType] == uiData)
+            if (m_auiEncounter[type] == data)
                 return;
-            if (uiData == SPECIAL)
+            if (data == SPECIAL)
             {
-                ++m_uiHorseMenKilled;
+                ++m_horsemenKilled;
 
-                if (m_uiHorseMenKilled == 4)
+                if (m_horsemenKilled == 4)
                     SetData(TYPE_FOUR_HORSEMEN, DONE);
 
                 // Don't store special data
                 break;
             }
-            if (uiData == FAIL)
-                m_uiHorseMenKilled = 0;
-            m_auiEncounter[uiType] = uiData;
-            DoUseDoorOrButton(GO_MILI_HORSEMEN_DOOR);
-            if (uiData == DONE)
+            if (data == FAIL)
             {
-                // Despawn spirits
-                if (Creature* pSpirit = GetSingleCreatureFromStorage(NPC_SPIRIT_OF_BLAUMEUX))
-                    pSpirit->ForcedDespawn();
-                if (Creature* pSpirit = GetSingleCreatureFromStorage(NPC_SPIRIT_OF_MOGRAINE))
-                    pSpirit->ForcedDespawn();
-                if (Creature* pSpirit = GetSingleCreatureFromStorage(NPC_SPIRIT_OF_KORTHAZZ))
-                    pSpirit->ForcedDespawn();
-                if (Creature* pSpirit = GetSingleCreatureFromStorage(NPC_SPIRIT_OF_ZELIREK))
-                    pSpirit->ForcedDespawn();
-
+                m_horsemenKilled = 0;
+                std::vector<uint32> entries = {NPC_BLAUMEUX, NPC_MOGRAINE, NPC_ZELIEK, NPC_THANE};
+                for (uint32 entry : entries)
+                {
+                    if (Creature* creature = GetSingleCreatureFromStorage(entry))
+                    {
+                        if (creature->IsInCombat())
+                            creature->AI()->EnterEvadeMode();
+                    }
+                }
+            }
+            m_auiEncounter[type] = data;
+            DoUseDoorOrButton(GO_MILI_HORSEMEN_DOOR);
+            // Despawn Horsemen's spirit on FAIL or DONE
+            std::vector<uint32> entries = {NPC_SPIRIT_OF_BLAUMEUX, NPC_SPIRIT_OF_MOGRAINE, NPC_SPIRIT_OF_KORTHAZZ, NPC_SPIRIT_OF_ZELIREK};
+            for (uint32 entry : entries)
+            {
+                if (Creature* spirit = GetSingleCreatureFromStorage(entry))
+                    spirit->ForcedDespawn();
+            }
+            if (data == DONE)
+            {
                 DoUseDoorOrButton(GO_MILI_EYE_RAMP);
                 DoUseDoorOrButton(GO_MILI_EYE_BOSS);
                 DoRespawnGameObject(GO_MILI_PORTAL, 30 * MINUTE);
                 DoToggleGameObjectFlags(GO_MILI_PORTAL, GO_FLAG_NO_INTERACT, false);
                 DoRespawnGameObject(GO_CHEST_HORSEMEN_NORM, 30 * MINUTE);
-                m_uiTauntTimer = 5000;
+                m_tauntTimer = 5000;
             }
             break;
+        }
         case TYPE_PATCHWERK:
-            m_auiEncounter[uiType] = uiData;
-            if (uiData == DONE)
+            m_auiEncounter[type] = data;
+            if (data == DONE)
                 DoUseDoorOrButton(GO_CONS_PATH_EXIT_DOOR);
             break;
         case TYPE_GROBBULUS:
-            m_auiEncounter[uiType] = uiData;
+            m_auiEncounter[type] = data;
             break;
         case TYPE_GLUTH:
-            m_auiEncounter[uiType] = uiData;
-            if (uiData == DONE)
+            m_auiEncounter[type] = data;
+            if (data == DONE)
             {
                 DoUseDoorOrButton(GO_CONS_GLUT_EXIT_DOOR);
                 DoUseDoorOrButton(GO_CONS_THAD_DOOR);
@@ -490,11 +591,11 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_THADDIUS:
             // Only process real changes here
-            if (m_auiEncounter[uiType] == uiData)
+            if (m_auiEncounter[type] == data)
                 return;
 
-            m_auiEncounter[uiType] = uiData;
-            if (uiData == FAIL)
+            m_auiEncounter[type] = data;
+            if (data == FAIL)
             {
                 // Reset stage for phase 1
                 // Respawn: Stalagg, Feugen, their respective Tesla Coil NPCs and Tesla GOs
@@ -510,7 +611,7 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                     feugen->Respawn();
                 }
 
-                for (auto& teslaGuid : m_lThadTeslaCoilList)
+                for (auto& teslaGuid : m_thaddiusTeslaCoilList)
                 {
                     if (Creature* teslaCoil = instance->GetCreature(teslaGuid))
                     {
@@ -519,50 +620,81 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                     }
                 }
                 if (GameObject* stalaggTesla = GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_STALAGG))
-                	stalaggTesla->SetGoState(GO_STATE_ACTIVE);
+                    stalaggTesla->SetGoState(GO_STATE_ACTIVE);
                 if (GameObject* feugenTesla = GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_FEUGEN))
-                	feugenTesla->SetGoState(GO_STATE_ACTIVE);
+                    feugenTesla->SetGoState(GO_STATE_ACTIVE);
             }
-            if (uiData != SPECIAL)
-                DoUseDoorOrButton(GO_CONS_THAD_DOOR, uiData);
-            if (uiData == DONE)
+            if (data != SPECIAL)
+                DoUseDoorOrButton(GO_CONS_THAD_DOOR, data);
+            if (data == DONE)
             {
                 DoUseDoorOrButton(GO_CONS_EYE_RAMP);
                 DoUseDoorOrButton(GO_CONS_EYE_BOSS);
                 DoRespawnGameObject(GO_CONS_PORTAL, 30 * MINUTE);
                 DoToggleGameObjectFlags(GO_CONS_PORTAL, GO_FLAG_NO_INTERACT, false);
-                m_uiTauntTimer = 5000;
+                m_tauntTimer = 5000;
             }
             break;
         case TYPE_SAPPHIRON:
-            m_auiEncounter[uiType] = uiData;
-            if (uiData == DONE)
+            m_auiEncounter[type] = data;
+            if (data == DONE)
             {
                 DoUseDoorOrButton(GO_KELTHUZAD_WATERFALL_DOOR);
                 StartNextDialogueText(NPC_KELTHUZAD);
             }
             // Start Sapph summoning process
-            if (uiData == SPECIAL)
-                m_uiSapphSpawnTimer = 22000;
+            if (data == SPECIAL)
+                m_sapphironSpawnTimer = 22000;
             break;
         case TYPE_KELTHUZAD:
-            m_auiEncounter[uiType] = uiData;
+            m_auiEncounter[type] = data;
             DoUseDoorOrButton(GO_KELTHUZAD_EXIT_DOOR);
-            if (uiData == NOT_STARTED)
+            if (data == IN_PROGRESS)
             {
-                if (GameObject* pWindow = GetSingleGameObjectFromStorage(GO_KELTHUZAD_WINDOW_1))
-                    pWindow->ResetDoorOrButton();
-                if (GameObject* pWindow = GetSingleGameObjectFromStorage(GO_KELTHUZAD_WINDOW_2))
-                    pWindow->ResetDoorOrButton();
-                if (GameObject* pWindow = GetSingleGameObjectFromStorage(GO_KELTHUZAD_WINDOW_3))
-                    pWindow->ResetDoorOrButton();
-                if (GameObject* pWindow = GetSingleGameObjectFromStorage(GO_KELTHUZAD_WINDOW_4))
-                    pWindow->ResetDoorOrButton();
+                if (Creature* kelthuzad = GetSingleCreatureFromStorage(NPC_KELTHUZAD))
+                {
+                    if (kelthuzad->IsAlive())
+                        kelthuzad->CastSpell(kelthuzad, SPELL_CHANNEL_VISUAL, TRIGGERED_OLD_TRIGGERED);
+                }
+                DoUseDoorOrButton(GO_KELTHUZAD_TRIGGER);
+                m_despawnKTTriggerTimer = 5 * IN_MILLISECONDS;
+            }
+            if (data == FAIL)
+            {
+                if (GameObject* window = GetSingleGameObjectFromStorage(GO_KELTHUZAD_WINDOW_1))
+                    window->ResetDoorOrButton();
+                if (GameObject* window = GetSingleGameObjectFromStorage(GO_KELTHUZAD_WINDOW_2))
+                    window->ResetDoorOrButton();
+                if (GameObject* window = GetSingleGameObjectFromStorage(GO_KELTHUZAD_WINDOW_3))
+                    window->ResetDoorOrButton();
+                if (GameObject* window = GetSingleGameObjectFromStorage(GO_KELTHUZAD_WINDOW_4))
+                    window->ResetDoorOrButton();
+                if (GameObject* trigger = GetSingleGameObjectFromStorage(GO_KELTHUZAD_TRIGGER))
+                {
+                    trigger->SetRespawnTime(5);
+                    trigger->Respawn();
+                }
+                // Clear everything related to Guardians of Icecrown
+                m_icrecrownGuardianList.clear();
+                m_checkGuardiansTimer = 0;
+                m_shackledGuardians = 0;
+            }
+            if (data == DONE)
+            {
+                for (auto guardianGuid : m_icrecrownGuardianList)
+                {
+                    if (Creature* guardian = instance->GetCreature(guardianGuid))
+                    {
+                        if (guardian->AI())
+                            guardian->AI()->EnterEvadeMode();
+                        DoScriptText(EMOTE_FLEE, guardian);
+                    }
+                }
             }
             break;
     }
 
-    if (uiData == DONE || (uiData == SPECIAL && uiType == TYPE_SAPPHIRON))
+    if (data == DONE || (data == SPECIAL && type == TYPE_SAPPHIRON))
     {
         OUT_SAVE_INST_DATA;
 
@@ -605,203 +737,323 @@ void instance_naxxramas::Load(const char* chrIn)
     OUT_LOAD_INST_DATA_COMPLETE;
 }
 
-uint32 instance_naxxramas::GetData(uint32 uiType) const
+uint32 instance_naxxramas::GetData(uint32 type) const
 {
-    if (uiType < MAX_ENCOUNTER)
-        return m_auiEncounter[uiType];
+    if (type < MAX_ENCOUNTER)
+        return m_auiEncounter[type];
 
     return 0;
 }
 
-void instance_naxxramas::Update(uint32 uiDiff)
+void instance_naxxramas::Update(uint32 diff)
 {
     // Handle the continuous spawning of Living Poison blobs in Patchwerk corridor
-    if (m_uiLivingPoisonTimer)
+    if (m_livingPoisonTimer)
     {
-        if (m_uiLivingPoisonTimer <= uiDiff)
+        if (m_livingPoisonTimer <= diff)
         {
             if (Creature* trigger = GetSingleCreatureFromStorage(NPC_NAXXRAMAS_TRIGGER))
             {
                 // Spawn 3 living poisons every 5 secs and make them cross the corridor and then despawn, for ever and ever
                 for (uint8 i = 0; i < 3; i++)
-                    if (Creature* poison = trigger->SummonCreature(NPC_LIVING_POISON, aLivingPoisonPositions[i].m_fX, aLivingPoisonPositions[i].m_fY, aLivingPoisonPositions[i].m_fZ, aLivingPoisonPositions[i].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0))
+                    if (Creature* poison = trigger->SummonCreature(NPC_LIVING_POISON, livingPoisonPositions[i].m_fX, livingPoisonPositions[i].m_fY, livingPoisonPositions[i].m_fZ, livingPoisonPositions[i].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0))
                     {
-                        poison->GetMotionMaster()->MovePoint(0, aLivingPoisonPositions[i + 3].m_fX, aLivingPoisonPositions[i + 3].m_fY, aLivingPoisonPositions[i + 3].m_fZ);
+                        poison->GetMotionMaster()->MovePoint(0, livingPoisonPositions[i + 3].m_fX, livingPoisonPositions[i + 3].m_fY, livingPoisonPositions[i + 3].m_fZ);
                         poison->ForcedDespawn(15000);
                     }
             }
-            m_uiLivingPoisonTimer = 5000;
+            m_livingPoisonTimer = 5000;
         }
         else
-            m_uiLivingPoisonTimer -= uiDiff;
+            m_livingPoisonTimer -= diff;
     }
 
-    if (m_uiScreamsTimer && m_auiEncounter[TYPE_THADDIUS] != DONE)
+    if (m_despawnKTTriggerTimer)
     {
-        if (m_uiScreamsTimer <= uiDiff)
+        if (m_despawnKTTriggerTimer < diff)
         {
-            if (Player* pPlayer = GetPlayerInMap())
-                pPlayer->GetMap()->PlayDirectSoundToMap(SOUND_SCREAM1 + urand(0, 3));
-            m_uiScreamsTimer = (2 * MINUTE + urand(0, 30)) * IN_MILLISECONDS;
+            if (GameObject* trigger = GetSingleGameObjectFromStorage(GO_KELTHUZAD_TRIGGER))
+            {
+                trigger->ResetDoorOrButton();
+                trigger->SetLootState(GO_JUST_DEACTIVATED);
+                trigger->SetForcedDespawn();
+            }
+            m_despawnKTTriggerTimer = 0;
         }
         else
-            m_uiScreamsTimer -= uiDiff;
+            m_despawnKTTriggerTimer -= diff;
     }
 
-    if (m_uiTauntTimer)
+    if (m_screamsTimer && m_auiEncounter[TYPE_THADDIUS] != DONE)
     {
-        if (m_uiTauntTimer <= uiDiff)
+        if (m_screamsTimer <= diff)
+        {
+            if (Player* player = GetPlayerInMap())
+                player->GetMap()->PlayDirectSoundToMap(SOUND_SCREAM1 + urand(0, 3));
+            m_screamsTimer = (2 * MINUTE + urand(0, 30)) * IN_MILLISECONDS;
+        }
+        else
+            m_screamsTimer -= diff;
+    }
+
+    if (m_tauntTimer)
+    {
+        if (m_tauntTimer <= diff)
         {
             DoTaunt();
-            m_uiTauntTimer = 0;
+            m_tauntTimer = 0;
         }
         else
-            m_uiTauntTimer -= uiDiff;
+            m_tauntTimer -= diff;
     }
 
-    if (m_uiSapphSpawnTimer)
+    if (m_checkGuardiansTimer)
     {
-        if (m_uiSapphSpawnTimer <= uiDiff)
+        if (m_checkGuardiansTimer <= diff)
         {
-            if (Player* pPlayer = GetPlayerInMap())
-                pPlayer->SummonCreature(NPC_SAPPHIRON, aSapphPositions[0], aSapphPositions[1], aSapphPositions[2], aSapphPositions[3], TEMPSPAWN_DEAD_DESPAWN, 0);
-
-            m_uiSapphSpawnTimer = 0;
+            if (m_shackledGuardians > MAX_SHACKLES)
+            {
+                if (Creature* kelthuzad = GetSingleCreatureFromStorage(NPC_KELTHUZAD))
+                {
+                    DoScriptText((urand(0, 1) ? SAY_KELTHUZAD_SHACKLES_1: SAY_KELTHUZAD_SHACKLES_2), kelthuzad);
+                    kelthuzad->CastSpell(nullptr, SPELL_CLEAR_ALL_SHACKLES, TRIGGERED_OLD_TRIGGERED);
+                }
+            }
+            m_shackledGuardians = 0;
+            m_checkGuardiansTimer = 2 * IN_MILLISECONDS;
         }
         else
-            m_uiSapphSpawnTimer -= uiDiff;
+            m_checkGuardiansTimer -= diff;
     }
 
-    DialogueUpdate(uiDiff);
+    if (m_auiEncounter[TYPE_FOUR_HORSEMEN] == NOT_STARTED)
+    {
+        if (m_horsemenTauntTimer <= diff)
+        {
+            uint32 horsemenEntry = 0;
+            int32 textId = 0;
+            switch (urand(0, 3))
+            {
+                case 0:
+                    horsemenEntry = NPC_BLAUMEUX;
+                    textId = SAY_BLAU_TAUNT3;
+                    break;
+                case 1:
+                    horsemenEntry = NPC_THANE;
+                    textId = SAY_KORT_TAUNT3;
+                    break;
+                case 2:
+                    horsemenEntry = NPC_MOGRAINE;
+                    textId = SAY_MORG_TAUNT3;
+                    break;
+                case 3:
+                    horsemenEntry = NPC_ZELIEK;
+                    textId = SAY_ZELI_TAUNT3;
+                    break;
+            }
+            DoOrSimulateScriptTextForThisInstance(textId, horsemenEntry);
+            m_horsemenTauntTimer = urand(30, 40) * MINUTE * IN_MILLISECONDS;
+        }
+        else
+            m_horsemenTauntTimer -= diff;
+    }
+
+    if (m_sapphironSpawnTimer)
+    {
+        if (m_sapphironSpawnTimer <= diff)
+        {
+            if (Player* player = GetPlayerInMap())
+                player->SummonCreature(NPC_SAPPHIRON, sapphironPositions[0], sapphironPositions[1], sapphironPositions[2], sapphironPositions[3], TEMPSPAWN_DEAD_DESPAWN, 0);
+
+            m_sapphironSpawnTimer = 0;
+        }
+        else
+            m_sapphironSpawnTimer -= diff;
+    }
+
+    DialogueUpdate(diff);
 }
 
-void instance_naxxramas::SetGothTriggers()
+// Initialize all triggers used in Gothik the Harvester encounter by flagging them with their position in the room and what kind of NPC they will summon
+void instance_naxxramas::InitializeGothikTriggers()
 {
-    Creature* pGoth = GetSingleCreatureFromStorage(NPC_GOTHIK);
+    Creature* gothik = GetSingleCreatureFromStorage(NPC_GOTHIK);
 
-    if (!pGoth)
+    if (!gothik)
         return;
 
-    for (GuidList::const_iterator itr = m_lGothTriggerList.begin(); itr != m_lGothTriggerList.end(); ++itr)
-    {
-        if (Creature* pTrigger = instance->GetCreature(*itr))
-        {
-            GothTrigger pGt;
-            pGt.bIsAnchorHigh = (pTrigger->GetPositionZ() >= (pGoth->GetPositionZ() - 5.0f));
-            pGt.bIsRightSide = IsInRightSideGothArea(pTrigger);
+    CreatureList summonList;
 
-            m_mGothTriggerMap[pTrigger->GetObjectGuid()] = pGt;
+    for (auto triggerGuid : m_gothikTriggerList)
+    {
+        if (Creature* trigger = instance->GetCreature(triggerGuid))
+        {
+            GothTrigger gt;
+            gt.isAnchorHigh = (trigger->GetPositionZ() >= (gothik->GetPositionZ() - 5.0f));
+            gt.isRightSide = IsInRightSideGothikArea(trigger);
+            gt.summonTypeFlag = 0x00;
+            m_gothikTriggerMap[trigger->GetObjectGuid()] = gt;
+
+            // Keep track of triggers that will be used as summon point
+            if (!gt.isAnchorHigh && gt.isRightSide)
+                summonList.push_back(trigger);
         }
     }
+
+    if (!summonList.empty())
+    {
+        // Sort summoning trigger NPCS by distance from Gothik
+        // and flag them regarding of what they will summon
+        summonList.sort(ObjectDistanceOrder(gothik));
+        uint8 index = 0;
+        for (auto trigger : summonList)
+        {
+            switch (index)
+            {
+                // Closest and furthest: Unrelenting Knights and Trainees
+                case 0:
+                case 3:
+                    m_gothikTriggerMap[trigger->GetObjectGuid()].summonTypeFlag = SUMMON_FLAG_TRAINEE | SUMMON_FLAG_KNIGHT;
+                    break;
+                // Middle: only Unrelenting Trainee
+                case 1:
+                    m_gothikTriggerMap[trigger->GetObjectGuid()].summonTypeFlag = SUMMON_FLAG_TRAINEE;
+                    break;
+                // Other middle: Unrelenting Rider
+                case 2:
+                    m_gothikTriggerMap[trigger->GetObjectGuid()].summonTypeFlag = SUMMON_FLAG_RIDER;
+                    break;
+                default:
+                    break;
+            }
+            ++index;
+        }
+    }
+    else
+        script_error_log("No suitable summon trigger found for Gothik combat area. Set up failed.");
 }
 
-Creature* instance_naxxramas::GetClosestAnchorForGoth(Creature* pSource, bool bRightSide)
+Creature* instance_naxxramas::GetClosestAnchorForGothik(Creature* source, bool rightSide)
 {
-    std::list<Creature* > lList;
+    std::list<Creature*> outputList;
 
-    for (auto& itr : m_mGothTriggerMap)
+    for (auto& itr : m_gothikTriggerMap)
     {
-        if (!itr.second.bIsAnchorHigh)
+        if (!itr.second.isAnchorHigh)
             continue;
 
-        if (itr.second.bIsRightSide != bRightSide)
+        if (itr.second.isRightSide != rightSide)
             continue;
 
         if (Creature* pCreature = instance->GetCreature(itr.first))
-            lList.push_back(pCreature);
+            outputList.push_back(pCreature);
     }
 
-    if (!lList.empty())
+    if (!outputList.empty())
     {
-        lList.sort(ObjectDistanceOrder(pSource));
-        return lList.front();
+        outputList.sort(ObjectDistanceOrder(source));
+        return outputList.front();
     }
 
     return nullptr;
 }
 
-void instance_naxxramas::GetGothSummonPointCreatures(CreatureList& lList, bool bRightSide)
+void instance_naxxramas::GetGothikSummonPoints(CreatureList& outputList, bool rightSide)
 {
-    for (auto& itr : m_mGothTriggerMap)
+    for (auto& itr : m_gothikTriggerMap)
     {
-        if (itr.second.bIsAnchorHigh)
+        if (itr.second.isAnchorHigh)
             continue;
 
-        if (itr.second.bIsRightSide != bRightSide)
+        if (itr.second.isRightSide != rightSide)
             continue;
 
         if (Creature* pCreature = instance->GetCreature(itr.first))
-            lList.push_back(pCreature);
+            outputList.push_back(pCreature);
     }
 }
 
-// Right is right side from gothik (eastern)
-bool instance_naxxramas::IsInRightSideGothArea(Unit* pUnit)
+// Right is right side from gothik (eastern), i.e. right is living and left is spectral
+bool instance_naxxramas::IsInRightSideGothikArea(Unit* unit)
 {
-    if (GameObject* pCombatGate = GetSingleGameObjectFromStorage(GO_MILI_GOTH_COMBAT_GATE))
-        return (pCombatGate->GetPositionY() >= pUnit->GetPositionY());
+    if (GameObject* combatGate = GetSingleGameObjectFromStorage(GO_MILI_GOTH_COMBAT_GATE))
+        return (combatGate->GetPositionY() >= unit->GetPositionY());
 
     script_error_log("left/right side check, Gothik combat area failed.");
     return true;
 }
 
-void instance_naxxramas::SetChamberCenterCoords(float fX, float fY, float fZ)
+bool instance_naxxramas::IsSuitableTriggerForSummon(Unit* trigger, uint8 flag)
 {
-    m_fChamberCenterX = fX;
-    m_fChamberCenterY = fY;
-    m_fChamberCenterZ = fZ;
+    return m_gothikTriggerMap[trigger->GetObjectGuid()].summonTypeFlag & flag;
 }
 
 void instance_naxxramas::DoTaunt()
 {
     if (m_auiEncounter[TYPE_KELTHUZAD] != DONE)
     {
-        uint8 uiWingsCleared = 0;
+        uint8 wingsCleared = 0;
 
         if (m_auiEncounter[TYPE_MAEXXNA] == DONE)
-            ++uiWingsCleared;
+            ++wingsCleared;
 
         if (m_auiEncounter[TYPE_LOATHEB] == DONE)
-            ++uiWingsCleared;
+            ++wingsCleared;
 
         if (m_auiEncounter[TYPE_FOUR_HORSEMEN] == DONE)
-            ++uiWingsCleared;
+            ++wingsCleared;
 
         if (m_auiEncounter[TYPE_THADDIUS] == DONE)
-            ++uiWingsCleared;
+            ++wingsCleared;
 
-        switch (uiWingsCleared)
+        switch (wingsCleared)
         {
             case 1: DoOrSimulateScriptTextForThisInstance(SAY_KELTHUZAD_TAUNT1, NPC_KELTHUZAD); break;
             case 2: DoOrSimulateScriptTextForThisInstance(SAY_KELTHUZAD_TAUNT2, NPC_KELTHUZAD); break;
             case 3: DoOrSimulateScriptTextForThisInstance(SAY_KELTHUZAD_TAUNT3, NPC_KELTHUZAD); break;
             case 4: DoOrSimulateScriptTextForThisInstance(SAY_KELTHUZAD_TAUNT4, NPC_KELTHUZAD); break;
+            default:
+                break;
         }
     }
 }
 
 // Used in Gluth fight: move all spawned Zombie Chow towards Gluth to be devoured
-void instance_naxxramas::HandleDecimateEvent()
+bool instance_naxxramas::DoHandleEvent(uint32 eventId)
 {
-    if (Creature* gluth = GetSingleCreatureFromStorage(NPC_GLUTH))
+    switch (eventId)
     {
-        for (auto& zombieGuid : m_lZombieChowList)
-        {
-            if (Creature* zombie = instance->GetCreature(zombieGuid))
+        case EVENT_ID_DECIMATE:
+            if (Creature* gluth = GetSingleCreatureFromStorage(NPC_GLUTH))
             {
-                if (zombie->isAlive())
+                for (auto& zombieGuid : m_zombieChowList)
                 {
-                    zombie->AI()->SetReactState(REACT_PASSIVE);
-                    zombie->AttackStop();
-                    zombie->SetTarget(nullptr);
-                    zombie->AI()->DoResetThreat();
-                    zombie->GetMotionMaster()->Clear();
-                    zombie->SetWalk(true);
-                    zombie->GetMotionMaster()->MoveFollow(gluth, ATTACK_DISTANCE, 0);
+                    if (Creature* zombie = instance->GetCreature(zombieGuid))
+                    {
+                        if (zombie->IsAlive())
+                        {
+                            zombie->AI()->SetReactState(REACT_PASSIVE);
+                            zombie->AttackStop();
+                            zombie->SetTarget(nullptr);
+                            zombie->AI()->DoResetThreat();
+                            zombie->GetMotionMaster()->MovePoint(0, gluth->GetPositionX(), gluth->GetPositionY(), gluth->GetPositionZ());
+                        }
+                    }
                 }
+                return false;
             }
-        }
+            return true;
+        case EVENT_CLEAR_SHACKLES:
+            m_shackledGuardians = 0;
+            m_checkGuardiansTimer = 2 * IN_MILLISECONDS;    // Check every two seconds how many Guardians of Icecrown are shackled
+            return true;
+        case EVENT_GUARDIAN_SHACKLE:
+            ++m_shackledGuardians;
+            return true;
+        default:
+            break;
     }
+    return false;
 }
 
 InstanceData* GetInstanceData_instance_naxxramas(Map* pMap)
@@ -809,23 +1061,154 @@ InstanceData* GetInstanceData_instance_naxxramas(Map* pMap)
     return new instance_naxxramas(pMap);
 }
 
+struct Location3DPoint
+{
+    float x, y, z;
+};
+
+static const Location3DPoint gargoyleResetCoords = {2963.f, -3476.f, 297.6f};
+
+enum
+{
+    SAY_GARGOYLE_NOISE      = -1533160, // %s emits a strange noise.
+
+    SPELL_STONEFORM         = 29154,
+    SPELL_STEALTH_DETECTION = 18950,
+    SPELL_STONESKIN         = 28995,
+    SPELL_ACID_VOLLEY       = 29325,
+};
+
+struct npc_stoneskin_gargoyleAI : public ScriptedAI
+{
+    npc_stoneskin_gargoyleAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+        {
+            return x > gargoyleResetCoords.x && y > gargoyleResetCoords.y && z > gargoyleResetCoords.z;
+        });
+        Reset();
+    }
+
+    uint32 acidVolleyTimer;
+    bool canCastVolley;
+
+    void Reset() override
+    {
+        acidVolleyTimer = 4000;
+        canCastVolley = false;
+        TryStoneForm();
+
+        DoCastSpellIfCan(m_creature, SPELL_STEALTH_DETECTION, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+    }
+
+    void TryStoneForm()
+    {
+        if (m_creature->GetDefaultMovementType() == IDLE_MOTION_TYPE)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_STONEFORM, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT) == CAST_OK)
+            {
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->SetImmuneToPlayer(true);
+            }
+        }
+    }
+
+    void JustReachedHome() override
+    {
+        TryStoneForm();
+    }
+
+    void MoveInLineOfSight(Unit* pWho) override
+    {
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+        {
+            if (pWho->GetTypeId() == TYPEID_PLAYER
+                && !m_creature->IsInCombat()
+                && m_creature->IsWithinDistInMap(pWho, 17.0f)
+                && !pWho->HasAuraType(SPELL_AURA_FEIGN_DEATH)
+                && m_creature->IsWithinLOSInMap(pWho))
+            {
+                AttackStart(pWho);
+            }
+        }
+        else
+            ScriptedAI::MoveInLineOfSight(pWho);
+    }
+
+    void Aggro(Unit*) override
+    {
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_SPAWNING))
+        {
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetImmuneToPlayer(false);
+        }
+
+        // All Stoneskin Gargoyles cast Acid Volley but the first one encountered
+        float respawnX, respawnY, respawnZ;
+        m_creature->GetRespawnCoord(respawnX, respawnY, respawnZ);
+        if (m_creature->GetDefaultMovementType() == IDLE_MOTION_TYPE || respawnZ < gargoyleResetCoords.z)
+            canCastVolley = true;
+    }
+
+    void UpdateAI(uint32 const diff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+            return;
+
+        // Stoneskin at 30% HP
+        if (m_creature->GetHealthPercent() < 30.0f && !m_creature->HasAura(SPELL_STONESKIN))
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_STONESKIN) == CAST_OK)
+                DoScriptText(SAY_GARGOYLE_NOISE, m_creature);
+        }
+
+        // Acid Volley
+        if (canCastVolley)
+        {
+            if (acidVolleyTimer < diff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_ACID_VOLLEY) == CAST_OK)
+                    acidVolleyTimer = 8000;
+            }
+            else
+                acidVolleyTimer -= diff;
+        }
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+/*###################
+#   npc_living_poison
+###################*/
+
+struct npc_living_poisonAI : public ScriptedAI
+{
+    npc_living_poisonAI(Creature* creature) : ScriptedAI(creature) { Reset(); }
+
+    void Reset() override
+    {
+        SetMeleeEnabled(false);
+    }
+
+    // Any time a player comes close to the Living Poison, it will explode and kill itself while doing heavy AoE damage to the player
+    void MoveInLineOfSight(Unit* who) override
+    {
+        if (m_creature->GetDistance2d(who->GetPositionX(), who->GetPositionY(), DIST_CALC_BOUNDING_RADIUS) > 4.0f)
+            return;
+
+        DoCastSpellIfCan(m_creature, SPELL_EXPLODE, CAST_TRIGGERED);
+    }
+
+    void AttackStart(Unit* /*who*/) override {}
+};
+
 bool instance_naxxramas::DoHandleAreaTrigger(AreaTriggerEntry const* areaTrigger)
 {
     if (areaTrigger->id == AREATRIGGER_KELTHUZAD)
     {
-        SetChamberCenterCoords(areaTrigger->x, areaTrigger->y, areaTrigger->z);
-
-        if (GetData(TYPE_KELTHUZAD) == NOT_STARTED)
-        {
-            if (Creature* kelthuzad = GetSingleCreatureFromStorage(NPC_KELTHUZAD))
-            {
-                if (kelthuzad->isAlive())
-                {
-                    SetData(TYPE_KELTHUZAD, IN_PROGRESS);
-                    kelthuzad->SetInCombatWithZone();
-                }
-            }
-        }
+        if (GetData(TYPE_KELTHUZAD) == NOT_STARTED || GetData(TYPE_KELTHUZAD) == FAIL)
+            SetData(TYPE_KELTHUZAD, IN_PROGRESS);
     }
 
     if (areaTrigger->id == AREATRIGGER_FAERLINA_INTRO)
@@ -861,39 +1244,47 @@ bool instance_naxxramas::DoHandleAreaTrigger(AreaTriggerEntry const* areaTrigger
 
 bool AreaTrigger_at_naxxramas(Player* player, AreaTriggerEntry const* areaTrigger)
 {
-    if (player->isGameMaster() || !player->isAlive())
+    if (player->IsGameMaster() || !player->IsAlive())
         return false;
 
-    if (instance_naxxramas* instance = (instance_naxxramas*)player->GetInstanceData())
+    if (auto* instance = (instance_naxxramas*)player->GetInstanceData())
         return instance->DoHandleAreaTrigger(areaTrigger);
 
     return false;
 }
 
-bool ProcessEventId_decimate(uint32 eventId, Object* source, Object* /*target*/, bool /*isStart*/)
+bool ProcessEventId_naxxramas(uint32 eventId, Object* source, Object* /*target*/, bool /*isStart*/)
 {
-    if (instance_naxxramas* instance = (instance_naxxramas*)((Creature*)source)->GetInstanceData())
-    {
-        if (eventId == EVENT_ID_DECIMATE)
-            instance->HandleDecimateEvent();
-    }
-    return false;   // return false so DBScripts can be triggered
+    if (auto* instance = (instance_naxxramas*)((Creature*)source)->GetInstanceData())
+        return instance->DoHandleEvent(eventId);
+
+    return false;
 }
 
 void AddSC_instance_naxxramas()
 {
-    Script* pNewScript = new Script;
-    pNewScript->Name = "instance_naxxramas";
-    pNewScript->GetInstanceData = &GetInstanceData_instance_naxxramas;
-    pNewScript->RegisterSelf();
+    Script* newScript = new Script;
+    newScript->Name = "instance_naxxramas";
+    newScript->GetInstanceData = &GetInstanceData_instance_naxxramas;
+    newScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "at_naxxramas";
-    pNewScript->pAreaTrigger = &AreaTrigger_at_naxxramas;
-    pNewScript->RegisterSelf();
+    newScript = new Script;
+    newScript->Name = "npc_stoneskin_gargoyle";
+    newScript->GetAI = &GetNewAIInstance<npc_stoneskin_gargoyleAI>;
+    newScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "event_decimate";
-    pNewScript->pProcessEventId = &ProcessEventId_decimate;
-    pNewScript->RegisterSelf();
+    newScript = new Script;
+    newScript->Name = "npc_living_poison";
+    newScript->GetAI = &GetNewAIInstance<npc_living_poisonAI>;
+    newScript->RegisterSelf();
+
+    newScript = new Script;
+    newScript->Name = "at_naxxramas";
+    newScript->pAreaTrigger = &AreaTrigger_at_naxxramas;
+    newScript->RegisterSelf();
+
+    newScript = new Script;
+    newScript->Name = "event_naxxramas";
+    newScript->pProcessEventId = &ProcessEventId_naxxramas;
+    newScript->RegisterSelf();
 }

@@ -24,8 +24,9 @@
 #include "Grids/GridNotifiersImpl.h"
 #include "Spells/SpellMgr.h"
 #include "Server/DBCStores.h"
+#include "Spells/Scripts/SpellScript.h"
 
-DynamicObject::DynamicObject() : WorldObject(), m_spellId(0), m_effIndex(), m_aliveDuration(0), m_radius(0), m_positive(false), m_target()
+DynamicObject::DynamicObject() : WorldObject(), m_spellId(0), m_effIndex(), m_radius(0), m_positive(false), m_target(), m_auraScript(nullptr)
 {
     m_objectType |= TYPEMASK_DYNAMICOBJECT;
     m_objectTypeId = TYPEID_DYNAMICOBJECT;
@@ -48,8 +49,8 @@ void DynamicObject::RemoveFromWorld()
     ///- Remove the dynamicObject from the accessor
     if (IsInWorld())
     {
-        GetMap()->GetObjectsStore().erase<DynamicObject>(GetObjectGuid(), (DynamicObject*)nullptr);
         GetViewPoint().Event_RemovedFromWorld();
+        GetMap()->GetObjectsStore().erase<DynamicObject>(GetObjectGuid(), (DynamicObject*)nullptr);
     }
 
     Object::RemoveFromWorld();
@@ -98,7 +99,7 @@ bool DynamicObject::Create(uint32 guidlow, Unit* caster, uint32 spellId, SpellEf
         return false;
     }
 
-    m_aliveDuration = duration;
+    m_aliveTime = GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(duration);
     m_radius = radius;
     m_effIndex = effIndex;
     m_spellId = spellId;
@@ -106,6 +107,8 @@ bool DynamicObject::Create(uint32 guidlow, Unit* caster, uint32 spellId, SpellEf
     m_target = target;
     m_damage = damage;
     m_basePoints = basePoints;
+
+    m_auraScript = SpellScriptMgr::GetAuraScript(m_spellId);
 
     return true;
 }
@@ -128,9 +131,7 @@ void DynamicObject::Update(const uint32 diff)
 
     bool deleteThis = false;
 
-    if (m_aliveDuration > int32(diff))
-        m_aliveDuration -= diff;
-    else
+    if (m_aliveTime < GetMap()->GetCurrentClockTime())
         deleteThis = true;
 
     // have radius and work as persistent effect
@@ -157,7 +158,7 @@ void DynamicObject::Delete()
 
 void DynamicObject::Delay(int32 delaytime)
 {
-    m_aliveDuration -= delaytime;
+    m_aliveTime -= std::chrono::milliseconds(delaytime);
     for (GuidSet::iterator iter = m_affected.begin(); iter != m_affected.end();)
     {
         Unit* target = GetMap()->GetUnit((*iter));
@@ -204,17 +205,12 @@ bool DynamicObject::isVisibleForInState(Player const* u, WorldObject const* view
         return true;
 
     // normal case
-    return IsWithinDistInMap(viewPoint, GetVisibilityDistance(), false);
+    return IsWithinDistInMap(viewPoint, GetVisibilityData().GetVisibilityDistance(), false);
 }
 
 void DynamicObject::OnPersistentAreaAuraEnd()
 {
-    switch (m_spellId)
-    {
-        case 30632: // Magtheridon - Debris
-            if (Unit* owner = GetCaster())
-                owner->CastSpell(nullptr, 30631, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetObjectGuid());
-            break;
-    }
+    if (m_auraScript)
+        m_auraScript->OnPersistentAreaAuraEnd(this);
 }
 

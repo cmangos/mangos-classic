@@ -23,8 +23,9 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "blackwing_lair.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -46,6 +47,7 @@ enum
     SPELL_SHADOWBOLT                = 22677,
     SPELL_FEAR                      = 22678,
     SPELL_TUNNEL_SELECTION          = 23343,
+    // wotlk + uses weird 65634 spell
 
     MAP_ID_BWL                      = 469,
 
@@ -60,77 +62,81 @@ static const DialogueEntry aIntroDialogue[] =
     {0, 0, 0},
 };
 
-struct boss_victor_nefariusAI : public ScriptedAI, private DialogueHelper
+enum VictorNefariusActions
 {
-    boss_victor_nefariusAI(Creature* pCreature) : ScriptedAI(pCreature),
+    NEFARIUS_SHADOW_BOLT,
+    NEFARIUS_FEAR,
+    NEFARIUS_SHADOWBOLT_VOLLEY,
+    NEFARIUS_SILENCE,
+    NEFARIUS_SHADOW_COMMAND,
+    NEFARIUS_SHADOW_BLINK,
+    NEFARIUS_ACTION_MAX,
+};
+
+struct boss_victor_nefariusAI : public CombatAI, private DialogueHelper
+{
+    boss_victor_nefariusAI(Creature* creature) : CombatAI(creature, NEFARIUS_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())),
         DialogueHelper(aIntroDialogue)
     {
+        if (m_creature->GetMapId() != MAP_ID_BWL)
+            return;
         // Select the 2 different drakonids that we are going to use for all instance lifetime
-        DoCastSpellIfCan(m_creature, SPELL_TUNNEL_SELECTION);
-
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        InitializeDialogueHelper(m_pInstance);
-        Reset();
+        m_creature->CastSpell(nullptr, SPELL_TUNNEL_SELECTION, TRIGGERED_NONE);
+        InitializeDialogueHelper(m_instance);
+        AddCombatAction(NEFARIUS_SHADOW_BOLT, uint32(3 * IN_MILLISECONDS));
+        AddCombatAction(NEFARIUS_FEAR, uint32(8 * IN_MILLISECONDS));
+        AddCombatAction(NEFARIUS_SHADOWBOLT_VOLLEY, uint32(13 * IN_MILLISECONDS));
+        AddCombatAction(NEFARIUS_SILENCE, uint32(23 * IN_MILLISECONDS));
+        AddCombatAction(NEFARIUS_SHADOW_COMMAND, uint32(30 * IN_MILLISECONDS));
+        AddCombatAction(NEFARIUS_SHADOW_BLINK, uint32(40 * IN_MILLISECONDS));
     }
 
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiShadowBoltTimer;
-    uint32 m_uiFearTimer;
-    uint32 m_uiShadowboltVolleyTimer;
-    uint32 m_uiSilenceTimer;
-    uint32 m_uiShadowCommandTimer;
-    uint32 m_uiShadowBlinkTimer;
+    ScriptedInstance* m_instance;
 
     void Reset() override
     {
-        // Check the map id because the same creature entry is involved in other scripted event in other instance
         if (m_creature->GetMapId() != MAP_ID_BWL)
             return;
-
-        m_uiShadowBoltTimer         = 3 * IN_MILLISECONDS;
-        m_uiFearTimer               = 8 * IN_MILLISECONDS;
-        m_uiShadowboltVolleyTimer   = 13 * IN_MILLISECONDS;
-        m_uiSilenceTimer            = 23 * IN_MILLISECONDS;
-        m_uiShadowCommandTimer      = 30 * IN_MILLISECONDS;
-        m_uiShadowBlinkTimer        = 40 * IN_MILLISECONDS;
-
+        CombatAI::Reset();
         // set gossip flag to begin the event
         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        SetCombatScriptStatus(false);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_NEFARIAN, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_NEFARIAN, IN_PROGRESS);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_NEFARIAN, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_NEFARIAN, FAIL);
     }
 
-    void JustDidDialogueStep(int32 iEntry) override
+    void JustDidDialogueStep(int32 entry) override
     {
         // Start combat after the dialogue is finished
-        if (iEntry == SPELL_SHADOWBLINK)
+        if (entry == SPELL_SHADOWBLINK)
         {
             m_creature->SetStandState(UNIT_STAND_STATE_STAND);
             m_creature->SetFactionTemporary(FACTION_BLACK_DRAGON, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
-            DoCastSpellIfCan(m_creature, SPELL_NEFARIUS_BARRIER, CAST_TRIGGERED);
-            DoCastSpellIfCan(m_creature, SPELL_SHADOWBLINK, CAST_TRIGGERED);
+            DoCastSpellIfCan(nullptr, SPELL_NEFARIUS_BARRIER, CAST_TRIGGERED);
+            DoCastSpellIfCan(nullptr, SPELL_SHADOWBLINK);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             m_creature->SetInCombatWithZone();
-            SetCombatMovement(false);   // Nefarius teleports via Shadowblink, he does not move
+            SetCombatMovement(false); // Nefarius teleports via Shadowblink, he does not move
 
             // Spawn the two spawner NPCs that will handle the drakonids spawning (both brood and chromatic)
-            if (m_pInstance)
+            if (m_instance)
             {
                 // Left
-                m_creature->SummonCreature(m_pInstance->GetData(TYPE_NEFA_LTUNNEL), aNefarianLocs[0].m_fX, aNefarianLocs[0].m_fY, aNefarianLocs[0].m_fZ, 5.000f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, HOUR * IN_MILLISECONDS);
+                m_creature->SummonCreature(m_instance->GetData(TYPE_NEFA_LTUNNEL), aNefarianLocs[0].m_fX, aNefarianLocs[0].m_fY, aNefarianLocs[0].m_fZ, 5.000f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, HOUR * IN_MILLISECONDS);
                 // Right
-                m_creature->SummonCreature(m_pInstance->GetData(TYPE_NEFA_RTUNNEL), aNefarianLocs[1].m_fX, aNefarianLocs[1].m_fY, aNefarianLocs[1].m_fZ, 5.000f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, HOUR * IN_MILLISECONDS);
+                m_creature->SummonCreature(m_instance->GetData(TYPE_NEFA_RTUNNEL), aNefarianLocs[1].m_fX, aNefarianLocs[1].m_fY, aNefarianLocs[1].m_fZ, 5.000f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, HOUR * IN_MILLISECONDS);
             }
         }
     }
@@ -140,122 +146,96 @@ struct boss_victor_nefariusAI : public ScriptedAI, private DialogueHelper
         StartNextDialogueText(SAY_GAMESBEGIN_1);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case NEFARIUS_SHADOW_BOLT:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SHADOWBOLT, SELECT_FLAG_PLAYER))
+                    if (DoCastSpellIfCan(target, SPELL_SHADOWBOLT) == CAST_OK)
+                        ResetCombatAction(action, urand(2 * IN_MILLISECONDS, 4 * IN_MILLISECONDS));
+                break;
+            }
+            case NEFARIUS_FEAR:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_FEAR, SELECT_FLAG_PLAYER))
+                    if (DoCastSpellIfCan(target, SPELL_FEAR) == CAST_OK)
+                        ResetCombatAction(action, urand(10 * IN_MILLISECONDS, 20 * IN_MILLISECONDS));
+                break;
+            }
+            case NEFARIUS_SHADOWBOLT_VOLLEY:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_SHADOWBOLT_VOLLEY) == CAST_OK)
+                    ResetCombatAction(action, urand(19 * IN_MILLISECONDS, 28 * IN_MILLISECONDS));
+                break;
+            }
+            case NEFARIUS_SILENCE:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SILENCE, SELECT_FLAG_PLAYER))
+                    if (DoCastSpellIfCan(target, SPELL_SILENCE) == CAST_OK)
+                        ResetCombatAction(action, urand(14 * IN_MILLISECONDS, 23 * IN_MILLISECONDS));
+                break;
+            }
+            case NEFARIUS_SHADOW_COMMAND:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_SHADOW_COMMAND, SELECT_FLAG_PLAYER))
+                    if (DoCastSpellIfCan(target, SPELL_SHADOW_COMMAND) == CAST_OK)
+                        ResetCombatAction(action, urand(24 * IN_MILLISECONDS, 30 * IN_MILLISECONDS));
+                break;
+            }
+            case NEFARIUS_SHADOW_BLINK:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_SHADOWBLINK) == CAST_OK)
+                    ResetCombatAction(action, urand(30 * IN_MILLISECONDS, 40 * IN_MILLISECONDS));
+                break;
+            }
+        }
+    }
+
+    void UpdateAI(const uint32 diff) override
     {
         if (m_creature->GetMapId() != MAP_ID_BWL)
             return;
 
-        DialogueUpdate(uiDiff);
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Shadowbolt Timer
-        if (m_uiShadowBoltTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_SHADOWBOLT) == CAST_OK)
-                    m_uiShadowBoltTimer = urand(2 * IN_MILLISECONDS, 4 * IN_MILLISECONDS);
-            }
-        }
-        else
-            m_uiShadowBoltTimer -= uiDiff;
-
-        // Fear Timer
-        if (m_uiFearTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_FEAR) == CAST_OK)
-                    m_uiFearTimer = urand(10 * IN_MILLISECONDS, 20 * IN_MILLISECONDS);
-            }
-        }
-        else
-            m_uiFearTimer -= uiDiff;
-
-        // Shadowbolt Volley
-        if (m_uiShadowboltVolleyTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SHADOWBOLT_VOLLEY) == CAST_OK)
-                m_uiShadowboltVolleyTimer = urand(19 * IN_MILLISECONDS, 28 * IN_MILLISECONDS);
-        }
-        else
-            m_uiShadowboltVolleyTimer -= uiDiff;
-
-        // Silence
-        if (m_uiSilenceTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_SILENCE) == CAST_OK)
-                    m_uiSilenceTimer = urand(14 * IN_MILLISECONDS, 23 * IN_MILLISECONDS);
-            }
-        }
-        else
-            m_uiSilenceTimer -= uiDiff;
-
-        // Shadow Command
-        if (m_uiShadowCommandTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_COMMAND) == CAST_OK)
-                    m_uiShadowCommandTimer = urand(24 * IN_MILLISECONDS, 30 * IN_MILLISECONDS);
-            }
-        }
-        else
-            m_uiShadowCommandTimer -= uiDiff;
-
-        // ShadowBlink
-        if (m_uiShadowBlinkTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SHADOWBLINK) == CAST_OK)
-                m_uiShadowBlinkTimer = urand(30 * IN_MILLISECONDS, 40 * IN_MILLISECONDS);
-        }
-        else
-            m_uiShadowBlinkTimer -= uiDiff;
+        DialogueUpdate(diff);
+        CombatAI::UpdateAI(diff);
     }
 };
 
-UnitAI* GetAI_boss_victor_nefarius(Creature* pCreature)
+bool GossipHello_boss_victor_nefarius(Player* player, Creature* creature)
 {
-    return new boss_victor_nefariusAI(pCreature);
-}
-
-bool GossipHello_boss_victor_nefarius(Player* pPlayer, Creature* pCreature)
-{
-    if (pCreature->GetMapId() != MAP_ID_BWL)
+    if (creature->GetMapId() != MAP_ID_BWL)
         return true;
 
-    pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NEFARIUS_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-    pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_NEFARIUS_1, pCreature->GetObjectGuid());
+    player->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NEFARIUS_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+    player->SEND_GOSSIP_MENU(GOSSIP_TEXT_NEFARIUS_1, creature->GetObjectGuid());
     return true;
 }
 
-bool GossipSelect_boss_victor_nefarius(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+bool GossipSelect_boss_victor_nefarius(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 action)
 {
-    if (pCreature->GetMapId() != MAP_ID_BWL)
+    if (creature->GetMapId() != MAP_ID_BWL)
         return true;
 
-    switch (uiAction)
+    switch (action)
     {
         case GOSSIP_ACTION_INFO_DEF+1:
-            pCreature->HandleEmote(EMOTE_ONESHOT_TALK);
-            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NEFARIUS_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-            pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_NEFARIUS_2, pCreature->GetObjectGuid());
+            creature->HandleEmote(EMOTE_ONESHOT_TALK);
+            player->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NEFARIUS_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+            player->SEND_GOSSIP_MENU(GOSSIP_TEXT_NEFARIUS_2, creature->GetObjectGuid());
             break;
         case GOSSIP_ACTION_INFO_DEF+2:
-            pCreature->HandleEmote(EMOTE_ONESHOT_TALK);
-            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NEFARIUS_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
-            pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_NEFARIUS_3, pCreature->GetObjectGuid());
+            creature->HandleEmote(EMOTE_ONESHOT_TALK);
+            player->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NEFARIUS_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+            player->SEND_GOSSIP_MENU(GOSSIP_TEXT_NEFARIUS_3, creature->GetObjectGuid());
             break;
         case GOSSIP_ACTION_INFO_DEF+3:
-            pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-            pPlayer->CLOSE_GOSSIP_MENU();
+            creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            player->CLOSE_GOSSIP_MENU();
             // Start the intro event
-            if (boss_victor_nefariusAI* pBossAI = dynamic_cast<boss_victor_nefariusAI*>(pCreature->AI()))
-                pBossAI->DoStartIntro();
+            if (boss_victor_nefariusAI* bossAI = dynamic_cast<boss_victor_nefariusAI*>(creature->AI()))
+                bossAI->DoStartIntro();
             break;
     }
     return true;
@@ -265,7 +245,7 @@ void AddSC_boss_victor_nefarius()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_victor_nefarius";
-    pNewScript->GetAI = &GetAI_boss_victor_nefarius;
+    pNewScript->GetAI = &GetNewAIInstance<boss_victor_nefariusAI>;
     pNewScript->pGossipHello = &GossipHello_boss_victor_nefarius;
     pNewScript->pGossipSelect = &GossipSelect_boss_victor_nefarius;
     pNewScript->RegisterSelf();

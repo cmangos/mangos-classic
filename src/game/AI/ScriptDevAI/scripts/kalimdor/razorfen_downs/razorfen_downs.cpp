@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
+#include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
 npc_belnistrasz
 EndContentData */
 
@@ -262,12 +262,12 @@ struct npc_belnistraszAI : public npc_escortAI
             return;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiFireballTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_FIREBALL);
+            DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FIREBALL);
             m_uiFireballTimer  = urand(2000, 3000);
         }
         else
@@ -275,7 +275,7 @@ struct npc_belnistraszAI : public npc_escortAI
 
         if (m_uiFrostNovaTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_NOVA);
+            DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FROST_NOVA);
             m_uiFrostNovaTimer = urand(10000, 15000);
         }
         else

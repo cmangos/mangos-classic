@@ -49,6 +49,7 @@ namespace MMAP
     static const int V9_SIZE_SQ = V9_SIZE * V9_SIZE;
     static const int V8_SIZE = 128;
     static const int V8_SIZE_SQ = V8_SIZE * V8_SIZE;
+
     static const float GRID_SIZE = 533.33333f;
     static const float GRID_PART_SIZE = GRID_SIZE / V8_SIZE;
 
@@ -81,7 +82,7 @@ namespace MMAP
     class TerrainBuilder
     {
         public:
-            TerrainBuilder(bool skipLiquid);
+            TerrainBuilder(bool skipLiquid, const char* workdir = "./");
             ~TerrainBuilder();
 
             void loadMap(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData);
@@ -106,6 +107,9 @@ namespace MMAP
 
             /// Controls whether liquids are loaded
             bool m_skipLiquid;
+
+            // wokrdir to read and write
+            const char* m_workdir;
 
             /// Load the map terrain from file
             bool loadHeightMap(uint32 mapID, uint32 tileX, uint32 tileY, G3D::Array<float>& vertices, G3D::Array<int>& triangles, Spot portion);

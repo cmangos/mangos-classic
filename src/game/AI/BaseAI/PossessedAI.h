@@ -25,12 +25,13 @@
 
 class Creature;
 class Spell;
+struct CreatureSpellList;
 
 class PossessedAI : public UnitAI
 {
     public:
 
-        explicit PossessedAI(Creature* creature) : UnitAI(creature) {}
+        explicit PossessedAI(Creature* creature);
         explicit PossessedAI(Unit* unit) : UnitAI(unit) {}
 
         static int Permissible(const Creature* /*creature*/) { return PERMIT_BASE_NO; }
@@ -41,6 +42,9 @@ class PossessedAI : public UnitAI
         {
             DoMeleeAttackIfReady();
         }
+
+        // ugly compilation fix
+        CreatureSpellList const& GetSpellList() const override;
 
     protected:
         std::string GetAIName() override { return "PossessedAI"; }

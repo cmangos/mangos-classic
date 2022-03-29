@@ -41,7 +41,7 @@ enum JOB_TYPE
     JOB_HEAL        = 0x04,
     JOB_TANK        = 0x08,
     JOB_MASTER      = 0x10,     // Not a fan of this distinction but user (or rather, admin) choice
-    JOB_TANK_MASTER = 0x19, 
+    JOB_TANK_MASTER = 0x19,
     JOB_DPS         = 0x20,
     JOB_ALL_NO_MT   = 0x3E,     // all of the above except Main Tank
     JOB_ALL         = 0x3F,     // all of the above
@@ -58,32 +58,29 @@ struct heal_priority
     bool operator<(const heal_priority& a) const { return type < a.type; }
 };
 
-class MANGOS_DLL_SPEC PlayerbotClassAI
+class PlayerbotClassAI
 {
     public:
-        PlayerbotClassAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
+        PlayerbotClassAI(Player& master, Player& bot, PlayerbotAI& ai);
         virtual ~PlayerbotClassAI();
 
         // all combat actions go here
         virtual CombatManeuverReturns DoFirstCombatManeuver(Unit*);
         virtual CombatManeuverReturns DoNextCombatManeuver(Unit*);
-        bool Pull() { DEBUG_LOG("[PlayerbotAI]: Warning: Using PlayerbotClassAI::Pull() rather than class specific function"); return false; }
-        bool Neutralize() { DEBUG_LOG("[PlayerbotAI]: Warning: Using PlayerbotClassAI::Neutralize() rather than class specific function"); return false; }
+        virtual bool CanPull() { return false; }
+        virtual bool Pull() { return false; }
+        virtual uint32 Neutralize(uint8 creatureType) { return 0; }
 
         // all non combat actions go here, ex buffs, heals, rezzes
         virtual void DoNonCombatActions();
         bool EatDrinkBandage(bool bMana = true, unsigned char foodPercent = 50, unsigned char drinkPercent = 50, unsigned char bandagePercent = 70);
 
         // Utilities
-        Player* GetMaster() { return m_master; }
-        Player* GetPlayerBot() { return m_bot; }
-        PlayerbotAI* GetAI() { return m_ai; }
-        bool CanPull();
         bool CastHoTOnTank();
         JOB_TYPE GetBotJob(Player* target);
         JOB_TYPE GetTargetJob(Player* target);
         time_t GetWaitUntil() { return m_WaitUntil; }
-        void SetWait(uint8 t) { m_WaitUntil = m_ai->CurrentTime() + t; }
+        void SetWait(uint8 t) { m_WaitUntil = m_ai.CurrentTime() + t; }
         void ClearWait() { m_WaitUntil = 0; }
         //void SetWaitUntil(time_t t) { m_WaitUntil = t; }
 
@@ -98,7 +95,7 @@ class MANGOS_DLL_SPEC PlayerbotClassAI
         virtual CombatManeuverReturns HealPlayer(Player* target);
         virtual CombatManeuverReturns ResurrectPlayer(Player* target);
         virtual CombatManeuverReturns DispelPlayer(Player* target);
-        CombatManeuverReturns Buff(bool (*BuffHelper)(PlayerbotAI*, uint32, Unit*), uint32 spellId, uint32 type = JOB_ALL, bool bMustBeOOC = true);
+        CombatManeuverReturns Buff(bool (*BuffHelper)(PlayerbotAI*, uint32, Unit*), uint32 spellId, uint32 type = JOB_ALL, bool mustBeOOC = true);
         bool FindTargetAndHeal();
         bool NeedGroupBuff(uint32 groupBuffSpellId, uint32 singleBuffSpellId);
         Player* GetHealTarget(JOB_TYPE type = JOB_ALL, bool onlyPickFromSameGroup = false);
@@ -118,9 +115,9 @@ class MANGOS_DLL_SPEC PlayerbotClassAI
 
         time_t m_WaitUntil;
 
-        Player* m_master;
-        Player* m_bot;
-        PlayerbotAI* m_ai;
+        Player& m_master;
+        Player& m_bot;
+        PlayerbotAI& m_ai;
 
         // first aid
         uint32 RECENTLY_BANDAGED;

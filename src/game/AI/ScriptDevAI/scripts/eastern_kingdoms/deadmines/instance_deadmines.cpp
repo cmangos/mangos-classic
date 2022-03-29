@@ -23,12 +23,13 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "deadmines.h"
 
 instance_deadmines::instance_deadmines(Map* pMap) : ScriptedInstance(pMap),
     m_uiIronDoorTimer(0),
-    m_uiDoorStep(0)
+    m_uiDoorStep(0),
+    m_firstEnter(true)
 {
     Initialize();
 }
@@ -44,6 +45,39 @@ void instance_deadmines::OnPlayerEnter(Player* pPlayer)
     if (pPlayer->GetQuestStatus(QUEST_FORTUNE_AWAITS) == QUEST_STATUS_COMPLETE &&
             !pPlayer->GetQuestRewardStatus(QUEST_FORTUNE_AWAITS))
         DoRespawnGameObject(GO_MYSTERIOUS_CHEST, HOUR);
+
+    if (m_firstEnter)
+    {
+        m_firstEnter = false;
+
+        if (m_auiEncounter[TYPE_RHAHKZOR] == DONE)
+            SpawnFirstDeadminesPatrol();
+
+        if (m_auiEncounter[TYPE_SNEED] == DONE)
+            SpawnSecondDeadminesPatrol();
+
+        if (m_auiEncounter[TYPE_GILNID] == DONE)
+            SpawnThirdDeadminesPatrol();
+    }
+}
+
+void instance_deadmines::SpawnFirstDeadminesPatrol()
+{
+    WorldObject::SpawnCreature(GUID_PREFIX + 200, instance); // Defias Overseer
+    WorldObject::SpawnCreature(GUID_PREFIX + 201, instance); // Defias Evoker
+}
+
+void instance_deadmines::SpawnSecondDeadminesPatrol()
+{
+    WorldObject::SpawnCreature(GUID_PREFIX + 202, instance); // Defias Evoker
+    WorldObject::SpawnCreature(GUID_PREFIX + 203, instance); // Defias Overseer
+}
+
+void instance_deadmines::SpawnThirdDeadminesPatrol()
+{
+    WorldObject::SpawnCreature(GUID_PREFIX + 204, instance); // Defias Wizard
+    WorldObject::SpawnCreature(GUID_PREFIX + 205, instance); // Defias Taskmaster
+    WorldObject::SpawnCreature(GUID_PREFIX + 206, instance); // Defias Taskmaster
 }
 
 void instance_deadmines::OnCreatureCreate(Creature* pCreature)
@@ -107,6 +141,7 @@ void instance_deadmines::SetData(uint32 uiType, uint32 uiData)
             if (uiData == DONE)
                 DoUseDoorOrButton(GO_FACTORY_DOOR);
 
+            SpawnFirstDeadminesPatrol();
             m_auiEncounter[uiType] = uiData;
             break;
         }
@@ -115,6 +150,7 @@ void instance_deadmines::SetData(uint32 uiType, uint32 uiData)
             if (uiData == DONE)
                 DoUseDoorOrButton(GO_MAST_ROOM_DOOR);
 
+            SpawnSecondDeadminesPatrol();
             m_auiEncounter[uiType] = uiData;
             break;
         }
@@ -123,6 +159,7 @@ void instance_deadmines::SetData(uint32 uiType, uint32 uiData)
             if (uiData == DONE)
                 DoUseDoorOrButton(GO_FOUNDRY_DOOR);
 
+            SpawnThirdDeadminesPatrol();
             m_auiEncounter[uiType] = uiData;
             break;
         }
@@ -197,20 +234,13 @@ void instance_deadmines::Update(uint32 uiDiff)
 
                     if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_IRON_CLAD_DOOR))
                     {
-                        // should be static spawns, fetch the closest ones at the pier
-                        if (Creature* pi1 = GetClosestCreatureWithEntry(pDoor, NPC_PIRATE, 40.0f))
-                        {
-                            pi1->SetWalk(false);
-                            pi1->GetMotionMaster()->MovePoint(0, pDoor->GetPositionX(), pDoor->GetPositionY(), pDoor->GetPositionZ());
-                        }
+                        for (uint32 i = 148u; i <= 149; ++i)
+                            if (Creature* guardfast = pDoor->GetMap()->GetCreature(GUID_PREFIX + i))
+                                guardfast->GetMotionMaster()->MovePoint(0, pDoor->GetPositionX(), pDoor->GetPositionY(), pDoor->GetPositionZ(), FORCED_MOVEMENT_RUN, true);
 
-                        if (Creature* pi2 = GetClosestCreatureWithEntry(pDoor, NPC_SQUALLSHAPER, 40.0f))
-                        {
-                            pi2->SetWalk(false);
-                            pi2->GetMotionMaster()->MovePoint(0, pDoor->GetPositionX(), pDoor->GetPositionY(), pDoor->GetPositionZ());
-                        }
+                        if (Creature* guardlow = pDoor->GetMap()->GetCreature(GUID_PREFIX + 150))
+                            guardlow->GetMotionMaster()->MovePoint(0, pDoor->GetPositionX(), pDoor->GetPositionY(), pDoor->GetPositionZ(), FORCED_MOVEMENT_WALK, true);
                     }
-
                     ++m_uiDoorStep;
                     m_uiIronDoorTimer = 15000;
                     break;

@@ -56,31 +56,47 @@ private:
 
 };
 
+enum MeshObjectType
+{
+    MESH_OBJECT_TYPE_TILE,
+    MESH_OBJECT_TYPE_OBJECT
+};
+
 class MeshObjects
 {
 public:
     MeshObjects(unsigned int mapId, unsigned int tx, unsigned int ty, BuildContext* ctx);
+    MeshObjects(const std::string modelName, BuildContext* ctx);
     ~MeshObjects();
 
     inline MeshInfos const* GetMap() const { return m_MapInfos; }
     inline MeshInfos const* GetVMap() const { return m_VMapInfos; }
+    inline MeshInfos const* GetModel() const { return m_ModelInfos; }
+
     inline unsigned int     GetTileX() const { return m_TileX; }
     inline unsigned int     GetTileY() const { return m_TileY; }
     inline float const*     BMin() const { return m_BMin; }
     inline float const*     BMax() const { return m_BMax; }
     bool                    GetMeshData(G3D::Array<float> &sVerts, G3D::Array<int> &sTris, G3D::Array<float> &lVerts, G3D::Array<int> &lTris, G3D::Array<unsigned char> &liquidFlags) const;
+    static void             GetMeshBounds(float const* verts, int vertCount, float* bmin, float* bmax);
     static void             GetTileBounds(unsigned int tileX, unsigned int tileY, float const* verts, int vertCount, float* bmin, float* bmax);
+    MeshObjectType          GetMeshObjectType() const { return m_meshType; }
 
 private:
     void LoadMap();
     void LoadVMap();
-    void MergeMeshArrays(G3D::Array<float> &dstVerts, G3D::Array<int> &dstTris, G3D::Array<float> const& srcVerts, G3D::Array<int> const& srcTris) const;
+    void LoadObject();
+    void MergeMeshArrays(G3D::Array<float>& dstVerts, G3D::Array<int>& dstTris, G3D::Array<float> const& srcVerts, G3D::Array<int> const& srcTris) const;
     void MergeIndices(G3D::Array<int> &dst, G3D::Array<int> const* src, unsigned int offset) const;
     MeshInfos*     m_MapInfos;
     MeshInfos*     m_VMapInfos;
+    MeshInfos*     m_ModelInfos;
     MMAP::MeshData m_MapMesh;
     MMAP::MeshData m_VMapMesh;
+    MMAP::MeshData m_ModelMesh;
     BuildContext*  m_Ctx;
+    std::string m_modelName;
+    MeshObjectType m_meshType;
     float          m_BMin[3];
     float          m_BMax[3];
     unsigned int   m_MapId;
@@ -97,7 +113,9 @@ public:
     ~GeomData();
 
     void               Init(unsigned int mapId, BuildContext* ctx);
+    void               Init(const std::string modelName, BuildContext* ctx);
     MeshObjects const* LoadTile(unsigned int tx, unsigned int ty);
+    MeshObjects const* LoadModel(const std::string modelName);
     bool               RemoveTile(unsigned int tx, unsigned int ty);
     void               RemoveAllTiles();
     MeshObjects const* GetMeshObjects(unsigned int tx, unsigned int ty) const;
@@ -115,6 +133,7 @@ private:
     MeshObjectsMap m_MeshObjectsMap;
     BuildContext*  m_Ctx;
     unsigned int   m_MapId;
+    std::string m_modelName;
     bool           m_NoMapFile;
     float          m_BMin[3];
     float          m_BMax[3];

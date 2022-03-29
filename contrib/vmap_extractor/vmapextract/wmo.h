@@ -23,32 +23,70 @@
 
 #include <string>
 #include <set>
+#include <memory>
 #include "vec3d.h"
 #include "loadlib/loadlib.h"
+#include <unordered_set>
+#include "adtfile.h"
 
 // MOPY flags
-#define WMO_MATERIAL_NOCAMCOLLIDE    0x01
-#define WMO_MATERIAL_DETAIL          0x02
-#define WMO_MATERIAL_NO_COLLISION    0x04
-#define WMO_MATERIAL_HINT            0x08
-#define WMO_MATERIAL_RENDER          0x10
-#define WMO_MATERIAL_COLLIDE_HIT     0x20
-#define WMO_MATERIAL_WALL_SURFACE    0x40
+enum MopyFlags
+{
+    WMO_MATERIAL_UNK01          = 0x01,
+    WMO_MATERIAL_NOCAMCOLLIDE   = 0x02,
+    WMO_MATERIAL_DETAIL         = 0x04,
+    WMO_MATERIAL_COLLISION      = 0x08,
+    WMO_MATERIAL_HINT           = 0x10,
+    WMO_MATERIAL_RENDER         = 0x20,
+    WMO_MATERIAL_WALL_SURFACE   = 0x40, // Guessed
+    WMO_MATERIAL_COLLIDE_HIT    = 0x80
+};
 
-class WMOInstance;
 class WMOManager;
 class MPQFile;
+
+namespace WMO
+{
+    struct MODS
+    {
+        char Name[20];
+        uint32 StartIndex;     // index of first doodad instance in this set
+        uint32 Count;          // number of doodad instances in this set
+        char _pad[4];
+    };
+
+    struct MODD
+    {
+        uint32 NameIndex : 24;
+        Vec3D Position;
+        Quaternion Rotation;
+        float Scale;
+        uint32 Color;
+    };
+}
 
 /* for whatever reason a certain company just can't stick to one coordinate system... */
 static inline Vec3D fixCoords(const Vec3D& v) { return Vec3D(v.z, v.x, v.y); }
 
+struct WMODoodadData
+{
+    std::vector<WMO::MODS> Sets;
+    std::unique_ptr<char[]> Paths;
+    std::vector<WMO::MODD> Spawns;
+    std::unordered_set<uint16> References;
+};
+
 class WMORoot
 {
     public:
-        uint32 nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, RootWMOID, liquidType;
-        unsigned int col;
+        unsigned int color;
+        uint32 nTextures, nGroups, nPortals, nLights, nDoodadNames, nDoodadDefs, nDoodadSets, RootWMOID, flags;
         float bbcorn1[3];
         float bbcorn2[3];
+
+        WMODoodadData DoodadData;
+        std::unordered_set<uint32> ValidDoodadNames;
+        std::vector<char> GroupNames;
 
         WMORoot(std::string& filename);
         ~WMORoot();
@@ -104,11 +142,15 @@ class WMOGroup
         char* LiquBytes;
         uint32 liquflags;
 
+        std::vector<uint16> DoodadReferences;
+
         WMOGroup(std::string& filename);
         ~WMOGroup();
 
         bool open();
         int ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPreciseVectorData);
+
+        bool ShouldSkip(WMORoot const& root) const;
 
     private:
         std::string filename;
@@ -119,14 +161,7 @@ class WMOInstance
 {
         static std::set<int> ids;
     public:
-        std::string MapName;
-        int currx;
-        int curry;
-        WMOGroup* wmo;
-        Vec3D pos;
-        Vec3D pos2, pos3, rot;
-        uint32 indx, id, d2, d3;
-        int doodadset;
+        ADT::MODF m_wmo;
 
         WMOInstance(MPQFile& f, const char* WmoInstName, uint32 mapID, uint32 tileX, uint32 tileY, FILE* pDirfile);
 

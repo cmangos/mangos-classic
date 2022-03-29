@@ -46,11 +46,4 @@ struct guardAI_orgrimmar : public guardAI
     void ReceiveEmote(Player* player, uint32 textEmote) override;
 };
 
-struct guardAI_stormwind : public guardAI
-{
-    guardAI_stormwind(Creature* creature) : guardAI(creature) {}
-
-    void ReceiveEmote(Player* player, uint32 textEmote) override;
-};
-
 #endif

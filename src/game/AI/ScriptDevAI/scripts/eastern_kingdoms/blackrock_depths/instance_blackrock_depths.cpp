@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "blackrock_depths.h"
 
 instance_blackrock_depths::instance_blackrock_depths(Map* pMap) : ScriptedInstance(pMap),
@@ -60,6 +60,7 @@ void instance_blackrock_depths::OnCreatureCreate(Creature* pCreature)
                 pCreature->UpdateEntry(NPC_PRIESTESS);
         // no break;
         case NPC_EMPEROR:
+        case NPC_MAGMUS:
         case NPC_PHALANX:
         case NPC_PLUGGER_SPAZZRING:
         case NPC_HATEREL:
@@ -264,7 +265,7 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
                 {
                     if (Creature* pDwarf = GetSingleCreatureFromStorage(aTombDwarfe))
                     {
-                        if (!pDwarf->isAlive())
+                        if (!pDwarf->IsAlive())
                             pDwarf->Respawn();
                     }
                 }
@@ -284,6 +285,8 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
             {
                 DoUseDoorOrButton(GO_GOLEM_ROOM_N);
                 DoUseDoorOrButton(GO_GOLEM_ROOM_S);
+                if (Creature* magmus = GetSingleCreatureFromStorage(NPC_MAGMUS))
+                    DoScriptText(YELL_MAGMUS_INTRO, magmus);
             }
             m_auiEncounter[4] = uiData;
             break;
@@ -556,7 +559,7 @@ void instance_blackrock_depths::OnCreatureDeath(Creature* pCreature)
             // of Shadowforge Senators in the Throne Room
             if (Creature* pDagran = GetSingleCreatureFromStorage(NPC_EMPEROR))
             {
-                if (!pDagran->isAlive())
+                if (!pDagran->IsAlive())
                     return;
 
                 if (m_uiDagranTimer > 0)

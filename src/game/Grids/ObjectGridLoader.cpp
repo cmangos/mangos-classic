@@ -97,6 +97,13 @@ template<class T> void addUnitState(T* /*obj*/, CellPair const& /*cell_pair*/)
 {
 }
 
+template<> void addUnitState(GameObject* obj, CellPair const& cell_pair)
+{
+    Cell cell(cell_pair);
+
+    obj->SetCurrentCell(cell);
+}
+
 template<> void addUnitState(Creature* obj, CellPair const& cell_pair)
 {
     Cell cell(cell_pair);
@@ -111,21 +118,31 @@ void LoadHelper(CellGuidSet const& guid_set, CellPair& cell, GridRefManager<T>& 
 
     for (uint32 guid : guid_set)
     {
-        T* obj = new T;
+        T* obj;
+        if constexpr (std::is_same_v<T, GameObject>)
+        {
+            GameObjectData const* data = sObjectMgr.GetGOData(guid);
+            MANGOS_ASSERT(data);
+            obj = (T*)GameObject::CreateGameObject(data->id);
+        }
+        else
+            obj = new T;
         // sLog.outString("DEBUG: LoadHelper from table: %s for (guid: %u) Loading",table,guid);
-        if (!obj->LoadFromDB(guid, map))
+        if (!obj->LoadFromDB(guid, map, guid, 0))
         {
             delete obj;
             continue;
         }
 
-        grid.AddGridObject(obj);
+        if (!obj->IsCreature())
+        {
+            grid.AddGridObject(obj);
 
-        addUnitState(obj, cell);
-        obj->SetMap(map);
-        obj->AddToWorld();
-        if (obj->isActiveObject())
-            map->AddToActive(obj);
+            addUnitState(obj, cell);
+        }
+
+        // if this assert is hit we have a problem somewhere because LoadFromDb should already add to map due to AI
+        MANGOS_ASSERT(obj->IsInWorld());
 
         obj->GetViewPoint().Event_AddedToWorld(&grid);
 

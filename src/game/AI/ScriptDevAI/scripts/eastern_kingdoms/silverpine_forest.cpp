@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
+#include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
 npc_deathstalker_erland
 npc_deathstalker_faerleia
 EndContentData */
@@ -69,31 +69,31 @@ struct npc_deathstalker_erlandAI : public npc_escortAI
 
         switch (i)
         {
-            case 0:
+            case 1:
                 DoScriptText(SAY_START_2, m_creature, pPlayer);
                 break;
-            case 13:
+            case 14:
                 DoScriptText(SAY_END, m_creature, pPlayer);
                 pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ERLAND, m_creature);
                 break;
-            case 14:
+            case 15:
                 if (Creature* pRane = GetClosestCreatureWithEntry(m_creature, NPC_RANE, 45.0f))
                     DoScriptText(SAY_RANE, pRane, m_creature);
                 break;
-            case 15:
+            case 16:
                 DoScriptText(SAY_RANE_REPLY, m_creature);
                 break;
-            case 16:
+            case 17:
                 DoScriptText(SAY_CHECK_NEXT, m_creature);
                 break;
-            case 24:
+            case 25:
                 DoScriptText(SAY_QUINN, m_creature);
                 break;
-            case 25:
+            case 26:
                 if (Creature* pQuinn = GetClosestCreatureWithEntry(m_creature, NPC_QUINN, 45.0f))
                     DoScriptText(SAY_QUINN_REPLY, pQuinn, m_creature);
                 break;
-            case 26:
+            case 27:
                 DoScriptText(SAY_BYE, m_creature);
                 break;
         }
@@ -280,7 +280,7 @@ struct npc_deathstalker_faerleiaAI : public ScriptedAI
                 m_uiWaveTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();

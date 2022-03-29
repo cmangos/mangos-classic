@@ -20,6 +20,19 @@
 
 namespace MMAP
 {
+    IntermediateValues::IntermediateValues() :
+        IntermediateValues("./")
+    {}
+
+    IntermediateValues::IntermediateValues(const char* workdir) :
+        compactHeightfield(NULL),
+        heightfield(NULL),
+        contours(NULL),
+        polyMesh(NULL),
+        polyMeshDetail(NULL),
+        m_workdir(workdir)
+    {}
+
     IntermediateValues::~IntermediateValues()
     {
         rcFreeCompactHeightfield(compactHeightfield);
@@ -37,11 +50,11 @@ namespace MMAP
 
         printf("%sWriting debug output...                       \r", tileString);
 
-        string name("meshes/%03u%02i%02i.");
+        string name("%s/meshes/%03u%02i%02i.");
 
 #define DEBUG_WRITE(fileExtension,data) \
         do { \
-            sprintf(fileName, (name + fileExtension).c_str(), mapID, tileY, tileX); \
+            sprintf(fileName, (name + fileExtension).c_str(), m_workdir, mapID, tileY, tileX); \
             FILE* file = fopen(fileName, "wb"); \
             if (!file) \
             { \
@@ -202,7 +215,7 @@ namespace MMAP
     void IntermediateValues::generateObjFile(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData)
     {
         char objFileName[255];
-        sprintf(objFileName, "meshes/map%03u%02u%02u.obj", mapID, tileY, tileX);
+        sprintf(objFileName, "%s/meshes/map%03u%02u%02u.obj", m_workdir, mapID, tileY, tileX);
 
         FILE* objFile = fopen(objFileName, "wb");
         if (!objFile)
@@ -239,7 +252,7 @@ namespace MMAP
         sprintf(tileString, "[%02u,%02u]: ", tileY, tileX);
         printf("%sWriting debug output...                       \r", tileString);
 
-        sprintf(objFileName, "meshes/%03u.map", mapID);
+        sprintf(objFileName, "%s/meshes/%03u.map", m_workdir, mapID);
 
         objFile = fopen(objFileName, "wb");
         if (!objFile)
@@ -254,7 +267,7 @@ namespace MMAP
         fwrite(&b, sizeof(char), 1, objFile);
         fclose(objFile);
 
-        sprintf(objFileName, "meshes/%03u%02u%02u.mesh", mapID, tileY, tileX);
+        sprintf(objFileName, "%s/meshes/%03u%02u%02u.mesh", m_workdir, mapID, tileY, tileX);
         objFile = fopen(objFileName, "wb");
         if (!objFile)
         {
@@ -273,5 +286,80 @@ namespace MMAP
         fflush(objFile);
 
         fclose(objFile);
+    }
+    void IntermediateValues::generateObjFile(std::string filename, MeshData& meshData)
+    {
+        std::string workdir = m_workdir;
+        std::string realFileName = workdir + "/meshes/" + filename + ".obj";
+        FILE* objFile = fopen(realFileName.c_str(), "wb");
+        if (!objFile)
+        {
+            char message[1024];
+            sprintf(message, "Failed to open %s for writing!\n", realFileName.c_str());
+            perror(message);
+            return;
+        }
+
+        G3D::Array<float> allVerts;
+        G3D::Array<int> allTris;
+
+        allTris.append(meshData.liquidTris);
+        allVerts.append(meshData.liquidVerts);
+        TerrainBuilder::copyIndices(meshData.solidTris, allTris, allVerts.size() / 3);
+        allVerts.append(meshData.solidVerts);
+
+        float* verts = allVerts.getCArray();
+        int* tris = allTris.getCArray();
+
+        for (int i = 0; i < allVerts.size() / 3; i++)
+            fprintf(objFile, "v %f %f %f\n", verts[i * 3], verts[i * 3 + 1], verts[i * 3 + 2]);
+
+        for (int i = 0; i < allTris.size() / 3; i++)
+            fprintf(objFile, "f %i %i %i\n", tris[i * 3] + 1, tris[i * 3 + 1] + 1, tris[i * 3 + 2] + 1);
+
+        fclose(objFile);
+
+#if 0
+        printf("%sWriting debug output...                       \r", filename.c_str());
+
+        realFileName = "meshes/" + filename + ".map";
+
+        objFile = fopen(realFileName.c_str(), "wb");
+        if (!objFile)
+        {
+            char message[1024];
+            sprintf(message, "Failed to open %s for writing!\n", realFileName.c_str());
+            perror(message);
+            return;
+        }
+
+        char b = '\0';
+        fwrite(&b, sizeof(char), 1, objFile);
+        fclose(objFile);
+
+        realFileName = "meshes/" + filename + ".mesh";
+        objFile = fopen(realFileName.c_str(), "wb");
+        if (!objFile)
+        {
+            char message[1024];
+            sprintf(message, "Failed to open %s for writing!\n", realFileName.c_str());
+            perror(message);
+            return;
+        }
+
+        int vertCount = allVerts.size() / 3;
+
+        fwrite(&vertCount, sizeof(int), 1, objFile);
+        fwrite(verts, sizeof(float), vertCount * 3, objFile);
+        fflush(objFile);
+
+        int triCount = allTris.size() / 3;
+
+        fwrite(&triCount, sizeof(int), 1, objFile);
+        fwrite(tris, sizeof(int), triCount * 3, objFile);
+        fflush(objFile);
+
+        fclose(objFile);
+#endif
     }
 }

@@ -25,11 +25,7 @@
 #include "Database.h"
 #include "Policies/Singleton.h"
 
-#ifdef _WIN32
-#include <mysql/mysql.h>
-#else
 #include <mysql.h>
-#endif
 
 // MySQL prepared statement class
 class MySqlPreparedStatement : public SqlPreparedStatement
@@ -51,7 +47,7 @@ class MySqlPreparedStatement : public SqlPreparedStatement
         // bind parameters
         void addParam(unsigned int nIndex, const SqlStmtFieldData& data);
 
-        static enum_field_types ToMySQLType(const SqlStmtFieldData& data, my_bool& bUnsigned);
+        static enum_field_types ToMySQLType(const SqlStmtFieldData& data, bool& bUnsigned);
 
     private:
         void RemoveBinds();

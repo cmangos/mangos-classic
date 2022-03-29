@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
+/* ContentData
 npc_bartleby
 npc_dashel_stonefist
 npc_lady_katrana_prestor
@@ -31,9 +31,9 @@ npc_squire_rowe
 npc_reginald_windsor
 EndContentData */
 
-
-#include "../world/world_map_scripts.h"
-#include "../../base/escort_ai.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
+#include "world_eastern_kingdoms.h"
+#include "AI/ScriptDevAI/base/escort_ai.h"
 
 /*######
 ## npc_bartleby
@@ -54,14 +54,14 @@ struct npc_bartlebyAI : public ScriptedAI
 
     void Reset() override {}
 
-    void DamageTaken(Unit* pDoneBy, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         if (damage > m_creature->GetHealth() || ((m_creature->GetHealth() - damage) * 100 / m_creature->GetMaxHealth() < 15))
         {
             damage = std::min(damage, m_creature->GetHealth() - 1);
 
-            if (pDoneBy->GetTypeId() == TYPEID_PLAYER)
-                ((Player*)pDoneBy)->AreaExploredOrEventHappens(QUEST_BEAT);
+            if (dealer && dealer->GetTypeId() == TYPEID_PLAYER)
+                ((Player*)dealer)->AreaExploredOrEventHappens(QUEST_BEAT);
 
             EnterEvadeMode();
         }
@@ -102,6 +102,8 @@ struct npc_dashel_stonefistAI : public ScriptedAI
 {
     npc_dashel_stonefistAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
+        m_uiStartEventTimer = 0;
+        m_uiEndEventTimer = 0;
         Reset();
     }
 
@@ -116,7 +118,7 @@ struct npc_dashel_stonefistAI : public ScriptedAI
         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
     }
 
-    void DamageTaken(Unit* /*doneBy*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         if (damage > m_creature->GetHealth() || ((m_creature->GetHealth() - damage) * 100 / m_creature->GetMaxHealth() < 15))
         {
@@ -205,38 +207,38 @@ UnitAI* GetAI_npc_dashel_stonefist(Creature* pCreature)
 #define GOSSIP_ITEM_KAT_3 "Begging your pardon, Lady Prestor. That was not my intent."
 #define GOSSIP_ITEM_KAT_4 "Thank you for your time, Lady Prestor."
 
-bool GossipHello_npc_lady_katrana_prestor(Player* pPlayer, Creature* pCreature)
+bool GossipHello_npc_lady_katrana_prestor(Player* player, Creature* creature)
 {
-    if (pCreature->isQuestGiver())
-        pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+    if (creature->isQuestGiver())
+        player->PrepareQuestMenu(creature->GetObjectGuid());
 
-    if (pPlayer->GetQuestStatus(4185) == QUEST_STATUS_INCOMPLETE)
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_KAT_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+    if (player->GetQuestStatus(4185) == QUEST_STATUS_INCOMPLETE)
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_KAT_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
 
-    pPlayer->SEND_GOSSIP_MENU(2693, pCreature->GetObjectGuid());
+    player->SEND_GOSSIP_MENU(2693, creature->GetObjectGuid());
 
     return true;
 }
 
-bool GossipSelect_npc_lady_katrana_prestor(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+bool GossipSelect_npc_lady_katrana_prestor(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 action)
 {
-    switch (uiAction)
+    switch (action)
     {
         case GOSSIP_ACTION_INFO_DEF:
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_KAT_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-            pPlayer->SEND_GOSSIP_MENU(2694, pCreature->GetObjectGuid());
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_KAT_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            player->SEND_GOSSIP_MENU(2694, creature->GetObjectGuid());
             break;
         case GOSSIP_ACTION_INFO_DEF+1:
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_KAT_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-            pPlayer->SEND_GOSSIP_MENU(2695, pCreature->GetObjectGuid());
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_KAT_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+            player->SEND_GOSSIP_MENU(2695, creature->GetObjectGuid());
             break;
         case GOSSIP_ACTION_INFO_DEF+2:
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_KAT_4, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
-            pPlayer->SEND_GOSSIP_MENU(2696, pCreature->GetObjectGuid());
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_KAT_4, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+            player->SEND_GOSSIP_MENU(2696, creature->GetObjectGuid());
             break;
         case GOSSIP_ACTION_INFO_DEF+3:
-            pPlayer->CLOSE_GOSSIP_MENU();
-            pPlayer->AreaExploredOrEventHappens(4185);
+            player->CLOSE_GOSSIP_MENU();
+            player->AreaExploredOrEventHappens(4185);
             break;
     }
     return true;
@@ -260,6 +262,10 @@ enum
 
     NPC_WINDSOR_MOUNT           = 12581,
 
+    SPELL_BLUE_FIREWORK         = 11540,
+    SPELL_DISMISS_HORSE         = 20000,
+    SPELL_WINDSOR_INSPIRATION   = 20273,
+
     QUEST_STORMWIND_RENDEZVOUS  = 6402,
     QUEST_THE_GREAT_MASQUERADE  = 6403,
 };
@@ -282,171 +288,161 @@ struct npc_squire_roweAI : public npc_escortAI, private DialogueHelper
     npc_squire_roweAI(Creature* m_creature) : npc_escortAI(m_creature),
         DialogueHelper(aIntroDialogue)
     {
-        m_bIsEventInProgress = false;
+        m_isEventInProgress = false;
         Reset();
     }
 
-    bool m_bIsEventInProgress;
+    bool m_isEventInProgress;
 
     ObjectGuid m_windsorGuid;
-    ObjectGuid m_horseGuid;
 
     void Reset() override { }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (pSummoned->GetEntry() == NPC_WINDSOR)
+        if (summoned->GetEntry() == NPC_WINDSOR)
         {
-            pSummoned->SetWalk(false);
-            pSummoned->GetMotionMaster()->MovePoint(1, aWindsorMoveLoc[0], aWindsorMoveLoc[1], aWindsorMoveLoc[2]);
+            summoned->SetWalk(false);
+            summoned->GetMotionMaster()->MovePoint(1, aWindsorMoveLoc[0], aWindsorMoveLoc[1], aWindsorMoveLoc[2]);
 
-            m_windsorGuid = pSummoned->GetObjectGuid();
-            m_bIsEventInProgress = true;
+            m_windsorGuid = summoned->GetObjectGuid();
+            m_isEventInProgress = true;
         }
-        else if (pSummoned->GetEntry() == NPC_WINDSOR_MOUNT)
-            m_horseGuid = pSummoned->GetObjectGuid();
     }
 
-    void SummonedCreatureDespawn(Creature* pSummoned) override
+    void SummonedCreatureDespawn(Creature* summoned) override
     {
-        if (pSummoned->GetEntry() == NPC_WINDSOR)
+        if (summoned->GetEntry() == NPC_WINDSOR)
         {
             m_windsorGuid.Clear();
-            m_bIsEventInProgress = false;
+            m_isEventInProgress = false;
         }
     }
 
-    void SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiPointId) override
+    void SummonedMovementInform(Creature* summoned, uint32 motionType, uint32 pointId) override
     {
-        if (uiMotionType != POINT_MOTION_TYPE || !uiPointId || pSummoned->GetEntry() != NPC_WINDSOR)
+        if (motionType != POINT_MOTION_TYPE || !pointId || summoned->GetEntry() != NPC_WINDSOR)
             return;
 
         // Summoned npc has escort and this can trigger twice if escort state is not checked
-        if (uiPointId && HasEscortState(STATE_ESCORT_PAUSED))
+        if (pointId && HasEscortState(STATE_ESCORT_PAUSED))
             StartNextDialogueText(NPC_WINDSOR);
     }
 
-    void WaypointReached(uint32 uiPointId) override
+    void WaypointReached(uint32 pointId) override
     {
-        switch (uiPointId)
+        switch (pointId)
         {
-            case 2:
+            case 3:
                 m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
                 break;
-            case 3:
+            case 4:
+                DoCastSpellIfCan(m_creature, SPELL_BLUE_FIREWORK, CAST_TRIGGERED);
                 m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-                m_creature->SummonCreature(NPC_WINDSOR, aWindsorSpawnLoc[0], aWindsorSpawnLoc[1], aWindsorSpawnLoc[2], 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
+                if (Creature* windsor = m_creature->SummonCreature(NPC_WINDSOR, aWindsorSpawnLoc[0], aWindsorSpawnLoc[1], aWindsorSpawnLoc[2], 0, TEMPSPAWN_CORPSE_DESPAWN, 0))
+                    windsor->SetWalk(false);
                 break;
-            case 6:
+            case 7:
                 DoScriptText(SAY_SIGNAL_SENT, m_creature);
-                m_creature->SetFacingTo(2.15f);
                 SetEscortPaused(true);
                 break;
         }
     }
 
-    void JustDidDialogueStep(int32 iEntry) override
+    void JustDidDialogueStep(int32 entry) override
     {
-        switch (iEntry)
+        switch (entry)
         {
             case NPC_WINDSOR_MOUNT:
             {
-                if (Creature* pWindsor = m_creature->GetMap()->GetCreature(m_windsorGuid))
+                if (Creature* windsor = m_creature->GetMap()->GetCreature(m_windsorGuid))
                 {
-                    pWindsor->Unmount();
-                    m_creature->SummonCreature(NPC_WINDSOR_MOUNT, pWindsor->GetPositionX() - 1.0f, pWindsor->GetPositionY() + 1.0f, pWindsor->GetPositionZ(), pWindsor->GetOrientation(), TEMPSPAWN_TIMED_DESPAWN, 30000);
-                }
-                break;
-            }
-            case SAY_DISMOUNT:
-            {
-                if (Creature* pHorse = m_creature->GetMap()->GetCreature(m_horseGuid))
-                {
-                    pHorse->SetWalk(false);
-                    pHorse->GetMotionMaster()->MovePoint(1, aWindsorSpawnLoc[0], aWindsorSpawnLoc[1], aWindsorSpawnLoc[2]);
+                    windsor->Unmount();
+                    windsor->SetFacingTo(1.5636f);
+                    windsor->CastSpell(windsor, SPELL_DISMISS_HORSE, TRIGGERED_NONE);
                 }
                 break;
             }
             case QUEST_STORMWIND_RENDEZVOUS:
             {
-                Creature* pWindsor = m_creature->GetMap()->GetCreature(m_windsorGuid);
-                Player* pPlayer = GetPlayerForEscort();
-                if (!pWindsor || !pPlayer)
+                Creature* windsor = m_creature->GetMap()->GetCreature(m_windsorGuid);
+                Player* player = GetPlayerForEscort();
+                if (!windsor || !player)
                     break;
 
-                pWindsor->SetFacingToObject(pPlayer);
+                windsor->SetFacingToObject(player);
                 break;
             }
             case QUEST_THE_GREAT_MASQUERADE:
             {
-                Creature* pWindsor = m_creature->GetMap()->GetCreature(m_windsorGuid);
-                Player* pPlayer = GetPlayerForEscort();
-                if (!pWindsor || !pPlayer)
+                Creature* windsor = m_creature->GetMap()->GetCreature(m_windsorGuid);
+                Player* player = GetPlayerForEscort();
+                if (!windsor || !player)
                     break;
 
-                DoScriptText(SAY_WELCOME, pWindsor, pPlayer);
+                DoScriptText(SAY_WELCOME, windsor, player);
                 // Allow players to finish quest and also finish the escort
-                pWindsor->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                windsor->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
                 SetEscortPaused(false);
                 break;
             }
         }
     }
 
-    Creature* GetSpeakerByEntry(uint32 uiEntry) override
+    Creature* GetSpeakerByEntry(uint32 entry) override
     {
-        if (uiEntry == NPC_WINDSOR)
+        if (entry == NPC_WINDSOR)
             return m_creature->GetMap()->GetCreature(m_windsorGuid);
 
         return nullptr;
     }
 
     // Check if the event is already running
-    bool IsStormwindQuestActive() const { return m_bIsEventInProgress; }
+    bool IsStormwindQuestActive() const { return m_isEventInProgress; }
 
     void UpdateEscortAI(const uint32 uiDiff) { DialogueUpdate(uiDiff); }
 };
 
-UnitAI* GetAI_npc_squire_rowe(Creature* pCreature)
+UnitAI* GetAI_npc_squire_rowe(Creature* creature)
 {
-    return new npc_squire_roweAI(pCreature);
+    return new npc_squire_roweAI(creature);
 }
 
-bool GossipHello_npc_squire_rowe(Player* pPlayer, Creature* pCreature)
+bool GossipHello_npc_squire_rowe(Player* player, Creature* creature)
 {
     // Allow gossip if quest 6402 is completed but not yet rewarded or 6402 is rewarded but 6403 isn't yet completed
-    if ((pPlayer->GetQuestStatus(QUEST_STORMWIND_RENDEZVOUS) == QUEST_STATUS_COMPLETE && !pPlayer->GetQuestRewardStatus(QUEST_STORMWIND_RENDEZVOUS)) ||
-            (pPlayer->GetQuestRewardStatus(QUEST_STORMWIND_RENDEZVOUS) && pPlayer->GetQuestStatus(QUEST_THE_GREAT_MASQUERADE) != QUEST_STATUS_COMPLETE))
+    if ((player->GetQuestStatus(QUEST_STORMWIND_RENDEZVOUS) == QUEST_STATUS_COMPLETE && !player->GetQuestRewardStatus(QUEST_STORMWIND_RENDEZVOUS)) ||
+        (player->GetQuestRewardStatus(QUEST_STORMWIND_RENDEZVOUS) && player->GetQuestStatus(QUEST_THE_GREAT_MASQUERADE) != QUEST_STATUS_COMPLETE))
     {
-        bool bIsEventInProgress = true;
+        bool isEventInProgress = true;
 
         // Check if event is already in progress
-        if (npc_squire_roweAI* pRoweAI = dynamic_cast<npc_squire_roweAI*>(pCreature->AI()))
-            bIsEventInProgress = pRoweAI->IsStormwindQuestActive();
+        if (npc_squire_roweAI* roweAi = dynamic_cast<npc_squire_roweAI*>(creature->AI()))
+            isEventInProgress = roweAi->IsStormwindQuestActive();
 
         // If event is already in progress, then inform the player to wait
-        if (bIsEventInProgress)
-            pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_PROGRESS, pCreature->GetObjectGuid());
+        if (isEventInProgress)
+            player->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_PROGRESS, creature->GetObjectGuid());
         else
         {
-            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_WINDSOR, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-            pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_START, pCreature->GetObjectGuid());
+            player->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_WINDSOR, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            player->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_START, creature->GetObjectGuid());
         }
     }
     else
-        pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_DEFAULT, pCreature->GetObjectGuid());
+        player->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_DEFAULT, creature->GetObjectGuid());
 
     return true;
 }
 
-bool GossipSelect_npc_squire_rowe(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+bool GossipSelect_npc_squire_rowe(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 action)
 {
-    if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+    if (action == GOSSIP_ACTION_INFO_DEF + 1)
     {
-        if (npc_squire_roweAI* pRoweAI = dynamic_cast<npc_squire_roweAI*>(pCreature->AI()))
-            pRoweAI->Start(true, pPlayer, nullptr, true, false);
+        if (npc_squire_roweAI* roweAi = dynamic_cast<npc_squire_roweAI*>(creature->AI()))
+            roweAi->Start(true, player, nullptr, true, false);
 
-        pPlayer->CLOSE_GOSSIP_MENU();
+        player->CLOSE_GOSSIP_MENU();
     }
 
     return true;
@@ -508,7 +504,7 @@ enum
 
     GOSSIP_TEXT_ID_MASQUERADE   = 5633,
 
-    // SPELL_ONYXIA_TRANSFORM    = 20409,            // removed from DBC
+    SPELL_ONYXIA_TRANSFORM      = 20409,
     SPELL_WINDSOR_READ          = 20358,
     SPELL_WINDSOR_DEATH         = 20465,
     SPELL_ONYXIA_DESPAWN        = 20466,
@@ -522,10 +518,8 @@ enum
     NPC_GUARD_CITY              = 68,
     NPC_GUARD_PATROLLER         = 1976,
     NPC_GUARD_ONYXIA            = 12739,
-    NPC_LADY_ONYXIA             = 12756,
 
     MAX_ROYAL_GUARDS            = 6,
-    MAX_GUARD_SALUTES           = 7,
 };
 
 static const float aGuardLocations[MAX_ROYAL_GUARDS][4] =
@@ -570,7 +564,7 @@ static const DialogueEntry aMasqueradeDialogue[] =
     {SAY_JON_DIALOGUE_10,       NPC_JONATHAN,   5000},
     {EMOTE_ONESHOT_SALUTE,      0,              4000},
     {SAY_JON_DIALOGUE_11,       NPC_JONATHAN,   3000},
-    {NPC_JONATHAN,              0,              2000},
+    {NPC_JONATHAN,              0,              6000},
     {EMOTE_ONESHOT_KNEEL,       0,              3000},
     {SAY_WINDSOR_DIALOGUE_12,   NPC_WINDSOR,    5000},
     {SAY_WINDSOR_DIALOGUE_13,   NPC_WINDSOR,    3000},
@@ -610,221 +604,201 @@ static const DialogueEntry aMasqueradeDialogue[] =
     {0, 0, 0},
 };
 
-static const int32 aGuardSalute[MAX_GUARD_SALUTES] = { -1000842, -1000843, -1000844, -1000845, -1000846, -1000847, -1000848};
-
 struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
 {
     npc_reginald_windsorAI(Creature* m_creature) : npc_escortAI(m_creature),
         DialogueHelper(aMasqueradeDialogue)
     {
-        m_pScriptedMap = (ScriptedMap*)m_creature->GetInstanceData();
+        m_scriptedMap = (ScriptedMap*)m_creature->GetInstanceData();
         // Npc flag is controlled by script
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-        InitializeDialogueHelper(m_pScriptedMap);
+        InitializeDialogueHelper(m_scriptedMap);
         Reset();
     }
 
-    ScriptedMap* m_pScriptedMap;
+    ScriptedMap* m_scriptedMap;
 
-    uint32 m_uiGuardCheckTimer;
-    uint8 m_uiOnyxiaGuardCount;
+    uint32 m_guardCheckTimer;
 
-    uint32 m_uiHammerTimer;
-    uint32 m_uiCleaveTimer;
+    uint32 m_hammerTimer;
+    uint32 m_cleaveTimer;
 
-    bool m_bIsKeepReady;
-    bool m_bCanGuardSalute;
+    bool m_isKeepReady;
 
     ObjectGuid m_playerGuid;
     ObjectGuid m_guardsGuid[MAX_ROYAL_GUARDS];
 
     GuidList m_lRoyalGuardsGuidList;
-    GuidSet m_sGuardsSalutedGuidSet;
 
     void Reset() override
     {
-        m_uiGuardCheckTimer  = 0;
-        m_bIsKeepReady       = false;
-        m_bCanGuardSalute    = false;
+        m_guardCheckTimer  = 0;
+        m_isKeepReady       = false;
 
-        m_uiHammerTimer      = urand(0, 1000);
-        m_uiCleaveTimer      = urand(1000, 3000);
+        m_hammerTimer      = urand(0, 1000);
+        m_cleaveTimer      = urand(1000, 3000);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoCastSpellIfCan(m_creature, SPELL_SHIELD_WALL);
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
+    void WaypointReached(uint32 pointId) override
     {
-        // Note: this implementation is not the best; It should be better handled by the guard script
-        if (m_bCanGuardSalute && (pWho->GetEntry() == NPC_GUARD_CITY || pWho->GetEntry() == NPC_GUARD_ROYAL ||
-                                  pWho->GetEntry() == NPC_GUARD_PATROLLER) && pWho->IsWithinDistInMap(m_creature, 15.0f) &&
-                m_sGuardsSalutedGuidSet.find(pWho->GetObjectGuid()) == m_sGuardsSalutedGuidSet.end() && pWho->IsWithinLOSInMap(m_creature))
+        switch (pointId)
         {
-            DoScriptText(aGuardSalute[urand(0, MAX_GUARD_SALUTES - 1)], pWho);
-            m_sGuardsSalutedGuidSet.insert(pWho->GetObjectGuid());
-        }
-    }
-
-    void WaypointReached(uint32 uiPointId) override
-    {
-        switch (uiPointId)
-        {
-            case 0:
-                if (!m_pScriptedMap)
+            case 1:
+                if (!m_scriptedMap)
                     break;
                 // Prepare Jonathan for the first event
-                if (Creature* pJonathan = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_JONATHAN))
+                if (Creature* jonathan = m_scriptedMap->GetSingleCreatureFromStorage(NPC_JONATHAN))
                 {
                     // Summon 3 guards on each side and move Jonathan in the middle
                     for (uint8 i = 0; i < MAX_ROYAL_GUARDS; ++i)
                     {
-                        if (Creature* pTemp = m_creature->SummonCreature(NPC_GUARD_ROYAL, aGuardLocations[i][0], aGuardLocations[i][1], aGuardLocations[i][2], aGuardLocations[i][3], TEMPSPAWN_TIMED_DESPAWN, 180000))
-                            m_guardsGuid[i] = pTemp->GetObjectGuid();
+                        if (Creature* temp = m_creature->SummonCreature(NPC_GUARD_ROYAL, aGuardLocations[i][0], aGuardLocations[i][1], aGuardLocations[i][2], aGuardLocations[i][3], TEMPSPAWN_TIMED_DESPAWN, 180000))
+                            m_guardsGuid[i] = temp->GetObjectGuid();
                     }
 
-                    pJonathan->SetWalk(false);
-                    pJonathan->Unmount();
-                    pJonathan->GetMotionMaster()->MovePoint(0, aMoveLocations[0][0], aMoveLocations[0][1], aMoveLocations[0][2]);
+                    jonathan->SetWalk(false);
+                    jonathan->Unmount();
+                    jonathan->GetMotionMaster()->MovePoint(0, aMoveLocations[0][0], aMoveLocations[0][1], aMoveLocations[0][2]);
                 }
                 break;
-            case 1:
+            case 2:
                 StartNextDialogueText(SAY_JON_DIALOGUE_1);
                 SetEscortPaused(true);
                 break;
-            case 3:
-                m_bCanGuardSalute = true;
+            case 4:
+                // Periodically triggers 20275 that is used in guardAI_stormwind to trigger random text and emotes
+                DoCastSpellIfCan(m_creature, SPELL_WINDSOR_INSPIRATION, CAST_TRIGGERED);
                 break;
-            case 11:
-                if (!m_pScriptedMap)
+            case 12:
+                if (!m_scriptedMap)
                     break;
                 // We can reset Jonathan now
-                if (Creature* pJonathan = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_JONATHAN))
+                if (Creature* jonathan = m_scriptedMap->GetSingleCreatureFromStorage(NPC_JONATHAN))
                 {
-                    pJonathan->SetWalk(true);
-                    pJonathan->SetStandState(UNIT_STAND_STATE_STAND);
-                    pJonathan->GetMotionMaster()->MoveTargetedHome();
+                    jonathan->SetWalk(true);
+                    jonathan->SetStandState(UNIT_STAND_STATE_STAND);
+                    jonathan->GetMotionMaster()->MoveTargetedHome();
                 }
                 break;
-            case 22:
+            case 23:
                 SetEscortPaused(true);
-                m_creature->SetFacingTo(5.41f);
                 StartNextDialogueText(NPC_GUARD_ROYAL);
                 break;
-            case 24:
-                m_bCanGuardSalute = false;
-                break;
-            case 25:
+            case 26:
                 StartNextDialogueText(NPC_WRYNN);
                 SetEscortPaused(true);
-                m_bCanGuardSalute = false;
                 break;
         }
     }
 
-    void SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiPointId) override
+    void SummonedMovementInform(Creature* summoned, uint32 motionType, uint32 pointId) override
     {
-        if (uiMotionType != POINT_MOTION_TYPE || !uiPointId || pSummoned->GetEntry() != NPC_GUARD_ROYAL)
+        if (motionType != POINT_MOTION_TYPE || !pointId || summoned->GetEntry() != NPC_GUARD_ROYAL)
             return;
 
         // Handle city gates royal guards
-        switch (uiPointId)
+        switch (pointId)
         {
             case 1:
             case 2:
-                pSummoned->SetFacingTo(2.234f);
-                pSummoned->SetStandState(UNIT_STAND_STATE_KNEEL);
+                summoned->SetFacingTo(2.234f);
+                summoned->SetStandState(UNIT_STAND_STATE_KNEEL);
                 break;
             case 3:
             case 4:
-                pSummoned->SetFacingTo(5.375f);
-                pSummoned->SetStandState(UNIT_STAND_STATE_KNEEL);
+                summoned->SetFacingTo(5.375f);
+                summoned->SetStandState(UNIT_STAND_STATE_KNEEL);
                 break;
         }
     }
 
-    void JustDidDialogueStep(int32 iEntry) override
+    void JustDidDialogueStep(int32 entry) override
     {
-        if (!m_pScriptedMap)
+        if (!m_scriptedMap)
             return;
 
-        switch (iEntry)
+        switch (entry)
         {
             // Set orientation and prepare the npcs for the next event
             case SAY_WINDSOR_GET_READY:
                 m_creature->SetFacingTo(0.6f);
                 break;
             case SAY_PRESTOR_SIEZE:
-                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
-                    Start(false, pPlayer);
+                if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                    Start(false, player);
                 break;
             case SAY_JON_DIALOGUE_8:
                 // Turn left and move the guards
-                if (Creature* pJonathan = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_JONATHAN))
-                    pJonathan->SetFacingTo(5.375f);
-                if (Creature* pGuard = m_creature->GetMap()->GetCreature(m_guardsGuid[5]))
+                if (Creature* jonathan = m_scriptedMap->GetSingleCreatureFromStorage(NPC_JONATHAN))
+                    jonathan->SetFacingTo(5.375f);
+                if (Creature* guard = m_creature->GetMap()->GetCreature(m_guardsGuid[5]))
                 {
-                    pGuard->SetFacingTo(2.234f);
-                    pGuard->SetStandState(UNIT_STAND_STATE_KNEEL);
+                    guard->SetFacingTo(2.234f);
+                    guard->SetStandState(UNIT_STAND_STATE_KNEEL);
                 }
-                if (Creature* pGuard = m_creature->GetMap()->GetCreature(m_guardsGuid[4]))
-                    pGuard->GetMotionMaster()->MovePoint(1, aMoveLocations[1][0], aMoveLocations[1][1], aMoveLocations[1][2]);
-                if (Creature* pGuard = m_creature->GetMap()->GetCreature(m_guardsGuid[3]))
-                    pGuard->GetMotionMaster()->MovePoint(2, aMoveLocations[2][0], aMoveLocations[2][1], aMoveLocations[2][2]);
+                if (Creature* guard = m_creature->GetMap()->GetCreature(m_guardsGuid[4]))
+                    guard->GetMotionMaster()->MovePoint(1, aMoveLocations[1][0], aMoveLocations[1][1], aMoveLocations[1][2]);
+                if (Creature* guard = m_creature->GetMap()->GetCreature(m_guardsGuid[3]))
+                    guard->GetMotionMaster()->MovePoint(2, aMoveLocations[2][0], aMoveLocations[2][1], aMoveLocations[2][2]);
                 break;
             case SAY_JON_DIALOGUE_9:
                 // Turn right and move the guards
-                if (Creature* pJonathan = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_JONATHAN))
-                    pJonathan->SetFacingTo(2.234f);
-                if (Creature* pGuard = m_creature->GetMap()->GetCreature(m_guardsGuid[2]))
+                if (Creature* jonathan = m_scriptedMap->GetSingleCreatureFromStorage(NPC_JONATHAN))
+                    jonathan->SetFacingTo(2.234f);
+                if (Creature* guard = m_creature->GetMap()->GetCreature(m_guardsGuid[2]))
                 {
-                    pGuard->SetFacingTo(5.375f);
-                    pGuard->SetStandState(UNIT_STAND_STATE_KNEEL);
+                    guard->SetFacingTo(5.375f);
+                    guard->SetStandState(UNIT_STAND_STATE_KNEEL);
                 }
-                if (Creature* pGuard = m_creature->GetMap()->GetCreature(m_guardsGuid[1]))
-                    pGuard->GetMotionMaster()->MovePoint(3, aMoveLocations[3][0], aMoveLocations[3][1], aMoveLocations[3][2]);
-                if (Creature* pGuard = m_creature->GetMap()->GetCreature(m_guardsGuid[0]))
-                    pGuard->GetMotionMaster()->MovePoint(4, aMoveLocations[4][0], aMoveLocations[4][1], aMoveLocations[4][2]);
+                if (Creature* guard = m_creature->GetMap()->GetCreature(m_guardsGuid[1]))
+                    guard->GetMotionMaster()->MovePoint(3, aMoveLocations[3][0], aMoveLocations[3][1], aMoveLocations[3][2]);
+                if (Creature* guard = m_creature->GetMap()->GetCreature(m_guardsGuid[0]))
+                    guard->GetMotionMaster()->MovePoint(4, aMoveLocations[4][0], aMoveLocations[4][1], aMoveLocations[4][2]);
                 break;
             case SAY_JON_DIALOGUE_10:
-                if (Creature* pJonathan = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_JONATHAN))
-                    pJonathan->SetFacingToObject(m_creature);
+                if (Creature* jonathan = m_scriptedMap->GetSingleCreatureFromStorage(NPC_JONATHAN))
+                    jonathan->SetFacingToObject(m_creature);
                 break;
             case EMOTE_ONESHOT_SALUTE:
-                if (Creature* pJonathan = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_JONATHAN))
-                    pJonathan->HandleEmote(EMOTE_ONESHOT_SALUTE);
+                if (Creature* jonathan = m_scriptedMap->GetSingleCreatureFromStorage(NPC_JONATHAN))
+                    jonathan->HandleEmote(EMOTE_ONESHOT_SALUTE);
                 break;
             case NPC_JONATHAN:
-                if (Creature* pJonathan = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_JONATHAN))
+                if (Creature* jonathan = m_scriptedMap->GetSingleCreatureFromStorage(NPC_JONATHAN))
                 {
-                    pJonathan->SetWalk(true);
-                    pJonathan->GetMotionMaster()->MovePoint(0, aMoveLocations[5][0], aMoveLocations[5][1], aMoveLocations[5][2]);
+                    jonathan->SetWalk(true);
+                    jonathan->GetMotionMaster()->MovePoint(0, aMoveLocations[5][0], aMoveLocations[5][1], aMoveLocations[5][2]);
                 }
                 break;
             case EMOTE_ONESHOT_KNEEL:
-                if (Creature* pJonathan = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_JONATHAN))
+                if (Creature* jonathan = m_scriptedMap->GetSingleCreatureFromStorage(NPC_JONATHAN))
                 {
-                    pJonathan->SetFacingToObject(m_creature);
-                    pJonathan->SetStandState(UNIT_STAND_STATE_KNEEL);
+                    jonathan->SetFacingToObject(m_creature);
+                    jonathan->SetStandState(UNIT_STAND_STATE_KNEEL);
                 }
                 break;
             case SAY_WINDSOR_DIALOGUE_12:
-                if (Creature* pJonathan = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_JONATHAN))
-                    m_creature->SetFacingToObject(pJonathan);
+                if (Creature* jonathan = m_scriptedMap->GetSingleCreatureFromStorage(NPC_JONATHAN))
+                    m_creature->SetFacingToObject(jonathan);
                 break;
             case SAY_WINDSOR_DIALOGUE_13:
-                m_creature->SetFacingTo(0.6f);
+                m_creature->SetFacingTo(0.08f);
                 break;
             case EMOTE_ONESHOT_POINT:
                 m_creature->HandleEmote(EMOTE_ONESHOT_POINT);
                 break;
             case NPC_WINDSOR:
+                // Stop triggering texts and emotes from nearby guards
+                m_creature->RemoveAurasDueToSpell(SPELL_WINDSOR_INSPIRATION);
                 SetEscortPaused(false);
                 break;
             case SAY_WINDSOR_BEFORE_KEEP:
-                m_bIsKeepReady = true;
+                m_isKeepReady = true;
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 break;
             case NPC_GUARD_CITY:
@@ -832,23 +806,23 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                 break;
             case NPC_WRYNN:
                 // Remove npc flags during the event
-                if (Creature* pOnyxia = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_PRESTOR))
-                    pOnyxia->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
-                if (Creature* pWrynn = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_WRYNN))
-                    pWrynn->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-                if (Creature* pBolvar = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_BOLVAR))
-                    pBolvar->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                if (Creature* onyxia = m_scriptedMap->GetSingleCreatureFromStorage(NPC_PRESTOR))
+                    onyxia->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                if (Creature* wrynn = m_scriptedMap->GetSingleCreatureFromStorage(NPC_WRYNN))
+                    wrynn->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                if (Creature* bolvar = m_scriptedMap->GetSingleCreatureFromStorage(NPC_BOLVAR))
+                    bolvar->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
                 break;
             case SAY_BOLVAR_KEEP_2:
-                if (Creature* pWrynn = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_WRYNN))
+                if (Creature* wrynn = m_scriptedMap->GetSingleCreatureFromStorage(NPC_WRYNN))
                 {
-                    pWrynn->SetWalk(false);
-                    pWrynn->ForcedDespawn(15000);
-                    pWrynn->GetMotionMaster()->MovePoint(0, aMoveLocations[6][0], aMoveLocations[6][1], aMoveLocations[6][2]);
+                    wrynn->SetWalk(false);
+                    wrynn->ForcedDespawn(15000);
+                    wrynn->GetMotionMaster()->MovePoint(0, aMoveLocations[6][0], aMoveLocations[6][1], aMoveLocations[6][2]);
 
                     // Store all the nearby guards, in order to transform them into Onyxia guards
                     CreatureList lGuardsList;
-                    GetCreatureListWithEntryInGrid(lGuardsList, pWrynn, NPC_GUARD_ROYAL, 25.0f);
+                    GetCreatureListWithEntryInGrid(lGuardsList, wrynn, NPC_GUARD_ROYAL, 25.0f);
 
                     for (CreatureList::const_iterator itr = lGuardsList.begin(); itr != lGuardsList.end(); ++itr)
                         m_lRoyalGuardsGuidList.push_back((*itr)->GetObjectGuid());
@@ -858,55 +832,55 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                 DoCastSpellIfCan(m_creature, SPELL_WINDSOR_READ);
                 break;
             case EMOTE_BOLVAR_GASP:
-                if (Creature* pOnyxia = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_PRESTOR))
+                if (Creature* onyxia = m_scriptedMap->GetSingleCreatureFromStorage(NPC_PRESTOR))
                 {
-                    pOnyxia->UpdateEntry(NPC_LADY_ONYXIA);
-
-                    if (Creature* pBolvar = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_BOLVAR))
-                        pBolvar->SetFacingToObject(pOnyxia);
+                    onyxia->CastSpell(onyxia, SPELL_ONYXIA_TRANSFORM, TRIGGERED_NONE);
+                    if (Creature* bolvar = m_scriptedMap->GetSingleCreatureFromStorage(NPC_BOLVAR))
+                        bolvar->SetFacingToObject(onyxia);
                 }
                 break;
             case SAY_PRESTOR_KEEP_9:
-                if (Creature* pBolvar = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_BOLVAR))
+                if (Creature* bolvar = m_scriptedMap->GetSingleCreatureFromStorage(NPC_BOLVAR))
                 {
-                    pBolvar->SetWalk(false);
-                    pBolvar->GetMotionMaster()->MovePoint(0, aMoveLocations[7][0], aMoveLocations[7][1], aMoveLocations[7][2]);
+                    bolvar->SetWalk(false);
+                    bolvar->GetMotionMaster()->MovePoint(0, aMoveLocations[7][0], aMoveLocations[7][1], aMoveLocations[7][2]);
                 }
                 break;
             case SAY_BOLVAR_KEEP_10:
-                if (Creature* pBolvar = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_BOLVAR))
+                if (Creature* bolvar = m_scriptedMap->GetSingleCreatureFromStorage(NPC_BOLVAR))
                 {
-                    if (Creature* pOnyxia = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_PRESTOR))
+                    if (Creature* onyxia = m_scriptedMap->GetSingleCreatureFromStorage(NPC_PRESTOR))
                     {
-                        pBolvar->SetFacingToObject(pOnyxia);
-                        DoScriptText(EMOTE_PRESTOR_LAUGH, pOnyxia);
+                        bolvar->SetFacingToObject(onyxia);
+                        DoScriptText(EMOTE_PRESTOR_LAUGH, onyxia);
                     }
+                    bolvar->SetFactionTemporary(11, TEMPFACTION_RESTORE_REACH_HOME);   // Change Faction so he can fight Onyxia's Guards
                 }
                 break;
             case SAY_PRESTOR_KEEP_11:
                 for (GuidList::const_iterator itr = m_lRoyalGuardsGuidList.begin(); itr != m_lRoyalGuardsGuidList.end(); ++itr)
                 {
-                    if (Creature* pGuard = m_creature->GetMap()->GetCreature(*itr))
+                    if (Creature* guard = m_creature->GetMap()->GetCreature(*itr))
                     {
-                        if (!pGuard->isAlive())
+                        if (!guard->IsAlive())
                             continue;
 
-                        pGuard->UpdateEntry(NPC_GUARD_ONYXIA);
-                        DoScriptText(EMOTE_GUARD_TRANSFORM, pGuard);
+                        guard->UpdateEntry(NPC_GUARD_ONYXIA);
+                        DoScriptText(EMOTE_GUARD_TRANSFORM, guard);
 
-                        if (Creature* pBolvar = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_BOLVAR))
-                            pGuard->AI()->AttackStart(pBolvar);
+                        if (Creature* bolvar = m_scriptedMap->GetSingleCreatureFromStorage(NPC_BOLVAR))
+                            guard->AI()->AttackStart(bolvar);
                     }
                 }
-                m_uiGuardCheckTimer = 1000;
+                m_guardCheckTimer = 1000;
                 break;
             case SPELL_WINDSOR_DEATH:
-                if (Creature* pOnyxia = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_PRESTOR))
-                    pOnyxia->CastSpell(m_creature, SPELL_WINDSOR_DEATH, TRIGGERED_NONE);
+                if (Creature* onyxia = m_scriptedMap->GetSingleCreatureFromStorage(NPC_PRESTOR))
+                    onyxia->CastSpell(m_creature, SPELL_WINDSOR_DEATH, TRIGGERED_NONE);
                 break;
             case SAY_WINDSOR_KEEP_12:
-                if (Creature* pOnyxia = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_PRESTOR))
-                    DoScriptText(SAY_PRESTOR_KEEP_13, pOnyxia);
+                if (Creature* onyxia = m_scriptedMap->GetSingleCreatureFromStorage(NPC_PRESTOR))
+                    DoScriptText(SAY_PRESTOR_KEEP_13, onyxia);
 
                 // Fake death
                 m_creature->InterruptNonMeleeSpells(true);
@@ -917,57 +891,58 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                 m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
                 m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 m_creature->ClearAllReactives();
-                m_creature->GetMotionMaster()->Clear();
-                m_creature->GetMotionMaster()->MoveIdle();
+                m_creature->SetImmobilizedState(true, true);
                 m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
                 break;
             case SAY_PRESTOR_KEEP_14:
-                if (Creature* pOnyxia = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_PRESTOR))
+                if (Creature* onyxia = m_scriptedMap->GetSingleCreatureFromStorage(NPC_PRESTOR))
                 {
-                    pOnyxia->ForcedDespawn(1000);
-                    pOnyxia->HandleEmote(EMOTE_ONESHOT_LIFTOFF);
-                    pOnyxia->CastSpell(pOnyxia, SPELL_ONYXIA_DESPAWN, TRIGGERED_NONE);
+                    onyxia->ForcedDespawn(1000);
+                    onyxia->HandleEmote(EMOTE_ONESHOT_LIFTOFF);
+                    onyxia->CastSpell(onyxia, SPELL_ONYXIA_DESPAWN, TRIGGERED_NONE);
                 }
                 break;
             case NPC_GUARD_ONYXIA:
-                if (Creature* pBolvar = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_BOLVAR))
-                    pBolvar->GetMotionMaster()->MovePoint(0, aMoveLocations[7][0], aMoveLocations[7][1], aMoveLocations[7][2]);
+                if (Creature* bolvar = m_scriptedMap->GetSingleCreatureFromStorage(NPC_BOLVAR))
+                    bolvar->GetMotionMaster()->MovePoint(0, aMoveLocations[7][0], aMoveLocations[7][1], aMoveLocations[7][2]);
                 break;
             case NPC_BOLVAR:
-                if (Creature* pBolvar = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_BOLVAR))
+                if (Creature* bolvar = m_scriptedMap->GetSingleCreatureFromStorage(NPC_BOLVAR))
                 {
-                    pBolvar->SetWalk(true);
-                    pBolvar->GetMotionMaster()->MovePoint(0, aMoveLocations[8][0], aMoveLocations[8][1], aMoveLocations[8][2]);
+                    bolvar->SetWalk(true);
+                    bolvar->GetMotionMaster()->MovePoint(0, aMoveLocations[8][0], aMoveLocations[8][1], aMoveLocations[8][2]);
                 }
                 break;
             case SAY_BOLVAR_KEEP_15:
-                if (Creature* pBolvar = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_BOLVAR))
-                    pBolvar->SetStandState(UNIT_STAND_STATE_KNEEL);
+                if (Creature* bolvar = m_scriptedMap->GetSingleCreatureFromStorage(NPC_BOLVAR))
+                    bolvar->SetStandState(UNIT_STAND_STATE_KNEEL);
 
                 DoScriptText(SAY_WINDSOR_KEEP_16, m_creature);
                 DoScriptText(EMOTE_WINDSOR_DIE, m_creature);
 
-                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
-                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_THE_GREAT_MASQUERADE, m_creature);
+                if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                    player->RewardPlayerAndGroupAtEventExplored(QUEST_THE_GREAT_MASQUERADE, m_creature);
                 break;
             case NPC_GUARD_PATROLLER:
                 // Reset Bolvar and Wrynn
-                if (Creature* pBolvar = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_BOLVAR))
+                if (Creature* bolvar = m_scriptedMap->GetSingleCreatureFromStorage(NPC_BOLVAR))
                 {
-                    pBolvar->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-                    pBolvar->SetStandState(UNIT_STAND_STATE_STAND);
-                    pBolvar->GetMotionMaster()->MoveTargetedHome();
+                    bolvar->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                    bolvar->SetStandState(UNIT_STAND_STATE_STAND);
+                    bolvar->GetMotionMaster()->Clear();
+                    bolvar->GetMotionMaster()->MoveTargetedHome();
+                    bolvar->ClearTemporaryFaction();
                 }
-                if (Creature* pWrynn = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_WRYNN))
+                if (Creature* wrynn = m_scriptedMap->GetSingleCreatureFromStorage(NPC_WRYNN))
                 {
-                    pWrynn->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-                    pWrynn->Respawn();
-                    pWrynn->SetWalk(true);
-                    pWrynn->GetMotionMaster()->MoveTargetedHome();
+                    wrynn->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                    wrynn->Respawn();
+                    wrynn->SetWalk(true);
+                    wrynn->GetMotionMaster()->MoveTargetedHome();
                 }
                 // Onyxia will respawn by herself in about 30 min, so just reset flags
-                if (Creature* pOnyxia = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_PRESTOR))
-                    pOnyxia->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                if (Creature* onyxia = m_scriptedMap->GetSingleCreatureFromStorage(NPC_PRESTOR))
+                    onyxia->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
                 // Allow creature to despawn
                 SetEscortPaused(false);
                 break;
@@ -980,117 +955,150 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
     }
 
-    void DoStartEscort(Player* pPlayer)
+    void DoStartEscort(Player* player)
     {
         StartNextDialogueText(SAY_WINDSOR_QUEST_ACCEPT);
-        m_playerGuid = pPlayer->GetObjectGuid();
+        m_playerGuid = player->GetObjectGuid();
     }
 
-    bool IsKeepEventReady() const { return m_bIsKeepReady; }
+    bool IsKeepEventReady() const { return m_isKeepReady; }
 
-    void UpdateEscortAI(const uint32 uiDiff) override
+    void UpdateEscortAI(const uint32 diff) override
     {
-        DialogueUpdate(uiDiff);
+        DialogueUpdate(diff);
 
         // Check if all Onyxia guards are dead
-        if (m_uiGuardCheckTimer)
+        if (m_guardCheckTimer)
         {
-            if (m_uiGuardCheckTimer <= uiDiff)
+            if (m_guardCheckTimer <= diff)
             {
-                uint8 uiDeadGuardsCount = 0;
+                uint8 deadGuardsCount = 0;
                 for (GuidList::const_iterator itr = m_lRoyalGuardsGuidList.begin(); itr != m_lRoyalGuardsGuidList.end(); ++itr)
                 {
-                    if (Creature* pGuard = m_creature->GetMap()->GetCreature(*itr))
+                    if (Creature* guard = m_creature->GetMap()->GetCreature(*itr))
                     {
-                        if (!pGuard->isAlive() && pGuard->GetEntry() == NPC_GUARD_ONYXIA)
-                            ++uiDeadGuardsCount;
+                        if (!guard->IsAlive() && guard->GetEntry() == NPC_GUARD_ONYXIA)
+                            ++deadGuardsCount;
                     }
                 }
-                if (uiDeadGuardsCount == m_lRoyalGuardsGuidList.size())
+                if (deadGuardsCount == m_lRoyalGuardsGuidList.size())
                 {
                     StartNextDialogueText(NPC_GUARD_ONYXIA);
-                    m_uiGuardCheckTimer = 0;
+                    m_guardCheckTimer = 0;
                 }
                 else
-                    m_uiGuardCheckTimer = 1000;
+                    m_guardCheckTimer = 1000;
             }
             else
-                m_uiGuardCheckTimer -= uiDiff;
+                m_guardCheckTimer -= diff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
-        if (m_uiHammerTimer < uiDiff)
+        if (m_hammerTimer < diff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HAMMER_OF_JUSTICE) == CAST_OK)
-                m_uiHammerTimer = 60000;
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HAMMER_OF_JUSTICE) == CAST_OK)
+                m_hammerTimer = 60000;
         }
         else
-            m_uiHammerTimer -= uiDiff;
+            m_hammerTimer -= diff;
 
-        if (m_uiCleaveTimer < uiDiff)
+        if (m_cleaveTimer < diff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_STRONG_CLEAVE) == CAST_OK)
-                m_uiCleaveTimer = urand(1000, 5000);
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_STRONG_CLEAVE) == CAST_OK)
+                m_cleaveTimer = urand(1000, 5000);
         }
         else
-            m_uiCleaveTimer -= uiDiff;
+            m_cleaveTimer -= diff;
 
         DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_npc_reginald_windsor(Creature* pCreature)
+UnitAI* GetAI_npc_reginald_windsor(Creature* creature)
 {
-    return new npc_reginald_windsorAI(pCreature);
+    return new npc_reginald_windsorAI(creature);
 }
 
-bool QuestAccept_npc_reginald_windsor(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+bool QuestAccept_npc_reginald_windsor(Player* player, Creature* creature, const Quest* quest)
 {
-    if (pQuest->GetQuestId() == QUEST_THE_GREAT_MASQUERADE)
+    if (quest->GetQuestId() == QUEST_THE_GREAT_MASQUERADE)
     {
-        if (npc_reginald_windsorAI* pReginaldAI = dynamic_cast<npc_reginald_windsorAI*>(pCreature->AI()))
-            pReginaldAI->DoStartEscort(pPlayer);
+        if (npc_reginald_windsorAI* pReginaldAI = dynamic_cast<npc_reginald_windsorAI*>(creature->AI()))
+            pReginaldAI->DoStartEscort(player);
     }
 
     return true;
 }
 
-bool GossipHello_npc_reginald_windsor(Player* pPlayer, Creature* pCreature)
+bool GossipHello_npc_reginald_windsor(Player* player, Creature* creature)
 {
-    bool bIsEventReady = false;
+    bool isEventReady = false;
 
-    if (npc_reginald_windsorAI* pReginaldAI = dynamic_cast<npc_reginald_windsorAI*>(pCreature->AI()))
-        bIsEventReady = pReginaldAI->IsKeepEventReady();
+    if (npc_reginald_windsorAI* reginaldAI = dynamic_cast<npc_reginald_windsorAI*>(creature->AI()))
+        isEventReady = reginaldAI->IsKeepEventReady();
 
     // Check if event is possible and also check the status of the quests
-    if (bIsEventReady && pPlayer->GetQuestStatus(QUEST_THE_GREAT_MASQUERADE) != QUEST_STATUS_COMPLETE && pPlayer->GetQuestRewardStatus(QUEST_STORMWIND_RENDEZVOUS))
+    if (isEventReady && player->GetQuestStatus(QUEST_THE_GREAT_MASQUERADE) != QUEST_STATUS_COMPLETE && player->GetQuestRewardStatus(QUEST_STORMWIND_RENDEZVOUS))
     {
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_REGINALD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-        pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_MASQUERADE, pCreature->GetObjectGuid());
+        player->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_REGINALD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        player->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_MASQUERADE, creature->GetObjectGuid());
     }
     else
     {
-        if (pCreature->isQuestGiver())
-            pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+        if (creature->isQuestGiver())
+            player->PrepareQuestMenu(creature->GetObjectGuid());
 
-        pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pCreature->GetObjectGuid());
+        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetObjectGuid());
     }
 
     return true;
 }
 
-bool GossipSelect_npc_reginald_windsor(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+bool GossipSelect_npc_reginald_windsor(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
 {
-    if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+    if (action == GOSSIP_ACTION_INFO_DEF + 1)
     {
-        if (npc_reginald_windsorAI* pReginaldAI = dynamic_cast<npc_reginald_windsorAI*>(pCreature->AI()))
-            pReginaldAI->DoStartKeepEvent();
+        if (npc_reginald_windsorAI* reginaldWindsorAI = dynamic_cast<npc_reginald_windsorAI*>(creature->AI()))
+            reginaldWindsorAI->DoStartKeepEvent();
 
-        pPlayer->CLOSE_GOSSIP_MENU();
+        player->CLOSE_GOSSIP_MENU();
     }
 
+    return true;
+}
+
+enum
+{
+    GO_HEAD_OF_NEFARIAN_SW = 179882,
+    GO_HEAD_OF_ONYXIA_SW = 179558,
+
+    GOSSIP_HEAD_MAT = 5754,
+    GOSSIP_HEAD_AFRA = 6027,
+};
+
+bool GossipHello_npc_major_mattingly(Player* player, Creature* creature)
+{
+    uint32 gossipId = creature->GetCreatureInfo()->GossipMenuId;
+    if (GameObject* go = GetClosestGameObjectWithEntry(creature, GO_HEAD_OF_ONYXIA_SW, 100.f))
+        if (go->IsSpawned())
+            gossipId = GOSSIP_HEAD_MAT;
+
+    player->PrepareGossipMenu(creature, gossipId);
+    player->SendPreparedGossip(creature);
+    return true;
+}
+
+bool GossipHello_npc_field_marshal_afrasiabi(Player* player, Creature* creature)
+{
+    uint32 gossipId = creature->GetCreatureInfo()->GossipMenuId;
+    if (GameObject* go = GetClosestGameObjectWithEntry(creature, GO_HEAD_OF_NEFARIAN_SW, 100.f))
+        if (go->IsSpawned())
+            gossipId = GOSSIP_HEAD_AFRA;
+
+    player->PrepareGossipMenu(creature, gossipId);
+    player->SendPreparedGossip(creature);
     return true;
 }
 
@@ -1127,5 +1135,15 @@ void AddSC_stormwind_city()
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_reginald_windsor;
     pNewScript->pGossipHello = &GossipHello_npc_reginald_windsor;
     pNewScript->pGossipSelect = &GossipSelect_npc_reginald_windsor;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_major_mattingly";
+    pNewScript->pGossipHello = &GossipHello_npc_major_mattingly;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_field_marshal_afrasiabi";
+    pNewScript->pGossipHello = &GossipHello_npc_field_marshal_afrasiabi;
     pNewScript->RegisterSelf();
 }

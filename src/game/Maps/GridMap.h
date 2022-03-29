@@ -22,6 +22,7 @@
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
 #include "Maps/GridDefines.h"
+#include "Entities/ObjectDefines.h"
 
 #include "Maps/GridMapDefines.h"
 
@@ -110,7 +111,7 @@ class GridMap
         inline float getHeight(float x, float y) const { return (this->*m_gridGetHeight)(x, y); }
         float getLiquidLevel(float x, float y) const;
         uint8 getTerrainType(float x, float y) const;
-        GridMapLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data = nullptr);
+        GridMapLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data = nullptr, float collisionHeight = 2.03128f);
 };
 
 template<typename Countable>
@@ -130,13 +131,6 @@ class Referencable
         Countable m_count;
 };
 
-#define MAX_HEIGHT            100000.0f                     // can be use for find ground height at surface
-#define INVALID_HEIGHT       -100000.0f                     // for check, must be equal to VMAP_INVALID_HEIGHT, real value for unknown height is VMAP_INVALID_HEIGHT_VALUE
-#define INVALID_HEIGHT_VALUE -200000.0f                     // for return, must be equal to VMAP_INVALID_HEIGHT_VALUE, check value for unknown height is VMAP_INVALID_HEIGHT
-#define MAX_FALL_DISTANCE     250000.0f                     // "unlimited fall" to find VMap ground if it is available, just larger than MAX_HEIGHT - INVALID_HEIGHT
-#define DEFAULT_HEIGHT_SEARCH     10.0f                     // default search distance to find height at nearby locations
-#define DEFAULT_WATER_SEARCH      50.0f                     // default search distance to case detection water level
-
 // class for sharing and managin GridMap objects
 class TerrainInfo : public Referencable<std::atomic_long>
 {
@@ -150,12 +144,12 @@ class TerrainInfo : public Referencable<std::atomic_long>
         // from 'Map' class into this class
         float GetHeightStatic(float x, float y, float z, bool checkVMap = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH) const;
         float GetWaterLevel(float x, float y, float z, float* pGround = nullptr) const;
-        float GetWaterOrGroundLevel(float x, float y, float z, float* pGround = nullptr, bool swim = false) const;
+        float GetWaterOrGroundLevel(float x, float y, float z, float& groundZ, bool swim = false, float minWaterDeep = DEFAULT_COLLISION_HEIGHT) const;
         bool IsInWater(float x, float y, float z, GridMapLiquidData* data = nullptr) const;
         bool IsSwimmable(float x, float y, float z, float radius = 1.5f, GridMapLiquidData* data = nullptr) const;
         bool IsUnderWater(float x, float y, float z) const;
 
-        GridMapLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data = nullptr) const;
+        GridMapLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data = nullptr, float collisionHeight = 2.03128f) const;
 
         uint16 GetAreaFlag(float x, float y, float z, bool* isOutdoors = nullptr) const;
         uint8 GetTerrainType(float x, float y) const;

@@ -26,6 +26,7 @@
 #include "Server/Opcodes.h"
 #include "World/World.h"
 #include "Entities/ObjectGuid.h"
+#include "Server/WorldSession.h"
 
 UpdateData::UpdateData() : m_data(1), m_currentIndex(0)
 {
@@ -44,7 +45,9 @@ void UpdateData::AddOutOfRangeGUID(ObjectGuid const& guid)
 
 void UpdateData::AddUpdateBlock(const ByteBuffer& block)
 {
-    if (m_data[m_currentIndex].m_buffer.size() < 700)
+    const size_t existing = (128 + (9 * m_outOfRangeGUIDs.size()) + m_data[m_currentIndex].m_buffer.size());
+
+    if ((existing + block.size()) < MAX_NETCLIENT_PACKET_SIZE)
     {
         m_data[m_currentIndex].m_buffer.append(block);
         ++m_data[m_currentIndex].m_blockCount;
@@ -163,4 +166,13 @@ void UpdateData::Clear()
 {
     m_data.clear();
     m_outOfRangeGUIDs.clear();
+}
+
+void UpdateData::SendData(WorldSession& session)
+{
+    for (size_t i = 0; i < GetPacketCount(); ++i)
+    {
+        WorldPacket packet = BuildPacket(i);
+        session.SendPacket(packet);
+    }
 }

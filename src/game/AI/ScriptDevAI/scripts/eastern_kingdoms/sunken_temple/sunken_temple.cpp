@@ -17,13 +17,13 @@
 /* ScriptData
 SDName: Sunken_Temple
 SD%Complete: 100
-SDComment: Quest support: 8733
+SDComment: Quest support: 3528, 8733
 SDCategory: Sunken Temple
 EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
+#include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
 at_shade_of_eranikus
 npc_malfurion_stormrage
 event_antalarion_statue_activation
@@ -77,14 +77,15 @@ enum
 
 struct npc_malfurionAI : public ScriptedAI
 {
-    npc_malfurionAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_malfurionAI(Creature* pCreature) :
+        ScriptedAI(pCreature),
+        m_uiSpeech(0),
+        m_uiSayTimer(3000)
     {
         // Only in Sunken Temple
         if (m_creature->GetMap()->IsDungeon())
         {
             DoScriptText(EMOTE_MALFURION1, m_creature);
-            m_uiSpeech   = 0;
-            m_uiSayTimer = 3000;
         }
 
         DoCastSpellIfCan(m_creature, SPELL_SPIRIT_SPAWN_IN, TRIGGERED_OLD_TRIGGERED);
@@ -189,17 +190,17 @@ bool ProcessEventId_event_antalarion_statue_activation(uint32 uiEventId, Object*
 /*######
 ## event_avatar_of_hakkar
 ######*/
-bool ProcessEventId_event_avatar_of_hakkar(uint32 /*uiEventId*/, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/)
+bool ProcessEventId_event_avatar_of_hakkar(uint32 /*eventId*/, Object* source, Object* /*target*/, bool /*isStart*/)
 {
-    if (pSource->GetTypeId() == TYPEID_PLAYER)
+    if (source->GetTypeId() == TYPEID_PLAYER)
     {
-        if (instance_sunken_temple* pInstance = (instance_sunken_temple*)((Player*)pSource)->GetInstanceData())
+        if (instance_sunken_temple* instance = (instance_sunken_temple*)((Player*)source)->GetInstanceData())
         {
-            // return if not NOT_STARTED
-            if (pInstance->GetData(TYPE_AVATAR) != NOT_STARTED)
+            // return if not NOT_STARTED or FAILED
+            if (instance->GetData(TYPE_AVATAR) != NOT_STARTED && instance->GetData(TYPE_AVATAR) != FAIL)
                 return true;
 
-            pInstance->SetData(TYPE_AVATAR, IN_PROGRESS);
+            instance->SetData(TYPE_AVATAR, IN_PROGRESS);
 
             return true;
         }
@@ -227,28 +228,61 @@ bool GOUse_go_eternal_flame(Player* /*pPlayer*/, GameObject* pGo)
     return true;
 }
 
-/*######
-## effectDummy_summon_hakkar
-######*/
-bool EffectDummyCreature_summon_hakkar(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* /*pCreatureTarget*/, ObjectGuid /*originalCasterGuid*/)
+struct SummonHakkar : public SpellScript
 {
-    // Always check spellid and effectindex
-    if (uiSpellId == SPELL_SUMMON_AVATAR && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        if (!pCaster || pCaster->GetTypeId() != TYPEID_UNIT)
-            return true;
-
-        // Update entry to avatar of Hakkar and cast some visuals
-        ((Creature*)pCaster)->UpdateEntry(NPC_AVATAR_OF_HAKKAR);
-        pCaster->CastSpell(pCaster, SPELL_AVATAR_SUMMONED, TRIGGERED_OLD_TRIGGERED);
-        DoScriptText(SAY_AVATAR_SPAWN, pCaster);
-
-        // Always return true when we are handling this spell and effect
-        return true;
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (Unit* caster = spell->GetCaster())
+            {
+                // Update entry to Avatar of Hakkar
+                if (caster->GetTypeId() != TYPEID_UNIT)
+                    return;
+                ((Creature*)caster)->UpdateEntry(NPC_AVATAR_OF_HAKKAR);
+                ((Creature*)caster)->AIM_Initialize();
+                DoScriptText(SAY_AVATAR_SPAWN, caster);
+            }
+            return;
+        }
     }
+};
 
-    return false;
-}
+struct HakkarSummoned : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (Unit* caster = spell->GetCaster())
+            {
+                GameObjectList evilCirclesInRange;
+                GetGameObjectListWithEntryInGrid(evilCirclesInRange, caster, GO_EVIL_CIRCLE, 40.0f);
+                // Despawn all evil summoning circles now that Avatar of Hakkar is summmoned
+                for (auto evilCircle : evilCirclesInRange)
+                {
+                    evilCircle->SetForcedDespawn();
+                    evilCircle->SetLootState(GO_JUST_DEACTIVATED);
+                }
+            }
+            return;
+        }
+    }
+};
+
+struct HexOfJammalanAura : public AuraScript // s.12479
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!apply && aura->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+            if (Unit* caster = aura->GetCaster())
+            {
+                caster->CastSpell(target, 12480, TRIGGERED_OLD_TRIGGERED);
+                caster->CastSpell(target, 12483, TRIGGERED_OLD_TRIGGERED);
+            }
+    }
+};
 
 void AddSC_sunken_temple()
 {
@@ -277,8 +311,7 @@ void AddSC_sunken_temple()
     pNewScript->pGOUse = &GOUse_go_eternal_flame;
     pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_shade_of_hakkar";
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_summon_hakkar;
-    pNewScript->RegisterSelf();
+    RegisterSpellScript<SummonHakkar>("spell_summon_hakkar");
+    RegisterSpellScript<HakkarSummoned>("spell_hakkar_summoned");
+    RegisterSpellScript<HexOfJammalanAura>("spell_hex_of_jammalan");
 }

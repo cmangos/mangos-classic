@@ -28,5 +28,6 @@ if (BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER)
   add_subdirectory(gsoap)
 endif()
 
-add_subdirectory(g3dlite)
-add_subdirectory(utf8cpp)
+if (BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER OR BUILD_EXTRACTORS)
+  add_subdirectory(utf8cpp)
+endif()

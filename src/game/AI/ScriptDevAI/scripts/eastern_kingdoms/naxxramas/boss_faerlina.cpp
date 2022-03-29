@@ -23,7 +23,8 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "naxxramas.h"
 
 enum
@@ -45,28 +46,33 @@ enum
     SPELL_RAIN_OF_FIRE          = 28794,
     SPELL_WIDOWS_EMBRACE_1      = 28732,                    // Cast onto Faerlina by Mind Controlled adds
     SPELL_WIDOWS_EMBRACE_2      = 28797,                    // Cast onto herself by Faerlina and handle all the cooldown and enrage debuff
+    SPELL_INSTAKILL_SELF        = 28748,
 };
 
-struct boss_faerlinaAI : public ScriptedAI
+static const float resetZ = 266.0f;                         // Above this altitude, Faerlina is outside her room and should reset (leashing)
+
+enum FaerlinaActions
 {
-    boss_faerlinaAI(Creature* creature) : ScriptedAI(creature)
+    FAERLINA_POISON_VOLLEY,
+    FAERLINA_RAIN_FIRE,
+    FAERLINA_ENRAGE,
+    FAERLINA_ACTION_MAX,
+};
+
+struct boss_faerlinaAI : public CombatAI
+{
+    boss_faerlinaAI(Creature* creature) : CombatAI(creature, FAERLINA_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_instance = (instance_naxxramas*)creature->GetInstanceData();
-        Reset();
+        AddCombatAction(FAERLINA_POISON_VOLLEY, 8000u);
+        AddCombatAction(FAERLINA_RAIN_FIRE, 16000u);
+        AddCombatAction(FAERLINA_ENRAGE, 60000u);
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float, float, float z)
+        {
+            return z > resetZ;
+        });
     }
 
-    instance_naxxramas* m_instance;
-
-    uint32 m_poisonBoltVolleyTimer;
-    uint32 m_rainOfFireTimer;
-    uint32 m_enrageTimer;
-
-    void Reset() override
-    {
-        m_poisonBoltVolleyTimer   = 8 * IN_MILLISECONDS;
-        m_rainOfFireTimer         = 16 * IN_MILLISECONDS;
-        m_enrageTimer             = 60 * IN_MILLISECONDS;
-    }
+    ScriptedInstance* m_instance;
 
     void Aggro(Unit* /*who*/) override
     {
@@ -89,8 +95,10 @@ struct boss_faerlinaAI : public ScriptedAI
             m_instance->SetData(TYPE_FAERLINA, DONE);
     }
 
-    void JustReachedHome() override
+    void EnterEvadeMode() override
     {
+        CombatAI::EnterEvadeMode();
+
         if (m_instance)
             m_instance->SetData(TYPE_FAERLINA, FAIL);
     }
@@ -106,67 +114,71 @@ struct boss_faerlinaAI : public ScriptedAI
             if (m_creature->HasAura(SPELL_ENRAGE))
             {
                 m_creature->RemoveAurasDueToSpell(SPELL_ENRAGE);
-                m_enrageTimer = 60 * IN_MILLISECONDS;             // Delay next enrage by 60 sec if Faerlina was already enraged
+                ResetCombatAction(FAERLINA_ENRAGE, 60 * IN_MILLISECONDS);   // Delay next enrage by 60 sec if Faerlina was already enraged
             }
         }
     }
 
-    void UpdateAI(const uint32 diff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Poison Bolt Volley
-        if (m_poisonBoltVolleyTimer < diff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_POISONBOLT_VOLLEY) == CAST_OK)
-                m_poisonBoltVolleyTimer = 11 * IN_MILLISECONDS;
-        }
-        else
-            m_poisonBoltVolleyTimer -= diff;
-
-        // Rain Of Fire
-        if (m_rainOfFireTimer < diff)
-        {
-            if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            case FAERLINA_POISON_VOLLEY:
             {
-                if (DoCastSpellIfCan(target, SPELL_RAIN_OF_FIRE) == CAST_OK)
-                    m_rainOfFireTimer = 16 * IN_MILLISECONDS;
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_POISONBOLT_VOLLEY) == CAST_OK)
+                    ResetCombatAction(action, 11 * IN_MILLISECONDS);
+                break;
             }
-        }
-        else
-            m_rainOfFireTimer -= diff;
-
-        // Enrage Timer
-        if (m_enrageTimer < diff && !m_creature->HasAura(SPELL_ENRAGE))
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+            case FAERLINA_RAIN_FIRE:
             {
-                switch (urand(0, 2))
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
-                    case 0: DoScriptText(SAY_ENRAGE_1, m_creature); break;
-                    case 1: DoScriptText(SAY_ENRAGE_2, m_creature); break;
-                    case 2: DoScriptText(SAY_ENRAGE_3, m_creature); break;
+                    if (DoCastSpellIfCan(target, SPELL_RAIN_OF_FIRE) == CAST_OK)
+                        ResetCombatAction(action, 16 * IN_MILLISECONDS);
                 }
-                m_enrageTimer = 60 * IN_MILLISECONDS;
+                break;
             }
+            case FAERLINA_ENRAGE:
+            {
+                if (!m_creature->HasAura(SPELL_ENRAGE))
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+                    {
+                        switch (urand(0, 2))
+                        {
+                            case 0: DoScriptText(SAY_ENRAGE_1, m_creature); break;
+                            case 1: DoScriptText(SAY_ENRAGE_2, m_creature); break;
+                            case 2: DoScriptText(SAY_ENRAGE_3, m_creature); break;
+                        }
+                        ResetCombatAction(action, 60 * IN_MILLISECONDS);
+                    }
+                }
+                break;
+            }
+            default:
+                break;
         }
-        else
-            m_enrageTimer -= diff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_faerlina(Creature* creature)
+struct WidowEmbrace : public SpellScript
 {
-    return new boss_faerlinaAI(creature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_1)
+        {
+            if (Unit* caster = spell->GetCaster())
+                caster->CastSpell(nullptr, SPELL_INSTAKILL_SELF, TRIGGERED_OLD_TRIGGERED);       // Self suicide
+        }
+    }
+};
 
 void AddSC_boss_faerlina()
 {
     Script* newScript = new Script;
     newScript->Name = "boss_faerlina";
-    newScript->GetAI = &GetAI_boss_faerlina;
+    newScript->GetAI = &GetNewAIInstance<boss_faerlinaAI>;
     newScript->RegisterSelf();
+
+    RegisterSpellScript<WidowEmbrace>("spell_faerlina_widow_embrace");
 }

@@ -157,22 +157,25 @@ bool BigNumber::isZero() const
     return BN_is_zero(_bn) != 0;
 }
 
-uint8* BigNumber::AsByteArray(int minSize)
+std::vector<uint8> BigNumber::AsByteArray(int minSize, bool reverse) const
 {
     int length = (minSize >= GetNumBytes()) ? minSize : GetNumBytes();
 
-    delete[] _array;
-    _array = new uint8[length];
+    std::vector<uint8> byteArray(length);
 
     // If we need more bytes than length of BigNumber set the rest to 0
     if (length > GetNumBytes())
-        memset((void*)_array, 0, length);
+        memset((void*)byteArray.data(), 0, length);
 
-    BN_bn2bin(_bn, (unsigned char*)_array);
+    // Padding should add leading zeroes, not trailing
+    auto const paddingOffset = length - GetNumBytes();
 
-    std::reverse(_array, _array + length);
+    BN_bn2bin(_bn, (unsigned char*)byteArray.data() + paddingOffset);
 
-    return _array;
+    if (reverse)
+        std::reverse(byteArray.begin(), byteArray.end());
+
+    return byteArray;
 }
 
 const char* BigNumber::AsHexStr() const

@@ -23,10 +23,14 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "Globals/ObjectMgr.h"
 #include "GameEvents/GameEventMgr.h"
+#include "Entities/TemporarySpawn.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
+#include "World/WorldState.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 
 /* ContentData
 npc_chicken_cluck       100%    support for quest 3861 (Cluck!)
@@ -36,7 +40,7 @@ npc_injured_patient     100%    patients for triage-quests (6622 and 6624)
 npc_doctor              100%    Gustaf Vanhowzen and Gregory Victor, quest 6622 and 6624 (Triage)
 npc_innkeeper            25%    ScriptName not assigned. Innkeepers in general.
 npc_redemption_target   100%    Used for the paladin quests: 1779,1781,9600,9685
-npc_aoe_damage_trigger   75%    Used for passive aoe damage triggers in various encounters with overlapping usage of entries: 16697
+npc_advanced_target_dummy
 EndContentData */
 
 /*########
@@ -94,7 +98,7 @@ struct npc_chicken_cluckAI : public ScriptedAI
                 m_uiResetFlagTimer -= uiDiff;
         }
 
-        if (m_creature->SelectHostileTarget() && m_creature->getVictim())
+        if (m_creature->SelectHostileTarget() && m_creature->GetVictim())
             DoMeleeAttackIfReady();
     }
 };
@@ -228,6 +232,12 @@ struct npc_injured_patientAI : public ScriptedAI
     Location* m_pCoord;
     bool isSaved;
 
+    void EnterEvadeMode() override
+    {
+        if (isSaved)
+            ScriptedAI::EnterEvadeMode();
+    }
+
     void Reset() override
     {
         m_doctorGuid.Clear();
@@ -260,10 +270,10 @@ struct npc_injured_patientAI : public ScriptedAI
 
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
     {
-        if (pCaster->GetTypeId() == TYPEID_PLAYER && m_creature->isAlive() && pSpell->Id == 20804)
+        if (pCaster->GetTypeId() == TYPEID_PLAYER && m_creature->IsAlive() && pSpell->Id == 20804)
         {
             Player* pPlayer = static_cast<Player*>(pCaster);
-            if (pPlayer->GetQuestStatus(6624) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(6622) == QUEST_STATUS_INCOMPLETE)
+            if (pPlayer->GetQuestStatus(QUEST_TRIAGE_A) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(QUEST_TRIAGE_H) == QUEST_STATUS_INCOMPLETE)
             {
                 if (Creature* pDoctor = m_creature->GetMap()->GetCreature(m_doctorGuid))
                 {
@@ -312,12 +322,12 @@ struct npc_injured_patientAI : public ScriptedAI
 
         // lower HP on every world tick makes it a useful counter, not officlone though
         uint32 uiHPLose = uint32(0.05f * uiDiff);
-        if (m_creature->isAlive() && m_creature->GetHealth() > 1 + uiHPLose)
+        if (m_creature->IsAlive() && m_creature->GetHealth() > 1 + uiHPLose)
         {
             m_creature->SetHealth(m_creature->GetHealth() - uiHPLose);
         }
 
-        if (m_creature->isAlive() && m_creature->GetHealth() <= 1 + uiHPLose)
+        if (m_creature->IsAlive() && m_creature->GetHealth() <= 1 + uiHPLose)
         {
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -371,7 +381,7 @@ void npc_doctorAI::PatientDied(Location* pPoint)
 {
     Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
 
-    if (pPlayer && (pPlayer->GetQuestStatus(6624) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(6622) == QUEST_STATUS_INCOMPLETE))
+    if (pPlayer && (pPlayer->GetQuestStatus(QUEST_TRIAGE_A) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(QUEST_TRIAGE_H) == QUEST_STATUS_INCOMPLETE))
     {
         ++m_uiPatientDiedCount;
 
@@ -555,7 +565,7 @@ struct npc_garments_of_questsAI : public npc_escortAI
         if (pSpell->Id == SPELL_LESSER_HEAL_R2 || pSpell->Id == SPELL_FORTITUDE_R1)
         {
             // not while in combat
-            if (m_creature->isInCombat())
+            if (m_creature->IsInCombat())
                 return;
 
             // nothing to be done now
@@ -664,7 +674,7 @@ struct npc_garments_of_questsAI : public npc_escortAI
 
     void UpdateEscortAI(const uint32 uiDiff) override
     {
-        if (m_bCanRun && !m_creature->isInCombat())
+        if (m_bCanRun && !m_creature->IsInCombat())
         {
             if (m_uiRunAwayTimer <= uiDiff)
             {
@@ -690,7 +700,7 @@ struct npc_garments_of_questsAI : public npc_escortAI
                 m_uiRunAwayTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();
@@ -706,25 +716,29 @@ UnitAI* GetAI_npc_garments_of_quests(Creature* pCreature)
 ## npc_guardian
 ######*/
 
-#define SPELL_DEATHTOUCH                5
+enum GuardianOfB
+{
+    SPELL_DEATHTOUCH            = 5,
+    SAY_AGGRO                   = 2077
+};
 
 struct npc_guardianAI : public ScriptedAI
 {
     npc_guardianAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
-    void Reset() override
+    void Aggro(Unit* who) override
     {
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        DoBroadcastText(SAY_AGGRO, m_creature, who);
     }
 
     void UpdateAI(const uint32 /*diff*/) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_creature->isAttackReady())
         {
-            m_creature->CastSpell(m_creature->getVictim(), SPELL_DEATHTOUCH, TRIGGERED_OLD_TRIGGERED);
+            m_creature->CastSpell(m_creature->GetVictim(), SPELL_DEATHTOUCH, TRIGGERED_OLD_TRIGGERED);
             m_creature->resetAttackTimer();
         }
     }
@@ -804,13 +818,17 @@ bool GossipSelect_npc_innkeeper(Player* pPlayer, Creature* pCreature, uint32 /*u
 enum
 {
     SAY_HEAL                    = -1000187,
+    SAY_HEAL_HENZE_NARM_FAULK   = 2283,
 
     SPELL_SYMBOL_OF_LIFE        = 8593,
-    SPELL_SHIMMERING_VESSEL     = 31225,
-    SPELL_REVIVE_SELF           = 32343,
+    SPELL_QUEST_SELF_HEALING    = 25155,
+    SPELL_SHIMMERING_VESSEL     = 31225,        // Not used until TBC
+    SPELL_REVIVE_SELF           = 32343,        // Not used until TBC
 
-    NPC_FURBOLG_SHAMAN          = 17542,        // draenei side
-    NPC_BLOOD_KNIGHT            = 17768,        // blood elf side
+    NPC_HENZE_FAULK             = 6172,
+    NPC_NARM_FAULK              = 6177,
+    NPC_FURBOLG_SHAMAN          = 17542,        // Draenei side
+    NPC_BLOOD_KNIGHT            = 17768,        // Blood Elf side
 };
 
 struct npc_redemption_targetAI : public ScriptedAI
@@ -818,15 +836,21 @@ struct npc_redemption_targetAI : public ScriptedAI
     npc_redemption_targetAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
     uint32 m_uiEvadeTimer;
-    uint32 m_uiHealTimer;
+    uint32 m_OrientationTimer;
+    uint32 m_TextTimer;
+    uint32 m_EmoteTimer;
 
     ObjectGuid m_playerGuid;
 
     void Reset() override
     {
         m_uiEvadeTimer = 0;
-        m_uiHealTimer  = 0;
+        m_OrientationTimer = 0;
+        m_TextTimer = 0;
+        m_EmoteTimer = 0;
 
+        // Reset Orientation?
+        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
         m_creature->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
         m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
     }
@@ -837,34 +861,70 @@ struct npc_redemption_targetAI : public ScriptedAI
         if (m_uiEvadeTimer)
             return;
 
-        DoCastSpellIfCan(m_creature, SPELL_REVIVE_SELF);
-        m_creature->SetDeathState(JUST_ALIVED);
+        DoCastSpellIfCan(m_creature, SPELL_QUEST_SELF_HEALING);
+        m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
+        m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+        m_uiEvadeTimer = 2 * MINUTE * IN_MILLISECONDS;
         m_playerGuid = m_guid;
-        m_uiHealTimer = 2000;
+        m_OrientationTimer = 3000;
+        m_TextTimer = 4000;
+        m_EmoteTimer = 7000;
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (m_uiHealTimer)
+        if (m_OrientationTimer)
         {
-            if (m_uiHealTimer <= uiDiff)
+            if (m_OrientationTimer <= uiDiff)
             {
-                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
                 {
-                    DoScriptText(SAY_HEAL, m_creature, pPlayer);
-
-                    // Quests 9600 and 9685 requires kill credit
-                    if (m_creature->GetEntry() == NPC_FURBOLG_SHAMAN || m_creature->GetEntry() == NPC_BLOOD_KNIGHT)
-                        pPlayer->KilledMonsterCredit(m_creature->GetEntry(), m_creature->GetObjectGuid());
+                    m_creature->SetFacingToObject(player);
+                    m_OrientationTimer = 0;
                 }
-
-                m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
-                m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-                m_uiHealTimer = 0;
-                m_uiEvadeTimer = 2 * MINUTE * IN_MILLISECONDS;
             }
             else
-                m_uiHealTimer -= uiDiff;
+                m_OrientationTimer -= uiDiff;
+        }
+
+        if (m_TextTimer)
+        {
+            if (m_TextTimer <= uiDiff)
+            {
+                if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                {
+                    // Quests 1783 and 1786 require NpcFlags i.6866
+                    if (m_creature->GetEntry() == NPC_HENZE_FAULK || m_creature->GetEntry() == NPC_NARM_FAULK)
+                    {
+                        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                        DoBroadcastText(SAY_HEAL_HENZE_NARM_FAULK, m_creature, player);
+                    }
+                    // Quests 9600 and 9685 requires kill credit i.6866/24184
+                    if (m_creature->GetEntry() == NPC_FURBOLG_SHAMAN || m_creature->GetEntry() == NPC_BLOOD_KNIGHT)
+                    {
+                        DoScriptText(SAY_HEAL, m_creature, player);
+                        player->KilledMonsterCredit(m_creature->GetEntry(), m_creature->GetObjectGuid());
+                    }
+
+                    m_TextTimer = 0;
+                }
+            }
+            else
+                m_TextTimer -= uiDiff;
+        }
+
+        if (m_EmoteTimer)
+        {
+            if (m_EmoteTimer <= uiDiff)
+            {
+                if (m_creature->GetEntry() == NPC_HENZE_FAULK || m_creature->GetEntry() == NPC_NARM_FAULK)
+                {
+                    m_creature->HandleEmote(EMOTE_ONESHOT_KNEEL);
+                    m_EmoteTimer = 0;
+                }
+            }
+            else
+                m_EmoteTimer -= uiDiff;
         }
 
         if (m_uiEvadeTimer)
@@ -898,53 +958,6 @@ bool EffectDummyCreature_npc_redemption_target(Unit* pCaster, uint32 uiSpellId, 
     }
 
     return false;
-}
-
-/*######
-## npc_aoe_damage_trigger
-######*/
-
-enum npc_aoe_damage_trigger
-{
-    // trigger npcs
-    NPC_VOID_ZONE = 16697,
-
-    // m_uiAuraPassive
-    SPELL_CONSUMPTION_NPC_16697 = 28874,
-    SPELL_CONSUMPTION_NPC_17471 = 30497,
-    SPELL_CONSUMPTION_NPC_20570 = 35952,
-};
-
-struct npc_aoe_damage_triggerAI : public Scripted_NoMovementAI
-{
-    npc_aoe_damage_triggerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature), m_uiAuraPassive(SetAuraPassive()) { }
-
-    uint32 m_uiAuraPassive;
-
-    inline uint32 SetAuraPassive()
-    {
-        switch (m_creature->GetCreatureInfo()->Entry)
-        {
-            case NPC_VOID_ZONE:
-                return SPELL_CONSUMPTION_NPC_16697;
-            default:
-                return SPELL_CONSUMPTION_NPC_16697;
-        }
-    }
-
-    void Reset() override
-    {
-        DoCastSpellIfCan(m_creature, m_uiAuraPassive, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-    }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 uiDiff) override {}
-};
-
-UnitAI* GetAI_npc_aoe_damage_trigger(Creature* pCreature)
-{
-    return new npc_aoe_damage_triggerAI(pCreature);
 }
 
 /*######
@@ -990,7 +1003,7 @@ struct npc_the_cleanerAI : public ScriptedAI
         else
             m_uiDespawnTimer -= uiDiff;
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();
@@ -1001,6 +1014,98 @@ UnitAI* GetAI_npc_the_cleaner(Creature* pCreature)
 {
     return new npc_the_cleanerAI(pCreature);
 }
+
+/*######
+## npc_aoe_damage_trigger
+######*/
+
+enum npc_aoe_damage_trigger
+{
+    // trigger npcs
+    NPC_VOID_ZONE = 16697,
+
+    // m_uiAuraPassive
+    SPELL_CONSUMPTION_NPC_16697 = 28874,
+};
+
+struct npc_aoe_damage_triggerAI : public ScriptedAI
+{
+    npc_aoe_damage_triggerAI(Creature* pCreature) : ScriptedAI(pCreature), m_uiAuraPassive(SetAuraPassive())
+    {
+        AddCustomAction(1, GetTimer(), [&]() {CastConsumption(); });
+        SetReactState(REACT_PASSIVE);
+    }
+
+    uint32 m_uiAuraPassive;
+
+    inline uint32 GetTimer()
+    {
+        return 2500; // adjust in future if other void zones are different this is for NPC_VOID_ZONE
+    }
+
+    inline uint32 SetAuraPassive()
+    {
+        switch (m_creature->GetCreatureInfo()->Entry)
+        {
+            case NPC_VOID_ZONE:
+                return SPELL_CONSUMPTION_NPC_16697;
+            default:
+                return SPELL_CONSUMPTION_NPC_16697;
+        }
+    }
+
+    void CastConsumption()
+    {
+        DoCastSpellIfCan(m_creature, m_uiAuraPassive, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+    }
+
+    void Reset() override {}
+};
+
+/*######
+## npc_advanced_target_dummy
+######*/
+
+enum
+{
+    SUICIDE                     = 7,
+    TARGET_DUMMY_SPAWN_EFFECT   = 4507
+};
+
+struct npc_advanced_target_dummyAI : public ScriptedAI
+{
+    npc_advanced_target_dummyAI(Creature* creature) : ScriptedAI(creature), m_dieTimer(15000)
+    {
+        DoCastSpellIfCan(nullptr, TARGET_DUMMY_SPAWN_EFFECT);
+        SetReactState(REACT_PASSIVE);
+        Reset();
+    }
+
+    void Reset() override {}
+
+    uint32 m_dieTimer;
+
+    void JustRespawned() override
+    {
+        if (!m_creature->GetSpawner())
+            return;
+
+        m_creature->SetLootRecipient(m_creature->GetSpawner());
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (m_dieTimer)
+        {
+            if (m_dieTimer <= diff)
+            {
+                DoCastSpellIfCan(m_creature, SUICIDE);
+            }
+            else
+                m_dieTimer -= diff;
+        }
+    }
+};
 
 void AddSC_npcs_special()
 {
@@ -1051,6 +1156,11 @@ void AddSC_npcs_special()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_aoe_damage_trigger";
-    pNewScript->GetAI = &GetAI_npc_aoe_damage_trigger;
+    pNewScript->GetAI = &GetNewAIInstance<npc_aoe_damage_triggerAI>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_advanced_target_dummy";
+    pNewScript->GetAI = &GetNewAIInstance<npc_advanced_target_dummyAI>;
     pNewScript->RegisterSelf();
 }

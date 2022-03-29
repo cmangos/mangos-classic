@@ -22,7 +22,7 @@
 #include "Server/DBCEnums.h"
 #include "MotionGenerators/Path.h"
 #include "Platform/Define.h"
-#include "Globals/SharedDefines.h"
+#include "Spells/SpellDefines.h"
 
 #include <map>
 #include <set>
@@ -128,6 +128,41 @@ struct ChatChannelsEntry
     // 20 string flag
 };
 
+struct CharacterFacialHairStylesEntry
+{
+    uint32 RaceID;                                          // 0
+    uint32 SexID;                                           // 1
+    uint32 VariationID;                                     // 2
+  //uint32 Geoset[6];                                       // 3-8
+};
+
+enum CharSectionFlags
+{
+    SECTION_FLAG_UNAVAILABLE = 0x01,
+};
+
+enum CharSectionType
+{
+    SECTION_TYPE_SKIN = 0,
+    SECTION_TYPE_FACE = 1,
+    SECTION_TYPE_FACIAL_HAIR = 2,
+    SECTION_TYPE_HAIR = 3,
+    SECTION_TYPE_UNDERWEAR = 4
+};
+
+struct CharSectionsEntry
+{
+    //uint32 Id;
+    uint32 Race;
+    uint32 Gender;
+    uint32 BaseSection;
+    uint32 VariationIndex;
+    uint32 ColorIndex;
+    //char* TexturePath[3];
+    uint32 Flags;
+    inline bool HasFlag(CharSectionFlags flag) const { return (Flags & flag) != 0; }
+};
+
 struct ChrClassesEntry
 {
     uint32  ClassID;                                        // 0        m_ID
@@ -186,7 +221,7 @@ struct CinematicSequencesEntry
 struct CreatureDisplayInfoEntry
 {
     uint32      Displayid;                                  // 0        m_ID
-    // 1        m_modelID
+    uint32      ModelId;                                    // 1        
     // 2        m_soundID
     uint32      ExtendedDisplayInfoID;                      // 3        m_extendedDisplayInfoID -> CreatureDisplayInfoExtraEntry::DisplayExtraId
     float       scale;                                      // 4        m_creatureModelScale
@@ -221,6 +256,28 @@ struct CreatureFamilyEntry
     uint32    skillLine[2];                                 // 5-6
     uint32    petFoodMask;                                  // 7
     char*     Name[8];
+};
+
+struct CreatureModelDataEntry
+{
+    uint32 Id;
+    uint32 Flags;
+    //char* ModelPath;
+    //uint32 Unk1;
+    float Scale;                                             // Used in calculation of unit collision data
+    //int32 Unk2
+    //int32 Unk3
+    //uint32 Unk4
+    //uint32 Unk5
+    //float Unk6
+    //uint32 Unk7
+    //float Unk8
+    //uint32 Unk9
+    //uint32 Unk10
+    float CollisionWidth;
+    float CollisionHeight;
+    //float MountHeight;                                       // Used in calculation of unit collision data when mounted - missing in classic - backport if needed from tbc
+    //float Unks[7] wotlk has 11
 };
 
 #define MAX_CREATURE_SPELL_DATA_SLOT 4
@@ -372,7 +429,14 @@ struct FactionTemplateEntry
                 return false;
         return enemyGroupMask == 0 && friendGroupMask == 0;
     }
-    bool IsContestedGuardFaction() const { return (factionFlags & FACTION_TEMPLATE_FLAG_CONTESTED_GUARD) != 0; }
+    bool IsContestedGuardFaction() const { return (factionFlags & FACTION_TEMPLATE_FLAG_ATTACK_PVP_ACTIVE_PLAYERS) != 0; }
+};
+
+struct GameObjectArtKitEntry
+{
+    uint32 ID;                                              // 0
+    //char* TextureVariation[3]                             // 1-3 m_textureVariations[3]
+    //char* AttachModel[4]                                  // 4-8 m_attachModels[4]
 };
 
 struct GameObjectDisplayInfoEntry
@@ -380,6 +444,34 @@ struct GameObjectDisplayInfoEntry
     uint32      Displayid;                                  // 0        m_ID
     char*       filename;                                   // 1        m_modelName
     // 2-11     m_Sound                                     // 2-11     m_Sound
+};
+
+struct GMSurveyCurrentSurveyEntry
+{
+    uint32    localeID;                                     // 0    m_LANGID
+    uint32    surveyID;                                     // 1    m_GMSURVEY_ID
+};
+
+#define MAX_GMSURVEY_QUESTIONS 10                           // Hardcoded in all versions of the game, max amount of questions in gm survey
+
+struct GMSurveyEntry
+{
+    uint32    ID;                                           // 0    m_ID
+    uint32    questionID[MAX_GMSURVEY_QUESTIONS];           // 1-11 m_Q[10]
+};
+
+struct GMSurveyQuestionsEntry
+{
+    uint32    ID;                                           // 0    m_ID
+    char*     question[8];                                  // 1-9  m_Question_lang;
+    // 10 string flags, unused
+};
+
+struct GMTicketCategoryEntry
+{
+    uint32    ID;                                           // 0    m_ID
+    char*     name[8];                                      // 1-9  m_category_lang
+    // 10 string flags, unused
 };
 
 // All Gt* DBC store data for 100 levels, some by 100 per class/race
@@ -729,6 +821,17 @@ struct SpellEntry
         // custom
         bool HasAttribute(SpellAttributesServerside attribute) const { return (AttributesServerside & attribute) != 0; }
 
+        uint32 GetAllEffectsMechanicMask() const
+        {
+            uint32 mask = 0;
+            if (Mechanic)
+                mask |= 1 << Mechanic;
+            for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+                if (Effect[i] && EffectMechanic[i])
+                    mask |= 1 << EffectMechanic[i];
+            return mask;
+        }
+
     private:
         // prevent creating custom entries (copy data from original in fact)
         SpellEntry(SpellEntry const&);                      // DON'T must have implementation
@@ -796,7 +899,7 @@ struct SpellItemEnchantmentEntry
     char*       description[8];                             // 13-20    m_name_lang[8]
     // 21 string flags
     uint32      aura_id;                                    // 22       m_itemVisual
-    uint32      slot;                                       // 23       m_flags
+    uint32      flags;                                      // 23       m_flags
 };
 
 struct StableSlotPricesEntry
@@ -868,6 +971,17 @@ struct TaxiPathNodeEntry
     uint32    delay;                                        // 8        m_delay
 };
 
+struct TransportAnimationEntry
+{
+    //uint32  Id;
+    uint32  TransportEntry;
+    uint32  TimeSeg;
+    float   X;
+    float   Y;
+    float   Z;
+    //uint32  MovementId;
+};
+
 struct WMOAreaTableEntry
 {
     uint32 Id;                                              // 0        m_ID index
@@ -918,6 +1032,7 @@ struct WorldMapOverlayEntry
     // 16       m_hitRectRight
 };
 
+/* Structure WorldSafeLocsEntry is no longer loaded from DBC but from DB instead
 struct WorldSafeLocsEntry
 {
     uint32    ID;                                           // 0        m_ID
@@ -928,6 +1043,7 @@ struct WorldSafeLocsEntry
     // char*   name[8]                                      // 5-12     m_AreaName_lang
     // 13 string flags
 };
+*/
 
 // GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some platform
 #if defined( __GNUC__ )
@@ -974,7 +1090,7 @@ struct TaxiPathBySourceAndDestination
 typedef std::map<uint32, TaxiPathBySourceAndDestination> TaxiPathSetForSource;
 typedef std::map<uint32, TaxiPathSetForSource> TaxiPathSetBySource;
 
-typedef std::vector<TaxiPathNodeEntry const*> TaxiPathNodeList;
+typedef Path<TaxiPathNodeEntry const*> TaxiPathNodeList;
 typedef std::vector<TaxiPathNodeList> TaxiPathNodesByPath;
 
 #define TaxiMaskSize 8

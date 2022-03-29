@@ -335,8 +335,8 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                 return;
             }
 
-            my_spell = new Spell(_player, spellEntry, true);
-            my_spell->m_CastItem = castItem;
+            my_spell = new Spell(_player, spellEntry, TRIGGERED_OLD_TRIGGERED);
+            my_spell->SetCastItem(castItem);
             my_targets.setTradeItemTarget(_player);
             my_spell->m_targets = my_targets;
 
@@ -371,8 +371,8 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                 return;
             }
 
-            his_spell = new Spell(trader, spellEntry, true);
-            his_spell->m_CastItem = castItem;
+            his_spell = new Spell(trader, spellEntry, TRIGGERED_OLD_TRIGGERED);
+            his_spell->SetCastItem(castItem);
             his_targets.setTradeItemTarget(trader);
             his_spell->m_targets = his_targets;
 
@@ -549,14 +549,14 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
 
     TradeStatusInfo info;
-    if (!GetPlayer()->isAlive())
+    if (!GetPlayer()->IsAlive())
     {
         info.Status = TRADE_STATUS_YOU_DEAD;
         SendTradeStatus(info);
         return;
     }
 
-    if (GetPlayer()->hasUnitState(UNIT_STAT_STUNNED))
+    if (GetPlayer()->IsStunned())
     {
         info.Status = TRADE_STATUS_YOU_STUNNED;
         SendTradeStatus(info);
@@ -593,7 +593,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (!pOther->isAlive())
+    if (!pOther->IsAlive())
     {
         info.Status = TRADE_STATUS_TARGET_DEAD;
         SendTradeStatus(info);
@@ -607,7 +607,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (pOther->hasUnitState(UNIT_STAT_STUNNED))
+    if (pOther->IsStunned())
     {
         info.Status = TRADE_STATUS_TARGET_STUNNED;
         SendTradeStatus(info);

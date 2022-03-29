@@ -148,7 +148,7 @@ enum AuraType
     /**
      * Changes whether the target is pacified or not depending on the apply flag.
      * Pacify makes the target silenced and have all it's attack skill disabled.
-     * See: http://www.wowhead.com/spell=6462/pacified
+     * See: http://classic.wowhead.com/spell=6462
      */
     SPELL_AURA_MOD_PACIFY = 25,
     /**
@@ -332,5 +332,21 @@ enum AreaAuraType
     AREA_AURA_PARTY,
     AREA_AURA_PET
 };
+
+
+// Spell aura states
+enum AuraState
+{
+    // (C) used in caster aura state     (T) used in target aura state
+    AURA_STATE_DEFENSE                      = 1,            // C   |
+    AURA_STATE_HEALTHLESS_20_PERCENT        = 2,            // C T |
+    AURA_STATE_BERSERKING                   = 3,            // C   |
+    AURA_STATE_FROZEN                       = 4,            //     | frozen target (but not used for any spells in 1.12.1 at client side)
+    AURA_STATE_JUDGEMENT                    = 5,            // C   |
+    // AURA_STATE_UNKNOWN6                   = 6,           //     | not used
+    AURA_STATE_HUNTER_PARRY                 = 7,            // C   |
+    AURA_STATE_ROGUE_ATTACK_FROM_STEALTH    = 7,            // C   | FIX ME: not implemented yet!
+};
+
 /** @} */
 #endif

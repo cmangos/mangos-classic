@@ -17,11 +17,14 @@ enum
 
     // Kel'Thuzad
     SAY_KELTHUZAD_CAT_DIED      = -1533089,
+    SAY_KELTHUZAD_SHACKLES_1    = -1533106,
+    SAY_KELTHUZAD_SHACKLES_2    = -1533108,
     // Kel'Thuzad's taunts after killing Wing Bosses
     SAY_KELTHUZAD_TAUNT1        = -1533090,
     SAY_KELTHUZAD_TAUNT2        = -1533091,
     SAY_KELTHUZAD_TAUNT3        = -1533092,
     SAY_KELTHUZAD_TAUNT4        = -1533093,
+    EMOTE_FLEE                  = -1533159,
     // Dialogues with Lich King
     SAY_SAPP_DIALOG1            = -1533084,
     SAY_SAPP_DIALOG2_LICH       = -1533085,
@@ -31,16 +34,16 @@ enum
     // Horsemen dialogue texts
     SAY_BLAU_TAUNT1             = -1533045,
     SAY_BLAU_TAUNT2             = -1533046,
-    SAY_BLAU_TAUNT3             = -1533047,             // NYI - requires additiona research
+    SAY_BLAU_TAUNT3             = -1533047,
     SAY_MORG_TAUNT1             = -1533071,
     SAY_MORG_TAUNT2             = -1533072,
-    SAY_MORG_TAUNT3             = -1533073,             // NYI - requires additiona research
+    SAY_MORG_TAUNT3             = -1533073,
     SAY_KORT_TAUNT1             = -1533052,
     SAY_KORT_TAUNT2             = -1533053,
-    SAY_KORT_TAUNT3             = -1533054,             // NYI - requires additiona research
+    SAY_KORT_TAUNT3             = -1533054,
     SAY_ZELI_TAUNT1             = -1533059,
     SAY_ZELI_TAUNT2             = -1533060,
-    SAY_ZELI_TAUNT3             = -1533061,             // NYI - requires additiona research
+    SAY_ZELI_TAUNT3             = -1533061,
     // Grand Widow Faerlina intro
     SAY_FAERLINA_INTRO          = -1533009,
     FOLLOWERS_STAND             = 1,
@@ -118,7 +121,7 @@ enum
     GO_ARAC_ANUB_DOOR           = 181126,                   // encounter door
     GO_ARAC_ANUB_GATE           = 181195,                   // open after boss is dead
     GO_ARAC_FAER_WEB            = 181235,                   // encounter door
-    GO_ARAC_FAER_DOOR           = 194022,                   // after faerlina, to outer ring
+    GO_ARAC_FAER_DOOR           = 181167,                   // after faerlina, to outer ring
     GO_ARAC_MAEX_INNER_DOOR     = 181197,                   // encounter door
     GO_ARAC_MAEX_OUTER_DOOR     = 181209,                   // right before maex
 
@@ -154,6 +157,7 @@ enum
     GO_KELTHUZAD_WINDOW_2       = 181403,
     GO_KELTHUZAD_WINDOW_3       = 181404,
     GO_KELTHUZAD_WINDOW_4       = 181405,
+    GO_KELTHUZAD_TRIGGER        = 181444,
 
     // Eyes
     GO_ARAC_EYE_RAMP            = 181212,
@@ -179,26 +183,67 @@ enum
     AREATRIGGER_FROSTWYRM_TELE  = 4156,
     AREATRIGGER_FAERLINA_INTRO  = 4115,
 
-    EVENT_ID_DECIMATE           = 10495,
+    // Gothik summon steps
+    STEP_TRAINEE                = 0,
+    STEP_KNIGHT                 = 1,
+    STEP_RIDER                  = 2,
+    SPELL_SUMMON_TRAINEE        = 28007,                    // Triggers 27884 every 20s
+    SPELL_SUMMON_KNIGHT         = 28009,                    // Triggers 28008 every 25s
+    SPELL_SUMMON_MOUNTED_KNIGHT = 28011,                    // Triggers 28010 every 30s
+    
+    SPELL_SPECTRAL_ASSAULT      = 28781,
+    SPELL_UNRELENTING_ASSAULT   = 29874,
 
-    SPELL_DARK_CHANNELING       = 21157   
+    EVENT_ID_DECIMATE           = 10495,
+    EVENT_CLEAR_SHACKLES        = 10536,
+    EVENT_GUARDIAN_SHACKLE      = 10537,
+
+    SPELL_DARK_CHANNELING       = 21157,
+    SPELL_CHANNEL_VISUAL        = 29423,                    // Periodically trigger 29422
+    SPELL_CLEAR_ALL_SHACKLES    = 29910,                    // Cast by Kel'Thuzad if more than three Guardians of Icecrown are controlled
+
+    MAX_SHACKLES                = 3,                        // How many Guardians of Icecrown can be crowed control without Kel'Thuzad dispelling the shackles
+
+    SPELL_EXPLODE               = 28433,                    // Used by Living Poison blobs when players come in range
+};
+
+enum GothikSpellDummy
+{
+    SPELL_A_TO_ANCHOR_1         = 27892,
+    SPELL_B_TO_ANCHOR_1         = 27928,
+    SPELL_C_TO_ANCHOR_1         = 27935,
+
+    SPELL_A_TO_ANCHOR_2         = 27893,
+    SPELL_B_TO_ANCHOR_2         = 27929,
+    SPELL_C_TO_ANCHOR_2         = 27936,
+
+    SPELL_A_TO_SKULL            = 27915,
+    SPELL_B_TO_SKULL            = 27931,
+    SPELL_C_TO_SKULL            = 27937
+};
+
+enum GothikSummonFlag {
+    SUMMON_FLAG_TRAINEE         = 0x01,
+    SUMMON_FLAG_KNIGHT          = 0x02,
+    SUMMON_FLAG_RIDER           = 0x04
 };
 
 struct GothTrigger
 {
-    bool bIsRightSide;
-    bool bIsAnchorHigh;
+    bool isRightSide;
+    bool isAnchorHigh;
+    int summonTypeFlag;
 };
 
-static const float aSapphPositions[4] = {3521.48f, -5234.87f, 137.626f, 4.53329f};
+static const float sapphironPositions[4] = {3521.48f, -5234.87f, 137.626f, 4.53329f};
 
 struct SpawnLocation
 {
     float m_fX, m_fY, m_fZ, m_fO;
 };
 
-// Used in Construct Quarter for the deadly blobs continuously spawning in Patcherk corridor
-static const SpawnLocation aLivingPoisonPositions[6] =
+// Used in Construct Quarter for the deadly blobs continuously spawning in Patchwerk corridor
+static const SpawnLocation livingPoisonPositions[6] =
 {
     {3128.692f, -3119.211f, 293.346f, 4.725505f},
     {3154.432f, -3125.669f, 293.408f, 4.456693f},
@@ -218,34 +263,33 @@ class instance_naxxramas : public ScriptedInstance, private DialogueHelper
 
         bool IsEncounterInProgress() const override;
 
-        void OnPlayerEnter(Player* pPlayer) override;
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
+        void OnPlayerEnter(Player* player) override;
+        void OnCreatureCreate(Creature* creature) override;
+        void OnObjectCreate(GameObject* gameObject) override;
 
-        void OnCreatureDeath(Creature* pCreature) override;
+        void OnCreatureDeath(Creature* creature) override;
 
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
+        void OnCreatureRespawn(Creature* creature) override;
+
+        void SetData(uint32 type, uint32 data) override;
+        uint32 GetData(uint32 type) const override;
 
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
 
         void Update(const uint32 diff) override;
 
-        // goth
-        void SetGothTriggers();
-        Creature* GetClosestAnchorForGoth(Creature* pSource, bool bRightSide);
-        void GetGothSummonPointCreatures(CreatureList& lList, bool bRightSide);
-        bool IsInRightSideGothArea(Unit* pUnit);
+        // Gothik
+        void InitializeGothikTriggers();
+        bool IsSuitableTriggerForSummon(Unit* trigger, uint8 flag);
+        Creature* GetClosestAnchorForGothik(Creature* source, bool rightSide);
+        void GetGothikSummonPoints(CreatureList& lList, bool rightSide);
+        bool IsInRightSideGothikArea(Unit* pUnit);
 
-        // kel
-        void SetChamberCenterCoords(float fX, float fY, float fZ);
-        void GetChamberCenterCoords(float& fX, float& fY, float& fZ) const
-        { fX = m_fChamberCenterX; fY = m_fChamberCenterY; fZ = m_fChamberCenterZ; }
+        // Kel'Thuzad
         void DoTaunt();
 
-        // Gluth
-        void HandleDecimateEvent();
+        bool DoHandleEvent(uint32 eventId);
 
         bool DoHandleAreaTrigger(AreaTriggerEntry const* areaTrigger);
 
@@ -253,22 +297,25 @@ class instance_naxxramas : public ScriptedInstance, private DialogueHelper
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
 
-        GuidList m_lThadTeslaCoilList;
-        GuidList m_lGothTriggerList;
-        GuidList m_lZombieChowList;
-        GuidList m_lFaerlinaFollowersList;
+        GuidList m_thaddiusTeslaCoilList;
+        GuidList m_gothikTriggerList;
+        GuidList m_zombieChowList;
+        GuidList m_faerlinaFollowersList;
+        GuidList m_unrelentingSideList;
+        GuidList m_spectralSideList;
+        GuidList m_icrecrownGuardianList;
 
-        std::unordered_map<ObjectGuid, GothTrigger> m_mGothTriggerMap;
+        std::unordered_map<ObjectGuid, GothTrigger> m_gothikTriggerMap;
 
-        float m_fChamberCenterX;
-        float m_fChamberCenterY;
-        float m_fChamberCenterZ;
-
-        uint32 m_uiSapphSpawnTimer;
-        uint32 m_uiTauntTimer;
-        uint8 m_uiHorseMenKilled;
-        uint32 m_uiLivingPoisonTimer;
-        uint32 m_uiScreamsTimer;
+        uint32 m_sapphironSpawnTimer;
+        uint32 m_tauntTimer;
+        uint8 m_horsemenKilled;
+        uint32 m_livingPoisonTimer;
+        uint32 m_screamsTimer;
+        uint32 m_horsemenTauntTimer;
+        uint32 m_despawnKTTriggerTimer;
+        uint32 m_checkGuardiansTimer;
+        uint32 m_shackledGuardians;
 
         bool isFaerlinaIntroDone;
 

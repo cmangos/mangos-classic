@@ -33,7 +33,7 @@
 #include "Policies/Singleton.h"
 
 /// List of Opcodes
-enum OpcodesList
+enum Opcodes
 {
     MSG_NULL_ACTION                                 = 0x000,
     CMSG_BOOTME                                     = 0x001,
@@ -950,19 +950,21 @@ enum OpcodesList
 /// Player state
 enum SessionStatus
 {
-    STATUS_AUTHED = 0,                                      ///< Player authenticated (_player==nullptr, m_playerRecentlyLogout = false or will be reset before handler call)
-    STATUS_LOGGEDIN,                                        ///< Player in game (_player!=nullptr, inWorld())
-    STATUS_TRANSFER,                                        ///< Player transferring to another map (_player!=nullptr, !inWorld())
-    STATUS_LOGGEDIN_OR_RECENTLY_LOGGEDOUT,                  ///< _player!= nullptr or _player==nullptr && m_playerRecentlyLogout)
-    STATUS_NEVER,                                           ///< Opcode not accepted from client (deprecated or server side only)
-    STATUS_UNHANDLED                                        ///< We don' handle this opcode yet
+    STATUS_AUTHED = 0,                                      // Player authenticated (_player==nullptr, m_playerRecentlyLogout = false or will be reset before handler call)
+    STATUS_LOGGEDIN,                                        // Player in game (_player!=nullptr, inWorld())
+    STATUS_TRANSFER,                                        // Player transferring to another map (_player!=nullptr, !inWorld())
+    STATUS_LOGGEDIN_OR_RECENTLY_LOGGEDOUT,                  // _player!= nullptr or _player==nullptr && m_playerRecentlyLogout)
+    STATUS_NEVER,                                           // Opcode not accepted from client (deprecated or server side only)
+    STATUS_UNHANDLED                                        // We don' handle this opcode yet
 };
 
 enum PacketProcessing
 {
     PROCESS_INPLACE = 0,                                    // process packet whenever we receive it - mostly for non-handled or non-implemented packets
     PROCESS_THREADUNSAFE,                                   // packet is not thread-safe - process it in World::UpdateSessions()
-    PROCESS_THREADSAFE                                      // packet is thread-safe - process it in Map::Update()
+    PROCESS_THREADSAFE,                                     // packet is thread-safe - process it in Map::Update()
+    PROCESS_MAP_THREAD,                                     // packet is map thread safe
+    PROCESS_IMMEDIATE,                                      // packet is network thread safe
 };
 
 class WorldPacket;
@@ -977,11 +979,11 @@ struct OpcodeHandler
 
 typedef std::map< uint16, OpcodeHandler> OpcodeMap;
 
-class Opcodes
+class OpcodeStore
 {
     public:
-        Opcodes();
-        ~Opcodes();
+        OpcodeStore();
+        ~OpcodeStore();
     public:
         void BuildOpcodeList();
         void StoreOpcode(uint16 Opcode, char const* name, SessionStatus status, PacketProcessing process, void (WorldSession::*handler)(WorldPacket& recvPacket))
@@ -1017,7 +1019,7 @@ class Opcodes
         OpcodeMap mOpcodeMap;
 };
 
-#define opcodeTable MaNGOS::Singleton<Opcodes>::Instance()
+#define opcodeTable MaNGOS::Singleton<OpcodeStore>::Instance()
 
 /// Lookup opcode name for human understandable logging
 inline char const* LookupOpcodeName(uint16 id)

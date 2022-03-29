@@ -93,13 +93,13 @@ void WorldSession::HandleLootOpcode(WorldPacket& recv_data)
     recv_data >> lguid;
 
     // Check possible cheat
-    if (!_player->isAlive())
+    if (!_player->IsAlive())
         return;
 
     if (Loot* loot = sLootMgr.GetLoot(_player, lguid))
     {
         // remove stealth aura
-        _player->DoInteraction(lguid);
+        _player->DoLoot();
 
         loot->ShowContentTo(_player);
     }
@@ -177,7 +177,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
 
     if (!lootItem->IsAllowed(target, pLoot))
     {
-        _player->SendEquipError(EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM, nullptr, nullptr);
+        _player->SendLootError(lootguid, LOOT_ERROR_MASTER_OTHER);
         return;
     }
 

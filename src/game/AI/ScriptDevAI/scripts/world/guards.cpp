@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
+#include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
 guard_bluffwatcher
 guard_contested
 guard_darnassus
@@ -86,6 +86,56 @@ UnitAI* GetAI_guard_orgrimmar(Creature* pCreature)
 {
     return new guardAI_orgrimmar(pCreature);
 }
+
+enum{
+    SPELL_WINDSOR_INSPIRATION_EFFECT = 20275,
+    MAX_GUARD_SALUTES                = 7,
+};
+
+static const int32 aGuardSalute[MAX_GUARD_SALUTES] = { -1000842, -1000843, -1000844, -1000845, -1000846, -1000847, -1000848};
+
+struct guardAI_stormwind : public guardAI
+{
+    guardAI_stormwind(Creature* creature) : guardAI(creature)
+    {
+        Reset();
+    }
+
+    uint32 m_saluteWaitTimer;
+
+    void Reset() override
+    {
+        m_saluteWaitTimer = 0;
+    }
+
+    void SpellHit(Unit* /*caster*/, const SpellEntry* spell) override
+    {
+        if (spell->Id == SPELL_WINDSOR_INSPIRATION_EFFECT && !m_saluteWaitTimer)
+        {
+            DoScriptText(aGuardSalute[urand(0, MAX_GUARD_SALUTES - 1)], m_creature);
+            m_saluteWaitTimer = 2 * MINUTE * IN_MILLISECONDS;
+        }
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (m_saluteWaitTimer)
+        {
+            if (m_saluteWaitTimer < diff)
+                m_saluteWaitTimer = 0;
+            else
+                m_saluteWaitTimer -= diff;
+        }
+
+        guardAI::UpdateAI(diff);
+    }
+
+    void  ReceiveEmote(Player* player, uint32 textEmote) override
+    {
+        if (player->GetTeam() == ALLIANCE)
+            DoReplyToTextEmote(textEmote);
+    }
+};
 
 UnitAI* GetAI_guard_stormwind(Creature* pCreature)
 {

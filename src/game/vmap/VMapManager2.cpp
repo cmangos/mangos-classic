@@ -24,6 +24,7 @@
 #include "ModelInstance.h"
 #include "WorldModel.h"
 #include "VMapDefinitions.h"
+#include "Maps/GridMapDefines.h"
 
 using G3D::Vector3;
 
@@ -241,7 +242,23 @@ namespace VMAP
         return result;
     }
 
-    bool VMapManager2::GetLiquidLevel(uint32 pMapId, float x, float y, float z, uint8 ReqLiquidType, float& level, float& floor, uint32& type) const
+    uint8 GetLiquidMask(uint32 type) // wotlk uses dbc
+    {
+        switch (type)
+        {
+            case 0: return MAP_LIQUID_TYPE_NO_WATER;
+            case 1: return MAP_LIQUID_TYPE_WATER;
+            case 2: return MAP_LIQUID_TYPE_OCEAN;
+            case 3: return MAP_LIQUID_TYPE_MAGMA;
+            case 4: return MAP_LIQUID_TYPE_SLIME;
+            case 21: return MAP_LIQUID_TYPE_SLIME;
+            case 41: return MAP_LIQUID_TYPE_WATER;
+            case 61: return MAP_LIQUID_TYPE_WATER;
+            default: return 0;
+        }
+    }
+
+    bool VMapManager2::GetLiquidLevel(uint32 pMapId, float x, float y, float z, uint8 ReqLiquidTypeMask, float& level, float& floor, uint32& type) const
     {
         InstanceTreeMap::const_iterator instanceTree = iInstanceMapTrees.find(pMapId);
         if (instanceTree != iInstanceMapTrees.end())
@@ -252,7 +269,7 @@ namespace VMAP
             {
                 floor = info.ground_Z;
                 type = info.hitModel->GetLiquidType();
-                if (ReqLiquidType && !(type & ReqLiquidType))
+                if (ReqLiquidTypeMask && !(GetLiquidMask(type) & ReqLiquidTypeMask))
                     return false;
                 if (info.hitInstance->GetLiquidLevel(pos, info, level))
                     return true;

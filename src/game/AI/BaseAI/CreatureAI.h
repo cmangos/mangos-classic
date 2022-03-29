@@ -27,6 +27,11 @@ class CreatureAI : public UnitAI
 {
     public:
         explicit CreatureAI(Creature* creature);
+        explicit CreatureAI(Creature* creature, uint32 combatActions);
+
+        virtual void Reset();
+
+        virtual void OnRemoveFromWorld() {}
 
         virtual void EnterCombat(Unit* enemy) override;
         virtual void AttackStart(Unit* who) override;
@@ -35,6 +40,7 @@ class CreatureAI : public UnitAI
 
         void DoFakeDeath(uint32 spellId = 0);
         void SetDeathPrevention(bool state);
+        bool IsPreventingDeath() const override { return m_deathPrevention; }
         void ResetDeathPrevented() { m_deathPrevented = false; }
 
         bool DoRetreat() override;
@@ -43,6 +49,15 @@ class CreatureAI : public UnitAI
         void RetreatingArrived() override;
         void RetreatingEnded() override;
 
+        void HandleAssistanceCall(Unit* sender, Unit* invoker) override;
+
+        void AddUnreachabilityCheck(); // use in constructor
+
+        CreatureSpellList const& GetSpellList() const;
+
+        void TimedFleeingEnded() override;
+
+        void OnCallForHelp(Unit* caller, Unit* enemy) override;
     protected:
         Creature* m_creature;
         bool m_deathPrevention;

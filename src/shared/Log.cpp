@@ -29,6 +29,8 @@
 #include <thread>
 #include <cstdarg>
 
+#include <boost/stacktrace.hpp>
+
 INSTANTIATE_SINGLETON_1(Log);
 
 LogFilterData logFilterData[LOG_FILTER_COUNT] =
@@ -47,8 +49,8 @@ LogFilterData logFilterData[LOG_FILTER_COUNT] =
     { "combat",              "LogFilter_Combat",             false },
     { "spell_cast",          "LogFilter_SpellCast",          false },
     { "db_stricted_check",   "LogFilter_DbStrictedCheck",    true  },
-    { "ahbot_seller",        "LogFilter_AhbotSeller",        true  },
-    { "ahbot_buyer",         "LogFilter_AhbotBuyer",         true  },
+    { "",                    "",                             true  },
+    { "",                    "",                             true  },
     { "pathfinding",         "LogFilter_Pathfinding",        true  },
     { "map_loading",         "LogFilter_MapLoading",         true  },
     { "event_ai_dev",        "LogFilter_EventAiDev",         true  },
@@ -266,6 +268,7 @@ void Log::Initialize()
     eventAiErLogfile = openLogFile("EventAIErrorLogFile", nullptr, "a");
     raLogfile = openLogFile("RaLogFile", nullptr, "a");
     worldLogfile = openLogFile("WorldLogFile", "WorldLogTimestamp", "a");
+    scriptErrLogFile = openLogFile("SD2ErrorLogFile", nullptr, "a");
     customLogFile = openLogFile("CustomLogFile", nullptr, "a");
 
     // Main log file settings
@@ -349,7 +352,9 @@ std::string Log::GetTimestampStr()
     //       MM     minutes (2 digits 00-59)
     //       SS     seconds (2 digits 00-59)
     char buf[20];
-    snprintf(buf, 20, "%04d-%02d-%02d_%02d-%02d-%02d", aTm->tm_year + 1900, aTm->tm_mon + 1, aTm->tm_mday, aTm->tm_hour, aTm->tm_min, aTm->tm_sec);
+    int snRes = snprintf(buf, 20, "%04d-%02d-%02d_%02d-%02d-%02d", aTm->tm_year + 1900, aTm->tm_mon + 1, aTm->tm_mday, aTm->tm_hour, aTm->tm_min, aTm->tm_sec);
+    if (snRes < 0 || snRes >= sizeof(buf))
+        return "";
     return std::string(buf);
 }
 
@@ -790,7 +795,6 @@ void Log::outCommand(uint32 account, const char* str, ...)
 
 void Log::outChar(const char* str, ...)
 {
-
     if (!str)
         return;
 
@@ -1100,4 +1104,25 @@ void script_error_log(const char* str, ...)
     va_end(ap);
 
     sLog.outErrorScriptLib("%s", buf);
+}
+
+void Log::traceLog()
+{
+    std::lock_guard<std::mutex> guard(m_worldLogMtx);
+    if (customLogFile)
+    {
+        fprintf(customLogFile, "%s\n", GetTraceLog().data());
+        fflush(customLogFile);
+    }
+
+    fflush(stdout);
+}
+
+// has to be in a locked enviroment on linux
+std::string Log::GetTraceLog()
+{
+    std::lock_guard<std::mutex> guard(m_traceLogMtx);
+    std::stringstream ss;
+    ss << boost::stacktrace::stacktrace(); // warning - not async-safe - hence the locking
+    return ss.str();
 }

@@ -234,7 +234,6 @@ class ByteBuffer
             return *this;
         }
 
-
         uint8 operator[](size_t pos) const
         {
             return read<uint8>(pos);
@@ -277,7 +276,13 @@ class ByteBuffer
         {
             if (pos + sizeof(T) > size())
                 throw ByteBufferException(false, pos, sizeof(T), size());
+#if defined(__arm__)
+            // ARM has alignment issues, we need to use memcpy to avoid them
+            T val;
+            memcpy((void*)&val, (void*)&_storage[pos], sizeof(T));
+#else
             T val = *((T const*)&_storage[pos]);
+#endif
             EndianConvert(val);
             return val;
         }
@@ -369,6 +374,11 @@ class ByteBuffer
                 _storage.resize(_wpos + cnt);
             memcpy(&_storage[_wpos], src, cnt);
             _wpos += cnt;
+        }
+
+        void append(const std::vector<uint8>& buffer)
+        {
+            append(buffer.data(), buffer.size());
         }
 
         void append(const ByteBuffer& buffer)

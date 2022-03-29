@@ -19,8 +19,11 @@
 #define DEF_GAMEOBJECT_AI_H
 
 #include "Platform/Define.h"
+#include "AI/BaseAI/AIDefines.h"
 
 class GameObject;
+class Unit;
+struct SpellEntry;
 
 class GameObjectAI
 {
@@ -59,6 +62,21 @@ class GameObjectAI
         * Called when a GO disappears from the world to normal observers
         */
         virtual void JustDespawned() {}
+
+        /*
+        * Enables generic receiving of events
+        */
+        virtual void ReceiveAIEvent(AIEventType /*eventType*/, uint32 /*miscValue*/ = 0) {}
+        
+        /*
+         * Enables handling of GO Use by all units
+         */
+        virtual void OnUse(Unit* /*user*/, SpellEntry const* /*spellInfo*/);
+
+        /*
+         * Notifies AI on object heartbeat
+         */
+        virtual void OnHeartbeat() {}
 
     protected:
         GameObject* m_go;

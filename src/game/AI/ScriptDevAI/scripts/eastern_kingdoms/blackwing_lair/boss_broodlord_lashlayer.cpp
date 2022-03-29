@@ -23,8 +23,9 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "blackwing_lair.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -37,105 +38,93 @@ enum
     SPELL_MORTAL_STRIKE         = 24573,
 };
 
-struct boss_broodlordAI : public ScriptedAI
+enum BroodlordActions
 {
-    boss_broodlordAI(Creature* pCreature) : ScriptedAI(pCreature)
+    BROODLORD_CLEAVE,
+    BROODLORD_KNOCK_AWAY,
+    BROODLORD_BLAST_WAVE,
+    BROODLORD_MORTAL_STRIKE,
+    BROODLORD_ACTION_MAX,
+};
+
+struct boss_broodlordAI : public CombatAI
+{
+    boss_broodlordAI(Creature* creature) : CombatAI(creature, BROODLORD_ACTION_MAX), m_instance(static_cast<instance_blackwing_lair*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        AddCombatAction(BROODLORD_CLEAVE, 8000u);
+        AddCombatAction(BROODLORD_KNOCK_AWAY, 12000u);
+        AddCombatAction(BROODLORD_BLAST_WAVE, 20000u);
+        AddCombatAction(BROODLORD_MORTAL_STRIKE, 30000u);
+        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float y, float z)
+        {
+            return z < 448.60f;
+        });        
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
 
-    uint32 m_uiCleaveTimer;
-    uint32 m_uiBlastWaveTimer;
-    uint32 m_uiMortalStrikeTimer;
-    uint32 m_uiKnockAwayTimer;
-
-    void Reset() override
+    void Aggro(Unit* /*who*/) override
     {
-        m_uiCleaveTimer         = 8000;                     // These times are probably wrong
-        m_uiBlastWaveTimer      = 12000;
-        m_uiMortalStrikeTimer   = 20000;
-        m_uiKnockAwayTimer      = 30000;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LASHLAYER, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_LASHLAYER, IN_PROGRESS);
 
         DoScriptText(SAY_AGGRO, m_creature);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LASHLAYER, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_LASHLAYER, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LASHLAYER, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_LASHLAYER, FAIL);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void OnLeash() override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        DoScriptText(SAY_LEASH, m_creature);
+    }
 
-        // Cleave Timer
-        if (m_uiCleaveTimer < uiDiff)
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
-                m_uiCleaveTimer = 7000;
+            case BROODLORD_CLEAVE:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE) == CAST_OK)
+                    ResetCombatAction(action, 7000);
+                break;
+            }
+            case BROODLORD_KNOCK_AWAY:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
+                    ResetCombatAction(action, urand(15000, 30000));
+                break;
+            }
+            case BROODLORD_BLAST_WAVE:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_BLAST_WAVE) == CAST_OK)
+                    ResetCombatAction(action, urand(8000, 16000));
+                break;
+            }
+            case BROODLORD_MORTAL_STRIKE:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MORTAL_STRIKE) == CAST_OK)
+                    ResetCombatAction(action, urand(25000, 35000));
+                break;
+            }
         }
-        else
-            m_uiCleaveTimer -= uiDiff;
-
-        // Blast Wave
-        if (m_uiBlastWaveTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_BLAST_WAVE) == CAST_OK)
-                m_uiBlastWaveTimer = urand(8000, 16000);
-        }
-        else
-            m_uiBlastWaveTimer -= uiDiff;
-
-        // Mortal Strike Timer
-        if (m_uiMortalStrikeTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTAL_STRIKE) == CAST_OK)
-                m_uiMortalStrikeTimer = urand(25000, 35000);
-        }
-        else
-            m_uiMortalStrikeTimer -= uiDiff;
-
-        // Knock Away Timer
-        if (m_uiKnockAwayTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
-                m_uiKnockAwayTimer = urand(15000, 30000);
-        }
-        else
-            m_uiKnockAwayTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
-
-        if (EnterEvadeIfOutOfCombatArea(uiDiff))
-            DoScriptText(SAY_LEASH, m_creature);
     }
 };
-UnitAI* GetAI_boss_broodlord(Creature* pCreature)
-{
-    return new boss_broodlordAI(pCreature);
-}
 
 void AddSC_boss_broodlord()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_broodlord";
-    pNewScript->GetAI = &GetAI_boss_broodlord;
+    pNewScript->GetAI = &GetNewAIInstance<boss_broodlordAI>;
     pNewScript->RegisterSelf();
 }

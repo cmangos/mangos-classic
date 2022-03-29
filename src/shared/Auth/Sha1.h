@@ -34,6 +34,7 @@ class Sha1Hash
         void UpdateBigNumbers(BigNumber* bn0, ...);
 
         void UpdateData(const uint8* dta, int len);
+        void UpdateData(const std::vector<uint8>& data);
         void UpdateData(const std::string& str);
 
         void Initialize();

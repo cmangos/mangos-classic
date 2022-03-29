@@ -9,7 +9,7 @@
 class GameObject;
 class Creature;
 
-struct ObjectDistanceOrder : public std::binary_function<const WorldObject, const WorldObject, bool>
+struct ObjectDistanceOrder
 {
     const Unit* m_source;
 
@@ -21,7 +21,7 @@ struct ObjectDistanceOrder : public std::binary_function<const WorldObject, cons
     }
 };
 
-struct ObjectDistanceOrderReversed : public std::binary_function<const WorldObject, const WorldObject, bool>
+struct ObjectDistanceOrderReversed
 {
     const Unit* m_source;
 
@@ -37,7 +37,9 @@ GameObject* GetClosestGameObjectWithEntry(WorldObject* source, uint32 entry, flo
 Creature* GetClosestCreatureWithEntry(WorldObject* source, uint32 entry, float maxSearchRange, bool onlyAlive = true, bool onlyDead = false, bool excludeSelf = false);
 
 void GetGameObjectListWithEntryInGrid(GameObjectList& goList, WorldObject* source, uint32 entry, float maxSearchRange);
+void GetGameObjectListWithEntryInGrid(GameObjectList& goList, WorldObject* source, std::vector<uint32> const& entries, float maxSearchRange);
 void GetCreatureListWithEntryInGrid(CreatureList& creatureList, WorldObject* source, uint32 entry, float maxSearchRange);
+void GetCreatureListWithEntryInGrid(CreatureList& creatureList, WorldObject* source, std::vector<uint32> const& entries, float maxSearchRange);
 void GetPlayerListWithEntryInWorld(PlayerList& playerList, WorldObject* source, float maxSearchRange);
 
 // Used in: hyjalAI.cpp
@@ -48,7 +50,7 @@ class AllFriendlyCreaturesInGrid
         AllFriendlyCreaturesInGrid(Unit const* obj) : pUnit(obj) {}
         bool operator() (Unit* u)
         {
-            if (u->isAlive() && u->GetVisibility() == VISIBILITY_ON && u->CanAssist(pUnit))
+            if (u->IsAlive() && u->GetVisibility() == VISIBILITY_ON && u->CanAssist(pUnit))
                 return true;
 
             return false;

@@ -28,6 +28,7 @@
 #include "Master.h"
 #include "SystemConfig.h"
 #include "AuctionHouseBot/AuctionHouseBot.h"
+#include "PlayerBot/config.h"
 
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
@@ -57,38 +58,22 @@ int m_ServiceStatus = -1;
 DatabaseType WorldDatabase;                                 ///< Accessor to the world database
 DatabaseType CharacterDatabase;                             ///< Accessor to the character database
 DatabaseType LoginDatabase;                                 ///< Accessor to the realm/login database
+DatabaseType LogsDatabase;                                  ///< Accessor to the logs database
 
 uint32 realmID;                                             ///< Id of the realm
-
-/// Print out the usage string for this program on the console.
-void usage(const char* prog)
-{
-    sLog.outString("Usage: \n %s [<options>]\n"
-                   "    -v, --version            print version and exist\n\r"
-                   "    -c config_file           use config_file as configuration file\n\r"
-                   "    -a, --ahbot config_file  use config_file as ahbot configuration file\n\r"
-#ifdef _WIN32
-                   "    Running as service functions:\n\r"
-                   "    -s run                   run as service\n\r"
-                   "    -s install               install service\n\r"
-                   "    -s uninstall             uninstall service\n\r"
-#else
-                   "    Running as daemon functions:\n\r"
-                   "    -s run                   run as daemon\n\r"
-                   "    -s stop                  stop daemon\n\r"
-#endif
-                   , prog);
-}
 
 /// Launch the mangos server
 int main(int argc, char* argv[])
 {
-    std::string auctionBotConfig, configFile, serviceParameter;
+    std::string auctionBotConfig, configFile, playerBotConfig, serviceParameter;
 
     boost::program_options::options_description desc("Allowed options");
     desc.add_options()
     ("ahbot,a", boost::program_options::value<std::string>(&auctionBotConfig), "ahbot configuration file")
     ("config,c", boost::program_options::value<std::string>(&configFile)->default_value(_MANGOSD_CONFIG), "configuration file")
+#ifdef BUILD_PLAYERBOT
+    ("playerbot,p", boost::program_options::value<std::string>(&playerBotConfig)->default_value(_D_PLAYERBOT_CONFIG), "playerbot configuration file")
+#endif
     ("help,h", "prints usage")
     ("version,v", "print version and exit")
 #ifdef _WIN32
@@ -126,7 +111,12 @@ int main(int argc, char* argv[])
     }
 
     if (vm.count("ahbot"))
-        sAuctionBotConfig.SetConfigFileName(auctionBotConfig);
+        sAuctionHouseBot.SetConfigFileName(auctionBotConfig);
+
+#ifdef BUILD_PLAYERBOT
+    if (vm.count("playerbot"))
+        _PLAYERBOT_CONFIG = playerBotConfig;
+#endif
 
 #ifdef _WIN32                                                // windows service command need execute before config read
     if (vm.count("s"))
@@ -170,17 +160,20 @@ int main(int argc, char* argv[])
     }
 #endif
 
-    sLog.outString("%s [world-daemon]", _FULLVERSION(REVISION_DATE, REVISION_ID));
-    sLog.outString("<Ctrl-C> to stop.");
+    sLog.outString("[%s World server v%s] id(%d) port(%d)", _PACKAGENAME, VERSION
+        , sConfig.GetIntDefault("RealmID", -1), sConfig.GetIntDefault("WorldServerPort", -1));
     sLog.outString("\n\n"
-                   "       _____     __  __       _   _  _____  ____   _____ \n"
-                   "      / ____|   |  \\/  |     | \\ | |/ ____|/ __ \\ / ____|\n"
-                   "     | |        | \\  / |     |  \\| | |  __  |  | | (___  \n"
-                   "     | |ontinued| |\\/| | __ _| . ` | | |_ | |  | |\\___ \\ \n"
-                   "     | |____    | |  | |/ _` | |\\  | |__| | |__| |____) |\n"
-                   "      \\_____|   |_|  |_| (_| |_| \\_|\\_____|\\____/ \\____/ \n"
-                   "      http://cmangos.net\\__,_|     Doing things right!\n\n");
+        "       _____     __  __       _   _  _____  ____   _____ \n"
+        "      / ____|   |  \\/  |     | \\ | |/ ____|/ __ \\ / ____|\n"
+        "     | |        | \\  / |     |  \\| | |  __  |  | | (___  \n"
+        "     | |ontinued| |\\/| | __ _| . ` | | |_ | |  | |\\___ \\ \n"
+        "     | |____    | |  | |/ _` | |\\  | |__| | |__| |____) |\n"
+        "      \\_____|   |_|  |_| (_| |_| \\_|\\_____|\\____/ \\____/ \n"
+        "      http://cmangos.net\\__,_|     Doing emulation right!\n\n");
 
+    sLog.outString("Built on %s at %s", __DATE__, __TIME__);
+    sLog.outString("Built for %s", _ENDIAN_PLATFORM);
+    sLog.outString("Using commit hash(%s) committed on %s", REVISION_ID, REVISION_DATE);
     sLog.outString("Using configuration file %s.", configFile.c_str());
 
     DETAIL_LOG("%s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
@@ -191,6 +184,9 @@ int main(int argc, char* argv[])
     }
 
     DETAIL_LOG("Using Boost: %s", BOOST_LIB_VERSION);
+
+    sLog.outString();
+    sLog.outString("<Ctrl-C> to stop.");
 
     ///- Set progress bars show mode
     BarGoLink::SetOutputState(sConfig.GetBoolDefault("ShowProgressBars", true));

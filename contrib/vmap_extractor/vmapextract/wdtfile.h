@@ -33,7 +33,7 @@ class WDTFile
         ~WDTFile(void);
         bool init(char* map_id, unsigned int mapID);
 
-        string* gWmoInstansName;
+        std::vector<std::string> m_wmoNames;
         int gnWMO, nMaps;
 
         ADTFile* GetMap(int x, int z);

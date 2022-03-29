@@ -1,0 +1,49 @@
+{
+	"0": {
+		"3653": {
+			"maxSimplificationError": 1.0,
+			"detailSampleDist": 0.5,
+			"walkableClimb": 7.9,
+			"_Info": "walkableClimb <= 8 else .go c 1000403 goes over the edge"
+		}
+	},
+	"530": {
+		"2029": {
+			"detailSampleDist": 1,
+			"detailSampleMaxError": 0.45
+		}
+	},
+	"532": {
+		"3552": {
+			"maxSimplificationError": 1.0,
+			"detailSampleDist": 0.5,
+			"detailSampleMaxError": 0.5,
+			"walkableHeight": 5.0,
+			"walkableClimb": 4.0
+		}
+	},
+	"545": {
+		"maxSimplificationError": 2.1,
+		"detailSampleDist": 0.7,
+		"detailSampleMaxError": 0.7,
+		"_Info": "walkableHeight >= 5 else some creatures cant chase from water to land",
+		"walkableHeight": 5.0,
+		"walkableClimb": 4.5,
+		"walkableRadius": 1,
+		"walkableSlopeAngle": 70,
+		"minRegionArea": 30,
+		"mergeRegionArea": 10,
+		"borderSize": 5
+	},
+	"562": {
+		"walkableRadius": 0.99
+	},
+	"572": {
+		"2829": {
+			"maxSimplificationError": 1,
+			"detailSampleDist": 1,
+			"detailSampleMaxError": 0.2,
+			"walkableClimb": 10
+		}
+	}
+}

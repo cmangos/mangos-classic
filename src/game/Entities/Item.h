@@ -161,10 +161,9 @@ enum EnchantmentOffset
 
 enum EnchantmentSlotMask
 {
-    ENCHANTMENT_CAN_SOULBOUND  = 0x01,
-    ENCHANTMENT_UNK1           = 0x02,
-    ENCHANTMENT_UNK2           = 0x04,
-    ENCHANTMENT_UNK3           = 0x08
+    ENCHANTMENT_SOULBOUND               = 0x01,
+    ENCHANTMENT_DO_NOT_LOG              = 0x02,
+    ENCHANTMENT_MAINHAND_ONLY           = 0x04, // removed when MH is swapped elsewhere
 };
 
 enum ItemUpdateState
@@ -249,6 +248,7 @@ class Item : public Object
         bool IsSoulBound() const { return HasFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_BINDED); }
         bool IsBindedNotWith(Player const* player) const;
         bool IsBoundByEnchant() const;
+        bool IsMainHandOnlyEnchant(EnchantmentSlot slot) const;
         virtual void SaveToDB();
         virtual bool LoadFromDB(uint32 guidLow, Field* fields, ObjectGuid ownerGuid = ObjectGuid());
         virtual void DeleteFromDB();
@@ -296,8 +296,8 @@ class Item : public Object
         uint32 GetEnchantmentDuration(EnchantmentSlot slot) const { return GetUInt32Value(ITEM_FIELD_ENCHANTMENT + slot * MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_DURATION_OFFSET);}
         uint32 GetEnchantmentCharges(EnchantmentSlot slot)  const { return GetUInt32Value(ITEM_FIELD_ENCHANTMENT + slot * MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_CHARGES_OFFSET);}
 
-        SpellModifier* GetEnchantmentModifier() { return m_enchantEffectModifier; }
-        void SetEnchantmentModifier(SpellModifier* mod);
+        uint32 GetEnchantmentModifier() { return m_enchantmentModifier; }
+        void SetEnchantmentModifier(uint32 value) { m_enchantmentModifier = value; }
 
         void SendTimeUpdate(Player* owner) const;
         void UpdateDuration(Player* owner, uint32 diff);
@@ -307,8 +307,8 @@ class Item : public Object
         void SetSpellCharges(uint8 index/*0..5*/, int32 value) { SetInt32Value(ITEM_FIELD_SPELL_CHARGES + index, value); }
 
         void SetLootState(ItemLootUpdateState state);
-        bool HasGeneratedLoot() const { return loot && m_lootState != ITEM_LOOT_NONE && m_lootState != ITEM_LOOT_REMOVED; }
-        bool HasTemporaryLoot() const { return loot && m_lootState == ITEM_LOOT_TEMPORARY; }
+        bool HasGeneratedLoot() const { return m_loot && m_lootState != ITEM_LOOT_NONE && m_lootState != ITEM_LOOT_REMOVED; }
+        bool HasTemporaryLoot() const { return m_loot && m_lootState == ITEM_LOOT_TEMPORARY; }
 
         bool HasSavedLoot() const { return m_lootState != ITEM_LOOT_NONE && m_lootState != ITEM_LOOT_NEW && m_lootState != ITEM_LOOT_TEMPORARY; }
 
@@ -332,6 +332,9 @@ class Item : public Object
         void AddToClientUpdateList() override;
         void RemoveFromClientUpdateList() override;
         void BuildUpdateData(UpdateDataMapType& update_players) override;
+
+        bool IsUsedInSpell() const { return m_usedInSpell; }
+        void SetUsedInSpell(bool state) { m_usedInSpell = state; }
     private:
         uint8 m_slot;
         Bag* m_container;
@@ -339,7 +342,8 @@ class Item : public Object
         int16 uQueuePos;
         bool mb_in_trade;                                   // true if item is currently in trade-window
         ItemLootUpdateState m_lootState;
-        SpellModifier* m_enchantEffectModifier;
+        bool m_usedInSpell;
+        uint32 m_enchantmentModifier; // used by one script and removed in wotlk
 };
 
 #endif

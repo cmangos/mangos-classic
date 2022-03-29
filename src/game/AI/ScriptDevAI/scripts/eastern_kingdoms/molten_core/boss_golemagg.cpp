@@ -23,16 +23,17 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "molten_core.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
     SPELL_MAGMA_SPLASH      = 13879,
     SPELL_PYROBLAST         = 20228,
     SPELL_EARTHQUAKE        = 19798,
-    SPELL_ENRAGE            = 19953,
-    SPELL_GOLEMAGG_TRUST    = 20553,
+    // SPELL_ENRAGE            = 19953, // unconfirmed
+    SPELL_GOLEMAGG_TRUST    = 20556,
     SPELL_DOUBLE_ATTACK     = 18943,
 
     // Core Rager
@@ -43,190 +44,156 @@ enum
     SPELL_MANGLE            = 19820
 };
 
-struct boss_golemaggAI : public ScriptedAI
+enum GolemaggActions
 {
-    boss_golemaggAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
+    GOLEMAGG_ENRAGE,
+    GOLEMAGG_PYROBLAST,
+    GOLEMAGG_EARTHQUAKE,
+    GOLEMAGG_ACTION_MAX,
+};
 
-        DoCastSpellIfCan(m_creature, SPELL_MAGMA_SPLASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+struct boss_golemaggAI : public CombatAI
+{
+    boss_golemaggAI(Creature* creature) : CombatAI(creature, GOLEMAGG_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    {
+        AddTimerlessCombatAction(GOLEMAGG_ENRAGE, true);
+        AddCombatAction(GOLEMAGG_PYROBLAST, uint32(7 * IN_MILLISECONDS));
+        AddCombatAction(GOLEMAGG_EARTHQUAKE, true);
     }
 
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiPyroblastTimer;
-    uint32 m_uiEarthquakeTimer;
-    uint32 m_uiBuffTimer;
-    bool m_bEnraged;
+    ScriptedInstance* m_instance;
 
     void Reset() override
     {
-        m_uiPyroblastTimer  = 7 * IN_MILLISECONDS;
-        m_uiEarthquakeTimer = 3 * IN_MILLISECONDS;
-        m_uiBuffTimer       = 1.5 * IN_MILLISECONDS;
-        m_bEnraged = false;
+        CombatAI::Reset();
+
+        DoCastSpellIfCan(nullptr, SPELL_MAGMA_SPLASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(nullptr, SPELL_GOLEMAGG_TRUST, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GOLEMAGG, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_GOLEMAGG, IN_PROGRESS);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         // Send event to the Core Ragers so they know that Golemagg is dead and that they must go suicide
         CreatureList lCoreRagerList;
         GetCreatureListWithEntryInGrid(lCoreRagerList, m_creature, NPC_CORE_RAGER, 100.0f);
         for (auto& itr : lCoreRagerList)
         {
-            if (itr->isAlive())
+            if (itr->IsAlive())
                 m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, itr);
         }
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GOLEMAGG, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_GOLEMAGG, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GOLEMAGG, FAIL);
-
-        DoCastSpellIfCan(m_creature, SPELL_MAGMA_SPLASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        if (m_instance)
+            m_instance->SetData(TYPE_GOLEMAGG, FAIL);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Pyroblast
-        if (m_uiPyroblastTimer < uiDiff)
+        switch (action)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            case GOLEMAGG_ENRAGE:
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_PYROBLAST) == CAST_OK)
-                    m_uiPyroblastTimer = 7 * IN_MILLISECONDS;
+                if (m_creature->GetHealthPercent() > 10.0f)
+                    return;
+
+                //if (DoCastSpellIfCan(nullptr, SPELL_ENRAGE) == CAST_OK)
+                //{
+                SetActionReadyStatus(action, false);
+                ResetCombatAction(GOLEMAGG_EARTHQUAKE, 0u);
+                //}
+                break;
+            }
+            case GOLEMAGG_PYROBLAST:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_PYROBLAST, SELECT_FLAG_PLAYER))
+                    if (DoCastSpellIfCan(target, SPELL_PYROBLAST) == CAST_OK)
+                        ResetCombatAction(action, 7 * IN_MILLISECONDS);
+                break;
+            }
+            case GOLEMAGG_EARTHQUAKE:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_EARTHQUAKE) == CAST_OK)
+                    ResetCombatAction(action, 3 * IN_MILLISECONDS);
+                break;
             }
         }
-        else
-            m_uiPyroblastTimer -= uiDiff;
-
-        // Enrage
-        if (!m_bEnraged && m_creature->GetHealthPercent() < 10.0f)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
-                m_bEnraged = true;
-        }
-
-        // Earthquake
-        if (m_bEnraged)
-        {
-            if (m_uiEarthquakeTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_EARTHQUAKE) == CAST_OK)
-                    m_uiEarthquakeTimer = 3 * IN_MILLISECONDS;
-            }
-            else
-                m_uiEarthquakeTimer -= uiDiff;
-        }
-
-        // Golemagg's Trust
-        if (m_uiBuffTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature, SPELL_GOLEMAGG_TRUST);
-            m_uiBuffTimer = 1.5 * IN_MILLISECONDS;
-        }
-        else
-            m_uiBuffTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
-struct mob_core_ragerAI : public ScriptedAI
+enum CoreRagerActions
 {
-    mob_core_ragerAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
+    CORE_RAGER_HEAL,
+    CORE_RAGER_MANGLE,
+    CORE_RAGER_ACTION_MAX,
+};
 
-        DoCastSpellIfCan(m_creature, SPELL_THRASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+struct mob_core_ragerAI : public CombatAI
+{
+    mob_core_ragerAI(Creature* creature) : CombatAI(creature, CORE_RAGER_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    {
+        AddTimerlessCombatAction(CORE_RAGER_HEAL, true);
+        AddCombatAction(CORE_RAGER_MANGLE, uint32(7 * IN_MILLISECONDS)); // These times are probably wrong
+        SetDeathPrevention(true);
     }
 
-    ScriptedInstance* m_pInstance;
-    uint32 m_uiMangleTimer;
+    ScriptedInstance* m_instance;
 
     void Reset() override
     {
-        m_uiMangleTimer = 7 * IN_MILLISECONDS;              // These times are probably wrong
+        CombatAI::Reset();
+        DoCastSpellIfCan(nullptr, SPELL_THRASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+    }
+    
+    void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    {
+        // Event sent by Golemagg at the time of his death so Core Rager knows he can self-suicide
+        if (sender->GetEntry() == NPC_GOLEMAGG && eventType == AI_EVENT_CUSTOM_A)
+            DoCastSpellIfCan(nullptr, SPELL_QUIET_SUICIDE, CAST_TRIGGERED);
     }
 
-    void DamageTaken(Unit* /*pDoneBy*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void ExecuteAction(uint32 action) override
     {
-        if (m_creature->GetHealthPercent() < 50.0f)
+        switch (action)
         {
-            if (m_pInstance && m_pInstance->GetData(TYPE_GOLEMAGG) != DONE)
+            case CORE_RAGER_HEAL:
             {
-                DoScriptText(EMOTE_LOW_HP, m_creature);
-                DoCastSpellIfCan(m_creature, SPELL_FULL_HEAL, CAST_TRIGGERED);
-                damage = 0;
+                if (m_creature->GetHealthPercent() > 50.0f)
+                    return;
+
+                if (DoCastSpellIfCan(nullptr, SPELL_FULL_HEAL) == CAST_OK)
+                    DoScriptText(EMOTE_LOW_HP, m_creature);
+                break;
+            }
+            case CORE_RAGER_MANGLE:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MANGLE) == CAST_OK)
+                    ResetCombatAction(action, 10 * IN_MILLISECONDS);
+                break;
             }
         }
     }
-
-    void JustReachedHome() override
-    {
-        DoCastSpellIfCan(m_creature, SPELL_THRASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-    }
-    
-    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
-    {
-        // Event sent by Golemagg at the time of his death so Core Rager knows he can self-suicide
-        if (pSender->GetEntry() == NPC_GOLEMAGG && eventType == AI_EVENT_CUSTOM_A)
-            DoCastSpellIfCan(m_creature, SPELL_QUIET_SUICIDE, CAST_TRIGGERED);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Mangle
-        if (m_uiMangleTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MANGLE) == CAST_OK)
-                m_uiMangleTimer = 10 * IN_MILLISECONDS;
-        }
-        else
-            m_uiMangleTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
-    }
 };
-
-UnitAI* GetAI_boss_golemagg(Creature* pCreature)
-{
-    return new boss_golemaggAI(pCreature);
-}
-
-UnitAI* GetAI_mob_core_rager(Creature* pCreature)
-{
-    return new mob_core_ragerAI(pCreature);
-}
 
 void AddSC_boss_golemagg()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_golemagg";
-    pNewScript->GetAI = &GetAI_boss_golemagg;
+    pNewScript->GetAI = &GetNewAIInstance<boss_golemaggAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_core_rager";
-    pNewScript->GetAI = &GetAI_mob_core_rager;
+    pNewScript->GetAI = &GetNewAIInstance<mob_core_ragerAI>;
     pNewScript->RegisterSelf();
 }

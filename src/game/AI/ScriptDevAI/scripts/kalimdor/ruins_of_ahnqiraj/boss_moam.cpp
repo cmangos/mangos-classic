@@ -23,7 +23,9 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -37,112 +39,147 @@ enum
     SPELL_SUMMON_MANAFIENDS  = 25684,
     SPELL_ENERGIZE           = 25685,
 
-    PHASE_ATTACKING          = 0,
-    PHASE_ENERGIZING         = 1
+    SPELL_SUMMON_MANA_FIEND_1 = 25681,
+    SPELL_SUMMON_MANA_FIEND_2 = 25682,
+    SPELL_SUMMON_MANA_FIEND_3 = 25683,
+
+    NPC_MANA_FIEND           = 15527,
 };
 
-struct boss_moamAI : public ScriptedAI
+enum MoamActions
 {
-    boss_moamAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+    MOAM_ARCANE_ERUPTION,
+    MOAM_MANA_FIENDS,
+    MOAM_ENERGIZE,
+    MOAM_TRAMPLE,
+    MOAM_MANA_DRAIN,
+    MOAM_ACTION_MAX,
+    MOAM_CANCEL_ENERGIZE,
+};
+
+struct boss_moamAI : public CombatAI
+{
+    boss_moamAI(Creature* creature) :
+        CombatAI(creature, MOAM_ACTION_MAX),
+        m_uiPhase(0)
+    {
+        AddCombatAction(MOAM_ARCANE_ERUPTION, 0u);
+        AddCombatAction(MOAM_TRAMPLE, 9000u);
+        AddCombatAction(MOAM_MANA_DRAIN, 6000u);
+        AddCombatAction(MOAM_MANA_FIENDS, 90000u);
+        AddCombatAction(MOAM_ENERGIZE, 90000u);
+        AddCustomAction(MOAM_CANCEL_ENERGIZE, true, [&]()
+        {
+            m_creature->RemoveAurasDueToSpell(SPELL_ENERGIZE);
+        });
+
+        if (m_creature->GetInstanceData())
+        {
+            m_creature->GetCombatManager().SetLeashingCheck([](Unit* unit, float x, float y, float z)
+            {
+                return static_cast<ScriptedInstance*>(unit->GetInstanceData())->GetPlayerInMap(true, false) == nullptr;
+            });
+        }
+    }
 
     uint8 m_uiPhase;
-
-    uint32 m_uiTrampleTimer;
-    uint32 m_uiManaDrainTimer;
-    uint32 m_uiCheckoutManaTimer;
-    uint32 m_uiSummonManaFiendsTimer;
+    GuidVector m_summons;
 
     void Reset() override
     {
-        m_uiTrampleTimer            = 9000;
-        m_uiManaDrainTimer          = 6000;
-        m_uiSummonManaFiendsTimer   = 90000;
-        m_uiCheckoutManaTimer       = 1500;
-        m_uiPhase                   = PHASE_ATTACKING;
+        CombatAI::Reset();
         m_creature->SetPower(POWER_MANA, 0);
+        DespawnGuids(m_summons);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoScriptText(EMOTE_AGGRO, m_creature);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        switch (m_uiPhase)
+        if (summoned->GetEntry() == NPC_MANA_FIEND)
         {
-            case PHASE_ATTACKING:
-                if (m_uiCheckoutManaTimer <= uiDiff)
-                {
-                    m_uiCheckoutManaTimer = 1500;
-                    if (m_creature->GetPowerPercent() > 75.0f)
-                    {
-                        DoCastSpellIfCan(m_creature, SPELL_ENERGIZE);
-                        DoScriptText(EMOTE_ENERGIZING, m_creature);
-                        m_uiPhase = PHASE_ENERGIZING;
-                        return;
-                    }
-                }
-                else
-                    m_uiCheckoutManaTimer -= uiDiff;
+            summoned->SetInCombatWithZone();
+            if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+            {
+                summoned->AddThreat(target, 100000.f);
+                summoned->AI()->AttackStart(target);
+            }
+            summoned->SetCorpseDelay(2);
+        }
+        m_summons.push_back(summoned->GetObjectGuid());
+    }
 
-                if (m_uiSummonManaFiendsTimer <= uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_MANAFIENDS) == CAST_OK)
-                        m_uiSummonManaFiendsTimer = 90000;
-                }
-                else
-                    m_uiSummonManaFiendsTimer -= uiDiff;
+    void SummonedCreatureJustDied(Creature* summoned) override
+    {
+        m_summons.erase(std::remove(m_summons.begin(), m_summons.end(), summoned->GetObjectGuid()), m_summons.end());
+        if (m_summons.size() == 0)
+            m_creature->RemoveAurasDueToSpell(SPELL_ENERGIZE);
+    }
 
-                if (m_uiManaDrainTimer <= uiDiff)
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case MOAM_ARCANE_ERUPTION:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_ARCANE_ERUPTION) == CAST_OK)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_DRAIN_MANA) == CAST_OK)
-                        m_uiManaDrainTimer = 6000;
+                    DoScriptText(EMOTE_MANA_FULL, m_creature);
+                    ResetCombatAction(action, 5000); // small CD to prevent AI spam
                 }
-                else
-                    m_uiManaDrainTimer -= uiDiff;
-
-                if (m_uiTrampleTimer <= uiDiff)
-                {
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_TRAMPLE);
-                    m_uiTrampleTimer = 15000;
-                }
-                else
-                    m_uiTrampleTimer -= uiDiff;
-
-                DoMeleeAttackIfReady();
                 break;
-            case PHASE_ENERGIZING:
-                if (m_uiCheckoutManaTimer <= uiDiff)
-                {
-                    m_uiCheckoutManaTimer = 1500;
-                    if (m_creature->GetPowerPercent() == 100)
-                    {
-                        m_creature->RemoveAurasDueToSpell(SPELL_ENERGIZE);
-                        DoCastSpellIfCan(m_creature, SPELL_ARCANE_ERUPTION);
-                        DoScriptText(EMOTE_MANA_FULL, m_creature);
-                        m_uiPhase = PHASE_ATTACKING;
-                    }
-                }
-                else
-                    m_uiCheckoutManaTimer -= uiDiff;
+            }
+            case MOAM_TRAMPLE:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_TRAMPLE) == CAST_OK)
+                    ResetCombatAction(action, 15000);
                 break;
+            }
+            case MOAM_MANA_DRAIN:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_DRAIN_MANA) == CAST_OK)
+                    ResetCombatAction(action, 6000);
+                break;
+            }
+            case MOAM_MANA_FIENDS:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_SUMMON_MANAFIENDS) == CAST_OK)
+                    ResetCombatAction(action, 90000);
+                break;
+            }
+            case MOAM_ENERGIZE:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_ENERGIZE) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_ENERGIZING, m_creature);
+                    ResetTimer(MOAM_CANCEL_ENERGIZE, 90000);
+                    ResetCombatAction(action, 180000);
+                }
+                break;
+            }
         }
     }
 };
 
-UnitAI* GetAI_boss_moam(Creature* pCreature)
+struct SummonManaFiendsMoam : public SpellScript
 {
-    return new boss_moamAI(pCreature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        spell->GetCaster()->CastSpell(nullptr, SPELL_SUMMON_MANA_FIEND_1, TRIGGERED_OLD_TRIGGERED);
+        spell->GetCaster()->CastSpell(nullptr, SPELL_SUMMON_MANA_FIEND_2, TRIGGERED_OLD_TRIGGERED);
+        spell->GetCaster()->CastSpell(nullptr, SPELL_SUMMON_MANA_FIEND_3, TRIGGERED_OLD_TRIGGERED);
+    }
+};
 
 void AddSC_boss_moam()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_moam";
-    pNewScript->GetAI = &GetAI_boss_moam;
+    pNewScript->GetAI = &GetNewAIInstance<boss_moamAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<SummonManaFiendsMoam>("spell_summon_mana_fiends_moam");
 }

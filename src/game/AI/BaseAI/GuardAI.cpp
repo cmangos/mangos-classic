@@ -36,13 +36,13 @@ GuardAI::GuardAI(Creature* creature) : CreatureAI(creature)
 void GuardAI::MoveInLineOfSight(Unit* who)
 {
     // Ignore Z for flying creatures
-    if (!m_creature->CanFly() && m_creature->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
+    if (!m_creature->CanFly() && who->IsFlying() && m_creature->GetDistanceZ(who) > (IsRangedUnit() ? CREATURE_Z_ATTACK_RANGE_RANGED : CREATURE_Z_ATTACK_RANGE_MELEE))
         return;
 
-    if (m_creature->getVictim())
+    if (m_creature->GetVictim())
         return;
 
-    if (who->isInCombat() && m_creature->CanAssist(who))
+    if (who->IsInCombat() && m_creature->CanAssist(who))
     {
         Unit* victim = who->getAttackerForHelper();
 
@@ -53,14 +53,14 @@ void GuardAI::MoveInLineOfSight(Unit* who)
         {
             if (who->GetTypeId() == TYPEID_PLAYER && victim->GetTypeId() != TYPEID_PLAYER)
             {
-                if (m_creature->IsWithinDistInMap(who, 5.0) && m_creature->IsWithinDistInMap(victim, 10.0) && m_creature->IsWithinLOSInMap(victim))
+                if (m_creature->IsWithinDistInMap(who, 5.0) && m_creature->IsWithinDistInMap(victim, 10.0) && m_creature->IsWithinLOSInMap(victim, true))
                 {
                     AttackStart(victim);
                 }
             }
             else if ((who->GetTypeId() == TYPEID_PLAYER && victim->GetTypeId() == TYPEID_PLAYER) || (victim->GetObjectGuid().IsCreature() && ((Creature*)victim)->IsPet() && ((Creature*)victim)->GetOwnerGuid().IsPlayer()))
             {
-                if (m_creature->IsWithinDistInMap(who, 30.0) && m_creature->IsWithinLOSInMap(who))
+                if (m_creature->IsWithinDistInMap(who, 30.0) && m_creature->IsWithinLOSInMap(who, true))
                 {
                     AttackStart(victim);
                 }
@@ -69,7 +69,7 @@ void GuardAI::MoveInLineOfSight(Unit* who)
             {
                 if (((Creature*)who)->IsGuard() || ((Creature*)who)->IsCivilian())
                 {
-                    if (m_creature->IsWithinDistInMap(who, 20.0) && m_creature->IsWithinLOSInMap(who))
+                    if (m_creature->IsWithinDistInMap(who, 20.0) && m_creature->IsWithinLOSInMap(who, true))
                     {
                         AttackStart(victim);
                     }
@@ -83,7 +83,7 @@ void GuardAI::MoveInLineOfSight(Unit* who)
         if (m_creature->CanInitiateAttack() && m_creature->CanAttackOnSight(who) && who->isInAccessablePlaceFor(m_creature))
         {
             float attackRadius = m_creature->GetAttackDistance(who);
-            if (m_creature->IsWithinDistInMap(who, attackRadius) && m_creature->IsWithinLOSInMap(who))
+            if (m_creature->IsWithinDistInMap(who, attackRadius) && m_creature->IsWithinLOSInMap(who, true))
             {
                 AttackStart(who);
             }
@@ -93,8 +93,8 @@ void GuardAI::MoveInLineOfSight(Unit* who)
 
 void GuardAI::UpdateAI(const uint32 /*diff*/)
 {
-    // update i_victimGuid if i_creature.getVictim() !=0 and changed
-    if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+    // update i_victimGuid if i_creature.GetVictim() !=0 and changed
+    if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         return;
 
     DoMeleeAttackIfReady();

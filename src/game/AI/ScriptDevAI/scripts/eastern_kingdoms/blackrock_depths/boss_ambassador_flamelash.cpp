@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "blackrock_depths.h"
 
 enum
@@ -70,8 +70,8 @@ struct boss_ambassador_flamelashAI : public ScriptedAI
     {
         ScriptedAI::MoveInLineOfSight(pWho);
 
-        if (pWho->GetEntry() == NPC_BURNING_SPIRIT && pWho->isAlive() && m_sSpiritsGuidsSet.find(pWho->GetObjectGuid()) != m_sSpiritsGuidsSet.end() &&
-                pWho->IsWithinDistInMap(m_creature, 2 * CONTACT_DISTANCE))
+        if (pWho->GetEntry() == NPC_BURNING_SPIRIT && pWho->IsAlive() && m_sSpiritsGuidsSet.find(pWho->GetObjectGuid()) != m_sSpiritsGuidsSet.end() &&
+            pWho->IsWithinDistInMap(m_creature, 2 * CONTACT_DISTANCE))
         {
             pWho->CastSpell(m_creature, SPELL_BURNING_SPIRIT, TRIGGERED_OLD_TRIGGERED);
             m_sSpiritsGuidsSet.erase(pWho->GetObjectGuid());
@@ -84,6 +84,11 @@ struct boss_ambassador_flamelashAI : public ScriptedAI
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_FLAMELASH, IN_PROGRESS);
+
+        m_creature->SummonCreature(NPC_FIREGUARD_DESTROYER, 919.21f, -231.029f, -50.1755f, 5.65487f, TEMPSPAWN_TIMED_OOC_DESPAWN, 300000);
+        m_creature->SummonCreature(NPC_FIREGUARD_DESTROYER, 913.883f, -236.914f, -49.8527f, 6.03884f, TEMPSPAWN_TIMED_OOC_DESPAWN, 300000);
+        m_creature->SummonCreature(NPC_FIREGUARD_DESTROYER, 924.225f, -256.302f, -49.8526f, 1.16937f, TEMPSPAWN_TIMED_OOC_DESPAWN, 300000);
+        m_creature->SummonCreature(NPC_FIREGUARD_DESTROYER, 932.524f, -252.475f, -49.8526f, 1.71042f, TEMPSPAWN_TIMED_OOC_DESPAWN, 300000);
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -100,14 +105,23 @@ struct boss_ambassador_flamelashAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        pSummoned->GetMotionMaster()->MoveFollow(m_creature, 0, 0);
-        m_sSpiritsGuidsSet.insert(pSummoned->GetObjectGuid());
+        switch (pSummoned->GetEntry())
+        {
+            case NPC_BURNING_SPIRIT:
+            {
+                pSummoned->GetMotionMaster()->MoveFollow(m_creature, 0, 0);
+                m_sSpiritsGuidsSet.insert(pSummoned->GetObjectGuid());
+                break;
+            }
+            case NPC_FIREGUARD_DESTROYER: break;
+            default: break;
+        }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // m_uiSpiritTimer

@@ -20,55 +20,99 @@
 #define TRANSPORTS_H
 
 #include "Entities/GameObject.h"
+#include "Maps/TransportMgr.h"
 
 #include <map>
 #include <set>
 
-class Transport : public GameObject
+typedef std::set<WorldObject*> PassengerSet;
+
+class GenericTransport : public GameObject
 {
     public:
-        explicit Transport();
+        GenericTransport() : m_passengerTeleportIterator(m_passengers.end()), m_pathProgress(0), m_movementStarted(0) {}
+        bool AddPassenger(Unit* passenger, bool adjustCoords = true);
+        bool RemovePassenger(Unit* passenger);
+        bool AddPetToTransport(Unit* passenger, Pet* pet);
 
-        bool Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress);
-        bool GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids);
-        void Update(const uint32 diff) override;
-        bool AddPassenger(Player* passenger);
-        bool RemovePassenger(Player* passenger);
+        void UpdatePosition(float x, float y, float z, float o);
+        void UpdatePassengerPosition(WorldObject* object);
 
         typedef std::set<Player*> PlayerSet;
-        PlayerSet const& GetPassengers() const { return m_passengers; }
+        PassengerSet& GetPassengers() { return m_passengers; }
+
+        /// This method transforms supplied transport offsets into global coordinates
+        void CalculatePassengerPosition(float& x, float& y, float& z, float* o = nullptr) const
+        {
+            CalculatePassengerPosition(x, y, z, o, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
+        }
+
+        /// This method transforms supplied global coordinates into local offsets
+        void CalculatePassengerOffset(float& x, float& y, float& z, float* o = nullptr) const
+        {
+            CalculatePassengerOffset(x, y, z, o, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
+        }
+
+        void CalculatePassengerOrientation(float& o) const;
+
+        static void CalculatePassengerPosition(float& x, float& y, float& z, float* o, float transX, float transY, float transZ, float transO);
+        static void CalculatePassengerOffset(float& x, float& y, float& z, float* o, float transX, float transY, float transZ, float transO);
+
+        uint32 GetPathProgress() const { return m_pathProgress; }
+    protected:
+        void UpdatePassengerPositions(PassengerSet& passengers);
+
+        PassengerSet m_passengers;
+        PassengerSet::iterator m_passengerTeleportIterator;
+
+        uint32 m_pathProgress; // for MO transport its full time since start for normal time in cycle
+        uint32 m_movementStarted;
+};
+
+class ElevatorTransport : public GenericTransport
+{
+    public:
+        bool Create(uint32 guidlow, uint32 name_id, Map* map, float x, float y, float z, float ang,
+            float rotation0 = 0.0f, float rotation1 = 0.0f, float rotation2 = 0.0f, float rotation3 = 0.0f, uint32 animprogress = GO_ANIMPROGRESS_DEFAULT, GOState go_state = GO_STATE_READY) override;
+        void Update(const uint32 diff) override;
 
     private:
-        struct WayPoint
-        {
-            WayPoint() : mapid(0), x(0), y(0), z(0), teleport(false) {}
-            WayPoint(uint32 _mapid, float _x, float _y, float _z, bool _teleport) :
-                mapid(_mapid), x(_x), y(_y), z(_z), teleport(_teleport) {}
+        TransportAnimation const* m_animationInfo;
+        uint32 m_currentSeg;
+};
 
-            uint32 mapid;
-            float x;
-            float y;
-            float z;
-            bool teleport;
-        };
-
-        typedef std::map<uint32, WayPoint> WayPointMap;
-
-        WayPointMap::const_iterator m_curr;
-        WayPointMap::const_iterator m_next;
-        uint32 m_pathTime;
-        uint32 m_timer;
-
-        PlayerSet m_passengers;
-
+class Transport : public GenericTransport
+{
     public:
-        WayPointMap m_WayPoints;
-        uint32 m_nextNodeTime;
+        explicit Transport(TransportTemplate const& transportTemplate);
+
+        static void LoadTransport(TransportTemplate const& transportTemplate, Map* map);
+        bool Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress);
+        void Update(const uint32 diff) override;
+
+        uint32 GetPeriod() const { return m_period; }
+        void SetPeriod(uint32 period) { m_period = period; }
+
+        KeyFrameVec const& GetKeyFrames() const { return m_transportTemplate.keyFrames; }
+    private:
+        void TeleportTransport(uint32 newMapid, float x, float y, float z, float o);
+        void UpdateForMap(Map const* targetMap, bool newMap);
+        void MoveToNextWayPoint();                          // move m_next/m_cur to next points
+        float CalculateSegmentPos(float perc);
+
+        bool IsMoving() const { return m_isMoving; }
+        void SetMoving(bool val) { m_isMoving = val; }
+
+        ShortTimeTracker m_positionChangeTimer;
+        bool m_isMoving;
+        bool m_pendingStop;
+
+        KeyFrameVec::const_iterator m_currentFrame;
+        KeyFrameVec::const_iterator m_nextFrame;
+        uint32 m_pathTime;
+
         uint32 m_period;
 
-    private:
-        void TeleportTransport(uint32 newMapid, float x, float y, float z);
-        void UpdateForMap(Map const* targetMap);
-        void MoveToNextWayPoint();                          // move m_next/m_cur to next points
+        TransportTemplate const& m_transportTemplate;
 };
 #endif

@@ -23,9 +23,9 @@
 #include "Server/Opcodes.h"
 #include "Policies/Singleton.h"
 
-INSTANTIATE_SINGLETON_1(Opcodes);
+INSTANTIATE_SINGLETON_1(OpcodeHandler);
 
-OpcodeHandler const Opcodes::emptyHandler =
+OpcodeHandler const OpcodeStore::emptyHandler =
 {
     "<none>",
     STATUS_UNHANDLED,
@@ -34,20 +34,20 @@ OpcodeHandler const Opcodes::emptyHandler =
 };
 
 
-Opcodes::Opcodes()
+OpcodeStore::OpcodeStore()
 {
     /// Build Opcodes map
     BuildOpcodeList();
 }
 
-Opcodes::~Opcodes()
+OpcodeStore::~OpcodeStore()
 {
     /// Clear Opcodes
     mOpcodeMap.clear();
 }
 
 
-void Opcodes::BuildOpcodeList()
+void OpcodeStore::BuildOpcodeList()
 {
     /// Correspondence between opcodes and their names
     /*0x000*/  StoreOpcode(MSG_NULL_ACTION,                   "MSG_NULL_ACTION",                  STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL);
@@ -136,17 +136,17 @@ void Opcodes::BuildOpcodeList()
     /*0x053*/  StoreOpcode(SMSG_PET_NAME_QUERY_RESPONSE,      "SMSG_PET_NAME_QUERY_RESPONSE",     STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     /*0x054*/  StoreOpcode(CMSG_GUILD_QUERY,                  "CMSG_GUILD_QUERY",                 STATUS_AUTHED,    PROCESS_THREADUNSAFE, &WorldSession::HandleGuildQueryOpcode);
     /*0x055*/  StoreOpcode(SMSG_GUILD_QUERY_RESPONSE,         "SMSG_GUILD_QUERY_RESPONSE",        STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
-    /*0x056*/  StoreOpcode(CMSG_ITEM_QUERY_SINGLE,            "CMSG_ITEM_QUERY_SINGLE",           STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleItemQuerySingleOpcode);
+    /*0x056*/  StoreOpcode(CMSG_ITEM_QUERY_SINGLE,            "CMSG_ITEM_QUERY_SINGLE",           STATUS_LOGGEDIN,  PROCESS_IMMEDIATE,    &WorldSession::HandleItemQuerySingleOpcode);
     /*0x057*/  StoreOpcode(CMSG_ITEM_QUERY_MULTIPLE,          "CMSG_ITEM_QUERY_MULTIPLE",         STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL);
     /*0x058*/  StoreOpcode(SMSG_ITEM_QUERY_SINGLE_RESPONSE,   "SMSG_ITEM_QUERY_SINGLE_RESPONSE",  STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     /*0x059*/  StoreOpcode(SMSG_ITEM_QUERY_MULTIPLE_RESPONSE, "SMSG_ITEM_QUERY_MULTIPLE_RESPONSE", STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
-    /*0x05A*/  StoreOpcode(CMSG_PAGE_TEXT_QUERY,              "CMSG_PAGE_TEXT_QUERY",             STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePageTextQueryOpcode);
+    /*0x05A*/  StoreOpcode(CMSG_PAGE_TEXT_QUERY,              "CMSG_PAGE_TEXT_QUERY",             STATUS_LOGGEDIN,  PROCESS_IMMEDIATE,    &WorldSession::HandlePageTextQueryOpcode);
     /*0x05B*/  StoreOpcode(SMSG_PAGE_TEXT_QUERY_RESPONSE,     "SMSG_PAGE_TEXT_QUERY_RESPONSE",    STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
-    /*0x05C*/  StoreOpcode(CMSG_QUEST_QUERY,                  "CMSG_QUEST_QUERY",                 STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleQuestQueryOpcode);
+    /*0x05C*/  StoreOpcode(CMSG_QUEST_QUERY,                  "CMSG_QUEST_QUERY",                 STATUS_LOGGEDIN,  PROCESS_IMMEDIATE,    &WorldSession::HandleQuestQueryOpcode);
     /*0x05D*/  StoreOpcode(SMSG_QUEST_QUERY_RESPONSE,         "SMSG_QUEST_QUERY_RESPONSE",        STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
-    /*0x05E*/  StoreOpcode(CMSG_GAMEOBJECT_QUERY,             "CMSG_GAMEOBJECT_QUERY",            STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleGameObjectQueryOpcode);
+    /*0x05E*/  StoreOpcode(CMSG_GAMEOBJECT_QUERY,             "CMSG_GAMEOBJECT_QUERY",            STATUS_LOGGEDIN,  PROCESS_IMMEDIATE,    &WorldSession::HandleGameObjectQueryOpcode);
     /*0x05F*/  StoreOpcode(SMSG_GAMEOBJECT_QUERY_RESPONSE,    "SMSG_GAMEOBJECT_QUERY_RESPONSE",   STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
-    /*0x060*/  StoreOpcode(CMSG_CREATURE_QUERY,               "CMSG_CREATURE_QUERY",              STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleCreatureQueryOpcode);
+    /*0x060*/  StoreOpcode(CMSG_CREATURE_QUERY,               "CMSG_CREATURE_QUERY",              STATUS_LOGGEDIN,  PROCESS_IMMEDIATE,    &WorldSession::HandleCreatureQueryOpcode);
     /*0x061*/  StoreOpcode(SMSG_CREATURE_QUERY_RESPONSE,      "SMSG_CREATURE_QUERY_RESPONSE",     STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     /*0x062*/  StoreOpcode(CMSG_WHO,                          "CMSG_WHO",                         STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleWhoOpcode);
     /*0x063*/  StoreOpcode(SMSG_WHO,                          "SMSG_WHO",                         STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
@@ -285,7 +285,7 @@ void Opcodes::BuildOpcodeList()
     /*0x0E8*/  StoreOpcode(SMSG_FORCE_MOVE_ROOT,              "SMSG_FORCE_MOVE_ROOT",             STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     /*0x0E9*/  StoreOpcode(CMSG_FORCE_MOVE_ROOT_ACK,          "CMSG_FORCE_MOVE_ROOT_ACK",         STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveRootAck);
     /*0x0EA*/  StoreOpcode(SMSG_FORCE_MOVE_UNROOT,            "SMSG_FORCE_MOVE_UNROOT",           STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
-    /*0x0EB*/  StoreOpcode(CMSG_FORCE_MOVE_UNROOT_ACK,        "CMSG_FORCE_MOVE_UNROOT_ACK",       STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveUnRootAck);
+    /*0x0EB*/  StoreOpcode(CMSG_FORCE_MOVE_UNROOT_ACK,        "CMSG_FORCE_MOVE_UNROOT_ACK",       STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveRootAck);
     /*0x0EC*/  StoreOpcode(MSG_MOVE_ROOT,                     "MSG_MOVE_ROOT",                    STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL);
     /*0x0ED*/  StoreOpcode(MSG_MOVE_UNROOT,                   "MSG_MOVE_UNROOT",                  STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL);
     /*0x0EE*/  StoreOpcode(MSG_MOVE_HEARTBEAT,                "MSG_MOVE_HEARTBEAT",               STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes);
@@ -296,7 +296,7 @@ void Opcodes::BuildOpcodeList()
     /*0x0F3*/  StoreOpcode(SMSG_MOVE_NORMAL_FALL,             "SMSG_MOVE_NORMAL_FALL",            STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     /*0x0F4*/  StoreOpcode(SMSG_MOVE_SET_HOVER,               "SMSG_MOVE_SET_HOVER",              STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     /*0x0F5*/  StoreOpcode(SMSG_MOVE_UNSET_HOVER,             "SMSG_MOVE_UNSET_HOVER",            STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
-    /*0x0F6*/  StoreOpcode(CMSG_MOVE_HOVER_ACK,               "CMSG_MOVE_HOVER_ACK",              STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveHoverAck);
+    /*0x0F6*/  StoreOpcode(CMSG_MOVE_HOVER_ACK,               "CMSG_MOVE_HOVER_ACK",              STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveFlagChangeOpcode);
     /*0x0F7*/  StoreOpcode(MSG_MOVE_HOVER,                    "MSG_MOVE_HOVER",                   STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL);
     /*0x0F8*/  StoreOpcode(CMSG_TRIGGER_CINEMATIC_CHEAT,      "CMSG_TRIGGER_CINEMATIC_CHEAT",     STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL);
     /*0x0F9*/  StoreOpcode(CMSG_OPENING_CINEMATIC,            "CMSG_OPENING_CINEMATIC",           STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL);
@@ -767,13 +767,13 @@ void Opcodes::BuildOpcodeList()
     /*0x2CC*/  StoreOpcode(SMSG_RAID_INSTANCE_INFO,           "SMSG_RAID_INSTANCE_INFO",          STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     /*0x2CD*/  StoreOpcode(CMSG_REQUEST_RAID_INFO,            "CMSG_REQUEST_RAID_INFO",           STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleRequestRaidInfoOpcode);
     /*0x2CE*/  StoreOpcode(CMSG_MOVE_TIME_SKIPPED,            "CMSG_MOVE_TIME_SKIPPED",           STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleMoveTimeSkippedOpcode);
-    /*0x2CF*/  StoreOpcode(CMSG_MOVE_FEATHER_FALL_ACK,        "CMSG_MOVE_FEATHER_FALL_ACK",       STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleFeatherFallAck);
-    /*0x2D0*/  StoreOpcode(CMSG_MOVE_WATER_WALK_ACK,          "CMSG_MOVE_WATER_WALK_ACK",         STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveWaterWalkAck);
+    /*0x2CF*/  StoreOpcode(CMSG_MOVE_FEATHER_FALL_ACK,        "CMSG_MOVE_FEATHER_FALL_ACK",       STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveFlagChangeOpcode);
+    /*0x2D0*/  StoreOpcode(CMSG_MOVE_WATER_WALK_ACK,          "CMSG_MOVE_WATER_WALK_ACK",         STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveFlagChangeOpcode);
     /*0x2D1*/  StoreOpcode(CMSG_MOVE_NOT_ACTIVE_MOVER,        "CMSG_MOVE_NOT_ACTIVE_MOVER",       STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveNotActiveMoverOpcode);
     /*0x2D2*/  StoreOpcode(SMSG_PLAY_SOUND,                   "SMSG_PLAY_SOUND",                  STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     /*0x2D3*/  StoreOpcode(CMSG_BATTLEFIELD_STATUS,           "CMSG_BATTLEFIELD_STATUS",          STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlefieldStatusOpcode);
     /*0x2D4*/  StoreOpcode(SMSG_BATTLEFIELD_STATUS,           "SMSG_BATTLEFIELD_STATUS",          STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
-    /*0x2D5*/  StoreOpcode(CMSG_BATTLEFIELD_PORT,             "CMSG_BATTLEFIELD_PORT",            STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattleFieldPortOpcode);
+    /*0x2D5*/  StoreOpcode(CMSG_BATTLEFIELD_PORT,             "CMSG_BATTLEFIELD_PORT",            STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlefieldPortOpcode);
     /*0x2D6*/  StoreOpcode(MSG_INSPECT_HONOR_STATS,           "MSG_INSPECT_HONOR_STATS",          STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleInspectHonorStatsOpcode);
     /*0x2D7*/  StoreOpcode(CMSG_BATTLEMASTER_HELLO,           "CMSG_BATTLEMASTER_HELLO",          STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlemasterHelloOpcode);
     /*0x2D8*/  StoreOpcode(CMSG_MOVE_START_SWIM_CHEAT,        "CMSG_MOVE_START_SWIM_CHEAT",       STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL);
@@ -791,7 +791,7 @@ void Opcodes::BuildOpcodeList()
     /*0x2E4*/  StoreOpcode(SMSG_AREA_SPIRIT_HEALER_TIME,      "SMSG_AREA_SPIRIT_HEALER_TIME",     STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     /*0x2E5*/  StoreOpcode(CMSG_GM_UNTEACH,                   "CMSG_GM_UNTEACH",                  STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL);
     /*0x2E6*/  StoreOpcode(SMSG_WARDEN_DATA,                  "SMSG_WARDEN_DATA",                 STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
-    /*0x2E7*/  StoreOpcode(CMSG_WARDEN_DATA,                  "CMSG_WARDEN_DATA",                 STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleWardenDataOpcode);
+    /*0x2E7*/  StoreOpcode(CMSG_WARDEN_DATA,                  "CMSG_WARDEN_DATA",                 STATUS_AUTHED,    PROCESS_THREADUNSAFE, &WorldSession::HandleWardenDataOpcode);
     /*0x2E8*/  StoreOpcode(SMSG_GROUP_JOINED_BATTLEGROUND,    "SMSG_GROUP_JOINED_BATTLEGROUND",   STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     /*0x2E9*/  StoreOpcode(MSG_BATTLEGROUND_PLAYER_POSITIONS, "MSG_BATTLEGROUND_PLAYER_POSITIONS", STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattleGroundPlayerPositionsOpcode);
     /*0x2EA*/  StoreOpcode(CMSG_PET_STOP_ATTACK,              "CMSG_PET_STOP_ATTACK",             STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetStopAttack);

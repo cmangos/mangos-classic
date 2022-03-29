@@ -22,9 +22,10 @@
 #include "Threading.h"
 #include "SqlOperations.h"
 
+#include <atomic>
+#include <memory>
 #include <mutex>
 #include <queue>
-#include <memory>
 
 class Database;
 class SqlOperation;
@@ -37,7 +38,7 @@ class SqlDelayThread : public MaNGOS::Runnable
         std::queue<std::unique_ptr<SqlOperation>> m_sqlQueue;   ///< Queue of SQL statements
         Database* m_dbEngine;                                   ///< Pointer to used Database engine
         SqlConnection* m_dbConnection;                          ///< Pointer to DB connection
-        volatile bool m_running;
+        std::atomic<bool> m_running;
 
         // process all enqueued requests
         void ProcessRequests();

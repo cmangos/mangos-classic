@@ -69,9 +69,9 @@ enum
     EVENT_ID_STATUE_5     = 3099,
     EVENT_ID_STATUE_6     = 3100,
 
+    SPELL_SUPPRESSION     = 12623,
     SPELL_SUMMON_AVATAR   = 12639,                          // Cast by the shade of hakkar, updates entry to avatar
-    SPELL_AVATAR_SUMMONED = 12948,
-    
+
     SPELL_SPIRIT_SPAWN_IN = 17321,
 
     SAY_JAMMALAN_INTRO    = -1109005,
@@ -80,6 +80,11 @@ enum
     SAY_AVATAR_BRAZIER_3  = -1109008,
     SAY_AVATAR_BRAZIER_4  = -1109009,
     SAY_AVATAR_SPAWN      = -1109010,
+    SAY_SUPPRESSOR_1      = -1109011,
+    SAY_SUPPRESSOR_2      = -1109012,
+    SAY_SUPPRESSOR_3      = -1109013,
+    SAY_SUPPRESSOR_4      = -1109014,
+    SAY_AVATAR_DESPAWN    = -1109015,
 };
 
 // This is also the needed order for activation: S, N, SW, SE, NW, NE
@@ -140,12 +145,13 @@ class instance_sunken_temple : public ScriptedInstance
         uint8 m_uiFlameCounter;                             // Avatar of Hakkar Event
         uint32 m_uiAvatarSummonTimer;
         uint32 m_uiSupressorTimer;
+        uint32 m_suppressionTimer;
         bool m_bIsFirstHakkarWave;
         bool m_bCanSummonBloodkeeper;
 
         GuidList m_luiFlameGUIDs;
         GuidList m_luiBigLightGUIDs;
-        GuidVector m_vuiCircleGUIDs;
+        GuidVector m_evilCircleGuidList;
 };
 
 #endif

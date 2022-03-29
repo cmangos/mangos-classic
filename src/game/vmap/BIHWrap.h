@@ -35,13 +35,13 @@ class BIHWrap
 
             MDLCallback(RayCallback& callback, const T* const* objects_array, uint32 objSize) : objects(objects_array), cb(callback), objectsSize(objSize) {}
 
-            bool operator()(const Ray& r, uint32 Idx, float& MaxDist, bool /*stopAtFirst*/, bool /*ignoreM2Model*/)
+            bool operator()(const Ray& r, uint32 Idx, float& MaxDist, bool stopAtFirst, bool ignoreM2Model)
             {
                 if (Idx >= objectsSize)
                     return false;
 
                 if (const T* obj = objects[Idx])
-                    return cb(r, *obj, MaxDist/*, stopAtFirst, ignoreM2Model*/);
+                    return cb(r, *obj, MaxDist, stopAtFirst, ignoreM2Model);
                 return false;
             }
 
@@ -98,11 +98,11 @@ class BIHWrap
         }
 
         template<typename RayCallback>
-        void intersectRay(const Ray& r, RayCallback& intersectCallback, float& maxDist)
+        void intersectRay(const Ray& r, RayCallback& intersectCallback, float& maxDist, bool ignoreM2Model)
         {
             balance();
             MDLCallback<RayCallback> temp_cb(intersectCallback, m_objects.getCArray(), m_objects.size());
-            m_tree.intersectRay(r, temp_cb, maxDist, true);
+            m_tree.intersectRay(r, temp_cb, maxDist, true, ignoreM2Model);
         }
 
         template<typename IsectCallback>

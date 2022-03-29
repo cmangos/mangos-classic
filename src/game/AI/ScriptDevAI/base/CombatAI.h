@@ -19,26 +19,40 @@
 
 #include "Entities/Creature.h"
 #include "AI/ScriptDevAI/include/sc_creature.h"
-#include "AI/ScriptDevAI/base/TimerAI.h"
 
 /*
     Small wrapper class that reduces the amount of code needed to use CombatActions and adds proper spell action reset functionality
 */
-class CombatAI : public ScriptedAI, public CombatActions
+class CombatAI : public ScriptedAI
 {
     public:
-        CombatAI(Creature* creature, uint32 combatActions) : ScriptedAI(creature), CombatActions(combatActions) { }
+        CombatAI(Creature* creature, uint32 combatActions);
 
-        void Reset() override
+        void Reset() override;
+
+        void HandleDelayedInstantAnimation(SpellEntry const* spellInfo) override;
+        void HandleTargetRestoration();
+        bool IsTargetingRestricted();
+        void StopTargeting(bool state) { m_stopTargeting = state; }
+        void OnTaunt() override;
+
+        void AddOnKillText(int32 text);
+        template<typename... Targs>
+        void AddOnKillText(int32 value, Targs... fargs)
         {
-            ResetAllTimers();
+            AddOnKillText(value);
+            AddOnKillText(fargs...);
         }
+        void KilledUnit(Unit* /*victim*/) override;
 
-        virtual void ExecuteActions() override;
+        // virtual void ExecuteAction(uint32 action) {}
+    private:
+        ObjectGuid m_storedTarget;
 
-        virtual void ExecuteAction(uint32 action) = 0;
+        std::vector<int32> m_onDeathTexts;
+        bool m_onKillCooldown;
 
-        void UpdateAI(const uint32 diff) override;
+        bool m_stopTargeting;
 };
 
 #endif

@@ -9,7 +9,7 @@ SDComment: Intended to be used with Guardian/Protector/Minipets. Little/no contr
 SDCategory: Npc
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "pet_ai.h"
 
 ScriptedPetAI::ScriptedPetAI(Creature* creature) : CreatureAI(creature)
@@ -23,7 +23,7 @@ void ScriptedPetAI::AttackStart(Unit* who)
 
 void ScriptedPetAI::AttackedBy(Unit* attacker)
 {
-    if (m_creature->getVictim())
+    if (m_creature->GetVictim())
         return;
 
     if (!HasReactState(REACT_PASSIVE) && m_creature->CanReachWithMeleeAttack(attacker))
@@ -57,15 +57,15 @@ void ScriptedPetAI::UpdatePetAI(const uint32 /*diff*/)
 
 void ScriptedPetAI::UpdateAI(const uint32 diff)
 {
-    if (!m_creature->isAlive())                             // should not be needed, isAlive is checked in mangos before calling UpdateAI
+    if (!m_creature->IsAlive())                             // should not be needed, IsAlive is checked in mangos before calling UpdateAI
         return;
 
     // UpdateAllies() is done in the generic PetAI in Mangos, but we can't do this from script side.
     // Unclear what side effects this has, but is something to be resolved from Mangos.
 
-    if (m_creature->getVictim())                            // in combat
+    if (m_creature->GetVictim())                            // in combat
     {
-        if (!m_creature->CanAttack(m_creature->getVictim()))
+        if (!m_creature->CanAttack(m_creature->GetVictim()))
         {
             // target no longer valid for pet, so either attack stops or new target are selected
             // doesn't normally reach this, because of how petAi is designed in Mangos. CombatStop
@@ -79,7 +79,7 @@ void ScriptedPetAI::UpdateAI(const uint32 diff)
     }
     else if (m_creature->GetCharmInfo())
     {
-        if (m_creature->isInCombat())
+        if (m_creature->IsInCombat())
             m_creature->CombatStop(true, true);
 
         Unit* owner = m_creature->GetMaster();
@@ -87,7 +87,7 @@ void ScriptedPetAI::UpdateAI(const uint32 diff)
         if (!owner)
             return;
 
-        if (owner->isInCombat() && !HasReactState(REACT_PASSIVE))
+        if (owner->IsInCombat() && !HasReactState(REACT_PASSIVE))
         {
             // Not correct in all cases.
             // When mob initiate attack by spell, pet should not start attack before spell landed.

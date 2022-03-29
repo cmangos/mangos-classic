@@ -46,6 +46,7 @@ Quest::Quest(Field* questRecord)
     PrevQuestId = questRecord[21].GetInt32();
     NextQuestId = questRecord[22].GetInt32();
     ExclusiveGroup = questRecord[23].GetInt32();
+    BreadcrumbForQuestId = questRecord[129].GetInt32();
     NextQuestInChain = questRecord[24].GetUInt32();
     SrcItemId = questRecord[25].GetUInt32();
     SrcItemCount = questRecord[26].GetUInt32();
@@ -172,7 +173,7 @@ uint32 Quest::XPValue(Player* pPlayer) const
     {
         if (RewMoneyMaxLevel > 0)
         {
-            uint32 pLevel = pPlayer->getLevel();
+            uint32 pLevel = pPlayer->GetLevel();
             uint32 qLevel = QuestLevel;
             float fullxp = 0;
             if (qLevel >= 65)
@@ -220,4 +221,12 @@ bool Quest::IsAllowedInRaid() const
         return true;
 
     return sWorld.getConfig(CONFIG_BOOL_QUEST_IGNORE_RAID);
+}
+
+uint32 Quest::GetRewMoneyMaxLevel() const
+{
+    if (HasQuestFlag(QUEST_FLAGS_NO_MONEY_FROM_XP))
+        return 0;
+
+    return RewMoneyMaxLevel;
 }

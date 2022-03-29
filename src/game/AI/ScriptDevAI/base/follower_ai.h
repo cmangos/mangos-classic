@@ -28,8 +28,6 @@ class FollowerAI : public ScriptedAI
 
         void MovementInform(uint32 motionType, uint32 pointId) override;
 
-        void AttackStart(Unit* who) override;
-
         void EnterEvadeMode() override;
 
         void JustDied(Unit* killer) override;

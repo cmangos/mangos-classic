@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
+#include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
 mob_aquementas
 npc_oox17tn
 npc_stone_watcher_of_norgannon
@@ -105,12 +105,12 @@ struct mob_aquementasAI : public ScriptedAI
                 m_uiSwitchFactionTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiFrostShockTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_SHOCK);
+            DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FROST_SHOCK);
             m_uiFrostShockTimer = 15000;
         }
         else
@@ -169,14 +169,14 @@ struct npc_oox17tnAI : public npc_escortAI
         switch (i)
         {
             // 1. Ambush: 3 scorpions
-            case 22:
+            case 23:
                 DoScriptText(SAY_OOX_AMBUSH, m_creature);
                 m_creature->SummonCreature(NPC_SCORPION, -8340.70f, -4448.17f, 9.17f, 3.10f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000);
                 m_creature->SummonCreature(NPC_SCORPION, -8343.18f, -4444.35f, 9.44f, 2.35f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000);
                 m_creature->SummonCreature(NPC_SCORPION, -8348.70f, -4457.80f, 9.58f, 2.02f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000);
                 break;
             // 2. Ambush: 2 Rogues & 1 Shadow Mage
-            case 28:
+            case 29:
                 DoScriptText(SAY_OOX_AMBUSH, m_creature);
 
                 m_creature->SummonCreature(NPC_SCOFFLAW, -7488.02f, -4786.56f, 10.67f, 3.74f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 10000);
@@ -186,7 +186,7 @@ struct npc_oox17tnAI : public npc_escortAI
                     DoScriptText(SAY_OOX17_AMBUSH_REPLY, pCreature);
 
                 break;
-            case 34:
+            case 35:
                 DoScriptText(SAY_OOX_END, m_creature);
                 // Award quest credit
                 pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_RESCUE_OOX_17TN, m_creature);
@@ -350,7 +350,7 @@ struct npc_toogaAI : public FollowerAI
     {
         FollowerAI::MoveInLineOfSight(pWho);
 
-        if (!m_creature->getVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE | STATE_FOLLOW_POSTEVENT) && pWho->GetEntry() == NPC_TORTA)
+        if (!m_creature->GetVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE | STATE_FOLLOW_POSTEVENT) && pWho->GetEntry() == NPC_TORTA)
         {
             if (m_creature->IsWithinDistInMap(pWho, INTERACTION_DISTANCE))
             {
@@ -379,7 +379,7 @@ struct npc_toogaAI : public FollowerAI
 
     void UpdateFollowerAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         {
             // we are doing the post-event, or...
             if (HasFollowState(STATE_FOLLOW_POSTEVENT))
@@ -388,7 +388,7 @@ struct npc_toogaAI : public FollowerAI
                 {
                     m_uiPostEventTimer = 5000;
 
-                    if (!pTorta || !pTorta->isAlive())
+                    if (!pTorta || !pTorta->IsAlive())
                     {
                         // something happened, so just complete
                         SetFollowComplete();

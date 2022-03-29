@@ -79,23 +79,18 @@ enum
     FACTION_BLACK_DRAGON        = 103
 };
 
-struct SpawnLocation
-{
-    float m_fX, m_fY, m_fZ, m_fO;
-};
-
-static const SpawnLocation aStadiumLocs[7] =
+static const Position aStadiumLocs[7] =
 {
     {210.00f, -420.30f, 110.94f, 3.14f},                    // dragons summon location
-    {210.14f, -397.54f, 111.1f},                            // Gyth summon location
-    {163.62f, -420.33f, 110.47f},                           // center of the stadium location (for movement)
+    {210.14f, -397.54f, 111.1f,  0.f},                      // Gyth summon location
+    {163.62f, -420.33f, 110.47f, 0.f},                      // center of the stadium location (for movement)
     {164.63f, -444.04f, 121.97f, 3.22f},                    // Lord Nefarius summon position
     {161.01f, -443.73f, 121.97f, 6.26f},                    // Rend summon position
     {164.64f, -443.30f, 121.97f, 1.61f},                    // Nefarius move position
-    {165.74f, -466.46f, 116.80f},                           // Rend move position
+    {165.74f, -466.46f, 116.80f, 0.f},                      // Rend move position
 };
 
-static const SpawnLocation aBeastLocs[3] =
+static const Position aBeastLocs[3] =
 {
     {98.09f, -563.45f, 109.86f, 2.37f},                     // Summon points
     {99.81f, -561.47f, 109.24f, 2.43f},
@@ -108,7 +103,7 @@ static const uint32 aStadiumSpectators[12] =
     NPC_BLACKHAND_VETERAN, NPC_BLACKHAND_VETERAN, NPC_BLACKHAND_VETERAN, NPC_BLACKHAND_ELITE, NPC_BLACKHAND_VETERAN, NPC_BLACKHAND_VETERAN
 };
 
-static const SpawnLocation aSpectatorsSpawnLocs[12] =
+static const Position aSpectatorsSpawnLocs[12] =
 {
     {163.3209f, -340.9818f, 111.0216f, 4.818223f},
     {164.2471f, -339.0313f, 111.0368f, 1.413717f},
@@ -124,7 +119,7 @@ static const SpawnLocation aSpectatorsSpawnLocs[12] =
     {111.9971f, -363.0948f, 116.929f, 5.951573f},
 };
 
-static const SpawnLocation aSpectatorsTargetLocs[12] =
+static const Position aSpectatorsTargetLocs[12] =
 {
     {160.619f, -395.826f, 121.9752f, -1.502597f},
     {162.1428f, -395.1175f, 121.9751f, -1.67753f},

@@ -62,7 +62,7 @@ void thOpenFile::ReadAndModifyFromBuff(char* pBuff, DWORD dwSize, const char* ps
     TypePtr p(pBuff);
     if ('WDBC' != TAG(*p.dw))
     {
-        _snprintf(szErrorMsg, 512, "[%s]Not Wow's dbc file!", pszFileName);
+        _snprintf(szErrorMsg, 512, "[%s]Not a client DBC file!", pszFileName);
         ShowMessage(szErrorMsg);
         return;
     }

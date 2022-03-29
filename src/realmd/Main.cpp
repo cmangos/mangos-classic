@@ -68,25 +68,6 @@ bool stopEvent = false;                                     ///< Setting it to t
 
 DatabaseType LoginDatabase;                                 ///< Accessor to the realm server database
 
-/// Print out the usage string for this program on the console.
-void usage(const char* prog)
-{
-    sLog.outString("Usage: \n %s [<options>]\n"
-                   "    -v, --version            print version and exist\n\r"
-                   "    -c config_file           use config_file as configuration file\n\r"
-#ifdef _WIN32
-                   "    Running as service functions:\n\r"
-                   "    -s run                   run as service\n\r"
-                   "    -s install               install service\n\r"
-                   "    -s uninstall             uninstall service\n\r"
-#else
-                   "    Running as daemon functions:\n\r"
-                   "    -s run                   run as daemon\n\r"
-                   "    -s stop                  stop daemon\n\r"
-#endif
-                   , prog);
-}
-
 /// Launch the realm server
 int main(int argc, char* argv[])
 {
@@ -161,8 +142,20 @@ int main(int argc, char* argv[])
 
     sLog.Initialize();
 
-    sLog.outString("%s [realm-daemon]", _FULLVERSION(REVISION_DATE, REVISION_ID));
-    sLog.outString("<Ctrl-C> to stop.\n");
+    sLog.outString("[%s Auth server v%s] port(%d)", _PACKAGENAME, VERSION
+        , sConfig.GetIntDefault("RealmServerPort", -1));
+    sLog.outString("\n\n"
+        "       _____     __  __       _   _  _____  ____   _____ \n"
+        "      / ____|   |  \\/  |     | \\ | |/ ____|/ __ \\ / ____|\n"
+        "     | |        | \\  / |     |  \\| | |  __  |  | | (___  \n"
+        "     | |ontinued| |\\/| | __ _| . ` | | |_ | |  | |\\___ \\ \n"
+        "     | |____    | |  | |/ _` | |\\  | |__| | |__| |____) |\n"
+        "      \\_____|   |_|  |_| (_| |_| \\_|\\_____|\\____/ \\____/ \n"
+        "      http://cmangos.net\\__,_|     Doing emulation right!\n\n");
+
+    sLog.outString("Built on %s at %s", __DATE__, __TIME__);
+    sLog.outString("Built for %s", _ENDIAN_PLATFORM);
+    sLog.outString("Using commit hash(%s) committed on %s", REVISION_ID, REVISION_DATE);
     sLog.outString("Using configuration file %s.", configFile.c_str());
 
     ///- Check the version of the configuration file
@@ -183,6 +176,9 @@ int main(int argc, char* argv[])
         DETAIL_LOG("WARNING: Outdated version of OpenSSL lib. Logins to server may not work!");
         DETAIL_LOG("WARNING: Minimal required version [OpenSSL 0.9.8k]");
     }
+
+    sLog.outString();
+    sLog.outString("<Ctrl-C> to stop.");
 
     /// realmd PID file creation
     std::string pidfile = sConfig.GetStringDefault("PidFile");
@@ -218,12 +214,16 @@ int main(int argc, char* argv[])
     // cleanup query
     // set expired bans to inactive
     LoginDatabase.BeginTransaction();
-    LoginDatabase.Execute("UPDATE account_banned SET active = 0 WHERE unbandate<=UNIX_TIMESTAMP() AND unbandate<>bandate");
-    LoginDatabase.Execute("DELETE FROM ip_banned WHERE unbandate<=UNIX_TIMESTAMP() AND unbandate<>bandate");
+    LoginDatabase.Execute("UPDATE account_banned SET active = 0 WHERE expires_at<=UNIX_TIMESTAMP() AND expires_at<>banned_at");
+    LoginDatabase.Execute("DELETE FROM ip_banned WHERE expires_at<=UNIX_TIMESTAMP() AND expires_at<>banned_at");
     LoginDatabase.CommitTransaction();
 
     // FIXME - more intelligent selection of thread count is needed here.  config option?
-    MaNGOS::Listener<AuthSocket> listener(sConfig.GetStringDefault("BindIP", "0.0.0.0"), sConfig.GetIntDefault("RealmServerPort", DEFAULT_REALMSERVER_PORT), 1);
+    MaNGOS::Listener<AuthSocket> listener(
+            sConfig.GetStringDefault("BindIP", "0.0.0.0"),
+            sConfig.GetIntDefault("RealmServerPort", DEFAULT_REALMSERVER_PORT),
+            sConfig.GetIntDefault("ListenerThreads", 1)
+    );
 
     ///- Catch termination signals
     HookSignals();

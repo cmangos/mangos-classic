@@ -1,0 +1,22 @@
+#!/usr/bin/expect
+
+set timeout 20
+set host [lindex $argv 0]
+set port [lindex $argv 1]
+set user [lindex $argv 2]
+set password [lindex $argv 3]
+set command [lindex $argv 4]
+set time [lindex $argv 5]
+
+spawn telnet $host $port
+expect "Username:" 
+send "$user\n"
+expect "Password:"
+send "$password\n"
+
+expect "mangos>"
+
+send "server $command $time\n"
+
+expect "mangos>"
+

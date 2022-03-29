@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
+#include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
 event_go_zulfarrak_gong
 event_spell_unlocking
 at_zulfarrak
@@ -83,7 +83,7 @@ bool AreaTrigger_at_zulfarrak(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
     if (pAt->id == AREATRIGGER_ANTUSUL)
     {
-        if (pPlayer->isGameMaster() || pPlayer->isDead())
+        if (pPlayer->IsGameMaster() || pPlayer->IsDead())
             return false;
 
         instance_zulfarrak* pInstance = (instance_zulfarrak*)pPlayer->GetInstanceData();
@@ -95,7 +95,7 @@ bool AreaTrigger_at_zulfarrak(Player* pPlayer, AreaTriggerEntry const* pAt)
         {
             if (Creature* pAntuSul = pInstance->GetSingleCreatureFromStorage(NPC_ANTUSUL))
             {
-                if (pAntuSul->isAlive())
+                if (pAntuSul->IsAlive())
                     pAntuSul->AI()->AttackStart(pPlayer);
             }
         }

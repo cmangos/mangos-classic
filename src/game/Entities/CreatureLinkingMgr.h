@@ -68,6 +68,7 @@ enum CreatureLinkingFlags
     FLAG_RESPAWN_ON_DEATH           = 0x0040,
     FLAG_RESPAWN_ON_RESPAWN         = 0x0080,
     FLAG_DESPAWN_ON_RESPAWN         = 0x0100,
+    FLAG_EVADE_ON_EVADE             = 0x4000,
 
     // Dynamic behaviour, out of combat
     FLAG_FOLLOW                     = 0x0200,
@@ -77,7 +78,7 @@ enum CreatureLinkingFlags
     FLAG_CANT_SPAWN_IF_BOSS_DEAD    = 0x0400,
     FLAG_CANT_SPAWN_IF_BOSS_ALIVE   = 0x0800,
 
-    LINKING_FLAG_INVALID            = 0x4000,               // TODO adjust when other flags are implemented
+    LINKING_FLAG_INVALID            = 0x8000,               // TODO adjust when other flags are implemented
 };
 
 // Structure holding the information for an entry
@@ -170,7 +171,8 @@ class CreatureLinkingHolder
         {
             uint16 linkingFlag: 16;
             uint16 searchRange: 16;
-            GuidList linkedGuids;
+            std::list<std::pair<uint32, ObjectGuid>> linkedGuids;
+            bool inUse = false;
         };
         // Structure associated to a master (guid case)
         struct InfoAndGuid
@@ -185,7 +187,7 @@ class CreatureLinkingHolder
         typedef std::pair<BossGuidMap::const_iterator, BossGuidMap::const_iterator> BossGuidMapBounds;
 
         // Helper function, to process a slave list
-        void ProcessSlaveGuidList(CreatureLinkingEvent eventType, Creature* pSource, uint32 flag, uint16 searchRange, GuidList& slaveGuidList, Unit* pEnemy);
+        void ProcessSlaveGuidList(CreatureLinkingEvent eventType, Creature* pSource, uint32 flag, uint16 searchRange, std::list<std::pair<uint32, ObjectGuid>>& slaveGuidList, Unit* pEnemy);
         // Helper function, to process a single slave
         void ProcessSlave(CreatureLinkingEvent eventType, Creature* pSource, uint32 flag, Creature* pSlave, Unit* pEnemy);
         // Helper function to set following

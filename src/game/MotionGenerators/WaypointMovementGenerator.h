@@ -28,11 +28,18 @@
 #include "MovementGenerator.h"
 #include "WaypointManager.h"
 #include "Server/DBCStructure.h"
+#include "Entities/Object.h"
 
 #include <set>
 
 #define FLIGHT_TRAVEL_UPDATE  100
 #define STOP_TIME_FOR_PLAYER  (3 * MINUTE * IN_MILLISECONDS)// 3 Minutes
+
+// forward declaration (declared in MovementSplineInit.h)
+namespace Movement
+{
+    typedef std::vector<G3D::Vector3> PointsArray;
+}
 
 template<class T, class P>
 class PathMovementBase
@@ -64,7 +71,9 @@ class WaypointMovementGenerator<Creature>
       public PathMovementBase<Creature, WaypointPath const*>
 {
     public:
-        WaypointMovementGenerator(Creature&) : i_nextMoveTime(0), m_isArrivalDone(false), m_lastReachedWaypoint(0), m_pathId(0), m_PathOrigin()
+        WaypointMovementGenerator(Creature&) :
+            i_nextMoveTime(0), m_scriptTime(0), m_lastReachedWaypoint(0), m_pathId(0),
+            m_pathDuration(0), m_PathOrigin(), m_speedChanged(false), m_forcedMovement(FORCED_MOVEMENT_NONE)
         {}
         ~WaypointMovementGenerator() { i_path = nullptr; }
         void Initialize(Creature& creature);
@@ -72,7 +81,7 @@ class WaypointMovementGenerator<Creature>
         void Finalize(Creature&);
         void Reset(Creature& creature);
         bool Update(Creature& creature, const uint32& diff);
-        void InitializeWaypointPath(Creature& u, int32 pathId, WaypointPathOrigin wpSource, uint32 initialDelay, uint32 overwriteEntry);
+        void InitializeWaypointPath(Creature& u, int32 pathId, WaypointPathOrigin wpSource, uint32 initialDelay, uint32 overwriteEntry = 0);
 
         MovementGeneratorType GetMovementGeneratorType() const { return WAYPOINT_MOTION_TYPE; }
 
@@ -81,44 +90,71 @@ class WaypointMovementGenerator<Creature>
         void GetPathInformation(uint32& pathId, WaypointPathOrigin& wpOrigin) const { pathId = m_pathId; wpOrigin = m_PathOrigin; }
         void GetPathInformation(std::ostringstream& oss) const;
 
-        void AddToWaypointPauseTime(int32 waitTimeDiff);
+        void AddToWaypointPauseTime(int32 waitTimeDiff, bool force = false);
         bool SetNextWaypoint(uint32 pointId);
+        void SetForcedMovement(ForcedMovement forcedMovement) { m_forcedMovement = forcedMovement; }
+        void SetGuid(ObjectGuid guid) { m_guid = guid; }
+
+        void UnitSpeedChanged() override { m_speedChanged = true; }
+
+    protected:
+        virtual void SwitchToNextNode(Creature& creature, WaypointPath::const_iterator& nodeItr);
+        //virtual bool GetNodeAfter(WaypointPath::const_iterator& nodeItr);
+        virtual bool GetNodeAfter(WaypointPath::const_iterator& nodeItr, bool looped = false);
 
     private:
         void LoadPath(Creature& creature, int32 pathId, WaypointPathOrigin wpOrigin, uint32 overwriteEntry);
+        uint32 BuildIntPath(Movement::PointsArray& path, Creature& creature, G3D::Vector3 const& endPos);
 
         void Stop(int32 time) { i_nextMoveTime.Reset(time); }
         bool Stopped(Creature& u);
         bool CanMove(int32 diff, Creature& u);
 
         void OnArrived(Creature&);
-        void StartMove(Creature&);
+        void SendNextWayPointPath(Creature&);
         void InformAI(Creature& creature, uint32 type, uint32 data);
 
+        WaypointPath::const_iterator m_currentWaypointNode;
         ShortTimeTracker i_nextMoveTime;
-        bool m_isArrivalDone;
+        int32 m_scriptTime;                                 // filled with delay change when script is instantly executed and want to change node delay
         uint32 m_lastReachedWaypoint;
+        Position m_resetPoint;
 
         uint32 m_pathId;
+        int32 m_pathDuration;
+        std::list<int32> m_nodeIndexes;
         WaypointPathOrigin m_PathOrigin;
+
+        bool m_speedChanged;
+        ForcedMovement m_forcedMovement;
+
+        ObjectGuid m_guid;
 };
 
-/** TaxiMovementGenerator generates movement of the player for the paths
- * and hence generates ground and activities for the player.
+/** LinearWPMovementGenerator loads a series of way points
+ * from the DB and apply it to the creature's movement generator.
+ * Creature will move in sequence from point A -> B -> C -> D -> C -> B -> A -> B .....
+ * Or if you prefer it will go back and forth all along provided nodes.
  */
-class TaxiMovementGenerator
-    : public MovementGeneratorMedium< Player, TaxiMovementGenerator >
+template<class T>
+class LinearWPMovementGenerator;
+
+template<>
+class LinearWPMovementGenerator<Creature> : public WaypointMovementGenerator<Creature>
 {
     public:
-        void Initialize(Player&);
-        void Finalize(Player&);
-        void Interrupt(Player&);
-        void Reset(Player&);
-        bool Update(Player&, const uint32&);
+    LinearWPMovementGenerator(Creature& creature) : WaypointMovementGenerator(creature), m_driveWayBack(false)
+    {}
 
-        MovementGeneratorType GetMovementGeneratorType() const override { return TAXI_MOTION_TYPE; }
+    // return WAYPOINT_MOTION_TYPE on purpose so it act like normal waypoint for large majority of the core
+    //MovementGeneratorType GetMovementGeneratorType() const override { return LINEAR_WP_MOTION_TYPE; }
 
-        bool Resume(Player& player) const;
+    private:
+    void SwitchToNextNode(Creature& creature, WaypointPath::const_iterator& nodeItr) override;
+    //bool GetNodeAfter(WaypointPath::const_iterator& nodeItr) override;
+    bool GetNodeAfter(WaypointPath::const_iterator& nodeItr, bool looped = false) override;
+
+    bool m_driveWayBack;
 };
 
 #endif

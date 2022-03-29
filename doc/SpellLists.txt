@@ -1,0 +1,51 @@
+Warning: New feature - do not go blindly converting to it as of 10.11.2021
+
+Meant to emulate official server tool image logic. Ties into not just AI but also Charms and Possess for giving spells and cooldowns.
+Set ID is changeable in EAI and C++ for now. Default is in creature_template SpellList column.
+Logically a consolidation of EAI timer 0 event, 9 event for combat spells, creature_template_spells and creature_cooldowns tables. Meant to replace non-conditional
+timers in CombatAI and is hot-reloadable.
+
+Table creature_spell_list_entry:
+Id - Spell List ID - recommended either entry or entry * 100 + 01 if entry has multiple
+Name - Mandatory - Spell name with zone prefix. Example: Westfall - Defias Pillager. This naming enables querying npcs by zone, very useful in dungeons.
+ChanceSupportAction and ChanceRangedAttack - Chance at each spell list tick in combat (1200ms) for the action with SPELL_LIST_FLAG_SUPPORT_ACTION (1) or
+SPELL_LIST_FLAG_RANGED_ACTION (2) set respectively. If multiple are set, always one spell is selected. During melee mode, ranged attack chance is -50.
+The 1200ms loop has been checked on official servers and will intentionally make the AI less responsive and less impactful on performance. EAI has a 500ms tick rate on timers,
+however that is not an issue due to it needing a finer control. A normal spell list entry should never have more than 10 spells, since that was an official limitation.
+
+Tabke creature_spell_targeting:
+Id - Spell Targeting ID - Ids below 100 are reserved for future use with hardcoded targets.
+Type - Hardcoded/Attack/Support - Hardcoded dont need additional parameters
+Comments - Description of target in format: Type - Use.
+
+Attack:
+Param1 - enum AttackingTarget
+Param2 - Number of positions from the top of the threat list to be skipped.
+Param3 - enum SelectFlags
+
+Support:
+Param1 - Minimum missing health
+Param2 - 0 or 1, 0 if minimum missing is flat health and 1 if minimum missing is percentage.
+Param3 - 0 or 1, 0 if self should not be eligible.
+
+Table creature_spell_list:
+Id - Spell List ID
+Position - Position on spell list bar - needed for Charms and Possess
+SpellId - Spell ID that will be casted when this spell list is eligible
+Flags - SPELL_LIST_FLAG_SUPPORT_ACTION (1) SPELL_LIST_FLAG_RANGED_ACTION (2)
+TargetId - creature_spell_targeting ID
+ScriptId - dbscripts_on_relay ID launched at successful cast start.
+Availability - Chance for spell to be included in spell list at assignment. Assignment happens by default on spawn.
+Probability - If several spells are eligible in the same spell list tick, this is the weight with which its likely this spell will go off. Higher probability,
+higher chance for spell to go off.
+InitialMin, InitialMax, RepeatMin, RepeatMax - Timers used for casting spell. Will emplace a cooldown on the user unlike EAI which only starts a timer. Repeat timers are used
+during charm to give spells cooldowns as well.
+Comments - Description of spell use - Preferred format: NPC name - <phase ID if needed> - Spell use on who
+
+Hardcoded targets:
+0 - None - nullptr
+1 - Current aggro target - getVictim in c++
+2 - Self
+3 - Eligible friendly dispel - automatically detects eligible spells for dispel from spell id
+4 - Eligible friendly dispel excluding self - same as 3
+

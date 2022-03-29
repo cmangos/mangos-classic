@@ -46,7 +46,6 @@ static DumpTable dumpTables[] =
     { "character_skills",                 DTT_CHAR_TABLE },
     { "character_spell",                  DTT_CHAR_TABLE },
     { "character_spell_cooldown",         DTT_CHAR_TABLE },
-    { "character_ticket",                 DTT_CHAR_TABLE },
     { "mail",                             DTT_MAIL       }, // -> mail guids
     { "mail_items",                       DTT_MAIL_ITEM  }, // -> item guids    <- mail guids
     { "pet_aura",                         DTT_PET_TABLE  }, //                  <- pet number
@@ -211,7 +210,7 @@ std::string CreateDumpString(char const* tableName, QueryResult* result)
             ss << ", ";
 
         if (fields[i].IsNULL())
-            ss << "nullptr";
+            ss << "NULL";
         else
         {
             std::string s =  fields[i].GetCppString();
@@ -569,19 +568,10 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
             }
             case DTT_ITEM:
             {
-                // item, owner, data field:item, owner guid
+                // item, owner
                 if (!changeGuid(line, 1, items, sObjectMgr.m_ItemGuids.GetNextAfterMaxUsed()))
                     ROLLBACK(DUMP_FILE_BROKEN);             // item_instance.guid update
                 if (!changenth(line, 2, newguid))           // item_instance.owner_guid update
-                    ROLLBACK(DUMP_FILE_BROKEN);
-                std::string vals = getnth(line, 3);         // item_instance.data get
-                if (!changetokGuid(vals, OBJECT_FIELD_GUID + 1, items, sObjectMgr.m_ItemGuids.GetNextAfterMaxUsed()))
-                    ROLLBACK(DUMP_FILE_BROKEN);             // item_instance.data.OBJECT_FIELD_GUID update
-                if (!changetoknth(vals, ITEM_FIELD_OWNER + 1, newguid))
-                    ROLLBACK(DUMP_FILE_BROKEN);             // item_instance.data.ITEM_FIELD_OWNER update
-                if (!changetokGuid(vals, ITEM_FIELD_ITEM_TEXT_ID + 1, itemTexts, sObjectMgr.m_ItemTextIds.GetNextAfterMaxUsed(), true))
-                    ROLLBACK(DUMP_FILE_BROKEN);
-                if (!changenth(line, 3, vals.c_str()))      // item_instance.data update
                     ROLLBACK(DUMP_FILE_BROKEN);
                 break;
             }

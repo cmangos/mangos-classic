@@ -2,7 +2,7 @@
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 
 /**
    Function that uses a door or a button
@@ -41,6 +41,12 @@ void ScriptedInstance::DoUseDoorOrButton(uint32 entry, uint32 withRestoreTime /*
         debug_log("SD2: Script call DoUseDoorOrButton(by Entry), but no gameobject of entry %u was created yet, or it was not stored by script for map %u.", entry, instance->GetId());
 }
 
+void ScriptedInstance::DoUseOpenableObject(uint32 entry, bool open, uint32 withRestoreTime, bool useAlternativeState)
+{
+    if (GameObject* go = GetSingleGameObjectFromStorage(entry))
+        go->UseOpenableObject(open, withRestoreTime, useAlternativeState);
+}
+
 /**
    Function that respawns a despawned GameObject with given time
 
@@ -54,16 +60,17 @@ void ScriptedInstance::DoRespawnGameObject(ObjectGuid guid, uint32 timeToDespawn
 
     if (GameObject* pGo = instance->GetGameObject(guid))
     {
-        // not expect any of these should ever be handled
-        if (pGo->GetGoType() == GAMEOBJECT_TYPE_FISHINGNODE || pGo->GetGoType() == GAMEOBJECT_TYPE_DOOR ||
-                pGo->GetGoType() == GAMEOBJECT_TYPE_BUTTON || pGo->GetGoType() == GAMEOBJECT_TYPE_TRAP)
-            return;
-
         if (pGo->IsSpawned())
             return;
 
-        pGo->SetRespawnTime(timeToDespawn);
-        pGo->Refresh();
+        // static spawned go - can only respawn
+        if (pGo->IsSpawnedByDefault())
+            pGo->Respawn();
+        else
+        {
+            pGo->SetRespawnTime(timeToDespawn);
+            pGo->Refresh();
+        }
     }
 }
 
@@ -133,39 +140,108 @@ void ScriptedInstance::DoUpdateWorldState(uint32 stateId, uint32 stateData)
 }
 
 /// Get the first found Player* (with requested properties) in the map. Can return nullptr.
-Player* ScriptedInstance::GetPlayerInMap(bool bOnlyAlive /*=false*/, bool bCanBeGamemaster /*=true*/) const
+Player* ScriptedInstance::GetPlayerInMap(bool onlyAlive /*=false*/, bool canBeGamemaster /*=true*/) const
 {
-    Map::PlayerList const& lPlayers = instance->GetPlayers();
+    Map::PlayerList const& players = instance->GetPlayers();
 
-    for (const auto& lPlayer : lPlayers)
+    for (const auto& playerRef : players)
     {
-        Player* pPlayer = lPlayer.getSource();
-        if (pPlayer && (!bOnlyAlive || pPlayer->isAlive()) && (bCanBeGamemaster || !pPlayer->isGameMaster()))
-            return pPlayer;
+        Player* player = playerRef.getSource();
+        if (player && (!onlyAlive || (player->IsAlive() && player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && !player->IsFeigningDeathSuccessfully() && !player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE_2))) && (canBeGamemaster || !player->IsGameMaster()))
+            return player;
     }
 
     return nullptr;
 }
 
-/// Returns a pointer to a loaded GameObject that was stored in m_goEntryGuidStore. Can return nullptr
-GameObject* ScriptedInstance::GetSingleGameObjectFromStorage(uint32 entry)
+void ScriptedInstance::BanPlayersIfNoGm(const std::string& reason)
 {
-    EntryGuidMap::iterator find = m_goEntryGuidStore.find(entry);
-    if (find != m_goEntryGuidStore.end())
-        return instance->GetGameObject(find->second);
+    bool found = false;
+    Map::PlayerList const& players = instance->GetPlayers();
+
+    for (const auto& playerRef : players)
+    {
+        Player* player = playerRef.getSource();
+        if (player && player->GetSession()->GetSecurity() >= SEC_GAMEMASTER)
+        {
+            found = true;
+            break;
+        }
+    }
+    if (!found)
+    {
+        for (const auto& playerRef : players)
+        {
+            Player* player = playerRef.getSource();
+            if (player && player->GetSession()->GetSecurity() < SEC_GAMEMASTER)
+            {
+                player->BanPlayer(reason);
+                break;
+            }
+        }
+    }
+}
+
+void ScriptedInstance::DespawnGuids(GuidVector& spawns)
+{
+    for (ObjectGuid& guid : spawns)
+    {
+        if (guid.IsAnyTypeCreature())
+        {
+            if (Creature* spawn = instance->GetAnyTypeCreature(guid))
+                spawn->ForcedDespawn();
+        }
+        else if (guid.IsGameObject())
+        {
+            if (GameObject* spawn = instance->GetGameObject(guid))
+            {
+                spawn->SetLootState(GO_JUST_DEACTIVATED);
+                spawn->SetForcedDespawn();
+            }
+        }
+    }
+    spawns.clear();
+}
+
+void ScriptedInstance::RespawnDbGuids(std::vector<uint32>& spawns, uint32 respawnDelay)
+{
+    for (uint32 spawn : spawns)
+    {
+        if (respawnDelay)
+        {
+            if (Creature* creature = instance->GetCreature(spawn))
+            {
+                if (creature->IsAlive())
+                {
+                    creature->SetRespawnDelay(respawnDelay, true);
+                    creature->ForcedDespawn();
+                }
+            }
+        }
+        instance->GetSpawnManager().RespawnCreature(spawn, respawnDelay);
+    }
+}
+
+/// Returns a pointer to a loaded GameObject that was stored in m_goEntryGuidStore. Can return nullptr
+GameObject* ScriptedInstance::GetSingleGameObjectFromStorage(uint32 entry, bool skipDebugLog /*=false*/) const
+{
+    auto iter = m_goEntryGuidStore.find(entry);
+    if (iter != m_goEntryGuidStore.end())
+        return instance->GetGameObject(iter->second);
 
     // Output log, possible reason is not added GO to map, or not yet loaded;
-    script_error_log("Script requested gameobject with entry %u, but no gameobject of this entry was created yet, or it was not stored by script for map %u.", entry, instance->GetId());
+    if (!skipDebugLog)
+        script_error_log("Script requested gameobject with entry %u, but no gameobject of this entry was created yet, or it was not stored by script for map %u.", entry, instance->GetId());
 
     return nullptr;
 }
 
 /// Returns a pointer to a loaded Creature that was stored in m_goEntryGuidStore. Can return nullptr
-Creature* ScriptedInstance::GetSingleCreatureFromStorage(uint32 entry, bool skipDebugLog /*=false*/)
+Creature* ScriptedInstance::GetSingleCreatureFromStorage(uint32 entry, bool skipDebugLog /*=false*/) const
 {
-    EntryGuidMap::iterator find = m_npcEntryGuidStore.find(entry);
-    if (find != m_npcEntryGuidStore.end())
-        return instance->GetCreature(find->second);
+    auto iter = m_npcEntryGuidStore.find(entry);
+    if (iter != m_npcEntryGuidStore.end())
+        return instance->GetCreature(iter->second);
 
     // Output log, possible reason is not added GO to map, or not yet loaded;
     if (!skipDebugLog)
@@ -174,14 +250,14 @@ Creature* ScriptedInstance::GetSingleCreatureFromStorage(uint32 entry, bool skip
     return nullptr;
 }
 
-void ScriptedInstance::GetCreatureGuidVectorFromStorage(uint32 entry, GuidVector& entryGuidVector, bool /*skipDebugLog*/)
+void ScriptedInstance::GetCreatureGuidVectorFromStorage(uint32 entry, GuidVector& entryGuidVector, bool /*skipDebugLog*/) const
 {
     auto iter = m_npcEntryGuidCollection.find(entry);
     if (iter != m_npcEntryGuidCollection.end())
         entryGuidVector = (*iter).second;
 }
 
-void ScriptedInstance::GetGameObjectGuidVectorFromStorage(uint32 entry, GuidVector& entryGuidVector, bool /*skipDebugLog*/)
+void ScriptedInstance::GetGameObjectGuidVectorFromStorage(uint32 entry, GuidVector& entryGuidVector, bool /*skipDebugLog*/) const
 {
     auto iter = m_goEntryGuidCollection.find(entry);
     if (iter != m_goEntryGuidCollection.end())

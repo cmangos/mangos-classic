@@ -22,11 +22,14 @@
 #include "Common.h"
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
+#include "Map.h"
 #include "Maps/Map.h"
 #include "Grids/GridStates.h"
+#include "Maps/MapUpdater.h"
 
 class Transport;
 class BattleGround;
+struct TransportTemplate;
 
 struct MapID
 {
@@ -68,7 +71,7 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         // only const version for outer users
         void DeleteInstance(uint32 mapid, uint32 instanceId);
 
-        void Initialize(void);
+        void Initialize();
         void Update(uint32);
 
         void SetGridCleanUpDelay(uint32 t)
@@ -81,7 +84,7 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
 
         void SetMapUpdateInterval(uint32 t)
         {
-            if (t > MIN_MAP_UPDATE_DELAY)
+            if (t < MIN_MAP_UPDATE_DELAY)
                 t = MIN_MAP_UPDATE_DELAY;
 
             i_timer.SetInterval(t);
@@ -121,22 +124,19 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
             if (o < 0)
             {
                 float mod = o * -1;
-                mod = fmod(mod, 2.0f * M_PI_F);
+                mod = std::fmod(mod, 2.0f * M_PI_F);
                 mod = -mod + 2.0f * M_PI_F;
                 return mod;
             }
-            return fmod(o, 2.0f * M_PI_F);
+            return std::fmod(o, 2.0f * M_PI_F);
         }
 
         void RemoveAllObjectsInRemoveList();
 
         void LoadTransports();
 
-        typedef std::set<Transport*> TransportSet;
-        TransportSet m_Transports;
-
-        typedef std::map<uint32, TransportSet> TransportMap;
-        TransportMap m_TransportsByMap;
+        typedef std::map<uint32, std::vector<const TransportTemplate*>> TransportMap;
+        TransportMap m_transportsByMap;
 
         uint32 GenerateInstanceId() { return ++i_MaxInstanceId; }
         void InitMaxInstanceId();
@@ -145,13 +145,16 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         uint32 GetNumInstances();
         uint32 GetNumPlayersInInstances();
 
-        uint32 GetMapUpdateMinTime(uint32 mapId, uint32 instance = 0);
-        uint32 GetMapUpdateMaxTime(uint32 mapId, uint32 instance = 0);
-        uint32 GetMapUpdateAvgTime(uint32 mapId, uint32 instance = 0);
-
         // get list of all maps
         const MapMapType& Maps() const { return i_maps; }
 
+        template<typename Do> void DoForAllMaps(Do& _do)
+        {
+            for (auto& mapData : i_maps)
+            {
+                _do(mapData.second);
+            }
+        }
         template<typename Do> void DoForAllMapsWithMapId(uint32 mapId, Do& _do);
         template<typename Check> inline WorldObject* SearchOnAllLoadedMap(Check& check);
         void DoForAllMaps(const std::function<void(Map*)>& worker);
@@ -184,6 +187,7 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         IntervalTimer i_timer;
 
         uint32 i_MaxInstanceId;
+        MapUpdater m_updater;
 };
 
 template<typename Do>

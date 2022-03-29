@@ -24,6 +24,18 @@ enum
 
     ITEM_CORRUPTED_ASHRBRINGER      = 22691,
     SAY_ASHBRINGER_ENTRANCE         = -1189036,
+    AREATRIGGER_CATHEDRAL_ENTRANCE  = 4089, // used to trigger Corrupted Ashbringer event
+    // these npcs are tracked for purposes of turning them friendly during the Corrupted Ashbringer event
+    NPC_SORCERER    = 4294,
+    NPC_MYRMIDON    = 4295,
+    NPC_DEFENDER    = 4298,
+    NPC_CHAPLAIN    = 4299,
+    NPC_WIZARD      = 4300,
+    NPC_CENTURION   = 4301,
+    NPC_CHAMPION    = 4302,
+    NPC_ABBOT       = 4303,
+    NPC_MONK        = 4540,
+    NPC_FAIRBANKS   = 4542,
 };
 
 class instance_scarlet_monastery : public ScriptedInstance
@@ -36,13 +48,16 @@ class instance_scarlet_monastery : public ScriptedInstance
         void OnCreatureCreate(Creature* pCreature) override;
         void OnCreatureDeath(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
-
-        void OnPlayerEnter(Player* pPlayer) override;
+        void OnCreatureRespawn(Creature* creature) override;
+        void OnObjectSpawn(GameObject* go) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiData) const override;
 
+        bool DoHandleAreaTrigger(AreaTriggerEntry const* areaTrigger);
+
     private:
+        GuidSet m_sAshbringerFriendlyGuids;
         uint32 m_auiEncounter[MAX_ENCOUNTER];
 };
 

@@ -17,12 +17,11 @@
  */
 
 #include "PointMovementGenerator.h"
-#include "Entities/Creature.h"
-#include "AI/BaseAI/UnitAI.h"
-#include "Entities/TemporarySpawn.h"
-#include "World/World.h"
 #include "Movement/MoveSpline.h"
 #include "Movement/MoveSplineInit.h"
+#include "Entities/Creature.h"
+#include "Entities/TemporarySpawn.h"
+#include "AI/BaseAI/UnitAI.h"
 
 //----- Point Movement Generator
 
@@ -95,6 +94,12 @@ void PointMovementGenerator::Move(Unit& unit)
     init.MoveTo(m_x, m_y, m_z, m_generatePath);
     if (m_forcedMovement == FORCED_MOVEMENT_WALK)
         init.SetWalk(true);
+    else if (m_forcedMovement == FORCED_MOVEMENT_RUN)
+        init.SetWalk(false);
+    else
+        init.SetWalk(!unit.hasUnitState(UNIT_STAT_RUNNING));
+    if (m_forcedMovement == FORCED_MOVEMENT_FLIGHT)
+        init.SetFly();
     if (m_o != 0.f)
         init.SetFacing(m_o);
     init.SetVelocity(m_speed);
@@ -117,6 +122,9 @@ void PointMovementGenerator::MovementInform(Unit& unit)
                     ai->SummonedMovementInform(static_cast<Creature*>(&unit), type, m_id);
             }
     }
+
+    if (m_relayId)
+        unit.GetMap()->ScriptsStart(sRelayScripts, m_relayId, &unit, m_guid ? unit.GetMap()->GetWorldObject(m_guid) : nullptr);
 }
 
 void RetreatMovementGenerator::Initialize(Unit& unit)
@@ -211,9 +219,12 @@ void PointTOLMovementGenerator::Move(Unit& unit)
     init.MoveTo(m_x, m_y, m_z, false);
     if (m_forcedMovement == FORCED_MOVEMENT_WALK)
         init.SetWalk(true);
+    else
+        init.SetWalk(!unit.hasUnitState(UNIT_STAT_RUNNING));
     if (m_o != 0.f)
         init.SetFacing(m_o);
     init.SetVelocity(m_speed);
     init.SetFly();
+    init.SetWalk(!unit.hasUnitState(UNIT_STAT_RUNNING));
     init.Launch();
 }

@@ -21,6 +21,7 @@
 
 #include <set>
 #include <vector>
+#include <map>
 #include "Tools.h"
 #include "MapData.h"
 #include "DetourNavMesh.h"
@@ -37,12 +38,35 @@
 
 #define MAX_TILE_TO_LOAD 9
 
+typedef std::map<std::string, std::string> TransportDataContainer;
+static TransportDataContainer TransportMap =
+{
+    // List of MO Transport gameobjects
+    {"3015", "Transportship.wmo.vmo"},
+    {"3031", "Transport_Zeppelin.wmo.vmo"},
+    {"7087", "Transportship_Ne.wmo.vmo"},
+    // List of Transport gameobjects
+    {"0360", "Elevatorcar.m2.vmo"},
+    {"0455", "Undeadelevator.m2.vmo"},
+    // buildGameObject("Undeadelevatordoor.m2.vmo", 462); // no model on which to path
+    {"0561", "Ironforgeelevator.m2.vmo"},
+    // buildGameObject("Ironforgeelevatordoor.m2.vmo", 562); // no model on which to path
+    {"0807", "Gnomeelevatorcar01.m2.vmo"},
+    {"0808", "Gnomeelevatorcar02.m2.vmo"},
+    {"0827", "Gnomeelevatorcar03.m2.vmo"},
+    {"0852", "Gnomeelevatorcar03.m2.vmo"},
+    {"1587", "Gnomehutelevator.m2.vmo"},
+    {"2454", "Burningsteppselevator.m2.vmo"},
+    {"3831", "Subwaycar.m2.vmo"},
+};
+
 enum ShowLevels
 {
     SHOW_LEVEL_NONE,
     SHOW_LEVEL_MAP,
     SHOW_LEVEL_NEIGHBOR_TILES,
-    SHOW_LEVEL_TILES
+    SHOW_LEVEL_TILES,
+    SHOW_LEVEL_TRANSPORT
 };
 
 struct SelectedTile
@@ -125,6 +149,7 @@ protected:
     std::set <uint32> m_MapsFound;
     std::set <uint32> m_NeighborTiles;
     string m_TileButtonStr;
+    string m_transportButtonStr;
     bool m_GeomChanged;
 
     BuildContext* m_ctx;
@@ -144,6 +169,7 @@ protected:
     float m_vertsPerPoly;
     float m_detailSampleDist;
     float m_detailSampleMaxError;
+
     SamplePartitionType m_partitionType;
     SampleTool* m_tool;
     SampleToolState* m_toolStates[MAX_TOOLS];
@@ -184,6 +210,7 @@ public:
     bool ShowMapLevel(int height, int width);
     bool ShowNeighborTiles(int height, int width);
     bool ShowTilesLevel(int height, int width);
+    bool ShowTransportLevel(int height, int width);
     bool LoadTileData(unsigned int tx, unsigned int ty);
     bool GeomChanged();
     inline void GetGeomBounds(float const* &bmin, float const* &bmax) { bmin = m_MapInfos->BMin(); bmax = m_MapInfos->BMax(); }

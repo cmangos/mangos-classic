@@ -37,7 +37,7 @@ class Totem : public Creature
         void Update(const uint32 diff) override;
         void Summon(Unit* owner);
         void UnSummon();
-        uint32 GetSpell() const { return m_spells[0]; }
+        uint32 GetSpell() const;
         uint32 GetTotemDuration() const { return m_duration; }
         TotemType GetTotemType() const { return m_type; }
         void SetTypeBySummonSpell(SpellEntry const* spellProto);
@@ -64,6 +64,8 @@ class Totem : public Creature
         void UpdateDamagePhysical(WeaponAttackType /*attType*/) override {}
 
         bool IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const override;
+
+        ObjectGuid const GetSpawnerGuid() const override { return GetOwnerGuid(); }
 
     protected:
         TotemType m_type;

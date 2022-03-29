@@ -24,6 +24,10 @@
 #include "Globals/SharedDefines.h"
 #include "Dynamic/FactoryHolder.h"
 #include "Entities/ObjectGuid.h"
+#include "AI/BaseAI/AIDefines.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
+#include "Entities/EntitiesMgr.h"
+#include <functional>
 
 class WorldObject;
 class GameObject;
@@ -33,6 +37,8 @@ class Player;
 struct SpellEntry;
 class ChatHandler;
 class Spell;
+struct CreatureSpellListTargeting;
+struct CreatureSpellList;
 
 #define TIME_INTERVAL_LOOK   5000
 #define VISIBILITY_RANGE    10000
@@ -51,6 +57,8 @@ enum CanCastResult
     CAST_FAIL_NOT_IN_LOS        = 8,
     CAST_FAIL_COOLDOWN          = 9,
     CAST_FAIL_EVADE             = 10,
+    CAST_FAIL_CAST_PREVENTED    = 11,
+    CAST_FAIL_MISCELLANEOUS     = 12,
 };
 
 enum CastFlags
@@ -66,42 +74,8 @@ enum CastFlags
     CAST_MAIN_SPELL             = 0x100,                    // Marks main spell
     CAST_PLAYER_ONLY            = 0x200,                    // Selects only player targets - substitution for EAI not having more params
     CAST_DISTANCE_YOURSELF      = 0x400,                    // If spell with this cast flag hits main aggro target, caster distances himself - EAI only
-};
-
-enum AIEventType
-{
-    // Usable with Event AI
-    AI_EVENT_JUST_DIED          = 0,                        // Sender = Killed Npc, Invoker = Killer
-    AI_EVENT_CRITICAL_HEALTH    = 1,                        // Sender = Hurt Npc, Invoker = DamageDealer - Expected to be sent by 10% health
-    AI_EVENT_LOST_HEALTH        = 2,                        // Sender = Hurt Npc, Invoker = DamageDealer - Expected to be sent by 50% health
-    AI_EVENT_LOST_SOME_HEALTH   = 3,                        // Sender = Hurt Npc, Invoker = DamageDealer - Expected to be sent by 90% health
-    AI_EVENT_GOT_FULL_HEALTH    = 4,                        // Sender = Healed Npc, Invoker = Healer
-    AI_EVENT_CUSTOM_EVENTAI_A   = 5,                        // Sender = Npc that throws custom event, Invoker = TARGET_T_ACTION_INVOKER (if exists)
-    AI_EVENT_CUSTOM_EVENTAI_B   = 6,                        // Sender = Npc that throws custom event, Invoker = TARGET_T_ACTION_INVOKER (if exists)
-    AI_EVENT_GOT_CCED           = 7,                        // Sender = CCed Npc, Invoker = Caster that CCed
-    AI_EVENT_CUSTOM_EVENTAI_C   = 8,                        // Sender = Npc that throws custom event, Invoker = TARGET_T_ACTION_INVOKER (if exists)
-    AI_EVENT_CUSTOM_EVENTAI_D   = 9,                        // Sender = Npc that throws custom event, Invoker = TARGET_T_ACTION_INVOKER (if exists)
-    AI_EVENT_CUSTOM_EVENTAI_E   = 10,                       // Sender = Npc that throws custom event, Invoker = TARGET_T_ACTION_INVOKER (if exists)
-    AI_EVENT_CUSTOM_EVENTAI_F   = 11,                       // Sender = Npc that throws custom event, Invoker = TARGET_T_ACTION_INVOKER (if exists)
-    MAXIMAL_AI_EVENT_EVENTAI    = 12,
-
-    // Internal Use
-    AI_EVENT_CALL_ASSISTANCE    = 13,                       // Sender = Attacked Npc, Invoker = Enemy
-
-    // Predefined for SD2
-    AI_EVENT_START_ESCORT       = 100,                      // Invoker = Escorting Player
-    AI_EVENT_START_ESCORT_B     = 101,                      // Invoker = Escorting Player
-    AI_EVENT_START_EVENT        = 102,                      // Invoker = EventStarter
-    AI_EVENT_START_EVENT_A      = 103,                      // Invoker = EventStarter
-    AI_EVENT_START_EVENT_B      = 104,                      // Invoker = EventStarter
-
-    // Some IDs for special cases in SD2
-    AI_EVENT_CUSTOM_A           = 1000,
-    AI_EVENT_CUSTOM_B           = 1001,
-    AI_EVENT_CUSTOM_C           = 1002,
-    AI_EVENT_CUSTOM_D           = 1003,
-    AI_EVENT_CUSTOM_E           = 1004,
-    AI_EVENT_CUSTOM_F           = 1005,
+    CAST_TARGET_CASTING         = 0x800,                    // Selects only targets that are casting - EAI only
+    CAST_ONLY_XYZ               = 0x1000,
 };
 
 enum ReactStates
@@ -118,13 +92,31 @@ enum AIOrders
     ORDER_FLEEING,
     ORDER_RETREATING,
     ORDER_EVADE,
+    ORDER_FLEE_FROM_CALL_FOR_HELP,
     ORDER_CUSTOM,
 };
 
-class UnitAI
+enum RangeModeType : uint32 // maybe can be substituted for class checks
+{
+    TYPE_NONE = 0,
+    TYPE_FULL_CASTER = 1,
+    TYPE_PROXIMITY = 2,
+    TYPE_NO_MELEE_MODE = 3,
+    TYPE_DISTANCER = 4,
+    TYPE_MAX,
+};
+
+enum GenericAIActions
+{
+    GENERIC_ACTION_DISTANCE   = 2000,
+    GENERIC_ACTION_SPELL_LIST = 2001,
+};
+
+class UnitAI : public CombatActions
 {
     public:
         explicit UnitAI(Unit* unit);
+        explicit UnitAI(Unit* unit, uint32 combatActions);
 
         virtual ~UnitAI();
 
@@ -151,7 +143,7 @@ class UnitAI
          * Called for reaction at enter to combat if not in combat yet
          * @param enemy Unit* of whom the Creature enters combat with, can be nullptr
          */
-        virtual void EnterCombat(Unit* /*enemy*/) {}
+        virtual void EnterCombat(Unit* /*enemy*/);
 
         /**
          * Called for reaction at stopping attack at no attackers or targets
@@ -196,7 +188,7 @@ class UnitAI
          * Called when the creature is killed
          * @param pKiller Unit* who killed the creature
          */
-        virtual void JustDied(Unit* /*killer*/) {}
+        virtual void JustDied(Unit* /*killer*/);
 
         /**
          * Called when the corpse of this creature gets removed
@@ -315,7 +307,7 @@ class UnitAI
          * Note: Use this function to handle Timers, Threat-Management and MeleeAttacking
          * @param uiDiff Passed time since last call
          */
-        virtual void UpdateAI(const uint32 /*diff*/) {}
+        virtual void UpdateAI(const uint32 /*diff*/);
 
         ///== State checks =================================
 
@@ -344,11 +336,12 @@ class UnitAI
          * @param uiCastFlags Some flags to define how to cast, see enum CastFlags
          * @param OriginalCasterGuid the original caster of the spell if required, empty by default
          */
-        CanCastResult DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 castFlags = 0, ObjectGuid originalCasterGUID = ObjectGuid()) const;
+        virtual CanCastResult DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 castFlags = 0);
 
         /// Set combat movement (on/off), also sets UNIT_STAT_NO_COMBAT_MOVEMENT
         void SetCombatMovement(bool enable, bool stopOrStartMovement = false);
         bool IsCombatMovement() const;
+        void SetFollowMovement(bool enable);
 
         ///== Event Handling ===============================
 
@@ -391,12 +384,6 @@ class UnitAI
         virtual bool AssistPlayerInCombat(Unit* /*who*/) { return false; }
 
         /*
-         * Called when a spell is interrupted
-         * @param spellInfo to specify which spell was interrupted
-         */
-        virtual void OnSpellInterrupt(SpellEntry const* /*spellInfo*/) {}
-
-        /*
          * Notifies AI on cast state change
          */
         virtual void OnSpellCastStateChange(Spell const* spell, bool state, WorldObject* target = nullptr);
@@ -407,22 +394,54 @@ class UnitAI
         virtual void OnChannelStateChange(Spell const* spell, bool state, WorldObject* target = nullptr);
 
         /*
-         * Notifies AI on successfull spell execution
+         * Notifies AI on successful spelllist spell cast
          */
-        virtual void OnSpellCooldownAdded(SpellEntry const* /*spellInfo*/) {}
+        virtual void OnSpellCast(SpellEntry const* spellInfo, Unit* target) {}
+
+        /*
+         * Notifies AI on stealth alert for player nearby
+         */
+        virtual void OnStealthAlert(Unit* who) {}
+
+        /*
+         * Notifies AI on evade from combat due to leash
+         */
+        virtual void OnLeash() {}
+
+        /*
+         * Notifies AI on object heartbeat
+         */
+        virtual void OnHeartbeat() {}
+
+        /*
+         * Notifies AI on being called for help
+         */
+        virtual void OnCallForHelp(Unit* caller, Unit* enemy) {}
+
+        /*
+         * Notifies AI on pet/totem unsummon - warning: works only for pets/totems
+         */
+        virtual void OnUnsummon() {}
 
         void CheckForHelp(Unit* /*who*/, Unit* /*me*/, float /*dist*/);
         void DetectOrAttack(Unit* who);
         bool CanTriggerStealthAlert(Unit* who, float attackRadius) const;
 
-        virtual void HandleMovementOnAttackStart(Unit* victim) const;
+        virtual void HandleMovementOnAttackStart(Unit* victim, bool targetChange) const;
 
 
         // TODO: Implement proper casterAI in EAI and remove this from Leotheras script
+        uint32 GetAttackDistance() { return m_attackDistance; }
         void SetMoveChaseParams(float dist, float angle, bool moveFurther) { m_attackDistance = dist; m_attackAngle = angle; m_moveFurther = moveFurther; }
 
         // Returns friendly unit with the most amount of hp missing from max hp - ignoreSelf - some spells cant target self
-        Unit* DoSelectLowestHpFriendly(float range, float minMissing = 1.f, bool percent = false, bool ignoreSelf = false);
+        Unit* DoSelectLowestHpFriendly(float range, float minMissing = 1.f, bool percent = false, bool targetSelf = true) const;
+        float CalculateSpellRange(SpellEntry const* spellInfo) const;
+        CreatureList DoFindFriendlyEligibleDispel(uint32 spellId, bool self = true) const;
+        CreatureList DoFindFriendlyEligibleDispel(SpellEntry const* spellInfo, bool self = true) const;
+        CreatureList DoFindFriendlyEligibleDispel(float range, uint32 dispelMask = 0, uint32 mechanicMask = 0, bool self = true) const;
+        CreatureList DoFindFriendlyMissingBuff(float range, uint32 spellId, bool inCombat, bool self = true) const;
+        CreatureList DoFindFriendlyMissingBuff(SpellEntry const* spellInfo, bool inCombat, bool self = true) const;
 
         // Start movement toward victim
         void DoStartMovement(Unit* victim);
@@ -432,13 +451,14 @@ class UnitAI
         bool HasReactState(ReactStates state) const { return (m_reactState == state); }
 
         virtual bool CanExecuteCombatAction();
+        bool CanCastSpell();
         void SetCombatScriptStatus(bool state) { m_combatScriptHappening = state; };
         bool GetCombatScriptStatus() const { return m_combatScriptHappening; }
 
         void SetAIOrder(AIOrders order) { m_currentAIOrder = order; }
         AIOrders GetAIOrder() const { return m_currentAIOrder; }
 
-        bool DoFlee();
+        bool DoFlee(uint32 duration = 0);
         virtual bool DoRetreat() { return false; } // implemented for creatures
         void DoDistance(); // TODO
         virtual void DoCallForHelp(float radius) {} // implemented for creatures
@@ -451,21 +471,91 @@ class UnitAI
         // Rough prototype, we might not need such fidelity
         virtual void JustRootedTarget(SpellEntry const* spellInfo, Unit* victim) { JustStoppedMovementOfTarget(spellInfo, victim); }
         virtual void JustStunnedTarget(SpellEntry const* spellInfo, Unit* victim) { JustStoppedMovementOfTarget(spellInfo, victim); }
-        virtual void JustStoppedMovementOfTarget(SpellEntry const* /*spellInfo*/, Unit* /*victim*/) {}
 
         // AI selection - works in connection with IsPossessCharmType
         virtual bool CanHandleCharm() { return false; }
+        virtual void JustGotCharmed(Unit* charmer) {}
 
         // Movement generator responses
         virtual void TimedFleeingEnded();
         virtual void RetreatingArrived() {}
         virtual void RetreatingEnded() {}
 
+        void AttackSpecificEnemy(std::function<void(Unit*,Unit*&)> check);
+        virtual void AttackClosestEnemy();
+
+        void SetRootSelf(bool apply, bool combatOnly = false); // must call parent JustDied if this is used
+        void ClearSelfRoot();
+
+        virtual void HandleDelayedInstantAnimation(SpellEntry const* spellInfo) {}
+        virtual bool IsTargetingRestricted() { return GetCombatScriptStatus(); }
+
+        virtual void OnTaunt() {}
+
+        virtual void HandleAssistanceCall(Unit* sender, Unit* invoker) {} // implemented for creatures
+
+        virtual bool IsPreventingDeath() const { return false; }
+
+        bool IsMeleeEnabled() const { return m_meleeEnabled; }
+
+        // EAI compatibility layer
+        virtual void UpdateEventTimers(const uint32 diff) {}
+
+        // Combat AI components
+        virtual void ExecuteActions();
+        virtual void ExecuteAction(uint32 action) {}
+
+        // Caster AI components
+        void AddMainSpell(uint32 spellId);
+        void AddDistanceSpell(uint32 spellId) { m_distanceSpells.insert(spellId); }
+
+        void SetRangedMode(bool state, float distance, RangeModeType type);
+        void SetCurrentRangedMode(bool state);
+
+        bool GetCurrentRangedMode() { return m_currentRangedMode; }
+
+        virtual void JustStoppedMovementOfTarget(SpellEntry const* spell, Unit* victim);
+
+        /*
+         * Called when a spell is interrupted
+         * @param spellInfo to specify which spell was interrupted
+         */
+        virtual void OnSpellInterrupt(SpellEntry const* spellInfo);
+
+        /*
+         * Notifies AI on successful spell execution
+         */
+        virtual void OnSpellCooldownAdded(SpellEntry const* spellInfo);
+
         virtual void DistancingStarted();
         virtual void DistancingEnded();
 
+        void DistanceYourself();
+        CanCastResult HandleSpellCastResult(CanCastResult result, SpellEntry const* spellInfo);
+
+        /*
+         * All units which attack at ranged need to return true. It is used for 3 purposes:
+         * Determining if a creature should ignore ranged targets during root
+         * Attacking enemies flying overhead at aggro range
+         * Checking main spell school instead of melee school for immunity suppress - TODO
+         */
+        bool IsRangedUnit() { return m_currentRangedMode; }
+        SpellSchoolMask GetMainAttackSchoolMask() const;
+
+        bool IsMainSpellPrevented(SpellEntry const* spellInfo) const;
+        bool IsEligibleForDistancing() const;
+
+        // Spell Lists
+        // called when owner spell list changes - need to recalculate main spell and a few other things
+        void SpellListChanged();
+        void UpdateSpellLists();
+        std::pair<bool, Unit*> ChooseTarget(CreatureSpellListTargeting* targetData, uint32 spellId) const;
+        virtual CreatureSpellList const& GetSpellList() const = 0;
+        void AddInitialCooldowns();
+
     protected:
         virtual std::string GetAIName() { return "UnitAI"; }
+        void DespawnGuids(GuidVector& spawns); // despawns all creature guids and clears contents
 
         ///== Fields =======================================
 
@@ -486,11 +576,33 @@ class UnitAI
         bool m_dismountOnAggro;
 
         bool m_meleeEnabled;                              // If we allow melee auto attack
+        bool m_selfRooted;
 
         ReactStates m_reactState;
 
         bool m_combatScriptHappening;                    // disables normal combat functions without leaving combat
         AIOrders m_currentAIOrder;
+
+        Spell const* m_currentSpell;
+
+        bool m_teleportUnreachable;
+
+        // Caster AI components
+        bool m_rangedMode;
+        RangeModeType m_rangedModeSetting;
+        float m_chaseDistance;
+        bool m_currentRangedMode;
+        std::unordered_set<uint32> m_mainSpells;
+        std::unordered_set<uint32> m_distanceSpells;
+        uint32 m_mainSpellId;
+        uint32 m_mainSpellCost;
+        SpellEntry const* m_mainSpellInfo;
+        float m_mainSpellMinRange;
+        SpellSchoolMask m_mainAttackMask;
+        bool m_distancingCooldown;
+
+        // Spell Lists
+        bool m_spellListCooldown;
 };
 
 struct SelectableAI : public FactoryHolder<UnitAI>, public Permissible<Creature>

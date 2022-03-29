@@ -73,7 +73,7 @@ Channel* ChannelMgr::GetChannel(const std::string& name, Player* p, bool pkt)
         if (pkt)
         {
             WorldPacket data;
-            MakeNotOnPacket(data, name);
+            Channel::MakeNotMember(data, name);
             p->GetSession()->SendPacket(data);
         }
 
@@ -100,10 +100,4 @@ void ChannelMgr::LeftChannel(const std::string& name)
         channels.erase(wname);
         delete channel;
     }
-}
-
-void ChannelMgr::MakeNotOnPacket(WorldPacket& data, const std::string& name) const
-{
-    data.Initialize(SMSG_CHANNEL_NOTIFY, (1 + 10)); // we guess size
-    data << (uint8)CHAT_NOT_MEMBER_NOTICE << name;
 }

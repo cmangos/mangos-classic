@@ -24,11 +24,13 @@
 #define __WORLDSESSION_H
 
 #include "Common.h"
+#include "Globals/Locales.h"
 #include "Globals/SharedDefines.h"
 #include "Entities/ObjectGuid.h"
 #include "AuctionHouse/AuctionHouseMgr.h"
 #include "Entities/Item.h"
 #include "Server/WorldSocket.h"
+#include "Multithreading/Messager.h"
 
 #include <deque>
 #include <mutex>
@@ -52,8 +54,16 @@ class CharacterHandler;
 class GMTicket;
 class MovementInfo;
 class WorldSession;
+class SessionAnticheatInterface;
 
 struct OpcodeHandler;
+
+enum ClientOSType
+{
+    CLIENT_OS_UNKNOWN,
+    CLIENT_OS_WIN,
+    CLIENT_OS_MAC
+};
 
 enum PartyOperation
 {
@@ -87,6 +97,24 @@ enum WorldSessionState
     WORLD_SESSION_STATE_CHAR_SELECTION = 1,
     WORLD_SESSION_STATE_READY          = 2,
     WORLD_SESSION_STATE_OFFLINE        = 3
+};
+
+struct CharacterNameQueryResponse
+{
+    ObjectGuid          guid;                   // pc's guid
+    std::string         name;                   // pc's name
+    std::string         realm;                  // realm name (xrealm battlegrounds)
+    uint32              race        = 0;        // pc's race
+    uint32              gender      = 0;        // pc's gender
+    uint32              classid     = 0;        // pc's class
+};
+
+enum AccountFlags
+{
+    ACCOUNT_FLAG_SHOW_ANTICHEAT = 0x01,
+    ACCOUNT_FLAG_SILENCED       = 0x02,
+    ACCOUNT_FLAG_SHOW_ANTISPAM  = 0x04,
+    ACCOUNT_FLAG_HIDDEN         = 0x08,
 };
 
 // class to deal with packet processing
@@ -132,12 +160,13 @@ class WorldSession
         friend class CharacterHandler;
 
     public:
-        WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, time_t mute_time, LocaleConstant locale);
+        WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, time_t mute_time, LocaleConstant locale, std::string accountName, uint32 accountFlags);
         ~WorldSession();
 
         // Set this session have no attached socket but keep it alive for short period of time to permit a possible reconnection
         void SetOffline();
         void SetOnline();
+        void SetInCharSelection();
 
         // Request set offline, close socket and put session offline
         bool RequestNewSocket(WorldSocket* socket);
@@ -153,6 +182,7 @@ class WorldSession
         void SendPacket(WorldPacket const& packet, bool forcedSend = false) const;
         void SendExpectedSpamRecords();
         void SendMotd(Player* currChar);
+        void SendOfflineNameQueryResponses();
         void SendNotification(const char* format, ...) const ATTR_PRINTF(2, 3);
         void SendNotification(int32 string_id, ...) const;
         void SendPetNameInvalid(uint32 error, const std::string& name) const;
@@ -161,10 +191,18 @@ class WorldSession
         void SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg = 0) const;
         void SendQueryTimeResponse() const;
 
+        bool IsInitialZoneUpdated() { return m_initialZoneUpdated; }
+
         AccountTypes GetSecurity() const { return _security; }
+        uint32 GetAccountFlags() const { return m_accountFlags; }
+        bool HasAccountFlag(uint32 flags) const { return (m_accountFlags & flags) != 0; }
+        void AddAccountFlag(uint32 flags) { m_accountFlags |= flags; }
+        void RemoveAccountFlag(uint32 flags) { m_accountFlags &= ~flags; }
         uint32 GetAccountId() const { return _accountId; }
+        std::string const& GetAccountName() const { return m_accountName; }
         Player* GetPlayer() const { return _player; }
         char const* GetPlayerName() const;
+        std::string GetChatType(uint32 type);
         void SetSecurity(AccountTypes security) { _security = security; }
 #ifdef BUILD_PLAYERBOT
         // Players connected without socket are bot
@@ -172,7 +210,18 @@ class WorldSession
 #else
         const std::string GetRemoteAddress() const { return m_Socket ? m_Socket->GetRemoteAddress() : "disconnected"; }
 #endif
-        void SetPlayer(Player* plr) { _player = plr; }
+        const std::string& GetLocalAddress() const { return m_localAddress; }
+
+        void SetPlayer(Player* plr, uint32 playerGuid);
+
+        void InitializeAnticheat(const BigNumber& K);
+        void AssignAnticheat();
+        void SetDelayedAnticheat(std::unique_ptr<SessionAnticheatInterface>&& anticheat);
+        SessionAnticheatInterface* GetAnticheat() const { return m_anticheat.get(); }
+
+#ifdef BUILD_PLAYERBOT
+        void SetNoAnticheat();
+#endif
 
         /// Session in auth.queue currently
         void SetInQueue(bool state) { m_inQueue = state; }
@@ -181,9 +230,11 @@ class WorldSession
         bool isLogingOut() const { return _logoutTime || m_playerLogout; }
 
         /// Engage the logout process for the user
-        void LogoutRequest(time_t requestTime)
+        void LogoutRequest(time_t requestTime, bool saveToDB = true, bool kickSession = false)
         {
             _logoutTime = requestTime;
+            m_playerSave = saveToDB;
+            m_kickSession = kickSession;
         }
 
         /// Is logout cooldown expired?
@@ -197,19 +248,22 @@ class WorldSession
             return (_logoutTime > 0 && currTime >= _logoutTime + 60);
         }
 
-        void LogoutPlayer(bool save);
-        void KickPlayer();
+        void LogoutPlayer();
+        void KickPlayer(bool save = false, bool inPlace = false); // inplace variable needed for shutdown
 
         void QueuePacket(std::unique_ptr<WorldPacket> new_packet);
 
-        bool Update(PacketFilter& updater);
+        void DeleteMovementPackets();
+
+        bool Update(uint32 diff);
+        void UpdateMap(uint32 diff);
 
         /// Handle the authentication waiting queue (to be completed)
         void SendAuthWaitQue(uint32 position) const;
 
-        void SendNameQueryOpcode(Player* p) const;
-        void SendNameQueryOpcodeFromDB(ObjectGuid guid) const;
-        static void SendNameQueryOpcodeFromDBCallBack(QueryResult* result, uint32 accountId);
+        void SendNameQueryResponse(CharacterNameQueryResponse& response) const;
+        void SendNameQueryResponseFromDB(ObjectGuid guid) const;
+        static void SendNameQueryResponseFromDBCallBack(QueryResult* result, uint32 accountId);
 
         void SendTrainerList(ObjectGuid guid) const;
 
@@ -220,7 +274,9 @@ class WorldSession
         void SendTabardVendorActivate(ObjectGuid guid) const;
         void SendSpiritResurrect() const;
         void SendBindPoint(Creature* npc) const;
-        void SendGMTicketGetTicket(uint32 status, GMTicket* ticket = nullptr) const;
+
+        void SendGMTicketResult(uint32 opcode, uint32 result) const;
+        void SendGMTicket(const GMTicket& ticket, time_t now = time(nullptr)) const;
 
         void SendAttackStop(Unit const* enemy) const;
 
@@ -285,6 +341,8 @@ class WorldSession
 
         // Account mute time
         time_t m_muteTime;
+        // Ticket squelch timer: prevent ticket spam
+        ShortTimeTracker m_ticketSquelchTimer;
 
         // Locales
         LocaleConstant GetSessionDbcLocale() const { return m_sessionDbcLocale; }
@@ -295,13 +353,26 @@ class WorldSession
         void SetLatency(uint32 latency) { m_latency = latency; }
         void ResetClientTimeDelay() { m_clientTimeDelay = 0; }
         uint32 getDialogStatus(const Player* pPlayer, const Object* questgiver, uint32 defstatus) const;
+        ClientOSType GetOS() const { return m_clientOS; }
+        void SetOS(ClientOSType os) { m_clientOS = os; }
+        uint32 GetGameBuild() const { return m_gameBuild; }
+        void SetGameBuild(uint32 version) { m_gameBuild = version; }
+        uint32 GetAccountMaxLevel() const { return m_accountMaxLevel; }
+        void SetAccountMaxLevel(uint32 level) { m_accountMaxLevel = level; }
+        uint32 GetOrderCounter() const { return m_orderCounter; }
+        void IncrementOrderCounter() { ++m_orderCounter; }
+
+        // Thread safety
+        uint32 GetCurrentPlayerLevel() { return m_currentPlayerLevel; }
+        void SetCurrentPlayerLevel(uint32 level) { m_currentPlayerLevel = level; }
 
         // Misc
-        void SendKnockBack(float angle, float horizontalSpeed, float verticalSpeed) const;
+        void SendKnockBack(Unit* who, float angle, float horizontalSpeed, float verticalSpeed);
         void SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit) const;
 
-        void SendAuthOk();
-        void SendAuthQueued();
+        void SendAuthOk() const;
+        void SendAuthQueued() const;
+        void SendKickReason(uint8 reason, std::string const& string) const;
         // opcodes handlers
         void Handle_NULL(WorldPacket& recvPacket);          // not used
         void Handle_EarlyProccess(WorldPacket& recvPacket); // just mark packets processed in WorldSocket::OnRead
@@ -320,7 +391,6 @@ class WorldSession
         void HandlePlayedTime(WorldPacket& recvPacket);
 
         // new
-        void HandleMoveUnRootAck(WorldPacket& recvPacket);
         void HandleMoveRootAck(WorldPacket& recvPacket);
 
         // new inspect
@@ -329,10 +399,7 @@ class WorldSession
         // new party stats
         void HandleInspectHonorStatsOpcode(WorldPacket& recvPacket);
 
-        void HandleMoveWaterWalkAck(WorldPacket& recvPacket);
-        void HandleFeatherFallAck(WorldPacket& recv_data);
-
-        void HandleMoveHoverAck(WorldPacket& recv_data);
+        void HandleMoveFlagChangeOpcode(WorldPacket& recvPacket);
 
         void HandleMountSpecialAnimOpcode(WorldPacket& recvdata);
 
@@ -359,13 +426,12 @@ class WorldSession
         void HandleLogoutRequestOpcode(WorldPacket& recvPacket);
         void HandlePlayerLogoutOpcode(WorldPacket& recvPacket);
         void HandleLogoutCancelOpcode(WorldPacket& recvPacket);
+
+        void HandleGMTicketSystemStatusOpcode(WorldPacket& recvPacket);
         void HandleGMTicketGetTicketOpcode(WorldPacket& recvPacket);
         void HandleGMTicketCreateOpcode(WorldPacket& recvPacket);
-        void HandleGMTicketSystemStatusOpcode(WorldPacket& recvPacket);
-
-        void HandleGMTicketDeleteTicketOpcode(WorldPacket& recvPacket);
         void HandleGMTicketUpdateTextOpcode(WorldPacket& recvPacket);
-
+        void HandleGMTicketDeleteTicketOpcode(WorldPacket& recvPacket);
         void HandleGMSurveySubmitOpcode(WorldPacket& recvPacket);
 
         void HandleTogglePvP(WorldPacket& recvPacket);
@@ -415,6 +481,8 @@ class WorldSession
         void HandleSetActiveMoverOpcode(WorldPacket& recv_data);
         void HandleMoveNotActiveMoverOpcode(WorldPacket& recv_data);
         void HandleMoveTimeSkippedOpcode(WorldPacket& recv_data);
+
+        bool ProcessMovementInfo(MovementInfo& movementInfo, Unit* mover, Player* plMover, WorldPacket& recv_data);
 
         void HandleRequestRaidInfoOpcode(WorldPacket& recv_data);
 
@@ -583,7 +651,7 @@ class WorldSession
         void HandlePushQuestToParty(WorldPacket& recvPacket);
         void HandleQuestPushResult(WorldPacket& recvPacket);
 
-        bool processChatmessageFurtherAfterSecurityChecks(std::string&, uint32);
+        bool CheckChatMessage(std::string&, bool addon = false);
         void SendPlayerNotFoundNotice(const std::string& name) const;
         void SendWrongFactionNotice() const;
         void SendChatRestrictedNotice() const;
@@ -596,6 +664,7 @@ class WorldSession
         void HandleResurrectResponseOpcode(WorldPacket& recvPacket);
         void HandleSummonResponseOpcode(WorldPacket& recv_data);
 
+        bool CheckChatChannelNameAndPassword(std::string& name, std::string& pass);
         void HandleJoinChannelOpcode(WorldPacket& recvPacket);
         void HandleLeaveChannelOpcode(WorldPacket& recvPacket);
         void HandleChannelListOpcode(WorldPacket& recvPacket);
@@ -651,11 +720,10 @@ class WorldSession
         void HandleBattleGroundPlayerPositionsOpcode(WorldPacket& recv_data);
         void HandlePVPLogDataOpcode(WorldPacket& recv_data);
         void HandleBattlefieldStatusOpcode(WorldPacket& recv_data);
-        void HandleBattleFieldPortOpcode(WorldPacket& recv_data);
+        void HandleBattlefieldPortOpcode(WorldPacket& recv_data);
         void HandleBattlefieldListOpcode(WorldPacket& recv_data);
         void HandleLeaveBattlefieldOpcode(WorldPacket& recv_data);
 
-        void HandleWardenDataOpcode(WorldPacket& recv_data);
         void HandleWorldTeleportOpcode(WorldPacket& recv_data);
         void HandleMinimapPingOpcode(WorldPacket& recv_data);
         void HandleRandomRollOpcode(WorldPacket& recv_data);
@@ -673,11 +741,25 @@ class WorldSession
 
         void HandleSetTaxiBenchmarkOpcode(WorldPacket& recv_data);
 
+#define MOVEMENT_PACKET_TIME_DELAY 0
+
+        // Warden
+        void HandleWardenDataOpcode(WorldPacket& recv_data);
+
+        // Movement
+        void SynchronizeMovement(MovementInfo& movementInfo);
+
+        std::deque<uint32> GetOutOpcodeHistory();
+        std::deque<uint32> GetIncOpcodeHistory();
+
+        Messager<WorldSession>& GetMessager() { return m_messager; }
+
+        void SetPacketLogging(bool state);
+
     private:
         // private trade methods
         void moveItems(Item* myItems[], Item* hisItems[]);
-        bool VerifyMovementInfo(MovementInfo const& movementInfo, ObjectGuid const& guid) const;
-        bool VerifyMovementInfo(MovementInfo const& movementInfo) const;
+        bool VerifyMovementInfo(MovementInfo const& movementInfo, Unit* mover, bool unroot) const;
         void HandleMoverRelocation(MovementInfo& movementInfo);
 
         void ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket& packet);
@@ -686,23 +768,39 @@ class WorldSession
         void LogUnexpectedOpcode(WorldPacket const& packet, const char* reason) const;
         void LogUnprocessedTail(WorldPacket const& packet) const;
 
-        std::mutex m_logoutMutex;                           // this mutex is necessary to avoid two simultaneous logouts due to a valid logout request and socket error
+        void ProcessByteBufferException(WorldPacket const& packet);
+
+        uint32 m_GUIDLow;                                   // set logged or recently logout player (while m_playerRecentlyLogout set)
         Player* _player;
         std::shared_ptr<WorldSocket> m_Socket;              // socket pointer is owned by the network thread which created it
         std::shared_ptr<WorldSocket> m_requestSocket;       // a new socket for this session is requested (double connection)
+        std::string m_localAddress;
         WorldSessionState m_sessionState;                   // this session state
 
         AccountTypes _security;
         uint32 _accountId;
+        std::string m_accountName;
+        uint32 m_accountFlags;
 
-        time_t _logoutTime;
+        // anticheat
+        ClientOSType m_clientOS;
+        uint32 m_gameBuild;
+        uint32 m_accountMaxLevel;
+        uint32 m_orderCounter;
+        uint32 m_lastAnticheatUpdate;
+        std::unique_ptr<SessionAnticheatInterface> m_delayedAnticheat;
+        std::unique_ptr<SessionAnticheatInterface> m_anticheat;
+
+        time_t _logoutTime;                                 // when logout will be processed after a logout request
+        time_t m_kickTime;
+        bool m_playerSave;                                  // should we have to save the player after logout request
         bool m_inQueue;                                     // session wait in auth.queue
         bool m_playerLoading;                               // code processed in LoginPlayer
+        bool m_kickSession;
 
         // True when the player is in the process of logging out (WorldSession::LogoutPlayer is currently executing)
         bool m_playerLogout;
         bool m_playerRecentlyLogout;
-        bool m_playerSave;                                  // code processed in LogoutPlayer with save request
         LocaleConstant m_sessionDbcLocale;
         int m_sessionDbLocaleIndex;
         uint32 m_latency;
@@ -710,8 +808,20 @@ class WorldSession
         uint32 m_Tutorials[8];
         TutorialDataState m_tutorialState;
 
+        std::set<ObjectGuid> m_offlineNameQueries; // for name queires made when not logged in (character selection screen)
+        std::deque<CharacterNameQueryResponse> m_offlineNameResponses; // for responses to name queries made when not logged in
+
+        bool m_initialZoneUpdated = false;
+
+        // Thread safety mechanisms
         std::mutex m_recvQueueLock;
+        std::mutex m_recvQueueMapLock;
         std::deque<std::unique_ptr<WorldPacket>> m_recvQueue;
+        std::deque<std::unique_ptr<WorldPacket>> m_recvQueueMap;
+
+        Messager<WorldSession> m_messager;
+
+        std::atomic<uint32> m_currentPlayerLevel;
 };
 #endif
 /// @}

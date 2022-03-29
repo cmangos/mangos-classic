@@ -92,6 +92,7 @@ namespace Movement
             int32 _currentSplineIdx() const { return point_Idx;}
             void _Finalize();
             void _Interrupt() { splineflags.done = true;}
+            float GetElapsedValue() const { return float(time_passed) / Duration(); }
 
         public:
 
@@ -120,12 +121,19 @@ namespace Movement
 
             uint32 GetId() const { return m_Id;}
             bool Finalized() const { return splineflags.done; }
-            bool isCyclic() const { return splineflags.cyclic;}
-            const Vector3 FinalDestination() const { return Initialized() ? spline.getPoint(spline.last()) : Vector3();}
+            bool isCyclic() const { return splineflags.cyclic; }
+            FacingInfo const& GetFacing() const { return facing; }
+            bool isFacing() const { return splineflags.isFacing(); }
+            bool isFacingPoint() const { return splineflags.final_point; }
+            bool isFacingTarget() const { return splineflags.final_target; }
+            bool isFacingAngle() const { return splineflags.final_angle; }
+            const Vector3 FinalDestination() const;
             const Vector3 CurrentDestination() const { return Initialized() ? spline.getPoint(point_Idx + 1) : Vector3();}
             int32 currentPathIdx() const;
+            int32 GetRawPathIndex() const { return point_Idx; }
 
             uint32 Duration() const { return spline.length();}
+            int32 ComputeTimeToIndex(uint32 idx) const { return spline.length(idx) - time_passed; }
 
             float Speed() const { return speed; }
 

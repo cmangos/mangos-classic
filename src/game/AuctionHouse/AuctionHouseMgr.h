@@ -29,6 +29,8 @@ class WorldPacket;
 
 #define MIN_AUCTION_TIME (2*HOUR)
 
+#define MAX_AUCTION_ITEMS_CLIENT_UI_PAGE 50
+
 enum AuctionError
 {
     AUCTION_OK                          = 0,                // depends on enum AuctionAction
@@ -112,8 +114,8 @@ class AuctionHouseObject
 
         void Update();
 
-        void BuildListBidderItems(WorldPacket& data, Player* player, uint32& count, uint32& totalcount);
-        void BuildListOwnerItems(WorldPacket& data, Player* player, uint32& count, uint32& totalcount);
+        void BuildListBidderItems(WorldPacket& data, Player* player, uint32 listfrom, uint32& count, uint32& totalcount);
+        void BuildListOwnerItems(WorldPacket& data, Player* player, uint32 listfrom, uint32& count, uint32& totalcount);
         void BuildListAuctionItems(WorldPacket& data, Player* player,
                                    std::wstring const& searchedname, uint32 listfrom, uint32 levelmin, uint32 levelmax, uint32 usable,
                                    uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality,

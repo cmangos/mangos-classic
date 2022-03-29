@@ -30,7 +30,7 @@ class PlayerbotClassAI;
 
 typedef std::unordered_map<ObjectGuid, Player*> PlayerBotMap;
 
-class MANGOS_DLL_SPEC PlayerbotMgr
+class PlayerbotMgr
 {
         // static functions, available without a PlayerbotMgr instance
     public:
@@ -39,6 +39,10 @@ class MANGOS_DLL_SPEC PlayerbotMgr
     public:
         PlayerbotMgr(Player* const master);
         virtual ~PlayerbotMgr();
+
+        // remove marked bot
+        // should be called from worldsession::Update only to avoid possible problem with invalid session or player pointer
+        void RemoveBots();
 
         // This is called from Unit.cpp and is called every second (I think)
         void UpdateAI(const uint32 p_time);
@@ -52,13 +56,13 @@ class MANGOS_DLL_SPEC PlayerbotMgr
         void HandleMasterOutgoingPacket(const WorldPacket& packet);
 
         void LoginPlayerBot(ObjectGuid guid);
-        void LogoutPlayerBot(ObjectGuid guid);
+        void LogoutPlayerBot(ObjectGuid guid);          // mark bot to be removed on next update
         Player* GetPlayerBot(ObjectGuid guid) const;
         Player* GetMaster() const { return m_master; };
         PlayerBotMap::const_iterator GetPlayerBotsBegin() const { return m_playerBots.begin(); }
         PlayerBotMap::const_iterator GetPlayerBotsEnd()   const { return m_playerBots.end();   }
 
-        void LogoutAllBots();
+        void LogoutAllBots(bool fullRemove = false);                           // mark all bots to be removed on next update
         void RemoveAllBotsFromGroup();
         void OnBotLogin(Player* const bot);
         void Stay();
@@ -83,6 +87,7 @@ class MANGOS_DLL_SPEC PlayerbotMgr
     private:
         Player* const m_master;
         PlayerBotMap m_playerBots;
+        GuidSet m_botToRemove;
 };
 
 #endif

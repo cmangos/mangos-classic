@@ -16,14 +16,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "vmapexport.h"
 #include "wmo.h"
+#include "vmapexport.h"
 #include "vec3d.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cassert>
 #include <map>
 #include <fstream>
+#include "adtfile.h"
 #undef min
 #undef max
 #include "mpq_libmpq04.h"
@@ -31,7 +32,9 @@
 using namespace std;
 extern uint16* LiqType;
 
-WMORoot::WMORoot(std::string& filename) : filename(filename)
+WMORoot::WMORoot(std::string& filename)
+    : filename(filename), color(0), nTextures(0), nGroups(0), nPortals(0), nLights(0),
+    nDoodadNames(0), nDoodadDefs(0), nDoodadSets(0), RootWMOID(0), flags(0)
 {
 }
 
@@ -47,6 +50,8 @@ bool WMORoot::open()
     uint32 size;
     char fourcc[5];
 
+    StringSet failedPaths;
+
     while (!f.isEof())
     {
         f.read(fourcc, 4);
@@ -61,17 +66,53 @@ bool WMORoot::open()
         {
             f.read(&nTextures, 4);
             f.read(&nGroups, 4);
-            f.read(&nP, 4);
+            f.read(&nPortals, 4);
             f.read(&nLights, 4);
-            f.read(&nModels, 4);
-            f.read(&nDoodads, 4);
+            f.read(&nDoodadNames, 4);
+            f.read(&nDoodadDefs, 4);
             f.read(&nDoodadSets, 4);
-            f.read(&col, 4);
+            f.read(&color, 4);
             f.read(&RootWMOID, 4);
             f.read(bbcorn1, 12);
             f.read(bbcorn2, 12);
-            f.read(&liquidType, 4);
-            break;
+            f.read(&flags, 4);
+        }
+        else if (!strcmp(fourcc, "MODS"))
+        {
+            DoodadData.Sets.resize(size / sizeof(WMO::MODS));
+            f.read(DoodadData.Sets.data(), size);
+        }
+        else if (!strcmp(fourcc, "MODN"))
+        {
+            char* ptr = f.getPointer();
+            char* end = ptr + size;
+            DoodadData.Paths = std::make_unique<char[]>(size);
+            memcpy(DoodadData.Paths.get(), ptr, size);
+            while (ptr < end)
+            {
+                std::string path = ptr;
+
+                char* s = GetPlainName(ptr);
+                fixnamen(s, strlen(s));
+                fixname2(s, strlen(s));
+
+                uint32 doodadNameIndex = ptr - f.getPointer();
+                ptr += path.length() + 1;
+
+                std::string fixedName;
+                if (ExtractSingleModel(path, fixedName, failedPaths))
+                    ValidDoodadNames.insert(doodadNameIndex);
+            }
+        }
+        else if (!strcmp(fourcc, "MODD"))
+        {
+            DoodadData.Spawns.resize(size / sizeof(WMO::MODD));
+            f.read(DoodadData.Spawns.data(), size);
+        }
+        else if (!strcmp(fourcc, "MOGN"))
+        {
+            GroupNames.resize(size);
+            f.read(GroupNames.data(), size);
         }
         /*
         else if (!strcmp(fourcc,"MOTX"))
@@ -80,22 +121,10 @@ bool WMORoot::open()
         else if (!strcmp(fourcc,"MOMT"))
         {
         }
-        else if (!strcmp(fourcc,"MOGN"))
-        {
-        }
         else if (!strcmp(fourcc,"MOGI"))
         {
         }
         else if (!strcmp(fourcc,"MOLT"))
-        {
-        }
-        else if (!strcmp(fourcc,"MODN"))
-        {
-        }
-        else if (!strcmp(fourcc,"MODS"))
-        {
-        }
-        else if (!strcmp(fourcc,"MODD"))
         {
         }
         else if (!strcmp(fourcc,"MOSB"))
@@ -211,6 +240,11 @@ bool WMOGroup::open()
             MOBA = new uint16[size / 2];
             moba_size = size / 2;
             f.read(MOBA, size);
+        }
+        else if (!strcmp(fourcc, "MODR"))
+        {
+            DoodadReferences.resize(size / sizeof(uint16));
+            f.read(DoodadReferences.data(), size);
         }
         else if (!strcmp(fourcc, "MLIQ"))
         {
@@ -344,9 +378,11 @@ int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPrecis
         for (int i = 0; i < nTriangles; ++i)
         {
             // Skip no collision triangles
-            if (MOPY[2 * i]&WMO_MATERIAL_NO_COLLISION ||
-                    !(MOPY[2 * i] & (WMO_MATERIAL_HINT | WMO_MATERIAL_COLLIDE_HIT)))
+            bool isRenderFace = (MOPY[2 * i] & WMO_MATERIAL_RENDER) && !(MOPY[2 * i] & WMO_MATERIAL_DETAIL);
+            bool isCollision = MOPY[2 * i] & WMO_MATERIAL_COLLISION || isRenderFace;
+            if (!isCollision)
                 continue;
+
             // Use this triangle
             for (int j = 0; j < 3; ++j)
             {
@@ -399,9 +435,9 @@ int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPrecis
         int LIQU_h[] = {0x5551494C, int(sizeof(WMOLiquidHeader) + LiquEx_size + hlq->xtiles * hlq->ytiles)}; // "LIQU"
         fwrite(LIQU_h, 4, 2, output);
 
-        // according to WoW.Dev Wiki:
+        // according to https://wowdev.wiki/
         uint32 liquidEntry;
-        if (rootWMO->liquidType & 4)
+        if (rootWMO->flags & 4)
             liquidEntry = liquidType;
         else if (liquidType == 15)
             liquidEntry = 0;
@@ -459,7 +495,7 @@ int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPrecis
 
         /* std::ofstream llog("Buildings/liquid.log", ios_base::out | ios_base::app);
         llog << filename;
-        llog << ":\nliquidEntry: " << liquidEntry << " type: " << hlq->type << " (root:" << rootWMO->liquidType << " group:" << liquidType << ")\n";
+        llog << ":\ntype: " << hlq->type << " (root:" << rootWMO->flags << " group:" << flags << ")\n";
         llog.close(); */
 
         fwrite(hlq, sizeof(WMOLiquidHeader), 1, output);
@@ -471,6 +507,22 @@ int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPrecis
     }
 
     return nColTriangles;
+}
+
+bool WMOGroup::ShouldSkip(WMORoot const& root) const
+{
+    // skip unreachable
+    if (mogpFlags & 0x80)
+        return true;
+
+    // skip antiportals
+    if (mogpFlags & 0x4000000)
+        return true;
+
+    if (groupName < int32(root.GroupNames.size()) && !strcmp(&root.GroupNames[groupName], "antiportal"))
+        return true;
+
+    return false;
 }
 
 WMOGroup::~WMOGroup()
@@ -486,27 +538,33 @@ WMOGroup::~WMOGroup()
 
 WMOInstance::WMOInstance(MPQFile& f, const char* WmoInstName, uint32 mapID, uint32 tileX, uint32 tileY, FILE* pDirfile)
 {
-    pos = Vec3D(0, 0, 0);
+    m_wmo.Position = Vec3D(0, 0, 0);
 
     float ff[3];
-    f.read(&id, 4);
+    f.read(&m_wmo.UniqueId, 4);
     f.read(ff, 12);
-    pos = Vec3D(ff[0], ff[1], ff[2]);
+    m_wmo.Position = Vec3D(ff[0], ff[1], ff[2]);
     f.read(ff, 12);
-    rot = Vec3D(ff[0], ff[1], ff[2]);
+    m_wmo.Rotation = Vec3D(ff[0], ff[1], ff[2]);
     f.read(ff, 12);
-    pos2 = Vec3D(ff[0], ff[1], ff[2]);
+    m_wmo.Bounds.min = Vec3D(ff[0], ff[1], ff[2]);
     f.read(ff, 12);
-    pos3 = Vec3D(ff[0], ff[1], ff[2]);
-    f.read(&d2, 4);
+    m_wmo.Bounds.max = Vec3D(ff[0], ff[1], ff[2]);
+    f.read(&m_wmo.Flags, 2);
+    f.read(&m_wmo.DoodadSet, 2);
 
     uint16 trash, adtId;
     f.read(&adtId, 2);
     f.read(&trash, 2);
 
+    // destructible wmo, do not dump. we can handle the vmap for these
+    // in dynamic tree (gameobject vmaps)
+    if ((m_wmo.Flags & 0x1) != 0)
+        return;
+
     //-----------add_in _dir_file----------------
 
-    char tempname[512];
+    char tempname[512 + (sizeof(szWorkDirWmo) / sizeof(szWorkDirWmo[0]))];
     sprintf(tempname, "%s/%s", szWorkDirWmo, WmoInstName);
     FILE* input;
     input = fopen(tempname, "r+b");
@@ -525,17 +583,16 @@ WMOInstance::WMOInstance(MPQFile& f, const char* WmoInstName, uint32 mapID, uint
     if (nVertices == 0)
         return;
 
-    float x, z;
-    x = pos.x;
-    z = pos.z;
-    if (x == 0 && z == 0)
+    if (m_wmo.Position.x == 0 && m_wmo.Position.z == 0)
     {
-        pos.x = 533.33333f * 32;
-        pos.z = 533.33333f * 32;
+        m_wmo.Position.x = 533.33333f * 32;
+        m_wmo.Position.z = 533.33333f * 32;
     }
-    pos = fixCoords(pos);
-    pos2 = fixCoords(pos2);
-    pos3 = fixCoords(pos3);
+    m_wmo.Position = fixCoords(m_wmo.Position);
+    m_wmo.Bounds.min = fixCoords(m_wmo.Bounds.min);
+    m_wmo.Bounds.max = fixCoords(m_wmo.Bounds.max);
+
+    uint32 uniqueId = GenerateUniqueObjectId(m_wmo.UniqueId, 0);
 
     float scale = 1.0f;
     uint32 flags = MOD_HAS_BOUND;
@@ -546,12 +603,11 @@ WMOInstance::WMOInstance(MPQFile& f, const char* WmoInstName, uint32 mapID, uint
     fwrite(&tileY, sizeof(uint32), 1, pDirfile);
     fwrite(&flags, sizeof(uint32), 1, pDirfile);
     fwrite(&adtId, sizeof(uint16), 1, pDirfile);
-    fwrite(&id, sizeof(uint32), 1, pDirfile);
-    fwrite(&pos, sizeof(float), 3, pDirfile);
-    fwrite(&rot, sizeof(float), 3, pDirfile);
+    fwrite(&uniqueId, sizeof(uint32), 1, pDirfile);
+    fwrite(&m_wmo.Position, sizeof(Vec3D), 1, pDirfile);
+    fwrite(&m_wmo.Rotation, sizeof(Vec3D), 1, pDirfile);
     fwrite(&scale, sizeof(float), 1, pDirfile);
-    fwrite(&pos2, sizeof(float), 3, pDirfile);
-    fwrite(&pos3, sizeof(float), 3, pDirfile);
+    fwrite(&m_wmo.Bounds, sizeof(AaBox3D), 1, pDirfile);
     uint32 nlen = strlen(WmoInstName);
     fwrite(&nlen, sizeof(uint32), 1, pDirfile);
     fwrite(WmoInstName, sizeof(char), nlen, pDirfile);

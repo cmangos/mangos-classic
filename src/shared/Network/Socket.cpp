@@ -34,7 +34,8 @@ namespace MaNGOS
 {
     Socket::Socket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler)
         : m_writeState(WriteState::Idle), m_readState(ReadState::Idle), m_socket(service),
-          m_closeHandler(std::move(closeHandler)), m_outBufferFlushTimer(service), m_address("0.0.0.0") {}
+          m_closeHandler(std::move(closeHandler)), m_outBufferFlushTimer(service), m_address("0.0.0.0"),
+          m_remoteAddress(boost::asio::ip::address()), m_remotePort(0){}
 
     bool Socket::Open()
     {
@@ -42,6 +43,8 @@ namespace MaNGOS
         {
             const_cast<std::string&>(m_address) = m_socket.remote_endpoint().address().to_string();
             const_cast<std::string&>(m_remoteEndpoint) = boost::lexical_cast<std::string>(m_socket.remote_endpoint());
+            m_remoteAddress = m_socket.remote_endpoint().address();
+            m_remotePort = m_socket.remote_endpoint().port();
         }
         catch (boost::system::system_error& error)
         {

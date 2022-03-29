@@ -39,12 +39,11 @@
 //#pragma comment(lib, "Winmm.lib")
 
 #include <map>
+#include <unordered_map>
 
 //From Extractor
-#include "adtfile.h"
 #include "wdtfile.h"
 #include "dbcfile.h"
-#include "wmo.h"
 #include "mpq_libmpq04.h"
 
 #include "vmapexport.h"
@@ -67,16 +66,25 @@ typedef struct
 map_id* map_ids;
 uint16* LiqType = 0;
 uint32 map_count;
-char output_path[128] = ".";
-char input_path[1024] = ".";
+char output_path[path_l] = ".";
+char input_path[path_l] = ".";
 bool hasInputPathParam = false;
+bool hasOutputPathParam = false;
 bool preciseVectorData = false;
+std::unordered_map<std::string, WMODoodadData> WmoDoodads;
 
 // Constants
 
 //static const char * szWorkDirMaps = ".\\Maps";
-const char* szWorkDirWmo = "./Buildings";
-const char* szRawVMAPMagic = "VMAP005";
+char szWorkDirWmo[path_l + 512];
+const char* szRawVMAPMagic = "VMAPs05";
+
+std::map<std::pair<uint32, uint16>, uint32> uniqueObjectIds;
+
+uint32 GenerateUniqueObjectId(uint32 clientId, uint16 clientDoodadId)
+{
+    return uniqueObjectIds.emplace(std::make_pair(clientId, clientDoodadId), uniqueObjectIds.size() + 1).first->second;
+}
 
 // Local testing functions
 
@@ -149,10 +157,11 @@ bool ExtractSingleWmo(std::string& fname)
 {
     // Copy files from archive
 
-    char szLocalFile[1024];
-    const char* plain_name = GetPlainName(fname.c_str());
+    char szLocalFile[(sizeof(szWorkDirWmo) / sizeof(szWorkDirWmo[0])) + 512];
+    char* plain_name = GetPlainName(&fname[0]);
+    fixnamen(plain_name, strlen(plain_name));
+    fixname2(plain_name, strlen(plain_name));
     sprintf(szLocalFile, "%s/%s", szWorkDirWmo, plain_name);
-    fixnamen(szLocalFile, strlen(szLocalFile));
 
     if (FileExists(szLocalFile))
         return true;
@@ -190,7 +199,10 @@ bool ExtractSingleWmo(std::string& fname)
         return false;
     }
     froot.ConvertToVMAPRootWmo(output);
+    WMODoodadData& doodads = WmoDoodads[plain_name];
+    std::swap(doodads, froot.DoodadData);
     int Wmo_nVertices = 0;
+    uint32 RealNbOfGroups = froot.nGroups;
     //printf("root has %d groups\n", froot->nGroups);
     if (froot.nGroups != 0)
     {
@@ -199,8 +211,13 @@ bool ExtractSingleWmo(std::string& fname)
             char temp[1024];
             strcpy(temp, fname.c_str());
             temp[fname.length() - 4] = 0;
-            char groupFileName[1024];
-            sprintf(groupFileName, "%s_%03d.wmo", temp, i);
+            char groupFileName[1500];
+            int snRes = snprintf(groupFileName, sizeof(groupFileName), "%s_%03d.wmo", temp, i);
+            if (snRes < 0 || snRes >= sizeof(groupFileName))
+            {
+                printf("ERROR: WMO Path is too long!\n");
+                return(false);
+            }
             //printf("Trying to open groupfile %s\n",groupFileName);
 
             string s = groupFileName;
@@ -212,12 +229,32 @@ bool ExtractSingleWmo(std::string& fname)
                 break;
             }
 
+            if (fgroup.ShouldSkip(froot))
+            {
+                printf("Skipped WMOGroup %s %s %d", fname.c_str(), s.c_str(), fgroup.mogpFlags);
+                RealNbOfGroups--;
+                continue;
+            }
+
             Wmo_nVertices += fgroup.ConvertToVMAPGroupWmo(output, &froot, preciseVectorData);
+            for (uint16 groupReference : fgroup.DoodadReferences)
+            {
+                if (groupReference >= doodads.Spawns.size())
+                    continue;
+
+                uint32 doodadNameIndex = doodads.Spawns[groupReference].NameIndex;
+                if (froot.ValidDoodadNames.find(doodadNameIndex) == froot.ValidDoodadNames.end())
+                    continue;
+
+                doodads.References.insert(groupReference);
+            }
         }
     }
 
     fseek(output, 8, SEEK_SET); // store the correct no of vertices
     fwrite(&Wmo_nVertices, sizeof(int), 1, output);
+    fseek(output, 12, SEEK_SET); // store the correct no of groups
+    fwrite(&RealNbOfGroups, sizeof(uint32), 1, output);
     fclose(output);
 
     // Delete the extracted file in the case of an error
@@ -309,7 +346,7 @@ bool fillArchiveNameVector(std::vector<std::string>& pArchiveNames)
 
     printf("\nGame path: %s\n", input_path);
 
-    char path[512];
+    char path[path_l + 512];
 
     // open expansion and common files
     printf("Opening data files from data directory.\n");
@@ -327,7 +364,13 @@ bool fillArchiveNameVector(std::vector<std::string>& pArchiveNames)
 
     // now, scan for the patch levels in the core dir
     printf("Scanning patch levels from data directory.\n");
-    sprintf(path, "%spatch", input_path);
+    int snRes = snprintf(path, sizeof(path), "%spatch", input_path);
+    if (snRes < 0 || snRes >= sizeof(path))
+    {
+        printf("ERROR: Path is too long!\n");
+        return(false);
+    }
+        
     if (!scan_patches(path, pArchiveNames))
         return (false);
 
@@ -341,6 +384,7 @@ bool processArgv(int argc, char** argv)
     bool result = true;
     hasInputPathParam = false;
     preciseVectorData = false;
+    sprintf(szWorkDirWmo, "%s", "./Buildings");
 
     for (int i = 1; i < argc; ++i)
     {
@@ -356,6 +400,22 @@ bool processArgv(int argc, char** argv)
                 strcpy(input_path, argv[i + 1]);
                 if (input_path[strlen(input_path) - 1] != '\\' && input_path[strlen(input_path) - 1] != '/')
                     strcat(input_path, "/");
+                ++i;
+            }
+            else
+            {
+                result = false;
+            }
+        }
+        else if (strcmp("-o", argv[i]) == 0)
+        {
+            if ((i + 1) < argc)
+            {
+                hasOutputPathParam = true;
+                strcpy(output_path, argv[i + 1]);
+                if (output_path[strlen(output_path) - 1] != '\\' && output_path[strlen(output_path) - 1] != '/')
+                    strcat(output_path, "/");
+                sprintf(szWorkDirWmo, "%s/Buildings", output_path);
                 ++i;
             }
             else
@@ -384,6 +444,7 @@ bool processArgv(int argc, char** argv)
         printf("   -s : (default) small size (data size optimization), ~500MB less vmap data.\n");
         printf("   -l : large size, ~500MB more vmap data. (might contain more details)\n");
         printf("   -d <path>: Path to the vector data source folder.\n");
+        printf("   -o <path>: Path to the output folder.\n");
         printf("   -? : This message.\n");
     }
     return result;

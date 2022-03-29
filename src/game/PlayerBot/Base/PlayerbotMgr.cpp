@@ -28,6 +28,7 @@
 #include "../../Globals/ObjectAccessor.h"
 #include "../../Loot/LootMgr.h"
 #include "../../MotionGenerators/WaypointMovementGenerator.h"
+#include "../../Spells/SpellMgr.h"
 #include "../../Tools/Language.h"
 #include "../../World/World.h"
 
@@ -42,7 +43,7 @@ void PlayerbotMgr::SetInitialWorldSettings()
     if (!botConfig.SetSource(_PLAYERBOT_CONFIG))
         sLog.outError("Playerbot: Unable to open configuration file. Database will be unaccessible. Configuration values will use default.");
     else
-        sLog.outString("Playerbot: Using configuration file %s", _PLAYERBOT_CONFIG);
+        sLog.outString("Playerbot: Using configuration file %s", _PLAYERBOT_CONFIG.c_str());
 
     //Check playerbot config file version
     if (botConfig.GetIntDefault("ConfVersion", 0) != PLAYERBOT_CONF_VERSION)
@@ -78,7 +79,7 @@ PlayerbotMgr::PlayerbotMgr(Player* const master) : m_master(master)
 
 PlayerbotMgr::~PlayerbotMgr()
 {
-    LogoutAllBots();
+    LogoutAllBots(true);
 }
 
 void PlayerbotMgr::UpdateAI(const uint32 /*diff*/) {}
@@ -339,10 +340,11 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
 
                 // If player and bot are on different maps: then player was teleported by GameObject
                 // let's return and let playerbot summon do its job by teleporting bots
-                if (bot->GetMap() != m_master->GetMap())
+                Map* masterMap = m_master->IsInWorld() ? m_master->GetMap() : nullptr;
+                if (!masterMap || bot->GetMap() != masterMap || m_master->IsBeingTeleported())
                     return;
 
-                GameObject* obj = m_master->GetMap()->GetGameObject(objGUID);
+                GameObject* obj = masterMap->GetGameObject(objGUID);
                 if (!obj)
                     return;
 
@@ -354,7 +356,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
 
                     // auto accept every available quest this NPC has
                     bot->PrepareQuestMenu(objGUID);
-                    QuestMenu& questMenu = bot->PlayerTalkClass->GetQuestMenu();
+                    QuestMenu& questMenu = bot->GetPlayerMenu()->GetQuestMenu();
                     for (uint32 iI = 0; iI < questMenu.MenuItemCount(); ++iI)
                     {
                         QuestMenuItem const& qItem = questMenu.GetItem(iI);
@@ -693,50 +695,133 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
     }
 }
 
-void PlayerbotMgr::HandleMasterOutgoingPacket(const WorldPacket& /*packet*/)
+void PlayerbotMgr::HandleMasterOutgoingPacket(const WorldPacket& packet)
 {
-    /*
        switch (packet.GetOpcode())
        {
-        // maybe our bots should only start looting after the master loots?
-        //case SMSG_LOOT_RELEASE_RESPONSE: {}
-        case SMSG_NAME_QUERY_RESPONSE:
-        case SMSG_MONSTER_MOVE:
-        case SMSG_COMPRESSED_UPDATE_OBJECT:
-        case SMSG_DESTROY_OBJECT:
-        case SMSG_UPDATE_OBJECT:
-        case SMSG_STANDSTATE_UPDATE:
-        case MSG_MOVE_HEARTBEAT:
-        case SMSG_QUERY_TIME_RESPONSE:
-        case SMSG_AURA_UPDATE_ALL:
-        case SMSG_CREATURE_QUERY_RESPONSE:
-        case SMSG_GAMEOBJECT_QUERY_RESPONSE:
-            return;
-        default:
-        {
-            const char* oc = LookupOpcodeName(packet.GetOpcode());
+            // If a change in speed was detected for the master
+            // make sure we have the same mount status
+            case SMSG_FORCE_RUN_SPEED_CHANGE:
+            {
+                WorldPacket p(packet);
+                ObjectGuid guid;
 
-            std::ostringstream out;
-            out << "masterout: " << oc;
-            sLog.outError(out.str().c_str());
-        }
+                // Only adjuste speed and mount if this is master that did so
+                p >> guid.ReadAsPacked();
+                if (guid != GetMaster()->GetObjectGuid())
+                    return;
+
+                for (auto it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+                {
+                    Player* const bot = it->second;
+                    if (GetMaster()->IsMounted() && !bot->IsMounted())
+                    {
+                        // Player Part
+                        if (!GetMaster()->GetAurasByType(SPELL_AURA_MOUNTED).empty())
+                        {
+                            int32 master_speed1 = 0;
+                            int32 master_speed2 = 0;
+                            master_speed1 = GetMaster()->GetAurasByType(SPELL_AURA_MOUNTED).front()->GetSpellProto()->EffectBasePoints[1];
+                            master_speed2 = GetMaster()->GetAurasByType(SPELL_AURA_MOUNTED).front()->GetSpellProto()->EffectBasePoints[2];
+
+                            // Bot Part
+                            // Step 1: find spell in bot spellbook that matches the speed change from master
+                            uint32 spellMount = 0;
+                            for (auto & itr : bot->GetSpellMap())
+                            {
+                                uint32 spellId = itr.first;
+                                if (itr.second.state == PLAYERSPELL_REMOVED || itr.second.disabled || IsPassiveSpell(spellId))
+                                    continue;
+                                const SpellEntry* pSpellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
+                                if (!pSpellInfo)
+                                    continue;
+
+                                if (pSpellInfo->EffectApplyAuraName[0] == SPELL_AURA_MOUNTED)
+                                {
+                                    if (pSpellInfo->EffectApplyAuraName[1] == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)
+                                    {
+                                        if (pSpellInfo->EffectBasePoints[1] == master_speed1)
+                                        {
+                                            spellMount = spellId;
+                                            continue;
+                                        }
+                                    }
+                                    else if (pSpellInfo->EffectApplyAuraName[2] == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)
+                                        if (pSpellInfo->EffectBasePoints[2] == master_speed2)
+                                        {
+                                            spellMount = spellId;
+                                            continue;
+                                        }
+                                }
+                            }
+                            if (spellMount > 0 && bot->CastSpell(bot, spellMount, TRIGGERED_NONE) == SPELL_CAST_OK)
+                                continue;
+
+                            // Step 2: no spell found or cast failed -> search for an item in inventory (mount)
+                            // We start with the fastest mounts as bot will not be able to outrun its master since it is following him/her
+                            uint32 skillLevels[] = {375, 300, 225, 150, 75};
+                            for (uint32 level: skillLevels)
+                            {
+                                Item* mount = bot->GetPlayerbotAI()->FindMount(level);
+                                if (mount)
+                                {
+                                    bot->GetPlayerbotAI()->UseItem(mount);
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                    // If master dismounted, do so
+                    else if (!GetMaster()->IsMounted() && bot->IsMounted())    // only execute code if master is the one who dismounted
+                    {
+                        WorldPacket emptyPacket;
+                        bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);  //updated code
+                    }
+                }
+                break;
+            }
+            // maybe our bots should only start looting after the master loots?
+            //case SMSG_LOOT_RELEASE_RESPONSE: {}
+            case SMSG_NAME_QUERY_RESPONSE:
+            case SMSG_MONSTER_MOVE:
+            case SMSG_COMPRESSED_UPDATE_OBJECT:
+            case SMSG_DESTROY_OBJECT:
+            case SMSG_UPDATE_OBJECT:
+            case SMSG_STANDSTATE_UPDATE:
+            case MSG_MOVE_HEARTBEAT:
+            case SMSG_QUERY_TIME_RESPONSE:
+            case SMSG_CREATURE_QUERY_RESPONSE:
+            case SMSG_GAMEOBJECT_QUERY_RESPONSE:
+            default:
+                return;
        }
-     */
 }
 
-void PlayerbotMgr::LogoutAllBots()
+void PlayerbotMgr::RemoveBots()
 {
-    while (true)
+    for (auto& guid : m_botToRemove)
     {
-        PlayerBotMap::const_iterator itr = GetPlayerBotsBegin();
-        if (itr == GetPlayerBotsEnd()) break;
-        Player* bot = itr->second;
-        LogoutPlayerBot(bot->GetObjectGuid());
+        Player* bot = GetPlayerBot(guid);
+        if (bot)
+        {
+            WorldSession* botWorldSessionPtr = bot->GetSession();
+            m_playerBots.erase(guid);                               // deletes bot player ptr inside this WorldSession PlayerBotMap
+            botWorldSessionPtr->LogoutPlayer();                     // this will delete the bot Player object and PlayerbotAI object
+            delete botWorldSessionPtr;                              // finally delete the bot's WorldSession
+        }
     }
-    RemoveAllBotsFromGroup();
+
+    m_botToRemove.clear();
 }
 
+void PlayerbotMgr::LogoutAllBots(bool fullRemove /*= false*/)
+{
+    for (auto itr : m_playerBots)
+        m_botToRemove.insert(itr.first);
 
+    if (fullRemove)
+        RemoveBots();
+}
 
 void PlayerbotMgr::Stay()
 {
@@ -751,14 +836,7 @@ void PlayerbotMgr::Stay()
 // Playerbot mod: logs out a Playerbot.
 void PlayerbotMgr::LogoutPlayerBot(ObjectGuid guid)
 {
-    Player* bot = GetPlayerBot(guid);
-    if (bot)
-    {
-        WorldSession* botWorldSessionPtr = bot->GetSession();
-        m_playerBots.erase(guid);    // deletes bot player ptr inside this WorldSession PlayerBotMap
-        botWorldSessionPtr->LogoutPlayer(true); // this will delete the bot Player object and PlayerbotAI object
-        delete botWorldSessionPtr;  // finally delete the bot's WorldSession
-    }
+    m_botToRemove.insert(guid);
 }
 
 // Playerbot mod: Gets a player bot Player object for this WorldSession master
@@ -780,7 +858,7 @@ void PlayerbotMgr::OnBotLogin(Player* const bot)
     bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(pMSG_MOVE_FALL_LAND)));
 
     // give the bot some AI, object is owned by the player class
-    PlayerbotAI* ai = new PlayerbotAI(this, bot);
+    PlayerbotAI* ai = new PlayerbotAI(*this, bot, m_confDebugWhisper);
     bot->SetPlayerbotAI(ai);
 
     // tell the world session that they now manage this new bot
@@ -839,14 +917,14 @@ void Creature::LoadBotMenu(Player* pPlayer)
                 word += "Recruit ";
                 word += name;
                 word += " as a Bot.";
-                pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem((uint8) 9, word, guidlo, GOSSIP_OPTION_BOT, word, false);
+                pPlayer->GetPlayerMenu()->GetGossipMenu().AddMenuItem((uint8) 9, word, guidlo, GOSSIP_OPTION_BOT, word, false);
             }
             else if (pPlayer->GetPlayerbotMgr()->GetPlayerBot(guidlo) != nullptr) // remove (if in game)
             {
                 word += "Dismiss ";
                 word += name;
                 word += " from duty.";
-                pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem((uint8) 0, word, guidlo, GOSSIP_OPTION_BOT, word, false);
+                pPlayer->GetPlayerMenu()->GetGossipMenu().AddMenuItem((uint8) 0, word, guidlo, GOSSIP_OPTION_BOT, word, false);
             }
         }
     }

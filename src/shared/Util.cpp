@@ -59,8 +59,9 @@ uint32 WorldTimer::tick()
 
 uint32 WorldTimer::getMSTime()
 {
-    static auto const start_time = std::chrono::system_clock::now();
-    return static_cast<uint32>((std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()) - std::chrono::duration_cast<std::chrono::milliseconds>(start_time.time_since_epoch())).count());
+    using namespace std::chrono;
+
+    return static_cast<uint32>(duration_cast<milliseconds>(steady_clock::now().time_since_epoch() - GetApplicationStartTime().time_since_epoch()).count());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -251,7 +252,9 @@ std::string TimeToTimestampStr(time_t t)
     //       MM     minutes (2 digits 00-59)
     //       SS     seconds (2 digits 00-59)
     char buf[20];
-    snprintf(buf, 20, "%04d-%02d-%02d_%02d-%02d-%02d", aTm->tm_year + 1900, aTm->tm_mon + 1, aTm->tm_mday, aTm->tm_hour, aTm->tm_min, aTm->tm_sec);
+    int snRes = snprintf(buf, 20, "%04d-%02d-%02d_%02d-%02d-%02d", aTm->tm_year + 1900, aTm->tm_mon + 1, aTm->tm_mday, aTm->tm_hour, aTm->tm_min, aTm->tm_sec);
+    if (snRes < 0 || snRes >= sizeof(buf))
+        return "";
     return std::string(buf);
 }
 
@@ -285,19 +288,6 @@ uint32 CreatePIDFile(const std::string& filename)
     fclose(pid_file);
 
     return (uint32)pid;
-}
-
-size_t utf8length(std::string& utf8str)
-{
-    try
-    {
-        return utf8::distance(utf8str.c_str(), utf8str.c_str() + utf8str.size());
-    }
-    catch (const std::exception&)
-    {
-        utf8str = "";
-        return 0;
-    }
 }
 
 bool Utf8toWStr(const std::string& utf8str, std::wstring& wstr, size_t max_len)
@@ -335,6 +325,47 @@ bool Utf8toWStr(const std::string& utf8str, std::wstring& wstr, size_t max_len)
     }
 
     return true;
+}
+
+size_t utf8length(std::string& utf8str)
+{
+    try
+    {
+        return utf8::distance(utf8str.c_str(), utf8str.c_str() + utf8str.size());
+    }
+    catch (const std::exception&)
+    {
+        utf8str = "";
+    }
+
+    return 0;
+}
+
+size_t utf8limit(std::string& utf8str, size_t bytes)
+{
+    if (utf8str.size() > bytes)
+    {
+        try
+        {
+            auto end = (utf8str.cbegin() + bytes);
+            auto itr = utf8::find_invalid(utf8str.cbegin(), end);
+
+            // Fix UTF8 if it was corrupted by bytes truncated
+            if (itr != end)
+                bytes = std::distance(utf8str.cbegin(), itr);
+
+            utf8str.resize(bytes);
+            utf8str.shrink_to_fit();
+
+            return bytes;
+        }
+        catch (const std::exception&)
+        {
+            utf8str = "";
+        }
+    }
+
+    return 0;
 }
 
 void utf8truncate(std::string& utf8str, size_t len)

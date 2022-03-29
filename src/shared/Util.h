@@ -128,6 +128,13 @@ struct Die
     uint32 chance[Sides];
 };
 
+template<typename T, typename... Args>
+T PickRandomValue(T first, Args ...rest)
+{
+    T array[sizeof...(rest) + 1] = { first, rest... };
+    return array[urand(0, (sizeof...(rest)))];
+}
+
 inline void ApplyModUInt32Var(uint32& var, int32 val, bool apply)
 {
     int32 cur = var;
@@ -156,7 +163,8 @@ bool Utf8toWStr(const std::string& utf8str, std::wstring& wstr, size_t max_len =
 
 bool WStrToUtf8(const std::wstring& wstr, std::string& utf8str);
 
-size_t utf8length(std::string& utf8str);                    // set string to "" if invalid utf8 sequence
+size_t utf8length(std::string& utf8str);                    // returns string's length in utf8 chars, sets string to "" on invalid utf8 sequence
+size_t utf8limit(std::string& utf8str, size_t bytes);       // returns string's new size in bytes, sets string to "" on invalid utf8 sequence
 void utf8truncate(std::string& utf8str, size_t len);
 
 inline bool isBasicLatinCharacter(wchar_t wchar)

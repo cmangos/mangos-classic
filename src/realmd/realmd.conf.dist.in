@@ -3,7 +3,7 @@
 ############################################
 
 [RealmdConf]
-ConfVersion=2010062001
+ConfVersion=2021031501
 
 ###################################################################################################################
 # REALMD SETTINGS
@@ -33,6 +33,10 @@ ConfVersion=2010062001
 #         This option is useful for running multiple worldd/realmd instances
 #         on different IP addresses using default ports.
 #         DO NOT CHANGE THIS UNLESS YOU _REALLY_ KNOW WHAT YOU'RE DOING
+#
+#    ListenerThreads
+#        Number of listener threads realmd should use.
+#        Default: 1
 #
 #    PidFile
 #        Realmd daemon PID file
@@ -117,6 +121,7 @@ LogsDir = ""
 MaxPingTime = 30
 RealmServerPort = 3724
 BindIP = "0.0.0.0"
+ListenerThreads = 1
 PidFile = ""
 LogLevel = 0
 LogTime = 0

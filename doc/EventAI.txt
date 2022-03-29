@@ -81,9 +81,9 @@ Some events such as EVENT_T_AGGRO, EVENT_T_DEATH, EVENT_T_SPAWNED, and EVENT_T_E
 11  EVENT_T_SPAWNED                     Condition, CondValue1, unused, unused                                   Expires on initial spawn and respawn of the NPC if Condition is met (Useful for setting Ranged Movement/Summoning Pets/Applying Buffs).
 12  EVENT_T_TARGET_HP                   HPMax%, HPMin%, RepeatMin, RepeatMax                                    Expires when current target's HP% is between (Param1) and (Param2). Will repeat every (Param3) and (Param4)If Event Conditions Are Still Met.
 13  EVENT_T_TARGET_CASTING              RepeatMin, RepeatatMax, unused, unused                                  Expires when the current target is casting a spell. Will repeat every (Param1) and (Param2) If Event Conditions Are Still Met.
-14  EVENT_T_FRIENDLY_HP                 HPDeficit, Radius, RepeatMin, RepeatMax                                 Expires when a friendly unit in (Radius) has at least (Param1) HP points missing. Will repeat every (Param3) and (Param4) If Event Conditions Are Still Met.
+14  EVENT_T_FRIENDLY_HP                 HPDeficit, Radius, RepeatMin, RepeatMax, IsPercent                      Expires when a friendly unit in (Radius) has at least (Param1) HP points missing. Will repeat every (Param3) and (Param4) If Event Conditions Are Still Met. If Param5=1 deficit is percentage of hp.
 15  EVENT_T_FRIENDLY_IS_CC              DispelType, Radius, RepeatMin, RepeatMax                                Expires when a friendly unit is crowd controlled within the given Radius (Param2). Will repeat every (Param3) and (Param4).
-16  EVENT_T_FRIENDLY_MISSING_BUFF       SpellId, Radius, RepeatMin, RepeatMax                                   Expires when a friendly unit is missing aura(s) given by a spell (Param1) within Radius (Param2). Will repeat every (Param3) and (Param4) If Event Conditions Are Still Met.
+16  EVENT_T_FRIENDLY_MISSING_BUFF       SpellId, Radius, RepeatMin, RepeatMax, InCombat                         Expires when a friendly unit is missing aura(s) given by a spell (Param1) within Radius (Param2). Will repeat every (Param3) and (Param4) If Event Conditions Are Still Met.
 17  EVENT_T_SUMMONED_UNIT               CreatureId, RepeatMin, RepeatMax, unused                                Expires after creature with entry = (Param1) is spawned (Param1 = 0 means all spawns). Will repeat every (Param2) and (Param3).
 18  EVENT_T_TARGET_MANA                 ManaMax%, ManaMin%, RepeatMin, RepeatMax                                Expires when current target's Mana% is between (Param1) and (Param2). Will repeat every (Param3) and (Param4) If Event Conditions Are Still Met.
 21  EVENT_T_REACHED_HOME                NONE                                                                    Expires when a creature reaches it's home (spawn) location after evade. This is commonly used for NPC's who Stealth once reaching their Spawn Location
@@ -101,6 +101,7 @@ Some events such as EVENT_T_AGGRO, EVENT_T_DEATH, EVENT_T_SPAWNED, and EVENT_T_E
 33  EVENT_T_FACING_TARGET               BackOrFront, unused, RepeatMin, RepeatMax                               Expires when the NPC is in back (Param1=0) or in front (Param1=1) of its current target. Will repeat after Param3 and Param4.
 34  EVENT_T_SPELLHIT_TARGET             SpellID, Schoolmask, RepeatMin, RepeatMax                               Expires upon Spell Hit of the NPC. When (param1) is set, it is the specific Spell ID used as the trigger. With (param2) specified, the expiration is limited to specific spell schools (-1 for all) and Spell ID value is ignored. Will repeat Event Conditions Check between every (Param3) and (Param4). Only A Spell ID or Spell School may be Specified but NOT both.
 35  EVENT_T_DEATH_PREVENTED             NONE                                                                    Expires when Death prevention kicks in
+36  EVENT_T_TARGET_NOT_REACHABLE        NONE                                                                    Expires when target is not reachable
 
 =========================================
 Action Types
@@ -136,7 +137,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 21  ACTION_T_COMBAT_MOVEMENT                AllowCombatMovement                 Stop combat based movement when (Param1) is zero, otherwise continue/allow combat based movement (targeted movement generator).
 22  ACTION_T_SET_PHASE                      Phase                               Sets the current phase to (Param1).
 23  ACTION_T_INC_PHASE                      Value                               Increments the phase by (Param1). May be negative to decrement, but should not be zero.
-24  ACTION_T_EVADE                          No Params                           Forces the creature to evade, wiping all threat and dropping combat.
+24  ACTION_T_EVADE                          No Params                           Forces the creature to evade, wiping all threat and dropping combat. Param1 - combat drop only
 25  ACTION_T_FLEE_FOR_ASSIST                No Params                           Causes the creature to flee for assistence (often at low health).
 26  ACTION_T_QUEST_EVENT_ALL                QuestId, UseThreatList              Calls GroupEventHappens with (Param1). Only used if it's _expected_ event should call quest completion for all players in a current party. Can be used for the creature's threat list, for complex scripted events.
 27  ACTION_T_CASTCREATUREGO_ALL             QuestId, SpellId                    Calls CastedCreatureOrGo for all players on the threat list with quest id specified in (Param1) and spell id in (Param2).
@@ -172,6 +173,11 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 57  ACTION_T_SET_RANGED_MODE                RangeModeType,chaseDistance         Enables RangeModeType AI (0 off, 1 = caster, 2 = hunter), distance to chase at
 58  ACTION_T_SET_WALK                       WalkSetting                         Enables Walk (0 off, 1 on) or enables chase walk (2 off, 3 on)
 59  ACTION_T_SET_FACING                     Target, Reset                       Set 0, Reset 1
+60  ACTION_T_SET_SPELL_SET                  SetId                               Set for possess
+61  ACTION_T_SET_IMMOBILIZED_STATE          Apply, CombatOnly                   CombatOnly is autoremoved on combat stop (death, evade, despawn)
+62  ACTION_T_SET_DESPAWN_AGGREGATION        Mask, Entry1, Entry2                Enable aggregation of guids for despawn on event (death, evade). To be used mostly on spawn.
+63  ACTION_T_SET_IMMUNITY_SET               SetId                               Immunity Set ID - creature_immunities
+64  ACTION_T_SET_FOLLOW_MOVEMENT            State                               0 Off, 1 On
 
 * = Use -1 where the param is expected to do nothing. Random constant is generated for each event, so if you have a random yell and a random sound, they will be linked up with each other (ie. param2 with param2).
 
@@ -346,6 +352,7 @@ Parameter 1: HPDeficit - This is the Amount of HP Missing from Full HP to trigge
 Parameter 2: Radius    - This is the Range in Yards the NPC will scan for nearby Friendlies (Faction is Friendly To) for the missing amount of HP in Param1.
 Parameter 3: RepeatMin - Minimum Time used to calculate Random Repeat Expire
 Parameter 4: RepeatMax - Maximum Time used to calculate Random Repeat Expire
+Parameter 5: IsPercent - Deficit is handled as percentage
 
 COMBAT ONLY - Expires when a friendly unit in radius(param2) has at least (param1) hp missing. Will repeat every (Param3) and (Param4).
 This is commonly used when an NPC in Combat will heal a nearby Friendly NPC in Combat with a Heal/Renew Spell.
@@ -368,6 +375,7 @@ Parameter 1: SpellId   - This is the SpellID That the Aura Check will look for (
 Parameter 2: Radius    - This is the Range in Yards the NPC will scan for nearby Friendlies (Faction is Friendly To) for the missing Aura.
 Parameter 3: RepeatMin - Minimum Time used to calculate Random Repeat Expire
 Parameter 4: RepeatMax - Maximum Time used to calculate Random Repeat Expire
+Parameter 5: InCombat  - 0 - Only in combat. 1 - Anytime. 2 - Only out of combat.
 
 BOTH - Expires when a friendly unit is missing aura's given by spell (param1) within radius (param2). Will repeat every (Param3) and (Param4).
 This is commonly used for NPC's who watch friendly units for a debuff to end so they can recast it on them again.
@@ -537,6 +545,11 @@ NOTE: For Repeat Events the Repeat Timer ONLY Re-Check's Event Conditions to see
 35 = EVENT_T_DEATH_PREVENTED:
 -----------------------------
 Expires when death prevention kicks in. It expires once, and then death prevention has to be reset for it to happen again.
+
+---------------------------------
+36 = EVENT_T_TARGET_NOT_REACHABLE
+---------------------------------
+Expires when main aggro target is not reachable by ChaseMovementGenerator - example of usage is teleporting player to creature
 
 (Name ==> School ==> School Bitmask Values)
 -------------------------------------------
@@ -767,7 +780,7 @@ This can be used instead of ACTION_T_SET_PHASE to change phases in scripts. Just
 24 = ACTION_T_EVADE:
 --------------------
 When activated, the creature will immediately exit out of combat, clear its threat list, and move back to its spawn point. Basically, this action will reset the whole encounter.
-NOTE: All Param Values Are 0 for this Action.
+Parameter 1: CombatOnly - of true (1) only cancels combat and does not move home. Warning: only use this if sniff verifies to drop combat. Many cases do not.
 
 -------------------
 25 = ACTION_T_FLEE:
@@ -1097,6 +1110,33 @@ Parameter 2: Reset boolean, 0 sets and 1 resets
 
 Sets facing, i.e. orientation to target, or resets it to last waypoint hit, or to respawn position.
 
+--------------------------------
+60 - ACTION_T_SET_SPELL_SET
+--------------------------------
+Parameter 1: creature_template_spells setid
+
+--------------------------------
+61 - ACTION_T_SET_IMMOBILIZED_STATE
+--------------------------------
+Parameter 1: apply
+Parameter 2: combatOnly - autoremoved on combat stop
+
+--------------------------------
+62 - ACTION_T_SET_DESPAWN_AGGREGATION
+--------------------------------
+Parameter 1: Mask - 0x1 - enabled, 0x2 - despawn on evade, 0x4 - despawn on death
+Parameter 2 and 3: Creature Entry - in case only specific entries should be despawned, else all despawn, can be appended over multiple action calls
+
+------------------------------
+63 - ACTION_T_SET_IMMUNITY_SET
+------------------------------
+Parameter 1: Set ID - creature_immunities
+
+---------------------------------
+64 - ACTION_T_SET_FOLLOW_MOVEMENT
+---------------------------------
+Parameter 1: State - 0 off, 1 on
+
 =========================================
 Target Types
 =========================================
@@ -1144,7 +1184,7 @@ Another example: the number "5" (101 in Binary, selecting first and third option
 8   128         CAST_SWITCH_CASTER_TARGET           Switches target and caster for spell cast - enables casting by spawner on AI owner for example
 9   256         CAST_MAIN_SPELL                     Marks main spell for ranged mode. When this spell is interrupted or goes OOM, the AI owner goes into melee mode. Connected to ACTION_T_SET_RANGED_MODE
 10  512         CAST_PLAYER_ONLY                    To be used in connection with targets. Restricts targeting to player only
-11  1024        CAST_DISTANCE_YOURSELF              Marks spell which stuns or immobilizes, so that creature distances itself from target, when main aggro target is hit (getVictim()). Connected to ACTION_T_SET_RANGED_MODE.
+11  1024        CAST_DISTANCE_YOURSELF              Marks spell which stuns or immobilizes, so that creature distances itself from target, when main aggro target is hit (GetVictim()). Connected to ACTION_T_SET_RANGED_MODE.
 
 NOTE: You can add the numbers in the decimal column to combine flags.
 For example if you wanted to use CAST_NO_MELEE_IF_OOM(8) and CAST_TRIGGERED(2) you would simply use 10 in the cast flags field (8 + 2 = 10).

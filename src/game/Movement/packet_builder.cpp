@@ -64,8 +64,6 @@ namespace Movement
                 break;
         }
 
-        // add fake Enter_Cycle flag - needed for client-side cyclic movement (client will erase first spline vertex after first cycle done)
-        splineflags.enter_cycle = move_spline.isCyclic();
         // add fake Runmode flag - client has strange issues without that flag
         data << uint32((splineflags & ~MoveSplineFlag::Mask_No_Monster_Move) | MoveSplineFlag::Runmode);
         data << move_spline.Duration();
@@ -73,20 +71,47 @@ namespace Movement
 
     void WriteLinearPath(const Spline<int32>& spline, ByteBuffer& data)
     {
-        Movement::SplineBase::ControlArray const& pathPoint = spline.getPoints(); // get ref of whole path points array
+        // get ref of whole path points array
+        // NOTE: This array contain special data, mostly first and last elements are not part of the path
+        auto& pathPoint = spline.getPoints();
 
-        int32 pathSize = spline.last() - spline.first() - 1; // -1 as we send destination first and last index is destination
-        MANGOS_ASSERT(pathSize >= 0);                       // should never be less than 0
+        // get needed indexes of data in the array
+        int32 loIdx = spline.first() + 1; // point 0 is current position and is already in the packet
+        int32 hiIdx = spline.last();
 
-        Vector3 destination = pathPoint[spline.last()];     // destination of this path should be send right after path size
-        data << pathSize;
+        // check that we have valid indexes
+        MANGOS_ASSERT(hiIdx >= loIdx);
+
+        // get destination (last valid element of the array)
+        Vector3 const& destination = pathPoint[hiIdx];
+
+        // placeholder for intermediate points count
+        uint32 countPos = data.wpos();
+        data << 0;
+
+        // put the destination on packet
         data << destination;
 
-        for (int32 i = spline.first(); i < spline.first() + pathSize; i++) // from first real index (this array contain also special data)
+        Vector3 offset;             // offset that will be computed from intermediate point to destination
+        uint32 offsetSent = 1;      // count of offset sent (destination should be considered too thats why its 1)
+
+        // loop for intermediates points sending
+        for (int32 i = loIdx; i < hiIdx; ++i) // stop before hiIdx as its the destination and is already sent
         {
-            Vector3 offset = destination - pathPoint[i];    // we have to send offset relative to destination instead of directly path point.
-            data.appendPackXYZ(offset.x, offset.y, offset.z); // we have to pack x,y,z before send
+            // compute offset
+            offset = destination - pathPoint[i];
+
+            // avoid sending too little offset to avoid client freeze
+            if (offset.squaredMagnitude() < 0.5f)
+                continue;
+
+            // add packed version of the offset and increment offset sent counter
+            data.appendPackXYZ(offset.x, offset.y, offset.z);
+            ++offsetSent;
         }
+
+        // fix the offset count sent in packet
+        data.put<uint32>(countPos, offsetSent);
     }
 
     void WriteCatmullRomPath(const Spline<int32>& spline, ByteBuffer& data)
@@ -96,12 +121,11 @@ namespace Movement
         data.append<Vector3>(&spline.getPoint(2), count);
     }
 
-    void WriteCatmullRomCyclicPath(const Spline<int32>& spline, ByteBuffer& data)
+    void WriteCatmullRomCyclicPath(Spline<int32> const& spline, ByteBuffer& data)
     {
-        uint32 count = spline.getPointCount() - 3;
-        data << uint32(count + 1);
-        data << spline.getPoint(1); // fake point, client will erase it from the spline after first cycle done
-        data.append<Vector3>(&spline.getPoint(1), count);
+        uint32 count = spline.getPointCount() - 4;
+        data << count;
+        data.append<Vector3>(&spline.getPoint(2), count);
     }
 
     void PacketBuilder::WriteMonsterMove(const MoveSpline& move_spline, WorldPacket& data)

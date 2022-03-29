@@ -31,12 +31,13 @@ class ChannelMgr
         ChannelMgr() {}
         ~ChannelMgr();
 
+        const ChannelMap& GetChannels() const { return channels; }
+
         Channel* GetJoinChannel(const std::string& name);
         Channel* GetChannel(const std::string& name, Player* p, bool pkt = true);
         void LeftChannel(const std::string& name);
     private:
         ChannelMap channels;
-        void MakeNotOnPacket(WorldPacket& data, const std::string& name) const;
 };
 
 class AllianceChannelMgr : public ChannelMgr {};

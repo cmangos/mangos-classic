@@ -32,7 +32,7 @@ boss_taerar
 boss_ysondre
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "World/WorldState.h"
 
 /*######
@@ -93,7 +93,7 @@ struct boss_emerald_dragonAI : public ScriptedAI
 
     void JustDied(Unit* killer) override
     {
-        sWorldState.HandleExternalEvent(m_creature->GetEntry() - NPC_YSONDRE + CUSTOM_EVENT_YSONDRE_DIED);
+        sWorldState.HandleExternalEvent(m_creature->GetEntry() - NPC_YSONDRE + CUSTOM_EVENT_YSONDRE_DIED, 0);
     }
 
     // Return true, if succeeded
@@ -105,7 +105,7 @@ struct boss_emerald_dragonAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Trigger special ability function at 75, 50 and 25% health

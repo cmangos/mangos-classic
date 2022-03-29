@@ -49,7 +49,7 @@ inline void MaNGOS::ObjectUpdater::Visit(CreatureMapType& m)
 inline void UnitVisitObjectsNotifierWorker(Unit* unitA, Unit* unitB)
 {
     if (unitA->hasUnitState(UNIT_STAT_LOST_CONTROL) ||
-        unitA->IsInEvadeMode() ||
+        unitA->GetCombatManager().IsInEvadeMode() ||
         !unitA->AI()->IsVisible(unitB))
         return;
 
@@ -60,13 +60,13 @@ inline void PlayerVisitCreatureWorker(Player* pl, Creature* c)
 {
     if (!c->hasUnitState(UNIT_STAT_LOST_CONTROL))
     {
-        if (c->AI() && c->AI()->IsVisible(pl) && !c->IsInEvadeMode())
+        if (c->AI() && c->AI()->IsVisible(pl) && !c->GetCombatManager().IsInEvadeMode())
             c->AI()->MoveInLineOfSight(pl);
     }
 
     if (!pl->hasUnitState(UNIT_STAT_LOST_CONTROL))
     {
-        if (pl->AI() && pl->AI()->IsVisible(c) && !pl->IsInEvadeMode())
+        if (pl->AI() && pl->AI()->IsVisible(c) && !pl->GetCombatManager().IsInEvadeMode())
             pl->AI()->MoveInLineOfSight(c);
     }
 }
@@ -75,13 +75,13 @@ inline void PlayerVisitPlayerWorker(Player* p1, Player* p2)
 {
     if (!p2->hasUnitState(UNIT_STAT_LOST_CONTROL))
     {
-        if (p2->AI() && p2->AI()->IsVisible(p1) && !p2->IsInEvadeMode())
+        if (p2->AI() && p2->AI()->IsVisible(p1) && !p2->GetCombatManager().IsInEvadeMode())
             p2->AI()->MoveInLineOfSight(p1);
     }
 
     if (!p1->hasUnitState(UNIT_STAT_LOST_CONTROL))
     {
-        if (p1->AI() && p1->AI()->IsVisible(p2) && !p1->IsInEvadeMode())
+        if (p1->AI() && p1->AI()->IsVisible(p2) && !p1->GetCombatManager().IsInEvadeMode())
             p1->AI()->MoveInLineOfSight(p2);
     }
 }
@@ -90,13 +90,13 @@ inline void CreatureVisitCreatureWorker(Creature* c1, Creature* c2)
 {
     if (!c1->hasUnitState(UNIT_STAT_LOST_CONTROL))
     {
-        if (c1->AI() && c1->AI()->IsVisible(c2) && !c1->IsInEvadeMode())
+        if (c1->AI() && c1->AI()->IsVisible(c2) && !c1->GetCombatManager().IsInEvadeMode())
             c1->AI()->MoveInLineOfSight(c2);
     }
 
     if (!c2->hasUnitState(UNIT_STAT_LOST_CONTROL))
     {
-        if (c2->AI() && c2->AI()->IsVisible(c1) && !c2->IsInEvadeMode())
+        if (c2->AI() && c2->AI()->IsVisible(c1) && !c2->GetCombatManager().IsInEvadeMode())
             c2->AI()->MoveInLineOfSight(c1);
     }
 }
@@ -104,7 +104,7 @@ inline void CreatureVisitCreatureWorker(Creature* c1, Creature* c2)
 template<>
 inline void MaNGOS::PlayerVisitObjectsNotifier::Visit(CreatureMapType& m)
 {
-    if (!i_player.isAlive() || i_player.IsTaxiFlying())
+    if (!i_player.IsAlive() || i_player.IsTaxiFlying())
         return;
 
     bool playerHasAI = i_player.AI() != nullptr;
@@ -112,7 +112,7 @@ inline void MaNGOS::PlayerVisitObjectsNotifier::Visit(CreatureMapType& m)
     for (auto& iter : m)
     {
         Creature* creature = iter.getSource();
-        if (!creature->isAlive())
+        if (!creature->IsAlive())
             continue;
 
         UnitVisitObjectsNotifierWorker(creature, &i_player);
@@ -125,7 +125,7 @@ inline void MaNGOS::PlayerVisitObjectsNotifier::Visit(CreatureMapType& m)
 template<>
 inline void MaNGOS::PlayerVisitObjectsNotifier::Visit(PlayerMapType& m)
 {
-    if (!i_player.isAlive() || i_player.IsTaxiFlying())
+    if (!i_player.IsAlive() || i_player.IsTaxiFlying())
         return;
 
     bool playerHasAI = i_player.AI() != nullptr;
@@ -133,7 +133,7 @@ inline void MaNGOS::PlayerVisitObjectsNotifier::Visit(PlayerMapType& m)
     for (auto& iter : m)
     {
         Player* player = iter.getSource();
-        if (player->isAlive() && !player->IsTaxiFlying())
+        if (player->IsAlive() && !player->IsTaxiFlying())
             continue;
 
         if (player->AI())
@@ -147,13 +147,13 @@ inline void MaNGOS::PlayerVisitObjectsNotifier::Visit(PlayerMapType& m)
 template<>
 inline void MaNGOS::CreatureVisitObjectsNotifier::Visit(PlayerMapType& m)
 {
-    if (!i_creature.isAlive())
+    if (!i_creature.IsAlive())
         return;
 
     for (auto& iter : m)
     {
         Player* player = iter.getSource();
-        if (!player->isAlive() || player->IsTaxiFlying())
+        if (!player->IsAlive() || player->IsTaxiFlying())
             continue;
 
         if (player->AI())
@@ -166,13 +166,13 @@ inline void MaNGOS::CreatureVisitObjectsNotifier::Visit(PlayerMapType& m)
 template<>
 inline void MaNGOS::CreatureVisitObjectsNotifier::Visit(CreatureMapType& m)
 {
-    if (!i_creature.isAlive())
+    if (!i_creature.IsAlive())
         return;
 
     for (auto& iter : m)
     {
         Creature* creature = iter.getSource();
-        if (creature == &i_creature || !creature->isAlive())
+        if (creature == &i_creature || !creature->IsAlive())
             continue;
 
         UnitVisitObjectsNotifierWorker(creature, &i_creature);
@@ -183,26 +183,29 @@ inline void MaNGOS::CreatureVisitObjectsNotifier::Visit(CreatureMapType& m)
 
 inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
 {
-    if (!target->isAlive() || target->IsTaxiFlying())
+    if (!target->IsAlive() || target->IsTaxiFlying())
         return;
 
     if (target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->IsTotem())
         return;
 
-    if (i_dynobject.GetDistance(target, true, DIST_CALC_COMBAT_REACH) > i_dynobject.GetRadius())
+    Unit* caster = i_dynobject.GetCaster();
+    float radius = i_dynobject.GetRadius();
+    if (caster->IsPlayerControlled() && !target->IsPlayerControlled())
+        radius += target->GetCombatReach();
+    if (i_dynobject.GetDistance(target, true, DIST_CALC_NONE) > radius * radius)
         return;
 
     // Evade target
-    if (target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->IsInEvadeMode())
+    if (target->GetCombatManager().IsInEvadeMode())
         return;
 
     // Check player targets and remove if in GM mode or GM invisibility (for not self casting case)
-    if (target->GetTypeId() == TYPEID_PLAYER && target != i_check && (((Player*)target)->isGameMaster() || ((Player*)target)->GetVisibility() == VISIBILITY_OFF))
+    if (target->GetTypeId() == TYPEID_PLAYER && target != i_check && (((Player*)target)->IsGameMaster() || ((Player*)target)->GetVisibility() == VISIBILITY_OFF))
         return;
 
     SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(i_dynobject.GetSpellId());
-    SpellEffectIndex eff_index  = i_dynobject.GetEffIndex();
-    Unit* caster = i_dynobject.GetCaster();
+    SpellEffectIndex eff_index = i_dynobject.GetEffIndex();
 
     SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(spellInfo->Id);
     if (bounds.first != bounds.second)
@@ -214,14 +217,14 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
                 continue;
 
             // only creature entries supported for this target type
-            if (i_spellST->type == SPELL_TARGET_TYPE_GAMEOBJECT)
+            if (i_spellST->type == SPELL_TARGET_TYPE_GAMEOBJECT || i_spellST->type == SPELL_TARGET_TYPE_GAMEOBJECT_GUID)
                 continue;
 
             if (target->GetEntry() == i_spellST->targetEntry)
             {
                 if (i_spellST->type == SPELL_TARGET_TYPE_DEAD && ((Creature*)target)->IsCorpse())
                     found = true;
-                else if (i_spellST->type == SPELL_TARGET_TYPE_CREATURE && target->isAlive())
+                else if (i_spellST->type == SPELL_TARGET_TYPE_CREATURE && target->IsAlive())
                     found = true;
 
                 break;
@@ -251,10 +254,11 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
         return;
 
     // Check target immune to spell or aura
-    if (target->IsImmuneToSpell(spellInfo, false, eff_index) || target->IsImmuneToSpellEffect(spellInfo, eff_index, false))
-        return;
+    if (!spellInfo->HasAttribute(SPELL_ATTR_NO_IMMUNITIES)) // confirmed 40657 - Ancient Flames goes through immunity
+        if (target->IsImmuneToSpell(spellInfo, false, (1 << eff_index)) || target->IsImmuneToSpellEffect(spellInfo, eff_index, false))
+            return;
 
-    if (!i_dynobject.IsWithinLOSInMap(target))
+    if (!spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !i_dynobject.IsWithinLOSInMap(target))
         return;
 
     // Apply PersistentAreaAura on target
@@ -280,6 +284,7 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
     {
         holder = CreateSpellAuraHolder(spellInfo, target, caster);
         PersistentAreaAura* Aur = new PersistentAreaAura(spellInfo, eff_index, &i_dynobject.GetDamage(), &i_dynobject.GetBasePoints(), holder, target, caster);
+        holder->SetAuraDuration(i_dynobject.GetDuration());
         holder->AddAura(Aur, eff_index);
         if (!target->AddSpellAuraHolder(holder))
             delete holder;
@@ -288,7 +293,7 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
     if (!i_dynobject.IsAffecting(target))
     {
         i_dynobject.AddAffected(target);
-        caster->CasterHitTargetWithSpell(caster, target, spellInfo);
+        caster->CasterHitTargetWithSpell(caster, target, spellInfo, false);
     }
 }
 

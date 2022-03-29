@@ -46,14 +46,10 @@ namespace MaNGOS
         public:
             NetworkThread() : m_work(new boost::asio::io_service::work(m_service)), m_serviceThread([this] { boost::system::error_code ec; this->m_service.run(ec); })
             {
-                m_serviceThread.detach();
             }
 
             ~NetworkThread()
             {
-                // Allow io_service::run() to exit.
-                m_work.reset();
-
                 // attempt to gracefully close any open connections
                 for (auto i = m_sockets.begin(); i != m_sockets.end();)
                 {
@@ -63,6 +59,11 @@ namespace MaNGOS
                     if (!(*current)->IsClosed())
                         (*current)->Close();
                 }
+
+                // Allow io_service::run() to exit.
+                m_service.stop();
+                if (m_serviceThread.joinable())
+                    m_serviceThread.join();
             }
 
             size_t Size() const { return m_sockets.size(); }

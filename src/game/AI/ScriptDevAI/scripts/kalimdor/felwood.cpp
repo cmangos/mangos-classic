@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
+#include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
 npc_kitten
 npc_niby_the_almighty
 npc_kroshius
@@ -64,7 +64,7 @@ struct npc_kittenAI : public FollowerAI
             SetFollowPaused(true);
             DoScriptText(EMOTE_SAB_JUMP, m_creature);
 
-            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
 
             // find a decent way to move to center of moonwell
         }
@@ -80,7 +80,7 @@ struct npc_kittenAI : public FollowerAI
     void MoveInLineOfSight(Unit* pWho) override
     {
         // should not have npcflag by default, so set when expected
-        if (!m_creature->getVictim() && !m_creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP) && HasFollowState(STATE_FOLLOW_INPROGRESS) && pWho->GetEntry() == NPC_WINNA)
+        if (!m_creature->GetVictim() && !m_creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP) && HasFollowState(STATE_FOLLOW_INPROGRESS) && pWho->GetEntry() == NPC_WINNA)
         {
             if (m_creature->IsWithinDistInMap(pWho, INTERACTION_DISTANCE))
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
@@ -89,7 +89,7 @@ struct npc_kittenAI : public FollowerAI
 
     void UpdateFollowerAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         {
             if (HasFollowState(STATE_FOLLOW_PAUSED))
             {
@@ -367,12 +367,12 @@ struct npc_kroshiusAI : public ScriptedAI
         }
         else
         {
-            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
                 return;
 
             if (m_uiKnockBackTimer < uiDiff)
             {
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCKBACK);
+                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_KNOCKBACK);
                 m_uiKnockBackTimer = urand(9000, 12000);
             }
             else
@@ -438,7 +438,11 @@ enum
 
 struct npc_captured_arkonarinAI : public npc_escortAI
 {
-    npc_captured_arkonarinAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    npc_captured_arkonarinAI(Creature* pCreature) : npc_escortAI(pCreature)
+    {
+        m_creature->SetStandState(UNIT_STAND_STATE_KNEEL, true);
+        Reset();
+    }
 
     ObjectGuid m_treyGuid;
 
@@ -480,7 +484,7 @@ struct npc_captured_arkonarinAI : public npc_escortAI
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
             m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-            m_creature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
+            m_creature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN + TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
             Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
 
             if (GameObject* pCage = GetClosestGameObjectWithEntry(m_creature, GO_ARKONARIN_CAGE, 5.0f))
@@ -492,60 +496,60 @@ struct npc_captured_arkonarinAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 if (Player* pPlayer = GetPlayerForEscort())
                     DoScriptText(SAY_ESCORT_START, m_creature, pPlayer);
                 break;
-            case 14:
+            case 15:
                 DoScriptText(SAY_FIRST_STOP, m_creature);
                 break;
-            case 34:
+            case 35:
                 DoScriptText(SAY_SECOND_STOP, m_creature);
                 SetRun();
                 break;
-            case 38:
+            case 39:
                 if (GameObject* pChest = GetClosestGameObjectWithEntry(m_creature, GO_ARKONARIN_CHEST, 5.0f))
                     pChest->Use(m_creature);
                 m_creature->HandleEmote(EMOTE_ONESHOT_KNEEL);
                 break;
-            case 39:
+            case 40:
                 DoCastSpellIfCan(m_creature, SPELL_STRENGTH_ARKONARIN);
                 break;
-            case 40:
+            case 41:
                 m_creature->UpdateEntry(NPC_ARKONARIN);
                 if (Player* pPlayer = GetPlayerForEscort())
                     m_creature->SetFacingToObject(pPlayer);
                 m_bCanAttack = true;
                 DoScriptText(SAY_FOUND_EQUIPMENT, m_creature);
                 break;
-            case 41:
+            case 42:
                 DoScriptText(SAY_ESCAPE_DEMONS, m_creature);
                 m_creature->SummonCreature(NPC_JAEDENAR_LEGIONNAIRE, 5082.068f, -490.084f, 296.856f, 5.15f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 m_creature->SummonCreature(NPC_JAEDENAR_LEGIONNAIRE, 5084.135f, -489.187f, 296.832f, 5.15f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 m_creature->SummonCreature(NPC_JAEDENAR_LEGIONNAIRE, 5085.676f, -488.518f, 296.824f, 5.15f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 break;
-            case 43:
+            case 44:
                 SetRun(false);
                 break;
-            case 104:
+            case 105:
                 DoScriptText(SAY_FRESH_AIR, m_creature);
                 break;
-            case 105:
+            case 106:
                 m_creature->SummonCreature(NPC_SPIRT_TREY, 4844.839f, -395.763f, 350.603f, 6.25f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 break;
-            case 106:
+            case 107:
                 DoScriptText(SAY_TREY, m_creature);
                 break;
-            case 107:
+            case 108:
                 if (Creature* pTrey = m_creature->GetMap()->GetCreature(m_treyGuid))
                     AttackStart(pTrey);
                 break;
-            case 108:
+            case 109:
                 if (Player* pPlayer = GetPlayerForEscort())
                     m_creature->SetFacingToObject(pPlayer);
                 DoScriptText(SAY_ESCORT_COMPLETE, m_creature);
                 break;
-            case 109:
+            case 110:
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_RESCUE_JAEDENAR, m_creature);
                 SetRun();
@@ -555,14 +559,14 @@ struct npc_captured_arkonarinAI : public npc_escortAI
 
     void UpdateEscortAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_bCanAttack)
         {
             if (m_uiMortalStrikeTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTAL_STRIKE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MORTAL_STRIKE) == CAST_OK)
                     m_uiMortalStrikeTimer = urand(7000, 10000);
             }
             else
@@ -570,7 +574,7 @@ struct npc_captured_arkonarinAI : public npc_escortAI
 
             if (m_uiCleaveTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE) == CAST_OK)
                     m_uiCleaveTimer = urand(3000, 6000);
             }
             else
@@ -705,7 +709,7 @@ struct npc_areiAI : public npc_escortAI, private DialogueHelper
 
     void WaypointReached(uint32 uiPointId) override
     {
-        if (uiPointId == 36)
+        if (uiPointId == 37)
         {
             SetEscortPaused(true);
 
@@ -751,12 +755,12 @@ struct npc_areiAI : public npc_escortAI, private DialogueHelper
     {
         DialogueUpdate(uiDiff);
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiWitherStrikeTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_WITHER_STRIKE) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_WITHER_STRIKE) == CAST_OK)
                 m_uiWitherStrikeTimer = urand(3000, 6000);
         }
         else

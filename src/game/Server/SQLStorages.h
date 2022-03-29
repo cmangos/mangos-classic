@@ -35,9 +35,10 @@ extern SQLStorage sSpellTemplate;
 extern SQLStorage sSpellCones;
 extern SQLStorage sDungeonEncounterStore;
 extern SQLStorage sCreatureConditionalSpawnStore;
+extern SQLStorage sWorldSafeLocsStore;
+
 
 extern SQLHashStorage sGOStorage;
-extern SQLHashStorage sCreatureTemplateSpellsStorage;
 
 extern SQLMultiStorage sSpellScriptTargetStorage;
 

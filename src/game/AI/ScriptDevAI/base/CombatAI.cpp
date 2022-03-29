@@ -16,31 +16,78 @@
 
 #include "Entities/Creature.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
+#include "Spells/Spell.h"
+#include "Spells/SpellMgr.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 
-void CombatAI::ExecuteActions()
+enum
 {
-    if (!CanExecuteCombatAction())
-        return;
+    ACTION_CASTING_RESTORE = 1000,
+    ACTION_ON_KILL_COOLDOWN = 1001,
+};
 
-    for (uint32 i = 0; i < GetCombatActionCount(); ++i)
-    {
-        // can be changed on any action - prevent all additional ones
-        if (GetCombatScriptStatus())
-            return;
-
-        if (GetActionReadyStatus(i))
-            ExecuteAction(i);
-    }
+CombatAI::CombatAI(Creature* creature, uint32 combatActions) : ScriptedAI(creature, combatActions), m_onKillCooldown(false), m_stopTargeting(false)
+{
+    AddCustomAction(ACTION_CASTING_RESTORE, true, [&]() { HandleTargetRestoration(); });
+    AddCustomAction(ACTION_ON_KILL_COOLDOWN, true, [&]() { m_onKillCooldown = false; });
 }
 
-void CombatAI::UpdateAI(const uint32 diff)
+void CombatAI::Reset()
 {
-    UpdateTimers(diff, m_creature->isInCombat());
+    ScriptedAI::Reset();
+    m_onKillCooldown = false;
+    m_storedTarget = ObjectGuid();
+}
 
-    if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+void CombatAI::HandleDelayedInstantAnimation(SpellEntry const* spellInfo)
+{
+    m_storedTarget = m_creature->GetTarget() ? m_creature->GetTarget()->GetObjectGuid() : ObjectGuid();
+    if (m_storedTarget)
+        ResetTimer(ACTION_CASTING_RESTORE, 2000);
+}
+
+void CombatAI::HandleTargetRestoration()
+{
+    ObjectGuid guid = m_unit->GetTarget() ? m_unit->GetTarget()->GetObjectGuid() : ObjectGuid();
+    if (guid != m_storedTarget || m_unit->IsNonMeleeSpellCasted(false))
+    {
+        m_storedTarget = ObjectGuid();
+        return;
+    }
+
+    if (m_unit->GetVictim() && !GetCombatScriptStatus())
+        m_unit->SetTarget(m_unit->GetVictim());
+    else
+        m_unit->SetTarget(nullptr);
+
+    m_storedTarget = ObjectGuid();
+}
+
+bool CombatAI::IsTargetingRestricted()
+{
+    return m_stopTargeting || m_storedTarget || ScriptedAI::IsTargetingRestricted();
+}
+
+void CombatAI::OnTaunt()
+{
+    if (m_storedTarget)
+        ResetTimer(ACTION_CASTING_RESTORE, 1); // clear on next update
+}
+
+void CombatAI::AddOnKillText(int32 text)
+{
+    m_onDeathTexts.push_back(text);
+}
+
+void CombatAI::KilledUnit(Unit* victim)
+{
+    if (!m_creature->IsAlive() || !victim->IsPlayer())
         return;
 
-    ExecuteActions();
-
-    DoMeleeAttackIfReady();
+    if (!m_onKillCooldown && m_onDeathTexts.size() > 0)
+    {
+        m_onKillCooldown = true;
+        DoScriptText(m_onDeathTexts[urand(0, m_onDeathTexts.size() - 1)], m_creature, victim);
+        ResetTimer(ACTION_ON_KILL_COOLDOWN, 10000);
+    }
 }

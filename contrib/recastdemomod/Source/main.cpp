@@ -27,6 +27,7 @@
 #include "Recast.h"
 #include "RecastDebugDraw.h"
 #include "Filelist.h"
+#include <filesystem>
 
 //#include "Sample_SoloMesh.h"
 //#include "Sample_TileMesh.h"
@@ -39,14 +40,50 @@
 #	define putenv _putenv
 #endif
 
-int main(int /*argc*/, char** /*argv*/)
+void printUsage()
+{
+    printf("Generator command line args\n\n");
+    printf("-? or /? or -h or --help: Show this help\n");
+    printf("--dataDir [directory] : Path to base directory of maps/vmaps/mmap subfolder.\n");
+    printf("                        Please not that folder with space or special characters are not supported.\n");
+}
+
+bool handleArgs(int argc, char** argv, char*& dataDir)
+{
+    char* param = NULL;
+    dataDir = "./";
+
+    for (int i = 1; i < argc; ++i)
+    {
+        if (strcmp(argv[i], "--dataDir") == 0 || strcmp(argv[i], "-d") == 0)
+        {
+            param = argv[++i];
+            if (!param)
+            {
+                printUsage();
+                return false;
+            }
+
+            dataDir = param;
+        }
+    }
+
+    return true;
+}
+
+int main(int argc, char** argv)
 {
     // Init SDL
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
-        printf("Could not initialise SDL\n");
+        printf("Could not initialize SDL\n");
         return -1;
     }
+
+    char* dataDir = nullptr;
+
+    if (!handleArgs(argc, argv, dataDir))
+        return -1;
 
     // Center window
     char env[] = "SDL_VIDEO_CENTERED=1";
@@ -80,13 +117,15 @@ int main(int /*argc*/, char** /*argv*/)
 
     if (!screen)
     {
-        printf("Could not initialise SDL opengl\n");
+        printf("Could not initialize SDL OpenGL\n");
         return -1;
     }
 
     glEnable(GL_MULTISAMPLE);
 
     SDL_WM_SetCaption("RecastDemo Mod (for CMaNGOS)", 0);
+
+    cout << "Current working directory: " << std::filesystem::current_path() << endl;
 
     if (!imguiRenderGLInit("DroidSans.ttf"))
     {
@@ -125,12 +164,12 @@ int main(int /*argc*/, char** /*argv*/)
 
     //InputGeom* geom = 0;
     CMaNGOS_Map* sample = new CMaNGOS_Map();
-    BuildContext ctx;
+    BuildContext ctx(dataDir);
     sample->setContext(&ctx);
     sample->Init();
     if (sample->GetMapId() < 0)
     {
-        printf("Could not init datas. Maps folders exist?\n");
+        printf("Could not init data. Maps folders exist?\n");
         SDL_Quit();
         return -1;
     }

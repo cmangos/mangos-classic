@@ -10,6 +10,7 @@ public:
     MapInfos() : m_Initilized(false){}
     void Init(unsigned int mapId, BuildContext* ctx);
     bool LoadTile(unsigned int tx, unsigned int ty, bool loadGeom = true, bool loadMmap = true);
+    bool LoadModel(const std::string modelName, const std::string objId);
     void RemoveTile(unsigned int tx, unsigned int ty);
     void ClearNavMeshOfTile(unsigned int tx, unsigned int ty) { m_MMapData.RemoveTile(tx, ty); };
     bool LoadNavMeshOfTile(unsigned int tx, unsigned int ty);

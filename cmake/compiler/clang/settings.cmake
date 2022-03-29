@@ -1,16 +1,10 @@
 # Set build-directive (used in core to tell which buildtype we used)
-add_definitions(-D_BUILD_DIRECTIVE='"$(CONFIGURATION)"')
+add_definitions(-D_BUILD_DIRECTIVE='"${CMAKE_BUILD_TYPE}"')
 
-# Check C++11 compiler support
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-if(COMPILER_SUPPORTS_CXX11)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-elseif(COMPILER_SUPPORTS_CXX0X)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-else()
-  message(FATAL_ERROR "Error, CMaNGOS requires a compiler that supports C++11!")
+# Additional compaitibility checks and flags for commonly found LTS Clang versions
+if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0)
+  # Set minimum C++17 compliant Clang version target to 7.0
+  message(SEND_ERROR "Clang: This project requires Clang version 7.0 or higher")
 endif()
 
 if(WARNINGS)
@@ -22,11 +16,11 @@ else()
 # disable "unused function result" warnings
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-result")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-result")
-  
+
 # disable "unused command line argument" warnings (mostly -I)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-command-line-argument")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-command-line-argument")
-  
+
   if (APPLE)
 # disable "has no symbols" warnings
     set(CMAKE_C_ARCHIVE_CREATE   "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")

@@ -17,3 +17,15 @@
  */
 
 //#include "DatabaseEnv.h"
+#include "Field.h"
+
+#include <iomanip>
+
+time_t Field::GetTime() const
+{
+    std::string time = GetCppString();
+    std::tm tm = {};
+    std::stringstream ss(time);
+    ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
+    return std::mktime(&tm);
+}

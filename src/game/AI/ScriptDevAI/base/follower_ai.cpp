@@ -9,7 +9,7 @@ SDComment: This AI is under development
 SDCategory: Npc
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "follower_ai.h"
 
 const float MAX_PLAYER_DISTANCE = 100.0f;
@@ -25,22 +25,6 @@ FollowerAI::FollowerAI(Creature* creature) : ScriptedAI(creature),
     m_questForFollow(nullptr)
 {}
 
-void FollowerAI::AttackStart(Unit* who)
-{
-    if (!who)
-        return;
-
-    if (m_creature->Attack(who, m_meleeEnabled))
-    {
-        m_creature->AddThreat(who);
-        m_creature->SetInCombatWith(who);
-        who->SetInCombatWith(m_creature);
-
-        if (IsCombatMovement())
-            m_creature->GetMotionMaster()->MoveChase(who);
-    }
-}
-
 // This part provides assistance to a player that are attacked by pWho, even if out of normal aggro range
 // It will cause m_creature to attack pWho that are attacking _any_ player (which has been confirmed may happen also on offi)
 bool FollowerAI::AssistPlayerInCombat(Unit* who)
@@ -48,7 +32,7 @@ bool FollowerAI::AssistPlayerInCombat(Unit* who)
     if (!HasFollowState(STATE_FOLLOW_INPROGRESS))
         return false;
 
-    if (!who->getVictim())
+    if (!who->GetVictim())
         return false;
 
     // experimental (unknown) flag not present
@@ -60,7 +44,7 @@ bool FollowerAI::AssistPlayerInCombat(Unit* who)
         return false;
 
     // victim of pWho is not a player
-    if (!who->getVictim()->GetBeneficiaryPlayer())
+    if (!who->GetVictim()->GetBeneficiaryPlayer())
         return false;
 
     // never attack friendly
@@ -71,13 +55,12 @@ bool FollowerAI::AssistPlayerInCombat(Unit* who)
     if (m_creature->IsWithinDistInMap(who, MAX_PLAYER_DISTANCE) && m_creature->IsWithinLOSInMap(who))
     {
         // already fighting someone?
-        if (!m_creature->getVictim())
+        if (!m_creature->GetVictim())
         {
             AttackStart(who);
             return true;
         }
-        who->SetInCombatWith(m_creature);
-        m_creature->AddThreat(who);
+        m_creature->EngageInCombatWith(who);
         return true;
     }
 
@@ -130,14 +113,14 @@ void FollowerAI::EnterEvadeMode()
 
         if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
         {
-            float posX, posY, posZ, posO;
-            m_creature->GetCombatStartPosition(posX, posY, posZ, posO);
-            m_creature->GetMotionMaster()->MovePoint(POINT_COMBAT_START, posX, posY, posZ);
+            Position pos;
+            m_creature->GetCombatStartPosition(pos);
+            m_creature->GetMotionMaster()->MovePoint(POINT_COMBAT_START, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
         }
     }
     else
     {
-        if (m_creature->isAlive())
+        if (m_creature->IsAlive())
             m_creature->GetMotionMaster()->MoveTargetedHome();
     }
 
@@ -148,7 +131,7 @@ void FollowerAI::EnterEvadeMode()
 
 void FollowerAI::UpdateAI(const uint32 diff)
 {
-    if (HasFollowState(STATE_FOLLOW_INPROGRESS) && !m_creature->getVictim())
+    if (HasFollowState(STATE_FOLLOW_INPROGRESS) && !m_creature->GetVictim())
     {
         if (m_updateFollowTimer < diff)
         {
@@ -210,7 +193,7 @@ void FollowerAI::UpdateAI(const uint32 diff)
 
 void FollowerAI::UpdateFollowerAI(const uint32 /*diff*/)
 {
-    if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+    if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         return;
 
     DoMeleeAttackIfReady();
@@ -235,7 +218,7 @@ void FollowerAI::MovementInform(uint32 motionType, uint32 pointId)
 
 void FollowerAI::StartFollow(Player* leader, uint32 factionForFollower, const Quest* quest)
 {
-    if (m_creature->getVictim())
+    if (m_creature->GetVictim())
     {
         debug_log("SD2: FollowerAI attempt to StartFollow while in combat.");
         return;
@@ -275,7 +258,7 @@ Player* FollowerAI::GetLeaderForFollower()
 {
     if (Player* leader = m_creature->GetMap()->GetPlayer(m_leaderGuid))
     {
-        if (leader->isAlive())
+        if (leader->IsAlive())
             return leader;
         if (Group* group = leader->GetGroup())
         {
@@ -283,7 +266,7 @@ Player* FollowerAI::GetLeaderForFollower()
             {
                 Player* member = ref->getSource();
 
-                if (member && member->isAlive() && m_creature->IsWithinDistInMap(member, MAX_PLAYER_DISTANCE))
+                if (member && member->IsAlive() && m_creature->IsWithinDistInMap(member, MAX_PLAYER_DISTANCE))
                 {
                     debug_log("SD2: FollowerAI GetLeader changed and returned new leader.");
                     m_leaderGuid = member->GetObjectGuid();

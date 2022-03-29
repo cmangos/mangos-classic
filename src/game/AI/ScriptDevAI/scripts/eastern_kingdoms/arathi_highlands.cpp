@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
+#include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
 npc_professor_phizzlethorpe
 npc_kinelory
 EndContentData */
@@ -67,20 +67,20 @@ struct npc_professor_phizzlethorpeAI : public npc_escortAI
 
         switch (uiPointId)
         {
-            case 4: DoScriptText(SAY_PROGRESS_2, m_creature, pPlayer); break;
-            case 5: DoScriptText(SAY_PROGRESS_3, m_creature, pPlayer); break;
-            case 8: DoScriptText(EMOTE_PROGRESS_4, m_creature); break;
-            case 9:
+            case 5: DoScriptText(SAY_PROGRESS_2, m_creature, pPlayer); break;
+            case 6: DoScriptText(SAY_PROGRESS_3, m_creature, pPlayer); break;
+            case 9: DoScriptText(EMOTE_PROGRESS_4, m_creature); break;
+            case 10:
                 m_creature->SummonCreature(ENTRY_VENGEFUL_SURGE, -2056.41f, -2144.01f, 20.59f, 5.70f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 600000);
                 m_creature->SummonCreature(ENTRY_VENGEFUL_SURGE, -2050.17f, -2140.02f, 19.54f, 5.17f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 600000);
                 break;
-            case 10: DoScriptText(SAY_PROGRESS_5, m_creature, pPlayer); break;
-            case 11:
+            case 11: DoScriptText(SAY_PROGRESS_5, m_creature, pPlayer); break;
+            case 12:
                 DoScriptText(SAY_PROGRESS_6, m_creature, pPlayer);
                 SetRun();
                 break;
-            case 19: DoScriptText(SAY_PROGRESS_7, m_creature, pPlayer); break;
-            case 20:
+            case 20: DoScriptText(SAY_PROGRESS_7, m_creature, pPlayer); break;
+            case 21:
                 DoScriptText(EMOTE_PROGRESS_8, m_creature);
                 DoScriptText(SAY_PROGRESS_9, m_creature, pPlayer);
                 pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_SUNKEN_TREASURE, m_creature);
@@ -160,23 +160,23 @@ struct npc_kineloryAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 9:
+            case 10:
                 DoScriptText(SAY_REACH_BOTTOM, m_creature);
                 break;
-            case 16:
+            case 17:
                 DoScriptText(SAY_WATCH_BACK, m_creature);
                 DoScriptText(EMOTE_BELONGINGS, m_creature);
                 break;
-            case 17:
+            case 18:
                 DoScriptText(SAY_DATA_FOUND, m_creature);
                 break;
-            case 18:
+            case 19:
                 DoScriptText(SAY_ESCAPE, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
                     m_creature->SetFacingToObject(pPlayer);
                 SetRun();
                 break;
-            case 33:
+            case 34:
                 DoScriptText(SAY_FINISH, m_creature);
                 m_creature->SetImmuneToNPC(true);
                 if (Creature* pQuae = GetClosestCreatureWithEntry(m_creature, NPC_QUAE, 10.0f))
@@ -185,7 +185,7 @@ struct npc_kineloryAI : public npc_escortAI
                     m_creature->SetFacingToObject(pQuae);
                 }
                 break;
-            case 34:
+            case 35:
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_HINTS_NEW_PLAGUE, m_creature);
                 break;
@@ -213,7 +213,7 @@ struct npc_kineloryAI : public npc_escortAI
 
     void UpdateEscortAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiBearFormTimer < uiDiff)

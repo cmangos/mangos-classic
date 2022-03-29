@@ -28,7 +28,7 @@ void HomeMovementGenerator<Creature>::Initialize(Creature& owner)
     wasActive = owner.isActiveObject();
     if (!wasActive)
         owner.SetActiveObjectState(true);
-    owner.SetEvade(EVADE_HOME);
+    owner.GetCombatManager().SetEvadeState(EVADE_HOME);
 
     _setTargetLocation(owner);
 }
@@ -42,18 +42,37 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature& owner)
     if (owner.hasUnitState(UNIT_STAT_NOT_MOVE))
         return;
 
-    Movement::MoveSplineInit init(owner);
-    float x, y, z, o;
+    Position pos;
     // at apply we can select more nice return points base at current movegen
-    if (owner.GetMotionMaster()->empty() || !owner.GetMotionMaster()->top()->GetResetPosition(owner, x, y, z, o))
-        owner.GetCombatStartPosition(x, y, z, o);
+    if (owner.GetMotionMaster()->empty() || !owner.GetMotionMaster()->top()->GetResetPosition(owner, pos.x, pos.y, pos.z, pos.o))
+        owner.GetCombatStartPosition(pos);
 
-    if (x == 0 && x == y && y == z)
-        owner.GetRespawnCoord(x, y, z, &o);
+    if (pos.IsEmpty())
+        owner.GetRespawnCoord(pos.x, pos.y, pos.z, &pos.o);
+    if (owner.GetDistance(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), DIST_CALC_NONE, owner.GetTransport()) > 150.f * 150.f)
+    {
+        if (!owner.IsInWorld() || !owner.GetMap()->IsDungeon())
+        {
+            arrived = true;
+            Finalize(owner);
+            owner.SetRespawnDelay(5, true);
+            owner.ForcedDespawn(1);
+            return;
+        }
+    }
 
-    init.SetFacing(o);
-    init.MoveTo(x, y, z, true);
+    PathFinder path(&owner);
+
+    Position curPos = owner.GetPosition(owner.GetTransport());
+    // source and target pos must be local coords
+    path.calculate(G3D::Vector3(curPos.GetPositionX(), curPos.GetPositionY(), curPos.GetPositionZ()), G3D::Vector3(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()), true);
+
+    Movement::MoveSplineInit init(owner);
+    init.MovebyPath(path.getPath());
     init.SetWalk(!runHome);
+    init.SetFacing(pos.GetPositionO());
+    if (path.getPathType() & (PATHFIND_NOPATH | PATHFIND_SHORTCUT))
+        init.SetVelocity(400.f);
     init.Launch();
 
     arrived = false;
@@ -68,16 +87,14 @@ bool HomeMovementGenerator<Creature>::Update(Creature& owner, const uint32& /*ti
 
 void HomeMovementGenerator<Creature>::Finalize(Creature& owner)
 {
-    owner.SetEvade(EVADE_NONE);
+    owner.GetCombatManager().SetEvadeState(EVADE_NONE);
     if (arrived)
     {
         if (owner.GetTemporaryFactionFlags() & TEMPFACTION_RESTORE_REACH_HOME)
             owner.ClearTemporaryFaction();
 
-        owner.SetWalk(!owner.hasUnitState(UNIT_STAT_RUNNING_STATE), false);
         owner.LoadCreatureAddon(true);
-        owner.AI()->JustReachedHome();
-
+        owner.TriggerHomeEvents();
         if (owner.IsTemporarySummon())
         {
             if (owner.GetSpawnerGuid().IsCreatureOrPet())
@@ -88,5 +105,7 @@ void HomeMovementGenerator<Creature>::Finalize(Creature& owner)
 
         if (!wasActive)
             owner.SetActiveObjectState(false);
+
+        owner.SetCombatStartPosition(Position());
     }
 }

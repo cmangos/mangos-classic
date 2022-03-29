@@ -19,6 +19,42 @@
 #include "Globals/ObjectMgr.h"                                      // for normalizePlayerName
 #include "Chat/ChannelMgr.h"
 
+bool WorldSession::CheckChatChannelNameAndPassword(std::string& name, std::string& pass)
+{
+    // check name max length and truncate if needed
+    if (name.length() > 128)
+        utf8limit(name, 128);
+
+    // strip invisible characters
+    stripLineInvisibleChars(name);
+
+    // check if password is too long
+    if (pass.length() > 128)
+    {
+        WorldPacket data(SMSG_CHANNEL_NOTIFY, (1 + name.size() + 1));
+        data << uint8(CHAT_WRONG_PASSWORD_NOTICE) << name;
+        SendPacket(data);
+        return false;
+    }
+
+    // skip remaining checks for higher sec level accounts
+    if (GetSecurity() > SEC_PLAYER)
+        return true;
+
+    // check for presence of escape sequences
+    if (ChatHandler::HasEscapeSequences(name.c_str()))
+    {
+        sLog.outError("Player %s (GUID: %u) attempted to join a chat channel with name containing escape sequence: \"%s\"", GetPlayer()->GetName(),
+                      GetPlayer()->GetGUIDLow(), name.c_str());
+
+        WorldPacket data(SMSG_CHANNEL_NOTIFY, (1 + name.size() + 1));
+        data << uint8(CHAT_INVALID_NAME_NOTICE) << name;
+        SendPacket(data);
+        return false;
+    }
+    return true;
+}
+
 void WorldSession::HandleJoinChannelOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s (%u, 0x%X)", recvPacket.GetOpcodeName(), recvPacket.GetOpcode(), recvPacket.GetOpcode());
@@ -31,6 +67,10 @@ void WorldSession::HandleJoinChannelOpcode(WorldPacket& recvPacket)
         return;
 
     recvPacket >> pass;
+
+    if (!CheckChatChannelNameAndPassword(channelname, pass))
+        return;
+
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetJoinChannel(channelname))
             chn->Join(_player, pass.c_str());
@@ -65,7 +105,7 @@ void WorldSession::HandleChannelListOpcode(WorldPacket& recvPacket)
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
-            chn->List(_player);
+            chn->SendChannelListResponse(_player);
 }
 
 void WorldSession::HandleChannelPasswordOpcode(WorldPacket& recvPacket)
@@ -79,7 +119,7 @@ void WorldSession::HandleChannelPasswordOpcode(WorldPacket& recvPacket)
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
-            chn->Password(_player, pass.c_str());
+            chn->SetPassword(_player, pass.c_str());
 }
 
 void WorldSession::HandleChannelSetOwnerOpcode(WorldPacket& recvPacket)
@@ -108,7 +148,7 @@ void WorldSession::HandleChannelOwnerOpcode(WorldPacket& recvPacket)
     recvPacket >> channelname;
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
-            chn->SendWhoOwner(_player);
+            chn->SendChannelOwnerResponse(_player);
 }
 
 void WorldSession::HandleChannelModeratorOpcode(WorldPacket& recvPacket)
@@ -125,7 +165,7 @@ void WorldSession::HandleChannelModeratorOpcode(WorldPacket& recvPacket)
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
-            chn->SetModerator(_player, otp.c_str());
+            chn->SetModerator(_player, otp.c_str(), true);
 }
 
 void WorldSession::HandleChannelUnmoderatorOpcode(WorldPacket& recvPacket)
@@ -142,7 +182,7 @@ void WorldSession::HandleChannelUnmoderatorOpcode(WorldPacket& recvPacket)
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
-            chn->UnsetModerator(_player, otp.c_str());
+            chn->SetModerator(_player, otp.c_str(), false);
 }
 
 void WorldSession::HandleChannelMuteOpcode(WorldPacket& recvPacket)
@@ -159,7 +199,7 @@ void WorldSession::HandleChannelMuteOpcode(WorldPacket& recvPacket)
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
-            chn->SetMute(_player, otp.c_str());
+            chn->SetMute(_player, otp.c_str(), true);
 }
 
 void WorldSession::HandleChannelUnmuteOpcode(WorldPacket& recvPacket)
@@ -177,7 +217,7 @@ void WorldSession::HandleChannelUnmuteOpcode(WorldPacket& recvPacket)
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
-            chn->UnsetMute(_player, otp.c_str());
+            chn->SetMute(_player, otp.c_str(), false);
 }
 
 void WorldSession::HandleChannelInviteOpcode(WorldPacket& recvPacket)
@@ -256,7 +296,7 @@ void WorldSession::HandleChannelAnnouncementsOpcode(WorldPacket& recvPacket)
     recvPacket >> channelname;
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
-            chn->Announce(_player);
+            chn->ToggleAnnouncements(_player);
 }
 
 void WorldSession::HandleChannelModerateOpcode(WorldPacket& recvPacket)
@@ -267,7 +307,7 @@ void WorldSession::HandleChannelModerateOpcode(WorldPacket& recvPacket)
     recvPacket >> channelname;
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
-            chn->Moderate(_player);
+            chn->ToggleModeration(_player);
 }
 
 void WorldSession::HandleChannelDisplayListQueryOpcode(WorldPacket& recvPacket)
@@ -278,7 +318,7 @@ void WorldSession::HandleChannelDisplayListQueryOpcode(WorldPacket& recvPacket)
     recvPacket >> channelname;
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
-            chn->List(_player);
+            chn->SendChannelListResponse(_player, true);
 }
 
 void WorldSession::HandleGetChannelMemberCountOpcode(WorldPacket& recvPacket)

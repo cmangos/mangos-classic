@@ -21,20 +21,21 @@ SDComment: Though gameplay is Blizzlike, logic in Zombie Chow Search and Call Al
            Also, based on similar encounters, Trigger NPCs for the summoning should probably be spawned by a (currently unknown) spell
            and the despawn of all adds should also be handled by a spell.
 SDCategory: Naxxramas
-EndScriptData
+EndScriptData */
 
-*/
-
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "naxxramas.h"
 
 enum
 {
     EMOTE_BOSS_GENERIC_ENRAGED      = -1000003,
+    EMOTE_DEVOURS_ZOMBIE_CHOW       = -1533119,
 
     SPELL_DOUBLE_ATTACK             = 19818,
     SPELL_MORTALWOUND               = 25646,
     SPELL_DECIMATE                  = 28374,
+    SPELL_DECIMATE_DAMAGE           = 28375,
     SPELL_ENRAGE                    = 28371,
     SPELL_BERSERK                   = 26662,
     SPELL_TERRIFYING_ROAR           = 29685,
@@ -42,37 +43,47 @@ enum
     SPELL_CALL_ALL_ZOMBIE_CHOW      = 29681,                // Triggers 29682
     SPELL_ZOMBIE_CHOW_SEARCH        = 28235,                // Triggers 28236 every 3 secs
     SPELL_ZOMBIE_CHOW_SEARCH_HEAL   = 28238,                // Healing effect
+    SPELL_ZOMBIE_CHOW_SEARCH_KILL   = 28239,                // Zombie Chow Suicide effect
 
     NPC_WORLD_TRIGGER               = 15384,                // Handle the summoning of the zombie chow NPCs
 };
 
-struct boss_gluthAI : public ScriptedAI
+enum GluthActions
 {
-    boss_gluthAI(Creature* creature) : ScriptedAI(creature)
-    {
-        m_instance = (instance_naxxramas*)creature->GetInstanceData();
-        Reset();
+    GLUTH_MORTAL_WOUND,
+    GLUTH_DECIMATE,
+    GLUTH_ENRAGE,
+    GLUTH_ROAR,
+    GLUTH_BERSERK,
+    GLUTH_ACTION_MAX,
+};
 
-        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+struct boss_gluthAI : public CombatAI
+{
+    boss_gluthAI(Creature* creature) : CombatAI(creature, GLUTH_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    {
+        AddCombatAction(GLUTH_MORTAL_WOUND, 10u * IN_MILLISECONDS);
+        AddCombatAction(GLUTH_DECIMATE, 105u * IN_MILLISECONDS);
+        AddCombatAction(GLUTH_ENRAGE, 10u * IN_MILLISECONDS);
+        AddCombatAction(GLUTH_ROAR, 20u * IN_MILLISECONDS);
+        AddCombatAction(GLUTH_BERSERK, (uint32)(6.5 * MINUTE * IN_MILLISECONDS)); // ~15 seconds after the third Decimate
     }
 
-    instance_naxxramas* m_instance;
-
-    uint32 m_mortalWoundTimer;
-    uint32 m_decimateTimer;
-    uint32 m_enrageTimer;
-    uint32 m_roarTimer;
-    uint32 m_berserkTimer;
+    ScriptedInstance* m_instance;
 
     CreatureList m_summoningTriggers;
 
-    void Reset() override
+    uint32 GetSubsequentActionTimer(uint32 id)
     {
-        m_mortalWoundTimer  = 10 * IN_MILLISECONDS;
-        m_decimateTimer     = 105 * IN_MILLISECONDS;
-        m_enrageTimer       = 10 * IN_MILLISECONDS;
-        m_roarTimer         = 20 * IN_MILLISECONDS;
-        m_berserkTimer      = 6.5 * MINUTE * IN_MILLISECONDS; // ~15 seconds after the third Decimate
+        switch (id)
+        {
+            case GLUTH_MORTAL_WOUND: return 10u * IN_MILLISECONDS;
+            case GLUTH_ENRAGE: return urand(10, 12) * IN_MILLISECONDS;
+            case GLUTH_ROAR: return 20u * IN_MILLISECONDS;
+            case GLUTH_DECIMATE: return urand(100, 110) * IN_MILLISECONDS;
+            case GLUTH_BERSERK: return 5 * MINUTE * IN_MILLISECONDS;
+            default: return 0; // never occurs but for compiler
+        }
     }
 
     void JustDied(Unit* /*killer*/) override
@@ -90,17 +101,13 @@ struct boss_gluthAI : public ScriptedAI
 
         DoCastSpellIfCan(m_creature, SPELL_ZOMBIE_CHOW_SEARCH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);     // Aura periodically looking for NPC 16360
         DoCastSpellIfCan(m_creature, SPELL_CALL_ALL_ZOMBIE_CHOW, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);   // Aura periodically calling all NPCs 16360
+        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
 
         // Add zombies summoning aura to the three triggers
+        m_summoningTriggers.clear();
         GetCreatureListWithEntryInGrid(m_summoningTriggers, m_creature, NPC_WORLD_TRIGGER, 100.0f);
         for (auto& trigger : m_summoningTriggers)
             trigger->CastSpell(trigger, SPELL_SUMMON_ZOMBIE_CHOW, TRIGGERED_OLD_TRIGGERED);
-    }
-
-    void KilledUnit(Unit* victim) override
-    {
-        if (victim->GetEntry() == NPC_ZOMBIE_CHOW)
-            DoCastSpellIfCan(m_creature, SPELL_ZOMBIE_CHOW_SEARCH_HEAL, CAST_TRIGGERED);
     }
 
     void JustReachedHome() override
@@ -119,73 +126,138 @@ struct boss_gluthAI : public ScriptedAI
             trigger->RemoveAllAuras();
     }
 
-    void UpdateAI(const uint32 diff) override
+    void ExecuteAction(uint32 action) override
     {
-        // Do nothing if no target or if we are currently stunned (Decimate effect)
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim() || m_creature->HasAuraType(SPELL_AURA_MOD_STUN))
+        if (!m_instance)
             return;
 
-        // Mortal Wound
-        if (m_mortalWoundTimer < diff)
+        if (m_creature->HasAuraType(SPELL_AURA_MOD_STUN))
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTALWOUND) == CAST_OK)
-                m_mortalWoundTimer = 10 * IN_MILLISECONDS;
+            DelayCombatAction(action, 500u);
+            return;
         }
-        else
-            m_mortalWoundTimer -= diff;
 
-        // Decimate
-        if (m_decimateTimer < diff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_DECIMATE, CAST_TRIGGERED) == CAST_OK)
-                m_decimateTimer = urand(100, 110) * IN_MILLISECONDS;
-        }
-        else
-            m_decimateTimer -= diff;
-
-        // Enrage
-        if (m_enrageTimer < diff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+            case GLUTH_MORTAL_WOUND:
             {
-                DoScriptText(EMOTE_BOSS_GENERIC_ENRAGED, m_creature);
-                m_enrageTimer = urand(10, 12) * IN_MILLISECONDS;
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MORTALWOUND) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                return;
+            }
+            case GLUTH_ENRAGE:
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_BOSS_GENERIC_ENRAGED, m_creature);
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                }
+                return;
+            }
+            case GLUTH_ROAR:
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_TERRIFYING_ROAR) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                return;
+            }
+            case GLUTH_DECIMATE:
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_DECIMATE, CAST_TRIGGERED) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                return;
+            }
+            case GLUTH_BERSERK:
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                return;
             }
         }
-        else
-            m_enrageTimer -= diff;
-
-        // Terrifying Roar
-        if (m_roarTimer < diff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_TERRIFYING_ROAR) == CAST_OK)
-                m_roarTimer = 20 * IN_MILLISECONDS;
-        }
-        else
-            m_roarTimer -= diff;
-
-        // Berserk
-        if (m_berserkTimer < diff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                m_berserkTimer = 5 * MINUTE * IN_MILLISECONDS;
-        }
-        else
-            m_berserkTimer -= diff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_gluth(Creature* creature)
+// Reduce all players and Zombie Chow NPCs HP to 5% max HP
+struct Decimate : public SpellScript
 {
-    return new boss_gluthAI(creature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx ) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (Unit* unitTarget = spell->GetUnitTarget())
+            {
+                // Return if not player, pet nor Zombie Chow NPC
+                if (unitTarget->GetTypeId() == TYPEID_UNIT && !unitTarget->IsControlledByPlayer() && unitTarget->GetEntry() != NPC_ZOMBIE_CHOW)
+                    return;
+
+                int32 damage = unitTarget->GetHealth() - unitTarget->GetMaxHealth() * 0.05f;
+                if (damage > 0)
+                    spell->GetCaster()->CastCustomSpell(unitTarget, SPELL_DECIMATE_DAMAGE, &damage, nullptr, nullptr, TRIGGERED_INSTANT_CAST);
+            }
+        }
+    }
+};
+
+struct CallAllZombies : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx ) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (Unit* unitTarget = spell->GetUnitTarget())
+            {
+                if (unitTarget->IsAlive())
+                {
+                    float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(spell->m_spellInfo->EffectRadiusIndex[effIdx]));
+                    unitTarget->GetMotionMaster()->MoveFollow(spell->GetCaster(), radius, 0);
+                }
+            }
+        }
+    }
+};
+
+struct ZombieChowSearch : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx ) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (Unit* unitTarget = spell->GetUnitTarget())
+            {
+                if (!unitTarget->IsAlive())
+                    return;
+
+                Unit* caster = spell->GetCaster();
+
+                caster->SetTarget(nullptr);
+                caster->SetFacingToObject(unitTarget);
+                if (caster->CastSpell(unitTarget, SPELL_ZOMBIE_CHOW_SEARCH_KILL, TRIGGERED_NONE) == SPELL_CAST_OK)    // Zombie Chow Search - Insta kill, single target
+                {
+                    DoScriptText(EMOTE_DEVOURS_ZOMBIE_CHOW, spell->GetCaster(), unitTarget);
+                    caster->CastSpell(caster, SPELL_ZOMBIE_CHOW_SEARCH_HEAL, TRIGGERED_INSTANT_CAST);
+                }
+            }
+        }
+    }
+};
+
+struct ZombieChowSearchHeal : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx ) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+            spell->GetCaster()->SetHealth(spell->GetCaster()->GetHealth() + spell->GetCaster()->GetMaxHealth() * 0.05f); // Gain 5% heal
+    }
+};
 
 void AddSC_boss_gluth()
 {
     Script* newScript = new Script;
     newScript->Name = "boss_gluth";
-    newScript->GetAI = &GetAI_boss_gluth;
+    newScript->GetAI = &GetNewAIInstance<boss_gluthAI>;
     newScript->RegisterSelf();
+
+    RegisterSpellScript<Decimate>("spell_gluth_decimate");
+    RegisterSpellScript<CallAllZombies>("spell_gluth_call_all_zombies");
+    RegisterSpellScript<ZombieChowSearch>("spell_gluth_zombie_search");
+    RegisterSpellScript<ZombieChowSearchHeal>("spell_gluth_zombie_search_heal");
 }

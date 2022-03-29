@@ -22,8 +22,10 @@
  EndScriptData
  */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "temple_of_ahnqiraj.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -38,121 +40,131 @@ enum
     SPELL_SUNDERING_CLEAVE      = 25174,
     SPELL_WHIRLWIND             = 26083,
     SPELL_BERSERK               = 27680,
+
+    SPELL_OTHER_WHIRLWIND_TRIGGER = 26686,
 };
 
-struct boss_sarturaAI : public ScriptedAI
+enum SarturaActions
 {
-    boss_sarturaAI(Creature* pCreature) : ScriptedAI(pCreature)
+    SARTURA_ENRAGE,
+    SARTURA_WHIRLWIND,
+    SARTURA_SUNDERING_CLEAVE,
+    SARTURA_BERSERK,
+    SARTURA_ACTION_MAX,
+};
+
+struct boss_sarturaAI : public CombatAI
+{
+    boss_sarturaAI(Creature* creature) : CombatAI(creature, SARTURA_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        AddTimerlessCombatAction(SARTURA_ENRAGE, true);
+        AddCombatAction(SARTURA_WHIRLWIND, 10000, 20000);
+        AddCombatAction(SARTURA_SUNDERING_CLEAVE, 2000, 5000);
+        AddCombatAction(SARTURA_BERSERK, uint32(10 * MINUTE * IN_MILLISECONDS));
+        AddOnKillText(SAY_SLAY);
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
 
-    uint32 m_uiWhirlWindTimer;
-    uint32 m_uiSunderingCleaveTimer;
-    uint32 m_uiBerserkTimer;
-
-    bool m_bIsEnraged;
-
-    void Reset() override
-    {
-        m_uiWhirlWindTimer = urand(10, 20) * IN_MILLISECONDS;
-        m_uiSunderingCleaveTimer = urand(2, 5) * IN_MILLISECONDS;
-        m_uiBerserkTimer = 10 * MINUTE * IN_MILLISECONDS;
-
-        m_bIsEnraged = false;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SARTURA, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_SARTURA, IN_PROGRESS);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(SAY_SLAY, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SARTURA, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_SARTURA, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SARTURA, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_SARTURA, FAIL);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Berserk
-        if (m_uiBerserkTimer)
+        switch (action)
         {
-            if (m_uiBerserkTimer <= uiDiff)
+            case SARTURA_ENRAGE:
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                if (m_creature->GetHealthPercent() <= 25.0f)
+                {
+                    if (DoCastSpellIfCan(nullptr, SPELL_ENRAGE) == CAST_OK)
+                    {
+                        DoScriptText(EMOTE_FRENZY, m_creature);
+                        SetActionReadyStatus(action, false);
+                    }
+                }
+                break;
+            }
+            case SARTURA_WHIRLWIND:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_WHIRLWIND) == CAST_OK)
+                    ResetCombatAction(action, urand(20, 25) * IN_MILLISECONDS);
+                break;
+            }
+            case SARTURA_SUNDERING_CLEAVE:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SUNDERING_CLEAVE) == CAST_OK)
+                    ResetCombatAction(action, urand(2, 5) * IN_MILLISECONDS);
+                break;
+            }
+            case SARTURA_BERSERK:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_BERSERK) == CAST_OK)
                 {
                     DoScriptText(EMOTE_BERSERK, m_creature);
-                    m_uiBerserkTimer = 0;
+                    DisableCombatAction(action);
                 }
-            }
-            else
-                m_uiBerserkTimer -= uiDiff;
-        }
-
-        // Enrage
-        if (!m_bIsEnraged && m_creature->GetHealthPercent() <= 25.0f)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
-            {
-                DoScriptText(EMOTE_FRENZY, m_creature);
-                m_bIsEnraged = true;
+                break;
             }
         }
-
-        // Whirlwind
-        if (m_uiWhirlWindTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_WHIRLWIND) == CAST_OK)
-                m_uiWhirlWindTimer = urand(20, 25) * IN_MILLISECONDS;
-        }
-        else
-            m_uiWhirlWindTimer -= uiDiff;
-
-        // Sundering Cleave
-        if (m_uiSunderingCleaveTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SUNDERING_CLEAVE) == CAST_OK)
-                m_uiSunderingCleaveTimer = urand(2, 5) * IN_MILLISECONDS;
-        }
-        else
-            m_uiSunderingCleaveTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_sartura(Creature* pCreature)
+struct AQWhirlwind : public SpellScript
 {
-    return new boss_sarturaAI(pCreature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_1)
+            return;
+
+        if (!spell->GetCaster()->CanHaveThreatList() || spell->GetCaster()->getThreatManager().isThreatListEmpty())
+            return;
+
+        if (!spell->GetTriggeredByAuraSpellInfo())
+            return;
+
+        SpellAuraHolder* holder = spell->GetCaster()->GetSpellAuraHolder(spell->GetTriggeredByAuraSpellInfo()->Id);
+        if (holder->m_auras[EFFECT_INDEX_0]->GetAuraTicks() != holder->m_auras[EFFECT_INDEX_0]->GetAuraMaxTicks())
+        {
+            if (spell->m_spellInfo->Id == SPELL_OTHER_WHIRLWIND_TRIGGER)
+                if (urand(0, 2))
+                    return;
+
+            spell->GetCaster()->getThreatManager().modifyAllThreatPercent(-100);
+            if (Unit* target = static_cast<Creature*>(spell->GetCaster())->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                spell->GetCaster()->getThreatManager().addThreat(target, 100000.f);
+        }
+        else
+            spell->GetCaster()->getThreatManager().modifyAllThreatPercent(-100);
+    }
+};
 
 void AddSC_boss_sartura()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_sartura";
-    pNewScript->GetAI = &GetAI_boss_sartura;
+    pNewScript->GetAI = &GetNewAIInstance<boss_sarturaAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<AQWhirlwind>("spell_aq_whirlwind");
 }

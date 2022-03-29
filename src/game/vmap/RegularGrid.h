@@ -41,7 +41,7 @@ struct NodeCreator
 template < class T,
            class Node,
            class NodeCreatorFunc = NodeCreator<Node>,
-           /*class BoundsFunc = BoundsTrait<T>,*/
+           class BoundsFunc = BoundsTrait<T>,
            class PositionFunc = PositionTrait<T>
            >
 class RegularGrid2D
@@ -56,7 +56,7 @@ class RegularGrid2D
 #define HGRID_MAP_SIZE  (533.33333f * 64.f)     // shouldn't be changed
 #define CELL_SIZE       float(HGRID_MAP_SIZE/(float)CELL_NUMBER)
 
-        typedef G3D::Table<const T*, Node*> MemberTable;
+        typedef std::unordered_multimap<const T*, Node*> MemberTable;
 
         MemberTable memberTable;
         Node* nodes[CELL_NUMBER][CELL_NUMBER];
@@ -75,18 +75,48 @@ class RegularGrid2D
 
         void insert(const T& value)
         {
-            Vector3 pos;
-            PositionFunc::getPosition(value, pos);
-            Node& node = getGridFor(pos.x, pos.y);
-            node.insert(value);
-            memberTable.set(&value, &node);
+            G3D::AABox bounds;
+            BoundsFunc::getBounds(value, bounds);
+            Cell low = Cell::ComputeCell(bounds.low().x, bounds.low().y);
+            Cell high = Cell::ComputeCell(bounds.high().x, bounds.high().y);
+            for (int x = low.x; x <= high.x; ++x)
+            {
+                for (int y = low.y; y <= high.y; ++y)
+                {
+                    Node& node = getGrid(x, y);
+                    node.insert(value);
+                    memberTable.emplace(&value, &node);
+                }
+            }
+        }
+
+        template<class iterator>
+        class IteratorPair
+        {
+            public:
+            constexpr IteratorPair() : _iterators() { }
+            constexpr IteratorPair(iterator first, iterator second) : _iterators(first, second) { }
+            constexpr IteratorPair(std::pair<iterator, iterator> iterators) : _iterators(iterators) { }
+
+            constexpr iterator begin() const { return _iterators.first; }
+            constexpr iterator end() const { return _iterators.second; }
+
+            private:
+            std::pair<iterator, iterator> _iterators;
+        };
+
+        template<class M>
+        inline auto MapEqualRange(M& map, typename M::key_type const& key) -> IteratorPair<decltype(map.begin())>
+        {
+            return { map.equal_range(key) };
         }
 
         void remove(const T& value)
         {
-            memberTable[&value]->remove(value);
+            for (auto& p : MapEqualRange(memberTable, &value))
+                p.second->remove(value);
             // Remove the member
-            memberTable.remove(&value);
+            memberTable.erase(&value);
         }
 
         void balance()
@@ -97,8 +127,8 @@ class RegularGrid2D
                         n->balance();
         }
 
-        bool contains(const T& value) const { return memberTable.containsKey(&value); }
-        int size() const { return memberTable.size(); }
+        bool contains(const T& value) const { return memberTable.count(&value) > 0; }
+        int size() const { return uint32(memberTable.size()); }
 
         struct Cell
         {
@@ -114,13 +144,6 @@ class RegularGrid2D
             bool isValid() const { return x >= 0 && x < CELL_NUMBER && y >= 0 && y < CELL_NUMBER;}
         };
 
-
-        Node& getGridFor(float fx, float fy)
-        {
-            Cell c = Cell::ComputeCell(fx, fy);
-            return getGrid(c.x, c.y);
-        }
-
         Node& getGrid(int x, int y)
         {
             MANGOS_ASSERT(x < CELL_NUMBER && y < CELL_NUMBER);
@@ -130,13 +153,13 @@ class RegularGrid2D
         }
 
         template<typename RayCallback>
-        void intersectRay(const Ray& ray, RayCallback& intersectCallback, float max_dist)
+        void intersectRay(const Ray& ray, RayCallback& intersectCallback, float max_dist, bool ignoreM2Model)
         {
-            intersectRay(ray, intersectCallback, max_dist, ray.origin() + ray.direction() * max_dist);
+            intersectRay(ray, intersectCallback, max_dist, ray.origin() + ray.direction() * max_dist, ignoreM2Model);
         }
 
         template<typename RayCallback>
-        void intersectRay(const Ray& ray, RayCallback& intersectCallback, float& max_dist, const Vector3& end)
+        void intersectRay(const Ray& ray, RayCallback& intersectCallback, float& max_dist, const Vector3& end, bool ignoreM2Model)
         {
             Cell cell = Cell::ComputeCell(ray.origin().x, ray.origin().y);
             if (!cell.isValid())
@@ -147,7 +170,7 @@ class RegularGrid2D
             if (cell == last_cell)
             {
                 if (Node* node = nodes[cell.x][cell.y])
-                    node->intersectRay(ray, intersectCallback, max_dist);
+                    node->intersectRay(ray, intersectCallback, max_dist, ignoreM2Model);
                 return;
             }
 
@@ -193,7 +216,7 @@ class RegularGrid2D
                 if (Node* node = nodes[cell.x][cell.y])
                 {
                     //float enterdist = max_dist;
-                    node->intersectRay(ray, intersectCallback, max_dist);
+                    node->intersectRay(ray, intersectCallback, max_dist, ignoreM2Model);
                 }
                 if (cell == last_cell)
                     break;
@@ -230,7 +253,7 @@ class RegularGrid2D
             if (!cell.isValid())
                 return;
             if (Node* node = nodes[cell.x][cell.y])
-                node->intersectRay(ray, intersectCallback, max_dist);
+                node->intersectRay(ray, intersectCallback, max_dist, false);
         }
 };
 

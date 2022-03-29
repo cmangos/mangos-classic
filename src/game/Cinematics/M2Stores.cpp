@@ -27,7 +27,7 @@
 
 std::unordered_map<uint32, FlyByCameraCollection> sFlyByCameraStore;
 
-// Convert the geomoetry from a spline value, to an actual WoW XYZ
+// Convert the geomoetry from a spline value, to an actual world XYZ
 G3D::Vector3 TranslateLocation(G3D::Vector4 const* DBCPosition, G3D::Vector3 const* basePosition, G3D::Vector3 const* splineVector)
 {
     G3D::Vector3 work;

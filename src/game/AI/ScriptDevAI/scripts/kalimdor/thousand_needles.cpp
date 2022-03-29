@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
+#include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
 npc_kanati
 npc_lakota_windsong
 npc_paoka_swiftmountain
@@ -57,12 +57,12 @@ struct npc_kanatiAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                 DoScriptText(SAY_KAN_START, m_creature);
                 DoSpawnGalak();
                 break;
-            case 1:
+            case 2:
                 m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_PROTECT_KANATI, m_creature);
@@ -143,19 +143,20 @@ struct npc_lakota_windsongAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 8:
+            case 9:
                 DoScriptText(SAY_LAKO_LOOK_OUT, m_creature);
                 DoSpawnBandits(ID_AMBUSH_1);
                 break;
-            case 14:
+            case 15:
                 DoScriptText(SAY_LAKO_HERE_COME, m_creature);
                 DoSpawnBandits(ID_AMBUSH_2);
                 break;
-            case 21:
+            case 22:
                 DoScriptText(SAY_LAKO_MORE, m_creature);
                 DoSpawnBandits(ID_AMBUSH_3);
                 break;
-            case 45:
+            case 46:
+                DoScriptText(SAY_LAKO_END, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_FREE_AT_LAST, m_creature);
                 break;
@@ -168,6 +169,11 @@ struct npc_lakota_windsongAI : public npc_escortAI
             m_creature->SummonCreature(NPC_GRIM_BANDIT,
                                        m_afBanditLoc[i + uiAmbushId][0], m_afBanditLoc[i + uiAmbushId][1], m_afBanditLoc[i + uiAmbushId][2], 0.0f,
                                        TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+    }
+
+    void JustSummoned(Creature* pSummoned) override
+    {
+        pSummoned->AI()->AttackStart(m_creature);
     }
 };
 
@@ -224,14 +230,14 @@ struct npc_paoka_swiftmountainAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 15:
+            case 16:
                 DoScriptText(SAY_WYVERN, m_creature);
                 DoSpawnWyvern();
                 break;
-            case 26:
+            case 27:
                 DoScriptText(SAY_COMPLETE, m_creature);
                 break;
-            case 27:
+            case 28:
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_HOMEWARD, m_creature);
                 break;
@@ -327,7 +333,7 @@ struct npc_plucky_johnsonAI : public ScriptedAI
         {
             if (m_uiResetTimer < uiDiff)
             {
-                if (!m_creature->getVictim())
+                if (!m_creature->GetVictim())
                     EnterEvadeMode();
                 else
                     m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
@@ -337,7 +343,7 @@ struct npc_plucky_johnsonAI : public ScriptedAI
             m_uiResetTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();

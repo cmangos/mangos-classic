@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2019120601
+ConfVersion=2022012301
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -26,6 +26,7 @@ ConfVersion=2019120601
 #    LoginDatabaseInfo
 #    WorldDatabaseInfo
 #    CharacterDatabaseInfo
+#    LogsDatabaseInfo
 #        Database connection settings for the world server.
 #        Default:
 #                ---MYSQL---
@@ -37,14 +38,15 @@ ConfVersion=2019120601
 #                    hostname;port;username;password;database
 #                    .;/path/to/unix_socket/DIRECTORY or . for default path;username;password;database - use Unix sockets at Unix/Linux
 #
-#	LoginDatabaseConnections
-#	WorldDatabaseConnections
-#	CharacterDatabaseConnections
-#		 Amount of connections to database which will be used for SELECT queries. Maximum 16 connections per database.
-#		 Please, note, for data consistency only one connection for each database is used for transactions and async SELECTs.
-#		 So formula to find out how many connections will be established: X = #_connections + 1
-#		 Default: 1 connection for SELECT statements
-#
+#    LoginDatabaseConnections
+#    WorldDatabaseConnections
+#    CharacterDatabaseConnections
+#    LogsDatabaseConnections
+#        Amount of connections to database which will be used for SELECT queries. Maximum 16 connections per database.
+#        Please, note, for data consistency only one connection for each database is used for transactions and async SELECTs.
+#        So formula to find out how many connections will be established: X = #_connections + 1
+#        Default: 1 connection for SELECT statements
+#   
 #    MaxPingTime
 #        Settings for maximum database-ping interval (minutes between pings)
 #
@@ -57,6 +59,9 @@ ConfVersion=2019120601
 #        on different IP addresses using default ports.
 #        DO NOT CHANGE THIS UNLESS YOU _REALLY_ KNOW WHAT YOU'RE DOING
 #
+#    SD2ErrorLogFile
+#        Log File for SD2-Errors
+#
 ###################################################################################################################
 
 RealmID = 1
@@ -65,18 +70,18 @@ LogsDir = ""
 LoginDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;classicrealmd"
 WorldDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;classicmangos"
 CharacterDatabaseInfo = "127.0.0.1;3306;mangos;mangos;classiccharacters"
+LogsDatabaseInfo      = "127.0.0.1;3306;mangos;mangos;classiclogs"
 LoginDatabaseConnections = 1
 WorldDatabaseConnections = 1
 CharacterDatabaseConnections = 1
+LogsDatabaseConnections = 1
 MaxPingTime = 30
 WorldServerPort = 8085
 BindIP = "0.0.0.0"
-
-# Log File for SD2-Errors
 SD2ErrorLogFile = "SD2Errors.log"
 
 ###################################################################################################################
-# PERFORMANCE SETINGS
+# PERFORMANCE SETTINGS
 #
 #    UseProcessors
 #        Used processors mask for multi-processors system (Used only at Windows)
@@ -121,6 +126,11 @@ SD2ErrorLogFile = "SD2Errors.log"
 #        Default: "" (don't load all grids at startup)
 #                 "mapId1[,mapId2[..]]" (DO load all grids on the given maps- Experimental and very resource consumming)
 #
+#    Autoload.Active
+#        Load active creatures that have ExtraFlags CREATURE_EXTRA_FLAG_ACTIVE or movementType WAYPOINT_MOTION_TYPE
+#        This will allow creatures having these conditions to update their grid without any player around. Useful for running in debug mode.
+#        Default: True
+#
 #    GridCleanUpDelay
 #        Grid clean up delay (in milliseconds)
 #        Default: 300000 (5 min)
@@ -153,10 +163,6 @@ SD2ErrorLogFile = "SD2Errors.log"
 #        You need to extract the VMaps in order to enable those options
 #        Default: 1 (enable)
 #                 0 (disable)
-#
-#    vmap.ignoreSpellIds
-#        These spells are ignored for LoS calculation
-#        List of ids with delimiter ','
 #
 #    vmap.enableIndoorCheck
 #        Enable/Disable VMap based indoor check to remove outdoor-only auras (mounts etc.).
@@ -193,6 +199,11 @@ SD2ErrorLogFile = "SD2Errors.log"
 #        Update realm uptime period in minutes (for save data in 'uptime' table). Must be > 0
 #        Default: 10 (minutes)
 #
+#    MapUpdate.Threads
+#        Number of threads to use for maps update.
+#        Default: 3
+#        Don't put more thread then your number of CPU threads -1 for this to work stable.
+#
 #    MaxCoreStuckTime
 #        Periodically check if the process got freezed, if this is the case force crash after the specified
 #        amount of seconds. Must be > 0. Recommended > 10 secs if you use this.
@@ -224,6 +235,7 @@ SaveRespawnTimeImmediately = 1
 MaxOverspeedPings = 2
 GridUnload = 1
 LoadAllGridsOnMaps = ""
+Autoload.Active = 1
 GridCleanUpDelay = 300000
 MapUpdateInterval = 100
 ChangeWeatherInterval = 600000
@@ -232,7 +244,6 @@ PlayerSave.Stats.MinLevel = 0
 PlayerSave.Stats.SaveOnlyOnLogout = 1
 vmap.enableLOS = 1
 vmap.enableHeight = 1
-vmap.ignoreSpellIds = "7720"
 vmap.enableIndoorCheck = 1
 DetectPosCollision = 1
 mmap.enabled = 1
@@ -240,6 +251,7 @@ mmap.ignoreMapIds = ""
 PathFinder.OptimizePath = 1
 PathFinder.NormalizeZ = 0
 UpdateUptimeInterval = 10
+MapUpdate.Threads = 3
 MaxCoreStuckTime = 0
 AddonChannel = 1
 CleanCharacterDB = 1
@@ -274,6 +286,12 @@ MaxWhoListReturns = 49
 #        Logfile name
 #        Default: "Server.log"
 #                 "" - Empty name disable creating log file
+#
+#    PacketLogFile
+#        Description: Binary packet logging file for the world server.
+#                     Filename extension must be .pkt to be parsable with WPP.
+#        Example:     "World.pkt" - (Enabled)
+#        Default:     ""          - (Disabled)
 #
 #    LogTimestamp
 #        Logfile with timestamp of server start in name
@@ -380,6 +398,7 @@ PidFile = ""
 LogLevel = 1
 LogTime = 0
 LogFile = "Server.log"
+PacketLogFile = ""
 LogTimestamp = 0
 LogFileLevel = 0
 LogFilter_TransportMoves = 1
@@ -424,35 +443,35 @@ LogColors = ""
 #    RealmZone
 #        Server realm zone (set allowed alphabet in character names/etc). See also Strict*Names options.
 #
-#    1 Development    - any language (Default)
-#    2 United States  - extended-Latin
-#    3 Oceanic        - extended-Latin
-#    4 Latin America  - extended-Latin
-#    5 Tournament     - basic-Latin at create, any at login
-#    6 Korea          - East-Asian
-#    7 Tournament     - basic-Latin at create, any at login
-#    8 English        - extended-Latin
-#    9 German         - extended-Latin
-#    10 French        - extended-Latin
-#    11 Spanish       - extended-Latin
-#    12 Russian       - Cyrillic
-#    13 Tournament    - basic-Latin at create, any at login
-#    14 Taiwan        - East-Asian
-#    15 Tournament    - basic-Latin at create, any at login
-#    16 China         - East-Asian
-#    17 CN1           - basic-Latin at create, any at login
-#    18 CN2           - basic-Latin at create, any at login
-#    19 CN3           - basic-Latin at create, any at login
-#    20 CN4           - basic-Latin at create, any at login
-#    21 CN5           - basic-Latin at create, any at login
-#    22 CN6           - basic-Latin at create, any at login
-#    23 CN7           - basic-Latin at create, any at login
-#    24 CN8           - basic-Latin at create, any at login
-#    25 Tournament    - basic-Latin at create, any at login
-#    26 Test Server   - any language
-#    27 Tournament    - basic-Latin at create, any at login
-#    28 QA Server     - any language
-#    29 CN9           - basic-Latin at create, any at login
+#        1 Development    - any language (Default)
+#        2 United States  - extended-Latin
+#        3 Oceanic        - extended-Latin
+#        4 Latin America  - extended-Latin
+#        5 Tournament     - basic-Latin at create, any at login
+#        6 Korea          - East-Asian
+#        7 Tournament     - basic-Latin at create, any at login
+#        8 English        - extended-Latin
+#        9 German         - extended-Latin
+#        10 French        - extended-Latin
+#        11 Spanish       - extended-Latin
+#        12 Russian       - Cyrillic
+#        13 Tournament    - basic-Latin at create, any at login
+#        14 Taiwan        - East-Asian
+#        15 Tournament    - basic-Latin at create, any at login
+#        16 China         - East-Asian
+#        17 CN1           - basic-Latin at create, any at login
+#        18 CN2           - basic-Latin at create, any at login
+#        19 CN3           - basic-Latin at create, any at login
+#        20 CN4           - basic-Latin at create, any at login
+#        21 CN5           - basic-Latin at create, any at login
+#        22 CN6           - basic-Latin at create, any at login
+#        23 CN7           - basic-Latin at create, any at login
+#        24 CN8           - basic-Latin at create, any at login
+#        25 Tournament    - basic-Latin at create, any at login
+#        26 Test Server   - any language
+#        27 Tournament    - basic-Latin at create, any at login
+#        28 QA Server     - any language
+#        29 CN9           - basic-Latin at create, any at login
 #
 #    DBC.Locale
 #        DBC Language Settings
@@ -557,6 +576,16 @@ LogColors = ""
 #        Enable or disable instant logout for security level (0..4) or high (NOT in combat/while dueling/while falling)
 #        Default: 1 (Mods/GMs/Admins)
 #
+#    DisableWaterBreath
+#        Enable or disable Waterbreathing
+#        Default: 4 (Console as noneone)
+#
+#    TaxiFlightChatFix
+#        Workaround for client bug: resuming taxi flight on login causes missing chat channels until the flight ends.
+#        When enabled allows clients to join local channels of the zone they are flying over on login and all custom channels.
+#        Default: 0 (disabled, original client behavior)
+#                 1 (enabled)
+#
 #    LongFlightPathsPersistence
 #        Controls whether logging out in multi-destination taxi flight will resume entire flight or the nearest destination only.
 #        Default: 0 (false)
@@ -588,7 +617,7 @@ LogColors = ""
 #                 0 (no limit)
 #        Default: 20
 #
-#   RabbitDay
+#    RabbitDay
 #        Set to Rabbit Day (date in unix time), only the day and month are considered, the year is not important
 #        Default: 0 (off)
 #        Suggested: 954547200 (April 1st, 2000)
@@ -659,6 +688,15 @@ LogColors = ""
 #        Generic environmental (lava/slime/etc) damage delay max timer value (in secs)
 #        Default:  1
 #                  0 (instant in liquid damage start)
+#
+#    EnvironmentalDamage.Min
+#    EnvironmentalDamage.Max
+#        Generic environmental (lava/slime/etc) damage taken on tick
+#        Default:  605-610
+#
+#    InteractionPauseTimer
+#        Creatures will pause waypoint movement for the specified time (in milliseconds) when a player interacts with them
+#        Default: 180000 (3 minutes)
 #
 #    MaxPrimaryTradeSkill
 #        Max count that player can learn the primary trade skill.
@@ -761,6 +799,7 @@ StartHonorPoints = 0
 MinHonorKills = 15
 MaintenanceDay = 3
 InstantLogout = 1
+TaxiFlightChatFix = 0
 LongFlightPathsPersistence = 0
 AllFlightPaths = 0
 AlwaysMaxSkillForLevel = 0
@@ -781,6 +820,9 @@ Guild.EventLogRecordsCount = 100
 MirrorTimer.Fatigue.Max = 60
 MirrorTimer.Breath.Max = 60
 MirrorTimer.Environmental.Max = 1
+EnvironmentalDamage.Min = 605
+EnvironmentalDamage.Max = 610
+InteractionPauseTimer = 180000
 MaxPrimaryTradeSkill = 2
 TradeSkill.GMIgnore.MaxPrimarySkillsCount = 4
 TradeSkill.GMIgnore.Level = 4
@@ -858,11 +900,6 @@ TalentsInspecting = 1
 ###################################################################################################################
 # CREATURE AND GAMEOBJECT SETTINGS
 #
-#    ThreatRadius
-#        Radius for creature to evade after being pulled away from combat start point
-#        If ThreatRadius is less than creature aggro radius then aggro radius will be used
-#        Default: 100 yards
-#
 #    Rate.Creature.Aggro
 #        Aggro radius percent or off.
 #        Default: 1   - 100%
@@ -872,6 +909,10 @@ TalentsInspecting = 1
 #    CreatureRespawnAggroDelay
 #        The delay between when a creature spawns and when it can be aggroed by nearby movement.
 #        Default: 5000 (5s)
+#
+#    LeashRadius
+#        Radius for default leash due to being too far from refresh position
+#        Default: 30 (yards)
 #
 #    CreatureFamilyFleeAssistanceRadius
 #        Radius which creature will use to seek for a near creature for assistance. Creature will flee to this creature.
@@ -886,6 +927,14 @@ TalentsInspecting = 1
 #    CreatureFamilyAssistanceDelay
 #        Reaction time for creature assistance call
 #        Default: 1500 (1.5s)
+#
+#    CreatureCheckForHelpRadius
+#        Range at which a close moving npc can be assisted
+#        Default: 5 yards
+#
+#    CreatureCheckForHelpAggroDelay
+#        Time during which at combat start check for help is disabled
+#        Default: 2000 (2 seconds)
 #
 #    CreatureFamilyFleeDelay
 #        Time during which creature can flee when no assistant found
@@ -915,8 +964,8 @@ TalentsInspecting = 1
 #        Default: 300, 900, 600, 1200, 3600
 #
 #    Rate.Corpse.Decay.Looted
-#         Controls how long the creature corpse stays after it had been looted, as a multiplier of its Corpse.Decay.* config.
-#         Default: 0.0 (will use modifier /3 of the creatures spawntimesecs when 0.0)
+#        Controls how long the creature corpse stays after it had been looted, as a multiplier of its Corpse.Decay.* config.
+#        Default: 0.0 (will use modifier /3 of the creatures spawntimesecs when 0.0)
 #
 #    Rate.Creature.Normal.Damage
 #    Rate.Creature.Elite.Elite.Damage
@@ -929,7 +978,7 @@ TalentsInspecting = 1
 #    Rate.Creature.Normal.SpellDamage
 #    Rate.Creature.Elite.Elite.SpellDamage
 #    Rate.Creature.Elite.RAREELITE.SpellDamage
-#    Rate.Creature.Elite.WORLDBOSS.SpellDamag
+#    Rate.Creature.Elite.WORLDBOSS.SpellDamage
 #    Rate.Creature.Elite.RARE.SpellDamage
 #        Creature Spell Damage Rates.
 #        Examples: 2 - creatures will damage with spells 2x, 1.7 - 1.7x.
@@ -944,11 +993,11 @@ TalentsInspecting = 1
 #
 #    ListenRange.Say
 #        Distance from player to listen text that creature (or other world object) say
-#        Default: 40
+#        Default: 25
 #
 #    ListenRange.TextEmote
 #        Distance from player to listen textemote that creature (or other world object) say
-#        Default: 40
+#        Default: 25
 #
 #    ListenRange.Yell
 #        Distance from player to listen text that creature (or other world object) yell
@@ -967,12 +1016,14 @@ TalentsInspecting = 1
 #
 ###################################################################################################################
 
-ThreatRadius = 100
 Rate.Creature.Aggro = 1
 CreatureRespawnAggroDelay = 5000
+LeashRadius = 30
 CreatureFamilyFleeAssistanceRadius = 30
 CreatureFamilyAssistanceRadius = 10
 CreatureFamilyAssistanceDelay = 1500
+CreatureCheckForHelpRadius = 5
+CreatureCheckForHelpAggroDelay = 2000
 CreatureFamilyFleeDelay = 10000
 WorldBossLevelDiff = 3
 Corpse.EmptyLootShow = 1
@@ -998,8 +1049,8 @@ Rate.Creature.Elite.Elite.HP = 1
 Rate.Creature.Elite.RAREELITE.HP = 1
 Rate.Creature.Elite.WORLDBOSS.HP = 1
 Rate.Creature.Elite.RARE.HP = 1
-ListenRange.Say = 40
-ListenRange.TextEmote = 40
+ListenRange.Say = 25
+ListenRange.TextEmote = 25
 ListenRange.Yell = 300
 GuidReserveSize.Creature = 100
 GuidReserveSize.GameObject = 100
@@ -1042,10 +1093,23 @@ CreaturePickpocketRestockDelay = 600
 #        Chat anti-flood protection, mute time at activation flood protection (not saved)
 #        Default: 10 (in secs)
 #
-#    Channel.SilentlyGMJoin
-#        Silently join GM characters (security level > 1) to channels
-#        Default: 0 (join announcement in normal way)
-#                 1 (GM join without announcement)
+#    Chat.RestrictedRaidWarnings
+#        Chat anti-flood protection, mute time at activation flood protection (not saved)
+#                 0 (unrestricted: allow use in parties by all members of the group) (2.0.0 - 3.3.0 behavior)
+#        Default: 1 (restricted: only allow use in raids by leader and assitants)
+#
+#    Channel.RestrictedLanguageMode
+#        Restrict usage of non-latin characters according to RealmZone
+#        Default: 0 (no restrictions, any characters in all channels)
+#                 1 (characters limited by RealmZone language in global channels only)
+#                 2 (characters limited by RealmZone language in global and custom static channels)
+#                 3 (characters limited by RealmZone language in global and all custom channels)
+#
+#    Channel.StaticAutoTreshold
+#        Static custom channels are custom channels pre-configured with global-like properties in a "world chat" manner.
+#        By default they have no owner, no moderators, no password and no premoderation (unless overriden by a GM).
+#        This setting is responsible for automatic conversion to static upon eligible channel reaching number of members.
+#        Default: 0 (disabled)
 #
 ###################################################################################################################
 
@@ -1055,7 +1119,9 @@ ChatStrictLinkChecking.Kick = 0
 ChatFlood.MessageCount = 10
 ChatFlood.MessageDelay = 1
 ChatFlood.MuteTime = 10
-Channel.SilentlyGMJoin = 0
+Chat.RestrictedRaidWarnings = 1
+Channel.RestrictedLanguageMode = 0
+Channel.StaticAutoTreshold = 0
 
 ###################################################################################################################
 # GAME MASTER SETTINGS
@@ -1078,11 +1144,41 @@ Channel.SilentlyGMJoin = 0
 #                 0 (disable)
 #                 1 (enable)
 #
+#    GM.AcceptTicketsLevel
+#        Min GM account security level required for accepting ticket notifications, alerts and using some commands.
+#                 0 (disabled for everyone)
+#                 1 (only moderators and above)
+#        Default: 2 (only gamemasters and above)
+#                 3 (only administrators)
+#
 #    GM.Chat
 #        GM chat mode at login
 #        Default: 2 (last save state)
 #                 0 (disable)
 #                 1 (enable)
+#
+#    GM.ChatLevel
+#        Min GM account security level required to be eligible for using GM chat tag.
+#                 0 (disabled for everyone)
+#        Default: 1 (only moderators and above)
+#                 2 (only gamemasters and above)
+#                 3 (only administrators)
+#
+#    GM.ChannelModerationLevel
+#        Min GM account security level required for executing moderator in-game commands in the channels
+#        This also bypasses password prompts on joining channels which require password
+#                 0 (in-game channel moderator privileges only)
+#        Default: 1 (enabled for moderators and above)
+#                 2 (enabled for gamemasters and above)
+#                 3 (enabled only for administrators)
+#
+#    GM.ChannelSilentJoinLevel
+#        Min GM account security level required for silently joining and leaving channels
+#        Default: 0 (join and leave announcements enabled for everyone)
+#                 1 (disabled for moderators and above)
+#                 2 (disabled for gamemasters and above)
+#                 3 (disabled only for administrators)
+#
 #
 #    GM.WhisperingTo
 #        Is GM accepting whispers from player by default or not.
@@ -1091,14 +1187,14 @@ Channel.SilentlyGMJoin = 0
 #                 1 (enable)
 #
 #    GM.InGMList.Level
-#        Max GM level showed in GM list (if visible) in non-GM state (.gm off)
+#        Max GM account security level showed in GM list (if visible) in non-GM state (.gm off)
 #                 0 (none)
 #                 1 (only moderators)
 #                 2 (only gamemasters)
 #        Default: 3 (anyone)
 #
 #    GM.InWhoList.Level
-#        Max GM level showed in who list (if visible).
+#        Max GM account security level showed in who list (if visible).
 #                 0 (only players)
 #                 1 (only moderators)
 #                 2 (only gamemasters)
@@ -1123,12 +1219,21 @@ Channel.SilentlyGMJoin = 0
 #        Default: 31748 (Spirit Particles, big)
 #                 0 (Disabled)
 #
+#    GM.TicketsQueueStatus
+#        GM tickets queue status on startup, when disabled server will not accept any GM tickets from players
+#        Default: 1 (Enabled)
+#                 0 (Disabled)
+#
 ###################################################################################################################
 
 GM.LoginState            = 2
 GM.Visible               = 2
 GM.AcceptTickets         = 2
+GM.AcceptTicketsLevel    = 2
 GM.Chat                  = 2
+GM.ChatLevel             = 1
+GM.ChannelModerationLevel= 1
+GM.ChannelSilentJoinLevel= 0
 GM.WhisperingTo          = 2
 GM.InGMList.Level        = 3
 GM.InWhoList.Level       = 3
@@ -1136,6 +1241,7 @@ GM.LogTrade              = 1
 GM.StartLevel            = 1
 GM.LowerSecurity         = 0
 GM.InvisibleAura         = 31748
+GM.TicketsQueueStatus    = 1
 
 ###################################################################################################################
 # VISIBILITY AND RADIUSES
@@ -1199,8 +1305,8 @@ Visibility.AIRelocationNotifyDelay = 1000
 #        Default: 1
 #
 #    Rate.Skill.Discovery
-#         Skill Discovery Rates
-#         Default: 1
+#        Skill Discovery Rates
+#        Default: 1
 #
 #    Rate.Drop.Item.Poor
 #    Rate.Drop.Item.Normal
@@ -1212,8 +1318,8 @@ Visibility.AIRelocationNotifyDelay = 1000
 #    Rate.Drop.Item.Referenced
 #    Rate.Drop.Item.Quest
 #    Rate.Drop.Money
-#         Drop rates (items by quality and money)
-#         Default: 1
+#        Drop rates (items by quality and money)
+#        Default: 1
 #
 #    Rate.Pet.XP.Kill
 #    Rate.XP.Kill
@@ -1252,16 +1358,16 @@ Visibility.AIRelocationNotifyDelay = 1000
 #        Default: 1
 #
 #    Rate.Reputation.Gain
-#         Reputation Gain rate
-#         Default: 1
+#        Reputation Gain rate
+#        Default: 1
 #
 #    Rate.Reputation.LowLevel.Kill
-#         Lowest Reputation Gain rate from low level kill
-#         Default: 0.2
+#        Lowest Reputation Gain rate from low level kill
+#        Default: 0.2
 #
 #    Rate.Reputation.LowLevel.Quest
-#         Lowest Reputation Gain rate from low level quest
-#         Default: 0.2
+#        Lowest Reputation Gain rate from low level quest
+#        Default: 0.2
 #
 #    Rate.InstanceResetTime
 #        Multiplier for the number of days in between global raid/heroic instance resets.
@@ -1271,8 +1377,8 @@ Visibility.AIRelocationNotifyDelay = 1000
 #    SkillGain.Defense
 #    SkillGain.Gathering
 #    SkillGain.Weapon
-#         crafting/defense/gathering/weapon skills gain at skill grow (1,2,...)
-#         Default: 1
+#        crafting/defense/gathering/weapon skills gain at skill grow (1,2,...)
+#        Default: 1
 #
 #    SkillChance.Orange
 #    SkillChance.Yellow
@@ -1283,58 +1389,58 @@ Visibility.AIRelocationNotifyDelay = 1000
 #
 #    SkillChance.MiningSteps
 #    SkillChance.SkinningSteps
-#         For skinning and Mining chance decrease with skill level.
-#         Default: 0  - no decrease
-#                  75 - in 2 times each 75 skill points
+#        For skinning and Mining chance decrease with skill level.
+#        Default: 0  - no decrease
+#                 75 - in 2 times each 75 skill points
 #
 #    SkillFail.Loot.Fishing
-#         For fishing instead fail provided junk loot
-#         Default: 0 (disabled)
-#                  1 (enabled)
+#        For fishing instead fail provided junk loot
+#        Default: 0 (disabled)
+#                 1 (enabled)
 #
 #    SkillFail.Gain.Fishing
-#         For fishing skill gain possible at fail also
-#         Default: 0 (disabled)
-#                  1 (enabled)
+#        For fishing skill gain possible at fail also
+#        Default: 0 (disabled)
+#                 1 (enabled)
 #
 #    SkillFail.Possible.FishingPool
-#         For fishing pool impossible fail from low skill by default
-#         Default: 1 (enabled)
-#                  0 (disabled)
+#        For fishing pool impossible fail from low skill by default
+#        Default: 1 (enabled)
+#                 0 (disabled)
 #
 #    DurabilityLossChance.Damage
-#         Chance lost one from equiped items durability point at damage apply or receive.
-#         Default: 0.5 (100/0.5 = 200) Each 200 damage apply one from 19 possible equipped items
+#        Chance lost one from equiped items durability point at damage apply or receive.
+#        Default: 0.5 (100/0.5 = 200) Each 200 damage apply one from 19 possible equipped items
 #
 #    DurabilityLossChance.Absorb
-#         Chance lost one from armor items durability point at damage absorb.
-#         Default: 0.5 (100/0.5 = 200) Each 200 absorbs apply one from 15 possible armor equipped items
+#        Chance lost one from armor items durability point at damage absorb.
+#        Default: 0.5 (100/0.5 = 200) Each 200 absorbs apply one from 15 possible armor equipped items
 #
 #    DurabilityLossChance.Parry
-#         Chance lost weapon durability point at parry.
-#         Default: 0.05 (100/0.05 = 2000) Each 2000 parry attacks main weapon lost point
+#        Chance lost weapon durability point at parry.
+#        Default: 0.05 (100/0.05 = 2000) Each 2000 parry attacks main weapon lost point
 #
 #    DurabilityLossChance.Block
-#         Chance lost sheild durability point at damage block.
-#         Default: 0.05 (100/0.05 = 2000) Each 2000 partly or full blocked attacks shield lost point
+#        Chance lost sheild durability point at damage block.
+#        Default: 0.05 (100/0.05 = 2000) Each 2000 partly or full blocked attacks shield lost point
 #
 #    Death.SicknessLevel
-#         Starting Character start gain sickness at spirit resurrection (1 min)
-#         Default: 11
-#                  -10 - character will have full time (10min) sickness at 1 level
-#                  maxplayerlevel+1 - character will not have sickness at any level
+#        Starting Character start gain sickness at spirit resurrection (1 min)
+#        Default: 11
+#                 -10 - character will have full time (10min) sickness at 1 level
+#                 maxplayerlevel+1 - character will not have sickness at any level
 #
 #    Death.CorpseReclaimDelay.PvP
 #    Death.CorpseReclaimDelay.PvE
-#         Enabled/disabled increase corpse reclaim delay at often PvP/PvE deaths
-#         Default: 1 (enabled)
-#                  0 (disabled)
+#        Enabled/disabled increase corpse reclaim delay at often PvP/PvE deaths
+#        Default: 1 (enabled)
+#                 0 (disabled)
 #
 #    Death.Bones.World
 #    Death.Bones.Battleground
-#         Enabled/disabled creating bones instead corpse at resurrection (in normal zones/instacnes, or battleground)
-#         Default: 1 (enabled)
-#                  0 (disabled)
+#        Enabled/disabled creating bones instead corpse at resurrection (in normal zones/instacnes, or battleground)
+#        Default: 1 (enabled)
+#                 0 (disabled)
 #
 #    Death.Ghost.RunSpeed.World
 #    Death.Ghost.RunSpeed.Battleground
@@ -1472,26 +1578,26 @@ OutdoorPvp.EPEnabled = 1
 # NETWORK CONFIG
 #
 #    Network.Threads
-#         Number of threads for network, recommend 1 thread per 1000 connections.
-#         Default: 1
+#        Number of threads for network, recommend 1 thread per 1000 connections.
+#        Default: 1
 #
 #    Network.OutKBuff
-#         The size of the output kernel buffer used ( SO_SNDBUF socket option, tcp manual ).
-#         Default: -1 (Use system default setting)
+#        The size of the output kernel buffer used ( SO_SNDBUF socket option, tcp manual ).
+#        Default: -1 (Use system default setting)
 #
 #    Network.OutUBuff
-#         Userspace buffer for output. This is amount of memory reserved per each connection.
-#         Default: 65536
+#        Userspace buffer for output. This is amount of memory reserved per each connection.
+#        Default: 65536
 #
-#    Network.TcpNoDelay:
-#         TCP Nagle algorithm setting
-#         Default: 0 (enable Nagle algorithm, less traffic, more latency)
-#                  1 (TCP_NO_DELAY, disable Nagle algorithm, more traffic but less latency)
+#    Network.TcpNodelay
+#        TCP Nagle algorithm setting
+#        Default: 0 (enable Nagle algorithm, less traffic, more latency)
+#                 1 (TCP_NO_DELAY, disable Nagle algorithm, more traffic but less latency)
 #
 #    Network.KickOnBadPacket
-#         Kick player on bad packet format.
-#         Default: 0 - do not kick
-#                  1 - kick
+#        Kick player on bad packet format.
+#        Default: 0 - do not kick
+#                 1 - kick
 #
 ###################################################################################################################
 
@@ -1530,13 +1636,12 @@ Network.KickOnBadPacket = 0
 #                 0 - off
 #        Default: 1 - on
 #
-#    Ra.Stricted
+#    Ra.Restricted
 #        Not allow execute console level only commands remotly by RA
 #                 0 - off
 #        Default: 1 - on
 #
-#
-#    SOAP.Enable
+#    SOAP.Enabled
 #        Enable soap service
 #        Default: 0 - off
 #                 1 - on
@@ -1557,7 +1662,7 @@ Ra.IP = 0.0.0.0
 Ra.Port = 3443
 Ra.MinLevel = 3
 Ra.Secure = 1
-Ra.Stricted = 1
+Ra.Restricted = 1
 
 SOAP.Enabled = 0
 SOAP.IP = 127.0.0.1
@@ -1589,3 +1694,43 @@ SOAP.Port = 7878
 CharDelete.Method = 0
 CharDelete.MinLevel = 0
 CharDelete.KeepDays = 30
+
+###################################################################################################################
+# METRICS CONFIGURATION -> Require core builded with BUILD_METRICS option
+#
+#    Metric.Enable
+#        Enable or disable metric logging
+#        Default: 0  - Disabled(default)
+#                 1  - Enable
+#
+#    Metric.Address
+#        IP / Hostname for the InfluxDB where measurements are stored.
+#        Default: "127.0.0.1"
+#
+#    Metric.Port
+#        Port for the InfluxDB where measurements are stored.
+#        Default: 8086
+#
+#    Metric.Database
+#        Database name for the InfluxDB where measurements are stored.
+#        Default: "perfd"
+#
+#    Metric.Username
+#        Username of the InfluxDB where measurements are stored.
+#        Default: ""
+#
+#    Metric.Password
+#        Password of the InfluxDB where measurements are stored.
+#        Default: ""
+#
+###################################################################################################################
+
+Metric.Enable = 0
+Metric.Address = "127.0.0.1"
+Metric.Port = 8086
+Metric.Database = "perfd"
+Metric.Username = ""
+Metric.Password = ""
+
+Dummy.Debug1 = 0
+Dummy.Debug2 = 0

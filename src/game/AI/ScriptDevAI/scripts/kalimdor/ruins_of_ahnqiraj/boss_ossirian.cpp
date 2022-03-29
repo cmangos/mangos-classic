@@ -23,8 +23,10 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "ruins_of_ahnqiraj.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
+#include "Globals/ObjectMgr.h"
 
 enum
 {
@@ -38,13 +40,14 @@ enum
     SAY_SLAY                = -1509026,
     SAY_DEATH               = -1509027,
 
-    SPELL_SILENCE           = 25195,
+    SPELL_CURSE_OF_TONGUES  = 25195,
     SPELL_CYCLONE           = 25189,
     SPELL_STOMP             = 25188,
     SPELL_SUPREME           = 25176,
     SPELL_SUMMON_CRYSTAL    = 25192,
     SPELL_SAND_STORM        = 25160,                        // tornado spell
     SPELL_SUMMON            = 20477,                        // TODO NYI
+    SPELL_DOUBLE_ATTACK     = 19818,
 
     MAX_CRYSTAL_POSITIONS   = 1,                            // TODO
 
@@ -66,137 +69,181 @@ static const float aSandVortexSpawnPos[2][4] =
 };
 
 static const float aCrystalSpawnPos[3] = { -9355.75f, 1905.43f, 85.55f};
-static const uint32 aWeaknessSpell[] = {SPELL_WEAKNESS_FIRE, SPELL_WEAKNESS_FROST, SPELL_WEAKNESS_NATURE, SPELL_WEAKNESS_ARCANE, SPELL_WEAKNESS_SHADOW};
+static const std::vector<uint32> aWeaknessSpell {SPELL_WEAKNESS_FIRE, SPELL_WEAKNESS_FROST, SPELL_WEAKNESS_NATURE, SPELL_WEAKNESS_ARCANE, SPELL_WEAKNESS_SHADOW};
 
-struct boss_ossirianAI : public ScriptedAI
+enum OssirianActions
 {
+    OSSIRIAN_INITIAL_SPAWN,
+    OSSIRIAN_SUPREME,
+    OSSIRIAN_CYCLONE,
+    OSSIRIAN_STOMP,
+    OSSIRIAN_CURSE_OF_TONGUES,
+    OSSIRIAN_SPEEDUP,
+    OSSIRIAN_ACTION_MAX,
+};
 
-    boss_ossirianAI(Creature* pCreature) : ScriptedAI(pCreature)
+struct boss_ossirianAI : public CombatAI
+{
+    boss_ossirianAI(Creature* creature) :
+        CombatAI(creature, OSSIRIAN_ACTION_MAX),
+        m_instance(static_cast<instance_ruins_of_ahnqiraj*>(m_creature->GetInstanceData())),
+        m_saidIntro(false),
+        m_uiCrystalPosition(0)
     {
-        m_pInstance = (instance_ruins_of_ahnqiraj*)m_creature->GetInstanceData();
-        m_bSaidIntro = false;
-        Reset();
+        AddCombatAction(OSSIRIAN_INITIAL_SPAWN, 10000u);
+        AddCombatAction(OSSIRIAN_SUPREME, 45000u);
+        AddCombatAction(OSSIRIAN_CYCLONE, 20000u);
+        AddCombatAction(OSSIRIAN_STOMP, 30000u);
+        AddCombatAction(OSSIRIAN_CURSE_OF_TONGUES, 30000u);
+        AddCombatAction(OSSIRIAN_SPEEDUP, 10000u);
     }
 
-    instance_ruins_of_ahnqiraj* m_pInstance;
+    instance_ruins_of_ahnqiraj* m_instance;
 
-    uint32 m_uiSupremeTimer;
-    uint32 m_uiCycloneTimer;
-    uint32 m_uiStompTimer;
-    uint32 m_uiSilenceTimer;
-    uint32 m_uiSpeedUpTimer;
     uint8 m_uiCrystalPosition;
 
-    bool m_bSaidIntro;
+    bool m_saidIntro;
+
+    GuidVector m_spawnedCrystals;
 
     void Reset() override
     {
+        CombatAI::Reset();
         m_uiCrystalPosition = 0;
-        m_uiCycloneTimer = 20000;
-        m_uiStompTimer   = 30000;
-        m_uiSilenceTimer = 30000;
-        m_uiSupremeTimer = 45000;
-        m_uiSpeedUpTimer = 10000;
 
         m_creature->UpdateSpeed(MOVE_RUN, false, 1.0f);
+
+        DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(nullptr, SPELL_SUPREME, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+
+        DespawnGuids(m_spawnedCrystals);
+        RespawnFirstCrystal();
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
-        DoCastSpellIfCan(m_creature, SPELL_SUPREME, CAST_TRIGGERED);
         DoScriptText(SAY_AGGRO, m_creature);
-        DoSpawnNextCrystal();
 
         for (auto aSandVortexSpawnPo : aSandVortexSpawnPos)
             m_creature->SummonCreature(NPC_SAND_VORTEX, aSandVortexSpawnPo[0], aSandVortexSpawnPo[1], aSandVortexSpawnPo[2], aSandVortexSpawnPo[3], TEMPSPAWN_CORPSE_DESPAWN, 0);
 
-        if (m_pInstance)
-            m_pInstance->instance->SetWeather(ZONE_ID_RUINS_AQ, WEATHER_TYPE_STORM, 1.0f, true);
+        if (m_instance)
+            m_instance->instance->SetWeather(ZONE_ID_RUINS_AQ, WEATHER_TYPE_STORM, 1.0f, true);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* /*victim*/) override
     {
         DoScriptText(SAY_SLAY, m_creature);
     }
 
-    void DoSpawnNextCrystal()
+    void DoSpawnNextCrystal(uint32 spawnCount)
     {
-        if (!m_pInstance)
+        if (!m_instance)
             return;
 
-        Creature* pOssirianTrigger = nullptr;
-        if (m_uiCrystalPosition == 0)
-        {
-            // Respawn static spawned crystal trigger
-            pOssirianTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_OSSIRIAN_TRIGGER);
-            if (pOssirianTrigger && !pOssirianTrigger->isAlive())
-                pOssirianTrigger->Respawn();
-        }
-        else
-        {
-            // Summon a new crystal trigger at some position depending on m_uiCrystalPosition
-            // Note: the summon points seem to be very random; requires additional research
-            float fX, fY, fZ;
-            m_creature->GetRandomPoint(aCrystalSpawnPos[0], aCrystalSpawnPos[1], aCrystalSpawnPos[2], 100.0f, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_OSSIRIAN_TRIGGER, fX, fY, fZ, 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
-        }
-        if (!pOssirianTrigger)
+        GuidVector vector;
+        m_instance->GetCreatureGuidVectorFromStorage(NPC_OSSIRIAN_TRIGGER, vector);
+        if (vector.size() < 2) // wrong db data
             return;
 
-        // Respawn GO near crystal trigger
-        if (GameObject* pCrystal = GetClosestGameObjectWithEntry(pOssirianTrigger, GO_OSSIRIAN_CRYSTAL, 10.0f))
-            m_pInstance->DoRespawnGameObject(pCrystal->GetObjectGuid(), 5 * MINUTE);
+        vector.erase(vector.begin()); // remove first
+        std::shuffle(vector.begin(), vector.end(), *GetRandomGenerator());
 
-        // Increase position
-        m_uiCrystalPosition = (m_uiCrystalPosition + 1) % MAX_CRYSTAL_POSITIONS;
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_OSSIRIAN_TRIGGER)
-            pSummoned->CastSpell(pSummoned, SPELL_SUMMON_CRYSTAL, TRIGGERED_OLD_TRIGGERED);
-        else if (pSummoned->GetEntry() == NPC_SAND_VORTEX)
+        uint32 spawned = 0;
+        for (uint32 i = 0; i < vector.size() - 1; ++i) // try to find at least one
         {
-            // The movement of this isn't very clear - may require additional research
-            pSummoned->CastSpell(pSummoned, SPELL_SAND_STORM, TRIGGERED_OLD_TRIGGERED);
-            pSummoned->GetMotionMaster()->MoveRandomAroundPoint(aCrystalSpawnPos[0], aCrystalSpawnPos[1], aCrystalSpawnPos[2], 100.0f);
-        }
-    }
-
-    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
-    {
-        if (pCaster->GetTypeId() == TYPEID_UNIT && pCaster->GetEntry() == NPC_OSSIRIAN_TRIGGER)
-        {
-            // Check for proper spell id
-            bool bIsWeaknessSpell = false;
-            for (unsigned int i : aWeaknessSpell)
+            // iterate from random roll until either one (should always occur) is found or we run out of crystals
+            if (Creature* creature = m_creature->GetMap()->GetCreature(vector[i]))
             {
-                if (pSpell->Id == i)
+                if (!creature->IsAlive())
                 {
-                    bIsWeaknessSpell = true;
-                    break;
+                    creature->Respawn();
+                    ++spawned;
+                    if (spawned >= spawnCount)
+                        break;
                 }
             }
-            if (!bIsWeaknessSpell)
+        }
+    }
+
+    void RespawnFirstCrystal()
+    {
+        GuidVector vector;
+        m_instance->GetCreatureGuidVectorFromStorage(NPC_OSSIRIAN_TRIGGER, vector);
+        if (vector.size() < 2) // wrong db data
+            return;
+
+        if (Creature* creature = m_creature->GetMap()->GetCreature(vector[0]))
+            if (!creature->IsAlive())
+                creature->Respawn();
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* invoker, uint32 /*miscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+        {
+            Creature* crystal = static_cast<Creature*>(invoker);
+            CreatureData const* data = sObjectMgr.GetCreatureData(crystal->GetGUIDLow());
+            if (data->spawntimesecsmin == 0 && m_instance->GetData(TYPE_OSSIRIAN) != IN_PROGRESS)
+            {
+                if (GameObject* crystalGo = GetClosestGameObjectWithEntry(crystal, GO_OSSIRIAN_CRYSTAL, 5.0f))
+                {
+                    crystalGo->SetLootState(GO_JUST_DEACTIVATED);
+                    crystalGo->SetForcedDespawn();
+                }
+                crystal->SetRespawnDelay(7200);
+                crystal->ForcedDespawn();
+            }
+            else
+            {
+                crystal->CastSpell(nullptr, SPELL_SUMMON_CRYSTAL, TRIGGERED_OLD_TRIGGERED);
+                m_spawnedCrystals.push_back(crystal->GetObjectGuid());
+            }
+        }
+    }
+
+    void JustSummoned(Creature* summoned) override
+    {
+        if (summoned->GetEntry() == NPC_SAND_VORTEX)
+        {
+            // The movement of this isn't very clear - may require additional research
+            summoned->CastSpell(summoned, SPELL_SAND_STORM, TRIGGERED_OLD_TRIGGERED);
+            summoned->GetMotionMaster()->MoveRandomAroundPoint(aCrystalSpawnPos[0], aCrystalSpawnPos[1], aCrystalSpawnPos[2], 100.0f);
+        }
+    }
+
+    void SpellHit(Unit* caster, const SpellEntry* spellInfo) override
+    {
+        if (caster->GetTypeId() == TYPEID_UNIT && caster->GetEntry() == NPC_OSSIRIAN_TRIGGER)
+        {
+            // Check for proper spell id
+            if (std::find(aWeaknessSpell.begin(), aWeaknessSpell.end(), spellInfo->Id) == aWeaknessSpell.end())
                 return;
 
             m_creature->RemoveAurasDueToSpell(SPELL_SUPREME);
-            m_uiSupremeTimer = 45000;
+            ResetCombatAction(OSSIRIAN_SUPREME, 45000);
 
-            ((Creature*)pCaster)->ForcedDespawn();
-            DoSpawnNextCrystal();
+            DoSpawnNextCrystal(1);
+            // despawn go
+            if (GameObject* crystal = GetClosestGameObjectWithEntry(caster, GO_OSSIRIAN_CRYSTAL, 5.0f))
+            {
+                crystal->SetLootState(GO_JUST_DEACTIVATED);
+                crystal->SetForcedDespawn();
+            }
+            static_cast<Creature*>(caster)->SetRespawnDelay(7200);
+            static_cast<Creature*>(caster)->ForcedDespawn(500);
         }
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
+    void MoveInLineOfSight(Unit* who) override
     {
         // TODO: Range guesswork
-        if (!m_bSaidIntro && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 75.0f, false))
+        if (!m_saidIntro && who->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(who, 75.0f, false))
         {
             switch (urand(0, 2))
             {
@@ -204,84 +251,69 @@ struct boss_ossirianAI : public ScriptedAI
                 case 1: DoScriptText(SAY_RAND_INTRO_2, m_creature); break;
                 case 2: DoScriptText(SAY_RAND_INTRO_3, m_creature); break;
             }
-            m_bSaidIntro = true;
+            m_saidIntro = true;
         }
+        CombatAI::MoveInLineOfSight(who);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Speed Up
-        if (m_uiSpeedUpTimer != 0 && m_uiSpeedUpTimer <= uiDiff)
+        switch (action)
         {
-            m_creature->UpdateSpeed(MOVE_RUN, false, 2.2f);
-            m_uiSpeedUpTimer = 0;
-        }
-        else
-            m_uiSpeedUpTimer -= uiDiff;
-
-        // Supreme
-        if (m_uiSupremeTimer <= uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SUPREME, CAST_AURA_NOT_PRESENT) == CAST_OK)
+            case OSSIRIAN_INITIAL_SPAWN:
             {
-                switch (urand(0, 2))
-                {
-                    case 0: DoScriptText(SAY_SUPREME_1, m_creature); break;
-                    case 1: DoScriptText(SAY_SUPREME_2, m_creature); break;
-                    case 2: DoScriptText(SAY_SUPREME_3, m_creature); break;
-                }
-                m_uiSupremeTimer = 45000;
+                DoSpawnNextCrystal(5);
+                DisableCombatAction(action);
+                break;
             }
-            else
-                m_uiSupremeTimer = 5000;
+            case OSSIRIAN_SUPREME:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_SUPREME, CAST_AURA_NOT_PRESENT) == CAST_OK)
+                {
+                    switch (urand(0, 2))
+                    {
+                        case 0: DoScriptText(SAY_SUPREME_1, m_creature); break;
+                        case 1: DoScriptText(SAY_SUPREME_2, m_creature); break;
+                        case 2: DoScriptText(SAY_SUPREME_3, m_creature); break;
+                    }
+                    ResetCombatAction(action, 45000);
+                }
+                break;
+            }
+            case OSSIRIAN_CYCLONE:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CYCLONE) == CAST_OK)
+                    ResetCombatAction(action, 20000);
+                break;
+            }
+            case OSSIRIAN_STOMP:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_STOMP) == CAST_OK)
+                    ResetCombatAction(action, 30000);
+                break;
+            }
+            case OSSIRIAN_CURSE_OF_TONGUES:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_CURSE_OF_TONGUES) == CAST_OK)
+                    ResetCombatAction(action, urand(20000, 30000));
+                break;
+            }
+            case OSSIRIAN_SPEEDUP:
+            {
+                m_creature->UpdateSpeed(MOVE_RUN, false, 2.2f);
+                DisableCombatAction(action);
+                break;
+            }
         }
-        else
-            m_uiSupremeTimer -= uiDiff;
-
-        // Stomp
-        if (m_uiStompTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_STOMP) == CAST_OK)
-                m_uiStompTimer = 30000;
-        }
-        else
-            m_uiStompTimer -= uiDiff;
-
-        // Cyclone
-        if (m_uiCycloneTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CYCLONE) == CAST_OK)
-                m_uiCycloneTimer = 20000;
-        }
-        else
-            m_uiCycloneTimer -= uiDiff;
-
-        // Silence
-        if (m_uiSilenceTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SILENCE) == CAST_OK)
-                m_uiSilenceTimer = urand(20000, 30000);
-        }
-        else
-            m_uiSilenceTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_ossirian(Creature* pCreature)
-{
-    return new boss_ossirianAI(pCreature);
-}
-
 // This is actually a hack for a server-side spell
-bool GOUse_go_ossirian_crystal(Player* /*pPlayer*/, GameObject* pGo)
+bool GOUse_go_ossirian_crystal(Player* /*player*/, GameObject* go)
 {
-    if (Creature* pOssirianTrigger = GetClosestCreatureWithEntry(pGo, NPC_OSSIRIAN_TRIGGER, 10.0f))
-        pOssirianTrigger->CastSpell(pOssirianTrigger, aWeaknessSpell[urand(0, 4)], TRIGGERED_NONE);
+    go->SendGameObjectCustomAnim(go->GetObjectGuid());
+    if (Creature* pOssirianTrigger = GetClosestCreatureWithEntry(go, NPC_OSSIRIAN_TRIGGER, 10.0f))
+        pOssirianTrigger->CastSpell(nullptr, aWeaknessSpell[urand(0, aWeaknessSpell.size() - 1)], TRIGGERED_NONE);
 
     return true;
 }
@@ -290,7 +322,7 @@ void AddSC_boss_ossirian()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_ossirian";
-    pNewScript->GetAI = &GetAI_boss_ossirian;
+    pNewScript->GetAI = &GetNewAIInstance<boss_ossirianAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

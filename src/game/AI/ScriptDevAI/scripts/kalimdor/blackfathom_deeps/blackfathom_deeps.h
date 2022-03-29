@@ -50,12 +50,7 @@ enum
 * On wipe the mobs don't despawn; they stay there until player returns
 */
 
-struct Locations
-{
-    float m_fX, m_fY, m_fZ, m_fO;
-};
-
-static const Locations aSpawnLocations[6] =                 // Should be near the correct positions
+static const Position aSpawnLocations[6] =                  // Should be near the correct positions
 {
     { -768.949f, -174.413f, -25.87f, 3.09f},                // Left side
     { -768.888f, -164.238f, -25.87f, 3.09f},

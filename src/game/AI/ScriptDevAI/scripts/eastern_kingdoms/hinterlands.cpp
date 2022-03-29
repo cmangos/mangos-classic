@@ -23,13 +23,16 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
+#include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
 npc_00x09hl
 npc_rinji
+spell_gammerita_turtle_camera - s.11610
 EndContentData */
 
 
 #include "AI/ScriptDevAI/base/escort_ai.h"
+#include "world_eastern_kingdoms.h"
+#include "Spells/Scripts/SpellScript.h"
 
 /*######
 ## npc_00x09hl
@@ -69,13 +72,13 @@ struct npc_00x09hlAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 26:
+            case 27:
                 DoScriptText(SAY_OOX_AMBUSH, m_creature);
                 break;
-            case 43:
+            case 44:
                 DoScriptText(SAY_OOX_AMBUSH, m_creature);
                 break;
-            case 64:
+            case 65:
                 DoScriptText(SAY_OOX_END, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_RESQUE_OOX_09, m_creature);
@@ -87,7 +90,7 @@ struct npc_00x09hlAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 27:
+            case 28:
                 if (m_uiSummonCount >= 3)
                     break;
 
@@ -100,7 +103,7 @@ struct npc_00x09hlAI : public npc_escortAI
                     ++m_uiSummonCount;
                 }
                 break;
-            case 44:
+            case 45:
                 if (m_uiSummonCount >= 6)
                     break;
 
@@ -182,21 +185,16 @@ enum
     GO_RINJI_CAGE           = 142036
 };
 
-struct Location
+Position m_afAmbushSpawn[] =
 {
-    float m_fX, m_fY, m_fZ;
+    {191.29620f, -2839.329346f, 107.388f, 0.f},
+    {70.972466f, -2848.674805f, 109.459f, 0.f}
 };
 
-Location m_afAmbushSpawn[] =
+Position m_afAmbushMoveTo[] =
 {
-    {191.29620f, -2839.329346f, 107.388f},
-    {70.972466f, -2848.674805f, 109.459f}
-};
-
-Location m_afAmbushMoveTo[] =
-{
-    {166.63038f, -2824.780273f, 108.153f},
-    {70.886589f, -2874.335449f, 116.675f}
+    {166.63038f, -2824.780273f, 108.153f, 0.f},
+    {70.886589f, -2874.335449f, 116.675f, 0.f}
 };
 
 struct npc_rinjiAI : public npc_escortAI
@@ -251,13 +249,13 @@ struct npc_rinjiAI : public npc_escortAI
             m_iSpawnId = 1;
 
         m_creature->SummonCreature(NPC_RANGER,
-                                   m_afAmbushSpawn[m_iSpawnId].m_fX, m_afAmbushSpawn[m_iSpawnId].m_fY, m_afAmbushSpawn[m_iSpawnId].m_fZ, 0.0f,
+                                   m_afAmbushSpawn[m_iSpawnId].x, m_afAmbushSpawn[m_iSpawnId].y, m_afAmbushSpawn[m_iSpawnId].z, 0.0f,
                                    TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 60000);
 
         for (int i = 0; i < 2; ++i)
         {
             m_creature->SummonCreature(NPC_OUTRUNNER,
-                                       m_afAmbushSpawn[m_iSpawnId].m_fX, m_afAmbushSpawn[m_iSpawnId].m_fY, m_afAmbushSpawn[m_iSpawnId].m_fZ, 0.0f,
+                                       m_afAmbushSpawn[m_iSpawnId].x, m_afAmbushSpawn[m_iSpawnId].y, m_afAmbushSpawn[m_iSpawnId].z, 0.0f,
                                        TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 60000);
         }
     }
@@ -265,7 +263,7 @@ struct npc_rinjiAI : public npc_escortAI
     void JustSummoned(Creature* pSummoned) override
     {
         m_creature->SetWalk(false);
-        pSummoned->GetMotionMaster()->MovePoint(0, m_afAmbushMoveTo[m_iSpawnId].m_fX, m_afAmbushMoveTo[m_iSpawnId].m_fY, m_afAmbushMoveTo[m_iSpawnId].m_fZ);
+        pSummoned->GetMotionMaster()->MovePoint(0, m_afAmbushMoveTo[m_iSpawnId].x, m_afAmbushMoveTo[m_iSpawnId].y, m_afAmbushMoveTo[m_iSpawnId].z);
     }
 
     void WaypointReached(uint32 uiPointId) override
@@ -277,16 +275,16 @@ struct npc_rinjiAI : public npc_escortAI
 
         switch (uiPointId)
         {
-            case 1:
+            case 2:
                 DoScriptText(SAY_RIN_FREE, m_creature, pPlayer);
                 break;
-            case 7:
+            case 8:
                 DoSpawnAmbush(true);
                 break;
-            case 13:
+            case 14:
                 DoSpawnAmbush(false);
                 break;
-            case 17:
+            case 18:
                 DoScriptText(SAY_RIN_COMPLETE, m_creature, pPlayer);
                 pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_RINJI_TRAPPED, m_creature);
                 SetRun();
@@ -298,7 +296,7 @@ struct npc_rinjiAI : public npc_escortAI
     void UpdateEscortAI(const uint32 uiDiff) override
     {
         // Check if we have a current target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         {
             if (HasEscortState(STATE_ESCORT_ESCORTING) && m_uiPostEventCount)
             {
@@ -357,6 +355,41 @@ UnitAI* GetAI_npc_rinji(Creature* pCreature)
     return new npc_rinjiAI(pCreature);
 }
 
+enum
+{
+    YELL_FALSTAD_INVADERS = -27,
+};
+
+bool ProcessEventId_WildhammerMessage(uint32 /*eventId*/, Object* source, Object* /*target*/, bool /*isStart*/)
+{
+    if (!source->IsPlayer())
+        return true;
+
+    Player* player = static_cast<Player*>(source);
+    player->UpdatePvP(true);
+    player->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_PVP_ACTIVE_CANCELS);
+    if (Creature* falstad = static_cast<ScriptedInstance*>(player->GetInstanceData())->GetSingleCreatureFromStorage(NPC_FALSTAD_WILDHAMMER))
+        DoScriptText(YELL_FALSTAD_INVADERS, falstad, player);
+    return true;
+}
+
+/*######
+## spell_gammerita_turtle_camera
+######*/
+
+struct GammeritaTurtleCamera : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        // Gammerita Turtle Camera can be cast only on this target
+        if (!target || target->GetEntry() != 7977)
+            return SPELL_FAILED_BAD_TARGETS;
+
+        return SPELL_CAST_OK;
+    }
+};
+
 void AddSC_hinterlands()
 {
     Script* pNewScript = new Script;
@@ -370,4 +403,11 @@ void AddSC_hinterlands()
     pNewScript->GetAI = &GetAI_npc_rinji;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_rinji;
     pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "event_wildhammer_message";
+    pNewScript->pProcessEventId = &ProcessEventId_WildhammerMessage;
+    pNewScript->RegisterSelf();
+
+    RegisterSpellScript<GammeritaTurtleCamera>("spell_gammerita_turtle_camera");
 }

@@ -2,7 +2,7 @@
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "Entities/Item.h"
 #include "Spells/Spell.h"
 #include "WorldPacket.h"
@@ -19,9 +19,10 @@ struct TSpellSummary
     uint8 Effects;                                          // set of enum SelectEffect
 }* SpellSummary;
 
-ScriptedAI::ScriptedAI(Creature* creature) : CreatureAI(creature),
+ScriptedAI::ScriptedAI(Creature* creature, uint32 combatActions) : CreatureAI(creature, combatActions),
     m_uiEvadeCheckCooldown(2500)
-{}
+{
+}
 
 /// This function shows if combat movement is enabled, overwrite for more info
 void ScriptedAI::GetAIInformation(ChatHandler& reader)
@@ -36,21 +37,6 @@ void ScriptedAI::EnterCombat(Unit* enemy)
 {
     if (enemy)
         Aggro(enemy);
-}
-
-/**
- * Main update function, by default let the creature behave as expected by a mob (threat management and melee dmg)
- * Always handle here threat-management with m_creature->SelectHostileTarget()
- * Handle (if required) melee attack with DoMeleeAttackIfReady()
- * This is usally overwritten to support timers for ie spells
- */
-void ScriptedAI::UpdateAI(const uint32 /*diff*/)
-{
-    // Check if we have a current target
-    if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        return;
-
-    DoMeleeAttackIfReady();
 }
 
 /**
@@ -93,7 +79,7 @@ void ScriptedAI::DoStartNoMovement(Unit* victim)
 
 void ScriptedAI::DoStopAttack()
 {
-    if (m_creature->getVictim())
+    if (m_creature->GetVictim())
         m_creature->AttackStop();
 }
 
@@ -128,9 +114,10 @@ SpellEntry const* ScriptedAI::SelectSpell(Unit* target, int32 school, int32 mech
     uint32 spellCount = 0;
 
     // Check if each spell is viable(set it to null if not)
+    std::vector<uint32> spells = m_unit->GetCharmSpells();
     for (uint8 i = 0; i < 4; ++i)
     {
-        SpellEntry const* tempSpellInfo = GetSpellStore()->LookupEntry<SpellEntry>(m_creature->m_spells[i]);
+        SpellEntry const* tempSpellInfo = GetSpellStore()->LookupEntry<SpellEntry>(spells[i]);
 
         // This spell doesn't exist
         if (!tempSpellInfo)
@@ -138,11 +125,11 @@ SpellEntry const* ScriptedAI::SelectSpell(Unit* target, int32 school, int32 mech
 
         // Targets and Effects checked first as most used restrictions
         // Check the spell targets if specified
-        if (selectTargets && !(SpellSummary[m_creature->m_spells[i]].Targets & (1 << (selectTargets - 1))))
+        if (selectTargets && !(SpellSummary[spells[i]].Targets & (1 << (selectTargets - 1))))
             continue;
 
         // Check the type of spell if we are looking for a specific spell type
-        if (selectEffects && !(SpellSummary[m_creature->m_spells[i]].Effects & (1 << (selectEffects - 1))))
+        if (selectEffects && !(SpellSummary[spells[i]].Effects & (1 << (selectEffects - 1))))
             continue;
 
         // Check for school if specified
@@ -318,26 +305,23 @@ void ScriptedAI::DoTeleportPlayer(Unit* unit, float x, float y, float z, float o
     ((Player*)unit)->TeleportTo(unit->GetMapId(), x, y, z, ori, TELE_TO_NOT_LEAVE_COMBAT);
 }
 
-CreatureList ScriptedAI::DoFindFriendlyCC(float range)
+CreatureList ScriptedAI::DoFindFriendlyMissingBuff(float range, uint32 spellId, bool inCombat)
 {
     CreatureList creatureList;
+    
+    if (inCombat == false)
+    {
+        MaNGOS::FriendlyMissingBuffInRangeInCombatCheck u_check(m_creature, range, spellId);
+        MaNGOS::CreatureListSearcher<MaNGOS::FriendlyMissingBuffInRangeInCombatCheck> searcher(creatureList, u_check);
+        Cell::VisitGridObjects(m_creature, searcher, range);
+    }
+    else if (inCombat == true)
+    {
+        MaNGOS::FriendlyMissingBuffInRangeNotInCombatCheck u_check(m_creature, range, spellId);
+        MaNGOS::CreatureListSearcher<MaNGOS::FriendlyMissingBuffInRangeNotInCombatCheck> searcher(creatureList, u_check);
 
-    MaNGOS::FriendlyCCedInRangeCheck u_check(m_creature, range);
-    MaNGOS::CreatureListSearcher<MaNGOS::FriendlyCCedInRangeCheck> searcher(creatureList, u_check);
-
-    Cell::VisitGridObjects(m_creature, searcher, range);
-
-    return creatureList;
-}
-
-CreatureList ScriptedAI::DoFindFriendlyMissingBuff(float range, uint32 spellId)
-{
-    CreatureList creatureList;
-
-    MaNGOS::FriendlyMissingBuffInRangeCheck u_check(m_creature, range, spellId);
-    MaNGOS::CreatureListSearcher<MaNGOS::FriendlyMissingBuffInRangeCheck> searcher(creatureList, u_check);
-
-    Cell::VisitGridObjects(m_creature, searcher, range);
+        Cell::VisitGridObjects(m_creature, searcher, range);
+    }    
 
     return creatureList;
 }
@@ -359,19 +343,23 @@ void ScriptedAI::SetEquipmentSlots(bool loadDefault, int32 mainHand, int32 offHa
     if (loadDefault)
     {
         m_creature->LoadEquipment(m_creature->GetCreatureInfo()->EquipmentTemplateId, true);
+        if (m_creature->hasWeapon(OFF_ATTACK))
+            m_creature->SetCanDualWield(true);
+        else
+            m_creature->SetCanDualWield(false);
         return;
     }
 
     if (mainHand >= 0)
-    { 
+    {
         m_creature->SetVirtualItem(VIRTUAL_ITEM_SLOT_0, mainHand);
-        m_creature->UpdateDamagePhysical(BASE_ATTACK);            
+        m_creature->UpdateDamagePhysical(BASE_ATTACK);
     }
 
     if (offHand >= 0)
-    { 
+    {
         m_creature->SetVirtualItem(VIRTUAL_ITEM_SLOT_1, offHand);
-        if(offHand == 1)
+        if (offHand >= 1)
             m_creature->SetCanDualWield(true);
         else
             m_creature->SetCanDualWield(false);
@@ -383,67 +371,7 @@ void ScriptedAI::SetEquipmentSlots(bool loadDefault, int32 mainHand, int32 offHa
     }
 }
 
-// Hacklike storage used for misc creatures that are expected to evade of outside of a certain area.
-// It is assumed the information is found elswehere and can be handled by mangos. So far no luck finding such information/way to extract it.
-enum
-{
-    NPC_BROODLORD               = 12017,
-};
-
-bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 diff)
-{
-    if (m_uiEvadeCheckCooldown < diff)
-        m_uiEvadeCheckCooldown = 2500;
-    else
-    {
-        m_uiEvadeCheckCooldown -= diff;
-        return false;
-    }
-
-    if (m_creature->IsInEvadeMode() || !m_creature->getVictim())
-        return false;
-
-    float x = m_creature->GetPositionX();
-    float y = m_creature->GetPositionY();
-    float z = m_creature->GetPositionZ();
-
-    switch (m_creature->GetEntry())
-    {
-        case NPC_BROODLORD:                                 // broodlord (not move down stairs)
-            if (z > 448.60f)
-                return false;
-            break;
-
-        default:
-            script_error_log("EnterEvadeIfOutOfCombatArea used for creature entry %u, but does not have any definition.", m_creature->GetEntry());
-            return false;
-    }
-
-    EnterEvadeMode();
-    return true;
-}
-
-void ScriptedAI::DespawnGuids(GuidVector& spawns)
-{
-    for (ObjectGuid& guid : spawns)
-        if (Creature* spawn = m_creature->GetMap()->GetCreature(guid))
-            spawn->ForcedDespawn();
-    spawns.clear();
-}
-
 void Scripted_NoMovementAI::GetAIInformation(ChatHandler& reader)
 {
     reader.PSendSysMessage("Subclass of Scripted_NoMovementAI");
-}
-
-void Scripted_NoMovementAI::AttackStart(Unit* who)
-{
-    if (who && m_creature->Attack(who, m_meleeEnabled))
-    {
-        m_creature->AddThreat(who);
-        m_creature->SetInCombatWith(who);
-        who->SetInCombatWith(m_creature);
-
-        DoStartNoMovement(who);
-    }
 }

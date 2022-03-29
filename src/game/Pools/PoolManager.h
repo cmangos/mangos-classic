@@ -121,6 +121,8 @@ class PoolGroup
 
         size_t size() const { return ExplicitlyChanced.size() + EqualChanced.size(); }
     private:
+        bool CanSpawn(PoolObject* object, MapPersistentState& mapState);
+        
         uint32 poolId;
         PoolObjectList ExplicitlyChanced;
         PoolObjectList EqualChanced;

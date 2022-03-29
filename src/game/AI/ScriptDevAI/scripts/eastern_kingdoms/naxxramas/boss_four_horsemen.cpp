@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "naxxramas.h"
 
 enum
@@ -97,11 +97,28 @@ static int32 const killSayList[4] = { SAY_BLAU_SLAY, 0, SAY_KORT_SLAY, SAY_ZELI_
 static uint32 const spiritSpellList[4] = { SPELL_SPIRIT_BLAUMEUX, SPELL_SPIRIT_MOGRAINE, SPELL_SPIRIT_KORTHAZZ, SPELL_SPIRIT_ZELIEK };
 static uint32 const markSpellList[4] = { SPELL_MARK_OF_BLAUMEUX, SPELL_MARK_OF_MOGRAINE, SPELL_MARK_OF_KORTHAZZ, SPELL_MARK_OF_ZELIEK };
 
+struct Location2DPoint
+{
+    float x, y;
+};
+
+// Coordinates at the entrance of the Four Horsemen room. Beyond these, the Horsemen reset (leashing)
+static const Location2DPoint resetCoords[3] = {
+        {2577.3f, -3024.0f},
+        {2585.9f, -3015.1f},
+        {2594.6f, -3006.7f}
+};
 struct boss_horsmenAI : public ScriptedAI
 {
     boss_horsmenAI(Creature* creature) : ScriptedAI(creature)
     {
         m_instance = (ScriptedInstance*)creature->GetInstanceData();
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float /*z*/)
+        {
+            return (x > resetCoords[0].x && y < resetCoords[0].y) ||
+                   (x > resetCoords[1].x && y < resetCoords[1].y) ||
+                   (x > resetCoords[2].x && y < resetCoords[2].y);
+        });
         Reset();
     }
 
@@ -144,8 +161,10 @@ struct boss_horsmenAI : public ScriptedAI
             m_instance->SetData(TYPE_FOUR_HORSEMEN, SPECIAL);
     }
 
-    void JustReachedHome() override
+    void EnterEvadeMode() override
     {
+        ScriptedAI::EnterEvadeMode();
+
         if (m_instance)
             m_instance->SetData(TYPE_FOUR_HORSEMEN, FAIL);
     }
@@ -155,7 +174,7 @@ struct boss_horsmenAI : public ScriptedAI
     void UpdateAI(const uint32 diff) override
     {
         // Do nothing if no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Call Horsemen specific virtual function to cast special spells
@@ -262,7 +281,7 @@ struct boss_alexandros_mograineAI : public boss_horsmenAI
     {
         if (m_righteousFireTimer < diff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_RIGHTEOUS_FIRE) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_RIGHTEOUS_FIRE) == CAST_OK)
             {
                 m_righteousFireTimer = (m_markCounter < MAX_MARK_STACKS ? 15 : 1) * IN_MILLISECONDS;
                 if (urand(0 ,9) < 1)
@@ -297,7 +316,7 @@ struct boss_thane_korthazzAI : public boss_horsmenAI
     {
         if (m_meteorTimer < diff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_METEOR) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_METEOR) == CAST_OK)
             {
                 m_meteorTimer = (m_markCounter < MAX_MARK_STACKS ? 20 : 1) * IN_MILLISECONDS;
                 if (urand(0 ,9) < 1)
@@ -332,7 +351,7 @@ struct boss_sir_zeliekAI : public boss_horsmenAI
     {
         if (m_holyWrathTimer < diff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HOLY_WRATH) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HOLY_WRATH) == CAST_OK)
             {
                 m_holyWrathTimer = (m_markCounter < MAX_MARK_STACKS ? 12 : 1) * IN_MILLISECONDS;
                 if (urand(0 ,9) < 1)

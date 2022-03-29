@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Guards
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "guard_ai.h"
 
 // This script is for use within every single guard to save coding time
@@ -69,7 +69,7 @@ void guardAI::UpdateAI(const uint32 diff)
         m_globalCooldown = 0;
 
     // Buff timer (only buff when we are alive and not in combat
-    if (m_creature->isAlive() && !m_creature->isInCombat())
+    if (m_creature->IsAlive() && !m_creature->IsInCombat())
     {
         if (m_buffTimer < diff)
         {
@@ -95,92 +95,41 @@ void guardAI::UpdateAI(const uint32 diff)
     }
 
     // Return since we have no target
-    if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+    if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         return;
 
     // Make sure our attack is ready and we arn't currently casting
-    if (m_creature->isAttackReady() && !m_creature->IsNonMeleeSpellCasted(false))
+    if (!m_creature->IsNonMeleeSpellCasted(false))
     {
         // If we are within range melee the target
-        if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
+        if (m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
         {
             bool bHealing = false;
             const SpellEntry* spellInfo = nullptr;
 
             // Select a healing spell if less than 30% hp
-            if (m_creature->GetHealthPercent() < 30.0f)
+            if (m_creature->GetHealthPercent() < 30.0f && !urand(0, 2))
                 spellInfo = SelectSpell(m_creature, -1, -1, SELECT_TARGET_ANY_FRIEND, 0, 0, 0, 0, SELECT_EFFECT_HEALING);
 
             // No healing spell available, select a hostile spell
             if (spellInfo)
                 bHealing = true;
             else
-                spellInfo = SelectSpell(m_creature->getVictim(), -1, -1, SELECT_TARGET_ANY_ENEMY, 0, 0, 0, 0, SELECT_EFFECT_DONTCARE);
+                spellInfo = SelectSpell(m_creature->GetVictim(), -1, -1, SELECT_TARGET_ANY_ENEMY, 0, 0, 0, 0, SELECT_EFFECT_DONTCARE);
 
             // 20% chance to replace our white hit with a spell
             if (spellInfo && !urand(0, 4) && !m_globalCooldown)
             {
-                // Cast the spell
-                if (bHealing)
-                    m_creature->CastSpell(m_creature, spellInfo, TRIGGERED_NONE);
-                else
-                    m_creature->CastSpell(m_creature->getVictim(), spellInfo, TRIGGERED_NONE);
-
-                // Set our global cooldown
-                m_globalCooldown = GENERIC_CREATURE_COOLDOWN;
-            }
-            else
-                m_creature->AttackerStateUpdate(m_creature->getVictim());
-
-            m_creature->resetAttackTimer();
-        }
-    }
-    else
-    {
-        // Only run this code if we arn't already casting
-        if (!m_creature->IsNonMeleeSpellCasted(false))
-        {
-            bool bHealing = false;
-            const SpellEntry* spellInfo = nullptr;
-
-            // Select a healing spell if less than 30% hp ONLY 33% of the time
-            if (m_creature->GetHealthPercent() < 30.0f && !urand(0, 2))
-                spellInfo = SelectSpell(m_creature, -1, -1, SELECT_TARGET_ANY_FRIEND, 0, 0, 0, 0, SELECT_EFFECT_HEALING);
-
-            // No healing spell available, See if we can cast a ranged spell (Range must be greater than ATTACK_DISTANCE)
-            if (spellInfo)
-                bHealing = true;
-            else
-                spellInfo = SelectSpell(m_creature->getVictim(), -1, -1, SELECT_TARGET_ANY_ENEMY, 0, 0, ATTACK_DISTANCE, 0, SELECT_EFFECT_DONTCARE);
-
-            // Found a spell, check if we arn't on cooldown
-            if (spellInfo && !m_globalCooldown)
-            {
-                // If we are currently moving stop us and set the movement generator
-                if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() != IDLE_MOTION_TYPE)
-                {
-                    m_creature->GetMotionMaster()->Clear(false);
-                    m_creature->GetMotionMaster()->MoveIdle();
-                }
-
                 // Cast spell
-                if (bHealing)
-                    m_creature->CastSpell(m_creature, spellInfo, TRIGGERED_NONE);
-                else
-                    m_creature->CastSpell(m_creature->getVictim(), spellInfo, TRIGGERED_NONE);
+                DoCastSpellIfCan(bHealing ? m_creature : m_creature->GetVictim(), spellInfo->Id);
 
                 // Set our global cooldown
                 m_globalCooldown = GENERIC_CREATURE_COOLDOWN;
-            }                                               // If no spells available and we arn't moving run to target
-            else if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE)
-            {
-                // Cancel our current spell and then mutate new movement generator
-                m_creature->InterruptNonMeleeSpells(false);
-                m_creature->GetMotionMaster()->Clear(false);
-                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
             }
         }
     }
+
+    DoMeleeAttackIfReady();
 }
 
 void guardAI::DoReplyToTextEmote(uint32 textEmote)
@@ -199,11 +148,5 @@ void guardAI::DoReplyToTextEmote(uint32 textEmote)
 void guardAI_orgrimmar::ReceiveEmote(Player* player, uint32 textEmote)
 {
     if (player->GetTeam() == HORDE)
-        DoReplyToTextEmote(textEmote);
-}
-
-void guardAI_stormwind::ReceiveEmote(Player* player, uint32 textEmote)
-{
-    if (player->GetTeam() == ALLIANCE)
         DoReplyToTextEmote(textEmote);
 }

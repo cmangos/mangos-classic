@@ -73,7 +73,7 @@ bool ChatHandler::HandleStartCommand(char* /*args*/)
         return false;
     }
 
-    if (chr->isInCombat())
+    if (chr->IsInCombat())
     {
         SendSysMessage(LANG_YOU_IN_COMBAT);
         SetSentErrorMessage(true);
@@ -163,8 +163,8 @@ bool ChatHandler::HandleGMListIngameCommand(char* /*args*/)
         {
             Player* player = itr->second;
             AccountTypes security = player->GetSession()->GetSecurity();
-            if ((player->isGameMaster() || (security > SEC_PLAYER && security <= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_IN_GM_LIST))) &&
-                    (!m_session || player->IsVisibleGloballyFor(m_session->GetPlayer())))
+            if ((player->IsGameMaster() || (security > SEC_PLAYER && security <= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_IN_GM_LIST))) &&
+                (!m_session || player->IsVisibleGloballyFor(m_session->GetPlayer())))
                 names.push_back(std::make_pair<std::string, bool>(GetNameLink(player), player->isAcceptWhispers()));
         }
     }

@@ -66,7 +66,8 @@ class GridCrawler : public Worker
 
         void execute() override
         {
-            MaNGOS::ObjectUpdater obj_updater(m_diff);
+            WorldObjectUnSet objToUpdate;
+            MaNGOS::ObjectUpdater obj_updater(objToUpdate, m_diff);
             TypeContainerVisitor<MaNGOS::ObjectUpdater, GridTypeMapContainer  > grid_object_update(obj_updater);    // For creature
             TypeContainerVisitor<MaNGOS::ObjectUpdater, WorldTypeMapContainer > world_object_update(obj_updater);   // For pets
 

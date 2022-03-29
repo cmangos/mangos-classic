@@ -19,6 +19,8 @@
 #ifndef MANGOS_SPELLTARGETS_H
 #define MANGOS_SPELLTARGETS_H
 
+#include <map>
+
 #include "Spells/SpellTargetDefines.h"
 #include "Spells/SpellEffectDefines.h"
 #include "Server/DBCEnums.h"
@@ -33,8 +35,9 @@ struct SpellTargetInfo
     SpellTargetImplicitType type;
     SpellTargetFilter filter;
     SpellTargetEnumerator enumerator;
+    SpellTargetLOS los;
 
-    SpellTargetInfo(char const* name = "", SpellTargetImplicitType type = TARGET_TYPE_UNKNOWN, SpellTargetFilter filter = TARGET_NEUTRAL, SpellTargetEnumerator enumerator = TARGET_ENUMERATOR_UNKNOWN);
+    SpellTargetInfo(char const* name = "", SpellTargetImplicitType type = TARGET_TYPE_UNKNOWN, SpellTargetFilter filter = TARGET_NEUTRAL, SpellTargetEnumerator enumerator = TARGET_ENUMERATOR_UNKNOWN, SpellTargetLOS los = TARGET_LOS_CASTER);
 };
 
 extern SpellTargetInfo SpellTargetInfoTable[MAX_SPELL_TARGETS];
@@ -44,14 +47,19 @@ struct SpellTargetingData
     SpellTargetImplicitType implicitType[MAX_EFFECT_INDEX];
     uint8 targetMask[MAX_EFFECT_INDEX][2] = { {1, 1}, {2, 2}, {4, 4} };
     std::pair<bool, bool> ignoredTargets[MAX_EFFECT_INDEX] = { {false, false}, {false, false}, {false, false} };
+    SpellTargetFilterScheme filteringScheme[MAX_EFFECT_INDEX][2] = { {SCHEME_RANDOM, SCHEME_RANDOM}, {SCHEME_RANDOM, SCHEME_RANDOM}, {SCHEME_RANDOM, SCHEME_RANDOM} };
 };
 
 class SpellTargetMgr // thread safe
 {
     public:
-        static void Initialize();
+        static void Initialize(); // precalculates ignored targets and dynamic effect targeting
         static SpellTargetingData& GetSpellTargetingData(uint32 spellId);
         static bool CanEffectBeFilledWithMask(uint32 spellId, uint32 effIdx, uint32 mask);
+
+        // temporary helpers
+        static float GetJumpRadius(uint32 spellId);
+        static SpellTargetFilterScheme GetSpellTargetingFilterScheme(SpellTargetFilterScheme oldScheme, uint32 spellId);
     private:
         static std::map<uint32, SpellTargetingData> spellTargetingData;
 };

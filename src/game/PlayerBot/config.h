@@ -26,9 +26,10 @@
 #define PLAYERBOT_CONF_VERSION    2019031701
 
 #if PLATFORM == PLATFORM_WINDOWS
-#define _PLAYERBOT_CONFIG  "playerbot.conf"
+#define _D_PLAYERBOT_CONFIG "playerbot.conf"
 #else
-#define _PLAYERBOT_CONFIG  SYSCONFDIR "playerbot.conf"
+#define _D_PLAYERBOT_CONFIG  SYSCONFDIR "playerbot.conf"
 #endif
+#define _PLAYERBOT_CONFIG  MaNGOS::Singleton<std::string>::Instance()
 
 #endif

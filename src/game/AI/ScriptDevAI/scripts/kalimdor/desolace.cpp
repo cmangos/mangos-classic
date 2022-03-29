@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
+#include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
 npc_aged_dying_ancient_kodo
 npc_dalinda_malem
 npc_melizza_brimbuzzle
@@ -31,6 +31,7 @@ EndContentData */
 
 
 #include "AI/ScriptDevAI/base/escort_ai.h"
+#include "AI/ScriptDevAI/scripts/kalimdor/world_kalimdor.h"
 
 /*######
 ## npc_aged_dying_ancient_kodo
@@ -53,7 +54,9 @@ enum
     SPELL_KODO_KOMBO_ITEM           = 18153,
     SPELL_KODO_KOMBO_PLAYER_BUFF    = 18172,                // spells here have unclear function, but using them at least for visual parts and checks
     SPELL_KODO_KOMBO_DESPAWN_BUFF   = 18377,
-    SPELL_KODO_KOMBO_GOSSIP         = 18362
+    SPELL_KODO_KOMBO_GOSSIP         = 18362,
+    SPELL_KODO_KOMBOBULATOR         = 18793,                // spell only exists in classic dbc, used by kodo on player after gossip menu is used
+    SPELL_KODO_DESPAWN              = 22970,                // spell only exists in classic dbc, used by kodo during following?
 };
 
 struct npc_aged_dying_ancient_kodoAI : public ScriptedAI
@@ -93,6 +96,7 @@ struct npc_aged_dying_ancient_kodoAI : public ScriptedAI
     {
         if (pSpell->Id == SPELL_KODO_KOMBO_GOSSIP)
         {
+            m_creature->GetMotionMaster()->MoveIdle();
             m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             m_uiDespawnTimer = 60000;
         }
@@ -103,7 +107,7 @@ struct npc_aged_dying_ancient_kodoAI : public ScriptedAI
         // timer should always be == 0 unless we already updated entry of creature. Then not expect this updated to ever be in combat.
         if (m_uiDespawnTimer && m_uiDespawnTimer <= diff)
         {
-            if (!m_creature->getVictim() && m_creature->isAlive())
+            if (!m_creature->GetVictim() && m_creature->IsAlive())
             {
                 Reset();
                 m_creature->SetDeathState(JUST_DIED);
@@ -113,7 +117,7 @@ struct npc_aged_dying_ancient_kodoAI : public ScriptedAI
         }
         else m_uiDespawnTimer -= diff;
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();
@@ -163,10 +167,11 @@ bool GossipHello_npc_aged_dying_ancient_kodo(Player* pPlayer, Creature* pCreatur
         pPlayer->TalkedToCreature(pCreature->GetEntry(), pCreature->GetObjectGuid());
 
         pPlayer->RemoveAurasDueToSpell(SPELL_KODO_KOMBO_PLAYER_BUFF);
-        pCreature->GetMotionMaster()->MoveIdle();
+        pCreature->ForcedDespawn(10000);
     }
 
-    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
+    pPlayer->PrepareGossipMenu(pCreature, pPlayer->GetDefaultGossipMenuForSource(pCreature));
+    pPlayer->SendPreparedGossip(pCreature);
     return true;
 }
 
@@ -181,7 +186,11 @@ enum
 
 struct npc_dalinda_malemAI : public npc_escortAI
 {
-    npc_dalinda_malemAI(Creature* m_creature) : npc_escortAI(m_creature) { Reset(); }
+    npc_dalinda_malemAI(Creature* m_creature) : npc_escortAI(m_creature)
+    {
+        m_creature->SetStandState(UNIT_STAND_STATE_KNEEL, true);
+        Reset();
+    }
 
     void Reset() override {}
 
@@ -235,11 +244,15 @@ enum
     SAY_MELIZZA_2               = -1000787,
     SAY_MELIZZA_3               = -1000788,
 
+    SAY_HORNIZZ_1               = -1010030,
+    SAY_HORNIZZ_2               = -1010031,
+
     NPC_MARAUDINE_MARAUDER      = 4659,
     NPC_MARAUDINE_BONEPAW       = 4660,
     NPC_MARAUDINE_WRANGLER      = 4655,
 
     NPC_MELIZZA                 = 12277,
+    // NPC_HORNIZZ                 = 6019,
 
     POINT_ID_QUEST_COMPLETE     = 1,
     POINT_ID_EVENT_COMPLETE     = 2,
@@ -256,7 +269,9 @@ static const DialogueEntry aIntroDialogue[] =
     {SAY_MELIZZA_1,             NPC_MELIZZA,    4000},
     {SAY_MELIZZA_2,             NPC_MELIZZA,    5000},
     {SAY_MELIZZA_3,             NPC_MELIZZA,    4000},
-    {NPC_MELIZZA,               0,              0},
+    {NPC_MELIZZA,               0,              6000},
+    {SAY_HORNIZZ_1,             NPC_HORNIZZ,    10000},
+    {SAY_HORNIZZ_2,             NPC_HORNIZZ,    0},
     {0, 0, 0},
 };
 
@@ -293,6 +308,10 @@ struct npc_melizza_brimbuzzleAI : public npc_escortAI, private DialogueHelper
     {
         if (uiEntry == NPC_MELIZZA)
             return m_creature;
+
+        if (uiEntry == NPC_HORNIZZ)
+            if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
+                return instance->GetSingleCreatureFromStorage(NPC_HORNIZZ);
 
         return nullptr;
     }
@@ -371,7 +390,7 @@ struct npc_melizza_brimbuzzleAI : public npc_escortAI, private DialogueHelper
     {
         DialogueUpdate(uiDiff);
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();
@@ -685,6 +704,7 @@ enum
     SPELL_GHOST_SPAWN_IN   = 17321,
     SPELL_BLUE_AURA        = 17327,
     SPELL_GREEN_AURA       = 18951,
+    SPELL_CHILLING_TOUCH   = 18146,
 
     FACTION_HOSTILE        = 16,
 
@@ -705,8 +725,9 @@ struct npc_magrami_spectre : public ScriptedAI
 
     void JustRespawned() override
     {
-        m_creature->CastSpell(m_creature, SPELL_GHOST_SPAWN_IN, TRIGGERED_NONE);
-        m_creature->CastSpell(m_creature, SPELL_BLUE_AURA, TRIGGERED_NONE);
+        m_creature->CastSpell(nullptr, SPELL_GHOST_SPAWN_IN, TRIGGERED_NONE);
+        m_creature->CastSpell(nullptr, SPELL_BLUE_AURA, TRIGGERED_NONE);
+        m_creature->CastSpell(nullptr, SPELL_CHILLING_TOUCH, TRIGGERED_NONE);
 
         switch (urand(0, 1))
         {
@@ -737,7 +758,7 @@ struct npc_magrami_spectre : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiCurseTimer)
@@ -745,7 +766,7 @@ struct npc_magrami_spectre : public ScriptedAI
             if (m_uiCurseTimer <= uiDiff)
             {
                 m_uiCurseTimer = 0;
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_CURSE_OF_MAGRAMI);
+                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CURSE_OF_MAGRAMI);
             }
             else
                 m_uiCurseTimer -= uiDiff;

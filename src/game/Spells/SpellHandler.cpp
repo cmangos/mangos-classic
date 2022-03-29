@@ -89,7 +89,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (pUser->isInCombat())
+    if (pUser->IsInCombat())
     {
         for (const auto& Spell : proto->Spells)
         {
@@ -142,6 +142,8 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
             Spell::SendCastResult(_player, spellInfo, SPELL_FAILED_BAD_TARGETS);
         return;
     }
+
+    _player->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ITEM_USE);
 
     // Note: If script stop casting it must send appropriate data to client to prevent stuck item in gray state.
     if (!sScriptDevAIMgr.OnItemUse(pUser, pItem, targets))
@@ -237,7 +239,7 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
     }
     else
     {
-        Loot*& loot = pItem->loot;
+        Loot*& loot = pItem->m_loot;
         if (!loot)
             loot = new Loot(pUser, pItem, LOOT_PICKPOCKETING);
 
@@ -255,6 +257,9 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
 
     // ignore for remote control state
     if (!_player->IsSelfMover())
+        return;
+
+    if (_player->IsBeingTeleported())
         return;
 
     GameObject* obj = _player->GetMap()->GetGameObject(guid);
@@ -278,12 +283,22 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
         return;
     }
 
+    if (obj->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED)) // we should not allow use of a locked GO
+        return;
+
+    if (obj->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE))
+        return;
+
     // Never expect this opcode for non intractable GO's
     if (obj->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT))
     {
         sLog.outError("HandleGameObjectUseOpcode: CMSG_GAMEOBJ_USE for GameObject (Entry %u) with non intractable flag (Flags %u), didn't expect this to happen.", obj->GetEntry(), obj->GetUInt32Value(GAMEOBJECT_FLAGS));
         return;
     }
+
+    // client checks this but needs recheck
+    if (obj->GetGOInfo()->CannotBeUsedUnderImmunity() && _player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE))
+        return;
 
     obj->Use(_player);
 }
@@ -373,7 +388,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     if (Unit* target = targets.getUnitTarget())
     {
         // if rank not found then function return nullptr but in explicit cast case original spell can be casted and later failed with appropriate error message
-        if (SpellEntry const* actualSpellInfo = sSpellMgr.SelectAuraRankForLevel(spellInfo, target->getLevel()))
+        if (SpellEntry const* actualSpellInfo = sSpellMgr.SelectAuraRankForLevel(spellInfo, target->GetLevel()))
             spellInfo = actualSpellInfo;
     }
 
@@ -381,6 +396,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         targets.setUnitTarget(mover->GetTarget());
 
     Spell* spell = new Spell(mover, spellInfo, TRIGGERED_NONE);
+    spell->m_clientCast = true;
     spell->SpellStart(&targets);
 }
 
@@ -393,6 +409,9 @@ void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
     // ignore for remote control state (for player case)
     Unit* mover = _player->GetMover();
     if (mover != _player && mover->GetTypeId() == TYPEID_PLAYER)
+        return;
+
+    if (!_player->IsClientControlled(_player))
         return;
 
     if (_player->IsNonMeleeSpellCasted(false))
@@ -494,7 +513,7 @@ void WorldSession::HandlePetCancelAuraOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (!pet->isAlive())
+    if (!pet->IsAlive())
     {
         pet->SendPetActionFeedback(FEEDBACK_PET_DEAD);
         return;

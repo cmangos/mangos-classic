@@ -1,0 +1,354 @@
+# NOTE:
+#
+#   This file is intended to be used in a setting where the anticheat should run
+#   purely in a read-only mode.  It will do all of its tasks, but take no action,
+#   aside from sending out notifications.  It is intended for testing purposes.
+
+[AnticheatConf]
+ConfVersion=2017102301
+
+# When disabled, incoming world sessions will not have anticheat initialized.  If this is enabled while
+# the server is running, the anticheat will remain disabled for those connected sessions.
+Enable = 1
+
+# How many entries should the fingerprint history table store, per fingerprint value.  The oldest
+# values will be pruned.
+FingerprintHistory = 30
+
+# Minimum GM account level to allow inclusion of client fingerprinting information in command output
+FingerprintLevel = 6
+
+# Minimum number of seconds to wait before kicking a cheater
+KickDelay.Min = 30
+
+# Maximum number of seconds to wait before kicking a cheater
+KickDelay.Max = 90
+
+# Minimum number of seconds to wait before banning a cheater
+BanDelay.Min = 30
+
+# Maximum number of seconds to wait before banning a cheater
+BanDelay.Max = 90
+
+# Minimum number of seconds to wait before IP banning a cheater
+IPBanDelay.Min = 30
+
+# Maximum number of seconds to wait before IP banning a cheater
+IPBanDelay.Max = 90
+
+# For ban waves, which day of the week should the bans be applied.
+# 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
+BanWave.Day = 1
+
+# For ban waves, which hour of the day should bans be applied.  Accepted values are between 0 and 23.
+BanWave.Hour = 10
+
+# For ban waves, which minute of the hour should bans be applied.  Accepted values are between 0 and 59.
+BanWave.Minute = 0
+
+################################
+#
+# Movement based heuristics, run server-side
+#
+# Thresholds and actions for server-side movement based heuristics
+#
+# For this section, there are 23 different checks.  Each check has four values:
+#
+#   Tick count   - how many times must this cheat be detected in one tick of the anticheat
+#   Tick action  - when the tick count is surpassed, what actions are taken
+#   Total count  - how many times must this cheat be detected in one session of the anticheat
+#   Total action - when the total count is surpassed, what actions are taken
+#
+#   Actions are a mask of the following flags, in decimal form:
+#
+#       CHEAT_ACTION_NONE           = 0x00,
+#
+#       informational notification (no actions are suggested)
+#       CHEAT_ACTION_INFO_LOG       = 0x01,
+#
+#       prompting notification (suggested actions defined by other flags)
+#       CHEAT_ACTION_PROMPT_LOG     = 0x02,
+#
+#       disconnect the offending world session
+#       CHEAT_ACTION_KICK           = 0x04,
+#
+#       permanently ban the offending account
+#       CHEAT_ACTION_BAN_ACCOUNT    = 0x08,
+#
+#       permanently ban the offending ip address
+#       CHEAT_ACTION_BAN_IP         = 0x10,
+#
+#       permanently silences the offending account
+#       CHEAT_ACTION_SILENCE        = 0x20,
+#
+#   Examples:
+#       * To ban the account and IP, the mask is 0x08 | 0x10, or 0x18, or 24.
+#       * To send out a notification, prompting for an action of an account ban
+#         or silence, the mask is 0x02 | 0x08 | 0x20, or 0x2A, or 42.
+#
+#   If the tick count is zero, the tick action will never be performed.  Similarly,
+#   if the total count is zero, the total action will never be performed.
+#
+################################
+
+# Use extrapolation to predict movement in server-side verification heuristics.  This produces more
+# accurate results but is computationally more intensive.
+Movement.UseExtrapolation = 1
+
+# Apply numerous heuristics and sanity checks on player movement to verify their movement speed.
+Movement.SpeedHack.Enable = 1
+
+# Check that a player is not traversing terrain which is too step
+# NOTE: This has not been implemented yet!
+Movement.WallClimb.TickCount = 0
+Movement.WallClimb.TickAction = 0
+Movement.WallClimb.TotalCount = 0
+Movement.WallClimb.TotalAction = 0
+
+# Check that a player is not walking on water while lacking an aura enabling it
+Movement.WaterWalk.TickCount = 1
+Movement.WaterWalk.TickAction = 1
+Movement.WaterWalk.TotalCount = 0
+Movement.WaterWalk.TotalAction = 0
+
+# Check that a player is not slow-falling while lacking an aura enabling it
+Movement.SlowFall.TickCount = 1
+Movement.SlowFall.TickAction = 1
+Movement.SlowFall.TotalCount = 0
+Movement.SlowFall.TotalAction = 0
+
+# Check that a player is not flying without permission
+Movement.FlyHack.TickCount = 1
+Movement.FlyHack.TickAction = 1
+Movement.FlyHack.TotalCount = 0
+Movement.FlyHack.TotalAction = 0
+
+# Check that a player is not in some forbidden location
+Movement.Forbidden.TickCount = 1
+Movement.Forbidden.TickAction = 1
+Movement.Forbidden.TotalCount = 0
+Movement.Forbidden.TotalAction = 0
+
+# Watches for one jump to begin before the previous one finishes
+Movement.MultiJump.TickCount = 1
+Movement.MultiJump.TickAction = 1
+Movement.MultiJump.TotalCount = 0
+Movement.MultiJump.TotalAction = 0
+
+# Watches for a client clock moving backwards.  This should never happen even when the
+# system clock is changed, as the client uses GetTickCount() and/or QueryPerformanceCounter(),
+# which track the elapsed time since the system began (which never goes backwards!)
+Movement.TimeBack.TickCount = 1
+Movement.TimeBack.TickAction = 1
+Movement.TimeBack.TotalCount = 0
+Movement.TimeBack.TotalAction = 0
+
+# Watches for a player jumping with a lateral speed faster than their run speed
+Movement.FastJump.TickCount = 1
+Movement.FastJump.TickAction = 1
+Movement.FastJump.TotalCount = 0
+Movement.FastJump.TotalAction = 0
+
+# Watches for a player with an increasing lateral jump speed
+Movement.JumpSpeedChange.TickCount = 1
+Movement.JumpSpeedChange.TickAction = 1
+Movement.JumpSpeedChange.TotalCount = 0
+Movement.JumpSpeedChange.TotalAction = 0
+
+# Watches for a client reporting a time of zero
+Movement.NullClientTime.TickCount = 1
+Movement.NullClientTime.TickAction = 1
+Movement.NullClientTime.TotalCount = 0
+Movement.NullClientTime.TotalAction = 0
+
+# Watches for a player moving while rooted
+Movement.RootMove.TickCount = 1
+Movement.RootMove.TickAction = 1
+Movement.RootMove.TotalCount = 0
+Movement.RootMove.TotalAction = 0
+
+# Watches for a player rapidly gaining exploration experience
+Movement.Explore.TickCount = 3
+Movement.Explore.TickAction = 1
+Movement.Explore.TotalCount = 0
+Movement.Explore.TotalAction = 0
+
+# Watches for a player rapidly gaining exploration experience in high level areas
+Movement.ExploreHigh.TickCount = 1
+Movement.ExploreHigh.TickAction = 1
+Movement.ExploreHigh.TotalCount = 0
+Movement.ExploreHigh.TotalAction = 0
+
+# Watches for a player with a z value changing too rapidly
+Movement.OverspeedZ.TickCount = 1
+Movement.OverspeedZ.TickAction = 1
+Movement.OverspeedZ.TotalCount = 0
+Movement.OverspeedZ.TotalAction = 0
+
+# Watches for a player with a heartbeat that arrives later than expected
+Movement.HeartbeatSkip.TickCount = 1
+Movement.HeartbeatSkip.TickAction = 1
+Movement.HeartbeatSkip.TotalCount = 0
+Movement.HeartbeatSkip.TotalAction = 0
+
+# Watches for a client whose clock is moving too fast
+Movement.ClockDesync.TickCount = 1
+Movement.ClockDesync.TickAction = 1
+Movement.ClockDesync.TotalCount = 0
+Movement.ClockDesync.TotalAction = 0
+
+# Watches for a player claiming to be aboard a transport which
+# either doesn't exist, or from which they are too far away
+Movement.FakeTransport.TickCount = 1
+Movement.FakeTransport.TickAction = 1
+Movement.FakeTransport.TotalCount = 0
+Movement.FakeTransport.TotalAction = 0
+
+# Watch for a player claiming to board a transport from which they are too far away
+Movement.TeleToTransport.TickCount = 1
+Movement.TeleToTransport.TickAction = 1
+Movement.TeleToTransport.TotalCount = 0
+Movement.TeleToTransport.TotalAction = 0
+
+# Watch for a player teleporting unexpectedly
+Movement.Teleport.TickCount = 1
+Movement.Teleport.TickAction = 1
+Movement.Teleport.TotalCount = 0
+Movement.Teleport.TotalAction = 0
+
+# Watch for a player teleporting a large distance (> 150 yards) unexpectedly
+Movement.TeleportFar.TickCount = 1
+Movement.TeleportFar.TickAction = 1
+Movement.TeleportFar.TotalCount = 0
+Movement.TeleportFar.TotalAction = 0
+
+# Watch for a client claiming to have the fixed-Z movement flag, which is not possible for players
+Movement.FixedZ.TickCount = 1
+Movement.FixedZ.TickAction = 1
+Movement.FixedZ.TotalCount = 0
+Movement.FixedZ.TotalAction = 0
+
+# Watch for a client acknowledging a movement order in an unexpected way
+Movement.BadOrderAck.TickCount = 1
+Movement.BadOrderAck.TickAction = 1
+Movement.BadOrderAck.TotalCount = 0
+Movement.BadOrderAck.TotalAction = 0
+
+################################
+#
+# Anti spam system
+#
+################################
+
+# Enable anti spam system
+Antispam.Enable = 1
+
+# Automatically silence accounts identified as spammers
+Antispam.Silence = 0
+
+# Above this level, the spam filter will not be enforced
+Antispam.MaxLevel = 25
+
+# Normalization flags:
+# NF_CUT_COLOR                = 0x001,
+# NF_REPLACE_WORDS            = 0x002,
+# NF_CUT_SPACE                = 0x004,
+# NF_CUT_CTRL                 = 0x008,
+# NF_CUT_PUNCT                = 0x010,
+# NF_CUT_NUMBERS              = 0x020,
+# NF_REPLACE_UNICODE          = 0x040,
+# NF_REMOVE_REPEATS           = 0x080,
+# NF_REMOVE_NON_LATIN         = 0x100
+
+# Mask of normalization flags to use when normalizing messages prior to spam checks
+Antispam.NormalizeMask = 0
+
+# Time, in seconds, between each analysis of recent messages for spam
+Antispam.AnalysisTimer = 30
+
+# Maximum messages per minute to be considered spamming based solely on the outgoing rate.  Zero to disable.
+Antispam.MaxRate = 30
+
+# Grace period, in seconds, before messaging rate is checked against maximum allowed value for spam
+Antispam.RateGracePeriod = 45
+
+# Maximum percentage of whisper and mail recipients which can be unique before being considered spam.  Zero to disable.
+Antispam.MaxUniquePercentage = 90
+
+# Minimum whispers or mails before unique recipient percentage is considered.
+# WARNING: Zero does NOT disable this!  To disable, set Antispam.MaxUniquePercentage to zero
+Antispam.MinUniqueMessages = 100
+
+# How many occurrences of blacklist entries before a GM notification is sent out.  Zero to disable.
+Antispam.BlacklistNotify = 5
+
+# How many minutes must pass before the same session can trigger a second GM notification
+Antispam.BlacklistNotifyCooldown = 10
+
+# How many occurrences of blacklist entries before the account is considered a spammer and silenced (assuming automatic silence is enabled).  Zero to disable.
+Antispam.BlacklistSilence = 15
+
+# Minimum GM account level to allow in-game additions to antispam blacklist
+Antispam.BlacklistLevel = 5
+
+# How many seconds must pass before a cache entry can expire
+Antispam.CacheExpiration = 3600
+
+# Minimum distance between two strings before they are considered unique as defined by the Damerau-Levenshtein distance algorithm
+Antispam.UniquenessThreshold = 5
+
+# Minimum number of chat messages which must be sent before message repetition is considered
+Antispam.MinRepetitionMessages = 5
+
+# What percentage of messages must be repetitive before a GM notification is sent out.  Zero to disable.
+Antispam.RepetitionNotify = 50
+
+# What percentage of messages must be repetitive before the account is silenced.  Zero to disable.
+Antispam.RepetitionSilence = 0
+
+# By what factor should distance traveled (in yards) reduce the weight of message repetition.  0.0 for no adjustment.
+Antispam.RepetitionDistanceScale = 1.0
+
+# By what factor should time-connected (in seconds) increase the weight of message repetition.  0.0 for no adjustment.
+Antispam.RepetitionTimeScale = 0.0
+
+# How many seconds must pass before total movement distance is ignored.  Zero to disable.
+Antispam.RepetitionMovementTimeout = 60
+
+################################
+#
+# Warden
+#
+################################
+
+# Similar to the overall anticheat, if Warden is disabled, it will not be initialized when a world session is created.
+# Changing this setting will have no effect on pre-existing world sessions.
+Warden.Enable = 1
+
+# Directory where Warden modules can be found
+Warden.ModuleDir = "warden_modules"
+
+# Time, in seconds, to wait for the client to reply to a Warden request
+Warden.Timeout = 30
+
+# Time, in seconds, between each Warden request
+Warden.ScanFrequency = 15
+
+# Maximum amount of scans to send per request (will be fewer if the request would overflow the client buffer)
+Warden.ScanCount = 10
+
+# Minimum level before non-logging actions are enforced
+Warden.MinimumLevel = 25
+
+# Minimum level before scans which are considered advanced are sent to the client.  This is to avoid
+# revealing detection methods to hack authors on low-level, throw-away accounts.
+Warden.MinimumAdvancedLevel = 18
+
+# What action to take when a suspicious hook of EndScene is found by Warden
+Warden.SuspiciousEndSceneHookAction = 1
+
+# These values follow the same pattern as the movement heuristics
+Warden.TickCount = 1
+Warden.TickAction = 1
+Warden.TotalCount = 0
+Warden.TotalCount = 0

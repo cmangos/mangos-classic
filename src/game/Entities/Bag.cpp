@@ -97,6 +97,13 @@ bool Bag::LoadFromDB(uint32 guidLow, Field* fields, ObjectGuid ownerGuid)
     if (!Item::LoadFromDB(guidLow, fields, ownerGuid))
         return false;
 
+    ItemPrototype const* itemProto = sObjectMgr.GetItemPrototype(GetEntry());
+    if (!itemProto || itemProto->ContainerSlots > MAX_BAG_SIZE)
+        return false;
+
+    // Setting the number of Slots the Container has
+    SetUInt32Value(CONTAINER_FIELD_NUM_SLOTS, itemProto->ContainerSlots);
+
     // cleanup bag content related item value fields (its will be filled correctly from `character_inventory`)
     for (int i = 0; i < MAX_BAG_SIZE; ++i)
     {
@@ -182,13 +189,16 @@ Item* Bag::GetItemByEntry(uint32 item) const
     return nullptr;
 }
 
-uint32 Bag::GetItemCount(uint32 item, Item* eItem) const
+uint32 Bag::GetItemCount(uint32 item, Item* skipItem) const
 {
     uint32 count = 0;
 
+    if (this != skipItem && GetEntry() == item)
+        ++count;
+
     for (uint32 i = 0; i < GetBagSize(); ++i)
         if (m_bagslot[i])
-            if (m_bagslot[i] != eItem && m_bagslot[i]->GetEntry() == item)
+            if (m_bagslot[i] != skipItem && m_bagslot[i]->GetEntry() == item)
                 count += m_bagslot[i]->GetCount();
 
     return count;

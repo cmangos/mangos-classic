@@ -2,7 +2,7 @@
 * This program is free software licensed under GPL version 2
 * Please see the included DOCS/LICENSE.TXT for more information */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "Policies/Singleton.h"
 #include "Config/Config.h"
 #include "Database/DatabaseEnv.h"
@@ -42,7 +42,7 @@ void LoadDatabase()
 * @param pSource Source of the text
 * @param pTarget Can be nullptr (depending on CHAT_TYPE of iTextEntry). Possible target for the text
 */
-void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
+void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget, uint32 chatTypeOverride)
 {
     if (!pSource)
     {
@@ -54,12 +54,35 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
     {
         script_error_log("DoScriptText with source entry %u (TypeId=%u, guid=%u) attempts to process text entry %i, but text entry must be negative.",
                          pSource->GetEntry(), pSource->GetTypeId(), pSource->GetGUIDLow(), iTextEntry);
-
         return;
     }
 
-    DoDisplayText(pSource, iTextEntry, pTarget);
-    // TODO - maybe add some call-stack like error output if above function returns false
+    DoDisplayText(pSource, iTextEntry, pTarget, chatTypeOverride);
+}
+
+/**
+* Function that does broadcast text
+*
+* @param iTextEntry Entry of the text
+* @param pSource Source of the text
+* @param pTarget Can be nullptr (depending on CHAT_TYPE of iTextEntry). Possible target for the text
+*/
+void DoBroadcastText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget, uint32 chatTypeOverride)
+{
+    if (!pSource)
+    {
+        script_error_log("DoScriptText entry %i, invalid Source pointer.", iTextEntry);
+        return;
+    }
+
+    if (iTextEntry <= 0)
+    {
+        script_error_log("DoBroadcastText with source entry %u (TypeId=%u, guid=%u) attempts to process text entry %i, but text entry must be positive.",
+                         pSource->GetEntry(), pSource->GetTypeId(), pSource->GetGUIDLow(), iTextEntry);
+        return;
+    }
+
+    DoDisplayText(pSource, iTextEntry, pTarget, chatTypeOverride);
 }
 
 /**
@@ -145,7 +168,7 @@ bool ScriptDevAIMgr::OnGossipHello(Player* pPlayer, Creature* pCreature)
     if (!pTempScript || !pTempScript->pGossipHello)
         return false;
 
-    pPlayer->PlayerTalkClass->ClearMenus();
+    pPlayer->GetPlayerMenu()->ClearMenus();
 
     return pTempScript->pGossipHello(pPlayer, pCreature);
 }
@@ -157,7 +180,7 @@ bool ScriptDevAIMgr::OnGossipHello(Player* pPlayer, GameObject* pGo)
     if (!pTempScript || !pTempScript->pGossipHelloGO)
         return false;
 
-    pPlayer->PlayerTalkClass->ClearMenus();
+    pPlayer->GetPlayerMenu()->ClearMenus();
 
     return pTempScript->pGossipHelloGO(pPlayer, pGo);
 }
@@ -176,14 +199,14 @@ bool ScriptDevAIMgr::OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32
         if (!pTempScript->pGossipSelectWithCode)
             return false;
 
-        pPlayer->PlayerTalkClass->ClearMenus();
+        pPlayer->GetPlayerMenu()->ClearMenus();
         return pTempScript->pGossipSelectWithCode(pPlayer, pCreature, uiSender, uiAction, code);
     }
 
     if (!pTempScript->pGossipSelect)
         return false;
 
-    pPlayer->PlayerTalkClass->ClearMenus();
+    pPlayer->GetPlayerMenu()->ClearMenus();
     return pTempScript->pGossipSelect(pPlayer, pCreature, uiSender, uiAction);
 }
 
@@ -201,14 +224,14 @@ bool ScriptDevAIMgr::OnGossipSelect(Player* pPlayer, GameObject* pGo, uint32 uiS
         if (!pTempScript->pGossipSelectGOWithCode)
             return false;
 
-        pPlayer->PlayerTalkClass->ClearMenus();
+        pPlayer->GetPlayerMenu()->ClearMenus();
         return pTempScript->pGossipSelectGOWithCode(pPlayer, pGo, uiSender, uiAction, code);
     }
 
     if (!pTempScript->pGossipSelectGO)
         return false;
 
-    pPlayer->PlayerTalkClass->ClearMenus();
+    pPlayer->GetPlayerMenu()->ClearMenus();
     return pTempScript->pGossipSelectGO(pPlayer, pGo, uiSender, uiAction);
 }
 
@@ -219,7 +242,7 @@ uint32 ScriptDevAIMgr::GetDialogStatus(const Player* pPlayer, const Creature* pC
     if (!pTempScript || !pTempScript->pDialogStatusNPC)
         return DIALOG_STATUS_UNDEFINED;
 
-    pPlayer->PlayerTalkClass->ClearMenus();
+    pPlayer->GetPlayerMenu()->ClearMenus();
 
     return pTempScript->pDialogStatusNPC(pPlayer, pCreature);
 }
@@ -231,7 +254,7 @@ uint32 ScriptDevAIMgr::GetDialogStatus(const Player* pPlayer, const GameObject* 
     if (!pTempScript || !pTempScript->pDialogStatusGO)
         return DIALOG_STATUS_UNDEFINED;
 
-    pPlayer->PlayerTalkClass->ClearMenus();
+    pPlayer->GetPlayerMenu()->ClearMenus();
 
     return pTempScript->pDialogStatusGO(pPlayer, pGo);
 }
@@ -243,7 +266,7 @@ bool ScriptDevAIMgr::OnQuestAccept(Player* pPlayer, Creature* pCreature, const Q
     if (!pTempScript || !pTempScript->pQuestAcceptNPC)
         return false;
 
-    pPlayer->PlayerTalkClass->ClearMenus();
+    pPlayer->GetPlayerMenu()->ClearMenus();
 
     return pTempScript->pQuestAcceptNPC(pPlayer, pCreature, pQuest);
 }
@@ -255,7 +278,7 @@ bool ScriptDevAIMgr::OnQuestAccept(Player* pPlayer, GameObject* pGo, const Quest
     if (!pTempScript || !pTempScript->pQuestAcceptGO)
         return false;
 
-    pPlayer->PlayerTalkClass->ClearMenus();
+    pPlayer->GetPlayerMenu()->ClearMenus();
 
     return pTempScript->pQuestAcceptGO(pPlayer, pGo, pQuest);
 }
@@ -267,7 +290,7 @@ bool ScriptDevAIMgr::OnQuestAccept(Player* pPlayer, Item* pItem, Quest const* pQ
     if (!pTempScript || !pTempScript->pQuestAcceptItem)
         return false;
 
-    pPlayer->PlayerTalkClass->ClearMenus();
+    pPlayer->GetPlayerMenu()->ClearMenus();
 
     return pTempScript->pQuestAcceptItem(pPlayer, pItem, pQuest);
 }
@@ -299,7 +322,7 @@ bool ScriptDevAIMgr::OnQuestRewarded(Player* pPlayer, Creature* pCreature, Quest
     if (!pTempScript || !pTempScript->pQuestRewardedNPC)
         return false;
 
-    pPlayer->PlayerTalkClass->ClearMenus();
+    pPlayer->GetPlayerMenu()->ClearMenus();
 
     return pTempScript->pQuestRewardedNPC(pPlayer, pCreature, pQuest);
 }
@@ -311,7 +334,7 @@ bool ScriptDevAIMgr::OnQuestRewarded(Player* pPlayer, GameObject* pGo, Quest con
     if (!pTempScript || !pTempScript->pQuestRewardedGO)
         return false;
 
-    pPlayer->PlayerTalkClass->ClearMenus();
+    pPlayer->GetPlayerMenu()->ClearMenus();
 
     return pTempScript->pQuestRewardedGO(pPlayer, pGo, pQuest);
 }
@@ -445,7 +468,7 @@ ScriptDevAIMgr::~ScriptDevAIMgr()
 
     m_scripts.clear();
 
-    num_sc_scripts = 0;
+    m_scriptCount = 0;
 
     setScriptLibraryErrorFile(nullptr, nullptr);
 }
@@ -456,7 +479,7 @@ void ScriptDevAIMgr::AddScript(uint32 id, Script* script)
         return;
 
     m_scripts[id] = script;
-    ++num_sc_scripts;
+    ++m_scriptCount;
 }
 
 Script* ScriptDevAIMgr::GetScript(uint32 id) const
@@ -496,15 +519,6 @@ void ScriptDevAIMgr::Initialize()
     FillSpellSummary();
 
     AddScripts();
-
-    // Check existence scripts for all registered by core script names
-    for (uint32 i = 1; i < GetScriptIdsCount(); ++i)
-    {
-        if (!m_scripts[i])
-            script_error_log("No script found for ScriptName '%s'.", GetScriptName(i));
-    }
-
-    outstring_log(">> Loaded %i C++ Scripts.", num_sc_scripts);
 #else
     outstring_log(">> ScriptDev is disabled!\n");
 #endif
@@ -553,6 +567,17 @@ void ScriptDevAIMgr::LoadScriptNames()
 
     sLog.outString(">> Loaded %d Script Names", count);
     sLog.outString();
+}
+
+void ScriptDevAIMgr::CheckScriptNames()
+{
+    // Check existence scripts for all registered by core script names
+    for (uint32 i = 1; i < GetScriptIdsCount(); ++i)
+    {
+        if (!m_scripts[i])
+            script_error_log("No script found for ScriptName '%s'.", GetScriptName(i));
+    }
+    outstring_log(">> Loaded %i C++ Scripts.", m_scriptCount);
 }
 
 uint32 ScriptDevAIMgr::GetScriptId(const char* name) const

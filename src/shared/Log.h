@@ -52,8 +52,8 @@ enum LogFilters
     LOG_FILTER_COMBAT             = 0x000800,               // 11 attack states/roll attack results/etc
     LOG_FILTER_SPELL_CAST         = 0x001000,               // 12 spell cast/aura apply/spell proc events
     LOG_FILTER_DB_STRICTED_CHECK  = 0x002000,               // 13 stricted DB data checks output (with possible false reports) for DB devs
-    LOG_FILTER_AHBOT_SELLER       = 0x004000,               // 14 Auction House Bot seller part
-    LOG_FILTER_AHBOT_BUYER        = 0x008000,               // 15 Auction House Bot buyer part
+    // reserved for future version
+    // reserved for future version
     LOG_FILTER_PATHFINDING        = 0x010000,               // 16 Pathfinding
     LOG_FILTER_MAP_LOADING        = 0x020000,               // 17 Map loading/unloading (MAP, VMAPS, MMAP)
     LOG_FILTER_EVENT_AI_DEV       = 0x040000,               // 18 Event AI actions
@@ -184,11 +184,14 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, std::m
         bool HasLogLevelOrHigher(LogLevel loglvl) const { return m_logLevel >= loglvl || (m_logFileLevel >= loglvl && logfile); }
         bool IsOutCharDump() const { return m_charLog_Dump; }
         bool IsIncludeTime() const { return m_includeTime; }
+        std::string GetTraceLog();
 
         static void WaitBeforeContinueIfNeed();
 
         // Set filename for scriptlibrary error output
         void setScriptLibraryErrorFile(char const* fname, char const* libName);
+
+        void traceLog();
 
     private:
         FILE* openLogFile(char const* configFileName, char const* configTimeStampFlag, char const* mode);
@@ -203,7 +206,9 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, std::m
         FILE* scriptErrLogFile;
         FILE* worldLogfile;
         FILE* customLogFile;
+
         std::mutex m_worldLogMtx;
+        std::mutex m_traceLogMtx;
 
         // log/console control
         LogLevel m_logLevel;

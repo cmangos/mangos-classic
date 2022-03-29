@@ -37,6 +37,7 @@ enum
 
     // Razorgore event related
     NPC_GRETHOK_CONTROLLER      = 12557,
+    NPC_BLACKWING_GUARDSMAN     = 14456,
     NPC_BLACKWING_ORB_TRIGGER   = 14449,
     NPC_NEFARIANS_TROOPS        = 14459,
     NPC_MONSTER_GENERATOR       = 12434,
@@ -71,6 +72,7 @@ enum
     SPELL_CONTROL_ORB           = 23018,                    // Visual used by Grethok the Controller
     SPELL_FIREBALL              = 23024,                    // Used by Razorgore to reset the event (and kill everyone like a badass)
     SPELL_EXPLODE_ORB           = 20037,                    // used if attacked without destroying the eggs - triggers 20038
+    SPELL_POSSESS               = 19832,
 
     MAX_EGGS_DEFENDERS          = 4,
     MAX_DRAGONSPAWN             = 12,
@@ -137,6 +139,8 @@ class instance_blackwing_lair : public ScriptedInstance
         void OnCreatureEnterCombat(Creature* pCreature) override;
         void OnCreatureDeath(Creature* pCreature) override;
 
+        void OnCreatureRespawn(Creature* creature) override;
+
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
 
@@ -174,6 +178,7 @@ class instance_blackwing_lair : public ScriptedInstance
         GuidList m_lDefendersGuids;
         GuidList m_lUsedEggsGuids;
         GuidList m_lDrakonidSpawnerGuids;
+        GuidList m_drakonids;
         GuidVector m_vGeneratorGuids;
 };
 

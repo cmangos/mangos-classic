@@ -120,6 +120,19 @@ void MapPersistentState::SaveGORespawnTime(uint32 loguid, time_t t)
     CharacterDatabase.CommitTransaction();
 }
 
+time_t MapPersistentState::GetObjectRespawnTime(uint32 typeId, uint32 loguid) const
+{
+    return typeId == TYPEID_UNIT ? GetCreatureRespawnTime(loguid) : GetGORespawnTime(loguid);
+}
+
+void MapPersistentState::SaveObjectRespawnTime(uint32 typeId, uint32 loguid, time_t t)
+{
+    if (typeId == TYPEID_UNIT)
+        SaveCreatureRespawnTime(loguid, t);
+    else
+        SaveGORespawnTime(loguid, t);
+}
+
 void MapPersistentState::SetCreatureRespawnTime(uint32 loguid, time_t t)
 {
     if (t > sWorld.GetGameTime())
@@ -298,6 +311,9 @@ void DungeonPersistentState::UpdateEncounterState(EncounterCreditType type, uint
         if (iter->second->creditType == type && dbcEntry->mapId == GetMapId())
         {
             m_completedEncountersMask |= 1 << dbcEntry->encounterIndex;
+
+            if (Map* map = GetMap())
+                map->GetVariableManager().SetEncounterVariable(dbcEntry->Id, true);
 
             CharacterDatabase.PExecute("UPDATE instance SET encountersMask = '%u' WHERE id = '%u'", m_completedEncountersMask, GetInstanceId());
 
@@ -755,7 +771,7 @@ void MapPersistentStateManager::CleanupInstances()
     CharacterDatabase.BeginTransaction();
     // clean character/group - instance binds with invalid group/characters
     _DelHelper(CharacterDatabase, "character_instance.guid, instance", "character_instance", "LEFT JOIN characters ON character_instance.guid = characters.guid WHERE characters.guid IS NULL");
-    _DelHelper(CharacterDatabase, "group_instance.leaderGuid, instance", "group_instance", "LEFT JOIN characters ON group_instance.leaderGuid = characters.guid LEFT JOIN groups ON group_instance.leaderGuid = groups.leaderGuid WHERE characters.guid IS NULL OR groups.leaderGuid IS NULL");
+    _DelHelper(CharacterDatabase, "group_instance.leaderGuid, instance", "group_instance", "LEFT JOIN characters ON group_instance.leaderGuid = characters.guid LEFT JOIN `groups` ON group_instance.leaderGuid = groups.leaderGuid WHERE characters.guid IS NULL OR groups.leaderGuid IS NULL");
 
     // clean instances that do not have any players or groups bound to them
     _DelHelper(CharacterDatabase, "id, map", "instance", "LEFT JOIN character_instance ON character_instance.instance = id LEFT JOIN group_instance ON group_instance.instance = id WHERE character_instance.instance IS NULL AND group_instance.instance IS NULL");

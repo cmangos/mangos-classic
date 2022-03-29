@@ -76,6 +76,20 @@ set(SRC_GRP_LOG
     Log.h
 )
 
+set(SRC_GRP_MT
+    Multithreading/Messager.h
+    Multithreading/Messager.cpp
+)
+
+if(BUILD_METRICS)
+    set(SRC_GRP_METRIC
+        Metric/Measurement.cpp
+        Metric/Measurement.h
+        Metric/Metric.cpp
+        Metric/Metric.h
+    )
+endif()
+
 set(SRC_GRP_NETWORK
     Network/PacketBuffer.cpp
     Network/Socket.cpp
@@ -95,6 +109,8 @@ set(SRC_GRP_UTIL
     Util.cpp
     Util.h
     WorldPacket.h
+    ProducerConsumerQueue.h
+    CommonDefines.h
 )
 
 set(SRC_GRP_SRP
@@ -108,16 +124,23 @@ set(LIBRARY_SRCS
     ${SRC_GRP_DATABASE}
     ${SRC_GRP_DATABASE_DBC}
     ${SRC_GRP_LOG}
+    ${SRC_GRP_METRIC}
     ${SRC_GRP_UTIL}
     ${SRC_GRP_SRP}
     ${SRC_GRP_NETWORK}
+    ${SRC_GRP_MT}
     Common.cpp
     Common.h
+    Filesystem.h
     revision_sql.h
     revision.h
     Threading.cpp
     Threading.h
 )
+
+# define header files
+set(PCH_FILE_HEADER "pchdef.h")
+set(PCH_FILE_SOURCE "pchdef.cpp")
 
 source_group("Auth"
   FILES
@@ -144,6 +167,13 @@ source_group("Log"
     ${SRC_GRP_LOG}
 )
 
+if(BUILD_METRICS)
+    source_group("Metric"
+    FILES
+        ${SRC_GRP_METRIC}
+    )
+endif()
+
 source_group("Util"
   FILES
     ${SRC_GRP_UTIL}
@@ -154,6 +184,11 @@ source_group("SRP"
     ${SRC_GRP_SRP}
 )
 
+source_group("Multithreading"
+  FILES
+    ${SRC_GRP_MT}
+)
+
 # OS specific files
 if(WIN32)
   set(LIBRARY_SRCS
@@ -161,13 +196,6 @@ if(WIN32)
       ServiceWin32.cpp
       ServiceWin32.h
      )
-  if(MSVC)
-    set(LIBRARY_SRCS
-      ${LIBRARY_SRCS}
-      WheatyExceptionReport.cpp
-      WheatyExceptionReport.h
-     )
-  endif()
 else()
   set(LIBRARY_SRCS
       ${LIBRARY_SRCS}
@@ -176,42 +204,56 @@ else()
      )
 endif()
 
-# include external dependencies without warnings
-include_directories(SYSTEM
-  ${OPENSSL_INCLUDE_DIR}
-)
-
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_BINARY_DIR}
-)
-
-if(POSTGRESQL AND POSTGRESQL_FOUND AND NOT WIN32)
-  include_directories(SYSTEM ${PostgreSQL_INCLUDE_DIRS})
-else()
-  include_directories(SYSTEM ${MYSQL_INCLUDE_DIR})
-endif()
-
 add_library(${LIBRARY_NAME} STATIC
   ${LIBRARY_SRCS}
 )
 
-target_link_libraries(${LIBRARY_NAME}
-  PUBLIC framework
-  PUBLIC utf8cpp
-  PUBLIC ${OPENSSL_LIBRARIES}
-)
-
 target_include_directories(${LIBRARY_NAME}
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+  PUBLIC ${Boost_INCLUDE_DIRS}
   PUBLIC ${OPENSSL_INCLUDE_DIR}
-  PRIVATE ${Boost_INCLUDE_DIRS}
+  PUBLIC "${CMAKE_SOURCE_DIR}/src/game"
 )
 
-if(POSTGRESQL AND POSTGRESQL_FOUND AND NOT WIN32)
+if(UNIX)
+  target_link_libraries(${LIBRARY_NAME}
+    PUBLIC framework
+    PUBLIC utf8cpp
+    PUBLIC dl
+    PUBLIC ${Boost_LIBRARIES}
+    PUBLIC ${OPENSSL_LIBRARIES}
+  )
+else()
+  target_link_libraries(${LIBRARY_NAME}
+    PUBLIC framework
+    PUBLIC ${Boost_LIBRARIES}
+    PUBLIC ${OPENSSL_LIBRARIES}
+    PUBLIC utf8cpp
+  )
+endif()
+
+if(POSTGRESQL AND POSTGRESQL_FOUND)
   target_include_directories(${LIBRARY_NAME} PUBLIC ${PostgreSQL_INCLUDE_DIRS})
+  target_link_libraries(${LIBRARY_NAME} PUBLIC ${PostgreSQL_LIBRARIES})
 else()
   target_include_directories(${LIBRARY_NAME} PUBLIC ${MYSQL_INCLUDE_DIR})
+  target_link_libraries(${LIBRARY_NAME} PUBLIC ${MYSQL_LIBRARY})
+  if (WIN32)
+    # Add provided dependency lib to dev folder
+    string(REGEX REPLACE "/" "\\\\" LibFolder ${DEV_PROVIDED_LIBS_FOLDER})
+    add_custom_command(TARGET ${LIBRARY_NAME} POST_BUILD
+      COMMAND xcopy /Y \"${LibFolder}\\*.dll\" \"${DEV_BIN_DIR}\\*.dll\")
+  endif()
+endif()
+
+# Specific definition for an issue with boost/stacktrace when building on macOS
+if(APPLE)
+  add_compile_definitions(_GNU_SOURCE)
+endif()
+
+# Generate precompiled header
+if(PCH)
+  target_precompile_headers(${LIBRARY_NAME} PRIVATE "${PCH_FILE_HEADER}")
 endif()
 
 # Mark the revision header as being generated.

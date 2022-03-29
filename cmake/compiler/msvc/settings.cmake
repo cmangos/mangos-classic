@@ -1,22 +1,12 @@
-if(PLATFORM EQUAL X64)
-  # This definition is necessary to work around a bug with Intellisense described
-  # here: http://tinyurl.com/2cb428.  Syntax highlighting is important for proper
-  # debugger functionality.
-  add_definitions("-D_WIN64")
-  message(STATUS "MSVC: 64-bit platform, enforced -D_WIN64 parameter")
+# This definition is necessary to work around a bug with Intellisense described
+# here: http://tinyurl.com/2cb428.  Syntax highlighting is important for proper
+# debugger functionality.
+add_definitions("-D_WIN64")
+message(STATUS "MSVC: 64-bit platform, enforced -D_WIN64 parameter")
 
-  #Enable extended object support for debug compiles on X64 (not required on X86)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
-  message(STATUS "MSVC: Enabled increased number of sections in object files")
-
-elseif(PLATFORM EQUAL X86)
-  # mark 32 bit executables large address aware so they can use > 2GB address space
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LARGEADDRESSAWARE")
-  message(STATUS "MSVC: Enabled large address awareness")
-
-  add_definitions(/arch:SSE2)
-  message(STATUS "MSVC: Enabled SSE2 support")
-endif()
+#Enable extended object support for debug compiles on X64 (not required on X86)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+message(STATUS "MSVC: Enabled increased number of sections in object files")
 
 # multithreaded compiling on VS
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")

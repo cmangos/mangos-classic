@@ -22,7 +22,7 @@
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
 
-GuardianAI::GuardianAI(Creature* creature) : CreatureEventAI(creature)
+GuardianAI::GuardianAI(Creature* creature) : CreatureEventAI(creature), m_followAngle(PET_FOLLOW_ANGLE), m_followDist(PET_FOLLOW_DIST)
 {
     Unit* owner = creature->GetOwner();
     MANGOS_ASSERT(owner);
@@ -39,23 +39,35 @@ void GuardianAI::JustRespawned()
     CreatureEventAI::JustRespawned();
 
     if (GetDefaultMovement() == FOLLOW_MOTION_TYPE)
-        m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+    {
+        if (Unit* owner = m_unit->GetOwner())
+        {
+            if (owner->IsPlayer())
+            {
+                auto data = static_cast<Player*>(owner)->RequestFollowData(m_creature->GetObjectGuid());
+                m_followAngle = data.first;
+                m_followDist = data.second;
+            }
+        }
+        m_creature->GetMotionMaster()->MoveFollow(owner, m_followDist, m_followAngle);
+    }
 }
 
 void GuardianAI::UpdateAI(const uint32 diff)
 {
-    Unit* owner = m_creature->GetOwner();
-
-    if (!owner)
-        return;
-
     switch (m_reactState)
     {
         case REACT_AGGRESSIVE:
         case REACT_DEFENSIVE:
-            if (!m_creature->isInCombat() && owner->isInCombat() && !(m_creature->IsPet() && ((Pet*)m_creature)->getPetType() == MINI_PET))
+        {
+            Unit* owner = m_creature->GetOwner();
+            if (!owner)
+                break;
+
+            if (!m_creature->IsInCombat() && owner->IsInCombat() && !(m_creature->IsPet() && ((Pet*)m_creature)->getPetType() == MINI_PET))
                 AttackStart(owner->getAttackerForHelper());   // check for getAttackerForHelper() == nullpter in AttackStart()
             break;
+        }
         default:
             break;
     }
@@ -79,8 +91,27 @@ void GuardianAI::CombatStop()
         return;
 
     // only alive creatures that are not on transport can return to home position
-    if (m_creature->isAlive() && GetDefaultMovement() == FOLLOW_MOTION_TYPE)
+    if (m_creature->IsAlive() && GetDefaultMovement() == FOLLOW_MOTION_TYPE)
         m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+}
+
+void GuardianAI::JustDied(Unit* killer)
+{
+    CreatureEventAI::JustDied(killer);
+    RelinquishFollowData();
+}
+
+void GuardianAI::OnUnsummon()
+{
+    CreatureEventAI::OnUnsummon();
+    RelinquishFollowData();
+}
+
+void GuardianAI::RelinquishFollowData()
+{
+    if (Unit* owner = m_creature->GetOwner())
+        if (owner->IsPlayer())
+            static_cast<Player*>(owner)->RelinquishFollowData(m_creature->GetObjectGuid());
 }
 
 void GuardianAI::EnterEvadeMode()

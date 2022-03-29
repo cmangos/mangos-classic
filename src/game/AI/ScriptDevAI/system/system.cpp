@@ -2,7 +2,7 @@
 * This program is free software licensed under GPL version 2
 * Please see the included DOCS/LICENSE.TXT for more information */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "system.h"
 #include "ProgressBar.h"
 #include "Globals/ObjectMgr.h"
@@ -66,7 +66,7 @@ void SystemMgr::LoadScriptWaypoints()
     uint64 creatureCount = 0;
 
     // Load Waypoints
-    QueryResult* result = WorldDatabase.PQuery("SELECT COUNT(entry) FROM script_waypoint GROUP BY entry");
+    QueryResult* result = WorldDatabase.PQuery("SELECT COUNT(Entry) FROM script_waypoint GROUP BY Entry");
     if (result)
     {
         creatureCount = result->GetRowCount();
@@ -75,19 +75,29 @@ void SystemMgr::LoadScriptWaypoints()
 
     outstring_log("SD2: Loading Script Waypoints for " UI64FMTD " creature(s)...", creatureCount);
 
-    result = WorldDatabase.PQuery("SELECT entry, pathId, pointid, position_x, position_y, position_z, orientation, waittime, script_id FROM script_waypoint ORDER BY entry, pathId, pointid");
+    //                                    0      1       2      3          4          5          6            7         8
+    result = WorldDatabase.PQuery("SELECT Entry, PathId, Point, PositionX, PositionY, PositionZ, Orientation, WaitTime, ScriptId FROM script_waypoint ORDER BY Entry, PathId, Point");
 
     if (result)
     {
         BarGoLink bar(result->GetRowCount());
         uint32 nodeCount = 0;
+        std::set<uint32> blacklistWaypoints;
 
         do
         {
             bar.step();
             Field* fields = result->Fetch();
 
-            uint32 entry  = fields[0].GetUInt32();
+            uint32 entry = fields[0].GetUInt32();
+            uint32 pathId = fields[1].GetUInt32();
+            uint32 pointId = fields[2].GetUInt32();
+
+            if (pointId == 0)
+            {
+                blacklistWaypoints.insert((entry << 8) + pathId);
+                error_db_log("SD2: DB table `script_waypoint` has invalid point 0 for entry %u in path %u. Skipping.", entry, pathId);
+            }
 
             CreatureInfo const* info = GetCreatureTemplateStore(entry);
             if (!info)
@@ -96,8 +106,6 @@ void SystemMgr::LoadScriptWaypoints()
                 continue;
             }
 
-            uint32 pathId       = fields[1].GetUInt32();
-            uint32 pointId      = fields[2].GetUInt32();
             float position_x    = fields[3].GetFloat();
             float position_y    = fields[4].GetFloat();
             float position_z    = fields[5].GetFloat();
@@ -105,7 +113,9 @@ void SystemMgr::LoadScriptWaypoints()
             uint32 waitTime     = fields[7].GetUInt32();
             uint32 scriptId     = fields[8].GetUInt32();
 
-            sWaypointMgr.AddExternalNode(entry, pathId, pointId, position_x, position_y, position_z, orientation, waitTime, scriptId);
+            // sanitize waypoints
+            if (blacklistWaypoints.find((entry << 8) + pathId) == blacklistWaypoints.end())
+                sWaypointMgr.AddExternalNode(entry, pathId, pointId, position_x, position_y, position_z, orientation, waitTime, scriptId);
 
             ++nodeCount;
         }

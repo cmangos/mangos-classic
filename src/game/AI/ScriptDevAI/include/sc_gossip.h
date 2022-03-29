@@ -133,17 +133,17 @@ enum
 // Text to be displayed in pop up box
 // Money value in pop up box
 // Coded
-#define ADD_GOSSIP_ITEM(icon, text, sender, optionId)   PlayerTalkClass->GetGossipMenu().AddMenuItem(icon, text, sender, optionId, "", 0)
-#define ADD_GOSSIP_ITEM_ID(icon, textId, sender, optionId)   PlayerTalkClass->GetGossipMenu().AddMenuItem(icon, textId, sender, optionId, 0, 0)
-#define ADD_GOSSIP_ITEM_EXTENDED(icon, text, sender, optionId, boxMessage, boxMoney, code)   PlayerTalkClass->GetGossipMenu().AddMenuItem(icon, text, sender, optionId, boxMessage, code)
+#define ADD_GOSSIP_ITEM(icon, text, sender, optionId)   GetPlayerMenu()->GetGossipMenu().AddMenuItem(icon, text, sender, optionId, "", 0)
+#define ADD_GOSSIP_ITEM_ID(icon, textId, sender, optionId)   GetPlayerMenu()->GetGossipMenu().AddMenuItem(icon, textId, sender, optionId, 0, 0)
+#define ADD_GOSSIP_ITEM_EXTENDED(icon, text, sender, optionId, boxMessage, boxMoney, code)   GetPlayerMenu()->GetGossipMenu().AddMenuItem(icon, text, sender, optionId, boxMessage, code)
 
 // This fuction Sends the current menu to show to client
 // uiTextId - NPCTEXTID (uint32)
 // guid - npc guid (ObjectGuid)
-#define SEND_GOSSIP_MENU(textId, guid)      PlayerTalkClass->SendGossipMenu(textId, guid)
+#define SEND_GOSSIP_MENU(textId, guid)      GetPlayerMenu()->SendGossipMenu(textId, guid)
 
 // Closes the Menu
-#define CLOSE_GOSSIP_MENU()        PlayerTalkClass->CloseGossip()
+#define CLOSE_GOSSIP_MENU()        GetPlayerMenu()->CloseGossip()
 
 // Fuctions to send NPC lists
 // guid - is always the npc guid (ObjectGuid)

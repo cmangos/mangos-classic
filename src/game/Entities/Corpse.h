@@ -72,7 +72,7 @@ class Corpse : public WorldObject
         uint8 getGender() const { return GetByteValue(CORPSE_FIELD_BYTES_1, 2); }
 
         // faction template id
-        uint32 getFaction() const;
+        uint32 GetFaction() const;
 
         time_t const& GetGhostTime() const { return m_time; }
         void ResetGhostTime() { m_time = time(nullptr); }

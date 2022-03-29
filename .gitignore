@@ -12,7 +12,6 @@
 .*
 *.o
 *.o.*
-*.a
 *.so
 *.so.dbg
 *.bin
@@ -44,6 +43,8 @@ autom4te.cache
 *.patch
 callgrind.out.*
 nbproject/
+.idea/
+cmake-build-*/
 
 #
 # Git stuff
@@ -89,3 +90,4 @@ cmake_install.cmake
 
 # recastnavigation directory needs exception
 !dep/recastnavigation/RecastDemo/Build/
+/_build/

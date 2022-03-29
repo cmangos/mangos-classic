@@ -99,6 +99,7 @@ float CONF_flat_liquid_delta_limit = 0.001f; // If max - min less this value - l
 // List MPQ for extract from
 const char* CONF_mpq_list[] =
 {
+    "model.MPQ",
     "dbc.MPQ",
     "terrain.MPQ",
     "patch.MPQ",
@@ -716,7 +717,10 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x)
                     if (minHeight > h) minHeight = h;
                 }
                 else
+                {
                     liquid_height[y][x] = CONF_use_minHeight;
+                    if (minHeight > CONF_use_minHeight) minHeight = CONF_use_minHeight;
+                }
             }
         }
         map.liquidMapOffset = map.heightMapOffset + map.heightMapSize;

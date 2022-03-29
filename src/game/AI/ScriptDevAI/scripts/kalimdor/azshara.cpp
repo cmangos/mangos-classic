@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
+#include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
 mobs_spitelashes
 npc_loramus_thalipedes
 npc_felhound_tracker
@@ -131,7 +131,7 @@ struct mobs_spitelashesAI : public ScriptedAI
                 pTarget = m_creature;
                 break;
             case TARGET_TYPE_VICTIM:
-                pTarget = m_creature->getVictim();
+                pTarget = m_creature->GetVictim();
                 break;
             case TARGET_TYPE_RANDOM:
                 pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, m_aSpitelashAbility[uiIndex].m_uiSpellId, SELECT_FLAG_IN_LOS);
@@ -152,7 +152,7 @@ struct mobs_spitelashesAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiMorphTimer)
@@ -465,7 +465,7 @@ enum
     SPELL_RAMPAGE               = 25744,
 
     EMOTE_GENERIC_FRENZY_KILL   = -1000001,
-    EMOTE_MAWS_KILL             = -1000891      // World emote that was removed in WotLK patch 3.2
+    EMOTE_MAWS_KILL             = -1010000      // World emote that was removed in WotLK patch 3.2
 };
 
 struct boss_mawsAI : public ScriptedAI
@@ -511,7 +511,7 @@ struct boss_mawsAI : public ScriptedAI
             uiDespawnTimer -= uiDiff;
 
         // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (uiFrenzyTimer < uiDiff)
@@ -525,7 +525,7 @@ struct boss_mawsAI : public ScriptedAI
 
         if (uiRampageTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_RAMPAGE);
+            DoCastSpellIfCan(m_creature->GetVictim(), SPELL_RAMPAGE);
             uiRampageTimer = (m_creature->GetHealthPercent() < 20.0f ? 12 : urand(20, 120)) * IN_MILLISECONDS;
         }
         else

@@ -19,11 +19,27 @@ enum
     SAY_BOSS_DIE_AD         = -1033007,
     SAY_BOSS_DIE_AS         = -1033008,
     YELL_PACK_DEAD          = -1033020,
+    SAY_ARUGAL_INTRO_1      = -1033009,
+    SAY_ARUGAL_INTRO_2      = -1033010,
+    SAY_ARUGAL_INTRO_3      = -1033011,
+    SAY_ARUGAL_INTRO_4      = -1033012,
+
+    YELL_FENRUS             = -1033013,
+    YELL_AGGRO              = -1033017,
+    YELL_KILLED_PLAYER      = -1033018,
+    YELL_WORGEN_CURSE       = -1033019,
+
+    SPELL_SPAWN             = 7741,
+    SPELL_ARUGAL_TELEPORT   = 7136,
+    SPELL_FIRE              = 6422,
 
     NPC_ASH                 = 3850,
     NPC_ADA                 = 3849,
-    //  NPC_ARUGAL              = 10000,                    //"Arugal" says intro text, not used
-    NPC_ARCHMAGE_ARUGAL     = 4275,                         //"Archmage Arugal" does Fenrus event
+    GOSSIP_ASH              = 798,
+    GOSSIP_ADA              = 799,
+
+    NPC_ARUGAL              = 10000,                        // "Arugal" says intro text
+    NPC_ARCHMAGE_ARUGAL     = 4275,                         // "Archmage Arugal" does Fenrus event
     NPC_FENRUS              = 4274,                         // used to summon Arugal in Fenrus event
     NPC_VINCENT             = 4444,                         // Vincent should be "dead" is Arugal is done the intro already
 
@@ -45,25 +61,44 @@ struct Waypoint
     float fX, fY, fZ;
 };
 
+enum {
+    VINCENT_DEATH = 1,
+    ARUGAL_VISIBLE,
+    ARUGAL_TELEPORT_IN,
+    ARUGAL_TURN_TO_VINCENT,
+    ARUGAL_EMOTE_POINT,
+    ARUGAL_EMOTE_EXCLAMATION,
+    ARUGAL_EMOTE_LAUGH,
+    ARUGAL_TELEPORT_OUT,
+    ARUGAL_INTRO_DONE,
+    ARCHMAGE_FIRE,
+    ARCHMAGE_LIGHTNING,
+    ARCHMAGE_INVIS,
+    ARCHMAGE_VOIDWALKERS,
+};
+
 static const Waypoint nandosMovement = {-170.6f, 2182.45f, 151.91f};
 
-class instance_shadowfang_keep : public ScriptedInstance
+class instance_shadowfang_keep : public ScriptedInstance, public DialogueHelper
 {
     public:
-        instance_shadowfang_keep(Map* pMap);
+        instance_shadowfang_keep(Map* map);
 
         void Initialize() override;
 
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnCreatureDeath(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
+        void OnCreatureCreate(Creature* creature) override;
+        void OnCreatureDeath(Creature* creature) override;
+        void OnObjectCreate(GameObject* go) override;
         void DoSpeech();
+        void JustDidDialogueStep(int32 entry) override;
 
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
+        void SetData(uint32 type, uint32 data) override;
+        uint32 GetData(uint32 type) const override;
 
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
+
+        void Update(const uint32 diff) override;
 
     private:
         uint32 m_auiEncounter[MAX_ENCOUNTER];

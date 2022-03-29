@@ -1,10 +1,15 @@
 # check what platform we're on (64-bit or 32-bit), and create a simpler test than CMAKE_SIZEOF_VOID_P
-if(CMAKE_SIZEOF_VOID_P MATCHES 8)
+string(TOLOWER ${CMAKE_HOST_SYSTEM_PROCESSOR} CURRENT_PROCESSOR_ARCHITECTURE)
+if(CMAKE_SIZEOF_VOID_P MATCHES 8 OR CURRENT_PROCESSOR_ARCHITECTURE STREQUAL amd64 OR CURRENT_PROCESSOR_ARCHITECTURE STREQUAL x86_64)
     set(PLATFORM X64)
     message(STATUS "Detected 64-bit platform")
 else()
     set(PLATFORM X86)
     message(STATUS "Detected 32-bit platform")
+    message(STATUS "CMaNGOS support for 32 bit is ended.")
+    if (NOT FORCE_32B)
+        message(FATAL_ERROR "32 bit build are not no more supported. You can force build by defining -DFORCE_32B=ON")
+    endif()
 endif()
 
 if(WIN32)

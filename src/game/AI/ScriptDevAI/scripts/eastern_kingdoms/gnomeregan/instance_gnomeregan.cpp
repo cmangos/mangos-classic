@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "gnomeregan.h"
 
 instance_gnomeregan::instance_gnomeregan(Map* pMap) : ScriptedInstance(pMap)

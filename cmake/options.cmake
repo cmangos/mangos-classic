@@ -7,8 +7,12 @@ option(BUILD_LOGIN_SERVER   "Build login server"                    ON)
 option(BUILD_EXTRACTORS     "Build map/dbc/vmap/mmap extractors"    OFF)
 option(BUILD_SCRIPTDEV      "Build ScriptDev. (OFF Speedup build)"  ON)
 option(BUILD_PLAYERBOT      "Build Playerbot mod"                   OFF)
+option(BUILD_AHBOT          "Build Auction House Bot mod"           OFF)
+option(BUILD_METRICS        "Build Metrics, generate data for Grafana" OFF)
 option(BUILD_RECASTDEMOMOD  "Build map/vmap/mmap viewer"            OFF)
 option(BUILD_GIT_ID         "Build git_id"                          OFF)
+option(BUILD_DOCS           "Build documentation with doxygen"      OFF)
+option(CMAKE_INTERPROCEDURAL_OPTIMIZATION "Enable link-time optimizations" OFF)
 
 # TODO: options that should be checked/created:
 #option(CLI                  "With CLI"                              ON)
@@ -30,8 +34,11 @@ message(STATUS
     BUILD_EXTRACTORS        Build map/dbc/vmap/mmap extractor
     BUILD_SCRIPTDEV         Build scriptdev. (Disable it to speedup build in dev mode by not including scripts)
     BUILD_PLAYERBOT         Build Playerbot mod
+    BUILD_AHBOT             Build Auction House Bot mod
+    BUILD_METRICS           Build Metrics, generate data for Grafana
     BUILD_RECASTDEMOMOD     Build map/vmap/mmap viewer
     BUILD_GIT_ID            Build git_id
+    BUILD_DOCS              Build documentation with doxygen
 
   To set an option simply type -D<OPTION>=<VALUE> after 'cmake <srcs>'.
   Also, you can specify the generator with -G. see 'cmake --help' for more details

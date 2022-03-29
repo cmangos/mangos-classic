@@ -1,0 +1,94 @@
+Tutorial:
+1. setup influxdb - start influxd, start influx and create database perfd
+2. setup grafana - add dataset - influxdb - perfd - http://localhost:8086
+
+Logged Entities:
+map.update:
+ - fields:
+  * count - count of updated objects
+  * duration - duration of map update
+ - tags:
+  * map_id
+  * instance_id
+
+unit.update:
+ - fields
+  * duration
+ - tags
+  * entry
+  * guid
+  * unit_type
+  * map_id
+  * instance_id
+
+unit.update.ai:
+ - fields
+  * duration
+ - tags
+  * entry
+  * guid
+  * unit_type
+  * map_id
+  * instance_id
+
+unit.updatesplinemovement:
+ - fields
+  * duration
+ - tags
+  * entry
+  * guid
+  * unit_type
+  * map_id
+  * instance_id
+
+motionmaster.updatemotion:
+ - fields
+  * duration
+ - tags
+  * entry
+  * guid
+  * unit_type
+  * map_id
+  * instance_id
+
+motionmaster.initialize:
+ - fields
+  * duration
+ - tags
+  * entry
+  * guid
+  * unit_type
+  * map_id
+  * instance_id
+
+pathfinder.calculate:
+ - fields
+  * duration
+ - tags
+  * entry
+  * guid
+  * unit_type
+  * map_id
+  * instance_id
+
+world.update:
+ - fields
+  * total
+  * presession
+  * premap
+  * map
+  * singletons
+  * cleanup
+
+world.metrics.packets.received:
+  - fields:
+   * count
+  - tags:
+   * opcode
+
+world.metrics.packets.received:
+  - fields:
+   * online
+   * unique
+   * queued
+

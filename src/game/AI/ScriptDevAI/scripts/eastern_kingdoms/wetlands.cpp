@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
+#include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
 npc_mikhail
 npc_tapoke_slim_jahn
 EndContentData */
@@ -99,14 +99,14 @@ struct npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
     {
         switch (uiPointId)
         {
-            case 2:
+            case 3:
                 SetRun();
                 m_creature->RemoveAurasDueToSpell(SPELL_STEALTH);
                 m_creature->SetFactionTemporary(FACTION_ENEMY, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_COMBAT_STOP);
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                 SetReactState(REACT_AGGRESSIVE);
                 break;
-            case 6:
+            case 7:
                 // fail the quest if he escapes
                 if (Player* pPlayer = GetPlayerForEscort())
                     JustDied(pPlayer);
@@ -133,7 +133,7 @@ struct npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
             pSummoned->AI()->AttackStart(pPlayer);
     }
 
-    void DamageTaken(Unit* /*doneBy*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         if (!HasEscortState(STATE_ESCORT_ESCORTING))
             return;
@@ -188,7 +188,7 @@ struct npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
     {
         DialogueUpdate(uiDiff);
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();

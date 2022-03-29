@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
+#include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
 npc_ranshalla
 EndContentData */
 
@@ -131,12 +131,7 @@ static const DialogueEntry aIntroDialogue[] =
     {0, 0, 0},
 };
 
-struct EventLocations
-{
-    float m_fX, m_fY, m_fZ, m_fO;
-};
-
-static EventLocations aWingThicketLocations[] =
+static Position aWingThicketLocations[] =
 {
     {5515.98f, -4903.43f, 846.30f, 4.58f},      // 0 right priestess summon loc
     {5501.94f, -4920.20f, 848.69f, 6.15f},      // 1 left priestess summon loc
@@ -233,15 +228,15 @@ struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
     void DoSummonPriestess()
     {
         // Summon 2 Elune priestess and make each of them move to a different spot
-        if (Creature* pPriestess = m_creature->SummonCreature(NPC_PRIESTESS_ELUNE, aWingThicketLocations[0].m_fX, aWingThicketLocations[0].m_fY, aWingThicketLocations[0].m_fZ, aWingThicketLocations[0].m_fO, TEMPSPAWN_CORPSE_DESPAWN, 0))
+        if (Creature* pPriestess = m_creature->SummonCreature(NPC_PRIESTESS_ELUNE, aWingThicketLocations[0].x, aWingThicketLocations[0].y, aWingThicketLocations[0].z, aWingThicketLocations[0].o, TEMPSPAWN_CORPSE_DESPAWN, 0))
         {
-            pPriestess->GetMotionMaster()->MovePoint(0, aWingThicketLocations[3].m_fX, aWingThicketLocations[3].m_fY, aWingThicketLocations[3].m_fZ);
+            pPriestess->GetMotionMaster()->MovePoint(0, aWingThicketLocations[3].x, aWingThicketLocations[3].y, aWingThicketLocations[3].z);
             m_firstPriestessGuid = pPriestess->GetObjectGuid();
         }
-        if (Creature* pPriestess = m_creature->SummonCreature(NPC_PRIESTESS_ELUNE, aWingThicketLocations[1].m_fX, aWingThicketLocations[1].m_fY, aWingThicketLocations[1].m_fZ, aWingThicketLocations[1].m_fO, TEMPSPAWN_CORPSE_DESPAWN, 0))
+        if (Creature* pPriestess = m_creature->SummonCreature(NPC_PRIESTESS_ELUNE, aWingThicketLocations[1].x, aWingThicketLocations[1].y, aWingThicketLocations[1].z, aWingThicketLocations[1].o, TEMPSPAWN_CORPSE_DESPAWN, 0))
         {
             // Left priestess should have a distinct move point because she is the one who starts the dialogue at point reach
-            pPriestess->GetMotionMaster()->MovePoint(1, aWingThicketLocations[4].m_fX, aWingThicketLocations[4].m_fY, aWingThicketLocations[4].m_fZ);
+            pPriestess->GetMotionMaster()->MovePoint(1, aWingThicketLocations[4].x, aWingThicketLocations[4].y, aWingThicketLocations[4].z);
             m_secondPriestessGuid = pPriestess->GetObjectGuid();
         }
     }
@@ -341,13 +336,13 @@ struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
             case SAY_PRIESTESS_ALTAR_9:
                 // move near the escort npc
                 if (Creature* pPriestess = m_creature->GetMap()->GetCreature(m_firstPriestessGuid))
-                    pPriestess->GetMotionMaster()->MovePoint(0, aWingThicketLocations[6].m_fX, aWingThicketLocations[6].m_fY, aWingThicketLocations[6].m_fZ);
+                    pPriestess->GetMotionMaster()->MovePoint(0, aWingThicketLocations[6].x, aWingThicketLocations[6].y, aWingThicketLocations[6].z);
                 break;
             case SAY_PRIESTESS_ALTAR_13:
                 // summon the Guardian of Elune
-                if (Creature* pGuard = m_creature->SummonCreature(NPC_GUARDIAN_ELUNE, aWingThicketLocations[2].m_fX, aWingThicketLocations[2].m_fY, aWingThicketLocations[2].m_fZ, aWingThicketLocations[2].m_fO, TEMPSPAWN_CORPSE_DESPAWN, 0))
+                if (Creature* pGuard = m_creature->SummonCreature(NPC_GUARDIAN_ELUNE, aWingThicketLocations[2].x, aWingThicketLocations[2].y, aWingThicketLocations[2].z, aWingThicketLocations[2].o, TEMPSPAWN_CORPSE_DESPAWN, 0))
                 {
-                    pGuard->GetMotionMaster()->MovePoint(0, aWingThicketLocations[5].m_fX, aWingThicketLocations[5].m_fY, aWingThicketLocations[5].m_fZ);
+                    pGuard->GetMotionMaster()->MovePoint(0, aWingThicketLocations[5].x, aWingThicketLocations[5].y, aWingThicketLocations[5].z);
                     m_guardEluneGuid = pGuard->GetObjectGuid();
                 }
                 // summon the Voice of Elune
@@ -362,7 +357,7 @@ struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
                 if (Creature* pPriestess = m_creature->GetMap()->GetCreature(m_secondPriestessGuid))
                 {
                     DoScriptText(SAY_PRIESTESS_ALTAR_14, pPriestess);
-                    pPriestess->GetMotionMaster()->MovePoint(0, aWingThicketLocations[7].m_fX, aWingThicketLocations[7].m_fY, aWingThicketLocations[7].m_fZ);
+                    pPriestess->GetMotionMaster()->MovePoint(0, aWingThicketLocations[7].x, aWingThicketLocations[7].y, aWingThicketLocations[7].z);
                 }
                 // make the voice of elune cast Bind Wildkin
                 if (Creature* pGuard = m_creature->GetMap()->GetCreature(m_guardEluneGuid))
@@ -372,7 +367,7 @@ struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
                 // make the voice of elune leave
                 if (Creature* pGuard = m_creature->GetMap()->GetCreature(m_guardEluneGuid))
                 {
-                    pGuard->GetMotionMaster()->MovePoint(0, aWingThicketLocations[2].m_fX, aWingThicketLocations[2].m_fY, aWingThicketLocations[2].m_fZ);
+                    pGuard->GetMotionMaster()->MovePoint(0, aWingThicketLocations[2].x, aWingThicketLocations[2].y, aWingThicketLocations[2].z);
                     pGuard->ForcedDespawn(4000);
                 }
                 break;
@@ -380,7 +375,7 @@ struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
                 // make the first priestess leave
                 if (Creature* pPriestess = m_creature->GetMap()->GetCreature(m_firstPriestessGuid))
                 {
-                    pPriestess->GetMotionMaster()->MovePoint(0, aWingThicketLocations[0].m_fX, aWingThicketLocations[0].m_fY, aWingThicketLocations[0].m_fZ);
+                    pPriestess->GetMotionMaster()->MovePoint(0, aWingThicketLocations[0].x, aWingThicketLocations[0].y, aWingThicketLocations[0].z);
                     pPriestess->ForcedDespawn(4000);
                 }
                 break;
@@ -388,7 +383,7 @@ struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
                 // make the second priestess leave
                 if (Creature* pPriestess = m_creature->GetMap()->GetCreature(m_secondPriestessGuid))
                 {
-                    pPriestess->GetMotionMaster()->MovePoint(0, aWingThicketLocations[1].m_fX, aWingThicketLocations[1].m_fY, aWingThicketLocations[1].m_fZ);
+                    pPriestess->GetMotionMaster()->MovePoint(0, aWingThicketLocations[1].x, aWingThicketLocations[1].y, aWingThicketLocations[1].z);
                     pPriestess->ForcedDespawn(4000);
                 }
                 break;
@@ -445,7 +440,7 @@ struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
                 m_uiDelayTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();
@@ -619,12 +614,8 @@ struct npc_artoriusAI : public ScriptedAI
                 {
                     if (Unit* pUnit = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
                     {
-                        if (pUnit->isAlive())
-                        {
-                            pCleaner->SetInCombatWith(pUnit);
-                            pCleaner->AddThreat(pUnit);
+                        if (pUnit->IsAlive())
                             pCleaner->AI()->AttackStart(pUnit);
-                        }
                     }
                 }
             }
@@ -672,14 +663,14 @@ struct npc_artoriusAI : public ScriptedAI
         {
             if (m_uiDespawn_Timer <= uiDiff)
             {
-                if (m_creature->isAlive() && !m_creature->isInCombat())
+                if (m_creature->IsAlive() && !m_creature->IsInCombat())
                     DemonDespawn(false);
             }
             else
                 m_uiDespawn_Timer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_creature->getThreatManager().getThreatList().size() > 1)
@@ -698,8 +689,8 @@ struct npc_artoriusAI : public ScriptedAI
             m_uiDemonic_Doom_Timer = 7500;
             // only attempt to cast this once every 7.5 seconds to give the hunter some leeway
             // LOWER max range for lag...
-            if (m_creature->IsWithinDistInMap(m_creature->getVictim(), 25))
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_DEMONIC_DOOM);
+            if (m_creature->IsWithinDistInMap(m_creature->GetVictim(), 25))
+                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DEMONIC_DOOM);
         }
         else
             m_uiDemonic_Doom_Timer -= uiDiff;

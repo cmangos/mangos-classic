@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
+#include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
 npc_gilthares
 npc_taskmaster_fizzule
 npc_twiggy_flathead
@@ -77,22 +77,22 @@ struct npc_giltharesAI : public npc_escortAI
 
         switch (uiPointId)
         {
-            case 16:
+            case 17:
                 DoScriptText(SAY_GIL_AT_LAST, m_creature, pPlayer);
                 break;
-            case 17:
+            case 18:
                 DoScriptText(SAY_GIL_PROCEED, m_creature, pPlayer);
                 break;
-            case 18:
+            case 19:
                 DoScriptText(SAY_GIL_FREEBOOTERS, m_creature, pPlayer);
                 break;
-            case 37:
+            case 38:
                 DoScriptText(SAY_GIL_ALMOST, m_creature, pPlayer);
                 break;
-            case 47:
+            case 48:
                 DoScriptText(SAY_GIL_SWEET, m_creature, pPlayer);
                 break;
-            case 53:
+            case 54:
                 DoScriptText(SAY_GIL_FREED, m_creature, pPlayer);
                 pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_FREE_FROM_HOLD, m_creature);
                 break;
@@ -221,7 +221,7 @@ struct npc_taskmaster_fizzuleAI : public ScriptedAI
                 resetTimer -= diff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();
@@ -338,12 +338,12 @@ struct npc_twiggy_flatheadAI : public ScriptedAI
     void FailEvent()
     {
         if (Creature* bigWill = m_creature->GetMap()->GetCreature(m_bigWillGuid))
-            if (bigWill->isAlive())
+            if (bigWill->IsAlive())
                 bigWill->ForcedDespawn();
 
         for (ObjectGuid guid : m_vAffrayChallengerGuidsVector)
             if (Creature* creature = m_creature->GetMap()->GetCreature(guid))
-                if (creature->isAlive())
+                if (creature->IsAlive())
                     creature->ForcedDespawn();
 
         Reset();
@@ -436,7 +436,7 @@ struct npc_twiggy_flatheadAI : public ScriptedAI
         {
             Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
 
-            if (!pPlayer || !pPlayer->isAlive())
+            if (!pPlayer || !pPlayer->IsAlive())
             {
                 FailEvent();
                 return;
@@ -489,7 +489,7 @@ UnitAI* GetAI_npc_twiggy_flathead(Creature* pCreature)
 
 bool AreaTrigger_at_twiggy_flathead(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 {
-    if (pPlayer->isAlive() && !pPlayer->isGameMaster() && pPlayer->GetQuestStatus(QUEST_AFFRAY) == QUEST_STATUS_INCOMPLETE)
+    if (pPlayer->IsAlive() && !pPlayer->IsGameMaster() && pPlayer->GetQuestStatus(QUEST_AFFRAY) == QUEST_STATUS_INCOMPLETE)
     {
         Creature* pCreature = GetClosestCreatureWithEntry(pPlayer, NPC_TWIGGY, 30.0f);
         if (!pCreature)
@@ -558,21 +558,21 @@ struct npc_wizzlecranks_shredderAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 if (Player* pPlayer = GetPlayerForEscort())
                     DoScriptText(SAY_STARTUP1, m_creature, pPlayer);
                 break;
-            case 9:
+            case 10:
                 SetRun(false);
                 break;
-            case 17:
+            case 18:
                 if (Creature* pTemp = m_creature->SummonCreature(NPC_MERCENARY, 1128.489f, -3037.611f, 92.701f, 1.472f, TEMPSPAWN_TIMED_OOC_DESPAWN, 120000))
                 {
                     DoScriptText(SAY_MERCENARY, pTemp);
                     m_creature->SummonCreature(NPC_MERCENARY, 1160.172f, -2980.168f, 97.313f, 3.690f, TEMPSPAWN_TIMED_OOC_DESPAWN, 120000);
                 }
                 break;
-            case 24:
+            case 25:
                 m_bIsPostEvent = true;
                 break;
         }
@@ -582,11 +582,11 @@ struct npc_wizzlecranks_shredderAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 9:
+            case 10:
                 if (Player* pPlayer = GetPlayerForEscort())
                     DoScriptText(SAY_STARTUP2, m_creature, pPlayer);
                 break;
-            case 18:
+            case 19:
                 if (Player* pPlayer = GetPlayerForEscort())
                     DoScriptText(SAY_PROGRESS_1, m_creature, pPlayer);
                 SetRun();
@@ -605,7 +605,7 @@ struct npc_wizzlecranks_shredderAI : public npc_escortAI
 
     void UpdateEscortAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         {
             if (m_bIsPostEvent)
             {
@@ -617,7 +617,8 @@ struct npc_wizzlecranks_shredderAI : public npc_escortAI
                             DoScriptText(SAY_PROGRESS_2, m_creature);
                             break;
                         case 1:
-                            DoScriptText(SAY_PROGRESS_3, m_creature);
+                            if (Player* pPlayer = GetPlayerForEscort())
+                                DoScriptText(SAY_PROGRESS_3, m_creature, pPlayer);
                             break;
                         case 2:
                             DoScriptText(SAY_END, m_creature);
@@ -663,25 +664,87 @@ UnitAI* GetAI_npc_wizzlecranks_shredder(Creature* pCreature)
     return new npc_wizzlecranks_shredderAI(pCreature);
 }
 
+enum
+{
+    SPELL_DECIMATE = 10268,
+    SPELL_SLUSH    = 10267,
+
+    SAY_STEALTH_ALERT_GALLYWIX   = -1010005,
+    SAY_STEALTH_ALERT_SILIXIZ    = -1010006,
+    SAY_STEALTH_ALERT_LOOKOUT_1  = -1010007,
+    SAY_STEALTH_ALERT_LOOKOUT_2  = -1010008,
+};
+
 struct npc_gallywixAI : public ScriptedAI
 {
-    npc_gallywixAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_gallywixAI(Creature* creature) : ScriptedAI(creature)
     {
         Reset();
     }
 
     void Reset() override {}
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
+    void OnStealthAlert(Unit* who) override
     {
-        if (spellInfo && spellInfo->IsFitToFamilyMask(0x0000000000800200)) // on Ambush
-            uiDamage = (m_creature->GetHealth() * 0.5); // Ambush should do 50% health in damage to this creature
+        DoScriptText(SAY_STEALTH_ALERT_GALLYWIX, m_creature, who);
+    }
+
+    void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
+    {
+        if (spellInfo && spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && spellInfo->IsFitToFamilyMask(0x0000000000800200)) // on Ambush
+            m_creature->CastSpell(nullptr, SPELL_DECIMATE, TRIGGERED_OLD_TRIGGERED);
     }
 };
 
-UnitAI* GetAI_npc_gallywix(Creature* pCreature)
+struct npc_venture_co_lookoutAI : public ScriptedAI
 {
-    return new npc_gallywixAI(pCreature);
+    npc_venture_co_lookoutAI(Creature* creature) : ScriptedAI(creature)
+    {
+        Reset();
+    }
+
+    void Reset() override {}
+
+    void OnStealthAlert(Unit* who) override
+    {
+        DoScriptText(urand(0, 1) ? SAY_STEALTH_ALERT_LOOKOUT_1 : SAY_STEALTH_ALERT_LOOKOUT_2, m_creature, who);
+    }
+
+    void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
+    {
+        if (spellInfo && spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && spellInfo->IsFitToFamilyMask(0x0000000000820000)) // on Eviscerate
+            m_creature->CastSpell(nullptr, SPELL_SLUSH, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct npc_foreman_silixizAI : public ScriptedAI
+{
+    npc_foreman_silixizAI(Creature* creature) : ScriptedAI(creature)
+    {
+        Reset();
+    }
+
+    void Reset() override {}
+
+    void OnStealthAlert(Unit* who) override
+    {
+        DoScriptText(SAY_STEALTH_ALERT_SILIXIZ, m_creature, who);
+    }
+};
+
+UnitAI* GetAI_npc_gallywix(Creature* creature)
+{
+    return new npc_gallywixAI(creature);
+}
+
+UnitAI* GetAI_npc_venture_co_lookout(Creature* creature)
+{
+    return new npc_venture_co_lookoutAI(creature);
+}
+
+UnitAI* GetAI_npc_foreman_silixiz(Creature* creature)
+{
+    return new npc_foreman_silixizAI(creature);
 }
 
 /*#####
@@ -692,9 +755,9 @@ enum
 {
     QUEST_COUNTERATTACK        = 4021,
 
-    SAY_START_REGTHAR          = -1000892,
-    SAY_DEFENDER               = -1000893,
-    YELL_RETREAT               = -1000894,
+    SAY_START_REGTHAR          = -1010001,
+    SAY_DEFENDER               = -1010002,
+    YELL_RETREAT               = -1010003,
 
     NPC_REGTHAR_DEATHGATE      = 3389,
     NPC_WARLORD_KROMZAR        = 9456,
@@ -848,7 +911,7 @@ private:
         {
             if (Creature * creature = m_creature->GetMap()->GetCreature(spawnItr.first))
             {
-                if (creature->isInCombat())
+                if (creature->IsInCombat())
                 {
                     // Give one minute to the NPCs still fighting before despawning them
                     creature->ForcedDespawn(MINUTE * IN_MILLISECONDS);
@@ -1063,6 +1126,16 @@ void AddSC_the_barrens()
     pNewScript = new Script;
     pNewScript->Name = "npc_gallywix";
     pNewScript->GetAI = &GetAI_npc_gallywix;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_foreman_silixiz";
+    pNewScript->GetAI = &GetAI_npc_foreman_silixiz;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_venture_co_lookout";
+    pNewScript->GetAI = &GetAI_npc_venture_co_lookout;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

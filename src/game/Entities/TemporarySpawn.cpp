@@ -44,9 +44,9 @@ void TemporarySpawn::Update(const uint32 diff)
 
         case TEMPSPAWN_TIMED_OOC_DESPAWN:
         {
-            if (isAlive())
+            if (IsAlive())
             {
-                if (!isInCombat())
+                if (!IsInCombat())
                 {
                     if (IsExpired())
                     {
@@ -85,7 +85,7 @@ void TemporarySpawn::Update(const uint32 diff)
         case TEMPSPAWN_CORPSE_DESPAWN:
         {
             // if m_deathState is DEAD, CORPSE was skipped
-            if (isDead())
+            if (IsDead())
             {
                 UnSummon();
                 return;
@@ -107,13 +107,13 @@ void TemporarySpawn::Update(const uint32 diff)
         case TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN:
         {
             // if m_deathState is DEAD, CORPSE was skipped
-            if (isDead())
+            if (IsDead())
             {
                 UnSummon();
                 return;
             }
 
-            if (!isInCombat())
+            if (!IsInCombat())
             {
                 if (IsExpired())
                 {
@@ -135,7 +135,7 @@ void TemporarySpawn::Update(const uint32 diff)
                 return;
             }
 
-            if (!isInCombat() && isAlive() && !GetCharmerGuid())
+            if (!IsInCombat() && IsAlive() && !GetCharmerGuid())
             {
                 if (IsExpired())
                 {
@@ -151,7 +151,7 @@ void TemporarySpawn::Update(const uint32 diff)
         case TEMPSPAWN_TIMED_OR_CORPSE_DESPAWN:
         {
             // if m_deathState is DEAD, CORPSE was skipped
-            if (isDead())
+            if (IsDead())
             {
                 UnSummon();
                 return;
@@ -274,6 +274,13 @@ void TemporarySpawn::RemoveAuraFromOwner()
 
 void TemporarySpawn::SaveToDB()
 {
+}
+
+void TemporarySpawn::SetDeathState(DeathState state)
+{
+    if (state == JUST_DIED && m_type == TEMPSPAWN_CORPSE_TIMED_DESPAWN)
+        m_expirationTimestamp = GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(m_lifetime);
+    Creature::SetDeathState(state);
 }
 
 bool TemporarySpawn::IsExpired() const

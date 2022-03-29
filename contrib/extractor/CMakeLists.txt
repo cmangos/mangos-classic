@@ -21,8 +21,13 @@ list(APPEND AD_SOURCE
      loadlib/loadlib.cpp
      loadlib/adt.cpp
      loadlib/wdt.cpp
+     loadlib/loadlib.h
+     loadlib/adt.h
+     loadlib/wdt.h
      dbcfile.cpp
+     dbcfile.h
      mpq_libmpq.cpp
+     mpq_libmpq.h
      System.cpp
 )
 
