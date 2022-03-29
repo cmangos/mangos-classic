@@ -1445,11 +1445,7 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket& data, ObjectGuid 
     data << uint32(mapId);                                 // battleground id
     data << uint8(0x00);                                   // unk
 
-    size_t count_pos = data.wpos();
-    uint32 count = 0;
-    data << uint32(0);                                     // number of bg instances
-
-    // battleground
+    // battleground - indented for cross core compatibility
     {
         data << uint8(0x00);                               // unk
 
