@@ -232,31 +232,38 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode(WorldPacket& /*recv_d
     {
         case BATTLEGROUND_WS:
         {
-            uint32 flagCarrierCount = 0;
-
-            Player* flagCarrierAlliance = sObjectMgr.GetPlayer(((BattleGroundWS*)bg)->GetFlagCarrierGuid(TEAM_INDEX_ALLIANCE));
-            if (flagCarrierAlliance)
-                ++flagCarrierCount;
-
-            Player* flagCarrierHorde = sObjectMgr.GetPlayer(((BattleGroundWS*)bg)->GetFlagCarrierGuid(TEAM_INDEX_HORDE));
-            if (flagCarrierHorde)
-                ++flagCarrierCount;
-
-            WorldPacket data(MSG_BATTLEGROUND_PLAYER_POSITIONS, 4 + 4 + 16 * flagCarrierCount);
+            WorldPacket data(MSG_BATTLEGROUND_PLAYER_POSITIONS);
+            size_t countPos = data.wpos();
+            uint32 count = 0;
             data << uint32(0);
-            data << uint32(flagCarrierCount);
-
-            if (flagCarrierAlliance)
+            for (auto const& itr : bg->GetPlayers())
             {
-                data << flagCarrierAlliance->GetObjectGuid();
-                data << float(flagCarrierAlliance->GetPositionX());
-                data << float(flagCarrierAlliance->GetPositionY());
+                if (_player->GetTeam() == itr.second.playerTeam)
+                {
+                    if (Player const* player = sObjectMgr.GetPlayer(itr.first))
+                    {
+                        data << ObjectGuid(player->GetObjectGuid());
+                        data << float(player->GetPositionX());
+                        data << float(player->GetPositionY());
+                        count++;
+                    }
+                }
             }
-            if (flagCarrierHorde)
+            data.put<uint32>(countPos, count);
+
+            Player* flagCarrier;
+            if (_player->GetTeam() == ALLIANCE)
+                flagCarrier = sObjectMgr.GetPlayer(static_cast<BattleGroundWS*>(bg)->GetFlagCarrierGuid(TEAM_INDEX_ALLIANCE));
+            else
+                flagCarrier = sObjectMgr.GetPlayer(static_cast<BattleGroundWS*>(bg)->GetFlagCarrierGuid(TEAM_INDEX_HORDE));
+
+            data << uint8(flagCarrier ? 1 : 0);
+
+            if (flagCarrier)
             {
-                data << flagCarrierHorde->GetObjectGuid();
-                data << float(flagCarrierHorde->GetPositionX());
-                data << float(flagCarrierHorde->GetPositionY());
+                data << ObjectGuid(flagCarrier->GetObjectGuid());
+                data << float(flagCarrier->GetPositionX());
+                data << float(flagCarrier->GetPositionY());
             }
 
             SendPacket(data);
@@ -268,13 +275,10 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode(WorldPacket& /*recv_d
             // for other BG types - send default
             WorldPacket data(MSG_BATTLEGROUND_PLAYER_POSITIONS, 4 + 4);
             data << uint32(0);
-            data << uint32(0);
+            data << uint8(0);
             SendPacket(data);
             break;
         }
-        default:
-            // maybe it is sent also in arena - do nothing
-            break;
     }
 }
 
@@ -454,12 +458,10 @@ void WorldSession::HandleLeaveBattlefieldOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_LEAVE_BATTLEFIELD");
 
-    recv_data.read_skip<uint8>();                           // unk1
-    recv_data.read_skip<uint8>();                           // BattleGroundTypeId-1 ?
-    recv_data.read_skip<uint16>();                          // unk2 0
-
-    // if(bgTypeId >= MAX_BATTLEGROUND_TYPES)               // cheating? but not important in this case
-    //    return;
+    uint32 mapId;
+    recv_data >> mapId;
+    if (_player->GetMapId() != mapId)               // cheating? but not important in this case
+        return;
 
     // not allow leave battleground in combat
     if (_player->IsInCombat())
