@@ -2625,6 +2625,14 @@ void GameObject::ForcedDespawn(uint32 timeMSToDespawn)
 
     SetForcedDespawn();
     SetLootState(GO_JUST_DEACTIVATED);
+
+    // some GOs have respawn time not filled to prevent despawn on action - need to override that this time
+    if (!m_respawnDelay && GetDbGuid() && !m_respawnOverriden)
+    {
+        // only static spawns should arrive here
+        if (GameObjectData const* data = sObjectMgr.GetGOData(GetDbGuid()))
+            SetRespawnDelay(data->GetRandomRespawnTime(), true);
+    }
 }
 
 bool ForcedDespawnDelayGameObjectEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
