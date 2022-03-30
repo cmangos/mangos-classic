@@ -238,7 +238,7 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode(WorldPacket& /*recv_d
             data << uint32(0);
             for (auto const& itr : bg->GetPlayers())
             {
-                if (_player->GetTeam() == itr.second.PlayerTeam)
+                if (_player->GetTeam() == itr.second.playerTeam)
                 {
                     if (Player const* player = sObjectMgr.GetPlayer(itr.first))
                     {
@@ -257,7 +257,7 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode(WorldPacket& /*recv_d
             else
                 flagCarrier = sObjectMgr.GetPlayer(((BattleGroundWS*)bg)->GetFlagCarrierGuid(TEAM_INDEX_ALLIANCE));
 
-            data << bool(flagCarrier != nullptr);
+            data << uint8(flagCarrier ? 1 : 0);
 
             if (flagCarrier)
             {

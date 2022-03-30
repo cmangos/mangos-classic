@@ -1442,13 +1442,11 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket& data, ObjectGuid 
 
     data.Initialize(SMSG_BATTLEFIELD_LIST);
     data << guid;                                          // battlemaster guid
-    data << uint32(mapId);                                 // battleground id
-    data << uint8(0x00);                                   // unk
+    data << uint32(mapId);
+    data << uint8(0x00);                                   // min level offset
 
     // battleground - indented for cross core compatibility
     {
-        data << uint8(0x00);                               // unk
-
         size_t count_pos = data.wpos();
         uint32 count = 0;
         data << uint32(0);                                 // number of bg instances
