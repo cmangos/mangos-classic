@@ -25,6 +25,7 @@ EndScriptData
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "Spells/Scripts/SpellScript.h"
+#include "OutdoorPvP/OutdoorPvP.h"
 
 // **** Script Info ****
 // Spiritguides in battlegrounds resurrecting many players at once
