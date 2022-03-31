@@ -539,10 +539,14 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
         G3D::Vector3 diffVec = (endVec - startVec);
         G3D::Vector3 prevVec = startVec;
         float len = diffVec.length();
-        diffVec *= SMOOTH_PATH_STEP_SIZE / len;
-        while (len > SMOOTH_PATH_STEP_SIZE)
+        float stepSize = SMOOTH_PATH_STEP_SIZE;
+        // protection against buffer overflow - if too long straight line, smooth path could exceed cachedPoints array
+        if (ceilf(len / SMOOTH_PATH_STEP_SIZE) > m_pointPathLimit - 2)
+            stepSize = len / (m_pointPathLimit - 2);
+        diffVec *= stepSize / len;
+        while (len > stepSize)
         {
-            len -= SMOOTH_PATH_STEP_SIZE;
+            len -= stepSize;
             prevVec += diffVec;
             pathPoints[VERTEX_SIZE * pointCount + 0] = prevVec.x;
             pathPoints[VERTEX_SIZE * pointCount + 1] = prevVec.y;
