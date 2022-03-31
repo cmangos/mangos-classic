@@ -204,6 +204,6 @@ void OutdoorPvP::RespawnGO(const WorldObject* objRef, ObjectGuid goGuid, bool re
         if (respawn)
             go->Refresh();
         else if (go->IsSpawned())
-            go->SetLootState(GO_JUST_DEACTIVATED);
+            go->ForcedDespawn();
     }
 }

@@ -89,6 +89,12 @@ UPDATE gameobject_template SET ScriptName='go_dragon_head' WHERE entry IN(179556
 UPDATE gameobject_template SET ScriptName='go_unadorned_spike' WHERE entry IN(175787);
 UPDATE gameobject_template SET ScriptName='go_containment_coffer' WHERE entry=122088;
 
+/* Outdoor PVP*/
+-- si
+UPDATE gameobject_template SET ScriptName='go_outdoor_pvp_notify' WHERE entry IN(181597,181598);
+-- ep
+UPDATE gameobject_template SET ScriptName='go_outdoor_pvp_notify' WHERE entry IN(181682,181955);
+
 /* GUARD */
 UPDATE creature_template SET ScriptName='guard_orgrimmar' WHERE entry=3296;
 UPDATE creature_template SET ScriptName='guard_stormwind' WHERE entry IN (68,1756,1976);
