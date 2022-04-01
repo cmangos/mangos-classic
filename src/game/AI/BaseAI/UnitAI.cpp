@@ -482,6 +482,14 @@ void UnitAI::OnChannelStateChange(Spell const* spell, bool state, WorldObject* t
     }
 }
 
+void UnitAI::HandleDelayedInstantAnimation(SpellEntry const* /*spellInfo*/)
+{
+    if (m_unit->GetVictim() && !IsTargetingRestricted())
+        m_unit->SetTarget(m_unit->GetVictim());
+    else
+        m_unit->SetTarget(nullptr);
+}
+
 void UnitAI::CheckForHelp(Unit* who, Unit* me, float distance)
 {
     Unit* victim = who->getAttackerForHelper();

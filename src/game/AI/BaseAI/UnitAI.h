@@ -487,7 +487,7 @@ class UnitAI : public CombatActions
         void SetRootSelf(bool apply, bool combatOnly = false); // must call parent JustDied if this is used
         void ClearSelfRoot();
 
-        virtual void HandleDelayedInstantAnimation(SpellEntry const* spellInfo) {}
+        virtual void HandleDelayedInstantAnimation(SpellEntry const* spellInfo);
         virtual bool IsTargetingRestricted() { return GetCombatScriptStatus(); }
 
         virtual void OnTaunt() {}
