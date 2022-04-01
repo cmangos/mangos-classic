@@ -10989,10 +10989,21 @@ bool Unit::TakePossessOf(Unit* possessed)
     possessed->SetCharmerGuid(GetObjectGuid());
     SetCharm(possessed);
 
-    // stop any generated movement TODO:: this may not be correct! what about possessing a feared creature?
-    possessed->GetMotionMaster()->Clear();
-    possessed->GetMotionMaster()->MoveIdle();
+    const bool panic = possessed->IsInPanic(), fleeing = possessed->IsFleeing(), confused = possessed->IsConfused();
+
+    // stop any generated movement: current solution
     possessed->StopMoving(true);
+    possessed->GetMotionMaster()->Clear(false, true);
+    possessed->GetMotionMaster()->MoveIdle();
+
+    if (confused)
+        possessed->GetMotionMaster()->MoveConfused();
+    else if (fleeing && !panic)
+    {
+        AuraList const& fears = possessed->GetAurasByType(SPELL_AURA_MOD_FEAR);
+        Unit* source = (fears.empty() ? nullptr : fears.back()->GetCaster());
+        possessed->GetMotionMaster()->MoveFleeing(source ? source : this);
+    }
 
     Position combatStartPosition;
 
@@ -11050,7 +11061,7 @@ bool Unit::TakePossessOf(Unit* possessed)
     {
         player->GetCamera().SetView(possessed);
         // Force client control (required to function propely)
-        player->UpdateClientControl(possessed, true, true);
+        player->UpdateClientControl(possessed, !IsCrowdControlled(), true);
         player->SetMover(possessed);
         player->SendForcedObjectUpdate();
 
