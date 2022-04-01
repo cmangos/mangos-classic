@@ -68,6 +68,8 @@ class SpawnManager
         std::string GetRespawnList();
 
         SpawnGroup* GetSpawnGroup(uint32 Id);
+
+        void RespawnSpawnGroupsInVicinity(Position pos, float range);
     private:
         Map& m_map;
 

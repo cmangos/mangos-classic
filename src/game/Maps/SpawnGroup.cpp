@@ -104,7 +104,7 @@ void SpawnGroup::Spawn(bool force)
     if (!m_enabled && !force)
         return;
 
-    if (m_objects.size() >= m_entry.MaxCount || (m_entry.WorldStateId && m_map.GetVariableManager().GetVariable(m_entry.WorldStateId) == 0))
+    if (m_objects.size() >= m_entry.MaxCount || !IsWorldstateConditionSatisfied())
         return;
 
     std::vector<SpawnGroupDbGuids const*> eligibleGuids;
@@ -224,6 +224,46 @@ void SpawnGroup::Spawn(bool force)
         if (entry && validEntries[entry])
             --validEntries[entry];
     }
+}
+
+bool SpawnGroup::IsWorldstateConditionSatisfied() const
+{
+    return !m_entry.WorldStateId || m_map.GetVariableManager().GetVariable(m_entry.WorldStateId == 1);
+}
+
+void SpawnGroup::RespawnIfInVicinity(Position pos, float range)
+{
+    if (!IsWorldstateConditionSatisfied())
+        return;
+
+    time_t now = time(nullptr);
+    bool eligible = false; // if one is eligible, reset whole group
+    for (auto& dbGuid : m_entry.DbGuids)
+    {
+        float x, y;
+        if (GetObjectTypeId() == TYPEID_UNIT)
+        {
+            auto data = sObjectMgr.GetCreatureData(dbGuid.DbGuid);
+            x = data->posX; y = data->posY;
+        }
+        else
+        {
+            auto data = sObjectMgr.GetGOData(dbGuid.DbGuid);
+            x = data->posX; y = data->posY;
+        }
+
+        if (pos.GetDistance(Position(x, y, pos.z)) < range * range)
+        {
+            eligible = true;
+            break;
+        }
+    }
+
+    if (!eligible)
+        return;
+
+    for (auto& dbGuid : m_entry.DbGuids)
+        m_map.GetPersistentState()->SaveObjectRespawnTime(GetObjectTypeId(), dbGuid.DbGuid, now);
 }
 
 std::string SpawnGroup::to_string() const

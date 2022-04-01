@@ -201,3 +201,9 @@ SpawnGroup* SpawnManager::GetSpawnGroup(uint32 Id)
 
     return (*itr).second;
 }
+
+void SpawnManager::RespawnSpawnGroupsInVicinity(Position pos, float range)
+{
+    for (auto& data : m_spawnGroups)
+        data.second->RespawnIfInVicinity(pos, range);
+}

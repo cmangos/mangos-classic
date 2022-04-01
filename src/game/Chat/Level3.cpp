@@ -5159,6 +5159,8 @@ bool ChatHandler::HandleRespawnCommand(char* /*args*/)
     MaNGOS::RespawnDo u_do;
     MaNGOS::WorldObjectWorker<MaNGOS::RespawnDo> worker(u_do);
     Cell::VisitGridObjects(pl, worker, pl->GetVisibilityData().GetVisibilityDistance());
+
+    pl->GetMap()->GetSpawnManager().RespawnSpawnGroupsInVicinity(pl->GetPosition(), pl->GetVisibilityData().GetVisibilityDistance());
     return true;
 }
 

@@ -54,6 +54,10 @@ class SpawnGroup
 
         virtual CreatureGroup* GetCreatureGroup() { return nullptr; }
 
+        bool IsWorldstateConditionSatisfied() const;
+
+        void RespawnIfInVicinity(Position pos, float range);
+
     protected:
         SpawnGroupEntry const& m_entry;
         Map& m_map;
