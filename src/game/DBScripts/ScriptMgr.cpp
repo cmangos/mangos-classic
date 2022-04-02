@@ -1198,7 +1198,7 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* originalSource, WorldObj
             if (m_script->IsCreatureBuddy())
             {
                 CreatureData const* cData = sObjectMgr.GetCreatureData(m_script->searchRadiusOrGuid);
-                buddy = m_map->GetCreature(cData->GetObjectGuid(m_script->searchRadiusOrGuid));
+                buddy = m_map->GetCreature(m_script->searchRadiusOrGuid);
 
                 if (buddy && ((Creature*)buddy)->IsAlive() == m_script->IsDeadOrDespawnedBuddy())
                 {
