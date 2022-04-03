@@ -489,10 +489,6 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     {
                         // Gamemasters should be always able to select units - remove not selectable flag:
                         value &= ~UNIT_FLAG_NOT_SELECTABLE;
-
-                        // Gamemasters have power to cliffwalk in GM mode:
-                        if (target == this)
-                            value |= UNIT_FLAG_UNK_0;
                     }
 
                     // Client bug workaround: Fix for missing chat channels when resuming taxi flight on login
