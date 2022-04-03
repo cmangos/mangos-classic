@@ -994,6 +994,7 @@ void ObjectMgr::LoadSpawnGroups()
             entry.Active = false;
             entry.EnabledByDefault = true;
             entry.formationEntry = nullptr;
+            entry.HasChancedSpawns = false;
             newContainer->spawnGroupMap.emplace(entry.Id, entry);
         } while (result->NextRow());
     }
@@ -1056,7 +1057,7 @@ void ObjectMgr::LoadSpawnGroups()
         } while (result->NextRow());
     }
 
-    result.reset(WorldDatabase.Query("SELECT Id, Guid, SlotId FROM spawn_group_spawn"));
+    result.reset(WorldDatabase.Query("SELECT Id, Guid, SlotId, Chance FROM spawn_group_spawn"));
     if (result)
     {
         do
@@ -1067,6 +1068,7 @@ void ObjectMgr::LoadSpawnGroups()
             guid.Id = fields[0].GetUInt32();
             guid.DbGuid = fields[1].GetUInt32();
             guid.SlotId = fields[2].GetInt32();
+            guid.Chance = fields[3].GetUInt32();
             guid.OwnEntry = 0;
             guid.RandomEntry = false;
 
@@ -1095,7 +1097,9 @@ void ObjectMgr::LoadSpawnGroups()
                 }
             }
 
-            group.DbGuids.push_back(guid);            
+            group.DbGuids.push_back(guid);
+            if (guid.Chance)
+                group.HasChancedSpawns = true;
         } while (result->NextRow());
 
         // check and fix correctness of slot id indexation

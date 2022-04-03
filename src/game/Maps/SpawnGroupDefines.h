@@ -47,14 +47,12 @@ struct SpawnGroupRandomEntry
     uint32 Chance;
 };
 
-// TODO: Formations struct
-// TODO: Linkage struct
-
 struct SpawnGroupDbGuids
 {
     uint32 Id;
     uint32 DbGuid;
     int32 SlotId;
+    uint32 Chance;
     uint32 OwnEntry;
     bool RandomEntry;
 };
@@ -96,6 +94,7 @@ struct SpawnGroupEntry
     uint32 Flags;
     bool Active;
     bool EnabledByDefault;
+    bool HasChancedSpawns;
     std::vector<SpawnGroupDbGuids> DbGuids;
     std::vector<SpawnGroupRandomEntry> RandomEntries;
     std::vector<SpawnGroupRandomEntry*> EquallyChanced;

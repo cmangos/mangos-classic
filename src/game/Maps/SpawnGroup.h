@@ -64,6 +64,7 @@ class SpawnGroup
         Map& m_map;
         std::map<uint32, uint32> m_objects;
         std::map<uint32, uint32> m_chosenEntries; // dungeon saving for entry per dynguid
+        std::map<uint32, bool> m_chosenSpawns;
         uint32 m_objectTypeId;
         bool m_enabled;
 };
