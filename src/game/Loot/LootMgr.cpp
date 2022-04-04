@@ -422,9 +422,12 @@ bool LootItem::AllowedForPlayer(Player const* player, WorldObject const* lootTar
             break;
     }
 
-    // Not quest only drop (check quest starting items for already accepted non-repeatable quests)
-    if (player != masterLooter && itemProto->StartQuest && player->GetQuestStatus(itemProto->StartQuest) != QUEST_STATUS_NONE && !player->HasQuestForItem(itemId))
-        return false;
+    // If the item starts a quest and the player has that quest accepted/completed/rewarded, it can't be looted (unless the player is the master looter, or the item has ITEM_EXTRA_IGNORE_QUEST_STATUS)
+    if (itemProto->StartQuest)
+    {
+        if (!(itemProto->ExtraFlags & ITEM_EXTRA_IGNORE_QUEST_STATUS) && player != masterLooter && player->GetQuestStatus(itemProto->StartQuest) != QUEST_STATUS_NONE)
+            return false;
+    }
 
     return true;
 }

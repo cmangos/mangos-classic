@@ -392,8 +392,9 @@ inline uint8 ItemSubClassToDurabilityMultiplierId(uint32 ItemClass, uint32 ItemS
 
 enum ItemExtraFlags
 {
-    ITEM_EXTRA_REAL_TIME_DURATION = 0x01,                   // if set and have Duration time, then offline time included in counting, if not set then counted only in game time
-    ITEM_EXTRA_ALL                = 0x01                    // all used flags, used for check DB data (mask all above flags)
+    ITEM_EXTRA_REAL_TIME_DURATION  = 0x01, // if set and have Duration time, then offline time included in counting, if not set then counted only in game time
+    ITEM_EXTRA_IGNORE_QUEST_STATUS = 0x02, // if set, queststarter item will drop for player regardless of the related quest's status
+    ITEM_EXTRA_ALL                 = 0x03  // all used flags, used for check DB data (mask all above flags)
 };
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
