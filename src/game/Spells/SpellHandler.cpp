@@ -353,6 +353,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
+    Unit* caster = mover;
     if (mover->GetTypeId() == TYPEID_PLAYER)
     {
         // not have spell in spellbook or spell passive and not casted by client
@@ -366,12 +367,18 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     }
     else
     {
+        bool isPassive = IsPassiveSpell(spellInfo);
         // not have spell in spellbook or spell passive and not casted by client
-        if (!mover->HasSpell(spellId) || IsPassiveSpell(spellInfo))
+        if (!mover->HasSpell(spellId) || isPassive)
         {
-            // cheater? kick? ban?
-            recvPacket.rpos(recvPacket.wpos());             // prevent spam at ignore packet
-            return;
+            if (!_player->HasSpell(spellId) || isPassive)
+            {
+                // cheater? kick? ban?
+                recvPacket.rpos(recvPacket.wpos());             // prevent spam at ignore packet
+                return;
+            }
+            else
+                caster = _player;
         }
     }
 
@@ -395,7 +402,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     if (HasMissingTargetFromClient(spellInfo))
         targets.setUnitTarget(mover->GetTarget());
 
-    Spell* spell = new Spell(mover, spellInfo, TRIGGERED_NONE);
+    Spell* spell = new Spell(caster, spellInfo, TRIGGERED_NONE);
     spell->m_clientCast = true;
     spell->SpellStart(&targets);
 }
