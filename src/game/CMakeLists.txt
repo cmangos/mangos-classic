@@ -80,7 +80,7 @@ target_link_libraries(${LIBRARY_NAME}
   PRIVATE shared
   PRIVATE g3dlite
   PRIVATE detour
-  PRIVATE ${ZLIB_LIBRARIES}
+  PRIVATE zlib
 )
 
 # include additionals headers

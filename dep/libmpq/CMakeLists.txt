@@ -20,13 +20,12 @@ add_library(mpqlib STATIC
 )
 
 target_link_libraries(mpqlib
-  PRIVATE ${ZLIB_LIBRARIES}
+  PRIVATE zlib
   PRIVATE ${BZIP2_LIBRARIES}
 )
 
 target_include_directories(mpqlib
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-  PRIVATE ${ZLIB_INCLUDE_DIRS}
   PRIVATE ${BZIP2_INCLUDE_DIRS}
 )
 
