@@ -35,7 +35,10 @@ if(NOT zlib_POPULATED)
     message(STATUS "Setting up zlib ...")
     FetchContent_Populate(zlib)
     # patch provided cmake to avoid unneeded target install and deprecation warning.
-    file(COPY_FILE "patch-zlib-CMakeLists.txt" "${zlib_SOURCE_DIR}/CMakeLists.txt" ONLY_IF_DIFFERENT)
+    #file(COPY_FILE "patch-zlib-CMakeLists.txt" "${zlib_SOURCE_DIR}/CMakeLists.txt" ONLY_IF_DIFFERENT) #not working on cmake < 3.21 so replaced with 3 next lines
+    file(COPY "patch-zlib-CMakeLists.txt" DESTINATION "${zlib_SOURCE_DIR}")
+    file(REMOVE "${zlib_SOURCE_DIR}/CMakeLists.txt")
+    file(RENAME "${zlib_SOURCE_DIR}/patch-zlib-CMakeLists.txt" "${zlib_SOURCE_DIR}/CMakeLists.txt")
     add_subdirectory(${zlib_SOURCE_DIR} ${zlib_BINARY_DIR})
     target_include_directories(zlib PUBLIC ${zlib_SOURCE_DIR} ${zlib_BINARY_DIR})
     message(STATUS "zlib ${ZLIB_FULL_VERSION} successfully installed!")
