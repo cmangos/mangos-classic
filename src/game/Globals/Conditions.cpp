@@ -461,6 +461,20 @@ bool inline ConditionEntry::Evaluate(WorldObject const* target, Map const* map, 
         {
             return sWorldState.IsConditionFulfilled(m_value1, m_value2);
         }
+        case CONDITION_WORLDSTATE_EXPRESSION:
+        {
+            int32 variable = map->GetVariableManager().GetVariable(m_value1);
+            switch (m_value2)
+            {
+                case WORLDSTATE_EQUALS: return variable == m_value3;
+                case WORLDSTATE_GREATER: return variable > m_value3;
+                case WORLDSTATE_GREATER_EQUAL: return variable >= m_value3;
+                case WORLDSTATE_LESS: return variable < m_value3;
+                case WORLDSTATE_LESS_EQUAL: return variable <= m_value3;
+                default: break;
+            }
+            return false;
+        }
         default:
             break;
     }
@@ -909,6 +923,13 @@ bool ConditionEntry::IsValid() const
         case CONDITION_INSTANCE_SCRIPT:
         case CONDITION_ACTIVE_HOLIDAY:
         case CONDITION_WORLD_SCRIPT:
+            break;
+        case CONDITION_WORLDSTATE_EXPRESSION:
+            if (m_value2 > WORLDSTATE_SIGN_MAX)
+            {
+                sLog.outErrorDb("Worldstate condition (entry %u, type %u) has invalid sign %u. Skipping.", m_entry, m_condition, m_value2);
+                return false;
+            }
             break;
         default:
             sLog.outErrorDb("Condition entry %u has bad type of %d, skipped ", m_entry, m_condition);

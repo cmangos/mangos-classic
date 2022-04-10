@@ -78,6 +78,7 @@ enum ConditionType
     CONDITION_SPAWN_COUNT           = 39,                   // value1: creatureId; value2: count;
     CONDITION_WORLD_SCRIPT          = 40,
     CONDITION_UNUSED_7              = 41,
+    CONDITION_WORLDSTATE_EXPRESSION = 42,                   // value1: worldstateId; value2: sign; value3: otherOperand - example, 10000; =; 0 - true when 10000 is zero
 };
 
 enum ConditionFlags
@@ -122,6 +123,16 @@ enum ConditionRequirement
     CONDITION_REQ_BOTH_GAMEOBJECTS,
     CONDITION_REQ_BOTH_UNITS,
     CONDITION_REQ_BOTH_PLAYERS,
+};
+
+enum WorldStateConditionSign
+{
+    WORLDSTATE_EQUALS           = 0,
+    WORLDSTATE_GREATER          = 1,
+    WORLDSTATE_GREATER_EQUAL    = 2,
+    WORLDSTATE_LESS             = 3,
+    WORLDSTATE_LESS_EQUAL       = 4,
+    WORLDSTATE_SIGN_MAX         = 5,
 };
 
 class ConditionEntry
