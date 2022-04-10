@@ -228,7 +228,7 @@ void SpawnGroup::Spawn(bool force)
 
 bool SpawnGroup::IsWorldstateConditionSatisfied() const
 {
-    return !m_entry.WorldStateId || m_map.GetVariableManager().GetVariable(m_entry.WorldStateId == 1);
+    return !m_entry.WorldStateId || m_map.GetVariableManager().GetVariable(m_entry.WorldStateId) == 1;
 }
 
 void SpawnGroup::RespawnIfInVicinity(Position pos, float range)
