@@ -44,7 +44,7 @@ class WorldStateVariableManager
     public:
         WorldStateVariableManager(Map* map);
 
-        void Initialize();
+        void Initialize(uint32 completedEncounterMask);
 
         int32 GetVariable(uint32 Id) const;
         void SetVariable(uint32 Id, int32 value);

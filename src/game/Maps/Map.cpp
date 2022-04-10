@@ -183,7 +183,7 @@ void Map::Initialize(bool loadInstanceData /*= true*/)
 
     LoadTransports();
 
-    m_variableManager.Initialize();
+    m_variableManager.Initialize(m_persistentState->GetCompletedEncountersMask());
 
     m_spawnManager.Initialize();
 }

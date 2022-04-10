@@ -27,13 +27,13 @@ WorldStateVariableManager::WorldStateVariableManager(Map* map) : m_owner(map)
 {
 }
 
-void WorldStateVariableManager::Initialize()
+void WorldStateVariableManager::Initialize(uint32 completedEncounterMask)
 {
     auto bounds = sObjectMgr.GetDungeonEncounterBoundsByMap(m_owner->GetId());
     for (auto itr = bounds.first; itr != bounds.second; ++itr)
     {
         DungeonEncounterEntry const* encounter = (*itr).second->dbcEntry;
-        SetEncounterVariable(encounter->Id, false);
+        SetEncounterVariable(encounter->Id, ((1 << encounter->encounterIndex) & completedEncounterMask) == 1);
     }
 }
 
