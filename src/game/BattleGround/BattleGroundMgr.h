@@ -53,6 +53,7 @@ struct GroupQueueInfo                                       // stores informatio
     uint32  joinTime;                                       // time when group was added
     uint32  removeInviteTime;                               // time when we will remove invite for players in group
     uint32  isInvitedToBgInstanceGuid;                      // was invited to certain BG
+    uint32  desiredInstanceId;                              // queued for this instance specifically
 };
 
 enum BattleGroundQueueGroupTypes
@@ -77,7 +78,7 @@ class BattleGroundQueue
         void FillPlayersToBg(BattleGround* /*bg*/, BattleGroundBracketId /*bracketId*/);
         bool CheckPremadeMatch(BattleGroundBracketId /*bracketId*/, uint32 /*minPlayersPerTeam*/, uint32 /*maxPlayersPerTeam*/);
         bool CheckNormalMatch(BattleGroundBracketId /*bracketId*/, uint32 /*minPlayers*/, uint32 /*maxPlayers*/);
-        GroupQueueInfo* AddGroup(Player* /*leader*/, Group* /*group*/, BattleGroundTypeId /*bgTypeId*/, BattleGroundBracketId /*bracketEntry*/, bool /*isPremade*/);
+        GroupQueueInfo* AddGroup(Player* /*leader*/, Group* /*group*/, BattleGroundTypeId /*bgTypeId*/, BattleGroundBracketId /*bracketEntry*/, bool /*isPremade*/, uint32 /*instanceId*/);
         void RemovePlayer(ObjectGuid /*guid*/, bool /*decreaseInvitedCount*/);
         bool IsPlayerInvited(ObjectGuid /*playerGuid*/, const uint32 /*bgInstanceGuid*/, const uint32 /*removeTime*/);
         bool GetPlayerGroupInfoData(ObjectGuid /*guid*/, GroupQueueInfo* /*groupInfo*/);
@@ -112,7 +113,7 @@ class BattleGroundQueue
             public:
                 SelectionPool() : playerCount(0) {}
                 void Init();
-                bool AddGroup(GroupQueueInfo* ginfo, uint32 desiredCount);
+                bool AddGroup(GroupQueueInfo* ginfo, uint32 desiredCount, uint32 bgInstanceId);
                 bool KickGroup(uint32 size);
                 uint32 GetPlayerCount() const {return playerCount;}
                 GroupsQueueType selectedGroups;
