@@ -78,7 +78,7 @@ enum ConditionType
     CONDITION_SPAWN_COUNT           = 39,                   // value1: creatureId; value2: count;
     CONDITION_WORLD_SCRIPT          = 40,
     CONDITION_UNUSED_7              = 41,
-    CONDITION_WORLDSTATE_EXPRESSION = 42,                   // value1: worldstateId; value2: sign; value3: otherOperand - example, 10000; =; 0 - true when 10000 is zero
+    CONDITION_WORLDSTATE            = 42,                   // value1: worldstateId; value2: sign; value3: otherOperand - example, 10000; =; 0 - true when 10000 is zero
 };
 
 enum ConditionFlags

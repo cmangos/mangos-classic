@@ -461,7 +461,7 @@ bool inline ConditionEntry::Evaluate(WorldObject const* target, Map const* map, 
         {
             return sWorldState.IsConditionFulfilled(m_value1, m_value2);
         }
-        case CONDITION_WORLDSTATE_EXPRESSION:
+        case CONDITION_WORLDSTATE:
         {
             int32 variable = map->GetVariableManager().GetVariable(m_value1);
             switch (m_value2)
@@ -924,7 +924,7 @@ bool ConditionEntry::IsValid() const
         case CONDITION_ACTIVE_HOLIDAY:
         case CONDITION_WORLD_SCRIPT:
             break;
-        case CONDITION_WORLDSTATE_EXPRESSION:
+        case CONDITION_WORLDSTATE:
             if (m_value2 > WORLDSTATE_SIGN_MAX)
             {
                 sLog.outErrorDb("Worldstate condition (entry %u, type %u) has invalid sign %u. Skipping.", m_entry, m_condition, m_value2);
