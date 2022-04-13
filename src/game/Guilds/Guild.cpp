@@ -903,6 +903,17 @@ void Guild::LogGuildEvent(uint8 EventType, ObjectGuid playerGuid1, ObjectGuid pl
                                m_Id, m_GuildEventLogNextGuid, uint32(NewEvent.EventType), NewEvent.PlayerGuid1, NewEvent.PlayerGuid2, uint32(NewEvent.NewRank), NewEvent.TimeStamp);
 }
 
+ObjectGuid Guild::GetGuildInviter(ObjectGuid playerGuid) const
+{
+    for (auto const& itr : m_GuildEventLog)
+    {
+        if (itr.EventType == GUILD_EVENT_LOG_INVITE_PLAYER &&
+            itr.PlayerGuid2 == playerGuid)
+            return ObjectGuid(HIGHGUID_PLAYER, itr.PlayerGuid1);
+    }
+    return ObjectGuid();
+}
+
 void Guild::BroadcastEvent(GuildEvents event, ObjectGuid guid, char const* str1 /*=nullptr*/, char const* str2 /*=nullptr*/, char const* str3 /*=nullptr*/)
 {
     uint8 strCount = !str1 ? 0 : (!str2 ? 1 : (!str3 ? 2 : 3));
