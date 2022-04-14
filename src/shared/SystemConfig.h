@@ -55,6 +55,10 @@
 # define ARCHITECTURE "x64"
 #elif defined(__ia64)  || defined(__IA64__)  || defined(_M_IA64)
 # define ARCHITECTURE "IA64"
+#elif defined(__aarch64__)
+# define ARCHITECTURE "AArch64"
+#elif defined(__arm__)
+# define ARCHITECTURE "ARM32"
 #else
 # define ARCHITECTURE "x32"
 #endif
