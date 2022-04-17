@@ -749,8 +749,12 @@ bool WorldSession::ProcessMovementInfo(MovementInfo& movementInfo, Unit* mover, 
     if (!m_anticheat->Movement(movementInfo, recv_data))
         return false;
 
-    if (mover->IsSitState() && movementInfo.GetMovementFlags() & MOVEFLAG_MASK_MOVING_OR_TURN)
-        mover->SetStandState(UNIT_STAND_STATE_STAND);
+    if (movementInfo.GetMovementFlags() & MOVEFLAG_MASK_MOVING_OR_TURN)
+    {
+        if (mover->IsSitState())
+            mover->SetStandState(UNIT_STAND_STATE_STAND);
+        mover->HandleEmoteState(0);
+    }
 
     /* process position-change */
     HandleMoverRelocation(movementInfo);
