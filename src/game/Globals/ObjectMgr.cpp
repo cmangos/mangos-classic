@@ -965,7 +965,7 @@ void ObjectMgr::LoadSpawnGroups()
             entry.Name = fields[1].GetCppString();
             if (entry.Name.empty())
             {
-                sLog.outErrorDb("LoadSpawnGroups: Invalid spawn_group empty name.");
+                sLog.outErrorDb("LoadSpawnGroups: Invalid spawn_group empty name. Skipping.");
                 continue;
             }
 
@@ -973,12 +973,23 @@ void ObjectMgr::LoadSpawnGroups()
 
             if (entry.Type > SPAWN_GROUP_GAMEOBJECT)
             {
-                sLog.outErrorDb("LoadSpawnGroups: Invalid spawn_group unknown type %u.", entry.Type);
+                sLog.outErrorDb("LoadSpawnGroups: Invalid spawn_group unknown type %u. Skipping.", entry.Type);
                 continue;
             }
 
             entry.MaxCount = fields[3].GetUInt32();
             entry.WorldStateCondition = fields[4].GetInt32();
+
+            if (entry.WorldStateCondition)
+            {
+                const ConditionEntry* condition = sConditionStorage.LookupEntry<ConditionEntry>(entry.WorldStateCondition);
+                if (!condition) // condition does not exist for some reason
+                {
+                    sLog.outErrorDb("LoadSpawnGroups: Invalid spawn_group (%u) condition entry %u. Skipping.", entry.Id, entry.WorldStateCondition);
+                    continue;
+                }
+            }
+
             entry.Flags = fields[5].GetUInt32();
             entry.Active = false;
             entry.EnabledByDefault = true;
