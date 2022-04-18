@@ -1057,6 +1057,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Dungeon Encounters...");
     sObjectMgr.LoadDungeonEncounters();                     // Load DungeonEncounter.dbc from DB
 
+    sLog.outString("Loading WorldState Names...");          // must be before conditions and dbscripts
+    sObjectMgr.LoadWorldStateNames();
+
     sLog.outString("Loading Conditions...");                // Load Conditions
     sObjectMgr.LoadConditions();
 

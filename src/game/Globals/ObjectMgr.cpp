@@ -797,6 +797,20 @@ CreatureSpellList* ObjectMgr::GetCreatureSpellList(uint32 Id) const
     return &(*itr).second;
 }
 
+bool ObjectMgr::HasWorldStateName(int32 Id) const
+{
+    return m_worldStateNames.find(Id) != m_worldStateNames.end();
+}
+
+WorldStateName* ObjectMgr::GetWorldStateName(int32 Id)
+{
+    auto itr = m_worldStateNames.find(Id);
+    if (itr == m_worldStateNames.end())
+        return nullptr;
+
+    return &(itr->second);
+}
+
 void ObjectMgr::LoadCreatureImmunities()
 {
     uint32 count = 0;
@@ -964,7 +978,7 @@ void ObjectMgr::LoadSpawnGroups()
             }
 
             entry.MaxCount = fields[3].GetUInt32();
-            entry.WorldStateId = fields[4].GetInt32();
+            entry.WorldStateCondition = fields[4].GetInt32();
             entry.Flags = fields[5].GetUInt32();
             entry.Active = false;
             entry.EnabledByDefault = true;
@@ -5196,6 +5210,44 @@ void ObjectMgr::LoadWorldTemplate()
     }
 
     sLog.outString(">> Loaded %u World Template definitions", sWorldTemplate.GetRecordCount());
+    sLog.outString();
+}
+
+void ObjectMgr::LoadWorldStateNames()
+{
+    std::unique_ptr<QueryResult> result(CharacterDatabase.Query("SELECT Id, Name FROM worldstate_name"));
+
+    uint32 count = 0;
+
+    if (!result)
+    {
+        BarGoLink bar(1);
+        bar.step();
+
+        sLog.outString();
+        sLog.outString(">> Loaded %u worldstate names", count);
+        return;
+    }
+
+    BarGoLink bar(result->GetRowCount());
+
+    Field* fields;
+    do
+    {
+        bar.step();
+
+        fields = result->Fetch();
+
+        WorldStateName name;
+        name.Id = fields[0].GetInt32();
+        name.Name = fields[1].GetCppString();
+
+        m_worldStateNames.emplace(name.Id, name);
+
+        ++count;
+    } while (result->NextRow());
+
+    sLog.outString(">> Loaded %u worldstate names", count);
     sLog.outString();
 }
 

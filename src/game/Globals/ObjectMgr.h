@@ -443,6 +443,12 @@ typedef std::vector<CreatureImmunity> CreatureImmunityVector;
 typedef std::map<uint32, CreatureImmunityVector> CreatureImmunitySetMap;
 typedef std::map<uint32, CreatureImmunitySetMap> CreatureImmunityContainer;
 
+struct WorldStateName
+{
+    int32 Id;
+    std::string Name;
+};
+
 class ObjectMgr
 {
         friend class PlayerDumpReader;
@@ -677,6 +683,7 @@ class ObjectMgr
         void LoadInstanceEncounters();
         void LoadInstanceTemplate();
         void LoadWorldTemplate();
+        void LoadWorldStateNames();
         void LoadConditions();
         void LoadAreatriggerLocales();
 
@@ -1167,6 +1174,9 @@ class ObjectMgr
         CreatureSpellList* GetCreatureSpellList(uint32 Id) const; // only for starttime checks - else use Map
         std::shared_ptr<CreatureSpellListContainer> GetCreatureSpellListContainer() { return m_spellListContainer; }
         std::shared_ptr<SpawnGroupEntryContainer> GetSpawnGroupContainer() { return m_spawnGroupEntries; }
+
+        bool HasWorldStateName(int32 Id) const;
+        WorldStateName* GetWorldStateName(int32 Id);
     protected:
 
         // current locale settings
@@ -1326,6 +1336,8 @@ class ObjectMgr
         std::shared_ptr<CreatureSpellListContainer> m_spellListContainer;
 
         std::shared_ptr<SpawnGroupEntryContainer> m_spawnGroupEntries;
+
+        std::map<int32, WorldStateName> m_worldStateNames;
 };
 
 #define sObjectMgr MaNGOS::Singleton<ObjectMgr>::Instance()

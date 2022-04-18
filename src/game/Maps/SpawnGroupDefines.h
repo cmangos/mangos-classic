@@ -65,11 +65,17 @@ enum SpawnGroupType
     SPAWN_GROUP_GAMEOBJECT = 1,
 };
 
+enum SpawnGroupFlags // flags that are common between both
+{
+    SPAWN_GROUP_DESPAWN_ON_COND_FAIL = 0x08,
+};
+
 enum CreatureGroupFlags
 {
     CREATURE_GROUP_AGGRO_TOGETHER   = 0x01,
     CREATURE_GROUP_RESPAWN_TOGETHER = 0x02,
     CREATURE_GROUP_EVADE_TOGETHER   = 0x04,
+    // SPAWN_GROUP_DESPAWN_ON_COND_FAIL
 };
 
 enum CreatureGroupEvent : uint32
@@ -86,7 +92,7 @@ struct SpawnGroupEntry
     std::string Name;
     SpawnGroupType Type;
     uint32 MaxCount; // Maximum active alive entities spawned in world
-    int32 WorldStateId; // Worldstate value when set to 1 enables spawning of given group and 0 disables spawning
+    int32 WorldStateCondition; // Worldstate value when set to 1 enables spawning of given group and 0 disables spawning
     uint32 Flags;
     bool Active;
     bool EnabledByDefault;

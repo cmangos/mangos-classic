@@ -930,6 +930,13 @@ bool ConditionEntry::IsValid() const
                 sLog.outErrorDb("Worldstate condition (entry %u, type %u) has invalid sign %u. Skipping.", m_entry, m_condition, m_value2);
                 return false;
             }
+
+            // only allow named to avoid not knowing what they are for
+            if (!sObjectMgr.HasWorldStateName(m_value1))
+            {
+                sLog.outErrorDb("Worldstate condition (entry %u, type %u) has has no worldstate name assigned for worldstate %u. Skipping.", m_entry, m_condition, m_value1);
+                return false;
+            }
             break;
         default:
             sLog.outErrorDb("Condition entry %u has bad type of %d, skipped ", m_entry, m_condition);

@@ -104,8 +104,15 @@ void SpawnGroup::Spawn(bool force)
     if (!m_enabled && !force)
         return;
 
-    if (m_objects.size() >= m_entry.MaxCount || !IsWorldstateConditionSatisfied())
+    if (m_objects.size() >= m_entry.MaxCount)
         return;
+
+    if (!IsWorldstateConditionSatisfied())
+    {
+        if ((m_entry.Flags & SPAWN_GROUP_DESPAWN_ON_COND_FAIL) != 0)
+            Despawn();
+        return;
+    }
 
     std::vector<SpawnGroupDbGuids const*> eligibleGuids;
     std::map<uint32, uint32> validEntries;
@@ -228,7 +235,7 @@ void SpawnGroup::Spawn(bool force)
 
 bool SpawnGroup::IsWorldstateConditionSatisfied() const
 {
-    return !m_entry.WorldStateId || m_map.GetVariableManager().GetVariable(m_entry.WorldStateId) == 1;
+    return !m_entry.WorldStateCondition || IsConditionSatisfied(m_entry.WorldStateCondition, nullptr, &m_map, nullptr, CONDITION_FROM_WORLDSTATE);
 }
 
 void SpawnGroup::RespawnIfInVicinity(Position pos, float range)
@@ -381,6 +388,13 @@ void CreatureGroup::MoveHome()
     }
 }
 
+void CreatureGroup::Despawn()
+{
+    for (auto objItr : m_objects)
+        if (Creature* creature = m_map.GetCreature(objItr.first))
+            creature->ForcedDespawn();
+}
+
 void CreatureGroup::ClearRespawnTimes()
 {
     time_t now = time(nullptr);
@@ -397,6 +411,13 @@ void GameObjectGroup::RemoveObject(WorldObject* wo)
     SpawnGroup::RemoveObject(wo);
     GameObjectData const* data = sObjectMgr.GetGOData(wo->GetDbGuid());
     m_map.GetPersistentState()->RemoveGameobjectFromGrid(wo->GetDbGuid(), data);
+}
+
+void GameObjectGroup::Despawn()
+{
+    for (auto objItr : m_objects)
+        if (GameObject* go = m_map.GetGameObject(objItr.first))
+            go->ForcedDespawn();
 }
 
 ////////////////////
