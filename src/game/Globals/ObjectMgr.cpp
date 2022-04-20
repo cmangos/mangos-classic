@@ -5226,7 +5226,7 @@ void ObjectMgr::LoadWorldTemplate()
 
 void ObjectMgr::LoadWorldStateNames()
 {
-    std::unique_ptr<QueryResult> result(CharacterDatabase.Query("SELECT Id, Name FROM worldstate_name"));
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Id, Name FROM worldstate_name"));
 
     uint32 count = 0;
 
