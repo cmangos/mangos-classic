@@ -687,6 +687,20 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
         }
     }
 
+    if (mask & GROUP_UPDATE_FLAG_AURAS_NEGATIVE)
+    {
+        const uint64& auramask = player->GetAuraUpdateMask();
+        uint16 maskForClient = uint16(auramask >> 32);
+        data << maskForClient;
+        for (uint64 i = MAX_POSITIVE_AURAS; i < MAX_AURAS; ++i)
+        {
+            if (auramask & (uint64(1) << i))
+            {
+                data << uint16(player->GetUInt32Value(UNIT_FIELD_AURA + i));
+            }
+        }
+    }
+
     Unit* charm = player->GetCharm();
     if (mask & GROUP_UPDATE_FLAG_PET_GUID)
         data << (charm ? charm->GetObjectGuid() : ObjectGuid());
@@ -765,6 +779,24 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
         else
             data << uint32(0);
     }
+
+    if (mask & GROUP_UPDATE_FLAG_PET_AURAS_NEGATIVE)
+    {
+        if (charm)
+        {
+            const uint64& auramask = charm->GetAuraUpdateMask();
+            data << uint16(auramask >> 32);
+            for (uint32 i = MAX_POSITIVE_AURAS; i < MAX_AURAS; ++i)
+            {
+                if (auramask & (uint64(1) << i))
+                {
+                    data << uint16(charm->GetUInt32Value(UNIT_FIELD_AURA + i));
+                }
+            }
+        }
+        else
+            data << uint16(0);
+    }
 }
 
 /*this procedure handles clients CMSG_REQUEST_PARTY_MEMBER_STATS request*/
@@ -777,7 +809,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
     Player* player = ObjectAccessor::FindPlayer(guid, false);
     if (!player)
     {
-        WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 3 + 4 + 2);
+        WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 3 + 4 + 1);
         data << guid.WriteAsPacked();
         data << uint32(GROUP_UPDATE_FLAG_STATUS);
         data << uint8(MEMBER_STATUS_OFFLINE);
@@ -790,9 +822,9 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
     WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 4 + 2 + 2 + 2 + 1 + 2 * 6 + 8 + 1 + 8);
     data << player->GetPackGUID();
 
-    uint32 mask1 = 0x00040BFF;                              // common mask, real flags used 0x000040BFF
-    if (charm)
-        mask1 = 0x7FFFFFFF;                                 // for hunters and other classes with pets
+    uint32 mask1 = GROUP_UPDATE_FULL;
+    if (!charm)
+        mask1 &= ~GROUP_UPDATE_PET;                         // for hunters and other classes with pets
 
     Powers powerType = player->GetPowerType();
     data << uint32(mask1);                                  // group update mask
@@ -834,7 +866,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
     uint32 auramask = 0;
     size_t maskPos = data.wpos();
     data << uint32(auramask);                               // placeholder
-    for (uint8 i = 0; i < MAX_AURAS; ++i)
+    for (uint8 i = 0; i < MAX_POSITIVE_AURAS; ++i)
     {
         if (uint32 aura = player->GetUInt32Value(UNIT_FIELD_AURA + i))
         {
@@ -843,6 +875,19 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
         }
     }
     data.put<uint32>(maskPos, auramask);                    // GROUP_UPDATE_FLAG_AURAS
+
+    uint64 negativeauramask = 0;
+    size_t negativemaskPos = data.wpos();
+    data << uint16(negativeauramask);                       // placeholder
+    for (uint64 i = MAX_POSITIVE_AURAS; i < MAX_AURAS; ++i)
+    {
+        if (uint32 aura = player->GetUInt32Value(UNIT_FIELD_AURA + i))
+        {
+            negativeauramask |= (uint64(1) << i);
+            data << uint16(aura);
+        }
+    }
+    data.put<uint16>(negativemaskPos, uint16(negativeauramask >> 32)); // GROUP_UPDATE_FLAG_AURAS_NEGATIVE
 
     if (charm)
     {
@@ -868,6 +913,19 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
             }
         }
         data.put<uint32>(petMaskPos, petauramask);          // GROUP_UPDATE_FLAG_PET_AURAS
+
+        uint64 petnegativeauramask = 0;
+        size_t petNegativeMaskPos = data.wpos();
+        data << uint16(petnegativeauramask);                // placeholder
+        for (uint32 i = MAX_POSITIVE_AURAS; i < MAX_AURAS; ++i)
+        {
+            if (uint32 petaura = charm->GetUInt32Value(UNIT_FIELD_AURA + i))
+            {
+                petnegativeauramask |= (uint64(1) << i);
+                data << uint16(petaura);
+            }
+        }
+        data.put<uint16>(petNegativeMaskPos, uint16(petnegativeauramask >> 32)); // GROUP_UPDATE_FLAG_PET_AURAS_NEGATIVE
     }
     else
     {
