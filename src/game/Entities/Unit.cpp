@@ -10324,6 +10324,7 @@ void Unit::UpdateAuraForGroup(uint8 slot)
         if (player->GetGroup())
         {
             player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_AURAS);
+            player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_AURAS_NEGATIVE);
             player->SetAuraUpdateMask(slot);
         }
     }
@@ -10333,6 +10334,7 @@ void Unit::UpdateAuraForGroup(uint8 slot)
         if (charmer && (charmer->GetTypeId() == TYPEID_PLAYER) && ((Player*)charmer)->GetGroup())
         {
             ((Player*)charmer)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_AURAS);
+            ((Player*)charmer)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_AURAS_NEGATIVE);
             SetAuraUpdateMask(slot);
         }
     }
