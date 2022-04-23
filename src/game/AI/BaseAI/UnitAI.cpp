@@ -1085,7 +1085,7 @@ void UnitAI::UpdateAI(const uint32 diff)
                 DistanceYourself();
             else if (m_currentRangedMode && m_unit->CanReachWithMeleeAttack(victim))
                 SetCurrentRangedMode(false);
-            else if (!m_currentRangedMode && !m_unit->CanReachWithMeleeAttack(victim, 2.f) && IsEligibleForDistancing() && !IsMainSpellPrevented(m_mainSpellInfo))
+            else if (!m_currentRangedMode && !m_unit->CanReachWithMeleeAttack(victim, 3.f) && IsEligibleForDistancing() && !IsMainSpellPrevented(m_mainSpellInfo))
                 SetCurrentRangedMode(true);
             else if (m_rangedModeSetting == TYPE_DISTANCER && !m_distancingCooldown)
             {
