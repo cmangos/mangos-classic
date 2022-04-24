@@ -23,6 +23,7 @@ EndScriptData
 
 */
 
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "Grids/GridNotifiers.h"
 #include "Grids/CellImpl.h"
@@ -790,28 +791,32 @@ enum {
     SPELL_BATTLE_STANCE      = 7165,
     SPELL_THUNDERCLAP        = 8078,
     SPELL_HEALING_WARD       = 5605,
-    EVENT_BECOME_PURIFIED    = 1,
-    EVENT_FURBOLG_RESET      = 2,
-    EVENT_START_PURIFICATION = 3,
+
+
+
+    EVENT_BECOME_PURIFIED    = 0,
+    EVENT_FURBOLG_RESET      = 1,
+    EVENT_START_PURIFICATION = 2,
+    ACTION_FLEE              = 3,
+    ACTION_THUNDERCLAP       = 4,
+    ACTION_HEALING_WARD      = 5,
+    ACTION_MAX               = 6,
+
     BOWL_DISTANCE            = 5,
 };
 
 static const std::vector<uint32> furbolgList = { NPC_BLACKWOOD_WARRIOR, NPC_BLACKWOOD_TOTEMIC };
-Position bowlCoords;
 
-struct npc_corrupted_furbolgAI : public ScriptedAI
+struct npc_corrupted_furbolgAI : public CombatAI
 {
-    bool m_isFirst;
-    bool m_hasFled;
-
-    npc_corrupted_furbolgAI(Creature* creature) : ScriptedAI(creature)
-    { 
+    npc_corrupted_furbolgAI(Creature* creature) : CombatAI(creature, ACTION_MAX)
+    {
         AddCustomAction(EVENT_BECOME_PURIFIED, true, [&]()
         {
             if (m_isFirst)
                 DoScriptText(EMOTE_PURIFIED, m_creature);
             m_creature->SetFactionTemporary(FACTION_BLACKWOOD, TEMPFACTION_RESTORE_COMBAT_STOP);
-            m_creature->GetMotionMaster()->MoveRandomAroundPoint(bowlCoords.GetPositionX(), bowlCoords.GetPositionY(), bowlCoords.GetPositionZ(), 40.f);
+            m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_bowlCoords.GetPositionX(), m_bowlCoords.GetPositionY(), m_bowlCoords.GetPositionZ(), 40.f);
             m_creature->SetWalk(true);
             ResetTimer(EVENT_FURBOLG_RESET, 1.5 * MINUTE * IN_MILLISECONDS);
         });
@@ -824,7 +829,7 @@ struct npc_corrupted_furbolgAI : public ScriptedAI
         });
         AddCustomAction(EVENT_START_PURIFICATION, true, [&]()
         {
-            if (!bowlCoords.IsEmpty() && sqrt(bowlCoords.GetDistance(m_creature->GetPosition())) <= 60.f)
+            if (!m_bowlCoords.IsEmpty() && m_bowlCoords.GetDistance(m_creature->GetPosition()) <= 3600.f)
             {
                 if (m_isFirst)
                     DoScriptText(EMOTE_LURED, m_creature);
@@ -834,18 +839,35 @@ struct npc_corrupted_furbolgAI : public ScriptedAI
                 m_creature->CombatStop();
 
                 float x, y, z, angle;
-                angle = m_creature->GetAngle(bowlCoords.GetPositionX(), bowlCoords.GetPositionY());
-                m_creature->GetNearPointAt(bowlCoords.GetPositionX(), bowlCoords.GetPositionY(), bowlCoords.GetPositionZ(),
+                angle = m_creature->GetAngle(m_bowlCoords.GetPositionX(), m_bowlCoords.GetPositionY());
+                m_creature->GetNearPointAt(m_bowlCoords.GetPositionX(), m_bowlCoords.GetPositionY(), m_bowlCoords.GetPositionZ(),
                     m_creature, x, y, z, m_creature->GetObjectBoundingRadius(), CONTACT_DISTANCE * 2.f, angle + M_PI);
                 m_creature->SetWalk(false);
                 m_creature->GetMotionMaster()->MovePoint(1, x, y, z);
             }
         });
-        Reset();
+        AddTimerlessCombatAction(ACTION_FLEE, true);
+        switch (m_creature->GetEntry())
+        {
+            case NPC_BLACKWOOD_WARRIOR: AddCombatAction(ACTION_THUNDERCLAP, 16000, 21000); break;
+            case NPC_BLACKWOOD_TOTEMIC: AddCombatAction(ACTION_HEALING_WARD, 6000, 12000); break;
+        }
     }
+
+    bool m_isFirst;
+    bool m_hasFled;
+    Position m_bowlCoords;
 
     void Reset() override
     {
+        CombatAI::Reset();
+        
+        switch (m_creature->GetEntry())
+        {
+            case NPC_BLACKWOOD_WARRIOR: DoCastSpellIfCan(m_creature, SPELL_BATTLE_STANCE); break;
+            case NPC_BLACKWOOD_TOTEMIC: break;
+        }
+        
         SetCombatScriptStatus(false);
         m_hasFled           = false;
         m_isFirst           = false;
@@ -853,9 +875,20 @@ struct npc_corrupted_furbolgAI : public ScriptedAI
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
     }
 
-    void SeekPurification(bool isFirst)
+    uint32 GetSubsequentActionTimer(uint32 actionID)
+    {
+        switch (actionID)
+        {
+            case ACTION_THUNDERCLAP: return urand(16, 21) * IN_MILLISECONDS;
+            case ACTION_HEALING_WARD: return urand(30, 36) * IN_MILLISECONDS;
+        }
+        return 0;
+    }
+
+    void SeekPurification(bool isFirst, Position bowlCoords)
     {
         m_isFirst = isFirst;
+        m_bowlCoords = bowlCoords;
         if(m_isFirst)
             ResetTimer(EVENT_START_PURIFICATION, 0);
         else
@@ -871,110 +904,39 @@ struct npc_corrupted_furbolgAI : public ScriptedAI
         ResetTimer(EVENT_BECOME_PURIFIED, 5 * IN_MILLISECONDS);
     }
 
-    // Return true to handle shared timers and MeleeAttack
-    virtual bool UpdateFurbolgAI(const uint32 /*diff*/) { return true; }
-
-    void UpdateAI(const uint32 diff) override
+    void ExecuteAction(uint32 action) override
     {
-        UpdateTimers(diff, m_creature->GetVictim());
-        ExecuteActions();
-
-        // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // Flee at 15% HP
-        if (m_creature->GetHealthPercent() <= 10.0f && !m_hasFled)
+        switch (action)
         {
-            DoScriptText(EMOTE_GENERIC_FLEE, m_creature);
-            if (DoFlee())
-                m_hasFled = true;
-        }
-
-        // Call furbolg specific virtual function
-        if (!UpdateFurbolgAI(diff))
-            return;
-
-        DoMeleeAttackIfReady();
-    }
-};
-
-/*######
-## npc_blackwood_warrior
-######*/
-
-struct npc_blackwood_warriorAI : public npc_corrupted_furbolgAI
-{
-    npc_blackwood_warriorAI(Creature* creature) : npc_corrupted_furbolgAI(creature) { Reset(); }
-
-    uint32 m_thunderclapTimer;
-
-    void Reset() override
-    {
-        npc_corrupted_furbolgAI::Reset();
-
-        DoCastSpellIfCan(m_creature, SPELL_BATTLE_STANCE);
-
-        m_thunderclapTimer = urand(16, 21) * IN_MILLISECONDS;
-    }
-
-    bool UpdateFurbolgAI(const uint32 diff)
-    {
-        if (m_thunderclapTimer < diff)
-        {
-            if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_IN_MELEE_RANGE))
+            case ACTION_FLEE:
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_THUNDERCLAP) == CAST_OK)
-                    m_thunderclapTimer = urand(16, 21) * IN_MILLISECONDS;
+                if (m_creature->GetHealthPercent() <= 15.f)
+                {
+                    DoScriptText(EMOTE_GENERIC_FLEE, m_creature);
+                    if (DoFlee())
+                        m_hasFled = true;
+                    DisableCombatAction(action);
+                }
+                break;
+            }
+            case ACTION_THUNDERCLAP:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_IN_MELEE_RANGE))
+                {
+                    if (DoCastSpellIfCan(nullptr, SPELL_THUNDERCLAP) == CAST_OK)
+                        ResetCombatAction(action, GetSubsequentActionTimer(action));
+                }
+                break;
+            }
+            case ACTION_HEALING_WARD:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_HEALING_WARD) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                break;
             }
         }
-        else
-            m_thunderclapTimer -= diff;
-
-        return true;
     }
 };
-
-UnitAI* GetAI_npc_blackwood_warrior(Creature* creature)
-{
-    return new npc_blackwood_warriorAI(creature);
-}
-
-/*######
-## npc_blackwood_totemic
-######*/
-
-struct npc_blackwood_totemicAI : public npc_corrupted_furbolgAI
-{
-    npc_blackwood_totemicAI(Creature* creature) : npc_corrupted_furbolgAI(creature) { Reset(); }
-
-    uint32 m_healingWardTimer;
-
-    void Reset() override
-    {
-        npc_corrupted_furbolgAI::Reset();
-
-        m_healingWardTimer = urand(6, 12) * IN_MILLISECONDS;
-    }
-
-    bool UpdateFurbolgAI(const uint32 diff)
-    {
-        if (m_healingWardTimer < diff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_HEALING_WARD) == CAST_OK)
-                m_healingWardTimer = urand(30, 36) * IN_MILLISECONDS;
-        }
-        else
-            m_healingWardTimer -= diff;
-
-        return true;
-    }
-};
-
-UnitAI* GetAI_npc_blackwood_totemic(Creature* creature)
-{
-    return new npc_blackwood_totemicAI(creature);
-}
 
 /*######
 ## EventId_event_purify_food
@@ -987,6 +949,7 @@ bool ProcessEventId_event_purify_food(uint32 /*eventId*/, Object* source, Object
         GameObject* bonfire = (GameObject*)target;
         Player* player = (Player*)source;
         CreatureList furbolgs;
+        Position bowlCoords;
         // Get all nearby Blackwood Furbolgs
         GetCreatureListWithEntryInGrid(furbolgs, bonfire, furbolgList, 40.f);
         player->GetFirstCollisionPosition(bowlCoords, float(BOWL_DISTANCE), player->GetOrientation());
@@ -1007,7 +970,7 @@ bool ProcessEventId_event_purify_food(uint32 /*eventId*/, Object* source, Object
                 continue;
 
             if (auto* furbolgAI = dynamic_cast<npc_corrupted_furbolgAI*>(furbolg->AI()))
-                furbolgAI->SeekPurification(furbolg == furbolgs.back());
+                furbolgAI->SeekPurification(furbolg == furbolgs.back(), bowlCoords);
         }
 
         return false;
@@ -1081,12 +1044,12 @@ void AddSC_darkshore()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_blackwood_warrior";
-    pNewScript->GetAI = &GetAI_npc_blackwood_warrior;
+    pNewScript->GetAI = &GetNewAIInstance<npc_corrupted_furbolgAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_blackwood_totemic";
-    pNewScript->GetAI = &GetAI_npc_blackwood_totemic;
+    pNewScript->GetAI = &GetNewAIInstance<npc_corrupted_furbolgAI>;
     pNewScript->RegisterSelf();
     
     pNewScript = new Script;
