@@ -4298,6 +4298,14 @@ bool Unit::IsUnderwater() const
     return GetTerrain()->IsUnderWater(GetPositionX(), GetPositionY(), GetPositionZ());
 }
 
+bool Unit::IsAboveGround(float diff) const
+{
+    float x, y, z;
+    GetPosition(x, y, z);
+    float floorZ = GetMap()->GetHeight(x, y, z);
+    return std::abs(z - floorZ) > diff;
+}
+
 void Unit::DeMorph()
 {
     SetDisplayId(GetNativeDisplayId());
