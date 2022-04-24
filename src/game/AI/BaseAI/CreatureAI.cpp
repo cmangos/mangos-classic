@@ -51,7 +51,10 @@ void CreatureAI::EnterCombat(Unit* enemy)
     UnitAI::EnterCombat(enemy);
     // TODO: Monitor this condition to see if it conflicts with any pets
     if (m_creature->IsCritter() && !m_creature->IsPet() && !m_creature->IsInPanic() && enemy && enemy->IsPlayerControlled())
+    {
         DoFlee(30000);
+        SetAIOrder(ORDER_CRITTER_FLEE); // mark as critter flee for custom handling
+    }
     if (enemy && (m_creature->IsGuard() || m_creature->IsCivilian()))
     {
         // Send Zone Under Attack message to the LocalDefense and WorldDefense Channels
@@ -211,4 +214,10 @@ void CreatureAI::TimedFleeingEnded()
             if (factionTemplate->factionFlags & FACTION_TEMPLATE_FLEE_FROM_CALL_FOR_HELP)
                 EnterEvadeMode();
     }
+    if (GetAIOrder() == ORDER_CRITTER_FLEE && m_creature->IsAlive())
+    {
+        SetCombatScriptStatus(false);
+        EnterEvadeMode();
+    }
+    SetAIOrder(ORDER_NONE);
 }
