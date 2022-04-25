@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2792_01_mangos_worldstate_name` bit(1) DEFAULT NULL
+  `required_z2793_01_mangos_dbscript_extension` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1556,10 +1556,12 @@ CREATE TABLE `dbscripts_on_creature_movement` (
   `dataint2` int(11) NOT NULL DEFAULT '0',
   `dataint3` int(11) NOT NULL DEFAULT '0',
   `dataint4` int(11) NOT NULL DEFAULT '0',
+  `datafloat` float NOT NULL DEFAULT '0',
   `x` float NOT NULL DEFAULT '0',
   `y` float NOT NULL DEFAULT '0',
   `z` float NOT NULL DEFAULT '0',
   `o` float NOT NULL DEFAULT '0',
+  `speed` float NOT NULL DEFAULT '0',
   `condition_id` MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
   `comments` varchar(255) NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

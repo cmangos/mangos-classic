@@ -107,8 +107,8 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
     scripts.first = tablename;
     scripts.second.clear();                                 // need for reload support
 
-    //                                                 0   1      2        3         4          5          6            7              8           9        10        11        12       13 14 15 16  17
-    QueryResult* result = WorldDatabase.PQuery("SELECT id, delay, command, datalong, datalong2, datalong3, buddy_entry, search_radius, data_flags, dataint, dataint2, dataint3, dataint4, x, y, z, o, condition_id FROM %s", tablename);
+    //                                                 0   1      2        3         4          5          6            7              8           9        10        11        12               13 14 15 16 17     18            19
+    QueryResult* result = WorldDatabase.PQuery("SELECT id, delay, command, datalong, datalong2, datalong3, buddy_entry, search_radius, data_flags, dataint, dataint2, dataint3, dataint4, datafloat, x, y, z, o, speed, condition_id FROM %s ORDER BY priority", tablename);
 
     uint32 count = 0;
 
@@ -143,11 +143,13 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
         tmp.textId[1]          = fields[10].GetInt32();
         tmp.textId[2]          = fields[11].GetInt32();
         tmp.textId[3]          = fields[12].GetInt32();
-        tmp.x                  = fields[13].GetFloat();
-        tmp.y                  = fields[14].GetFloat();
-        tmp.z                  = fields[15].GetFloat();
-        tmp.o                  = fields[16].GetFloat();
-        tmp.condition_id       = fields[17].GetUInt32();
+        tmp.rawFloat.data[0]   = fields[13].GetFloat();
+        tmp.x                  = fields[14].GetFloat();
+        tmp.y                  = fields[15].GetFloat();
+        tmp.z                  = fields[16].GetFloat();
+        tmp.o                  = fields[17].GetFloat();
+        tmp.speed              = fields[18].GetFloat();
+        tmp.condition_id       = fields[19].GetUInt32();
 
         if (tmp.condition_id && !sConditionStorage.LookupEntry<ConditionEntry>(tmp.condition_id))
         {

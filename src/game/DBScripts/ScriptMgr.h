@@ -475,13 +475,22 @@ struct ScriptInfo
 
     int32 textId[MAX_TEXT_ID];                              // dataint to dataint4
 
+    union
+    {
+        struct
+        {
+            float data[1];
+        } rawFloat;
+    };
+
     float x;
     float y;
     float z;
     float o;
+    float speed;
     uint32 condition_id;
 
-    ScriptInfo() : id(0), delay(0), command(0), buddyEntry(0), searchRadiusOrGuid(0), data_flags(0), x(0), y(0), z(0), o(0), condition_id(0)
+    ScriptInfo() : id(0), delay(0), command(0), buddyEntry(0), searchRadiusOrGuid(0), data_flags(0), x(0), y(0), z(0), o(0), speed(0), condition_id(0)
     {
         memset(raw.data, 0, sizeof(raw.data));
         memset(textId, 0, sizeof(textId));
