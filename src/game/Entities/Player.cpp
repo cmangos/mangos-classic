@@ -16782,6 +16782,10 @@ void Player::SendAllSpellMods(SpellModType modType)
                 if (modifier->type == modType && (modifier->mask.IsFitToFamilyMask(_mask)))
                     val += modifier->value;
             }
+
+            if (val == 0) // do not send zero payload
+                continue;
+
             WorldPacket data(opcode, (1 + 1 + 4));
             data << uint8(eff);
             data << uint8(op);
