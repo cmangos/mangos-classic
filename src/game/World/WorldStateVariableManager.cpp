@@ -37,7 +37,7 @@ void WorldStateVariableManager::Initialize(uint32 completedEncounterMask)
     }
 }
 
-int32 WorldStateVariableManager::GetVariable(uint32 Id) const
+int32 WorldStateVariableManager::GetVariable(int32 Id) const
 {
     auto itr = m_variables.find(Id);
     if (itr == m_variables.end())
@@ -45,12 +45,12 @@ int32 WorldStateVariableManager::GetVariable(uint32 Id) const
     return (*itr).second.value;
 }
 
-void WorldStateVariableManager::SetVariable(uint32 Id, int32 value)
+void WorldStateVariableManager::SetVariable(int32 Id, int32 value)
 {
     m_variables[Id].value = value;
 }
 
-void WorldStateVariableManager::SetVariableData(uint32 Id, bool send, uint32 zoneId, uint32 areaId)
+void WorldStateVariableManager::SetVariableData(int32 Id, bool send, uint32 zoneId, uint32 areaId)
 {
     auto& variable = m_variables[Id];
     variable.send = send;
@@ -58,7 +58,7 @@ void WorldStateVariableManager::SetVariableData(uint32 Id, bool send, uint32 zon
     variable.areaId = areaId;
 }
 
-void WorldStateVariableManager::AddVariableExecutor(uint32 Id, std::function<void()>& executor)
+void WorldStateVariableManager::AddVariableExecutor(int32 Id, std::function<void()>& executor)
 {
     m_variables[Id].executors.push_back(executor);
 }
@@ -71,14 +71,14 @@ void WorldStateVariableManager::FillInitialWorldStates(ByteBuffer& data, uint32&
             (!variable.second.zoneId || variable.second.zoneId == zoneId) &&
             (!variable.second.areaId || variable.second.areaId == areaId))
         {
-            data << uint32(variable.first);
+            data << int32(variable.first);
             data << int32(variable.second.value);
             ++count;
         }
     }
 }
 
-void WorldStateVariableManager::BroadcastVariable(uint32 Id)
+void WorldStateVariableManager::BroadcastVariable(int32 Id) const
 {
     auto const& lPlayers = m_owner->GetPlayers();
     if (!lPlayers.isEmpty())

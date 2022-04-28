@@ -410,3 +410,10 @@ Defining a buddy could be done in several way:
                                                        Set flag 0x1 for keep compact option (after a member death)
                                                        Set flag 0x2 for disabling pathfinding (not impemented yet)
 
+52 SCRIPT_COMMAND_SET_GOSSIP_MENU           Sets a new gossip menu id for creature
+                                            * datalong = new gossip menu id
+
+53 SCRIPT_COMMAND_SET_WORLDSTATE            Sets worldstate variable to new value in current map
+                                            * dataint = worldstate variable id
+                                            * dataint2 = new value
+
