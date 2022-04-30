@@ -30,6 +30,7 @@ class GameObject;
 class Creature;
 class WorldObject;
 class ChatHandler;
+class CreatureGroup;
 
 enum InstanceConditionIDs                                   // Suggested values used with CONDITION_INSTANCE_SCRIPT for some generic uses
 {
@@ -108,6 +109,9 @@ class InstanceData
 
         // called on creature despawn
         virtual void OnCreatureDespawn(Creature* /*creature*/) {}
+
+        // called on creature group last member despawn or death - whichever occurs first
+        virtual void OnCreatureGroupDespawn(CreatureGroup* /*creatureGroup*/) {}
 
         // called on game event
         virtual void OnEventHappened(uint16 /*event_id*/, bool /*activate*/, bool /*resume*/) {}
