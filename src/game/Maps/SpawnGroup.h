@@ -40,6 +40,7 @@ class SpawnGroup
 {
     public:
         SpawnGroup(SpawnGroupEntry const& entry, Map& map, uint32 typeId);
+        virtual ~SpawnGroup() {}
         virtual void AddObject(uint32 dbGuid, uint32 entry);
         virtual void RemoveObject(WorldObject* wo);
         uint32 GetGuidEntry(uint32 dbGuid) const;

@@ -27,6 +27,7 @@
 #include "Globals/ObjectMgr.h"
 #include "MotionGenerators/TargetedMovementGenerator.h"
 #include "World/World.h"
+#include "Maps/InstanceData.h"
 
 SpawnGroup::SpawnGroup(SpawnGroupEntry const& entry, Map& map, uint32 typeId) : m_entry(entry), m_map(map), m_objectTypeId(typeId), m_enabled(m_entry.EnabledByDefault)
 {
