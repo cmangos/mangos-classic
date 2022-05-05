@@ -1453,7 +1453,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
             MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, check);
             Cell::VisitAllObjects(this, searcher, 5.f);
             for (Unit* attacker : targets)
-                if (attacker->AI())
+                if (attacker->IsCreature() && !static_cast<Creature*>(attacker)->IsCritter() && attacker->AI())
                     attacker->AI()->AttackStart(user);
 
             return;
