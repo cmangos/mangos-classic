@@ -9223,13 +9223,13 @@ bool ObjectMgr::IsVendorItemValid(bool isTemplate, char const* tableName, uint32
     uint32 countItems = vItems ? vItems->GetItemCount() : 0;
     countItems += tItems ? tItems->GetItemCount() : 0;
 
-    if (countItems >= MAX_VENDOR_ITEMS)
+    if (countItems > std::numeric_limits<uint8>::max())
     {
         if (pl)
             ChatHandler(pl).SendSysMessage(LANG_COMMAND_ADDVENDORITEMITEMS);
         else
-            sLog.outErrorDb("Table `%s` has too many items (%u >= %i) for %s %u, ignoring",
-                            tableName, countItems, MAX_VENDOR_ITEMS, idStr, vendor_entry);
+            sLog.outErrorDb("Table `%s` has too many items (%u > %i) for %s %u, ignoring",
+                            tableName, countItems, std::numeric_limits<uint8>::max(), idStr, vendor_entry);
         return false;
     }
 
