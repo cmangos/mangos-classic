@@ -1829,7 +1829,7 @@ void ObjectMgr::LoadGameObjects()
     uint32 count = 0;
 
     //                                                0                           1   2    3           4           5           6
-    QueryResult* result = WorldDatabase.Query("SELECT gameobject.guid, gameobject.id, map, round(position_x, 20), round(position_y, 20), round(position_z, 20), orientation,"
+    QueryResult* result = WorldDatabase.Query("SELECT gameobject.guid, gameobject.id, map, round(position_x, 20), round(position_y, 20), round(position_z, 20), round(orientation, 20),"
                           //   7          8          9          10         11             12               13            14     15         16
                           "round(rotation0, 20), round(rotation1, 20), round(rotation2, 20), round(rotation3, 20), spawntimesecsmin, spawntimesecsmax, animprogress, state, spawnMask, event,"
                           //   17                          18
