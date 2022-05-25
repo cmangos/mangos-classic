@@ -5980,6 +5980,8 @@ bool SpellAuraHolder::IsSaveToDbHolder() const
     if (GetTrackedAuraType() == TRACK_AURA_TYPE_SINGLE_TARGET)
         return false;
 
+    if (m_spellProto->AuraInterruptFlags & AURA_INTERRUPT_FLAG_LEAVE_WORLD)
+        return false;
 
     if (IsPermanent())
     {
