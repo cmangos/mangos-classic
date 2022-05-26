@@ -5756,11 +5756,19 @@ void Unit::SendSpellOrDamageImmune(ObjectGuid casterGuid, Unit* target, uint32 s
 void Unit::SendEnchantmentLog(ObjectGuid targetGuid, uint32 itemEntry, uint32 enchantId) const
 {
     WorldPacket data(SMSG_ENCHANTMENTLOG, (8 + 8 + 4 + 4));
-    data << GetPackGUID();
-    data << targetGuid.WriteAsPacked();
+    data << GetObjectGuid();
+    data << targetGuid;
     data << uint32(itemEntry);
     data << uint32(enchantId);
-    SendMessageToSet(data, true);
+
+    size_t affiliationPos = data.wpos();
+    data << uint8(false); // vanilla only field - showAffiliation
+
+    if (Player const* player = dynamic_cast<Player const*>(this))
+        player->GetSession()->SendPacket(data);
+
+    data.put<uint8>(affiliationPos, uint8(true));
+    SendMessageToSet(data, false);
 }
 
 void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry const* spellInfo, bool triggered, bool success/* = true*/)
