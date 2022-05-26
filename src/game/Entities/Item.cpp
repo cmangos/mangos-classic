@@ -970,6 +970,11 @@ void Item::ClearEnchantment(EnchantmentSlot slot)
     if (!GetEnchantmentId(slot))
         return;
 
+    if (slot < MAX_INSPECTED_ENCHANTMENT_SLOT)
+        if (uint32 oldEnchant = GetEnchantmentId(slot))
+            if (Player* owner = GetOwner())
+                owner->SendEnchantmentLog(ObjectGuid(), GetEntry(), oldEnchant);
+
     for (uint8 x = 0; x < 3; ++x)
         SetUInt32Value(ITEM_FIELD_ENCHANTMENT + slot * MAX_ENCHANTMENT_OFFSET + x, 0);
     SetState(ITEM_CHANGED);
