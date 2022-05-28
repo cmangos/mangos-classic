@@ -28,6 +28,7 @@
 #include "Movement/MoveSpline.h"
 #include "Maps/GridDefines.h"
 #include "Entities/Transports.h"
+#include "AI/ScriptDevAI/base/escort_ai.h"
 
 #include <cassert>
 
@@ -189,8 +190,18 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
     // Inform script
     if (creature.AI())
     {
-        uint32 type = WAYPOINT_MOTION_TYPE;
+        bool inform = false;
         if (m_PathOrigin == PATH_FROM_EXTERNAL)
+            inform = true;
+        else if (m_PathOrigin == PATH_FROM_WAYPOINT_PATH) // temporary transitional code for transitioning from script_texts to waypoint_path
+        {
+            if (npc_escortAI* ai = dynamic_cast<npc_escortAI*>(creature.AI()))
+                if (ai->GetCurrentWaypointPath() == m_pathId)
+                    inform = true;
+        }
+
+        uint32 type = WAYPOINT_MOTION_TYPE;
+        if (inform)
             type = EXTERNAL_WAYPOINT_MOVE;
         InformAI(creature, type, i_currentNode);
     }
@@ -226,8 +237,18 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
     // Fire event only if it is already moving to the next node (for normal start it is already done in SendNewPath)
     if (!m_nodeIndexes.empty() && !Stopped(creature))
     {
+        bool inform = false;
+        if (m_PathOrigin == PATH_FROM_EXTERNAL)
+            inform = true;
+        else if (m_PathOrigin == PATH_FROM_WAYPOINT_PATH) // temporary transitional code for transitioning from script_texts to waypoint_path
+        {
+            if (npc_escortAI* ai = dynamic_cast<npc_escortAI*>(creature.AI()))
+                if (ai->GetCurrentWaypointPath() == m_pathId)
+                    inform = true;
+        }
+
         // Inform AI that we start to move
-        if (creature.AI() && m_PathOrigin == PATH_FROM_EXTERNAL)
+        if (creature.AI() && inform)
             InformAI(creature, uint32(EXTERNAL_WAYPOINT_MOVE_START), m_currentWaypointNode->first);
     }
 
@@ -307,8 +328,18 @@ void WaypointMovementGenerator<Creature>::SendNextWayPointPath(Creature& creatur
 
     WaypointNode const* nextNode = &m_currentWaypointNode->second;
 
+    bool inform = false;
+    if (m_PathOrigin == PATH_FROM_EXTERNAL)
+        inform = true;
+    else if (m_PathOrigin == PATH_FROM_WAYPOINT_PATH) // temporary transitional code for transitioning from script_texts to waypoint_path
+    {
+        if (npc_escortAI* ai = dynamic_cast<npc_escortAI*>(creature.AI()))
+            if (ai->GetCurrentWaypointPath() == m_pathId)
+                inform = true;
+    }
+
     // Inform AI that we start to move or reached last node
-    if (creature.AI() && m_PathOrigin == PATH_FROM_EXTERNAL)
+    if (creature.AI() && inform)
     {
         uint32 type = uint32(EXTERNAL_WAYPOINT_MOVE_START);
         if (i_path->begin()->first == i_currentNode && i_path->rbegin()->first == m_lastReachedWaypoint)

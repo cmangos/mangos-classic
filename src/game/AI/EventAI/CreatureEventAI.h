@@ -228,6 +228,13 @@ enum DespawnAggregation : uint32
     AGGREGATION_DEATH   = 0x4,
 };
 
+enum ChangeMovementFlags : uint32
+{
+    CHANGE_MOVEMENT_FLAG_AS_DEFAULT = 0x1,
+    CHANGE_MOVEMENT_FLAG_WAYPOINT_PATH = 0x2,
+    CHANGE_MOVEMENT_MAX = 0x3,
+};
+
 struct CreatureEventAI_Action
 {
     EventAI_ActionType type: 16;
@@ -479,7 +486,7 @@ struct CreatureEventAI_Action
         {
             uint32 movementType;
             uint32 wanderORpathID;
-            uint32 asDefault;
+            uint32 flags;
         } changeMovement;
         // ACTION_T_REUSE                                   = 49
         struct

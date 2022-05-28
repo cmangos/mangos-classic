@@ -2048,7 +2048,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
 
             if (m_script->movement.movementType == WAYPOINT_MOTION_TYPE || m_script->movement.movementType == PATH_MOTION_TYPE)
             {
-                if (m_script->movement.timerOrPassTarget && !pTarget)
+                if ((m_script->movement.timerOrPassTarget & 0x1) && !pTarget)
                 {
                     DETAIL_FILTER_LOG(LOG_FILTER_DB_SCRIPT, " DB-SCRIPTS: Process table `%s` id %u, SCRIPT_COMMAND_MOVEMENT called for movement change to %u with source guid %s, pass target true and target nullptr: skipping.", m_table, m_script->id, m_script->movement.movementType, pSource->GetGuidStr().c_str());
                     break;
@@ -2074,28 +2074,43 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                     }
                     break;
                 case WAYPOINT_MOTION_TYPE:
+                {
                     source->StopMoving();
                     source->GetMotionMaster()->Clear(false, true);
-                    if (!m_script->movement.timerOrPassTarget)
+                    WaypointPathOrigin origin = PATH_NO_PATH;
+                    if (m_script->movement.timerOrPassTarget & 0x2)
+                        origin = PATH_FROM_WAYPOINT_PATH;
+                    if (!m_script->movement.timerOrPassTarget & 0x1)
                         source->GetMotionMaster()->MoveWaypoint(m_script->movement.wanderORpathId);
                     else
                         source->GetMotionMaster()->MoveWaypoint(m_script->movement.wanderORpathId, 0, 0, 0, ForcedMovement(m_script->textId[0]), pTarget->GetObjectGuid());
                     break;
+                }
                 case PATH_MOTION_TYPE:
+                {
                     source->StopMoving();
-                    if (!m_script->movement.timerOrPassTarget)
+                    WaypointPathOrigin origin = PATH_NO_PATH;
+                    if (m_script->movement.timerOrPassTarget & 0x2)
+                        origin = PATH_FROM_WAYPOINT_PATH;
+                    if (!m_script->movement.timerOrPassTarget & 0x1)
                         source->GetMotionMaster()->MovePath(m_script->movement.wanderORpathId);
                     else
                         source->GetMotionMaster()->MovePath(m_script->movement.wanderORpathId, PATH_NO_PATH, ForcedMovement(m_script->textId[0]), false, 0.f, false, pTarget->GetObjectGuid());
                     break;
+                }
                 case LINEAR_WP_MOTION_TYPE:
+                {
                     source->StopMoving();
                     source->GetMotionMaster()->Clear(false, true);
-                    if (!m_script->movement.timerOrPassTarget)
+                    WaypointPathOrigin origin = PATH_NO_PATH;
+                    if (m_script->movement.timerOrPassTarget & 0x2)
+                        origin = PATH_FROM_WAYPOINT_PATH;
+                    if (!m_script->movement.timerOrPassTarget & 0x1)
                         source->GetMotionMaster()->MoveLinearWP(m_script->movement.wanderORpathId);
                     else
                         source->GetMotionMaster()->MoveLinearWP(m_script->movement.wanderORpathId, 0, 0, 0, ForcedMovement(m_script->textId[0]), pTarget->GetObjectGuid());
                     break;
+                }
             }
 
             break;

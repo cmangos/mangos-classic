@@ -40,7 +40,7 @@ struct npc_escortAI : public ScriptedAI
         virtual void WaypointReached(uint32 pointId) = 0;
         virtual void WaypointStart(uint32 /*pointId*/) {}
 
-        void Start(bool run = false, const Player* player = nullptr, const Quest* quest = nullptr, bool instantRespawn = false, bool canLoopPath = false);
+        void Start(bool run = false, const Player* player = nullptr, const Quest* quest = nullptr, bool instantRespawn = false, bool canLoopPath = false, uint32 waypointPath = 0);
 
         void SetRun(bool run = true);
         void SetEscortPaused(bool paused);
@@ -53,6 +53,8 @@ struct npc_escortAI : public ScriptedAI
         void FailQuestForPlayerAndGroup();
 
         bool AssistPlayerInCombat(Unit* who) override;
+
+        uint32 GetCurrentWaypointPath() const { return m_currentEscortWaypointPath; }
     protected:
         Player* GetPlayerForEscort() const { return m_creature->GetMap()->GetPlayer(m_playerGuid); }
         bool IsSD2EscortMovement(uint32 moveType) const;
@@ -76,6 +78,7 @@ struct npc_escortAI : public ScriptedAI
         bool m_canReturnToStart;                           // if creature can walk same path (loop) without despawn. Not for regular escort quests.
 
         uint32 m_waypointPathID;
+        uint32 m_currentEscortWaypointPath;
 };
 
 #endif
