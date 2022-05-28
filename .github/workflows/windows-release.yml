@@ -10,14 +10,16 @@ env:
   BUILD_TYPE: Release
   REPO_DIR : ${{github.workspace}}
   BUILD_DIR: ${{github.workspace}}/bin/builddir
-  BOOST_TOOLSET: "msvc14.2"
-  BOOST_VERSION: "1.73.0"
+  BOOST_TOOLSET: "msvc"
+  BOOST_VERSION: "1.79.0.beta1"
   BOOST_INSTALL_DIR: "${{github.workspace}}/bin"
 
 jobs:
   build:
+    runs-on: windows-2022
+    permissions:
+      contents: read
 
-    runs-on: windows-2019
     strategy:
       matrix:
        include:
@@ -45,7 +47,6 @@ jobs:
       - uses: FranzDiebold/github-env-vars-action@v2
       - name: Create Build Environment
         run: |
-          echo "BOOST_ROOT=${{env.BOOST_INSTALL_DIR}}/boost/boost-${{env.BOOST_VERSION}}-win32-${{env.BOOST_TOOLSET}}-x86_64" >> $env:GITHUB_ENV
           echo "ARCHIVE_FILENAME=$env:CI_REPOSITORY_NAME-${{matrix.TYPE}}-$env:CI_SHA_SHORT.zip" >> $env:GITHUB_ENV
           cmake -E make_directory ${{ env.BUILD_DIR }}
 
@@ -55,25 +56,28 @@ jobs:
         id: cache-boost
         with:
           path: "${{env.BOOST_INSTALL_DIR}}/boost"
-          key: ${{ runner.os }}-${{ hashFiles('.github/workflows/windows.yml') }}
+          key: ${{ runner.os }}-${{ hashFiles('.github/workflows/windows-release.yml') }}
 
       - if: steps.cache-boost.outputs.cache-hit != 'true'
         name: Install boost
-        uses: MarkusJx/install-boost@v1.0.1
+        uses: MarkusJx/install-boost@v2.3.0
         id: install-boost
         with:
           # REQUIRED: Specify the required boost version
-          # A list of supported versions can be found here: 
+          # A list of supported versions can be found here:
           # https://github.com/actions/boost-versions/blob/main/versions-manifest.json
           boost_version: ${{env.BOOST_VERSION}}
           # OPTIONAL: Specify a toolset on windows
           toolset: ${{env.BOOST_TOOLSET}}
           # OPTIONAL: Specify a custon install location
           boost_install_dir: ${{env.BOOST_INSTALL_DIR}}
+          platform_version: 2022
           # NOTE: If a boost version matching all requirements cannot be found,
           # this build step will fail
 
       - name: Configure
+        env:
+          BOOST_ROOT: "${{env.BOOST_INSTALL_DIR}}/boost/boost"
         run: cmake ${{matrix.OPTIONAL_DEFINES}} -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
 
       - name: Build
@@ -92,8 +96,11 @@ jobs:
           path: "bin/${{env.ARCHIVE_FILENAME}}"
 
   upload:
-    runs-on: windows-2019
+    runs-on: windows-2022
+    permissions:
+      contents: write  # for marvinpinto/action-automatic-releases to generate pre-release
     needs: build
+
     steps:
       - name: Download artifact snapshot-default
         uses: actions/download-artifact@v1
@@ -134,9 +141,53 @@ jobs:
           title: "Development Build(${{ steps.date.outputs.date }})"
           files: all_snapshots
 
+  notify-success:
+    name: Discord release successfully notification
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: none
+    needs:
+      - upload
+
+    steps:
+      - name: Set environmental variables
+        run: |
+          echo "GIT_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+          shortSHA=`echo ${GITHUB_SHA} | cut -c1-8`
+          echo "GIT_SHORT_SHA=${shortSHA}" >> $GITHUB_ENV
+          projectNames="${GITHUB_REPOSITORY#*/}"
+          expension="${projectNames#*-}"
+          echo "EXPENSION_NAME=${expension}" >> $GITHUB_ENV
+          echo "DEFAULT_ARCH_NAME=${projectNames}-default-${shortSHA}.zip" >> $GITHUB_ENV
+          echo "ALL_ARCH_NAME=${projectNames}-with-all-${shortSHA}.zip" >> $GITHUB_ENV
+          echo "AB_ARCH_NAME=${projectNames}-with-ahbot-${shortSHA}.zip" >> $GITHUB_ENV
+          echo "PB_ARCH_NAME=${projectNames}-with-playerbot-${shortSHA}.zip" >> $GITHUB_ENV
+          echo "PB_AB_ARCH_NAME=${projectNames}-with-playerbot-ahbot-${shortSHA}.zip" >> $GITHUB_ENV
+
+      - name: Notify
+        uses: rjstone/discord-webhook-notify@v1.0.4
+        with:
+          severity: info
+          username: ${{env.EXPENSION_NAME}}-core
+          description: |
+            **${{env.EXPENSION_NAME}} prebuilt have just been released**
+          details: |
+            **Branch:** ${{env.GIT_BRANCH}}
+            __**Winodws prebuild Binaries**__
+            - [Default download](${{github.server_url}}/${{ github.repository }}/releases/download/latest/${{env.DEFAULT_ARCH_NAME}})
+            - [All options on](${{github.server_url}}/${{ github.repository }}/releases/download/latest/${{env.ALL_ARCH_NAME}})
+            - [AhBot enabled](${{github.server_url}}/${{ github.repository }}/releases/download/latest/${{env.AB_ARCH_NAME}})
+            - [PlayerBot enabled](${{github.server_url}}/${{ github.repository }}/releases/download/latest/${{env.PB_ARCH_NAME}})
+            - [AhBot and PlayerBot enabled](${{github.server_url}}/${{ github.repository }}/releases/download/latest/${{env.PB_AB_ARCH_NAME}})
+          footer: By CMaNGOS team!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK_RELEASE }}
+          avatarUrl: https://github.githubassets.com/images/modules/logos_page/Octocat.png
+
   notify:
     name: Discord Notification
     runs-on: ubuntu-20.04
+    permissions:
+      contents: none
     needs: # make sure the notification is sent AFTER the jobs you want included have completed
       - build
     if: failure()
@@ -151,7 +202,7 @@ jobs:
         uses: rjstone/discord-webhook-notify@v1.0.4
         with:
           severity: error
-          username: ${{ github.event.repository.name }}
+          username: ${{env.EXPENSION_NAME}}-core
           description: |
             **Windows buid failed**
           details: |

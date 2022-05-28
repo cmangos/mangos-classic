@@ -7,10 +7,18 @@ env:
   BUILD_TYPE: Release
   REPO_DIR : ${{github.workspace}}
   BUILD_DIR: ${{github.workspace}}/bin/builddir
+  BOOST_PLATFORM_VERSION: "11"
+  BOOST_VERSION: "1.79.0"
+  BOOST_INSTALL_DIR: "${{github.workspace}}/bin"
+
+permissions:
+  contents: read
 
 jobs:
   build:
-    runs-on: macos-10.15
+    runs-on: macos-11
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
@@ -20,12 +28,38 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install boost mysql-client
+          brew install mysql-client
           brew install openssl
           echo "OPENSSL_ROOT_DIR=$(brew --prefix --installed openssl)" >> $GITHUB_ENV
+          mkdir -p ${{env.BOOST_INSTALL_DIR}}
+
+      - name: Cache Windows boost
+        uses: actions/cache@v2
+        id: cache-boost
+        with:
+          path: "${{env.BOOST_INSTALL_DIR}}/boost"
+          key: ${{ runner.os }}-${{ hashFiles('.github/workflows/macos.yml') }}
+
+      - if: steps.cache-boost.outputs.cache-hit != 'true'
+        name: Install boost
+        uses: MarkusJx/install-boost@v2.3.0
+        id: install-boost
+        with:
+          # REQUIRED: Specify the required boost version
+          # A list of supported versions can be found here:
+          # https://github.com/actions/boost-versions/blob/main/versions-manifest.json
+          boost_version: ${{env.BOOST_VERSION}}
+          # OPTIONAL: Specify a platform version
+          platform_version: ${{env.BOOST_PLATFORM_VERSION}}
+          # OPTIONAL: Specify a custom install location
+          boost_install_dir: ${{env.BOOST_INSTALL_DIR}}
+          # OPTIONAL: Specify a toolset
+          toolset: clang
 
       - name: Configure
-        run: cmake -DBoost_ARCHITECTURE=-x64 -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
+        env:
+          BOOST_ROOT: "${{env.BOOST_INSTALL_DIR}}/boost/boost"
+        run: cmake -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}} -DBoost_ARCHITECTURE=-x64
 
       - name: Build
         env:
@@ -33,6 +67,8 @@ jobs:
         run: cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}}
 
   notify:
+    permissions:
+      contents: none
     name: Discord Notification
     runs-on: ubuntu-20.04
     needs: # make sure the notification is sent AFTER the jobs you want included have completed

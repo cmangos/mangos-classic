@@ -1,4 +1,4 @@
-  
+
 name: Windows build
 
 on: [push]
@@ -8,15 +8,16 @@ env:
   BUILD_TYPE: Release
   REPO_DIR : ${{github.workspace}}
   BUILD_DIR: ${{github.workspace}}/bin/builddir
-  BOOST_TOOLSET: "msvc14.2"
-  BOOST_VERSION: "1.73.0"
+  BOOST_TOOLSET: "msvc"
+  BOOST_VERSION: "1.79.0"
   BOOST_INSTALL_DIR: "${{github.workspace}}/bin"
 
 jobs:
   build:
-  
-    runs-on: windows-2019
-    
+    runs-on: windows-2022
+    permissions:
+      contents: read
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -25,7 +26,6 @@ jobs:
 
       - name: Create Build Environment
         run: |
-          echo "BOOST_ROOT=${{env.BOOST_INSTALL_DIR}}/boost/boost-${{env.BOOST_VERSION}}-win32-${{env.BOOST_TOOLSET}}-x86_64" >> $env:GITHUB_ENV
           echo "GITHUB_SHORT_REV=$(git rev-parse --short HEAD)" >> $env:GITHUB_ENV
           echo "ARCHIVE_FILENAME=${{ github.event.repository.name }}-$(git rev-parse --short HEAD).zip" >> $env:GITHUB_ENV
           cmake -E make_directory ${{ env.BUILD_DIR }}
@@ -40,21 +40,24 @@ jobs:
 
       - if: steps.cache-boost.outputs.cache-hit != 'true'
         name: Install boost
-        uses: MarkusJx/install-boost@v1.0.1
+        uses: MarkusJx/install-boost@v2.3.0
         id: install-boost
         with:
           # REQUIRED: Specify the required boost version
-          # A list of supported versions can be found here: 
+          # A list of supported versions can be found here:
           # https://github.com/actions/boost-versions/blob/main/versions-manifest.json
           boost_version: ${{env.BOOST_VERSION}}
           # OPTIONAL: Specify a toolset on windows
           toolset: ${{env.BOOST_TOOLSET}}
           # OPTIONAL: Specify a custon install location
           boost_install_dir: ${{env.BOOST_INSTALL_DIR}}
+          platform_version: 2022
           # NOTE: If a boost version matching all requirements cannot be found,
           # this build step will fail
 
       - name: Configure
+        env:
+          BOOST_ROOT: "${{env.BOOST_INSTALL_DIR}}/boost/boost"
         run: cmake -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
 
       - name: Build
@@ -76,6 +79,8 @@ jobs:
   notify:
     name: Discord Notification
     runs-on: ubuntu-20.04
+    permissions:
+      contents: none
     needs: # make sure the notification is sent AFTER the jobs you want included have completed
       - build
     if: failure()
