@@ -160,7 +160,7 @@ void WaypointManager::Load()
     // creature_movement
     // /////////////////////////////////////////////////////
 
-    QueryResult* result = WorldDatabase.Query("SELECT Id, COUNT(Point) FROM creature_movement GROUP BY Id");
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Id, COUNT(Point) FROM creature_movement GROUP BY Id"));
 
     if (!result)
     {
@@ -183,10 +183,9 @@ void WaypointManager::Load()
             total_nodes += count;
         }
         while (result->NextRow());
-        delete result;
 
-        //                                   0   1      2          3          4          5            6         7
-        result = WorldDatabase.Query("SELECT Id, Point, PositionX, PositionY, PositionZ, Orientation, WaitTime, ScriptId FROM creature_movement");
+        //                                       0   1      2          3          4          5            6         7
+        result.reset(WorldDatabase.Query("SELECT Id, Point, PositionX, PositionY, PositionZ, Orientation, WaitTime, ScriptId FROM creature_movement"));
 
         BarGoLink bar(result->GetRowCount());
 
@@ -284,15 +283,13 @@ void WaypointManager::Load()
 
         sLog.outString(">> Loaded %u paths, %u nodes and %u behaviors from waypoints", total_paths, total_nodes, total_behaviors);
         sLog.outString();
-
-        delete result;
     }
 
     // /////////////////////////////////////////////////////
     // creature_movement_template
     // /////////////////////////////////////////////////////
 
-    result = WorldDatabase.Query("SELECT Entry, COUNT(Point) FROM creature_movement_template GROUP BY Entry");
+    result.reset(WorldDatabase.Query("SELECT Entry, COUNT(Point) FROM creature_movement_template GROUP BY Entry"));
 
     if (!result)
     {
@@ -317,10 +314,9 @@ void WaypointManager::Load()
             total_nodes += count;
         }
         while (result->NextRow());
-        delete result;
 
-        //                                   0      1       2      3          4          5          6            7         8
-        result = WorldDatabase.Query("SELECT Entry, PathId, Point, PositionX, PositionY, PositionZ, Orientation, WaitTime, ScriptId FROM creature_movement_template");
+        //                                       0      1       2      3          4          5          6            7         8
+        result.reset(WorldDatabase.Query("SELECT Entry, PathId, Point, PositionX, PositionY, PositionZ, Orientation, WaitTime, ScriptId FROM creature_movement_template"));
 
         BarGoLink bar(result->GetRowCount());
         std::set<uint32> blacklistWaypoints;
@@ -378,8 +374,6 @@ void WaypointManager::Load()
         }
         while (result->NextRow());
 
-        delete result;
-
         // sanitize waypoints
         for (uint32 itr : blacklistWaypoints)
             m_pathTemplateMap.erase(itr);
@@ -392,7 +386,7 @@ void WaypointManager::Load()
     // waypoint_path
     // /////////////////////////////////////////////////////
 
-    result = WorldDatabase.Query("SELECT PathId, COUNT(Point) FROM waypoint_path GROUP BY PathId");
+    result.reset(WorldDatabase.Query("SELECT PathId, COUNT(Point) FROM waypoint_path GROUP BY PathId"));
 
     if (!result)
     {
@@ -416,10 +410,24 @@ void WaypointManager::Load()
 
             total_nodes += count;
         } while (result->NextRow());
-        delete result;
 
-        //                                   0       1      2          3          4          5            6         7
-        result = WorldDatabase.Query("SELECT PathId, Point, PositionX, PositionY, PositionZ, Orientation, WaitTime, ScriptId FROM waypoint_path");
+        std::set<uint32> foundNames;
+
+        result.reset(WorldDatabase.Query("SELECT PathId FROM waypoint_path_name"));
+        if (result)
+        {
+            do
+            {
+                Field* fields = result->Fetch();
+
+                uint32 pathId = fields[0].GetUInt32();
+
+                foundNames.insert(pathId);
+            } while (result->NextRow());
+        }
+
+        //                                       0       1      2          3          4          5            6         7
+        result.reset(WorldDatabase.Query("SELECT PathId, Point, PositionX, PositionY, PositionZ, Orientation, WaitTime, ScriptId FROM waypoint_path"));
 
         BarGoLink bar(result->GetRowCount());
         std::set<uint32> blacklistWaypoints;
@@ -436,6 +444,12 @@ void WaypointManager::Load()
             {
                 blacklistWaypoints.insert(pathId);
                 sLog.outErrorDb("Table `waypoint_path` has invalid point 0 for path %u. Skipping.`", pathId);
+            }
+
+            if (foundNames.find(pathId) == foundNames.end())
+            {
+                foundNames.insert(pathId); // prevents error from displaying more than once
+                sLog.outErrorDb("Table `waypoint_path` has no defined name in `waypoint_path_name` for path %u.`", pathId);
             }
 
             WaypointPath& path = m_pathMovementTemplateMap[pathId];
@@ -466,8 +480,6 @@ void WaypointManager::Load()
             if (node.script_id)
                 CheckDbscript(node, pathId, point, movementScriptSet, "waypoint_path");
         } while (result->NextRow());
-
-        delete result;
 
         // sanitize waypoints
         for (uint32 itr : blacklistWaypoints)

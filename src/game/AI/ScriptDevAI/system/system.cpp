@@ -66,17 +66,14 @@ void SystemMgr::LoadScriptWaypoints()
     uint64 creatureCount = 0;
 
     // Load Waypoints
-    QueryResult* result = WorldDatabase.PQuery("SELECT COUNT(Entry) FROM script_waypoint GROUP BY Entry");
+    std::unique_ptr<QueryResult> result(WorldDatabase.PQuery("SELECT COUNT(Entry) FROM script_waypoint GROUP BY Entry"));
     if (result)
-    {
         creatureCount = result->GetRowCount();
-        delete result;
-    }
 
     outstring_log("SD2: Loading Script Waypoints for " UI64FMTD " creature(s)...", creatureCount);
 
     //                                    0      1       2      3          4          5          6            7         8
-    result = WorldDatabase.PQuery("SELECT Entry, PathId, Point, PositionX, PositionY, PositionZ, Orientation, WaitTime, ScriptId FROM script_waypoint ORDER BY Entry, PathId, Point");
+    result.reset(WorldDatabase.PQuery("SELECT Entry, PathId, Point, PositionX, PositionY, PositionZ, Orientation, WaitTime, ScriptId FROM script_waypoint ORDER BY Entry, PathId, Point"));
 
     if (result)
     {
@@ -120,8 +117,6 @@ void SystemMgr::LoadScriptWaypoints()
             ++nodeCount;
         }
         while (result->NextRow());
-
-        delete result;
 
         outstring_log("\n>> Loaded %u Script Waypoint nodes.", nodeCount);
     }
