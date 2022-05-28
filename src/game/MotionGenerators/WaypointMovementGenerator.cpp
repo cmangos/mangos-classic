@@ -28,7 +28,6 @@
 #include "Movement/MoveSpline.h"
 #include "Maps/GridDefines.h"
 #include "Entities/Transports.h"
-#include "AI/ScriptDevAI/base/escort_ai.h"
 
 #include <cassert>
 
@@ -195,9 +194,8 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
             inform = true;
         else if (m_PathOrigin == PATH_FROM_WAYPOINT_PATH) // temporary transitional code for transitioning from script_texts to waypoint_path
         {
-            if (npc_escortAI* ai = dynamic_cast<npc_escortAI*>(creature.AI()))
-                if (ai->GetCurrentWaypointPath() == m_pathId)
-                    inform = true;
+            if (m_pathId == creature.AI()->GetCurrentWaypointPath())
+                inform = true;
         }
 
         uint32 type = WAYPOINT_MOTION_TYPE;
@@ -242,9 +240,8 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
             inform = true;
         else if (m_PathOrigin == PATH_FROM_WAYPOINT_PATH) // temporary transitional code for transitioning from script_texts to waypoint_path
         {
-            if (npc_escortAI* ai = dynamic_cast<npc_escortAI*>(creature.AI()))
-                if (ai->GetCurrentWaypointPath() == m_pathId)
-                    inform = true;
+            if (m_pathId == creature.AI()->GetCurrentWaypointPath())
+                inform = true;
         }
 
         // Inform AI that we start to move
@@ -333,9 +330,8 @@ void WaypointMovementGenerator<Creature>::SendNextWayPointPath(Creature& creatur
         inform = true;
     else if (m_PathOrigin == PATH_FROM_WAYPOINT_PATH) // temporary transitional code for transitioning from script_texts to waypoint_path
     {
-        if (npc_escortAI* ai = dynamic_cast<npc_escortAI*>(creature.AI()))
-            if (ai->GetCurrentWaypointPath() == m_pathId)
-                inform = true;
+        if (m_pathId == creature.AI()->GetCurrentWaypointPath())
+            inform = true;
     }
 
     // Inform AI that we start to move or reached last node

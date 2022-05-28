@@ -54,7 +54,7 @@ struct npc_escortAI : public ScriptedAI
 
         bool AssistPlayerInCombat(Unit* who) override;
 
-        uint32 GetCurrentWaypointPath() const { return m_currentEscortWaypointPath; }
+        uint32 GetCurrentWaypointPath() const override { return m_currentEscortWaypointPath; }
     protected:
         Player* GetPlayerForEscort() const { return m_creature->GetMap()->GetPlayer(m_playerGuid); }
         bool IsSD2EscortMovement(uint32 moveType) const;

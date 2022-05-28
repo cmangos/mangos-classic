@@ -554,6 +554,8 @@ class UnitAI : public CombatActions
         virtual CreatureSpellList const& GetSpellList() const = 0;
         void AddInitialCooldowns();
 
+        // compatibility layer for removing script_waypoint from escort ai using waypoint_path
+        virtual uint32 GetCurrentWaypointPath() const { return 0; }
     protected:
         virtual std::string GetAIName() { return "UnitAI"; }
         void DespawnGuids(GuidVector& spawns); // despawns all creature guids and clears contents
