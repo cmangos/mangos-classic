@@ -39,17 +39,21 @@ EndContentData */
 
 enum
 {
-    SAY_KAN_START              = -1000410,
+    SAY_KAN_START               = 6149,
 
     QUEST_PROTECT_KANATI        = 4966,
-    NPC_GALAK_ASS               = 10720
+    NPC_GALAK_ASS               = 10720,
+
+    FACTION_KANATI_ESCORT       = 232,
+
+    PATH_ID_KANATI              = 10638,
 };
 
 const float m_afGalakLoc[] = { -4867.387695f, -1357.353760f, -48.226f};
 
 struct npc_kanatiAI : public npc_escortAI
 {
-    npc_kanatiAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    npc_kanatiAI(Creature* creature) : npc_escortAI(creature) { Reset(); }
 
     void Reset() override { }
 
@@ -59,42 +63,40 @@ struct npc_kanatiAI : public npc_escortAI
         {
             case 1:
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-                DoScriptText(SAY_KAN_START, m_creature);
+                DoBroadcastText(SAY_KAN_START, m_creature);
                 DoSpawnGalak();
                 break;
             case 2:
                 m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-                if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_PROTECT_KANATI, m_creature);
+                if (Player* player = GetPlayerForEscort())
+                    player->RewardPlayerAndGroupAtEventExplored(QUEST_PROTECT_KANATI, m_creature);
+
+                m_creature->RestoreOriginalFaction();
                 break;
         }
     }
 
     void DoSpawnGalak()
     {
-        for (int i = 0; i < 3; ++i)
-            m_creature->SummonCreature(NPC_GALAK_ASS,
-                                       m_afGalakLoc[0], m_afGalakLoc[1], m_afGalakLoc[2], 0.0f,
-                                       TEMPSPAWN_TIMED_OOC_DESPAWN, 25000);
+        for (uint32 i = 0; i < 3; ++i)
+            m_creature->SummonCreature(NPC_GALAK_ASS, m_afGalakLoc[0], m_afGalakLoc[1], m_afGalakLoc[2], 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 25000);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        pSummoned->AI()->AttackStart(m_creature);
+        summoned->AI()->AttackStart(m_creature);
     }
 };
 
-UnitAI* GetAI_npc_kanati(Creature* pCreature)
+bool QuestAccept_npc_kanati(Player* player, Creature* creature, const Quest* quest)
 {
-    return new npc_kanatiAI(pCreature);
-}
-
-bool QuestAccept_npc_kanati(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_PROTECT_KANATI)
+    if (quest->GetQuestId() == QUEST_PROTECT_KANATI)
     {
-        if (npc_kanatiAI* pEscortAI = dynamic_cast<npc_kanatiAI*>(pCreature->AI()))
-            pEscortAI->Start(false, pPlayer, pQuest, true);
+        if (npc_kanatiAI* escortAI = dynamic_cast<npc_kanatiAI*>(creature->AI()))
+        {
+            creature->SetFactionTemporary(FACTION_KANATI_ESCORT, TEMPFACTION_RESTORE_RESPAWN);
+            escortAI->Start(false, player, quest, true, false, PATH_ID_KANATI);
+        }
     }
     return true;
 }
@@ -379,7 +381,7 @@ void AddSC_thousand_needles()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_kanati";
-    pNewScript->GetAI = &GetAI_npc_kanati;
+    pNewScript->GetAI = &GetNewAIInstance<npc_kanatiAI>;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_kanati;
     pNewScript->RegisterSelf();
 

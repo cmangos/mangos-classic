@@ -1124,8 +1124,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1000408','Rin''ji will tell you secret now... $n, should go to the Overlook Cliffs. Rin''ji hid something on island  there','0','0','1','0','0','SAY_RIN_PROGRESS_1'),
 ('-1000409','You find it, you keep it! Don''t tell no one that Rin''ji talked to you!','0','0','1','0','3818','SAY_RIN_PROGRESS_2'),
 
-('-1000410','Here they come! Defend yourself!','0','0','1','5','0','kanati SAY_KAN_START'),
-
 ('-1000411','Come, $N. See what the Nightmare brings...','0','4','0','0','11271','Twilight Corrupter SAY_TWILIGHT_CORRUPTER_SPAWN'),
 
 ('-1000412','Kill her! Take the farm!','0','1','0','0','2366','Daphne Stilwell YELL_DEFIAS_START'),
@@ -4042,8 +4040,6 @@ INSERT INTO script_waypoint (Entry, PathId, Point, PositionX, PositionY, Positio
 (10427,0,26,-4929.55,-1101.27,-50.637,0,0,0,''),
 (10427,0,27,-4920.68,-1100.03,-51.944,0,10000,0,'SAY_COMPLETE'),
 (10427,0,28,-4920.68,-1100.03,-51.944,0,0,0,'quest complete'),
-(10638,0,1,-4903.52,-1368.34,-52.611,0,5000,0,'SAY_KAN_START'),
-(10638,0,2,-4906,-1367.05,-52.611,0,0,0,''),
 (10646,0,1,-4792.4,-2137.78,82.423,0,0,0,''),
 (10646,0,2,-4813.51,-2141.54,80.774,0,0,0,''),
 (10646,0,3,-4828.63,-2154.31,82.074,0,0,0,''),
