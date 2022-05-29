@@ -567,7 +567,7 @@ Action Types
 =========================================
 
 ------------------
-1 = ACTION_T_TEXT:
+1 = ACTION_T_TEXT: - DEPRECATED - use ACTION_T_TEXT_NEW instead
 ------------------
 Parameter 1: The entry of the text that the NPC should use from eventai_texts table. Optionally a entry from other tables can be used (such as custom_texts).
              Entry are required to be negative and exist in a *_texts-table. The type text to be displayed are defined in the texts-table itself (Say, Yell, Whisper, Emote Text, Boss Whisper, Boss Emote)
@@ -713,7 +713,7 @@ This action will call CastedCreatureOrGO() function for the player. It can be us
 This is commonly used for NPC's who have a special requirement to have a Spell cast on them to complete a quest.
 
 -----------------------------
-17 = ACTION_T_SET_UNIT_FIELD:
+17 = ACTION_T_SET_UNIT_FIELD: - DEPRECATED - use specific field action instead - not portable across versions
 -----------------------------
 Parameter 1: Field_Number - The index of the Field Number to be changed. Use (http://wiki.udbforums.org/index.php/Character_data) for a list of indeces and what they control. Creatures only contain the OBJECT_FIELD_* and UNIT_FIELD_* fields. They do not contain the PLAYER_FIELD_* fields.
 Parameter 2: Value        - The new value to be put in the field.
@@ -1185,6 +1185,8 @@ Another example: the number "5" (101 in Binary, selecting first and third option
 9   256         CAST_MAIN_SPELL                     Marks main spell for ranged mode. When this spell is interrupted or goes OOM, the AI owner goes into melee mode. Connected to ACTION_T_SET_RANGED_MODE
 10  512         CAST_PLAYER_ONLY                    To be used in connection with targets. Restricts targeting to player only
 11  1024        CAST_DISTANCE_YOURSELF              Marks spell which stuns or immobilizes, so that creature distances itself from target, when main aggro target is hit (GetVictim()). Connected to ACTION_T_SET_RANGED_MODE.
+12  2048        CAST_TARGET_CASTING                 Selects only targets that are casting
+13  4096        CAST_ONLY_XYZ                       Targets only coords of target and not unit
 
 NOTE: You can add the numbers in the decimal column to combine flags.
 For example if you wanted to use CAST_NO_MELEE_IF_OOM(8) and CAST_TRIGGERED(2) you would simply use 10 in the cast flags field (8 + 2 = 10).

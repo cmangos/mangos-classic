@@ -71,11 +71,11 @@ enum CastFlags
     CAST_AURA_NOT_PRESENT       = 0x20,                     // Only casts the spell if the target does not have an aura from the spell
     CAST_IGNORE_UNSELECTABLE_TARGET = 0x40,                 // Can target UNIT_FLAG_NOT_SELECTABLE - Needed in some scripts
     CAST_SWITCH_CASTER_TARGET   = 0x80,                     // Switches target and caster for spell cast
-    CAST_MAIN_SPELL             = 0x100,                    // Marks main spell
+    CAST_MAIN_SPELL             = 0x100,                    // Marks main spell - DEPRECATED - use creature_spell_list instead
     CAST_PLAYER_ONLY            = 0x200,                    // Selects only player targets - substitution for EAI not having more params
-    CAST_DISTANCE_YOURSELF      = 0x400,                    // If spell with this cast flag hits main aggro target, caster distances himself - EAI only
+    CAST_DISTANCE_YOURSELF      = 0x400,                    // If spell with this cast flag hits main aggro target, caster distances himself - EAI only - DEPRECATED - use creature_spell_list instead
     CAST_TARGET_CASTING         = 0x800,                    // Selects only targets that are casting - EAI only
-    CAST_ONLY_XYZ               = 0x1000,
+    CAST_ONLY_XYZ               = 0x1000,                   // Targets only coords of target and not unit
 };
 
 enum ReactStates
