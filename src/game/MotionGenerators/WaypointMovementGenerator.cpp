@@ -48,7 +48,7 @@ void WaypointMovementGenerator<Creature>::LoadPath(Creature& creature, int32 pat
         m_PathOrigin = wpOrigin == PATH_NO_PATH ? PATH_FROM_ENTRY : wpOrigin;
         i_path = sWaypointMgr.GetPathFromOrigin(overwriteEntry, creature.GetDbGuid(), pathId, m_PathOrigin);
     }
-    m_pathId = pathId;
+    m_pathId = wpOrigin == PATH_FROM_WAYPOINT_PATH ? overwriteEntry : pathId; // waypoint path stores pathId in overwriteEntry
 
     // No movement found for entry nor guid
     if (!i_path)
@@ -328,7 +328,7 @@ void WaypointMovementGenerator<Creature>::SendNextWayPointPath(Creature& creatur
     bool inform = false;
     if (m_PathOrigin == PATH_FROM_EXTERNAL)
         inform = true;
-    else if (m_PathOrigin == PATH_FROM_WAYPOINT_PATH) // temporary transitional code for transitioning from script_texts to waypoint_path
+    else if (m_PathOrigin == PATH_FROM_WAYPOINT_PATH && creature.AI()) // temporary transitional code for transitioning from script_texts to waypoint_path
     {
         if (m_pathId == creature.AI()->GetCurrentWaypointPath())
             inform = true;
