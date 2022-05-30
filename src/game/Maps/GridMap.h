@@ -37,6 +37,11 @@ class Group;
 class BattleGround;
 class Map;
 
+namespace VMAP
+{
+    class IVMapManager;
+};
+
 class GridMap
 {
     private:
@@ -147,7 +152,7 @@ class TerrainInfo : public Referencable<std::atomic_long>
         float GetWaterOrGroundLevel(float x, float y, float z, float& groundZ, bool swim = false, float minWaterDeep = DEFAULT_COLLISION_HEIGHT) const;
         bool IsInWater(float x, float y, float z, GridMapLiquidData* data = nullptr) const;
         bool IsSwimmable(float x, float y, float z, float radius = 1.5f, GridMapLiquidData* data = nullptr) const;
-        bool IsUnderWater(float x, float y, float z) const;
+        bool IsUnderWater(float x, float y, float z, float* waterZ = nullptr) const;
 
         GridMapLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data = nullptr, float collisionHeight = 2.03128f) const;
 
@@ -167,6 +172,8 @@ class TerrainInfo : public Referencable<std::atomic_long>
         // to destroy them dynamically, especially on highly populated servers
         // THIS METHOD IS NOT THREAD-SAFE!!!! AND IT SHOULDN'T BE THREAD-SAFE!!!!
         void CleanUpGrids(const uint32 diff);
+
+        bool CanCheckLiquidLevel(float x, float y) const;
 
     protected:
         friend class Map;
@@ -188,10 +195,13 @@ class TerrainInfo : public Referencable<std::atomic_long>
         const uint32 m_mapId;
 
         GridMap* m_GridMaps[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
+        bool m_GridMapsLoadAttempted[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
         int16 m_GridRef[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
 
         // global garbage collection timer
         ShortIntervalTimer i_timer;
+
+        VMAP::IVMapManager* m_vmgr;
 
         typedef std::mutex LOCK_TYPE;
         typedef std::lock_guard<LOCK_TYPE> LOCK_GUARD;
