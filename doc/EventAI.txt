@@ -900,11 +900,10 @@ Calls ScriptedInstance::SetData64 with field (param1) and data (param2) target's
 ------------------------------
 36 = ACTION_T_UPDATE_TEMPLATE:
 ------------------------------
-Parameter 1: TemplateId - The creature template ID. The value here must be a valid creature template ID.
-Parameter 2: Team       - Use model_id from team : Alliance(0) or Horde (1).
+Parameter 1: TemplateId - The creature template ID. The value here must be a valid creature template ID
 
 This function temporarily changes creature entry to new entry, display is changed, loot is changed, but AI is not changed. At respawn creature will be reverted to original entry.
-Changes the creature to a new creature template of (param1) with team = Alliance if (param2) = false or Horde if (param2) = true
+Changes the creature to a new creature template of (param1).
 
 ------------------
 37 = ACTION_T_DIE:
