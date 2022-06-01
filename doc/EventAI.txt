@@ -1113,7 +1113,7 @@ Sets facing, i.e. orientation to target, or resets it to last waypoint hit, or t
 --------------------------------
 60 - ACTION_T_SET_SPELL_SET
 --------------------------------
-Parameter 1: creature_template_spells setid
+Parameter 1: creature_spell_list Id
 
 --------------------------------
 61 - ACTION_T_SET_IMMOBILIZED_STATE
