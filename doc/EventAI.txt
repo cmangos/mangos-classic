@@ -703,7 +703,7 @@ NOTE: This action can only be used with player targets so it must be ensured tha
 This is commonly used for Quests where only ONE player will gain credit for the quest.
 
 -----------------------------
-16 = ACTION_T_CASTCREATUREGO:
+16 = ACTION_T_CASTCREATUREGO: - DEPRECATED - use ACTION_T_KILLED_MONSTER instead
 -----------------------------
 Parameter 1: CreatureID - The Creature Template ID to be Summoned. The value here needs to be a valid Creature Template ID.
 Parameter 2: SpellID    - The Spell ID to use to simulate the cast. The value used in this field needs to be a valid Spell ID.
@@ -750,7 +750,7 @@ This is commonly used in combination with EVENT_T_RANGE and ACTION_T_COMBAT_MOVE
 21 = ACTION_T_COMBAT_MOVEMENT:
 ------------------------------
 Parameter 1: If zero, then the creature will stop moving towards its victim (if its victim gets out of melee range) and will be stationary. If non-zero, then the creature will either continue to follow its victim (the action would have no effect) or it will start to follow the target with the top threat if its movement was disabled before.
-Parameter 2: If non-zero, then stop melee combat state (if param1=0) or start melee combat state (if param1!=0) and creature in combat with selected target.
+Parameter 2: If non-zero, then stop melee combat state (if param1=0) or start melee combat state (if param1!=0) and creature in combat with selected target. - DEPRECATED - use action 20 instead
 
 This action controls whether or not the creature will always move towards its target.
 NOTE: The ACID Dev Team has conformed to using either 0 or 1 for the Param values. (0 = Stop Movement, 1 = Start Movement)
@@ -798,7 +798,7 @@ This action does the same thing as the ACTION_T_QUEST_EVENT does but it does it 
 NOTE: If a player is not in the NPC's threat list for whatever reason, he/she won't get the quest completed.
 
 ---------------------------------
-27 = ACTION_T_CASTCREATUREGO_ALL:
+27 = ACTION_T_CASTCREATUREGO_ALL: - DEPRECATED - use ACTION_T_KILLED_MONSTER instead
 ---------------------------------
 Parameter 1: QuestId - The quest template ID.
 Parameter 2: SpellId - The spell ID used to simulate the cast.
