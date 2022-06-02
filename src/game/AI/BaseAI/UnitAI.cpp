@@ -261,7 +261,7 @@ CanCastResult UnitAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 cast
                 }
 
                 if (canCastResult == CAST_FAIL_OTHER)
-                    sLog.outBasic("DoCastSpellIfCan by %s attempt to cast spell %u but spell failed due to unknown result %u.", m_unit->GetObjectGuid().GetString().c_str(), spellId, result);
+                    sLog.outBasic("DoCastSpellIfCan by %s attempt to cast spell %u but spell failed due to unknown result %u : %s.", m_unit->GetObjectGuid().GetString().c_str(), spellId, result, GetSpellCastResultString(result));
                 return HandleSpellCastResult(canCastResult, spellInfo);
             }
             return HandleSpellCastResult(CAST_OK, spellInfo);

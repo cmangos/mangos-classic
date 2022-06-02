@@ -212,7 +212,7 @@ enum SpellAttributesServerside
     SPELL_ATTR_SS_IGNORE_EVADE                 = 0x00000004,
 };
 
-enum SpellCastResult
+enum SpellCastResult : uint32
 {
     SPELL_FAILED_AFFECTING_COMBAT               = 0x00, // You are in combat
     SPELL_FAILED_ALREADY_AT_FULL_HEALTH         = 0x01, // You are already at full Health.
@@ -361,6 +361,8 @@ enum SpellCastResult
     SPELL_FAILED_MIN_SKILL                      = 0x90, // Your skill is not high enough.  Requires %s (%d).
     SPELL_FAILED_UNKNOWN                        = 0x91, // Generic out of bounds response:  Unknown reason
 
+    SPELL_FAILED_CLIENT_MAX                     = 0x92,
+
     SPELL_NOT_FOUND                             = 0xFE,
     SPELL_CAST_OK                               = 0xFF      // custom value, don't must be send to client
 };
@@ -464,5 +466,7 @@ enum TriggerCastFlags : uint32
     TRIGGERED_CHANNEL_ONLY                      = 0x00008000,   // Only starts channel and no effects - used for summoning portal GO anims
     TRIGGERED_FULL_MASK                         = 0xFFFFFFFF
 };
+
+const char* GetSpellCastResultString(SpellCastResult result);
 
 #endif
