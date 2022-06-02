@@ -5019,9 +5019,18 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (targetsCombat.empty())
                         break;
 
+                    bool inCombat = true;
                     for (auto& itr : targetsCombat)
-                        if (itr->IsInCombat())
-                            return SPELL_FAILED_TARGET_IN_COMBAT;
+                    {
+                        if (!itr->IsInCombat())
+                        {
+                            inCombat = false;
+                            break;
+                        }
+                    }
+                            
+                    if (inCombat)
+                        return SPELL_FAILED_TARGET_IN_COMBAT;
                 }
                 break;
             }
@@ -6838,6 +6847,10 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
         switch (m_spellInfo->Effect[eff])
         {
             case SPELL_EFFECT_SUMMON_PLAYER:                    // from anywhere
+                break;
+            case SPELL_EFFECT_DISTRACT:
+                if (target->IsInCombat())
+                    return false;
                 break;
                 // fall through
             case SPELL_EFFECT_RESURRECT_NEW:
