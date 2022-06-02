@@ -2795,15 +2795,21 @@ SpellMissInfo Unit::SpellHitResult(WorldObject* caster, Unit* pVictim, SpellEntr
             return SPELL_MISS_IMMUNE;
     }
 
-    if (caster->IsUnit() && !spell->HasAttribute(SPELL_ATTR_EX3_NO_AVOIDANCE))
+    Unit* hitCaster = nullptr;
+    if (caster->IsUnit())
+        hitCaster = static_cast<Unit*>(caster);
+    else if (caster->IsGameObject())
+        hitCaster = static_cast<GameObject*>(caster)->GetOwner();
+
+    if (hitCaster && !spell->HasAttribute(SPELL_ATTR_EX3_NO_AVOIDANCE))
     {
         switch (spell->DmgClass)
         {
             case SPELL_DAMAGE_CLASS_MELEE:
             case SPELL_DAMAGE_CLASS_RANGED:
-                return static_cast<Unit*>(caster)->MeleeSpellHitResult(pVictim, spell, heartbeatResistChance);
+                return hitCaster->MeleeSpellHitResult(pVictim, spell, heartbeatResistChance);
             case SPELL_DAMAGE_CLASS_MAGIC:
-                return static_cast<Unit*>(caster)->MagicSpellHitResult(pVictim, spell, schoolMask, heartbeatResistChance);
+                return hitCaster->MagicSpellHitResult(pVictim, spell, schoolMask, heartbeatResistChance);
             case SPELL_DAMAGE_CLASS_NONE:
                 // Usually never misses, but needs more research for some spells
                 break;
