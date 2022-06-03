@@ -2087,7 +2087,14 @@ class Unit : public WorldObject
         uint32 MeleeDamageBonusDone(Unit* victim, uint32 damage, WeaponAttackType attType, SpellSchoolMask schoolMask, SpellEntry const* spellProto = nullptr, DamageEffectType damagetype = DIRECT_DAMAGE, uint32 stack = 1, bool flat = true);
         uint32 MeleeDamageBonusTaken(Unit* caster, uint32 pdamage, WeaponAttackType attType, SpellSchoolMask schoolMask, SpellEntry const* spellProto = nullptr, DamageEffectType damagetype = DIRECT_DAMAGE, uint32 stack = 1, bool flat = true);
 
-        bool IsTriggeredAtSpellProcEvent(ProcExecutionData& data, SpellAuraHolder* holder, SpellProcEventEntry const*& spellProcEvent);
+        enum class SpellProcEventTriggerCheck
+        {
+            SPELL_PROC_TRIGGER_FAILED = 0,
+            SPELL_PROC_TRIGGER_ROLL_FAILED = 1,
+            SPELL_PROC_TRIGGER_OK = 2,
+        };
+
+        SpellProcEventTriggerCheck IsTriggeredAtSpellProcEvent(ProcExecutionData& data, SpellAuraHolder* holder, SpellProcEventEntry const*& spellProcEvent);
         // only to be used in proc handlers - basepoints is expected to be a MAX_EFFECT_INDEX sized array
         SpellAuraProcResult TriggerProccedSpell(Unit* target, std::array<int32, MAX_EFFECT_INDEX>& basepoints, uint32 triggeredSpellId, Item* castItem, Aura* triggeredByAura, uint32 cooldown, ObjectGuid originalCaster);
         SpellAuraProcResult TriggerProccedSpell(Unit* target, std::array<int32, MAX_EFFECT_INDEX>& basepoints, SpellEntry const* spellInfo, Item* castItem, Aura* triggeredByAura, uint32 cooldown, ObjectGuid originalCaster);
