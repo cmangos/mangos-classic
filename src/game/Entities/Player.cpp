@@ -6066,7 +6066,7 @@ void Player::CheckAreaExploreAndOutdoor()
         }
     }
     else if (sWorld.getConfig(CONFIG_BOOL_VMAP_INDOOR_CHECK) && !IsGameMaster())
-        RemoveAurasWithAttribute(SPELL_ATTR_OUTDOORS_ONLY);
+        RemoveAurasWithAttribute(SPELL_ATTR_ONLY_OUTDOORS);
 
     if (areaFlag == 0xffff)
         return;
@@ -14597,7 +14597,7 @@ void Player::_LoadAuras(QueryResult* result, uint32 timediff)
                 holder->SetState(SPELLAURAHOLDER_STATE_READY);
                 DETAIL_LOG("Added player auras from spellid %u", spellproto->Id);
 
-                if (holder->GetSpellProto()->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
+                if (holder->GetSpellProto()->HasAttribute(SPELL_ATTR_COOLDOWN_ON_EVENT))
                     AddCooldown(*holder->GetSpellProto(), nullptr, true);
             }
             else
@@ -19889,7 +19889,7 @@ void Player::AddGCD(SpellEntry const& spellEntry, uint32 /*forcedDuration = 0*/,
     // apply haste rating
     if (spellEntry.StartRecoveryCategory == 133 && gcdDuration == 1500 &&
         spellEntry.DmgClass != SPELL_DAMAGE_CLASS_MELEE && spellEntry.DmgClass != SPELL_DAMAGE_CLASS_RANGED &&
-        !spellEntry.HasAttribute(SPELL_ATTR_RANGED) && !spellEntry.HasAttribute(SPELL_ATTR_ABILITY))
+        !spellEntry.HasAttribute(SPELL_ATTR_USES_RANGED_SLOT) && !spellEntry.HasAttribute(SPELL_ATTR_IS_ABILITY))
     {
         gcdDuration = int32(float(gcdDuration) * GetFloatValue(UNIT_MOD_CAST_SPEED));
         gcdDuration = std::max(gcdDuration, 1000);
@@ -19982,7 +19982,7 @@ void Player::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* item
     {
         // shoot spells used equipped item cooldown values already assigned in GetAttackTime(RANGED_ATTACK)
         // prevent 0 cooldowns set by another way
-        if (spellEntry.HasAttribute(SPELL_ATTR_RANGED) && !spellEntry.HasAttribute(SPELL_ATTR_EX2_NOT_RESET_AUTO_ACTIONS))
+        if (spellEntry.HasAttribute(SPELL_ATTR_USES_RANGED_SLOT) && !spellEntry.HasAttribute(SPELL_ATTR_EX2_NOT_RESET_AUTO_ACTIONS))
             recTime += GetFloatValue(UNIT_FIELD_RANGEDATTACKTIME);
     }
 
@@ -20006,7 +20006,7 @@ void Player::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* item
         if (haveToSendEvent)
         {
             // client keeps track of category cd by original spellId
-            if (spellCategory && spellEntry.HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
+            if (spellCategory && spellEntry.HasAttribute(SPELL_ATTR_COOLDOWN_ON_EVENT))
             {
                 auto itr = m_cooldownMap.FindByCategory(spellCategory);
                 if (itr != m_cooldownMap.end() && (*itr).second->GetSpellId() != spellEntry.Id)
@@ -20101,7 +20101,7 @@ void Player::LockOutSpells(SpellSchoolMask schoolMask, uint32 duration)
         SpellEntry const* spellEntry = sSpellTemplate.LookupEntry<SpellEntry>(unSpellId);
 
         // Not send cooldown for this spells
-        if (spellEntry->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
+        if (spellEntry->HasAttribute(SPELL_ATTR_COOLDOWN_ON_EVENT))
             continue;
 
         TimePoint expireTime;
@@ -20137,7 +20137,7 @@ void Player::RemoveSpellLockout(SpellSchoolMask spellSchoolMask, std::set<uint32
         SpellEntry const* spellEntry = sSpellTemplate.LookupEntry<SpellEntry>(unSpellId);
 
         // Not send cooldown for this spells
-        if (!spellEntry || !(GetSpellSchoolMask(spellEntry) & spellSchoolMask) || spellEntry->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
+        if (!spellEntry || !(GetSpellSchoolMask(spellEntry) & spellSchoolMask) || spellEntry->HasAttribute(SPELL_ATTR_COOLDOWN_ON_EVENT))
             continue;
 
         if (spellAlreadySent)

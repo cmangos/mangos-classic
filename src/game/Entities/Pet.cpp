@@ -2321,7 +2321,7 @@ void Pet::StartCooldown(Unit* owner)
         m_imposedCooldown = true;
         SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(GetUInt32Value(UNIT_CREATED_BY_SPELL));
         // Remove infinity cooldown
-        if (spellInfo && spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
+        if (spellInfo && spellInfo->HasAttribute(SPELL_ATTR_COOLDOWN_ON_EVENT))
             owner->AddCooldown(*spellInfo);
     }
 }

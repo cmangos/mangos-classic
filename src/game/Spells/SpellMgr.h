@@ -478,7 +478,7 @@ inline bool IsDeathPersistentSpell(SpellEntry const* spellInfo)
 
 inline bool IsNonCombatSpell(SpellEntry const* spellInfo)
 {
-    return spellInfo->HasAttribute(SPELL_ATTR_CANT_USED_IN_COMBAT);
+    return spellInfo->HasAttribute(SPELL_ATTR_NOT_IN_COMBAT_ONLY_PEACEFUL);
 }
 
 // some creatures should run immediately after being summoned by spell
@@ -1378,7 +1378,7 @@ inline bool isSpellBreakStealth(SpellEntry const* spellInfo)
 
 inline bool IsAutoRepeatRangedSpell(SpellEntry const* spellInfo)
 {
-    return spellInfo->HasAttribute(SPELL_ATTR_RANGED) && spellInfo->HasAttribute(SPELL_ATTR_EX2_AUTOREPEAT_FLAG);
+    return spellInfo->HasAttribute(SPELL_ATTR_USES_RANGED_SLOT) && spellInfo->HasAttribute(SPELL_ATTR_EX2_AUTOREPEAT_FLAG);
 }
 
 inline bool IsSpellRequiresRangedAP(SpellEntry const* spellInfo)
@@ -1406,12 +1406,12 @@ inline bool IsNeedCastSpellAtFormApply(SpellEntry const* spellInfo, ShapeshiftFo
 
 inline bool IsNeedCastSpellAtOutdoor(SpellEntry const* spellInfo)
 {
-    return (spellInfo->HasAttribute(SPELL_ATTR_OUTDOORS_ONLY) && spellInfo->HasAttribute(SPELL_ATTR_PASSIVE));
+    return (spellInfo->HasAttribute(SPELL_ATTR_ONLY_OUTDOORS) && spellInfo->HasAttribute(SPELL_ATTR_PASSIVE));
 }
 
 inline bool IsReflectableSpell(SpellEntry const* spellInfo)
 {
-    return spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !spellInfo->HasAttribute(SPELL_ATTR_ABILITY)
+    return spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !spellInfo->HasAttribute(SPELL_ATTR_IS_ABILITY)
            && !spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_BE_REFLECTED) && !spellInfo->HasAttribute(SPELL_ATTR_NO_IMMUNITIES)
            && !spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) && !IsPositiveSpell(spellInfo);
 }
@@ -2699,7 +2699,7 @@ class SpellMgr
                 return true;
 
             // Uncancellable spells are expected to be persistent at all times
-            if (entry1->HasAttribute(SPELL_ATTR_CANT_CANCEL) || entry2->HasAttribute(SPELL_ATTR_CANT_CANCEL))
+            if (entry1->HasAttribute(SPELL_ATTR_NO_AURA_CANCEL) || entry2->HasAttribute(SPELL_ATTR_NO_AURA_CANCEL))
                 return true;
 
             // Allow stacking passive and active spells

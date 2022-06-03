@@ -345,7 +345,7 @@ void LoadDBCStores(const std::string& dataPath)
         }
 
         SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(skillLine->spellId);
-        if (spellInfo && (spellInfo->Attributes & (SPELL_ATTR_ABILITY | SPELL_ATTR_PASSIVE | SPELL_ATTR_DO_NOT_DISPLAY | SPELL_ATTR_HIDE_IN_COMBAT_LOG)) == (SPELL_ATTR_ABILITY | SPELL_ATTR_PASSIVE | SPELL_ATTR_DO_NOT_DISPLAY | SPELL_ATTR_HIDE_IN_COMBAT_LOG))
+        if (spellInfo && (spellInfo->Attributes & (SPELL_ATTR_IS_ABILITY | SPELL_ATTR_PASSIVE | SPELL_ATTR_DO_NOT_DISPLAY | SPELL_ATTR_DO_NOT_LOG)) == (SPELL_ATTR_IS_ABILITY | SPELL_ATTR_PASSIVE | SPELL_ATTR_DO_NOT_DISPLAY | SPELL_ATTR_DO_NOT_LOG))
         {
             for (unsigned int i = 1; i < sCreatureFamilyStore.GetNumRows(); ++i)
             {

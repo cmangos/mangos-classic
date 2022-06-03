@@ -2240,7 +2240,7 @@ bool Spell::DoCreateItem(SpellEffectIndex /*eff_idx*/, uint32 itemtype, bool rep
 
 void Spell::EffectCreateItem(SpellEffectIndex eff_idx)
 {
-    if (DoCreateItem(eff_idx, m_spellInfo->EffectItemType[eff_idx], !m_spellInfo->HasAttribute(SPELL_ATTR_HIDE_IN_COMBAT_LOG)))
+    if (DoCreateItem(eff_idx, m_spellInfo->EffectItemType[eff_idx], !m_spellInfo->HasAttribute(SPELL_ATTR_DO_NOT_LOG)))
         m_spellLog.AddLog(uint32(SPELL_EFFECT_CREATE_ITEM), m_spellInfo->EffectItemType[eff_idx]);
 }
 
@@ -3351,7 +3351,7 @@ void Spell::EffectEnchantItemTmp(SpellEffectIndex eff_idx)
 
     // TODO: Strange stuff in following code
     // shaman family enchantments
-    if (m_spellInfo->Attributes == (SPELL_ATTR_TARGET_MAINHAND_ITEM | SPELL_ATTR_NOT_SHAPESHIFT | SPELL_ATTR_DONT_AFFECT_SHEATH_STATE))
+    if (m_spellInfo->Attributes == (SPELL_ATTR_HELD_ITEM_ONLY | SPELL_ATTR_NOT_SHAPESHIFT | SPELL_ATTR_DO_NOT_SHEATH))
         duration = 300;                                     // 5 mins
     // imbue enchantments except Imbue Weapon - Beastslayer
     else if (m_spellInfo->SpellIconID == 241 && m_spellInfo->Id != 7434)
@@ -5350,7 +5350,7 @@ void Spell::EffectCharge(SpellEffectIndex /*eff_idx*/)
     // Players: charge against hostiles initiates auto-attack
     // TODO: This is executed after spell effects. Verify if this should be executed before spell effects
     if (m_caster->IsClientControlled() && m_caster->CanAttackNow(unitTarget) && m_caster->CanAttackSpell(unitTarget, m_spellInfo))
-        m_caster->Attack(unitTarget, !m_spellInfo->HasAttribute(SPELL_ATTR_RANGED));
+        m_caster->Attack(unitTarget, !m_spellInfo->HasAttribute(SPELL_ATTR_USES_RANGED_SLOT));
 }
 
 void Spell::EffectSummonCritter(SpellEffectIndex eff_idx)

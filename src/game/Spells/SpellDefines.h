@@ -27,38 +27,38 @@
 
 enum SpellAttributes
 {
-    SPELL_ATTR_UNK0                            = 0x00000001,// 0
-    SPELL_ATTR_RANGED                          = 0x00000002,// 1 All ranged abilites have this flag
+    SPELL_ATTR_PROC_FAILURE_BURNS_CHARGE       = 0x00000001,// 0
+    SPELL_ATTR_USES_RANGED_SLOT                = 0x00000002,// 1 All ranged abilites have this flag
     SPELL_ATTR_ON_NEXT_SWING_NO_DAMAGE         = 0x00000004,// 2 on next swing
-    SPELL_ATTR_UNK3                            = 0x00000008,// 3 not set in 3.0.3
-    SPELL_ATTR_ABILITY                         = 0x00000010,// 4 Displays ability instead of spell clientside
-    SPELL_ATTR_TRADESPELL                      = 0x00000020,// 5 trade spells, will be added by client to a sublist of profession spell
+    SPELL_ATTR_DO_NOT_LOG_IMMUNE_MISSES        = 0x00000008,// 3 not set in 3.0.3
+    SPELL_ATTR_IS_ABILITY                      = 0x00000010,// 4 Displays ability instead of spell clientside
+    SPELL_ATTR_IS_TRADESKILL                   = 0x00000020,// 5 trade spells, will be added by client to a sublist of profession spell
     SPELL_ATTR_PASSIVE                         = 0x00000040,// 6 Passive spell
     SPELL_ATTR_DO_NOT_DISPLAY                  = 0x00000080,// 7 Hidden in Spellbook, Aura Icon, Combat Log
-    SPELL_ATTR_HIDE_IN_COMBAT_LOG              = 0x00000100,// 8 Do Not Log - our name is better understandable
-    SPELL_ATTR_TARGET_MAINHAND_ITEM            = 0x00000200,// 9 Client automatically selects item from mainhand slot as a cast target TODO: Implement
+    SPELL_ATTR_DO_NOT_LOG                      = 0x00000100,// 8
+    SPELL_ATTR_HELD_ITEM_ONLY                  = 0x00000200,// 9 Client automatically selects item from mainhand slot as a cast target
     SPELL_ATTR_ON_NEXT_SWING                   = 0x00000400,// 10 on next swing 2
     SPELL_ATTR_WEARER_CASTS_PROC_TRIGGER       = 0x00000800,// 11
     SPELL_ATTR_DAYTIME_ONLY                    = 0x00001000,// 12 only useable at daytime, not set in 2.4.2
     SPELL_ATTR_NIGHT_ONLY                      = 0x00002000,// 13 only useable at night, not set in 2.4.2
-    SPELL_ATTR_INDOORS_ONLY                    = 0x00004000,// 14 only useable indoors, not set in 2.4.2
-    SPELL_ATTR_OUTDOORS_ONLY                   = 0x00008000,// 15 Only useable outdoors.
+    SPELL_ATTR_ONLY_INDOORS                    = 0x00004000,// 14 only useable indoors, not set in 2.4.2
+    SPELL_ATTR_ONLY_OUTDOORS                   = 0x00008000,// 15 Only useable outdoors.
     SPELL_ATTR_NOT_SHAPESHIFT                  = 0x00010000,// 16 Not while shapeshifted
     SPELL_ATTR_ONLY_STEALTHED                  = 0x00020000,// 17 Must be in stealth
-    SPELL_ATTR_DONT_AFFECT_SHEATH_STATE        = 0x00040000,// 18 client won't hide unit weapons in sheath on cast/channel TODO: Implement
-    SPELL_ATTR_LEVEL_DAMAGE_CALCULATION        = 0x00080000,// 19 spelldamage depends on caster level
-    SPELL_ATTR_STOP_ATTACK_TARGET              = 0x00100000,// 20 Stop attack after use this spell (and not begin attack if use)
-    SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK    = 0x00200000,// 21 Cannot be dodged/parried/blocked
-    SPELL_ATTR_SET_TRACKING_TARGET             = 0x00400000,// 22 SetTrackingTarget
-    SPELL_ATTR_CASTABLE_WHILE_DEAD             = 0x00800000,// 23 castable while dead
-    SPELL_ATTR_CASTABLE_WHILE_MOUNTED          = 0x01000000,// 24 castable while mounted
-    SPELL_ATTR_DISABLED_WHILE_ACTIVE           = 0x02000000,// 25 Activate and start cooldown after aura fade or remove summoned creature or go
+    SPELL_ATTR_DO_NOT_SHEATH                   = 0x00040000,// 18 client won't hide unit weapons in sheath on cast/channel TODO: Implement
+    SPELL_ATTR_SCALES_WITH_CREATURE_LEVEL      = 0x00080000,// 19 spelldamage depends on caster level
+    SPELL_ATTR_CANCELS_AUTO_ATTACK_COMBAT      = 0x00100000,// 20 Stop attack after use this spell (and not begin attack if use)
+    SPELL_ATTR_NO_ACTIVE_DEFENSE               = 0x00200000,// 21 Cannot be dodged/parried/blocked
+    SPELL_ATTR_TRACK_TARGET_IN_CAST_PLAYER_ONLY= 0x00400000,// 22 SetTrackingTarget
+    SPELL_ATTR_ALLOW_CAST_WHILE_DEAD           = 0x00800000,// 23 castable while dead
+    SPELL_ATTR_ALLOW_WHILE_MOUNTED             = 0x01000000,// 24 castable while mounted
+    SPELL_ATTR_COOLDOWN_ON_EVENT               = 0x02000000,// 25 Activate and start cooldown after aura fade or remove summoned creature or go
     SPELL_ATTR_AURA_IS_DEBUFF                  = 0x04000000,// 26
-    SPELL_ATTR_CASTABLE_WHILE_SITTING          = 0x08000000,// 27 castable while sitting
-    SPELL_ATTR_CANT_USED_IN_COMBAT             = 0x10000000,// 28 Cannot be used in combat
+    SPELL_ATTR_ALLOW_WHILE_SITTING             = 0x08000000,// 27 castable while sitting
+    SPELL_ATTR_NOT_IN_COMBAT_ONLY_PEACEFUL     = 0x10000000,// 28 Cannot be used in combat
     SPELL_ATTR_NO_IMMUNITIES                   = 0x20000000,// 29 unaffected by invulnerability
-    SPELL_ATTR_HEARTBEAT_RESIST_CHECK          = 0x40000000,// 30 Chance for spell effects to break early (heartbeat resist)
-    SPELL_ATTR_CANT_CANCEL                     = 0x80000000,// 31 positive aura can't be canceled
+    SPELL_ATTR_HEARTBEAT_RESIST                = 0x40000000,// 30 Chance for spell effects to break early (heartbeat resist)
+    SPELL_ATTR_NO_AURA_CANCEL                  = 0x80000000,// 31 positive aura can't be canceled
 };
 
 enum SpellAttributesEx

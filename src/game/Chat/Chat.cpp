@@ -1983,7 +1983,7 @@ bool ChatHandler::CheckEscapeSequences(const char* message)
                     if (linkedSpell)
                     {
                         // spells with that flag have a prefix of "$PROFESSION: "
-                        if (linkedSpell->HasAttribute(SPELL_ATTR_TRADESPELL))
+                        if (linkedSpell->HasAttribute(SPELL_ATTR_IS_TRADESKILL))
                         {
                             // lookup skillid
                             SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBoundsBySpellId(linkedSpell->Id);
