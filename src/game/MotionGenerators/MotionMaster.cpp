@@ -78,15 +78,14 @@ void MotionMaster::Initialize()
         {
             // check if creature is part of formation and use waypoint path as path origin
             WaypointPathOrigin pathOrigin = WaypointPathOrigin::PATH_NO_PATH;
-            uint32 pathEntry = 0;
             auto creatureGroup = creature->GetCreatureGroup();
             if (creatureGroup && creatureGroup->GetFormationEntry() && creatureGroup->GetGroupEntry().GetFormationSlotId(m_owner->GetDbGuid()) == 0)
             {
-                pathEntry = creatureGroup->GetFormationEntry()->MovementID;
+                m_currentPathId = creatureGroup->GetFormationEntry()->MovementID;
                 pathOrigin = WaypointPathOrigin::PATH_FROM_WAYPOINT_PATH;
             }
 
-            (static_cast<WaypointMovementGenerator<Creature>*>(top()))->InitializeWaypointPath(*creature, m_currentPathId, pathOrigin, 0, pathEntry);
+            (static_cast<WaypointMovementGenerator<Creature>*>(top()))->InitializeWaypointPath(*creature, m_currentPathId, pathOrigin, 0);
         }
     }
     else

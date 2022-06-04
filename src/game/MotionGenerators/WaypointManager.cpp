@@ -588,7 +588,13 @@ void WaypointManager::DeleteNode(uint32 entry, uint32 dbGuid, uint32 point, uint
 
     char const* const table     = waypointOriginTables[wpOrigin];
     char const* const key_field = waypointKeyColumn[wpOrigin];
-    uint32 const key            = wpOrigin == PATH_FROM_GUID ? dbGuid : entry;
+    uint32 key = 0;
+    if (wpOrigin == PATH_FROM_GUID)
+        key = dbGuid;
+    else if (wpOrigin == PATH_FROM_WAYPOINT_PATH)
+        key = pathId;
+    else
+        key = ((entry << 8) + pathId);
     if (wpOrigin == PATH_FROM_ENTRY)
         WorldDatabase.PExecuteLog("DELETE FROM %s WHERE %s=%u AND Point=%u AND PathId=%u", table, key_field, key, point, pathId);
     else
@@ -621,7 +627,13 @@ void WaypointManager::SetNodePosition(uint32 entry, uint32 dbGuid, uint32 point,
 
     char const* const table     = waypointOriginTables[wpOrigin];
     char const* const key_field = waypointKeyColumn[wpOrigin];
-    uint32 const key            = wpOrigin == PATH_FROM_GUID ? dbGuid : entry;
+    uint32 key = 0;
+    if (wpOrigin == PATH_FROM_GUID)
+        key = dbGuid;
+    else if (wpOrigin == PATH_FROM_WAYPOINT_PATH)
+        key = pathId;
+    else
+        key = ((entry << 8) + pathId);
     if (wpOrigin == PATH_FROM_ENTRY)
         WorldDatabase.PExecuteLog("UPDATE %s SET PositionX=%f, PositionY=%f, PositionZ=%f WHERE %s=%u AND Point=%u AND PathId=%u", table, x, y, z, key_field, key, point, pathId);
     else
@@ -648,7 +660,13 @@ void WaypointManager::SetNodeWaittime(uint32 entry, uint32 dbGuid, uint32 point,
 
     char const* const table     = waypointOriginTables[wpOrigin];
     char const* const key_field = waypointKeyColumn[wpOrigin];
-    uint32 const key            = wpOrigin == PATH_FROM_GUID ? dbGuid : entry;
+    uint32 key = 0;
+    if (wpOrigin == PATH_FROM_GUID)
+        key = dbGuid;
+    else if (wpOrigin == PATH_FROM_WAYPOINT_PATH)
+        key = pathId;
+    else
+        key = ((entry << 8) + pathId);
     if (wpOrigin == PATH_FROM_ENTRY)
         WorldDatabase.PExecuteLog("UPDATE %s SET WaitTime=%u WHERE %s=%u AND Point=%u AND PathId=%u", table, waittime, key_field, key, point, pathId);
     else
@@ -671,7 +689,13 @@ void WaypointManager::SetNodeOrientation(uint32 entry, uint32 dbGuid, uint32 poi
 
     char const* const table     = waypointOriginTables[wpOrigin];
     char const* const key_field = waypointKeyColumn[wpOrigin];
-    uint32 const key            = wpOrigin == PATH_FROM_GUID ? dbGuid : entry;
+    uint32 key = 0;
+    if (wpOrigin == PATH_FROM_GUID)
+        key = dbGuid;
+    else if (wpOrigin == PATH_FROM_WAYPOINT_PATH)
+        key = pathId;
+    else
+        key = ((entry << 8) + pathId);
     if (wpOrigin == PATH_FROM_ENTRY)
         WorldDatabase.PExecuteLog("UPDATE %s SET Orientation=%f WHERE %s=%u AND Point=%u AND PathId=%u", table, orientation, key_field, key, point, pathId);
     else
@@ -695,7 +719,13 @@ bool WaypointManager::SetNodeScriptId(uint32 entry, uint32 dbGuid, uint32 point,
 
     char const* const table     = waypointOriginTables[wpOrigin];
     char const* const key_field = waypointKeyColumn[wpOrigin];
-    uint32 const key            = wpOrigin == PATH_FROM_GUID ? dbGuid : ((entry << 8) + pathId);
+    uint32 key = 0;
+    if (wpOrigin == PATH_FROM_GUID)
+        key = dbGuid;
+    else if (wpOrigin == PATH_FROM_WAYPOINT_PATH)
+        key = pathId;
+    else
+        key = ((entry << 8) + pathId);
     if (wpOrigin == PATH_FROM_ENTRY)
         WorldDatabase.PExecuteLog("UPDATE %s SET ScriptId=%u WHERE %s=%u AND Point=%u AND PathId=%u", table, scriptId, key_field, key, point, pathId);
     else

@@ -48,7 +48,7 @@ void WaypointMovementGenerator<Creature>::LoadPath(Creature& creature, int32 pat
         m_PathOrigin = wpOrigin == PATH_NO_PATH ? PATH_FROM_ENTRY : wpOrigin;
         i_path = sWaypointMgr.GetPathFromOrigin(overwriteEntry, creature.GetDbGuid(), pathId, m_PathOrigin);
     }
-    m_pathId = wpOrigin == PATH_FROM_WAYPOINT_PATH ? overwriteEntry : pathId; // waypoint path stores pathId in overwriteEntry
+    m_pathId = pathId;
 
     // No movement found for entry nor guid
     if (!i_path)

@@ -114,7 +114,7 @@ class WaypointManager
                     wpMap = &m_externalPathTemplateMap;
                     break;
                 case PATH_FROM_WAYPOINT_PATH:
-                    key = entry;
+                    key = pathId;
                     wpMap = &m_pathMovementTemplateMap;
                     break;
                 case PATH_NO_PATH:

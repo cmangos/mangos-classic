@@ -3545,6 +3545,7 @@ bool ChatHandler::HandleWpExportCommand(char* args)
         case PATH_FROM_ENTRY: key = wpOwner->GetEntry();    key_field = "Entry";    table = "creature_movement_template"; break;
         case PATH_FROM_GUID: key = wpOwner->GetGUIDLow();   key_field = "Id";       table = "creature_movement"; break;
         case PATH_FROM_EXTERNAL: key = wpOwner->GetEntry(); key_field = "Entry";    table = sWaypointMgr.GetExternalWPTable(); break;
+        case PATH_FROM_WAYPOINT_PATH: key = wpOwner->GetMotionMaster()->GetPathId(); key_field = "PathId"; table = "waypoint_path"; break;
         default:
             return false;
     }
