@@ -610,14 +610,14 @@ void FormationData::SetMasterMovement()
     newMaster->GetMotionMaster()->Clear(true, true);
     if (m_masterMotionType == WAYPOINT_MOTION_TYPE)
     {
-        newMaster->GetMotionMaster()->MoveWaypoint(m_wpPathId, 4, 0, m_fEntry->MovementID);
+        newMaster->GetMotionMaster()->MoveWaypoint(m_fEntry->MovementID, PATH_FROM_WAYPOINT_PATH);
         newMaster->GetMotionMaster()->SetNextWaypoint(m_lastWP + 1);
         m_wpPathId = 0;
         m_lastWP = 0;
     }
     else if (m_masterMotionType == LINEAR_WP_MOTION_TYPE)
     {
-        newMaster->GetMotionMaster()->MoveLinearWP(m_wpPathId, 4, 0, m_fEntry->MovementID);
+        newMaster->GetMotionMaster()->MoveLinearWP(m_fEntry->MovementID, PATH_FROM_WAYPOINT_PATH);
         newMaster->GetMotionMaster()->SetNextWaypoint(m_lastWP + 1);
         m_wpPathId = 0;
         m_lastWP = 0;
