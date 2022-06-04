@@ -4936,9 +4936,7 @@ void Aura::PeriodicTick()
             {
                 if (target->IsImmuneToSchool(spellProto, (1 << GetEffIndex())))
                 {
-                    // likely need to ignore all of them but the only case is periodic energize
-                    if (!spellProto->HasAttribute(SPELL_ATTR_DO_NOT_LOG_IMMUNE_MISSES))
-                        Unit::SendSpellOrDamageImmune(GetCasterGuid(), target, spellProto->Id);
+                    Unit::SendSpellOrDamageImmune(GetCasterGuid(), target, spellProto->Id);
                     break;
                 }
             }

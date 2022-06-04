@@ -30,7 +30,7 @@ enum SpellAttributes
     SPELL_ATTR_PROC_FAILURE_BURNS_CHARGE       = 0x00000001,// 0
     SPELL_ATTR_USES_RANGED_SLOT                = 0x00000002,// 1 All ranged abilites have this flag
     SPELL_ATTR_ON_NEXT_SWING_NO_DAMAGE         = 0x00000004,// 2 on next swing
-    SPELL_ATTR_DO_NOT_LOG_IMMUNE_MISSES        = 0x00000008,// 3 not set in 3.0.3
+    SPELL_ATTR_NEED_EXOTIC_AMMO                = 0x00000008,// 3 vanilla only attribute removed in tbc - unused
     SPELL_ATTR_IS_ABILITY                      = 0x00000010,// 4 Displays ability instead of spell clientside
     SPELL_ATTR_IS_TRADESKILL                   = 0x00000020,// 5 trade spells, will be added by client to a sublist of profession spell
     SPELL_ATTR_PASSIVE                         = 0x00000040,// 6 Passive spell
