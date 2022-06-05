@@ -19,7 +19,7 @@ enum
     NPC_NARALEX     = 3679,
     NPC_DISCIPLE    = 3678,
 
-    SAY_INTRO       = -1043000,                             // Say when the first 4 encounter are DONE
+    SAY_INTRO       = 2101,                             // Say when the first 4 encounter are DONE
 
     GO_MYSTERIOUS_CHEST     = 180055,                       // used for quest 7944; spawns in the instance only if one of the players has the quest
 

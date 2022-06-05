@@ -94,7 +94,7 @@ void instance_wailing_caverns::SetData(uint32 uiType, uint32 uiData)
         if (m_auiEncounter[4] == NOT_STARTED)
         {
             if (Creature* pDisciple = GetSingleCreatureFromStorage(NPC_DISCIPLE))
-                DoScriptText(SAY_INTRO, pDisciple);
+                DoBroadcastText(SAY_INTRO, pDisciple);
         }
 
         m_auiEncounter[4] = SPECIAL;

@@ -29,26 +29,25 @@ EndScriptData
 
 enum
 {
-    SAY_PREPARE             = -1043001,
-    SAY_FIRST_CORNER        = -1043002,
-    SAY_CONTINUE            = -1043003,
-    SAY_CIRCLE_BANISH       = -1043004,
-    SAY_PURIFIED            = -1043005,
-    SAY_NARALEX_CHAMBER     = -1043006,
-    SAY_BEGIN_RITUAL        = -1043007,
-    SAY_MUTANUS             = -1043012,
-    SAY_NARALEX_AWAKE       = -1043013,
-    SAY_AWAKE               = -1043014,
-    SAY_NARALEX_THANKYOU    = -1043015,
-    SAY_FAREWELL            = -1043016,
-    SAY_AGGRO_1             = -1043017,                     // Random between the first 2
-    SAY_AGGRO_2             = -1043018,
-    SAY_AGGRO_3             = -1043019,                     // During the awakening ritual
+    SAY_FIRST_CORNER        = 1256,
+    SAY_CONTINUE            = 1257,
+    SAY_CIRCLE_BANISH       = 1258,
+    SAY_PURIFIED            = 1259,
+    SAY_NARALEX_CHAMBER     = 1263,
+    SAY_BEGIN_RITUAL        = 1264,
+    SAY_MUTANUS             = 1276,
+    SAY_NARALEX_AWAKE       = 1271,
+    SAY_AWAKE               = 2101,
+    SAY_NARALEX_THANKYOU    = 1272,
+    SAY_FAREWELL            = 2103,
+    SAY_AGGRO_1             = 1273,                     // Random between the first 2
+    SAY_AGGRO_2             = 1277,
+    SAY_AGGRO_3             = 1274,                     // During the awakening ritual
 
-    EMOTE_RITUAL_BEGIN      = -1043008,
-    EMOTE_NARALEX_AWAKE     = -1043009,
-    EMOTE_BREAK_THROUGH     = -1043010,
-    EMOTE_VISION            = -1043011,
+    EMOTE_RITUAL_BEGIN      = 1265,
+    EMOTE_NARALEX_AWAKE     = 1268,
+    EMOTE_BREAK_THROUGH     = 1269,
+    EMOTE_VISION            = 1270,
 
     GOSSIP_ITEM_BEGIN       = -3043000,
     TEXT_ID_BEGIN           = 699,
@@ -62,31 +61,79 @@ enum
     SPELL_SHAPESHIFT        = 8153,
 
     NPC_DEVIATE_RAPTOR      = 3636,                         // 2 of them at the first stop
-    NPC_DEVIATE_VIPER       = 5755,                         // 3 of them at the circle
+    NPC_DEVIATE_VIPER       = 5755,                         // 3 RND at the circle
+    NPC_DEVIATE_ADDER       = 5048,                         // 3 RND at the circle
     NPC_DEVIATE_MOCCASIN    = 5762,                         // 6 of them at Naralex chamber
     NPC_NIGHTMARE_ECTOPLASM = 5763,                         // 10 of them at Naralex chamber
-    NPC_MUTANUS             = 3654
+    NPC_MUTANUS             = 3654,
+
+    PATH_ID_NARALEX         = 3678,                      // Sniffed Waypoints for Escort Event
 };
 
-// Distance, Angle or Offset
-static const float aSummonPositions[5][2] =
+struct firstWaveLocations
 {
-    {50.0f, -0.507f},                                       // First Raptors
-    {53.0f, -0.603f},
-    { 7.0f, 1.73f},                                         // Vipers
-    {45.0f, 5.16f},                                         // Chamber
-    {47.0f, 0.5901f}                                        // Mutanus
+    uint32 uiEntry;
+    float fX, fY, fZ;
+    uint32 uiPathId;
 };
+
+// Raptor spawns
+static const firstWaveLocations raptorLocations[2] =
+{
+    { NPC_DEVIATE_RAPTOR , -67.44779f, 214.5348f, -93.42037f, 1 },
+    { NPC_DEVIATE_RAPTOR , -67.85276f, 203.7873f, -93.57328f, 2 }
+};
+
+static const float circleLocations[3][4] =
+{
+    { -50.1237f, 274.7166f, -92.7608f, 3.0368f},
+    { -60.2538f, 273.0981f, -92.7608f, 0.4014f},
+    { -57.5452f, 280.2068f, -92.7608f, 5.0789f}
+};
+
+struct secondWaveLocations
+{
+    uint32 uiEntry;
+    float fX, fY, fZ;
+    uint32 uiPathId;
+};
+
+// Todo: have more then 3 spawn points, but always spawn 3
+static const secondWaveLocations moccasinLocations[3] =
+{
+    { NPC_DEVIATE_MOCCASIN, 171.39545f, 213.76605f, -105.50746f, 1},
+    { NPC_DEVIATE_MOCCASIN, 156.72229f, 189.91829f, -107.48995f, 2},
+    { NPC_DEVIATE_MOCCASIN, 121.39977f, 166.31746f, -105.54061f, 3}
+};
+
+struct thirdWaveLocations
+{
+    uint32 uiEntry;
+    float fX, fY, fZ;
+    uint32 uiPathId;
+};
+// Todo: have more then 7 spawn points, but always spawn 7
+static const thirdWaveLocations ectoplasmLocations[7] =
+{
+    { NPC_NIGHTMARE_ECTOPLASM, 162.06705f, 218.71494f, -105.36240f, 1},
+    { NPC_NIGHTMARE_ECTOPLASM, 115.55489f, 168.22847f, -105.68655f, 2},
+    { NPC_NIGHTMARE_ECTOPLASM, 82.065025f, 280.37723f, -103.29671f, 3},
+    { NPC_NIGHTMARE_ECTOPLASM, 144.84305f, 278.07928f, -104.57445f, 4},
+    { NPC_NIGHTMARE_ECTOPLASM, 155.84459f, 186.68817f, -107.08412f, 5},
+    { NPC_NIGHTMARE_ECTOPLASM, 145.35356f, 219.34600f, -102.98572f, 6},
+    { NPC_NIGHTMARE_ECTOPLASM, 164.62735f, 274.12335f, -107.29780f, 7}
+};
+
+float  mutanosLocations[4] = { 150.94276f, 262.79715f, -103.90348f, 1 };
 
 struct npc_disciple_of_naralexAI : public npc_escortAI
 {
-    npc_disciple_of_naralexAI(Creature* pCreature) : npc_escortAI(pCreature)
+    npc_disciple_of_naralexAI(Creature* creature) : npc_escortAI(creature), m_instance(static_cast<instance_wailing_caverns*>(creature->GetInstanceData()))
     {
-        m_pInstance = (instance_wailing_caverns*)pCreature->GetInstanceData();
         Reset();
     }
 
-    instance_wailing_caverns* m_pInstance;
+    instance_wailing_caverns* m_instance;
 
     uint32 m_uiEventTimer;
     uint32 m_uiSleepTimer;
@@ -122,8 +169,8 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
         npc_escortAI::JustRespawned();
 
         // Reset event if can
-        if (m_pInstance && m_pInstance->GetData(TYPE_DISCIPLE) != DONE)
-            m_pInstance->SetData(TYPE_DISCIPLE, FAIL);
+        if (m_instance && m_instance->GetData(TYPE_DISCIPLE) != DONE)
+            m_instance->SetData(TYPE_DISCIPLE, FAIL);
     }
 
     void AttackedBy(Unit* pAttacker) override
@@ -131,13 +178,13 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
         if (!m_bIsFirstHit)
         {
             if (pAttacker->GetEntry() == NPC_MUTANUS)
-                DoScriptText(SAY_MUTANUS, m_creature, pAttacker);
+                DoBroadcastText(SAY_MUTANUS, m_creature, pAttacker);
             // Check if already in ritual
             else if (m_uiPoint >= 30)
-                DoScriptText(SAY_AGGRO_3, m_creature, pAttacker);
+                DoBroadcastText(SAY_AGGRO_3, m_creature, pAttacker);
             else
                 // Aggro 1 should be in 90% of the cases
-                DoScriptText(roll_chance_i(90) ? SAY_AGGRO_1 : SAY_AGGRO_2, m_creature, pAttacker);
+                DoBroadcastText(roll_chance_i(90) ? SAY_AGGRO_1 : SAY_AGGRO_2, m_creature, pAttacker);
 
             m_bIsFirstHit = true;
         }
@@ -147,7 +194,7 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
     void EnterEvadeMode() override
     {
         // Do not stop casting at these points
-        if (m_uiPoint == 15 || m_uiPoint == 32)
+        if (m_uiPoint == 30)
         {
             m_creature->SetLootRecipient(nullptr);
             m_creature->CombatStop(false);
@@ -166,38 +213,29 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
 
     void JustStartedEscort() override
     {
-        DoScriptText(SAY_PREPARE, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_DISCIPLE, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_DISCIPLE, IN_PROGRESS);
     }
 
     void WaypointReached(uint32 uiPointId) override
     {
         switch (uiPointId)
         {
-            case 8:
-                DoScriptText(SAY_FIRST_CORNER, m_creature);
+            case 12:
+                DoBroadcastText(SAY_FIRST_CORNER, m_creature);
                 m_uiSubeventPhase = 0;
                 m_uiEventTimer = 2000;
                 m_uiPoint = uiPointId;
                 SetEscortPaused(true);
                 break;
-            case 16:
+            case 30:
                 m_uiSubeventPhase = 0;
-                m_uiEventTimer = 2000;
+                m_uiEventTimer = 1000;
                 m_uiPoint = uiPointId;
                 SetEscortPaused(true);
                 break;
-            case 27:
-                DoScriptText(SAY_NARALEX_CHAMBER, m_creature);
-                break;
-            case 33:
-                if (Creature* pNaralex = m_pInstance->GetSingleCreatureFromStorage(NPC_NARALEX))
-                    m_creature->SetFacingToObject(pNaralex);
-
-                m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
-                m_uiEventTimer = 2000;
+            case 70:                
+                m_uiEventTimer = 1000;
                 m_uiSubeventPhase = 0;
                 m_uiPoint = uiPointId;
                 SetEscortPaused(true);
@@ -207,9 +245,6 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        // Attack the disciple
-        pSummoned->AI()->AttackStart(m_creature);
-
         ++m_uiSummonedAlive;
     }
 
@@ -222,16 +257,7 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
 
         // Continue Event if all are dead and we are in a stopped subevent
         if (m_uiSummonedAlive == 0 && m_uiEventTimer == 0)
-            m_uiEventTimer = 1000;
-    }
-
-    // Summon mobs at calculated points
-    void DoSpawnMob(uint32 uiEntry, float fDistance, float fAngle)
-    {
-        float fX, fY, fZ;
-        m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, fDistance, fAngle);
-
-        m_creature->SummonCreature(uiEntry, fX, fY, fZ, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 20000);
+            m_uiEventTimer = 2000;
     }
 
     void UpdateEscortAI(const uint32 uiDiff) override
@@ -243,52 +269,48 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
                 switch (m_uiPoint)
                 {
                     // Corner stop -> raptors
-                    case 8:
+                    case 12:
                         switch (m_uiSubeventPhase)
                         {
                             case 0:
                                 // Summon raptors at first stop
-                                DoSpawnMob(NPC_DEVIATE_RAPTOR, aSummonPositions[0][0], aSummonPositions[0][1]);
-                                DoSpawnMob(NPC_DEVIATE_RAPTOR, aSummonPositions[1][0], aSummonPositions[1][1]);
+                                for (auto& i : raptorLocations)
+                                    m_creature->SummonCreature(i.uiEntry, i.fX, i.fY, i.fZ, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 20000, true, true, i.uiPathId);
                                 m_uiEventTimer = 0;
                                 ++m_uiSubeventPhase;
                                 break;
                             case 1:
-                                // After the summoned mobs are killed continue
-                                DoScriptText(SAY_CONTINUE, m_creature);
+                                // After the summoned mobs are killed continue                                
                                 SetEscortPaused(false);
                                 m_uiEventTimer = 0;
                                 break;
                         }
                         break;
                     // Circle stop -> vipers
-                    case 16:
+                    case 30:
                         switch (m_uiSubeventPhase)
                         {
                             case 0:
-                                DoScriptText(SAY_CIRCLE_BANISH, m_creature);
-                                m_uiEventTimer = 2000;
-                                ++m_uiSubeventPhase;
-                                break;
-                            case 1:
+                                DoBroadcastText(SAY_CIRCLE_BANISH, m_creature);
                                 DoCastSpellIfCan(m_creature, SPELL_CLEANSING);
                                 m_uiEventTimer = 20000;
                                 ++m_uiSubeventPhase;
                                 break;
-                            case 2:
+                            case 1:
                                 // Summon vipers at the first circle
                                 for (uint8 i = 0; i < 3; ++i)
-                                    DoSpawnMob(NPC_DEVIATE_VIPER, aSummonPositions[2][0], aSummonPositions[2][1] + 2 * M_PI_F / 3 * i);
+                                    m_creature->SummonCreature(urand(0, 1) ? NPC_DEVIATE_ADDER : NPC_DEVIATE_VIPER, circleLocations[i][0], circleLocations[i][1], circleLocations[i][2], circleLocations[i][3], TEMPSPAWN_TIMED_OOC_DESPAWN, 20000, true);
                                 m_uiEventTimer = 0;
                                 ++m_uiSubeventPhase;
                                 break;
-                            case 3:
-                                // Wait for casting to be complete - TODO, this might have to be done better
+                            case 2:
+                                // Wait for casting to be complete - TODO, if spawned creatures are dead and cast finished we continue without any waiting
                                 ++m_uiSubeventPhase;
                                 m_uiEventTimer = 10000;
                                 break;
-                            case 4:
-                                DoScriptText(SAY_PURIFIED, m_creature);
+                            case 3:
+                                m_creature->HandleEmote(EMOTE_ONESHOT_TALK);
+                                DoBroadcastText(SAY_PURIFIED, m_creature);
                                 m_uiEventTimer = 0;
                                 ++m_uiPoint;             // Increment this in order to avoid the special case evade
                                 SetEscortPaused(false);
@@ -296,101 +318,112 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
                         }
                         break;
                     // Chamber stop -> ritual and final boss
-                    case 33:
+                    case 70:
                         switch (m_uiSubeventPhase)
                         {
                             case 0:
-                                DoScriptText(SAY_BEGIN_RITUAL, m_creature);
-                                m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-                                m_uiEventTimer = 2000;
+                                DoBroadcastText(SAY_BEGIN_RITUAL, m_creature);
+                                m_creature->HandleEmote(EMOTE_ONESHOT_BEG);
+                                SetCombatScriptStatus(true);
+                                SetCombatMovement(false);
+                                m_uiEventTimer = 5000;
                                 ++m_uiSubeventPhase;
                                 break;
                             case 1:
                                 DoCastSpellIfCan(m_creature, SPELL_AWAKENING);
-                                DoScriptText(EMOTE_RITUAL_BEGIN, m_creature);
-                                m_uiEventTimer = 4000;
+                                DoBroadcastText(EMOTE_RITUAL_BEGIN, m_creature);
+                                m_uiEventTimer = 3000;
                                 ++m_uiSubeventPhase;
                                 break;
                             case 2:
-                                if (Creature* pNaralex = m_pInstance->GetSingleCreatureFromStorage(NPC_NARALEX))
-                                    DoScriptText(EMOTE_NARALEX_AWAKE, pNaralex);
+                                // First set of mobs
+                                for (auto& i : moccasinLocations)
+                                    m_creature->SummonCreature(i.uiEntry, i.fX, i.fY, i.fZ, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 20000, false, false, i.uiPathId);
                                 m_uiEventTimer = 5000;
                                 ++m_uiSubeventPhase;
                                 break;
                             case 3:
-                                // First set of mobs
-                                for (uint8 i = 0; i < 3; ++i)
-                                    DoSpawnMob(NPC_DEVIATE_MOCCASIN, aSummonPositions[3][0], aSummonPositions[3][1] + M_PI_F / 3 * i);
-                                m_uiEventTimer = 20000;
+                                if (Creature* pNaralex = m_instance->GetSingleCreatureFromStorage(NPC_NARALEX))
+                                    DoBroadcastText(EMOTE_NARALEX_AWAKE, pNaralex);
+                                m_uiEventTimer = 0;
                                 ++m_uiSubeventPhase;
                                 break;
                             case 4:
                                 // Second set of mobs
-                                for (uint8 i = 0; i < 7; ++i)
-                                    DoSpawnMob(NPC_NIGHTMARE_ECTOPLASM, aSummonPositions[3][0], aSummonPositions[3][1] + M_PI_F / 7 * i);
-                                m_uiEventTimer = 0;
+                                for (auto& i : ectoplasmLocations)
+                                    m_creature->SummonCreature(i.uiEntry, i.fX, i.fY, i.fZ, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 20000, true, false, i.uiPathId);
+                                m_uiEventTimer = 20000;
                                 ++m_uiSubeventPhase;
                                 break;
                             case 5:
                                 // Advance only when all mobs are dead
-                                if (Creature* pNaralex = m_pInstance->GetSingleCreatureFromStorage(NPC_NARALEX))
-                                    DoScriptText(EMOTE_BREAK_THROUGH, pNaralex);
+                                if (Creature* pNaralex = m_instance->GetSingleCreatureFromStorage(NPC_NARALEX))
+                                    DoBroadcastText(EMOTE_BREAK_THROUGH, pNaralex);
                                 ++m_uiSubeventPhase;
-                                m_uiEventTimer = 10000;
+                                m_uiEventTimer = 0;
                                 break;
                             case 6:
                                 // Mutanus
-                                if (Creature* pNaralex = m_pInstance->GetSingleCreatureFromStorage(NPC_NARALEX))
-                                    DoScriptText(EMOTE_VISION, pNaralex);
-                                DoSpawnMob(NPC_MUTANUS, aSummonPositions[4][0], aSummonPositions[4][1]);
+                                if (Creature* pNaralex = m_instance->GetSingleCreatureFromStorage(NPC_NARALEX))
+                                    DoBroadcastText(EMOTE_VISION, pNaralex);
+
+                                m_creature->SummonCreature(NPC_MUTANUS, mutanosLocations[0], mutanosLocations[1], mutanosLocations[2], 0.0f, TEMPSPAWN_DEAD_DESPAWN, 20000, true, false, mutanosLocations[3]);
                                 m_uiEventTimer = 0;
                                 ++m_uiSubeventPhase;
                                 break;
                             case 7:
                                 // Awaken Naralex after mutanus is defeated
-                                if (Creature* pNaralex = m_pInstance->GetSingleCreatureFromStorage(NPC_NARALEX))
+                                if (Creature* pNaralex = m_instance->GetSingleCreatureFromStorage(NPC_NARALEX))
                                 {
-                                    pNaralex->SetStandState(UNIT_STAND_STATE_SIT);
-                                    DoScriptText(SAY_NARALEX_AWAKE, pNaralex);
+                                    pNaralex->SetStandState(UNIT_STAND_STATE_STAND);
+                                    DoBroadcastText(SAY_NARALEX_AWAKE, pNaralex);
                                 }
-                                m_creature->InterruptNonMeleeSpells(false, SPELL_AWAKENING);
-                                m_creature->RemoveAurasDueToSpell(SPELL_AWAKENING);
-                                m_pInstance->SetData(TYPE_DISCIPLE, DONE);
+                                m_instance->SetData(TYPE_DISCIPLE, DONE);
                                 ++m_uiSubeventPhase;
-                                m_uiEventTimer = 2000;
+                                m_uiEventTimer = 5000;
                                 break;
                             case 8:
-                                DoScriptText(SAY_AWAKE, m_creature);
-                                m_uiEventTimer = 5000;
+                                m_creature->InterruptNonMeleeSpells(false, SPELL_AWAKENING);
+                                m_creature->RemoveAurasDueToSpell(SPELL_AWAKENING);
+                                m_creature->HandleEmote(EMOTE_ONESHOT_POINT);
+                                DoBroadcastText(SAY_AWAKE, m_creature);
+                                m_uiEventTimer = 1000;
                                 ++m_uiSubeventPhase;
                                 break;
                             case 9:
-                                if (Creature* pNaralex = m_pInstance->GetSingleCreatureFromStorage(NPC_NARALEX))
-                                {
-                                    DoScriptText(SAY_NARALEX_THANKYOU, pNaralex);
-                                    pNaralex->SetStandState(UNIT_STAND_STATE_STAND);
+                                if (Creature* pNaralex = m_instance->GetSingleCreatureFromStorage(NPC_NARALEX))    
+                                { 
+                                    pNaralex->HandleEmote(EMOTE_ONESHOT_BOW);
+                                    DoBroadcastText(SAY_NARALEX_THANKYOU, pNaralex);  
                                 }
-                                m_uiEventTimer = 10000;
+                                m_uiEventTimer = 7000;
                                 ++m_uiSubeventPhase;
                                 break;
                             case 10:
-                                // Shapeshift into a bird
-                                if (Creature* pNaralex = m_pInstance->GetSingleCreatureFromStorage(NPC_NARALEX))
+                                // Say Farewell
+                                if (Creature* pNaralex = m_instance->GetSingleCreatureFromStorage(NPC_NARALEX))
                                 {
-                                    DoScriptText(SAY_FAREWELL, pNaralex);
-                                    pNaralex->CastSpell(pNaralex, SPELL_SHAPESHIFT, TRIGGERED_NONE);
+                                    pNaralex->HandleEmote(EMOTE_ONESHOT_TALK);
+                                    DoBroadcastText(SAY_FAREWELL, pNaralex);                                    
                                 }
-                                DoCastSpellIfCan(m_creature, SPELL_SHAPESHIFT);
-                                m_uiEventTimer = 10000;
+                                m_uiEventTimer = 3000;
                                 ++m_uiSubeventPhase;
                                 break;
                             case 11:
+                                // Shapeshift into a bird
+                                if (Creature* pNaralex = m_instance->GetSingleCreatureFromStorage(NPC_NARALEX))                                
+                                    pNaralex->CastSpell(pNaralex, SPELL_SHAPESHIFT, TRIGGERED_NONE);                                
+                                DoCastSpellIfCan(m_creature, SPELL_SHAPESHIFT);
+                                m_uiEventTimer = 8000;
+                                ++m_uiSubeventPhase;
+                                break;
+                            case 12:
                                 SetEscortPaused(false);
                                 m_creature->SetLevitate(true);
                                 m_creature->SetHover(true);
                                 SetRun();
                                 // Send them flying somewhere outside of the room
-                                if (Creature* pNaralex = m_pInstance->GetSingleCreatureFromStorage(NPC_NARALEX))
+                                if (Creature* pNaralex = m_instance->GetSingleCreatureFromStorage(NPC_NARALEX))
                                 {
                                     // Set to flying
                                     pNaralex->SetLevitate(true);
@@ -402,11 +435,11 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
                                 }
                                 m_uiEventTimer = 30000;
                                 break;
-                            case 12:
-                                if (Creature* pNaralex = m_pInstance->GetSingleCreatureFromStorage(NPC_NARALEX))
+                            case 13:
+                                if (Creature* pNaralex = m_instance->GetSingleCreatureFromStorage(NPC_NARALEX))
                                     pNaralex->ForcedDespawn(1000); // Despawn after some time
                                 m_creature->ForcedDespawn(1000);
-                                m_pInstance->DespawnAll(); // whole instance despawns
+                                m_instance->DespawnAll(); // whole instance despawns
                                 break;
                         }
                         break;
@@ -448,56 +481,51 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
     }
 };
 
-bool GossipHello_npc_disciple_of_naralex(Player* pPlayer, Creature* pCreature)
+bool GossipHello_npc_disciple_of_naralex(Player* player, Creature* creature)
 {
-    ScriptedInstance* m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+    ScriptedInstance* m_pInstance = (ScriptedInstance*)creature->GetInstanceData();
 
-    if (pCreature->isQuestGiver())
-        pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+    if (creature->isQuestGiver())
+        player->PrepareQuestMenu(creature->GetObjectGuid());
 
     // Buff the players
-    pCreature->CastSpell(pPlayer, SPELL_MARK, TRIGGERED_NONE);
-
-    if (m_pInstance && m_pInstance->GetData(TYPE_DISCIPLE) == SPECIAL)
+    creature->CastSpell(player, SPELL_MARK, TRIGGERED_NONE);
+    
+    if (m_pInstance && m_pInstance->GetData(TYPE_DISCIPLE) == SPECIAL || player->IsGameMaster())
     {
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_BEGIN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-        pPlayer->SEND_GOSSIP_MENU(TEXT_ID_BEGIN, pCreature->GetObjectGuid());
+        player->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_BEGIN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        player->SEND_GOSSIP_MENU(TEXT_ID_BEGIN, creature->GetObjectGuid());
     }
     else
-        pPlayer->SEND_GOSSIP_MENU(TEXT_ID_DISCIPLE, pCreature->GetObjectGuid());
-
+        player->SEND_GOSSIP_MENU(TEXT_ID_DISCIPLE, creature->GetObjectGuid());
+ 
     return true;
 }
 
-bool GossipSelect_npc_disciple_of_naralex(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+bool GossipSelect_npc_disciple_of_naralex(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
 {
-    ScriptedInstance* m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+    ScriptedInstance* m_pInstance = (ScriptedInstance*)creature->GetInstanceData();
 
     if (!m_pInstance)
         return false;
 
     if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
     {
-        if (npc_disciple_of_naralexAI* pEscortAI = dynamic_cast<npc_disciple_of_naralexAI*>(pCreature->AI()))
+        if (npc_disciple_of_naralexAI* escortAI = dynamic_cast<npc_disciple_of_naralexAI*>(creature->AI()))
         {
-            pEscortAI->Start(false, pPlayer);               // Note: after 4.0.3 set him run = true
-            pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
+            escortAI->Start(false, player, nullptr, false, false, PATH_ID_NARALEX);               // Note: after 4.0.3 set him run = true
+            creature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
         }
-        pPlayer->CLOSE_GOSSIP_MENU();
+        player->CLOSE_GOSSIP_MENU();
     }
     return true;
-}
-
-UnitAI* GetAI_npc_disciple_of_naralex(Creature* pCreature)
-{
-    return new npc_disciple_of_naralexAI(pCreature);
 }
 
 void AddSC_wailing_caverns()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_disciple_of_naralex";
-    pNewScript->GetAI = &GetAI_npc_disciple_of_naralex;
+    pNewScript->GetAI = &GetNewAIInstance<npc_disciple_of_naralexAI>;
     pNewScript->pGossipHello =  &GossipHello_npc_disciple_of_naralex;
     pNewScript->pGossipSelect = &GossipSelect_npc_disciple_of_naralex;
     pNewScript->RegisterSelf();
