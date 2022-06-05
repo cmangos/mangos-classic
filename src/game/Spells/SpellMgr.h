@@ -1770,7 +1770,9 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
         }
         // By default base stats cannot stack if they're similar
         case SPELL_AURA_MOD_STAT:
-        {
+        { 
+            if (entry->Id == 8733 && entry2->Id == 8733)    // Blessing of Blackfathom - should'nt stack with itself
+                return false;
             if (entry->Id == 5320 || entry2->Id == 5320) // Echeyakee's Grace - stacks with everything
                 return true;
             if (entry->Id == 15366 || entry2->Id == 15366) // Songflower Serenade - stacks with everything
