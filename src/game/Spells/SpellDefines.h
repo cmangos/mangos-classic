@@ -63,38 +63,38 @@ enum SpellAttributes
 
 enum SpellAttributesEx
 {
-    SPELL_ATTR_EX_DISMISS_PET                  = 0x00000001,// 0
-    SPELL_ATTR_EX_DRAIN_ALL_POWER              = 0x00000002,// 1 use all power (Only paladin Lay of Hands and Bunyanize)
-    SPELL_ATTR_EX_CHANNELED_1                  = 0x00000004,// 2 channeled 1
-    SPELL_ATTR_EX_CANT_BE_REDIRECTED           = 0x00000008,// 3
-    SPELL_ATTR_EX_UNK4                         = 0x00000010,// 4
-    SPELL_ATTR_EX_NOT_BREAK_STEALTH            = 0x00000020,// 5 Not break stealth
-    SPELL_ATTR_EX_CHANNELED_2                  = 0x00000040,// 6 channeled 2
-    SPELL_ATTR_EX_CANT_BE_REFLECTED            = 0x00000080,// 7
-    SPELL_ATTR_EX_NOT_IN_COMBAT_TARGET         = 0x00000100,// 8 Spell req target not to be in combat state
-    SPELL_ATTR_EX_FACING_TARGET                = 0x00000200,// 9 TODO: CONFIRM!
-    SPELL_ATTR_EX_NO_THREAT                    = 0x00000400,// 10 no generates threat on cast 100%
-    SPELL_ATTR_EX_DONT_REFRESH_DURATION_ON_RECAST = 0x00000800,// 11 Aura will not refresh its duration when recast
+    SPELL_ATTR_EX_DISMISS_PET_FIRST            = 0x00000001,// 0
+    SPELL_ATTR_EX_USE_ALL_MANA                 = 0x00000002,// 1
+    SPELL_ATTR_EX_IS_CHANNELED                 = 0x00000004,// 2
+    SPELL_ATTR_EX_NO_REDIRECTION               = 0x00000008,// 3
+    SPELL_ATTR_EX_NO_SKILL_INCREASE            = 0x00000010,// 4
+    SPELL_ATTR_EX_ALLOW_WHILE_STEALTHED        = 0x00000020,// 5
+    SPELL_ATTR_EX_IS_SELF_CHANNELED            = 0x00000040,// 6
+    SPELL_ATTR_EX_NO_REFLECTION                = 0x00000080,// 7
+    SPELL_ATTR_EX_ONLY_PEACEFUL_TARGETS        = 0x00000100,// 8 Target must not be in combat
+    SPELL_ATTR_EX_INITIATES_COMBAT_ENABLES_AUTO_ATTACK = 0x00000200,// 9
+    SPELL_ATTR_EX_NO_THREAT                    = 0x00000400,// 10
+    SPELL_ATTR_EX_AURA_UNIQUE                  = 0x00000800,// 11
     SPELL_ATTR_EX_FAILURE_BREAKS_STEALTH       = 0x00001000,// 12
     SPELL_ATTR_EX_TOGGLE_FARSIGHT              = 0x00002000,// 13
-    SPELL_ATTR_EX_CHANNEL_TRACK_TARGET         = 0x00004000,// 14
-    SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY     = 0x00008000,// 15 remove auras on immunity
-    SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE  = 0x00010000,// 16 unaffected by school immunity
-    SPELL_ATTR_EX_UNAUTOCASTABLE_BY_CHARMED    = 0x00020000,// 17 TODO: Investigate more Chero version: SPELL_ATTR_EX_PLAYER_CANT_CAST_CHARMED, likely related to MC
+    SPELL_ATTR_EX_TRACK_TARGET_IN_CHANNEL      = 0x00004000,// 14
+    SPELL_ATTR_EX_IMMUNITY_PURGES_EFFECT       = 0x00008000,// 15 auras which give immunity also punch through and purge the given effect
+    SPELL_ATTR_EX_IMMUNITY_TO_HOSTILE_AND_FRIENDLY_EFFECTS = 0x00010000,// 16 TODO: Investigate use
+    SPELL_ATTR_EX_NO_AUTOCAST_AI               = 0x00020000,// 17
     SPELL_ATTR_EX_PREVENTS_ANIM                = 0x00040000,// 18
-    SPELL_ATTR_EX_CANT_TARGET_SELF             = 0x00080000,// 19 spells with area effect or friendly targets that exclude the caster
-    SPELL_ATTR_EX_REQ_TARGET_COMBO_POINTS      = 0x00100000,// 20 Req combo points on target
+    SPELL_ATTR_EX_EXCLUDE_CASTER               = 0x00080000,// 19 spells with area effect or friendly targets that exclude the caster
+    SPELL_ATTR_EX_FINISHING_MOVE_DAMAGE        = 0x00100000,// 20 Uses combo points
     SPELL_ATTR_EX_THREAT_ONLY_ON_MISS          = 0x00200000,// 21
-    SPELL_ATTR_EX_REQ_COMBO_POINTS             = 0x00400000,// 22 Use combo points (in 4.x not required combo point target selected)
-    SPELL_ATTR_EX_UNK23                        = 0x00800000,// 23
-    SPELL_ATTR_EX_UNK24                        = 0x01000000,// 24 Req fishing pole?? SPELL_ATTR_EX_FISHING
-    SPELL_ATTR_EX_UNK25                        = 0x02000000,// 25 not set in 2.4.2
+    SPELL_ATTR_EX_FINISHING_MOVE_DURATION      = 0x00400000,// 22 Uses combo points
+    SPELL_ATTR_EX_UNK23                        = 0x00800000,// 23 Different in vanilla
+    SPELL_ATTR_EX_SPECIAL_SKILLUP              = 0x01000000,// 24
+    SPELL_ATTR_EX_AURA_STAYS_AFTER_COMBAT      = 0x02000000,// 25 possibly different in vanilla
     SPELL_ATTR_EX_REQUIRE_ALL_TARGETS          = 0x04000000,// 26
-    SPELL_ATTR_EX_REFUND_POWER                 = 0x08000000,// 27 All these spells refund power on parry or deflect
-    SPELL_ATTR_EX_DONT_DISPLAY_IN_AURA_BAR     = 0x10000000,// 28
-    SPELL_ATTR_EX_CHANNEL_DISPLAY_SPELL_NAME   = 0x20000000,// 29
-    SPELL_ATTR_EX_ENABLE_AT_DODGE              = 0x40000000,// 30 overpower
-    SPELL_ATTR_EX_UNK31                        = 0x80000000,// 31
+    SPELL_ATTR_EX_DISCOUNT_POWER_ON_MISS       = 0x08000000,// 27
+    SPELL_ATTR_EX_NO_AURA_ICON                 = 0x10000000,// 28
+    SPELL_ATTR_EX_NAME_IN_CHANNEL_BAR          = 0x20000000,// 29
+    SPELL_ATTR_EX_COMBO_ON_BLOCK               = 0x40000000,// 30 NYI
+    SPELL_ATTR_EX_CAST_WHEN_LEARNED            = 0x80000000,// 31
 };
 
 enum SpellAttributesEx2

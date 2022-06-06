@@ -2923,7 +2923,7 @@ void Spell::EffectPickPocket(SpellEffectIndex /*eff_idx*/)
         }
         loot->ShowContentTo(playerCaster);
     }
-    else
+    else // current implementation of SPELL_ATTR_EX_FAILURE_BREAKS_STEALTH
     {
         //BASIC_LOG("Failed pickpocket result %i for chance %i", result, chance);
 
@@ -3609,7 +3609,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
         ((Player*)m_caster)->PetSpellInitialize();
         NewSummon->SetLoading(false);
     }
-    else // current implementation of SPELL_ATTR_EX_FAILURE_BREAKS_STEALTH
+    else
     {
         NewSummon->SetLoading(false);
         // Notify Summoner

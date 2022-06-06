@@ -1725,8 +1725,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
                         // TODO: find reasonable value for fishing hole search
                         fishingHole = LookupFishingHoleAround(20.0f + CONTACT_DISTANCE);
 
-                    if (success || sWorld.getConfig(CONFIG_BOOL_SKILL_FAIL_GAIN_FISHING))
-                        player->UpdateFishingSkill();
+                    player->UpdateFishingSkill();
 
                     // fish catch or fail and junk allowed (after 3.1.0)
                     if (success || sWorld.getConfig(CONFIG_BOOL_SKILL_FAIL_LOOT_FISHING))

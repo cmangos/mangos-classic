@@ -1043,7 +1043,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                         if (temp.action[j].type == ACTION_T_CAST && temp.action[j].cast.target == TARGET_T_EVENT_SPECIFIC)
                         {
                             SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(temp.action[j].cast.spellId);
-                            if (spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_TARGET_SELF))
+                            if (spellInfo->HasAttribute(SPELL_ATTR_EX_EXCLUDE_CASTER))
                                 data.friendlyHp.targetSelf = false;
                         }
                     }

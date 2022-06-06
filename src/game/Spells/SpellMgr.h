@@ -383,7 +383,7 @@ inline bool IsPassiveSpellStackableWithRanks(SpellEntry const* spellProto)
 
 inline bool IsAutocastable(SpellEntry const* spellInfo)
 {
-    return !(spellInfo->HasAttribute(SPELL_ATTR_EX_UNAUTOCASTABLE_BY_CHARMED) || spellInfo->HasAttribute(SPELL_ATTR_PASSIVE));
+    return !(spellInfo->HasAttribute(SPELL_ATTR_EX_NO_AUTOCAST_AI) || spellInfo->HasAttribute(SPELL_ATTR_PASSIVE));
 }
 
 inline bool IsAutocastable(uint32 spellId)
@@ -425,7 +425,7 @@ inline uint32 GetAllowedMechanicMask(SpellEntry const* spellProto)
 // based on client Spell_C::CancelsAuraEffect
 inline bool SpellCancelsAuraEffect(SpellEntry const* spellInfo, SpellEntry const* auraSpellInfo, uint8 auraEffIndex)
 {
-    if (!spellInfo->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))
+    if (!spellInfo->HasAttribute(SPELL_ATTR_EX_IMMUNITY_PURGES_EFFECT))
         return false;
 
     if (auraSpellInfo->HasAttribute(SPELL_ATTR_NO_IMMUNITIES))
@@ -506,6 +506,9 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         return false;
 
     if (spellInfo->HasAttribute(SPELL_ATTR_SS_IGNORE_EVADE))
+        return false;
+
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX_AURA_STAYS_AFTER_COMBAT))
         return false;
 
     switch (spellInfo->Id)
@@ -1320,7 +1323,7 @@ inline bool CanPierceImmuneAura(SpellEntry const* spellInfo, SpellEntry const* a
         return false;
 
     // these spells (Cyclone for example) can pierce all...
-    if (spellInfo->HasAttribute(SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE) || spellInfo->HasAttribute(SPELL_ATTR_EX2_UNAFFECTED_BY_AURA_SCHOOL_IMMUNE))
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX_IMMUNITY_TO_HOSTILE_AND_FRIENDLY_EFFECTS) || spellInfo->HasAttribute(SPELL_ATTR_EX2_UNAFFECTED_BY_AURA_SCHOOL_IMMUNE))
     {
         // ...but not these (Divine shield, Ice block, Cyclone and Banish for example)
         if (auraSpellInfo->Mechanic != MECHANIC_IMMUNE_SHIELD &&
@@ -1329,7 +1332,7 @@ inline bool CanPierceImmuneAura(SpellEntry const* spellInfo, SpellEntry const* a
             return true;
     }
 
-    if (spellInfo->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX_IMMUNITY_PURGES_EFFECT))
     {
         for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         {
@@ -1373,7 +1376,7 @@ inline bool IsDispelSpell(SpellEntry const* spellInfo)
 
 inline bool isSpellBreakStealth(SpellEntry const* spellInfo)
 {
-    return !spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH);
+    return !spellInfo->HasAttribute(SPELL_ATTR_EX_ALLOW_WHILE_STEALTHED);
 }
 
 inline bool IsAutoRepeatRangedSpell(SpellEntry const* spellInfo)
@@ -1390,7 +1393,7 @@ SpellCastResult GetErrorAtShapeshiftedCast(SpellEntry const* spellInfo, uint32 f
 
 inline bool IsChanneledSpell(SpellEntry const* spellInfo)
 {
-    return spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNELED_1) || spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNELED_2);
+    return spellInfo->HasAttribute(SPELL_ATTR_EX_IS_CHANNELED) || spellInfo->HasAttribute(SPELL_ATTR_EX_IS_SELF_CHANNELED);
 }
 
 inline bool IsNeedCastSpellAtFormApply(SpellEntry const* spellInfo, ShapeshiftForm form)
@@ -1412,7 +1415,7 @@ inline bool IsNeedCastSpellAtOutdoor(SpellEntry const* spellInfo)
 inline bool IsReflectableSpell(SpellEntry const* spellInfo)
 {
     return spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !spellInfo->HasAttribute(SPELL_ATTR_IS_ABILITY)
-           && !spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_BE_REFLECTED) && !spellInfo->HasAttribute(SPELL_ATTR_NO_IMMUNITIES)
+           && !spellInfo->HasAttribute(SPELL_ATTR_EX_NO_REFLECTION) && !spellInfo->HasAttribute(SPELL_ATTR_NO_IMMUNITIES)
            && !spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) && !IsPositiveSpell(spellInfo);
 }
 
@@ -1453,7 +1456,7 @@ inline bool IsIgnoreLosSpellCast(SpellEntry const* spellInfo)
 
 inline bool NeedsComboPoints(SpellEntry const* spellInfo)
 {
-    return spellInfo->HasAttribute(SPELL_ATTR_EX_REQ_TARGET_COMBO_POINTS) || spellInfo->HasAttribute(SPELL_ATTR_EX_REQ_COMBO_POINTS);
+    return spellInfo->HasAttribute(SPELL_ATTR_EX_FINISHING_MOVE_DAMAGE) || spellInfo->HasAttribute(SPELL_ATTR_EX_FINISHING_MOVE_DURATION);
 }
 
 inline SpellSchoolMask GetSpellSchoolMask(SpellEntry const* spellInfo)
@@ -1501,7 +1504,7 @@ inline Mechanics GetEffectMechanic(SpellEntry const* spellInfo, SpellEffectIndex
 
 inline bool IsIgnoreRootSpell(SpellEntry const* spellInfo)
 {
-    if (!spellInfo->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))
+    if (!spellInfo->HasAttribute(SPELL_ATTR_EX_IMMUNITY_PURGES_EFFECT))
         return false;
 
     for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
@@ -2697,6 +2700,9 @@ class SpellMgr
         {
             if (!entry1 || !entry2)
                 return true;
+
+            if (entry1 == entry2 && entry1->HasAttribute(SPELL_ATTR_EX_AURA_UNIQUE))
+                return false;
 
             // Uncancellable spells are expected to be persistent at all times
             if (entry1->HasAttribute(SPELL_ATTR_NO_AURA_CANCEL) || entry2->HasAttribute(SPELL_ATTR_NO_AURA_CANCEL))
