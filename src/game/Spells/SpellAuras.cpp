@@ -864,6 +864,8 @@ void Aura::PickTargetsForSpellTrigger(Unit*& triggerCaster, Unit*& triggerTarget
 void Aura::CastTriggeredSpell(PeriodicTriggerData& data)
 {
     Spell* spell = new Spell(data.caster, data.spellInfo, TRIGGERED_OLD_TRIGGERED, GetCasterGuid(), GetSpellProto());
+    if (data.spellInfo->HasAttribute(SPELL_ATTR_EX2_RETAIN_ITEM_CAST)) // forward guid to at least spell go
+        spell->SetForwardedCastItem(GetCastItemGuid());
     SpellCastTargets targets;
     if (data.spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
     {
@@ -3078,7 +3080,7 @@ void Aura::HandleAuraModSchoolImmunity(bool apply, bool Real)
     target->ApplySpellImmune(this, IMMUNITY_SCHOOL, m_modifier.m_miscvalue, apply);
 
     // remove all flag auras (they are positive, but they must be removed when you are immune)
-    if (GetSpellProto()->HasAttribute(SPELL_ATTR_EX_IMMUNITY_PURGES_EFFECT) && GetSpellProto()->HasAttribute(SPELL_ATTR_EX2_DAMAGE_REDUCED_SHIELD))
+    if (GetSpellProto()->HasAttribute(SPELL_ATTR_EX_IMMUNITY_PURGES_EFFECT))
         target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_INVULNERABILITY_BUFF_CANCELS);
 
     // TODO: optimalize this cycle - use RemoveAurasWithInterruptFlags call or something else
@@ -4814,29 +4816,6 @@ void Aura::PeriodicTick()
                 target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto, false, true);
 
             Unit::ProcDamageAndSpell(ProcSystemArguments(pCaster, target, procAttacker, procVictim, procEx, gain, BASE_ATTACK, spellProto, nullptr, gain, true));
-
-            // apply damage part to caster if needed (ex. health funnel)
-            if (target != pCaster && spellProto->HasAttribute(SPELL_ATTR_EX2_HEALTH_FUNNEL))
-            {
-                uint32 damage = spellProto->manaPerSecond;
-                uint32 absorb = 0;
-
-                Unit::DealDamageMods(pCaster, pCaster, damage, &absorb, NODAMAGE, spellProto);
-                if (pCaster->GetHealth() > damage)
-                {
-                    CleanDamage cleanDamage(damage, BASE_ATTACK, MELEE_HIT_NORMAL, damage > 0);
-                    Unit::DealDamage(pCaster, pCaster, damage, &cleanDamage, NODAMAGE, GetSpellSchoolMask(spellProto), spellProto, true);
-                }
-                else
-                {
-                    // cannot apply damage part so we have to cancel responsible aura
-                    pCaster->RemoveAurasDueToSpell(GetId());
-
-                    // finish current generic/channeling spells, don't affect autorepeat
-                    pCaster->FinishSpell(CURRENT_GENERIC_SPELL);
-                    pCaster->FinishSpell(CURRENT_CHANNELED_SPELL);
-                }
-            }
             break;
         }
         case SPELL_AURA_PERIODIC_MANA_LEECH:
@@ -5256,7 +5235,7 @@ inline bool IsRemovedOnShapeshiftLost(SpellEntry const* spellproto, ObjectGuid c
                     break;
             }
 
-            if (!spellproto->HasAttribute(SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) && !spellproto->HasAttribute(SPELL_ATTR_NOT_SHAPESHIFT))
+            if (!spellproto->HasAttribute(SPELL_ATTR_EX2_ALLOW_WHILE_NOT_SHAPESHIFTED) && !spellproto->HasAttribute(SPELL_ATTR_NOT_SHAPESHIFT))
                 return true;
         }
         else if (spellproto->SpellFamilyName == SPELLFAMILY_DRUID && spellproto->EffectApplyAuraName[0] == SPELL_AURA_MOD_DODGE_PERCENT)
@@ -5797,23 +5776,30 @@ void SpellAuraHolder::Update(uint32 diff)
 
         if (m_timeCla <= 0)
         {
-            if (Unit* caster = GetCaster())
+            if (!GetSpellProto()->HasAttribute(SPELL_ATTR_EX2_NO_TARGET_PER_SECOND_COSTS) || GetCasterGuid() == GetTarget()->GetObjectGuid())
             {
-                // This should not be used for health funnel (already processed in PeriodicTick()).
-                // TODO:: is the fallowing code can be removed?
-                if (GetSpellProto()->SpellVisual != 163)
-                {
-                    Powers powertype = Powers(GetSpellProto()->powerType);
-                    int32 manaPerSecond = GetSpellProto()->manaPerSecond + GetSpellProto()->manaPerSecondPerLevel * caster->GetLevel();
-                    m_timeCla = 1 * IN_MILLISECONDS;
+                Powers powertype = Powers(GetSpellProto()->powerType);
+                int32 manaPerSecond = GetSpellProto()->manaPerSecond + GetSpellProto()->manaPerSecondPerLevel * GetTarget()->GetLevel();
+                m_timeCla = 1 * IN_MILLISECONDS;
 
-                    if (manaPerSecond)
+                if (manaPerSecond)
+                {
+                    if (powertype == POWER_HEALTH)
                     {
-                        if (powertype == POWER_HEALTH)
-                            caster->ModifyHealth(-manaPerSecond);
+                        if (GetTarget()->GetHealth() <= manaPerSecond)
+                        {
+                            // cannot apply damage part so we have to cancel responsible aura
+                            GetTarget()->RemoveAurasDueToSpell(GetId());
+
+                            // finish current generic/channeling spells, don't affect autorepeat
+                            GetTarget()->FinishSpell(CURRENT_GENERIC_SPELL);
+                            GetTarget()->FinishSpell(CURRENT_CHANNELED_SPELL);
+                        }
                         else
-                            caster->ModifyPower(powertype, -manaPerSecond);
+                            GetTarget()->ModifyHealth(-manaPerSecond);
                     }
+                    else
+                        GetTarget()->ModifyPower(powertype, -manaPerSecond);
                 }
             }
         }

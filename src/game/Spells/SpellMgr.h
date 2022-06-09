@@ -284,7 +284,7 @@ inline bool IsAuraSpellRefreshInsteadOfRecast(SpellEntry const* spellInfo)
 
 inline bool IsAllowingDeadTarget(SpellEntry const* spellInfo)
 {
-    return spellInfo->HasAttribute(SPELL_ATTR_EX2_CAN_TARGET_DEAD) || spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) || spellInfo->Targets & (TARGET_FLAG_CORPSE_ENEMY | TARGET_FLAG_UNIT_DEAD | TARGET_FLAG_CORPSE_ALLY);
+    return spellInfo->HasAttribute(SPELL_ATTR_EX2_ALLOW_DEAD_TARGET) || spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) || spellInfo->Targets & (TARGET_FLAG_CORPSE_ENEMY | TARGET_FLAG_UNIT_DEAD | TARGET_FLAG_CORPSE_ALLY);
 }
 
 inline bool IsSealSpell(SpellEntry const* spellInfo)
@@ -444,7 +444,7 @@ inline bool SpellCancelsAuraEffect(SpellEntry const* spellInfo, SpellEntry const
                     continue;
                 break;
             case SPELL_AURA_SCHOOL_IMMUNITY:
-                if (auraSpellInfo->HasAttribute(SPELL_ATTR_EX2_UNAFFECTED_BY_AURA_SCHOOL_IMMUNE) || !(GetSchoolMask(auraSpellInfo->School) & miscValue))
+                if (auraSpellInfo->HasAttribute(SPELL_ATTR_EX2_NO_SCHOOL_IMMUNITIES) || !(GetSchoolMask(auraSpellInfo->School) & miscValue))
                     continue;
                 break;
             case SPELL_AURA_DISPEL_IMMUNITY:
@@ -1323,7 +1323,7 @@ inline bool CanPierceImmuneAura(SpellEntry const* spellInfo, SpellEntry const* a
         return false;
 
     // these spells (Cyclone for example) can pierce all...
-    if (spellInfo->HasAttribute(SPELL_ATTR_EX_IMMUNITY_TO_HOSTILE_AND_FRIENDLY_EFFECTS) || spellInfo->HasAttribute(SPELL_ATTR_EX2_UNAFFECTED_BY_AURA_SCHOOL_IMMUNE))
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX_IMMUNITY_TO_HOSTILE_AND_FRIENDLY_EFFECTS) || spellInfo->HasAttribute(SPELL_ATTR_EX2_NO_SCHOOL_IMMUNITIES))
     {
         // ...but not these (Divine shield, Ice block, Cyclone and Banish for example)
         if (auraSpellInfo->Mechanic != MECHANIC_IMMUNE_SHIELD &&
@@ -1381,7 +1381,7 @@ inline bool isSpellBreakStealth(SpellEntry const* spellInfo)
 
 inline bool IsAutoRepeatRangedSpell(SpellEntry const* spellInfo)
 {
-    return spellInfo->HasAttribute(SPELL_ATTR_USES_RANGED_SLOT) && spellInfo->HasAttribute(SPELL_ATTR_EX2_AUTOREPEAT_FLAG);
+    return spellInfo->HasAttribute(SPELL_ATTR_USES_RANGED_SLOT) && spellInfo->HasAttribute(SPELL_ATTR_EX2_AUTO_REPEAT);
 }
 
 inline bool IsSpellRequiresRangedAP(SpellEntry const* spellInfo)
@@ -1404,7 +1404,7 @@ inline bool IsNeedCastSpellAtFormApply(SpellEntry const* spellInfo, ShapeshiftFo
     // passive spells with SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT are already active without shapeshift, do no recast!
     // Feline Swiftness Passive 2a not have 0x1 mask in Stance field in spell data as expected
     return (((spellInfo->Stances & (1 << (form - 1)) || (spellInfo->Id == 24864 && form == FORM_CAT))) &&
-            !spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT));
+            !spellInfo->HasAttribute(SPELL_ATTR_EX2_ALLOW_WHILE_NOT_SHAPESHIFTED));
 }
 
 inline bool IsNeedCastSpellAtOutdoor(SpellEntry const* spellInfo)
@@ -1431,7 +1431,7 @@ inline bool IsIgnoreLosSpell(SpellEntry const* spellInfo)
             break;
     }
 
-    return spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS);
+    return spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LINE_OF_SIGHT);
 }
 
 inline bool IsIgnoreLosSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex effIdx)
@@ -1789,7 +1789,7 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
                 {
                     if (type)
                         return false; // Do not stack scrolls and other non-player buffs with each other
-                    if (entry->HasAttribute(SPELL_ATTR_EX2_UNK28) && entry2->HasAttribute(SPELL_ATTR_EX2_UNK28))
+                    if (entry->HasAttribute(SPELL_ATTR_EX2_NOT_AN_ACTION) && entry2->HasAttribute(SPELL_ATTR_EX2_NOT_AN_ACTION))
                         return false; // FIXME: Cozy fire hack
                 }
             }
@@ -2351,7 +2351,7 @@ class SpellMgr
                 }
             }
             // Well Fed buffs (must be exclusive with Food / Drink replenishment effects, or else Well Fed will cause them to be removed)
-            else if (entry->HasAttribute(SPELL_ATTR_EX2_FOOD_BUFF))
+            else if (entry->HasAttribute(SPELL_ATTR_EX2_RETAIN_ITEM_CAST))
                 return SPELL_WELL_FED;
 
             // Spells without attributes, but classified as well fed

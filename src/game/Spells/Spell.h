@@ -553,6 +553,8 @@ class Spell
         void CleanupTargetList();
         void ClearCastItem();
 
+        void SetForwardedCastItem(ObjectGuid guid) { m_forwardedCastItemGuid = guid; }
+
         // spell mods
         std::set<SpellModifierPair> m_usedAuraCharges;
 
@@ -707,6 +709,7 @@ class Spell
         Unit* m_caster;
         Item* m_CastItem;
         bool m_itemCastSpell;
+        ObjectGuid m_forwardedCastItemGuid;
 
         ObjectGuid m_originalCasterGUID;                    // real source of cast (aura caster/etc), used for spell targets selection
         // e.g. damage around area spell trigered by victim aura and da,age emeies of aura caster

@@ -1409,7 +1409,7 @@ bool ChatHandler::HandleLearnAllCommand(char* /*args*/)
                     // skip passives
                     if (newSpell->HasAttribute(SPELL_ATTR_PASSIVE) ||
                         newSpell->HasAttribute(SPELL_ATTR_DO_NOT_DISPLAY) ||
-                        newSpell->HasAttribute(SPELL_ATTR_EX2_DISPLAY_IN_STANCE_BAR))
+                        newSpell->HasAttribute(SPELL_ATTR_EX2_USE_SHAPESHIFT_BAR))
                         continue;
                 }
 

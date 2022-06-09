@@ -99,38 +99,38 @@ enum SpellAttributesEx
 
 enum SpellAttributesEx2
 {
-    SPELL_ATTR_EX2_CAN_TARGET_DEAD             = 0x00000001,// 0 can target dead unit or corpse
-    SPELL_ATTR_EX2_UNK1                        = 0x00000002,// 1 
-    SPELL_ATTR_EX2_IGNORE_LOS                  = 0x00000004,// 2 do not need LOS (e.g. 18220 since 3.3.3)
-    SPELL_ATTR_EX2_UNK3                        = 0x00000008,// 3 auto targeting? (e.g. fishing skill enhancement items since 3.3.3)
-    SPELL_ATTR_EX2_DISPLAY_IN_STANCE_BAR       = 0x00000010,// 4 client displays icon in stance bar when learned, even if not shapeshift
-    SPELL_ATTR_EX2_AUTOREPEAT_FLAG             = 0x00000020,// 5
-    SPELL_ATTR_EX2_CANT_TARGET_TAPPED          = 0x00000040,// 6 only usable on tabbed by yourself
-    SPELL_ATTR_EX2_UNK7                        = 0x00000080,// 7
-    SPELL_ATTR_EX2_UNK8                        = 0x00000100,// 8 not set in 2.4.2
-    SPELL_ATTR_EX2_UNK9                        = 0x00000200,// 9
-    SPELL_ATTR_EX2_UNK10                       = 0x00000400,// 10 SPELL_ATTR_EX2_TAME_SPELLS
-    SPELL_ATTR_EX2_HEALTH_FUNNEL               = 0x00000800,// 11
-    SPELL_ATTR_EX2_UNK12                       = 0x00001000,// 12 SPELL_ATTR_EX2_CLASS_CLEAVE
-    SPELL_ATTR_EX2_UNK13                       = 0x00002000,// 13 TODO: Implement from TC SPELL_ATTR_EX2_CASTABLE_ON_ITEMS
-    SPELL_ATTR_EX2_UNK14                       = 0x00004000,// 14
-    SPELL_ATTR_EX2_UNK15                       = 0x00008000,// 15 not set in 2.4.2
-    SPELL_ATTR_EX2_TAME_BEAST                  = 0x00010000,// 16
-    SPELL_ATTR_EX2_NOT_RESET_AUTO_ACTIONS      = 0x00020000,// 17 suspend weapon timer instead of resetting it, (?Hunters Shot and Stings only have this flag?)
-    SPELL_ATTR_EX2_REQ_DEAD_PET                = 0x00040000,// 18 Only Revive pet - possible req dead pet
-    SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT         = 0x00080000,// 19 does not necessary need shapeshift (pre-3.x not have passive spells with this attribute)
-    SPELL_ATTR_EX2_FACING_TARGETS_BACK         = 0x00100000,// 20 TODO: CONFIRM!
-    SPELL_ATTR_EX2_DAMAGE_REDUCED_SHIELD       = 0x00200000,// 21 for ice blocks, pala immunity buffs, priest absorb shields, but used also for other spells -> not sure!
+    SPELL_ATTR_EX2_ALLOW_DEAD_TARGET           = 0x00000001,// 0 can target dead unit or corpse
+    SPELL_ATTR_EX2_NO_SHAPESHIFT_UI            = 0x00000002,// 1 
+    SPELL_ATTR_EX2_IGNORE_LINE_OF_SIGHT        = 0x00000004,// 2
+    SPELL_ATTR_EX2_ALLOW_LOW_LEVEL_BUFF        = 0x00000008,// 3
+    SPELL_ATTR_EX2_USE_SHAPESHIFT_BAR          = 0x00000010,// 4 client displays icon in stance bar when learned, even if not shapeshift
+    SPELL_ATTR_EX2_AUTO_REPEAT                 = 0x00000020,// 5
+    SPELL_ATTR_EX2_CANNOT_CAST_ON_TAPPED       = 0x00000040,// 6 only usable on tapped by yourself
+    SPELL_ATTR_EX2_DO_NOT_REPORT_SPELL_FAILURE = 0x00000080,// 7
+    SPELL_ATTR_EX2_INCLUDE_IN_ADVANCED_COMBAT_LOG = 0x00000100,// 8 not used anywhere - likely also had different meaning
+    SPELL_ATTR_EX2_ALWAYS_CAST_AS_UNIT         = 0x00000200,// 9 no idea
+    SPELL_ATTR_EX2_SPECIAL_TAMING_FLAG         = 0x00000400,// 10 no idea
+    SPELL_ATTR_EX2_NO_TARGET_PER_SECOND_COSTS  = 0x00000800,// 11
+    SPELL_ATTR_EX2_CHAIN_FROM_CASTER           = 0x00001000,// 12
+    SPELL_ATTR_EX2_ENCHANT_OWN_ITEM_ONLY       = 0x00002000,// 13
+    SPELL_ATTR_EX2_ALLOW_WHILE_INVISIBLE       = 0x00004000,// 14
+    SPELL_ATTR_EX2_UNK15                       = 0x00008000,// 15
+    SPELL_ATTR_EX2_NO_ACTIVE_PETS              = 0x00010000,// 16
+    SPELL_ATTR_EX2_DO_NOT_RESET_COMBAT_TIMERS  = 0x00020000,// 17 suspend weapon timer instead of resetting it, (?Hunters Shot and Stings only have this flag?)
+    SPELL_ATTR_EX2_REQ_DEAD_PET                = 0x00040000,// 18 unconfirmed
+    SPELL_ATTR_EX2_ALLOW_WHILE_NOT_SHAPESHIFTED= 0x00080000,// 19
+    SPELL_ATTR_EX2_INITIATE_COMBAT_POST_CAST   = 0x00100000,// 20 NYI
+    SPELL_ATTR_EX2_FAIL_ON_ALL_TARGETS_IMMUNE  = 0x00200000,// 21
     SPELL_ATTR_EX2_NO_INITIAL_THREAT           = 0x00400000,// 22
-    SPELL_ATTR_EX2_IS_ARCANE_CONCENTRATION     = 0x00800000,// 23 Only mage Arcane Concentration have this flag
-    SPELL_ATTR_EX2_UNK24                       = 0x01000000,// 24
-    SPELL_ATTR_EX2_UNK25                       = 0x02000000,// 25
-    SPELL_ATTR_EX2_UNAFFECTED_BY_AURA_SCHOOL_IMMUNE = 0x04000000,// 26
-    SPELL_ATTR_EX2_UNK27                       = 0x08000000,// 27
-    SPELL_ATTR_EX2_UNK28                       = 0x10000000,// 28 no breaks stealth if it fails??
+    SPELL_ATTR_EX2_PROC_COOLDOWN_ON_FAILURE    = 0x00800000,// 23
+    SPELL_ATTR_EX2_ITEM_CAST_WITH_OWNER_SKILL  = 0x01000000,// 24 NYI
+    SPELL_ATTR_EX2_DONT_BLOCK_MANA_REGEN       = 0x02000000,// 25 maybe different meaning - doesnt hurt anything however
+    SPELL_ATTR_EX2_NO_SCHOOL_IMMUNITIES        = 0x04000000,// 26
+    SPELL_ATTR_EX2_IGNORE_WEAPONSKILL          = 0x08000000,// 27 NYI
+    SPELL_ATTR_EX2_NOT_AN_ACTION               = 0x10000000,// 28
     SPELL_ATTR_EX2_CANT_CRIT                   = 0x20000000,// 29 Spell can't crit
-    SPELL_ATTR_EX2_TRIGGERED_CAN_TRIGGER_PROC  = 0x40000000,// 30 Chero hint: SPELL_ATTR_EX2_CAN_TRIGGER_VICTIM
-    SPELL_ATTR_EX2_FOOD_BUFF                   = 0x80000000,// 31 Food or Drink Buff (like Well Fed)
+    SPELL_ATTR_EX2_ACTIVE_THREAT               = 0x40000000,// 30 NYI - has some sort of active threat component like fire nova totem
+    SPELL_ATTR_EX2_RETAIN_ITEM_CAST            = 0x80000000,// 31 Possibly could have stacking implications in aura triggered spells because item guid is retained
 };
 
 enum SpellAttributesEx3

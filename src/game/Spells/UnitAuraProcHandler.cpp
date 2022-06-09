@@ -427,6 +427,15 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
             result == SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_ROLL_FAILED && holder->GetAuraCharges() > 0)
             holdersForDeletion.push_back(holder);
 
+        if (holder->GetSpellProto()->HasAttribute(SPELL_ATTR_EX2_PROC_COOLDOWN_ON_FAILURE) && result == SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_ROLL_FAILED)
+        {
+            uint32 cooldown = 0;
+            if (spellProcEvent && spellProcEvent->cooldown)
+                cooldown = spellProcEvent->cooldown;
+            if (cooldown)
+                AddCooldown(*holder->GetSpellProto(), nullptr, false, cooldown * IN_MILLISECONDS);
+        }
+
         if (result != SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_OK)
             continue;
 
@@ -613,7 +622,7 @@ Unit::SpellProcEventTriggerCheck Unit::IsTriggeredAtSpellProcEvent(ProcExecution
     {
         if (data.spell->m_IsTriggeredSpell && !spellProto->HasAttribute(SPELL_ATTR_EX3_CAN_PROC_FROM_TRIGGERED))
         {
-            if (!data.spell->m_spellInfo->HasAttribute(SPELL_ATTR_EX2_TRIGGERED_CAN_TRIGGER_PROC) && !data.spell->m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TRIGGERED_CAN_TRIGGER_SPECIAL))
+            if (!data.spell->m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TRIGGERED_CAN_TRIGGER_SPECIAL))
                 return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
         }
 
