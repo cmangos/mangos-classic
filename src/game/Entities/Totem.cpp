@@ -71,6 +71,8 @@ bool Totem::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* 
     else // legacy compatibility
         SetSpellList(cinfo->Entry * 100 + 0);
 
+    SetAOEImmune(true);
+
     return true;
 }
 

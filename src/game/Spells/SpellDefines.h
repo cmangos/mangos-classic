@@ -135,38 +135,38 @@ enum SpellAttributesEx2
 
 enum SpellAttributesEx3
 {
-    SPELL_ATTR_EX3_OUT_OF_COMBAT_ATTACK        = 0x00000001,// 0 Spell landed counts as hostile action against enemy even if it doesn't trigger combat state, propagates PvP flags
-    SPELL_ATTR_EX3_UNK1                        = 0x00000002,// 1
-    SPELL_ATTR_EX3_UNK2                        = 0x00000004,// 2
-    SPELL_ATTR_EX3_BLOCKABLE_SPELL             = 0x00000008,// 3 TODO: Investigate more
-    SPELL_ATTR_EX3_IGNORE_RESURRECTION_TIMER   = 0x00000010,// 4 Druid Rebirth only this spell have this flag
-    SPELL_ATTR_EX3_UNK5                        = 0x00000020,// 5
-    SPELL_ATTR_EX3_UNK6                        = 0x00000040,// 6
-    SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS      = 0x00000080,// 7 create a separate (de)buff stack for each caster
-    SPELL_ATTR_EX3_TARGET_ONLY_PLAYER          = 0x00000100,// 8 Can target only player
-    SPELL_ATTR_EX3_TRIGGERED_CAN_TRIGGER_SPECIAL = 0x00000200,// 9 Can only proc auras
-    SPELL_ATTR_EX3_MAIN_HAND                   = 0x00000400,// 10 Main hand weapon required
-    SPELL_ATTR_EX3_BATTLEGROUND                = 0x00000800,// 11 Can casted only on battleground
-    SPELL_ATTR_EX3_CAST_ON_DEAD                = 0x00001000,// 12 target is a dead player (not every spell has this flag)
-    SPELL_ATTR_EX3_DONT_DISPLAY_CHANNEL_BAR    = 0x00002000,// 13
-    SPELL_ATTR_EX3_IS_HONORLESS_TARGET         = 0x00004000,// 14 "Honorless Target" only this spells have this flag
-    SPELL_ATTR_EX3_RANGED_ATTACK               = 0x00008000,// 15 Spells with this attribute are processed as ranged attacks in client
+    SPELL_ATTR_EX3_PVP_ENABLING                = 0x00000001,// 0 Spell landed counts as hostile action against enemy even if it doesn't trigger combat state, propagates PvP flags
+    SPELL_ATTR_EX3_NO_PROC_EQUIP_REQUIREMENT   = 0x00000002,// 1
+    SPELL_ATTR_EX3_NO_CASTING_BAR_TEXT         = 0x00000004,// 2
+    SPELL_ATTR_EX3_COMPLETELY_BLOCKED          = 0x00000008,// 3
+    SPELL_ATTR_EX3_NO_RES_TIMER                = 0x00000010,// 4
+    SPELL_ATTR_EX3_NO_DURABILITY_LOSS          = 0x00000020,// 5
+    SPELL_ATTR_EX3_NO_AVOIDANCE                = 0x00000040,// 6
+    SPELL_ATTR_EX3_DOT_STACKING_RULE           = 0x00000080,// 7 create a separate (de)buff stack for each caster
+    SPELL_ATTR_EX3_ONLY_ON_PLAYER              = 0x00000100,// 8 Can target only player
+    SPELL_ATTR_EX3_NOT_A_PROC                  = 0x00000200,// 9 aura periodic trigger is not evaluated as triggered (official meaning of proc)
+    SPELL_ATTR_EX3_REQUIRES_MAIN_HAND_WEAPON   = 0x00000400,// 10
+    SPELL_ATTR_EX3_ONLY_BATTLEGROUNDS          = 0x00000800,// 11 Can casted only on battleground
+    SPELL_ATTR_EX3_ONLY_ON_GHOSTS              = 0x00001000,// 12
+    SPELL_ATTR_EX3_HIDE_CHANNEL_BAR            = 0x00002000,// 13
+    SPELL_ATTR_EX3_HIDE_IN_RAID_FILTER         = 0x00004000,// 14 "Honorless Target" only these spells have this flag
+    SPELL_ATTR_EX3_NORMAL_RANGED_ATTACK        = 0x00008000,// 15 Spells with this attribute are processed as ranged attacks in client
     SPELL_ATTR_EX3_SUPPRESS_CASTER_PROCS       = 0x00010000,// 16
     SPELL_ATTR_EX3_SUPPRESS_TARGET_PROCS       = 0x00020000,// 17
     SPELL_ATTR_EX3_ALWAYS_HIT                  = 0x00040000,// 18 Spell should always hit its target 
-    SPELL_ATTR_EX3_UNK19                       = 0x00080000,// 19 TODO: Implement from TC
-    SPELL_ATTR_EX3_DEATH_PERSISTENT            = 0x00100000,// 20 Death persistent spells
-    SPELL_ATTR_EX3_UNK21                       = 0x00200000,// 21
-    SPELL_ATTR_EX3_REQ_WAND                    = 0x00400000,// 22 Req wand
-    SPELL_ATTR_EX3_UNK23                       = 0x00800000,// 23
-    SPELL_ATTR_EX3_REQ_OFFHAND                 = 0x01000000,// 24 Req offhand weapon
+    SPELL_ATTR_EX3_INSTANT_TARGET_PROCS        = 0x00080000,// 19 Related to spell batching - not an issue for us
+    SPELL_ATTR_EX3_ALLOW_AURA_WHILE_DEAD       = 0x00100000,// 20 Death persistent spells
+    SPELL_ATTR_EX3_ONLY_PROC_OUTDOORS          = 0x00200000,// 21
+    SPELL_ATTR_EX3_CASTING_CANCELS_AUTOREPEAT  = 0x00400000,// 22
+    SPELL_ATTR_EX3_NO_DAMAGE_HISTORY           = 0x00800000,// 23
+    SPELL_ATTR_EX3_REQUIRES_OFFHAND_WEAPON     = 0x01000000,// 24 Req offhand weapon
     SPELL_ATTR_EX3_TREAT_AS_PERIODIC           = 0x02000000,// 25 Treated as periodic spell
-    SPELL_ATTR_EX3_CAN_PROC_FROM_TRIGGERED     = 0x04000000,// 26 Auras with this attribute can proc off SPELL_ATTR_EX3_TRIGGERED_CAN_TRIGGER_SPECIAL
-    SPELL_ATTR_EX3_UNK27                       = 0x08000000,// 27
-    SPELL_ATTR_EX3_UNK28                       = 0x10000000,// 28 always cast ok ? (requires more research)
+    SPELL_ATTR_EX3_CAN_PROC_FROM_PROCS         = 0x04000000,// 26 Auras with this attribute can proc off procced spells (periodic triggers etc)
+    SPELL_ATTR_EX3_ONLY_PROC_ON_CASTER         = 0x08000000,// 27
+    SPELL_ATTR_EX3_IGNORE_CASTER_AND_TARGET_RESTRICTIONS = 0x10000000,// 28 NYI
     SPELL_ATTR_EX3_IGNORE_CASTER_MODIFIERS     = 0x20000000,// 29 Resistances should still affect damage
-    SPELL_ATTR_EX3_DONT_DISPLAY_RANGE          = 0x40000000,// 30
-    SPELL_ATTR_EX3_UNK31                       = 0x80000000,// 31
+    SPELL_ATTR_EX3_DO_NOT_DISPLAY_RANGE        = 0x40000000,// 30
+    SPELL_ATTR_EX3_NOT_ON_AOE_IMMUNE           = 0x80000000,// 31
 };
 
 enum SpellAttributesEx4

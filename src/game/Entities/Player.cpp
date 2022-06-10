@@ -18579,14 +18579,14 @@ bool Player::HasItemFitToSpellReqirements(SpellEntry const* spellInfo, Item cons
     if (spellInfo->EquippedItemClass < 0)
         return true;
 
-    if (spellInfo->HasAttribute(SPELL_ATTR_EX3_MAIN_HAND) && !hasMainhandWeaponForAttack())
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX3_REQUIRES_MAIN_HAND_WEAPON) && !hasMainhandWeaponForAttack())
     {
         if (error)
             *error = SPELL_FAILED_EQUIPPED_ITEM_CLASS_MAINHAND;
         return false;
     }
 
-    if (spellInfo->HasAttribute(SPELL_ATTR_EX3_REQ_OFFHAND) && !hasOffhandWeaponForAttack())
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX3_REQUIRES_OFFHAND_WEAPON) && !hasOffhandWeaponForAttack())
     {
         if (error)
             *error = SPELL_FAILED_EQUIPPED_ITEM_CLASS_OFFHAND;
@@ -18832,7 +18832,7 @@ void Player::SendResurrectRequest(SpellEntry const* spellInfo, bool isSpiritHeal
     data << sentName;
     data << uint8(isSpiritHealer);
     // override delay sent with SMSG_CORPSE_RECLAIM_DELAY, set instant resurrection for spells with this attribute
-    data << uint8(!spellInfo->HasAttribute(SPELL_ATTR_EX3_IGNORE_RESURRECTION_TIMER));
+    data << uint8(!spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_RES_TIMER));
     GetSession()->SendPacket(data);
 }
 

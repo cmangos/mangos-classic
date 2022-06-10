@@ -333,7 +333,7 @@ WeaponAttackType GetWeaponAttackType(SpellEntry const* spellInfo)
     switch (spellInfo->DmgClass)
     {
         case SPELL_DAMAGE_CLASS_MELEE:
-            if (spellInfo->HasAttribute(SPELL_ATTR_EX3_REQ_OFFHAND))
+            if (spellInfo->HasAttribute(SPELL_ATTR_EX3_REQUIRES_OFFHAND_WEAPON))
                 return OFF_ATTACK;
             return BASE_ATTACK;
         case SPELL_DAMAGE_CLASS_RANGED:
@@ -343,7 +343,7 @@ WeaponAttackType GetWeaponAttackType(SpellEntry const* spellInfo)
             // Wands
             if (spellInfo->HasAttribute(SPELL_ATTR_EX2_AUTO_REPEAT))
                 return RANGED_ATTACK;
-            if (spellInfo->HasAttribute(SPELL_ATTR_EX3_REQ_OFFHAND))
+            if (spellInfo->HasAttribute(SPELL_ATTR_EX3_REQUIRES_OFFHAND_WEAPON))
                 return OFF_ATTACK;
             return BASE_ATTACK;
         }
@@ -2552,7 +2552,7 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const* spell
     // bg spell checks
 
     // Spell casted only on battleground
-    if (spellInfo->HasAttribute(SPELL_ATTR_EX3_BATTLEGROUND))
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX3_ONLY_BATTLEGROUNDS))
         if (!player || !player->InBattleGround())
             return SPELL_FAILED_ONLY_BATTLEGROUNDS;
 

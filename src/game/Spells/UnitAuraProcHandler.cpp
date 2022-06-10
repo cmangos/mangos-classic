@@ -569,7 +569,7 @@ Unit::SpellProcEventTriggerCheck Unit::IsTriggeredAtSpellProcEvent(ProcExecution
         return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
 
     // Check if current equipment allows aura to proc
-    if (!data.isVictim && GetTypeId() == TYPEID_PLAYER)
+    if (!data.isVictim && GetTypeId() == TYPEID_PLAYER && !spellProto->HasAttribute(SPELL_ATTR_EX3_NO_PROC_EQUIP_REQUIREMENT))
     {
         if (spellProto->EquippedItemClass == ITEM_CLASS_WEAPON)
         {
@@ -603,6 +603,12 @@ Unit::SpellProcEventTriggerCheck Unit::IsTriggeredAtSpellProcEvent(ProcExecution
         }
     }
 
+    if (spellProto->HasAttribute(SPELL_ATTR_EX3_ONLY_PROC_OUTDOORS) && !GetTerrain()->IsOutdoors(GetPositionX(), GetPositionY(), GetPositionZ()))
+        return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
+
+    if (spellProto->HasAttribute(SPELL_ATTR_EX3_ONLY_PROC_ON_CASTER) && holder->GetTarget()->GetObjectGuid() != holder->GetCasterGuid())
+        return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
+
     // Get chance from spell
     float chance = (float)spellProto->procChance;
     // If in spellProcEvent exist custom chance, chance = spellProcEvent->customChance;
@@ -620,9 +626,9 @@ Unit::SpellProcEventTriggerCheck Unit::IsTriggeredAtSpellProcEvent(ProcExecution
 
     if (data.spell)
     {
-        if (data.spell->m_IsTriggeredSpell && !spellProto->HasAttribute(SPELL_ATTR_EX3_CAN_PROC_FROM_TRIGGERED))
+        if (data.spell->m_IsTriggeredSpell)
         {
-            if (!data.spell->m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TRIGGERED_CAN_TRIGGER_SPECIAL))
+            if (!data.spell->m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NOT_A_PROC) && !spellProto->HasAttribute(SPELL_ATTR_EX3_CAN_PROC_FROM_PROCS))
                 return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
         }
 

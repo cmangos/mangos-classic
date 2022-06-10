@@ -994,20 +994,17 @@ namespace MaNGOS
                 if (!itr->getSource()->IsInMap(i_originalCaster) || itr->getSource()->IsTaxiFlying())
                     continue;
 
+                if (itr->getSource()->IsAOEImmune())
+                    continue;
+
                 switch (i_TargetType)
                 {
                     case SPELL_TARGETS_ASSISTABLE:
-                        if (itr->getSource()->GetTypeId() == TYPEID_UNIT && ((Creature*)itr->getSource())->IsTotem())
-                            continue;
-
                         if (!i_originalCaster->CanAssistSpell(itr->getSource(), i_spell.m_spellInfo))
                             continue;
                         break;
                     case SPELL_TARGETS_AOE_ATTACKABLE:
                     {
-                        if (itr->getSource()->GetTypeId() == TYPEID_UNIT && ((Creature*)itr->getSource())->IsTotem())
-                            continue;
-
                         if (!i_originalCaster->CanAttackSpell(itr->getSource(), i_spell.m_spellInfo, true))
                             continue;
                     }
