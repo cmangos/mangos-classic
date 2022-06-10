@@ -14260,7 +14260,9 @@ insert  into `warden_scans`(`id`,`type`,`str`,`data`,`address`,`length`,`result`
 (86,1,'kernel32.dll',NULL,0,0,'1',14,'Warden module search bypass sanity check'),
 (87,1,'wpespy.dll',NULL,0,0,'0',14,'WPE Pro'),
 (88,1,'speedhack-i386.dll',NULL,0,0,'0',14,'CheatEngine'),
-(89,1,'tamia.dll',NULL,0,0,'0',14,'Tamia hack');
+(89,1,'tamia.dll',NULL,0,0,'0',14,'Tamia hack'),
+(90,0,NULL,NULL,12900744,4,'0000C843',2,'Nameplate extender'),
+(91,0,NULL,NULL,8784512,4,'00006144',2,'Unlimited follow distance');
 
 --
 -- Table structure for table `waypoint_path`
