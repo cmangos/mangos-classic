@@ -1026,7 +1026,7 @@ inline uint32 GetCheckCastSelfEffectMask(SpellEntry const* spellInfo)
 {
     uint32 resultingMask = 0;
     for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-        if (HasSpellTarget(spellInfo, TARGET_UNIT_CASTER))
+        if (spellInfo->EffectImplicitTargetA[i] == TARGET_UNIT_CASTER)
             resultingMask |= (1 << i);
     return resultingMask;
 }
