@@ -648,7 +648,7 @@ bool IsExplicitNegativeTarget(uint32 targetA);
 
 inline bool IsResistableSpell(const SpellEntry* entry)
 {
-    return (entry->DmgClass != SPELL_DAMAGE_CLASS_NONE && !entry->HasAttribute(SPELL_ATTR_EX4_IGNORE_RESISTANCES));
+    return entry->DmgClass != SPELL_DAMAGE_CLASS_NONE;
 }
 
 inline bool IsSpellEffectDamage(SpellEntry const& spellInfo, SpellEffectIndex i)

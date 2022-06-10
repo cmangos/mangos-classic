@@ -171,38 +171,16 @@ enum SpellAttributesEx3
 
 enum SpellAttributesEx4
 {
-    SPELL_ATTR_EX4_IGNORE_RESISTANCES          = 0x00000001,// 0
-    SPELL_ATTR_EX4_PROC_ONLY_ON_CASTER         = 0x00000002,// 1 Only proc on self-cast
+    SPELL_ATTR_EX4_NO_CAST_LOG                 = 0x00000001,// 0
+    SPELL_ATTR_EX4_CLASS_TRIGGER_ONLY_ON_TARGET= 0x00000002,// 1
     SPELL_ATTR_EX4_AURA_EXPIRES_OFFLINE        = 0x00000004,// 2
-    SPELL_ATTR_EX4_UNK3                        = 0x00000008,// 3
-    SPELL_ATTR_EX4_UNK4                        = 0x00000010,// 4 This will no longer cause guards to attack on use??
-    SPELL_ATTR_EX4_UNK5                        = 0x00000020,// 5
-    SPELL_ATTR_EX4_NOT_STEALABLE               = 0x00000040,// 6 although such auras might be dispellable, they cannot be stolen
-    SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING      = 0x00000080,// 7 In theory, can use this spell while another is channeled/cast/autocast
+    SPELL_ATTR_EX4_NO_HELPFUL_THREAT           = 0x00000008,// 3
+    SPELL_ATTR_EX4_NO_HARMFUL_THREAT           = 0x00000010,// 4
+    SPELL_ATTR_EX4_ALLOW_CLIENT_TARGETING      = 0x00000020,// 5
+    SPELL_ATTR_EX4_CANNOT_BE_STOLEN            = 0x00000040,// 6 although such auras might be dispellable, they cannot be stolen
+    SPELL_ATTR_EX4_ALLOW_CAST_WHILE_CASTING    = 0x00000080,// 7 Can use this spell while another is channeled/cast/autocast
     SPELL_ATTR_EX4_IGNORE_DAMAGE_TAKEN_MODIFIERS = 0x00000100,// 8
-    SPELL_ATTR_EX4_TRIGGER_ACTIVATE            = 0x00000200,// 9 initially disabled / trigger activate from event (Execute, Riposte, Deep Freeze end other)
-    SPELL_ATTR_EX4_SPELL_VS_EXTEND_COST        = 0x00000400,// 10 Rogue Shiv have this flag
-    SPELL_ATTR_EX4_UNK11                       = 0x00000800,// 11
-    SPELL_ATTR_EX4_UNK12                       = 0x00001000,// 12
-    SPELL_ATTR_EX4_UNK13                       = 0x00002000,// 13
-    SPELL_ATTR_EX4_DAMAGE_DOESNT_BREAK_AURAS   = 0x00004000,// 14
-    SPELL_ATTR_EX4_UNK15                       = 0x00008000,// 15 Dont add to spellbook
-    SPELL_ATTR_EX4_NOT_USABLE_IN_ARENA         = 0x00010000,// 16 not usable in arena
-    SPELL_ATTR_EX4_USABLE_IN_ARENA             = 0x00020000,// 17 usable in arena
-    SPELL_ATTR_EX4_UNK18                       = 0x00040000,// 18 TODO: Investigate from TC
-    SPELL_ATTR_EX4_UNK19                       = 0x00080000,// 19
-    SPELL_ATTR_EX4_NOT_CHECK_SELFCAST_POWER    = 0x00100000,// 20 do not give "more powerful spell" error message
-    SPELL_ATTR_EX4_UNK21                       = 0x00200000,// 21
-    SPELL_ATTR_EX4_UNK22                       = 0x00400000,// 22
-    SPELL_ATTR_EX4_UNK23                       = 0x00800000,// 23
-    SPELL_ATTR_EX4_AUTO_RANGED_COMBAT_SPELL    = 0x01000000,// 24
-    SPELL_ATTR_EX4_IS_PET_SCALING              = 0x02000000,// 25 pet scaling auras
-    SPELL_ATTR_EX4_CAST_ONLY_IN_OUTLAND        = 0x04000000,// 26 Can only be used in Outland.
-    SPELL_ATTR_EX4_UNK27                       = 0x08000000,// 27 Always shown in combat log
-    SPELL_ATTR_EX4_UNK28                       = 0x10000000,// 28
-    SPELL_ATTR_EX4_UNK29                       = 0x20000000,// 29 Related to client check about dispel, CC seems to have them - dispel effect 0
-    SPELL_ATTR_EX4_UNK30                       = 0x40000000,// 30 - dispel effect 1
-    SPELL_ATTR_EX4_UNK31                       = 0x80000000,// 31 - dispel effect 2
+    SPELL_ATTR_EX4_COMBAT_FEEDBACK_WHEN_USABLE = 0x00000200,// 9 initially disabled / trigger activate from event (Execute, Riposte, Deep Freeze end other)
 };
 
 enum SpellAttributesServerside

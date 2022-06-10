@@ -815,7 +815,7 @@ class Spell
         bool IsValidDeadOrAliveTarget(Unit const* unit) const;
         SpellCastResult CanOpenLock(SpellEffectIndex effIndex, uint32 lockid, SkillType& skillId, int32& reqSkillValue, int32& skillValue);
         void ProcSpellAuraTriggers();
-        bool CanExecuteTriggersOnHit(uint8 effMask, SpellEntry const* triggeredByAura) const;
+        bool CanExecuteTriggersOnHit(uint8 effMask, SpellEntry const* triggeredByAura, bool auraTarget) const;
         // -------------------------------------------
 
         // Diminishing returns

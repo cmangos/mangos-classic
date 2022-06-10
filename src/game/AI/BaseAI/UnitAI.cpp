@@ -351,7 +351,7 @@ void UnitAI::OnSpellCastStateChange(Spell const* spell, bool state, WorldObject*
         return;
 
     SpellEntry const* spellInfo = spell->m_spellInfo;
-    if (spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING) || spellInfo->HasAttribute(SPELL_ATTR_ON_NEXT_SWING_NO_DAMAGE) || spellInfo->HasAttribute(SPELL_ATTR_ON_NEXT_SWING))
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX4_ALLOW_CAST_WHILE_CASTING) || spellInfo->HasAttribute(SPELL_ATTR_ON_NEXT_SWING_NO_DAMAGE) || spellInfo->HasAttribute(SPELL_ATTR_ON_NEXT_SWING))
         return;
 
     // Creature should always stop before it will cast a non-instant spell
@@ -437,7 +437,7 @@ void UnitAI::OnChannelStateChange(Spell const* spell, bool state, WorldObject* t
     // TODO: Determine if CHANNEL_FLAG_MOVEMENT is worth implementing
     if (!spellInfo->HasAttribute(SPELL_ATTR_EX_TRACK_TARGET_IN_CHANNEL))
     {
-        if (spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING))
+        if (spellInfo->HasAttribute(SPELL_ATTR_EX4_ALLOW_CAST_WHILE_CASTING))
             return;
     }
 

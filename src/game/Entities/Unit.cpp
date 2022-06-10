@@ -873,8 +873,7 @@ uint32 Unit::DealDamage(Unit* dealer, Unit* victim, uint32 damage, CleanDamage c
     }
 
     if ((cleanDamage && cleanDamage->takenOrAbsorbedDamage) &&
-        (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE || damagetype == DOT || damagetype == SELF_DAMAGE || damagetype == SPELL_DAMAGE_SHIELD)
-        && !(spellProto && spellProto->HasAttribute(SPELL_ATTR_EX4_DAMAGE_DOESNT_BREAK_AURAS)))
+        (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE || damagetype == DOT || damagetype == SELF_DAMAGE || damagetype == SPELL_DAMAGE_SHIELD))
     {
         int32 actionInterruptFlags = AURA_INTERRUPT_FLAG_DAMAGE;
         if (damagetype != DOT)
@@ -4067,7 +4066,7 @@ void Unit::SetCurrentCastedSpell(Spell* newSpell)
             // Unless they have this attribute
             if (Spell const* channeledSpell = m_currentSpells[CURRENT_CHANNELED_SPELL])
             {
-                if (!channeledSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING) && !newSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING))
+                if (!channeledSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_ALLOW_CAST_WHILE_CASTING) && !newSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_ALLOW_CAST_WHILE_CASTING))
                     InterruptSpell(CURRENT_CHANNELED_SPELL, false);
             }
 
@@ -4087,10 +4086,10 @@ void Unit::SetCurrentCastedSpell(Spell* newSpell)
 
             // Channeled spell can only be one
             // Spells with this attribute can be cast in parallel with generic spells
-            if (!newSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING) && !newSpell->m_IsTriggeredSpell)
+            if (!newSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_ALLOW_CAST_WHILE_CASTING) && !newSpell->m_IsTriggeredSpell)
             {
                 if (Spell const* genericSpell = m_currentSpells[CURRENT_AUTOREPEAT_SPELL])
-                    if (!genericSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING))
+                    if (!genericSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_ALLOW_CAST_WHILE_CASTING))
                         InterruptSpell(CURRENT_GENERIC_SPELL, false);
 
                 // it also does break autorepeat if not Auto Shot
@@ -4109,7 +4108,7 @@ void Unit::SetCurrentCastedSpell(Spell* newSpell)
                 InterruptSpell(CURRENT_GENERIC_SPELL, false);
                 if (m_currentSpells[CURRENT_CHANNELED_SPELL])
                 {
-                    if (!newSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING))
+                    if (!newSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_ALLOW_CAST_WHILE_CASTING))
                         InterruptSpell(CURRENT_CHANNELED_SPELL, false);
                 }
             }
@@ -4199,7 +4198,7 @@ bool Unit::IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled, bool skip
         {
             bool attributeResult = false;
             if (!forMovement)
-                attributeResult = channeledSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING);
+                attributeResult = channeledSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_ALLOW_CAST_WHILE_CASTING);
 
             bool isAutoNonInterrupting = forAutoIgnore && channeledSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX2_DO_NOT_RESET_COMBAT_TIMERS);
             if (!isAutoNonInterrupting && !attributeResult && !channeledSpell->m_IsTriggeredSpell && (channeledSpell->getState() != SPELL_STATE_FINISHED))
@@ -8496,6 +8495,9 @@ float Unit::ApplyTotalThreatModifier(float threat, SpellSchoolMask schoolMask)
 
 void Unit::AddThreat(Unit* pVictim, float threat /*= 0.0f*/, bool crit /*= false*/, SpellSchoolMask schoolMask /*= SPELL_SCHOOL_MASK_NONE*/, SpellEntry const* threatSpell /*= nullptr*/ /*= nullptr*/)
 {
+    if (threatSpell && threatSpell->HasAttribute(SPELL_ATTR_EX4_NO_HARMFUL_THREAT))
+        return;
+
     // Only mobs can manage threat lists
     if (CanHaveThreatList())
         getThreatManager().addThreat(pVictim, threat, crit, schoolMask, threatSpell);

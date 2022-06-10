@@ -446,7 +446,7 @@ Spell::Spell(WorldObject* caster, SpellEntry const* info, uint32 triggeredFlags,
     m_ignoreGCD = m_IsTriggeredSpell || ((triggeredFlags & TRIGGERED_IGNORE_GCD) != 0);
     m_ignoreCosts = m_IsTriggeredSpell || ((triggeredFlags & TRIGGERED_IGNORE_COSTS) != 0);
     m_ignoreCooldowns = m_IsTriggeredSpell || ((triggeredFlags & TRIGGERED_IGNORE_COOLDOWNS) != 0);
-    m_ignoreConcurrentCasts = m_IsTriggeredSpell || ((triggeredFlags & TRIGGERED_IGNORE_CURRENT_CASTED_SPELL) != 0) || m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING);
+    m_ignoreConcurrentCasts = m_IsTriggeredSpell || ((triggeredFlags & TRIGGERED_IGNORE_CURRENT_CASTED_SPELL) != 0) || m_spellInfo->HasAttribute(SPELL_ATTR_EX4_ALLOW_CAST_WHILE_CASTING);
     m_hideInCombatLog = (m_IsTriggeredSpell && !IsAutoRepeatRangedSpell(m_spellInfo)) || ((triggeredFlags & TRIGGERED_HIDE_CAST_IN_COMBAT_LOG) != 0);
     m_resetLeash = (triggeredFlags & TRIGGERED_DO_NOT_RESET_LEASH) == 0;
     m_channelOnly = (triggeredFlags & TRIGGERED_CHANNEL_ONLY) != 0;
@@ -4742,8 +4742,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                         if (sSpellMgr.IsSpellStackableWithSpellForDifferentCasters(m_spellInfo, existingSpell))
                             continue;
                     }
-                    else if (m_spellInfo == existingSpell && m_spellInfo->HasAttribute(SPELL_ATTR_EX4_NOT_CHECK_SELFCAST_POWER))
-                        continue;
                     else if (sSpellMgr.IsSpellStackableWithSpell(m_spellInfo, existingSpell))
                         continue;
 
@@ -7277,12 +7275,12 @@ void Spell::ResetEffectDamageAndHeal()
     m_healing = 0;
 }
 
-bool Spell::CanExecuteTriggersOnHit(uint8 effMask, SpellEntry const* triggeredByAura) const
+bool Spell::CanExecuteTriggersOnHit(uint8 effMask, SpellEntry const* triggeredByAura, bool auraTarget) const
 {
-    bool only_on_caster = (triggeredByAura && triggeredByAura->HasAttribute(SPELL_ATTR_EX4_PROC_ONLY_ON_CASTER));
+    bool onlyOnTarget = (triggeredByAura && triggeredByAura->HasAttribute(SPELL_ATTR_EX4_CLASS_TRIGGER_ONLY_ON_TARGET));
     // If triggeredByAura has SPELL_ATTR4_PROC_ONLY_ON_CASTER then it can only proc on a cast spell with TARGET_UNIT_CASTER
     for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
-        if ((effMask & (1 << i)) && (!only_on_caster || (m_spellInfo->EffectImplicitTargetA[i] == TARGET_UNIT_CASTER)))
+        if ((effMask & (1 << i)) && (!onlyOnTarget || (onlyOnTarget && auraTarget)))
             return true;
 
     return false;
@@ -7306,7 +7304,7 @@ void Spell::ProcSpellAuraTriggers()
                 if (!target || !target->IsAlive())
                     continue;
                 SpellEntry const* auraSpellInfo = targetTrigger->GetSpellProto();
-                if (!CanExecuteTriggersOnHit(ihit->effectHitMask, auraSpellInfo))
+                if (!CanExecuteTriggersOnHit(ihit->effectHitMask, auraSpellInfo, targetTrigger->GetTarget()->GetObjectGuid() == ihit->targetGUID))
                     continue;
                 SpellEffectIndex auraSpellIdx = targetTrigger->GetEffIndex();
                 const uint32 procid = auraSpellInfo->EffectTriggerSpell[auraSpellIdx];

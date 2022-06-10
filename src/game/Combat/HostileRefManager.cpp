@@ -41,6 +41,9 @@ void HostileRefManager::threatAssist(Unit* victim, float threat, SpellEntry cons
     if (threatSpell->HasAttribute(SPELL_ATTR_EX2_NO_INITIAL_THREAT) || threatSpell->HasAttribute(SPELL_ATTR_EX_NO_THREAT) || !getOwner()->CanEnterCombat() || !victim->CanEnterCombat())
         return;
 
+    if (threatSpell->HasAttribute(SPELL_ATTR_EX4_NO_HELPFUL_THREAT))
+        return;
+
     HostileReference* ref = getFirst();
     if (!ref)
         return;
