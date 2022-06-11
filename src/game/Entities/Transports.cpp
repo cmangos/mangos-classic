@@ -472,13 +472,9 @@ void ElevatorTransport::Update(const uint32 /*diff*/)
             currentPos = posPrev;
         else
         {
-            uint32 timeElapsed = m_pathProgress - nodePrev->TimeSeg;
-            uint32 timeDiff = nodeNext->TimeSeg - nodePrev->TimeSeg;
-            G3D::Vector3 segmentDiff = posNext - posPrev;
-            float velocityX = float(segmentDiff.x) / timeDiff, velocityY = float(segmentDiff.y) / timeDiff, velocityZ = float(segmentDiff.z) / timeDiff;
+            float nodeProgress = float(m_pathProgress - nodePrev->TimeSeg) / float(nodeNext->TimeSeg - nodePrev->TimeSeg);
 
-            currentPos = G3D::Vector3(timeElapsed * velocityX, timeElapsed * velocityY, timeElapsed * velocityZ);
-            currentPos += posPrev;
+            currentPos = posPrev.lerp(posNext, nodeProgress);
         }
 
         auto data = GetLocalRotation();
