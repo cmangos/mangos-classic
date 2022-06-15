@@ -2680,9 +2680,6 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
         }
         case SCRIPT_COMMAND_START_RELAY_SCRIPT:             // 45
         {
-            if (LogIfNotUnit(pSource))
-                return false;
-
             uint32 chosenId;
             if (m_script->relayScript.templateId)
                 chosenId = sScriptMgr.GetRandomRelayDbscriptFromTemplate(m_script->relayScript.templateId);
