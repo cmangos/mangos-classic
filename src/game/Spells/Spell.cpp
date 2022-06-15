@@ -462,7 +462,7 @@ Spell::Spell(WorldObject* caster, SpellEntry const* info, uint32 triggeredFlags,
 
     m_scriptValue = 0;
 
-    memset(m_triggerSpellChance, -1, sizeof(m_triggerSpellChance));
+    memset(m_effectTriggerChance, -1, sizeof(m_effectTriggerChance));
     memset(damagePerEffect, 0, sizeof(damagePerEffect));
 
     CleanupTargetList();
@@ -4363,6 +4363,12 @@ void Spell::ExecuteEffects(Unit* unitTarget, Item* itemTarget, GameObject* GOTar
 
 void Spell::HandleEffect(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOTarget, SpellEffectIndex i, float DamageMultiplier)
 {
+    if (m_effectTriggerChance[i] != -1)
+    {
+        if (m_effectTriggerChance[i] == 0 || irand(1, 100) > m_effectTriggerChance[i])
+            return;
+    }
+
     unitTarget = pUnitTarget;
     itemTarget = pItemTarget;
     gameObjTarget = pGOTarget;

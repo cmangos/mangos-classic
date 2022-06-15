@@ -1723,12 +1723,6 @@ void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
             return;
     }
 
-    if (m_triggerSpellChance[effIndex] != -1)
-    {
-        if (m_triggerSpellChance[effIndex] == 0 || irand(1, 100) > m_triggerSpellChance[effIndex])
-            return;
-    }
-
     // normal case
     SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(triggered_spell_id);
     if (!spellInfo)

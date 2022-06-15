@@ -565,7 +565,7 @@ class Spell
         void RegisterAuraProc(Aura* aura);
         bool IsAuraProcced(Aura* aura);
         // setting 0 disables the trigger
-        void SetTriggerChance(int32 triggerChance, SpellEffectIndex effIdx) { m_triggerSpellChance[effIdx] = triggerChance; }
+        void SetEffectChance(int32 triggerChance, SpellEffectIndex effIdx) { m_effectTriggerChance[effIdx] = triggerChance; }
 
         // Spell Target Subsystem - public part
         // Targets store structures and data
@@ -830,7 +830,7 @@ class Spell
         uint64 m_scriptValue; // persistent value for spell script state
         SpellScript* m_spellScript;
         AuraScript* m_auraScript; // needed for some checks for value calculation
-        int32 m_triggerSpellChance[MAX_EFFECT_INDEX]; // used by trigger spell effects to roll
+        int32 m_effectTriggerChance[MAX_EFFECT_INDEX]; // used by effects to roll if they should go off
 
         uint32 m_spellState;
         uint32 m_timer;
