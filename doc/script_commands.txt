@@ -266,7 +266,7 @@ Defining a buddy could be done in several way:
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: RandomMovement around current position
                                             * dataint = enum ForcedMovement
 
-21 SCRIPT_COMMAND_SET_ACTIVEOBJECT          resultingSource = Creature
+21 SCRIPT_COMMAND_SET_ACTIVEOBJECT          resultingSource = WorldObject
                                             * datalong=bool 0=off, 1=on
 
 22 SCRIPT_COMMAND_SET_FACTION               resultingSource = Creature

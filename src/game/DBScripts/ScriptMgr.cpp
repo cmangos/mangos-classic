@@ -2117,10 +2117,13 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
         }
         case SCRIPT_COMMAND_SET_ACTIVEOBJECT:               // 21
         {
-            if (LogIfNotCreature(pSource))
-                break;
+            if (pSource->GetTypeId() == TYPEID_PLAYER)
+            {
+                sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u call for player, skipping.", m_table, m_script->id, m_script->command);
+                break;;
+            }
 
-            ((Creature*)pSource)->SetActiveObjectState(m_script->activeObject.activate != 0);
+            pSource->SetActiveObjectState(m_script->activeObject.activate != 0);
             break;
         }
         case SCRIPT_COMMAND_SET_FACTION:                    // 22
