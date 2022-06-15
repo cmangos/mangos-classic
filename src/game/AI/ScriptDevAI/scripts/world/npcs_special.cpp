@@ -1062,6 +1062,15 @@ struct npc_aoe_damage_triggerAI : public ScriptedAI
     void Reset() override {}
 };
 
+struct HarvestSilithidEgg : public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        spell->SetEffectChance(75, EFFECT_INDEX_1);
+        spell->SetEffectChance(1, EFFECT_INDEX_2);
+    }
+};
+
 /*######
 ## npc_advanced_target_dummy
 ######*/
@@ -1163,4 +1172,6 @@ void AddSC_npcs_special()
     pNewScript->Name = "npc_advanced_target_dummy";
     pNewScript->GetAI = &GetNewAIInstance<npc_advanced_target_dummyAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<HarvestSilithidEgg>("spell_harvest_silithid_egg");
 }
