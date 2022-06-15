@@ -2489,7 +2489,10 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
     {
         SpellCastResult result = m_currentSpells[CURRENT_MELEE_SPELL]->cast();
         if (result == SPELL_CAST_OK)
+        {
+            RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ATTACKING);
             return;
+        }
     }
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ATTACKING);
