@@ -5087,12 +5087,9 @@ void Unit::RemoveAurasOnCast(uint32 flag, SpellEntry const* castedSpellEntry)
                 return foundType;
             };
 
-            if (castedSpellEntry->HasAttribute(SPELL_ATTR_EX_ALLOW_WHILE_STEALTHED) && !auraCheck(SPELL_AURA_MOD_STEALTH))
-                removeThisHolder = true;
-            else if (castedSpellEntry->HasAttribute(SPELL_ATTR_EX2_ALLOW_WHILE_INVISIBLE) && !auraCheck(SPELL_AURA_MOD_INVISIBILITY))
-                removeThisHolder = true;
-            else
-                removeThisHolder = true;
+            if (!castedSpellEntry->HasAttribute(SPELL_ATTR_EX_ALLOW_WHILE_STEALTHED) || !auraCheck(SPELL_AURA_MOD_STEALTH))
+                if (!castedSpellEntry->HasAttribute(SPELL_ATTR_EX2_ALLOW_WHILE_INVISIBLE) || !auraCheck(SPELL_AURA_MOD_INVISIBILITY))
+                    removeThisHolder = true;
         }
 
         if (removeThisHolder)
