@@ -77,13 +77,12 @@ void CreatureAI::AttackStart(Unit* who)
     }
 }
 
-void CreatureAI::DamageTaken(Unit* dealer, uint32& damage, DamageEffectType /*damageType*/, SpellEntry const* /*spellInfo*/)
+void CreatureAI::DamageTaken(Unit* dealer, uint32& damage, DamageEffectType damageType, SpellEntry const* /*spellInfo*/)
 {
-    if (m_deathPrevention)
+    if (m_deathPrevention && damageType != INSTAKILL)
     {
-        if (m_creature->GetHealth() <= damage)
+        if (m_creature->GetHealth() <= damage) // the damage will be reduced in Unit::DealDamage
         {
-            damage = m_creature->GetHealth() - 1;
             if (!m_deathPrevented)
             {
                 m_deathPrevented = true;
