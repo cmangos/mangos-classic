@@ -48,7 +48,6 @@ struct Stealth : public AuraScript
         {
             switch (data.spell->m_spellInfo->Id)
             {
-                case SPELL_DISTRACT:
                 case SPELL_EARTHBIND:
                     return false;
             }
@@ -87,6 +86,18 @@ struct VanishRogue : public SpellScript
     }
 };
 
+// 6770 - Sap
+struct SapRogue : public SpellScript
+{
+    // SPELL_ATTR_EX3_SUPPRESS_TARGET_PROCS prevents sap to proc stealth normally
+    void OnHit(Spell* spell, SpellMissInfo missInfo) const override
+    {
+        if (missInfo == SPELL_MISS_NONE && spell->GetUnitTarget())
+            spell->GetUnitTarget()->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+    }
+};
+
+// 14076 - Improved Sap
 struct ImprovedSap : public SpellScript
 {
     void OnSuccessfulFinish(Spell* spell) const override
@@ -109,6 +120,7 @@ void LoadRogueScripts()
     RegisterSpellScript<Preparation>("spell_preparation");
     RegisterSpellScript<Stealth>("spell_stealth");
     RegisterSpellScript<VanishRogue>("spell_vanish");
+    RegisterSpellScript<SapRogue>("spell_sap");
     RegisterSpellScript<ImprovedSap>("spell_improved_sap");
     RegisterSpellScript<SetupRogue>("spell_setup_rogue");
 }
