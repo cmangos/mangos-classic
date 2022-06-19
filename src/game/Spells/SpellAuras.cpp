@@ -4546,7 +4546,7 @@ void Aura::HandleModUnattackable(bool Apply, bool Real)
     if (Real && Apply)
         GetTarget()->CombatStop();
 
-    GetTarget()->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE_2, Apply);
+    GetTarget()->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNTARGETABLE, Apply);
 }
 
 void Aura::HandleSpiritOfRedemption(bool apply, bool Real)
