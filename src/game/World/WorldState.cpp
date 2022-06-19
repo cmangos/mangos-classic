@@ -216,7 +216,7 @@ void WorldState::Load()
     SpawnWarEffortGos();
     if (m_siData.m_state == STATE_1_ENABLED)
     {
-        StartScourgeInvasion();
+        StartScourgeInvasion(false);
         HandleDefendedZones();
     }
     RespawnEmeraldDragons();
@@ -1021,15 +1021,15 @@ void WorldState::SetScourgeInvasionState(SIState state)
     
     m_siData.m_state = state;
     if (oldState == STATE_0_DISABLED)
-        StartScourgeInvasion();
+        StartScourgeInvasion(true);
     else if (state == STATE_0_DISABLED)
         StopScourgeInvasion();
     Save(SAVE_ID_SCOURGE_INVASION);
 }
 
-void WorldState::StartScourgeInvasion()
+void WorldState::StartScourgeInvasion(bool sendMail)
 {
-    sGameEventMgr.StartEvent(GAME_EVENT_SCOURGE_INVASION);
+    sGameEventMgr.StartEvent(GAME_EVENT_SCOURGE_INVASION, false, !sendMail);
     BroadcastSIWorldstates();
     if (m_siData.m_state == STATE_1_ENABLED)
     {
