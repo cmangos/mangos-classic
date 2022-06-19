@@ -147,8 +147,8 @@ struct boss_ragnarosAI : public CombatAI
         // Reset flag if Ragnaros had been submerged
         if (m_phase != PHASE_EMERGED)
             DoCastSpellIfCan(m_creature, SPELL_RAGNA_EMERGE);
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
         ScriptedAI::EnterEvadeMode();
     }
@@ -220,7 +220,7 @@ struct boss_ragnarosAI : public CombatAI
             {
                 // Submerge and attack again after 90 secs
                 DoCastSpellIfCan(m_creature, SPELL_RAGNA_SUBMERGE_VISUAL, CAST_TRIGGERED);
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
                 // Say dependend if first time or not
                 DoScriptText(!m_bHasSubmergedOnce ? SAY_REINFORCEMENTS_1 : SAY_REINFORCEMENTS_2, m_creature);
@@ -262,7 +262,7 @@ struct boss_ragnarosAI : public CombatAI
             case PHASE_EMERGING:
             {
                 DoCastSpellIfCan(m_creature, SPELL_RAGNA_EMERGE);
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 m_phase = PHASE_EMERGED;
                 ResetCombatAction(RAGNAROS_PHASE_TRANSITION, 3 * MINUTE * IN_MILLISECONDS);
                 ResetCombatAction(RAGNAROS_WRATH_OF_RAGNAROS, 20000);

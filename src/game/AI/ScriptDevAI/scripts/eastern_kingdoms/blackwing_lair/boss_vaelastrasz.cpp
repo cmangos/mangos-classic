@@ -170,7 +170,7 @@ struct boss_vaelastraszAI : public CombatAI
         if (summoned->GetEntry() == NPC_LORD_VICTOR_NEFARIUS)
         {
             // Set not selectable, so players won't interact with it
-            summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_nefariusGuid = summoned->GetObjectGuid();
         }
     }

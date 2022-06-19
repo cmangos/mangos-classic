@@ -107,7 +107,7 @@ struct boss_thekalBaseAI : public CombatAI
         m_creature->ClearComboPointHolders();
         m_creature->RemoveAllAurasOnDeath();
         m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->ClearAllReactives();
         m_creature->GetMotionMaster()->Clear();
         m_creature->GetMotionMaster()->MoveIdle();
@@ -124,7 +124,7 @@ struct boss_thekalBaseAI : public CombatAI
 
     void Revive(bool bOnlyFlags = false)
     {
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
 
         m_creature->RemoveAurasDueToSpell(SPELL_PACIFY_SELF);
@@ -188,7 +188,7 @@ struct boss_thekalAI : public boss_thekalBaseAI
             SetCombatScriptStatus(false);
             SetMeleeEnabled(true);
             SetCombatMovement(true, true);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_creature->SetSpellList(SPELL_LIST_PHASE_2);
             SetActionReadyStatus(THEKAL_TIGER_ENRAGE, true);
         });
@@ -285,7 +285,7 @@ struct boss_thekalAI : public boss_thekalBaseAI
         // Both Adds are 'dead' enter tiger phase
         if (CanPreventAddsResurrect())
         {
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             SetMeleeEnabled(false);
             DoCastSpellIfCan(nullptr, SPELL_RESSURECTION_IMPACT_VISUAL);
             m_creature->SetTarget(nullptr);

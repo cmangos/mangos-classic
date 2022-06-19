@@ -126,7 +126,7 @@ struct boss_thaddiusAI : public CombatAI
     {
         CombatAI::Reset();
 
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->SetImmuneToPlayer(true);
         DoCastSpellIfCan(m_creature, SPELL_THADIUS_SPAWN, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
@@ -146,7 +146,7 @@ struct boss_thaddiusAI : public CombatAI
         ResetCombatAction(THADDIUS_BALL_LIGHTNING, 3u * IN_MILLISECONDS);
 
         // Make Attackable
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->SetImmuneToPlayer(false);
     }
 
@@ -295,7 +295,7 @@ struct boss_thaddiusAddsAI : public ScriptedAI
         m_shockOverloadTimer = 0;
 
         // We might Reset while faking death, so undo this
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->SetImmuneToPlayer(false);
         m_creature->SetHealth(m_creature->GetMaxHealth());
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
@@ -472,7 +472,7 @@ struct boss_thaddiusAddsAI : public ScriptedAI
         m_creature->ClearComboPointHolders();
         m_creature->RemoveAllAurasOnDeath();
         m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->SetImmuneToPlayer(true);
         m_creature->ClearAllReactives();
         m_creature->GetMotionMaster()->Clear();

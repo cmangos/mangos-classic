@@ -193,7 +193,7 @@ struct boss_nefarianAI : public CombatAI
         SetCombatMovement(true);
         m_creature->SetInCombatWithZone();
         // Make attackable and attack
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             m_creature->AI()->AttackStart(target);
         ResetCombatAction(NEFARIAN_SHADOW_FLAME, 12000u);

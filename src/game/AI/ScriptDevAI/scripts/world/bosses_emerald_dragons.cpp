@@ -388,8 +388,8 @@ struct boss_taerarAI : public boss_emerald_dragonAI
         m_uiShadesDead = 0;
 
         // Remove Unselectable if needed
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
         // Despawn all remaining summoned NPCs in case of raid wipe
         DoCastSpellIfCan(m_creature, SPELL_DESPAWN_SHADES, CAST_TRIGGERED);
@@ -411,7 +411,7 @@ struct boss_taerarAI : public boss_emerald_dragonAI
             DoCastSpellIfCan(m_creature, SPELL_SUMMON_SHADE_3, CAST_TRIGGERED);
 
             // Make boss not selectable when banished
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
             DoScriptText(SAY_SUMMONSHADE, m_creature);
             m_uiShadesTimeoutTimer = 60000;
@@ -437,7 +437,7 @@ struct boss_taerarAI : public boss_emerald_dragonAI
     void DoUnbanishBoss()
     {
         m_creature->RemoveAurasDueToSpell(SPELL_SELF_STUN);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
         m_uiShadesTimeoutTimer = 0;
         m_uiShadesDead = 0;

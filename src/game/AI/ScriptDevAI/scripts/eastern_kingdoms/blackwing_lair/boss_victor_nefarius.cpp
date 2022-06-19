@@ -100,7 +100,7 @@ struct boss_victor_nefariusAI : public CombatAI, private DialogueHelper
         CombatAI::Reset();
         // set gossip flag to begin the event
         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         SetCombatScriptStatus(false);
     }
 
@@ -126,7 +126,7 @@ struct boss_victor_nefariusAI : public CombatAI, private DialogueHelper
             DoCastSpellIfCan(nullptr, SPELL_NEFARIUS_BARRIER, CAST_TRIGGERED);
             DoCastSpellIfCan(nullptr, SPELL_SHADOWBLINK);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_creature->SetInCombatWithZone();
             SetCombatMovement(false); // Nefarius teleports via Shadowblink, he does not move
 

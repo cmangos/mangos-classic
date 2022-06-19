@@ -157,7 +157,7 @@ struct boss_jeklikAI : public CombatAI
         }
         else if (summoned->GetEntry() == NPC_BAT_RIDER)
         {
-            summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_lBombRiderGuidsList.push_back(summoned->GetObjectGuid());
         }
     }
@@ -285,7 +285,7 @@ struct npc_gurubashi_bat_riderAI : public CombatAI
 
         DoCastSpellIfCan(m_creature, SPELL_DEMORALIZING_SHOUT);
         // For normal mobs flag needs to be removed
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
     }
 
     void ExecuteAction(uint32 action) override

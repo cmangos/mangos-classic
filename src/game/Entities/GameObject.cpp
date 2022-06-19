@@ -487,7 +487,7 @@ void GameObject::Update(const uint32 diff)
                                 }
                             }
 
-                            if (target && (!goInfo->trapCustom.triggerOn || !target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))) // do not trigger on hostile traps if not selectable
+                            if (target && (!goInfo->trapCustom.triggerOn || !target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))) // do not trigger on hostile traps if not selectable
                                 Use(target);
                         }
                     }

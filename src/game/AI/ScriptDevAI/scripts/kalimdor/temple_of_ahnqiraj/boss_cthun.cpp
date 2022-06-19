@@ -289,7 +289,7 @@ struct boss_cthunAI : public CombatAI
         m_playersInStomachList.clear();
 
         // Reset flags
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         SetCombatMovement(false);
         SetMeleeEnabled(false);
         SetReactState(REACT_PASSIVE);
@@ -402,7 +402,7 @@ struct boss_cthunAI : public CombatAI
             // Make ready for fight
             SetReactState(REACT_AGGRESSIVE);
             DoCastSpellIfCan(m_creature, SPELL_CARAPACE_CTHUN, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_creature->SetInCombatWithZone();
         }
     }

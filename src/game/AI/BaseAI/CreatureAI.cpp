@@ -106,7 +106,7 @@ void CreatureAI::DoFakeDeath(uint32 spellId)
     m_creature->ClearComboPointHolders();
     m_creature->RemoveAllAurasOnDeath();
     m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
-    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
     m_creature->ClearAllReactives();
     m_creature->SetTarget(nullptr);
     m_creature->GetMotionMaster()->Clear();

@@ -70,7 +70,7 @@ struct boss_archaedasAI : public ScriptedAI
         m_uiHpPhaseCheck    = 1;
 
         DoCastSpellIfCan(m_creature, SPELL_FREEZE_ANIM);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -122,7 +122,7 @@ struct boss_archaedasAI : public ScriptedAI
                     case 2:
                         DoScriptText(SAY_AGGRO, m_creature);
                         m_creature->RemoveAurasDueToSpell(SPELL_FREEZE_ANIM);
-                        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
                         // Attack player
                         if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_pInstance->GetGuid(DATA_EVENT_STARTER)))

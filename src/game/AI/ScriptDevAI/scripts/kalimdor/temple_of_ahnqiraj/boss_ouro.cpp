@@ -194,7 +194,7 @@ struct boss_ouroAI : public CombatAI
             DoCastSpellIfCan(nullptr, SPELL_SUMMON_OURO_MOUNDS, CAST_TRIGGERED);
             DoCastSpellIfCan(nullptr, SPELL_SUMMON_TRIGGER, CAST_TRIGGERED);
 
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_creature->ForcedDespawn(2000);
             DisableCombatAction(OURO_SUBMERGE);
             DisableCombatAction(OURO_NO_MELEE_BURROW);

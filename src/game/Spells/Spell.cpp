@@ -6823,7 +6823,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
         {
             // unselectable targets skipped in all cases except targets with TARGET_SCRIPT
             if (!m_ignoreUnselectableTarget && target != m_targets.getUnitTarget() &&
-                    target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                    target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
                 return false;
         }
 

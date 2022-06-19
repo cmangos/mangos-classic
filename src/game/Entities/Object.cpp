@@ -488,7 +488,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     if (target->IsGameMaster())
                     {
                         // Gamemasters should be always able to select units - remove not selectable flag:
-                        value &= ~UNIT_FLAG_NOT_SELECTABLE;
+                        value &= ~UNIT_FLAG_UNINTERACTIBLE;
                     }
 
                     // Client bug workaround: Fix for missing chat channels when resuming taxi flight on login
