@@ -358,7 +358,7 @@ class WorldState
         std::string GetAQPrintout();
 
         void SetScourgeInvasionState(SIState state);
-        void StartScourgeInvasion();
+        void StartScourgeInvasion(bool sendMail);
         void StopScourgeInvasion();
         uint32 GetSIRemaining(SIRemaining remaining) const;
         uint32 GetSIRemainingByZone(uint32 zoneId) const;
