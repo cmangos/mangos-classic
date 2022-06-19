@@ -123,7 +123,7 @@ pAuraProcHandler AuraProcHandler[TOTAL_AURAS] =
     &Unit::HandleNULLProc,                                  // 90 SPELL_AURA_MOD_RESIST_CHANCE  Useless
     &Unit::HandleNULLProc,                                  // 91 SPELL_AURA_MOD_DETECT_RANGE
     &Unit::HandleNULLProc,                                  // 92 SPELL_AURA_PREVENTS_FLEEING
-    &Unit::HandleNULLProc,                                  // 93 SPELL_AURA_MOD_UNATTACKABLE
+    &Unit::HandleNULLProc,                                  // 93 SPELL_AURA_MOD_UNTARGETABLE
     &Unit::HandleNULLProc,                                  // 94 SPELL_AURA_INTERRUPT_REGEN
     &Unit::HandleNULLProc,                                  // 95 SPELL_AURA_GHOST
     &Unit::HandleMagnetAuraProc,                            // 96 SPELL_AURA_SPELL_MAGNET
