@@ -150,7 +150,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleUnused,                                    // 90 SPELL_AURA_MOD_RESIST_CHANCE  Useless
     &Aura::HandleNoImmediateEffect,                         // 91 SPELL_AURA_MOD_DETECT_RANGE implemented in Creature::GetAttackDistance
     &Aura::HandlePreventFleeing,                            // 92 SPELL_AURA_PREVENTS_FLEEING
-    &Aura::HandleModUntargetable,                           // 93 SPELL_AURA_MOD_UNTARGETABLE
+    &Aura::HandleModUnattackable,                           // 93 SPELL_AURA_MOD_UNATTACKABLE
     &Aura::HandleInterruptRegen,                            // 94 SPELL_AURA_INTERRUPT_REGEN implemented in Player::RegenerateAll
     &Aura::HandleAuraGhost,                                 // 95 SPELL_AURA_GHOST
     &Aura::HandleNoImmediateEffect,                         // 96 SPELL_AURA_SPELL_MAGNET implemented in Unit::SelectMagnetTarget
@@ -4541,7 +4541,7 @@ void Aura::HandleAuraRetainComboPoints(bool apply, bool Real)
             target->AddComboPoints(unit, -m_modifier.m_amount);
 }
 
-void Aura::HandleModUntargetable(bool Apply, bool Real)
+void Aura::HandleModUnattackable(bool Apply, bool Real)
 {
     if (Real && Apply)
         GetTarget()->CombatStop();

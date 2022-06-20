@@ -381,7 +381,7 @@ class Aura
         void HandleModHealingDone(bool Apply, bool Real);
         void HandleModTotalPercentStat(bool apply, bool Real);
         void HandleAuraModTotalThreat(bool apply, bool Real);
-        void HandleModUntargetable(bool Apply, bool Real);
+        void HandleModUnattackable(bool Apply, bool Real);
         void HandleAuraModPacify(bool apply, bool Real);
         void HandleAuraGhost(bool apply, bool Real);
         void HandleAuraModAttackPowerPercent(bool apply, bool Real);
