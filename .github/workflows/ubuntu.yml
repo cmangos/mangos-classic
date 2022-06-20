@@ -24,16 +24,19 @@ jobs:
             COMPILER_CC: gcc
             COMPILER_PP: g++
             USE_PCH: ON
+            EXTRA_BUILD: ""
 
           - os: ubuntu-20.04
             COMPILER_CC: clang
             COMPILER_PP: clang++
             USE_PCH: ON
+            EXTRA_BUILD: "-DBUILD_EXTRACTORS=ON -DBUILD_AHBOT=ON -DBUILD_PLAYERBOT=ON "
 
           - os: ubuntu-20.04
             COMPILER_CC: clang
             COMPILER_PP: clang++
             USE_PCH: OFF
+            EXTRA_BUILD: ""
 
     steps:
       - name: Checkout
@@ -77,8 +80,9 @@ jobs:
       - name: Configure
         env:
           USE_PCH: ${{ matrix.USE_PCH }}
+          EXTRA_BUILD: ${{ matrix.EXTRA_BUILD }}
           BOOST_ROOT: "${{env.BOOST_INSTALL_DIR}}/boost/boost"
-        run: cmake -DBoost_ARCHITECTURE=-x64 -DPCH=$USE_PCH -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
+        run: cmake -DBoost_ARCHITECTURE=-x64 -DPCH=${{env.USE_PCH}} ${{env.EXTRA_BUILD}}-B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
 
       - name: Build
         env:
@@ -104,7 +108,7 @@ jobs:
         uses: rjstone/discord-webhook-notify@v1.0.4
         with:
           severity: error
-          username: ${{ github.event.repository.name }}
+          username: ${{env.EXPENSION_NAME}}-core
           description: |
             **Linux buid failed**
           details: |

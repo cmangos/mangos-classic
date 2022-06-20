@@ -85,7 +85,7 @@ jobs:
         uses: rjstone/discord-webhook-notify@v1.0.4
         with:
           severity: error
-          username: ${{ github.event.repository.name }}
+          username: ${{env.EXPENSION_NAME}}-core
           description: |
             **MacOS buid failed**
           details: |
