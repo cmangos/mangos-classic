@@ -72,10 +72,8 @@ class DynamicObject : public WorldObject
 
         void OnPersistentAreaAuraEnd();
 
-        float GetObjectBoundingRadius() const override      // overwrite WorldObject version
-        {
-            return 0.0f;                                    // dynamic object not have real interact size
-        }
+        float GetObjectBoundingRadius() const override { return 0.f; } // dynamic object not have real interact size
+        float GetCollisionHeight() const override { return 1.f; } // to get away with ground collision
 
         bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const override;
         SpellTarget GetTarget() const { return m_target; }
