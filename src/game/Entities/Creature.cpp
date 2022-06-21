@@ -2895,9 +2895,9 @@ void Creature::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* /*
         if (success)
             recTime = cooldown;
     }
-    if (recTime || spellEntry.CategoryRecoveryTime)
+    uint32 categoryRecTime = spellEntry.CategoryRecoveryTime;
+    if (recTime || categoryRecTime)
     {
-        uint32 categoryRecTime = spellEntry.CategoryRecoveryTime;
         if (Player* modOwner = GetSpellModOwner())
         {
             if (recTime)
@@ -2908,17 +2908,27 @@ void Creature::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* /*
 
         m_cooldownMap.AddCooldown(GetMap()->GetCurrentClockTime(), spellEntry.Id, recTime, spellEntry.Category, categoryRecTime, 0, permanent);
     }
-    if (recTime && !permanent)
+    if ((recTime || categoryRecTime))
     {
-        if (Player const* player = dynamic_cast<Player const*>(GetCharmer()))
+        if (Player const* player = dynamic_cast<Player const*>(GetMaster()))
         {
-            // send to client
-            WorldPacket data(SMSG_SPELL_COOLDOWN, 8 + 1 + 4);
-            data << GetObjectGuid();
-            // data << uint8(1);
-            data << uint32(spellEntry.Id);
-            data << uint32(recTime);
-            player->GetSession()->SendPacket(data);
+            if (spellEntry.HasAttribute(SPELL_ATTR_COOLDOWN_ON_EVENT) && !permanent)
+            {
+                WorldPacket data(SMSG_COOLDOWN_EVENT, (4 + 8));
+                data << uint32(spellEntry.Id);
+                data << GetObjectGuid();
+                player->GetSession()->SendPacket(data);
+            }
+            else
+            {
+                // send to client
+                WorldPacket data(SMSG_SPELL_COOLDOWN, 8 + 1 + 4);
+                data << GetObjectGuid();
+                // data << uint8(1);
+                data << uint32(spellEntry.Id);
+                data << uint32(recTime);
+                player->GetSession()->SendPacket(data);
+            }
         }
     }
 }
