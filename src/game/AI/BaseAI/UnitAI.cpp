@@ -1286,6 +1286,8 @@ std::pair<bool, Unit*> UnitAI::ChooseTarget(CreatureSpellListTargeting* targetDa
             target = m_unit->SelectAttackingTarget(AttackingTarget(targetData->Param1), targetData->Param2, spellId, targetData->Param3);
             if (!target)
                 result = false;
+            if (targetData->Param3 & (SELECT_FLAG_USE_EFFECT_RADIUS | SELECT_FLAG_USE_EFFECT_RADIUS_OF_TRIGGERED_SPELL)) // these select flags only check if target exists but doesnt pass it to cast
+                target = nullptr;
             break;
         case SPELL_LIST_TARGETING_SUPPORT:
             SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);

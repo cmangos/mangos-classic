@@ -1039,6 +1039,7 @@ enum SelectFlags
     SELECT_FLAG_CASTING             = 0x8000,               // Selects only targets that are casting
     SELECT_FLAG_SKIP_CUSTOM         =0x10000,               // skips custom target
     SELECT_FLAG_NOT_IMMUNE          =0x20000,
+    SELECT_FLAG_USE_EFFECT_RADIUS_OF_TRIGGERED_SPELL = 0x40000 // For AOE targeted abilities which have correct data in triggered spell effect index 0
 };
 
 struct SelectAttackingTargetParams

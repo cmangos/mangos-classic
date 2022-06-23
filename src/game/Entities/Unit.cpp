@@ -11950,9 +11950,12 @@ bool Unit::MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spell
             case SPELL_RANGE_IDX_COMBAT:    return CanReachWithMeleeAttack(target);
         }
 
-        if (selectFlags & SELECT_FLAG_USE_EFFECT_RADIUS)
+        if (selectFlags & (SELECT_FLAG_USE_EFFECT_RADIUS | SELECT_FLAG_USE_EFFECT_RADIUS_OF_TRIGGERED_SPELL))
         {
-            SpellRadiusEntry const* srange = sSpellRadiusStore.LookupEntry(spellInfo->EffectRadiusIndex[0]);
+            SpellEntry const* resultingEntry = spellInfo;
+            if (selectFlags & SELECT_FLAG_USE_EFFECT_RADIUS_OF_TRIGGERED_SPELL)
+                resultingEntry = sSpellTemplate.LookupEntry<SpellEntry>(spellInfo->EffectTriggerSpell[0]);
+            SpellRadiusEntry const* srange = sSpellRadiusStore.LookupEntry(resultingEntry->EffectRadiusIndex[0]);
             float max_range = GetSpellRadius(srange);
             float dist = target->GetDistance(GetPositionX(), GetPositionY(), GetPositionZ(), DIST_CALC_COMBAT_REACH);
             return dist < max_range;
