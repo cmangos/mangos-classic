@@ -5525,6 +5525,7 @@ void SpellAuraHolder::SetStackAmount(uint32 stackAmount, Unit* newCaster)
     if (!target)
         return;
 
+    bool refresh = false;
     if (stackAmount >= m_stackAmount)
     {
         // Change caster
@@ -5534,8 +5535,8 @@ void SpellAuraHolder::SetStackAmount(uint32 stackAmount, Unit* newCaster)
             m_casterGuid = newCaster->GetObjectGuid();
             // New caster duration sent for owner in RefreshHolder
         }
-        // Stack increased refresh duration
-        RefreshHolder();
+
+        refresh = true;
     }
 
     int32 oldStackAmount = m_stackAmount;
@@ -5564,6 +5565,9 @@ void SpellAuraHolder::SetStackAmount(uint32 stackAmount, Unit* newCaster)
             }
         }
     }
+
+    if (refresh) // Stack increased refresh duration
+        RefreshHolder();
 }
 
 Unit* SpellAuraHolder::GetCaster() const
