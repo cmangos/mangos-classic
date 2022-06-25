@@ -115,6 +115,30 @@ struct OpeningCapping : public SpellScript
     }
 };
 
+struct FlagAuraBg : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const
+    {
+        Unit* unitTarget = aura->GetTarget();
+        if (!unitTarget || !unitTarget->IsPlayer())
+            return;
+
+        Player* player = static_cast<Player*>(unitTarget);
+
+        if (apply)
+            player->pvpInfo.isPvPFlagCarrier = true;
+        else
+        {
+            player->pvpInfo.isPvPFlagCarrier = false;
+
+            if (BattleGround* bg = player->GetBattleGround())
+                bg->HandlePlayerDroppedFlag(player);
+            else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player->GetCachedZoneId()))
+                outdoorPvP->HandleDropFlag(player, aura->GetSpellProto()->Id);
+        }
+    }
+};
+
 /*#####
 # spell_battleground_banner_trigger
 #
@@ -168,5 +192,6 @@ void AddSC_battleground()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<OpeningCapping>("spell_opening_capping");
+    RegisterSpellScript<FlagAuraBg>("spell_flag_aura_bg");
     RegisterSpellScript<spell_battleground_banner_trigger>("spell_battleground_banner_trigger");
 }
