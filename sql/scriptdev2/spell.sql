@@ -217,7 +217,13 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (12574,'spell_arcane_concentration'),
 (12575,'spell_arcane_concentration'),
 (12576,'spell_arcane_concentration'),
-(12577,'spell_arcane_concentration');
+(12577,'spell_arcane_concentration'),
+(10,'spell_blizzard'),
+(6141,'spell_blizzard'),
+(8427,'spell_blizzard'),
+(10185,'spell_blizzard'),
+(10186,'spell_blizzard'),
+(10187,'spell_blizzard');
 
 -- Druid
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

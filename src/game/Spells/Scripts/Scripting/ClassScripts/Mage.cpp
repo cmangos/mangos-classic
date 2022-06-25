@@ -46,7 +46,28 @@ struct ArcaneConcentration : public AuraScript
     }
 };
 
+// 10 - Blizzard
+struct Blizzard : public AuraScript
+{
+    void OnPeriodicTickEnd(Aura* aura) const override
+    {
+        Unit* caster = aura->GetCaster();
+        if (caster)
+        {
+            uint32 spellId = 0;
+            if (caster->HasOverrideScript(836)) // Improved Blizzard (Rank 1)
+                spellId = 12484;
+            if (caster->HasOverrideScript(988)) // Improved Blizzard (Rank 2)
+                spellId = 12485;
+            if (caster->HasOverrideScript(989)) // Improved Blizzard (Rank 3)
+                spellId = 12486;
+            caster->CastSpell(aura->GetTarget(), spellId, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void LoadMageScripts()
 {
     RegisterSpellScript<ArcaneConcentration>("spell_arcane_concentration");
+    RegisterSpellScript<Blizzard>("spell_blizzard");
 }

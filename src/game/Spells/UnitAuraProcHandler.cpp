@@ -1597,27 +1597,6 @@ SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(ProcExecutionData& d
 
     switch (scriptId)
     {
-        case 836:                                           // Improved Blizzard (Rank 1)
-        {
-            if (!spellInfo || spellInfo->SpellVisual != 259)
-                return SPELL_AURA_PROC_FAILED;
-            triggered_spell_id = 12484;
-            break;
-        }
-        case 988:                                           // Improved Blizzard (Rank 2)
-        {
-            if (!spellInfo || spellInfo->SpellVisual != 259)
-                return SPELL_AURA_PROC_FAILED;
-            triggered_spell_id = 12485;
-            break;
-        }
-        case 989:                                           // Improved Blizzard (Rank 3)
-        {
-            if (!spellInfo || spellInfo->SpellVisual != 259)
-                return SPELL_AURA_PROC_FAILED;
-            triggered_spell_id = 12486;
-            break;
-        }
         case 3656:                                          // Corrupted Healing (Priest class call in Nefarian encounter)
         {
             // Procced spell can only be triggered by direct heals
