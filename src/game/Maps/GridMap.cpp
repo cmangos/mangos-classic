@@ -777,6 +777,7 @@ void TerrainInfo::CleanUpGrids(const uint32 diff)
             if (pMap && iRef == 0)
             {
                 m_GridMaps[x][y] = nullptr;
+                m_GridMapsLoadAttempted[x][y] = false;
                 // delete grid data if reference count == 0
                 pMap->unloadData();
                 delete pMap;
