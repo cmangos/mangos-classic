@@ -753,6 +753,7 @@ void TerrainInfo::Unload(const uint32 x, const uint32 y)
         // decrease grid reference count...
         if (UnrefGrid(x, y) == 0)
         {
+            m_GridMapsLoadAttempted[x][y] = false;
             // TODO: add your additional logic here
         }
     }
