@@ -2655,18 +2655,12 @@ void Unit::SendMeleeAttackStart(Unit* pVictim) const
 
 void Unit::SendMeleeAttackStop(Unit* victim) const
 {
-    if (!victim)
-        return;
-
     WorldPacket data(SMSG_ATTACKSTOP, (4 + 16));            // we guess size
     data << GetPackGUID();
-    data << victim->GetPackGUID();                          // can be 0x00...
-    data << uint32(0);                                      // can be 0x1
+    data << (victim ? victim->GetPackGUID() : PackedGuid());
+    data << uint32(victim ? victim->IsDead() : false);
     SendMessageToSet(data, true);
     DETAIL_FILTER_LOG(LOG_FILTER_COMBAT, "%s stopped attacking %s", GetGuidStr().c_str(), victim->GetGuidStr().c_str());
-
-    /*if(victim->GetTypeId() == TYPEID_UNIT)
-    ((Creature*)victim)->AI().EnterEvadeMode(this);*/
 }
 
 SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell, uint32* heartbeatResistChance/* = nullptr*/)

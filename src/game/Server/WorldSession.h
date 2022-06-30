@@ -278,8 +278,6 @@ class WorldSession
         void SendGMTicketResult(uint32 opcode, uint32 result) const;
         void SendGMTicket(const GMTicket& ticket, time_t now = time(nullptr)) const;
 
-        void SendAttackStop(Unit const* enemy) const;
-
         void SendBattleGroundList(ObjectGuid guid, BattleGroundTypeId bgTypeId) const;
 
         void SendTradeStatus(const TradeStatusInfo& status) const;
