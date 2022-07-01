@@ -2003,22 +2003,13 @@ bool ChatHandler::HandleListObjectCommand(char* args)
     bool noRestriction = false;
     uint32 playerZoneId = 0;
     uint32 playerAreaId = 0;
+
+    char* prevArgs = args;
+
     char const* za = ExtractLiteralArg(&args);
-    if (za == nullptr)
+    if (za == nullptr || za[0] == 'w' || za[0] == 'W')
         noRestriction = true;
     else
-    {
-        if (za[0] == 'w' || za[0] == 'W')
-        {
-            noRestriction = true;
-
-            if (!ExtractOptUInt32(&args, count, MaxResult))
-                return false;
-        }
-    }
-
-    // handle different option
-    if (!noRestriction)
     {
         if (za[0] == 'a' || za[0] == 'A') // area filter
         {
@@ -2033,14 +2024,23 @@ bool ChatHandler::HandleListObjectCommand(char* args)
             restrictMap = true;
         }
         else
-            return false;
-
-        if (!ExtractOptUInt32(&args, count, MaxResult))
-            return false;
+        {
+            restrictZone = true;
+            args = prevArgs;
+        }
     }
+
+    if (za != nullptr)
+        ExtractOptUInt32(&args, count, MaxResult);
 
     if (player)
         player->GetTerrain()->GetZoneAndAreaId(playerZoneId, playerAreaId, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
+
+    static const std::string QueryTablesName[] = {
+        "gameobject",
+        "gameobject_spawn_entry",
+        "spawn_group_entry"
+    };
 
     // temporary struct to hold gameobject data
     struct TempGobData
@@ -2051,6 +2051,7 @@ bool ChatHandler::HandleListObjectCommand(char* args)
         float z;
         int mapid;
         float dist;
+        uint32 originTable;
         bool operator < (const TempGobData& other) const { return dist < other.dist; }
     };
 
@@ -2061,6 +2062,7 @@ bool ChatHandler::HandleListObjectCommand(char* args)
     uint32 zoneCounter = 0;
     uint32 areaCounter = 0;
     uint32 mapCounter = 0;
+    uint32 queryTableNameIndex = 0;
 
     // this lambda just fill tempData with request data (expect guid, position_x, position_y, position_z, map) in that order!
     // it will handle zone, area, map and sort result by distance from player
@@ -2075,6 +2077,7 @@ bool ChatHandler::HandleListObjectCommand(char* args)
             data.y = fields[2].GetFloat();
             data.z = fields[3].GetFloat();
             data.mapid = fields[4].GetUInt16();
+            data.originTable = queryTableNameIndex;
             data.dist = std::pow(data.x - player->GetPositionX(), 2) + std::pow(data.y - player->GetPositionY(), 2) + std::pow(data.z - player->GetPositionZ(), 2);
 
             uint32 objZoneId = 0;
@@ -2121,6 +2124,7 @@ bool ChatHandler::HandleListObjectCommand(char* args)
             data.y = fields[2].GetFloat();
             data.z = fields[3].GetFloat();
             data.mapid = fields[4].GetUInt16();
+            data.originTable = queryTableNameIndex;
             data.dist = counter++;
 
             worldCounter++;
@@ -2140,10 +2144,22 @@ bool ChatHandler::HandleListObjectCommand(char* args)
         player ? AddPlayerData() : AddSimpleData();
 
     // query gameobject_spawn_entry
+    queryTableNameIndex = 1;
     result.reset(WorldDatabase.PQuery(
         "SELECT a.guid, b.position_x, b.position_y, b.position_z, b.map "
         "FROM gameobject_spawn_entry a LEFT JOIN gameobject b ON a.guid = b.guid "
         "WHERE a.entry = '%u'",
+        go_id));
+
+    if (result)
+        player ? AddPlayerData() : AddSimpleData();
+
+    // query spawn_group_entry
+    queryTableNameIndex = 2;
+    result.reset(WorldDatabase.PQuery(
+        "SELECT d.guid, d.position_x, d.position_y, d.position_z, d.map "
+        "FROM spawn_group_entry a LEFT JOIN spawn_group b ON a.Id = b.Id LEFT JOIN spawn_group_spawn c ON a.ID = c.Id LEFT JOIN gameobject d ON c.Guid = d.guid "
+        "WHERE a.Entry = '%u' AND b.Type = 1",
         go_id));
 
     if (result)
@@ -2157,11 +2173,14 @@ bool ChatHandler::HandleListObjectCommand(char* args)
         uint32 counter = 0;
         for (auto const& gob : tempData)
         {
+            std::string info = " - From `" + QueryTablesName[gob.originTable];
+            info += "`";
+            info += PrepareStringNpcOrGoSpawnInformation<GameObject>(gob.guid);
             if (player)
-                PSendSysMessage(LANG_GO_LIST_CHAT, gob.guid, PrepareStringNpcOrGoSpawnInformation<GameObject>(gob.guid).c_str(),
+                PSendSysMessage(LANG_GO_LIST_CHAT, gob.guid, info.c_str(),
                     gob.guid, gInfo->name, gob.x, gob.y, gob.z, gob.mapid);
             else
-                PSendSysMessage(LANG_GO_LIST_CONSOLE, gob.guid, PrepareStringNpcOrGoSpawnInformation<GameObject>(gob.guid).c_str(),
+                PSendSysMessage(LANG_GO_LIST_CONSOLE, gob.guid, info.c_str(),
                     gInfo->name, gob.x, gob.y, gob.z, gob.mapid);
             ++counter;
             if (counter >= count)
