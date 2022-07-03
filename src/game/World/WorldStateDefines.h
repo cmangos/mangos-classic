@@ -156,6 +156,9 @@ enum WorldStateID : int32
     WORLD_STATE_SI_GATHERED_A = 2313,
     WORLD_STATE_SI_GATHERED_H = 2314,
     WORLD_STATE_SI_SILITHYST_MAX = 2317,
+
+    // Custom Worldstates
+    WORLD_STATE_CUSTOM_SPAWN_ANNORA    = 20000,
 };
 
 #endif

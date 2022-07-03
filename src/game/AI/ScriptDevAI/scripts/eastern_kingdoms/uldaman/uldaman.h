@@ -5,6 +5,8 @@
 #ifndef DEF_ULDAMAN_H
 #define DEF_ULDAMAN_H
 
+#include "World/WorldStateDefines.h"
+
 enum
 {
     MAX_ENCOUNTER               = 2,
@@ -45,6 +47,8 @@ class instance_uldaman : public ScriptedInstance
 
         void OnCreatureDeath(Creature* pCreature) override;
         void OnCreatureEvade(Creature* pCreature) override;
+
+        void OnCreatureGroupDespawn(CreatureGroup* pGroup, Creature* pCreature) override;
 
         void Update(const uint32 diff) override;
 

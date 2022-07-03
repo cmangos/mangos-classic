@@ -36,6 +36,7 @@ instance_uldaman::instance_uldaman(Map* pMap) : ScriptedInstance(pMap),
 void instance_uldaman::Initialize()
 {
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+    instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_SPAWN_ANNORA, 0);
 }
 
 void instance_uldaman::OnObjectCreate(GameObject* pGo)
@@ -76,6 +77,13 @@ void instance_uldaman::OnCreatureCreate(Creature* pCreature)
         default:
             break;
     }
+}
+
+// Prototype, hardcoded
+void instance_uldaman::OnCreatureGroupDespawn(CreatureGroup* pGroup, Creature* pCreature)
+{
+    if (pGroup->GetGroupId() == 7000000)    
+        instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_SPAWN_ANNORA, 1);
 }
 
 void instance_uldaman::SetData(uint32 uiType, uint32 uiData)
