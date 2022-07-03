@@ -343,7 +343,7 @@ void CreatureGroup::RemoveObject(WorldObject* wo)
     CreatureData const* data = sObjectMgr.GetCreatureData(wo->GetDbGuid());
     m_map.GetPersistentState()->RemoveCreatureFromGrid(wo->GetDbGuid(), data);
     if (m_objects.empty() && wo->GetInstanceData()) // on last being removed
-        wo->GetInstanceData()->OnCreatureGroupDespawn(this);
+        wo->GetInstanceData()->OnCreatureGroupDespawn(this, static_cast<Creature*>(wo));
 }
 
 void CreatureGroup::TriggerLinkingEvent(uint32 event, Unit* target)
