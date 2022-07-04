@@ -51,6 +51,7 @@ if(MSVC)
   # Define OutDir to source/bin/(platform)_(configuaration) folder.
   set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${DEV_BIN_DIR}/Extractors")
   set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${DEV_BIN_DIR}/Extractors")
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${DEV_BIN_DIR}/Extractors")
   set_target_properties(${EXECUTABLE_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$(OutDir)")
   set_target_properties(${EXECUTABLE_NAME} PROPERTIES PROJECT_LABEL "VMapAssembler")
   set_target_properties(${EXECUTABLE_NAME} PROPERTIES FOLDER "Extractors")
