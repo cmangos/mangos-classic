@@ -960,7 +960,7 @@ char const* TerrainInfo::GetAreaName(float x, float y, float z, uint32 langIndex
 
 uint16 TerrainInfo::GetAreaFlag(float x, float y, float z, bool* isOutdoors) const
 {
-    uint32 mogpFlags;
+    uint32 mogpFlags = 0;
     int32 adtId, rootId, groupId;
     AreaTableEntry const* atEntry = nullptr;
     bool haveAreaInfo = false;
