@@ -939,6 +939,13 @@ char const* TerrainInfo::GetAreaName(float x, float y, float z, uint32 langIndex
         {
             if (wmoEntries.front()->Name[langIndex][0] != '\0')
                 areaName = wmoEntries.front()->Name[langIndex];
+            else
+            {
+                // if nothing is in previous entry that mean we should get it from parent area id
+                auto aEntry = GetAreaEntryByAreaID(wmoEntries.front()->areaId);
+                if (aEntry && aEntry->area_name[langIndex][0] != '\0')
+                    areaName = aEntry->area_name[langIndex];
+            }
         }
     }
 
