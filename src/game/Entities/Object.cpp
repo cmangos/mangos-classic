@@ -1174,6 +1174,11 @@ uint32 WorldObject::GetAreaId() const
     return GetTerrain()->GetAreaId(m_position.x, m_position.y, m_position.z);
 }
 
+char const* WorldObject::GetAreaName(LocaleConstant locale) const
+{
+    return GetTerrain()->GetAreaName(m_position.x, m_position.y, m_position.z, locale);
+}
+
 void WorldObject::GetZoneAndAreaId(uint32& zoneid, uint32& areaid) const
 {
     GetTerrain()->GetZoneAndAreaId(zoneid, areaid, m_position.x, m_position.y, m_position.z);

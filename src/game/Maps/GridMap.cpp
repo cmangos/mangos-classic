@@ -919,6 +919,45 @@ bool TerrainInfo::GetAreaInfo(float x, float y, float z, uint32& flags, int32& a
     return false;
 }
 
+
+// Return:    char const* (name of area or uknown if it fail to get one)
+// Parameter: float x, y, z (object position)
+// Parameter: uint32 langIndex (language index for specific locale)
+char const* TerrainInfo::GetAreaName(float x, float y, float z, uint32 langIndex) const
+{
+    static const char* fallbackName = "<unknown>";
+    const char* areaName = fallbackName;
+    int32 adtId, rootId, groupId;
+    uint32 mogpFlags = 0;
+
+    if (GetAreaInfo(x, y, z, mogpFlags, adtId, rootId, groupId))
+    {
+        // getting data from WMOAreaTable.dbc using vmap data
+        auto wmoEntries = GetWMOAreaTableEntriesByTripple(rootId, adtId, groupId);
+
+        if (!wmoEntries.empty())
+        {
+            if (wmoEntries.front()->Name[langIndex][0] != '\0')
+                areaName = wmoEntries.front()->Name[langIndex];
+        }
+    }
+
+    if (areaName == fallbackName)
+    {
+        // getting data from AreaTable.dbc using map data
+        uint16 areaflag;
+        if (GridMap* gmap = const_cast<TerrainInfo*>(this)->GetGrid(x, y, true))
+        {
+            areaflag = gmap->getArea(x, y);
+            AreaTableEntry const* entry = GetAreaEntryByAreaFlagAndMap(areaflag, m_mapId);
+
+            if (entry && entry->area_name[langIndex][0] != '\0')
+                areaName = entry->area_name[langIndex];
+        }
+    }
+    return areaName;
+}
+
 uint16 TerrainInfo::GetAreaFlag(float x, float y, float z, bool* isOutdoors) const
 {
     uint32 mogpFlags;

@@ -164,6 +164,7 @@ class TerrainInfo : public Referencable<std::atomic_long>
         void GetZoneAndAreaId(uint32& zoneid, uint32& areaid, float x, float y, float z) const;
 
         bool GetAreaInfo(float x, float y, float z, uint32& flags, int32& adtId, int32& rootId, int32& groupId) const;
+        char const* GetAreaName(float x, float y, float z, uint32 langIndex) const;
         bool IsOutdoors(float x, float y, float z) const;
 
 
