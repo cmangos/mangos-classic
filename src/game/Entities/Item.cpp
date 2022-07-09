@@ -42,16 +42,7 @@ void AddItemsSetItem(Player* player, Item* item)
     if (set->required_skill_id && player->GetSkillValue(set->required_skill_id) < set->required_skill_value)
         return;
 
-    ItemSetEffect* eff = nullptr;
-
-    for (auto& x : player->ItemSetEff)
-    {
-        if (x && x->setid == setid)
-        {
-            eff = x;
-            break;
-        }
-    }
+    ItemSetEffect* eff = player->GetItemSetEffect(setid);
 
     if (!eff)
     {
@@ -59,15 +50,7 @@ void AddItemsSetItem(Player* player, Item* item)
         memset(eff, 0, sizeof(ItemSetEffect));
         eff->setid = setid;
 
-        size_t x = 0;
-        for (; x < player->ItemSetEff.size(); ++x)
-            if (!player->ItemSetEff[x])
-                break;
-
-        if (x < player->ItemSetEff.size())
-            player->ItemSetEff[x] = eff;
-        else
-            player->ItemSetEff.push_back(eff);
+        player->SetItemSetEffect(setid, eff);
     }
 
     ++eff->item_count;
@@ -121,16 +104,7 @@ void RemoveItemsSetItem(Player* player, ItemPrototype const* proto)
         return;
     }
 
-    ItemSetEffect* eff = nullptr;
-    size_t setindex = 0;
-    for (; setindex < player->ItemSetEff.size(); ++setindex)
-    {
-        if (player->ItemSetEff[setindex] && player->ItemSetEff[setindex]->setid == setid)
-        {
-            eff = player->ItemSetEff[setindex];
-            break;
-        }
-    }
+    ItemSetEffect* eff = player->GetItemSetEffect(setid);
 
     // can be in case now enough skill requirement for set appling but set has been appliend when skill requirement not enough
     if (!eff)
@@ -161,9 +135,8 @@ void RemoveItemsSetItem(Player* player, ItemPrototype const* proto)
 
     if (!eff->item_count)                                   // all items of a set were removed
     {
-        MANGOS_ASSERT(eff == player->ItemSetEff[setindex]);
         delete eff;
-        player->ItemSetEff[setindex] = nullptr;
+        player->SetItemSetEffect(setid, nullptr);
     }
 }
 
