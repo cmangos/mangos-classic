@@ -142,7 +142,7 @@ struct DevourMagic : public SpellScript
             for (auto itr : auras)
             {
                 SpellEntry const* spell = itr.second->GetSpellProto();
-                if (itr.second->GetTarget()->GetObjectGuid() != caster->GetObjectGuid() && spell->Dispel == DISPEL_MAGIC && IsPositiveSpell(spell) && !IsPassiveSpell(spell))
+                if (itr.second->GetTarget()->GetObjectGuid() != caster->GetObjectGuid() && spell->Dispel == DISPEL_MAGIC && (caster->CanAssist(target) ? !IsPositiveSpell(spell) : IsPositiveSpell(spell)) && !IsPassiveSpell(spell))
                     return SPELL_CAST_OK;
             }
         }
