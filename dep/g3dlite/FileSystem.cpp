@@ -43,6 +43,13 @@
 #   define _stat stat
 #endif
 
+#if defined __aarch64__ && defined __APPLE__
+#    if defined stat64
+#        undef stat64
+#    endif
+#    define stat64 stat
+#endif
+
 namespace G3D {
 
 static FileSystem* common = NULL;
