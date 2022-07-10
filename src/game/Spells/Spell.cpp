@@ -677,6 +677,22 @@ void Spell::FillTargetMap()
             finish(false);
         }
     }
+
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_REQUIRE_ALL_TARGETS))
+    {
+        for (auto& ihit : m_UniqueTargetInfo)
+        {
+            if (ihit.targetGUID == m_targets.getUnitTargetGuid() && ihit.missCondition != SPELL_MISS_NONE)
+            {
+                for (auto& ihit : m_UniqueTargetInfo)
+                {
+                    ihit.effectHitMask = 0;
+                    ihit.effectMask = 0;
+                }
+                return;
+            }
+        }
+    }
 }
 
 bool Spell::FillUnitTargets(TempTargetingData& targetingData, SpellTargetingData& data, uint32 i)
