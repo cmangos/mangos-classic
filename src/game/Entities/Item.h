@@ -33,9 +33,8 @@ struct SpellModifier;
 
 struct ItemSetEffect
 {
-    uint32 setid;
-    uint32 item_count;
-    SpellEntry const* spells[8];
+    uint32 item_count = 0;
+    SpellEntry const* spells[8] = {};
 };
 
 // [-ZERO] Need fix, possible uptodate in mangos-0.6

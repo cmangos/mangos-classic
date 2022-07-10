@@ -45,13 +45,7 @@ void AddItemsSetItem(Player* player, Item* item)
     ItemSetEffect* eff = player->GetItemSetEffect(setid);
 
     if (!eff)
-    {
-        eff = new ItemSetEffect;
-        memset(eff, 0, sizeof(ItemSetEffect));
-        eff->setid = setid;
-
-        player->SetItemSetEffect(setid, eff);
-    }
+        eff = player->AddItemSetEffect(setid);
 
     ++eff->item_count;
 
@@ -134,10 +128,7 @@ void RemoveItemsSetItem(Player* player, ItemPrototype const* proto)
     }
 
     if (!eff->item_count)                                   // all items of a set were removed
-    {
-        delete eff;
-        player->SetItemSetEffect(setid, nullptr);
-    }
+        player->RemoveItemSetEffect(setid);
 }
 
 bool ItemCanGoIntoBag(ItemPrototype const* pProto, ItemPrototype const* pBagProto)
