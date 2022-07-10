@@ -245,6 +245,10 @@ void Creature::RemoveFromWorld()
         if (m_countSpawns)
             GetMap()->RemoveFromSpawnCount(GetObjectGuid());
 
+        if (uint32 spellId = GetCreatedBySpellId())
+            if (Unit* spawner = GetSpawner())
+                spawner->RemoveCreature(spellId, false);
+
         ClearCreatureGroup();
     }
 

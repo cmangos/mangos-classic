@@ -5626,6 +5626,23 @@ void Unit::RemoveAllGameObjects()
     m_wildGameObjs.clear();
 }
 
+void Unit::AddCreature(uint32 spellId, Creature* creature)
+{
+    m_creatures.emplace(spellId, creature);
+}
+
+void Unit::RemoveCreature(uint32 spellId, bool del)
+{
+    if (del)
+    {
+        auto itr = m_creatures.find(spellId);
+        if (itr != m_creatures.end())
+            itr->second->ForcedDespawn();
+    }
+
+    m_creatures.erase(spellId);
+}
+
 void Unit::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log)
 {
     WorldPacket data(SMSG_SPELLNONMELEEDAMAGELOG, (8 + 8 + 4 + 4 + 1 + 4 + 4 + 1 + 1 + 4 + 4 + 1));
