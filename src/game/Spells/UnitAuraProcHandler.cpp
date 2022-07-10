@@ -609,6 +609,9 @@ Unit::SpellProcEventTriggerCheck Unit::IsTriggeredAtSpellProcEvent(ProcExecution
     if (spellProto->HasAttribute(SPELL_ATTR_EX3_ONLY_PROC_ON_CASTER) && holder->GetTarget()->GetObjectGuid() != holder->GetCasterGuid())
         return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
 
+    if (IsSitState() && !spellProto->HasAttribute(SPELL_ATTR_ALLOW_WHILE_SITTING))
+        return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
+
     // Get chance from spell
     float chance = (float)spellProto->procChance;
     // If in spellProcEvent exist custom chance, chance = spellProcEvent->customChance;
