@@ -326,6 +326,14 @@ struct HateToZero : public SpellScript
     }
 };
 
+struct InstillLordValthalaksSpirit : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        spell->GetCaster()->AddCreature(spell->m_spellInfo->Id, summon);
+    }
+};
+
 struct Stoned : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -372,6 +380,7 @@ void AddSC_spell_scripts()
     RegisterSpellScript<spell_effect_summon_no_follow_movement>("spell_effect_summon_no_follow_movement");
     RegisterSpellScript<spell_scourge_strike>("spell_scourge_strike");
     RegisterSpellScript<TribalDeath>("spell_tribal_death");
+    RegisterSpellScript<InstillLordValthalaksSpirit>("spell_instill_lord_valthalaks_spirit");
     RegisterSpellScript<RetaliationCreature>("spell_retaliation_creature");
     RegisterSpellScript<HateToHalf>("spell_hate_to_half");
     RegisterSpellScript<HateToZero>("spell_hate_to_zero");
