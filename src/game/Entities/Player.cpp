@@ -2263,6 +2263,11 @@ void Player::Regenerate(Powers power, uint32 diff)
         {
             float EnergyRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_ENERGY);
             addvalue = uint32(float(diff) / 100) * EnergyRate;
+
+            AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
+            for (auto ModPowerRegenPCTAura : ModPowerRegenPCTAuras)
+                if (ModPowerRegenPCTAura->GetModifier()->m_miscvalue == int32(power))
+                    addvalue *= (ModPowerRegenPCTAura->GetModifier()->m_amount + 100) / 100.0f;
             break;
         }
         case POWER_FOCUS:
