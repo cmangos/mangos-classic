@@ -165,6 +165,9 @@ void instance_naxxramas::OnCreatureCreate(Creature* creature)
             m_livingPoisonTimer = 5 * IN_MILLISECONDS;
             break;
         }
+        case NPC_TOXIC_TUNNEL:
+            creature->SetCanEnterCombat(false);
+            break;
         case NPC_ZOMBIE_CHOW:
         {
             m_zombieChowList.push_back(creature->GetObjectGuid());
