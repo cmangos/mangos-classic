@@ -3738,6 +3738,9 @@ bool Unit::RollSpellCritOutcome(Unit* caster, const Unit* victim, SpellSchoolMas
     if (!caster || !caster->CanCrit(spell, schoolMask, GetWeaponAttackType(spell)))
         return false;
 
+    if (spell->DmgClass == SPELL_DAMAGE_CLASS_MELEE && victim->IsPlayer() && !victim->IsStandState()) // autocrit on not standing for melee ability
+        return true;
+
     const float chance = caster->CalculateSpellCritChance(victim, schoolMask, spell);
     return roll_chance_combat(chance);
 }
