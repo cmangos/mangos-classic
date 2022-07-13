@@ -295,6 +295,8 @@ struct npc_daphne_stilwellAI : public npc_escortAI
 
     void UpdateEscortAI(const uint32 diff) override
     {
+        UpdateTimers(diff, m_unit->IsInCombat());
+
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 

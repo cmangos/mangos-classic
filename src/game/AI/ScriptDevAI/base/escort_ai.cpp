@@ -162,8 +162,6 @@ void npc_escortAI::UpdateAI(const uint32 diff)
             m_playerCheckTimer -= diff;
     }
 
-    UpdateTimers(diff, m_creature->IsInCombat());
-
     UpdateEscortAI(diff);
 }
 
