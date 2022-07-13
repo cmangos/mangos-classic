@@ -338,6 +338,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (23333,'spell_flag_aura_bg'),
 (23335,'spell_flag_aura_bg'),
 (29519,'spell_flag_aura_bg'),
+-- WSG
+(23383,'spell_flag_click_bg'),
+(23384,'spell_flag_click_bg'),
 -- Arathi basin
 (23936,'spell_battleground_banner_trigger'),
 (23932,'spell_battleground_banner_trigger'),

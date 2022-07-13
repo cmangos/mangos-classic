@@ -3145,7 +3145,7 @@ void ScriptMgr::CollectPossibleEventIds(std::set<uint32>& eventIds)
 }
 
 // Starters for events
-bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool isStart/*=true*/, Unit* forwardToPvp/*=nullptr*/)
+bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool isStart/*=true*/)
 {
     MANGOS_ASSERT(source);
 
@@ -3154,28 +3154,25 @@ bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool
         return true;
 
     // Handle PvP Calls
-    if (forwardToPvp && source->GetTypeId() == TYPEID_GAMEOBJECT)
+    if (source->IsGameObject() || source->IsUnit())
     {
         BattleGround* bg = nullptr;
         OutdoorPvP* opvp = nullptr;
-        if (forwardToPvp->GetTypeId() == TYPEID_PLAYER)
-        {
-            bg = ((Player*)forwardToPvp)->GetBattleGround();
-            if (!bg)
-                opvp = sOutdoorPvPMgr.GetScript(((Player*)forwardToPvp)->GetCachedZoneId());
-        }
+        uint32 zoneId = 0;
+        if (source->IsPlayer())
+            zoneId = static_cast<Player*>(source)->GetCachedZoneId();
         else
-        {
-            if (map->IsBattleGround())
-                bg = ((BattleGroundMap*)map)->GetBG();
-            else                                            // Use the go, because GOs don't move
-                opvp = sOutdoorPvPMgr.GetScript(((GameObject*)source)->GetZoneId());
-        }
+            zoneId = static_cast<WorldObject*>(source)->GetZoneId();
 
-        if (bg && bg->HandleEvent(id, static_cast<GameObject*>(source), forwardToPvp))
+        if (map->IsBattleGround())
+            bg = static_cast<BattleGroundMap*>(map)->GetBG();
+        else                                            // Use the go, because GOs don't move
+            opvp = sOutdoorPvPMgr.GetScript(zoneId);
+
+        if (bg && bg->HandleEvent(id, source, target))
             return true;
 
-        if (opvp && opvp->HandleEvent(id, static_cast<GameObject*>(source), forwardToPvp))
+        if (opvp && opvp->HandleEvent(id, source, target))
             return true;
     }
 

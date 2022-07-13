@@ -55,7 +55,7 @@ class OutdoorPvP
         virtual void FillInitialWorldStates(WorldPacket& /*data*/, uint32& /*count*/) {}
 
         // Process Capture event
-        virtual bool HandleEvent(uint32 /*eventId*/, GameObject* /*go*/, Unit* /*invoker*/) { return false; }
+        virtual bool HandleEvent(uint32 /*eventId*/, Object* /*source*/, Object* /*target*/) { return false; }
 
         // handle capture objective complete
         virtual void HandleObjectiveComplete(uint32 /*eventId*/, const PlayerList& /*players*/, Team /*team*/) {}

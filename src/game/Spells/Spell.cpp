@@ -418,7 +418,7 @@ Spell::Spell(WorldObject* caster, SpellEntry const* info, uint32 triggeredFlags,
     itemTarget = nullptr;
     gameObjTarget = nullptr;
     corpseTarget = nullptr;
-    focusObject = nullptr;
+    m_eventTarget = nullptr;
     m_triggeredByAuraSpell  = nullptr;
     m_spellAuraHolder = nullptr;
 
@@ -4924,7 +4924,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (!ok)
             return SPELL_FAILED_REQUIRES_SPELL_FOCUS;
 
-        focusObject = ok;                                   // game object found in range
+        m_eventTarget = ok;                                   // game object found in range
     }
 
     if (!m_IsTriggeredSpell)
@@ -6083,7 +6083,7 @@ std::pair<float, float> Spell::GetMinMaxRange(bool strict)
 
             if (target || m_targets.getCorpseTarget())
             {
-                rangeMod = m_caster->GetCombatReach() + (target ? target->GetCombatReach() : m_caster->GetCombatReach());
+                rangeMod = m_trueCaster->GetCombatReach() + (target ? target->GetCombatReach() : m_trueCaster->GetCombatReach());
 
                 if (minRange > 0.0f && !(spellRange->Flags & SPELL_RANGE_FLAG_RANGED))
                     minRange += rangeMod;
@@ -6437,7 +6437,7 @@ SpellCastResult Spell::CheckItems()
         if (!ok)
             return SPELL_FAILED_REQUIRES_SPELL_FOCUS;
 
-        focusObject = ok;                                   // game object found in range
+        m_eventTarget = ok;                                   // game object found in range
     }
 
     // check reagents (ignore triggered spells with reagents processed by original spell) and special reagent ignore case.

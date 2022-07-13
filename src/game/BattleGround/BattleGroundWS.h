@@ -106,11 +106,11 @@ enum WSGraveyards
 
 enum WSEventIds
 {
+    WS_EVENT_ALLIANCE_FLAG_PICKUP       = 8504,             // triggered from flag events - source player, target go
+    WS_EVENT_HORDE_FLAG_PICKUP          = 8505,
+
     WS_EVENT_ALLIANCE_FLAG_DROP         = 8506,             // not used; events used for flag handling; triggered from spell
     WS_EVENT_HORDE_FLAG_DROP            = 8507,
-
-    WS_EVENT_ALLIACE_FLAG_PICKUP        = 8623,             // events triggered when player clicks on the flag drop
-    WS_EVENT_HORDE_FLAG_PICKUP          = 8624,
 };
 
 enum WSGameObjects
@@ -204,7 +204,7 @@ class BattleGroundWS : public BattleGround
         Team GetPrematureWinner() override;
 
         // Battleground event handlers
-        bool HandleEvent(uint32 eventId, GameObject* go, Unit* invoker) override;
+        bool HandleEvent(uint32 eventId, Object* source, Object* target) override;
         bool HandleAreaTrigger(Player* source, uint32 trigger) override;
         void HandleGameObjectCreate(GameObject* go) override;
         void HandleKillPlayer(Player* player, Player* killer) override;

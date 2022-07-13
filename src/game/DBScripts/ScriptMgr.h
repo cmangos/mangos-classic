@@ -701,7 +701,7 @@ class ScriptMgr
 };
 
 // Starters for events
-bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool isStart = true, Unit* forwardToPvp = nullptr);
+bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool isStart = true);
 
 #define sScriptMgr MaNGOS::Singleton<ScriptMgr>::Instance()
 
