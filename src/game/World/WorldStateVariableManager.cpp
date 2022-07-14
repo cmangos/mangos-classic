@@ -45,9 +45,19 @@ int32 WorldStateVariableManager::GetVariable(int32 Id) const
     return (*itr).second.value;
 }
 
+WorldStateVariable const* WorldStateVariableManager::GetVariableData(int32 Id) const
+{
+    auto itr = m_variables.find(Id);
+    if (itr == m_variables.end())
+        return nullptr;
+    return &((*itr).second);
+}
+
 void WorldStateVariableManager::SetVariable(int32 Id, int32 value)
 {
     m_variables[Id].value = value;
+    if (m_variables[Id].send)
+        BroadcastVariable(Id);
 }
 
 void WorldStateVariableManager::SetVariableData(int32 Id, bool send, uint32 zoneId, uint32 areaId)
@@ -83,10 +93,22 @@ void WorldStateVariableManager::BroadcastVariable(int32 Id) const
     auto const& lPlayers = m_owner->GetPlayers();
     if (!lPlayers.isEmpty())
     {
-        int32 value = GetVariable(Id);
+        WorldStateVariable const* variable = GetVariableData(Id);
+        MANGOS_ASSERT(variable); // if we are broadcasting a variable it must be initialized
+        int32 value = variable->value;
+        bool queryIds = variable->zoneId || variable->areaId;
         for (const auto& lPlayer : lPlayers)
+        {
             if (Player* player = lPlayer.getSource())
-                player->SendUpdateWorldState(Id, value);
+            {
+                uint32 zoneId, areaId;
+                if (queryIds) // optimization
+                    player->GetZoneAndAreaId(zoneId, areaId);
+                if ((!variable->zoneId || variable->zoneId == zoneId) &&
+                    (!variable->areaId || variable->areaId == areaId))
+                    player->SendUpdateWorldState(Id, value);
+            }
+        }
     }
 }
 

@@ -47,6 +47,7 @@ class WorldStateVariableManager
         void Initialize(uint32 completedEncounterMask);
 
         int32 GetVariable(int32 Id) const;
+        WorldStateVariable const* GetVariableData(int32 Id) const;
         void SetVariable(int32 Id, int32 value);
         void SetVariableData(int32 Id, bool send, uint32 zoneId, uint32 areaId);
         void AddVariableExecutor(int32 Id, std::function<void()>& executor);
