@@ -109,7 +109,12 @@ void BattleGroundAB::Update(uint32 diff)
         {
             m_lastTick[teamIndex]            -= abTickIntervals[points];
 
-            m_teamScores[teamIndex]          += abTickPoints[points];
+            int32 worldstateId = teamIndex == TEAM_INDEX_ALLIANCE ? BG_AB_OP_RESOURCES_ALLY : BG_AB_OP_RESOURCES_HORDE;
+            int32 newValue = GetBgMap()->GetVariableManager().GetVariable(worldstateId) + abTickPoints[points];
+
+            if (newValue > BG_AB_MAX_TEAM_SCORE)
+                newValue = BG_AB_MAX_TEAM_SCORE;
+
             m_honorScoreTicks[teamIndex]     += abTickPoints[points];
             m_reputationScoreTics[teamIndex] += abTickPoints[points];
 
@@ -128,25 +133,22 @@ void BattleGroundAB::Update(uint32 diff)
             }
 
             // send info for near victory
-            if (!m_isInformedNearVictory && m_teamScores[teamIndex] > BG_AB_WARNING_NEAR_VICTORY_SCORE)
+            if (!m_isInformedNearVictory && newValue > BG_AB_WARNING_NEAR_VICTORY_SCORE)
             {
                 SendMessageToAll(teamIndex == TEAM_INDEX_ALLIANCE ? LANG_BG_AB_A_NEAR_VICTORY : LANG_BG_AB_H_NEAR_VICTORY, CHAT_MSG_BG_SYSTEM_NEUTRAL);
                 PlaySoundToAll(teamIndex == TEAM_INDEX_ALLIANCE ? BG_AB_SOUND_NEAR_VICTORY_ALLIANCE : BG_AB_SOUND_NEAR_VICTORY_HORDE);
                 m_isInformedNearVictory = true;
             }
 
-            if (m_teamScores[teamIndex] > BG_AB_MAX_TEAM_SCORE)
-                m_teamScores[teamIndex] = BG_AB_MAX_TEAM_SCORE;
-
             // update resource world state
-            UpdateWorldState(teamIndex == TEAM_INDEX_ALLIANCE ? BG_AB_OP_RESOURCES_ALLY : BG_AB_OP_RESOURCES_HORDE, m_teamScores[teamIndex]);
+            GetBgMap()->GetVariableManager().SetVariable(worldstateId, newValue);
         }
     }
 
     // Test win condition
-    if (m_teamScores[TEAM_INDEX_ALLIANCE] >= BG_AB_MAX_TEAM_SCORE)
+    if (GetBgMap()->GetVariableManager().GetVariable(BG_AB_OP_RESOURCES_ALLY) >= BG_AB_MAX_TEAM_SCORE)
         EndBattleGround(ALLIANCE);
-    if (m_teamScores[TEAM_INDEX_HORDE] >= BG_AB_MAX_TEAM_SCORE)
+    if (GetBgMap()->GetVariableManager().GetVariable(BG_AB_OP_RESOURCES_HORDE) >= BG_AB_MAX_TEAM_SCORE)
         EndBattleGround(HORDE);
 }
 
@@ -222,49 +224,28 @@ int32 BattleGroundAB::GetNodeMessageId(uint8 node) const
     return 0;
 }
 
-void BattleGroundAB::FillInitialWorldStates(WorldPacket& data, uint32& count)
-{
-    // Node icons
-    for (uint8 i = 0; i < BG_AB_MAX_NODES; ++i)
-        FillInitialWorldState(data, count, m_nodeVisualState[i], WORLD_STATE_ADD);
-
-    FillInitialWorldState(data, count, BG_AB_OP_OCCUPIED_BASES_ALLY, m_capturedNodeCount[TEAM_INDEX_ALLIANCE]);
-    FillInitialWorldState(data, count, BG_AB_OP_OCCUPIED_BASES_HORDE, m_capturedNodeCount[TEAM_INDEX_HORDE]);
-
-    // Team scores
-    FillInitialWorldState(data, count, BG_AB_OP_RESOURCES_MAX,      BG_AB_MAX_TEAM_SCORE);
-    FillInitialWorldState(data, count, BG_AB_OP_RESOURCES_WARNING,  BG_AB_WARNING_NEAR_VICTORY_SCORE);
-    FillInitialWorldState(data, count, BG_AB_OP_RESOURCES_ALLY,     m_teamScores[TEAM_INDEX_ALLIANCE]);
-    FillInitialWorldState(data, count, BG_AB_OP_RESOURCES_HORDE,    m_teamScores[TEAM_INDEX_HORDE]);
-
-    // other unknown
-    FillInitialWorldState(data, count, 0x745, 0x2);         // 37 1861 unk
-}
-
 // Method that sends the world state update for the given node
 void BattleGroundAB::DoUpdateNodeWorldstate(uint8 node, uint32 newState)
 {
     // Send node owner state update to refresh map icons on client
-    UpdateWorldState(m_nodeVisualState[node], WORLD_STATE_REMOVE);
+    GetBgMap()->GetVariableManager().SetVariable(m_nodeVisualState[node], WORLD_STATE_REMOVE);
     m_nodeVisualState[node] = newState;
-    UpdateWorldState(m_nodeVisualState[node], WORLD_STATE_ADD);
-
-    // How many bases each team owns
-    UpdateWorldState(BG_AB_OP_OCCUPIED_BASES_ALLY, m_capturedNodeCount[TEAM_INDEX_ALLIANCE]);
-    UpdateWorldState(BG_AB_OP_OCCUPIED_BASES_HORDE, m_capturedNodeCount[TEAM_INDEX_HORDE]);
+    GetBgMap()->GetVariableManager().SetVariable(m_nodeVisualState[node], WORLD_STATE_ADD);
 }
 
 // Method that handles the node capture by a team
 void BattleGroundAB::ProcessNodeCapture(uint8 node, PvpTeamIndex teamIdx)
 {
     Team team = GetTeamIdByTeamIndex(teamIdx);
-    ++m_capturedNodeCount[teamIdx];
+    int32 worldstateId = teamIdx == TEAM_INDEX_ALLIANCE ? BG_AB_OP_OCCUPIED_BASES_ALLY : BG_AB_OP_OCCUPIED_BASES_HORDE;
+    int32 newValue = GetBgMap()->GetVariableManager().GetVariable(worldstateId) + 1;
+    GetBgMap()->GetVariableManager().SetVariable(worldstateId, newValue);
 
     DEBUG_LOG("BattleGroundAB: Node with id %u was captured by team %u.", node, team);
 
-    if (m_capturedNodeCount[teamIdx] >= 5)
+    if (newValue >= 5)
         CastSpellOnTeam(BG_AB_SPELL_QUEST_REWARD_5_BASES, team);
-    else if (m_capturedNodeCount[teamIdx] >= 4)
+    else if (newValue >= 4)
         CastSpellOnTeam(BG_AB_SPELL_QUEST_REWARD_4_BASES, team);
 
     // setup graveyards
@@ -360,7 +341,9 @@ void BattleGroundAB::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
         soundId                 = (teamIndex == TEAM_INDEX_ALLIANCE) ? BG_AB_SOUND_NODE_ASSAULTED_ALLIANCE : BG_AB_SOUND_NODE_ASSAULTED_HORDE;
 
         PvpTeamIndex otherTeamIndex = GetOtherTeamIndex(teamIndex);
-        --m_capturedNodeCount[otherTeamIndex];
+        int32 worldstateId = otherTeamIndex == TEAM_INDEX_ALLIANCE ? BG_AB_OP_OCCUPIED_BASES_ALLY : BG_AB_OP_OCCUPIED_BASES_HORDE;
+        int32 newValue = GetBgMap()->GetVariableManager().GetVariable(worldstateId) - 1;
+        GetBgMap()->GetVariableManager().SetVariable(worldstateId, newValue);
 
         GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(abGraveyardIds[node], BG_AB_ZONE_MAIN, TEAM_INVALID);
     }
@@ -391,14 +374,38 @@ void BattleGroundAB::Reset()
     // call parent's class reset
     BattleGround::Reset();
 
+    for (auto Id : abDefaultStates)
+        GetBgMap()->GetVariableManager().SetVariableData(Id, true, 0, 0);
+
+    for (auto data : abOccupiedStates)
+        for (uint32 i = 0; i < BG_AB_MAX_NODES; ++i)
+            GetBgMap()->GetVariableManager().SetVariableData(data[i], true, 0, 0);
+
+    for (auto data : abContestedStates)
+        for (uint32 i = 0; i < BG_AB_MAX_NODES; ++i)
+            GetBgMap()->GetVariableManager().SetVariableData(data[i], true, 0, 0);
+
+    GetBgMap()->GetVariableManager().SetVariableData(BG_AB_OP_OCCUPIED_BASES_ALLY, true, 0, 0);
+    GetBgMap()->GetVariableManager().SetVariableData(BG_AB_OP_OCCUPIED_BASES_HORDE, true, 0, 0);
+    GetBgMap()->GetVariableManager().SetVariableData(BG_AB_OP_RESOURCES_MAX, true, 0, 0);
+    GetBgMap()->GetVariableManager().SetVariable(BG_AB_OP_RESOURCES_MAX, BG_AB_MAX_TEAM_SCORE);
+    GetBgMap()->GetVariableManager().SetVariableData(BG_AB_OP_RESOURCES_WARNING, true, 0, 0);
+    GetBgMap()->GetVariableManager().SetVariable(BG_AB_OP_RESOURCES_WARNING, BG_AB_WARNING_NEAR_VICTORY_SCORE);
+    GetBgMap()->GetVariableManager().SetVariableData(BG_AB_OP_RESOURCES_ALLY, true, 0, 0);
+    GetBgMap()->GetVariableManager().SetVariableData(BG_AB_OP_RESOURCES_HORDE, true, 0, 0);
+    // legacy FillInitialWorldState(data, count, 0x745, 0x2);         // 37 1861 unk - not using until we found out what its for
+
     for (uint8 i = 0; i < PVP_TEAM_COUNT; ++i)
     {
-        m_teamScores[i] = 0;
         m_lastTick[i] = 0;
         m_honorScoreTicks[i] = 0;
         m_reputationScoreTics[i] = 0;
-        m_capturedNodeCount[i] = 0;
     }
+
+    GetBgMap()->GetVariableManager().SetVariable(BG_AB_OP_RESOURCES_ALLY, 0);
+    GetBgMap()->GetVariableManager().SetVariable(BG_AB_OP_RESOURCES_HORDE, 0);
+    GetBgMap()->GetVariableManager().SetVariable(BG_AB_OP_OCCUPIED_BASES_ALLY, 0);
+    GetBgMap()->GetVariableManager().SetVariable(BG_AB_OP_OCCUPIED_BASES_HORDE, 0);
 
     m_isInformedNearVictory = false;
     bool isBgWeekend = BattleGroundMgr::IsBgWeekend(GetTypeId());
@@ -408,6 +415,8 @@ void BattleGroundAB::Reset()
     for (uint8 i = 0; i < BG_AB_MAX_NODES; ++i)
     {
         m_nodeVisualState[i] = abDefaultStates[i];
+        GetBgMap()->GetVariableManager().SetVariable(m_nodeVisualState[i], WORLD_STATE_ADD);
+
         m_nodeStatus[i]      = BG_AB_NODE_STATUS_NEUTRAL;
         m_prevNodeStatus[i]  = BG_AB_NODE_STATUS_NEUTRAL;
 
@@ -459,8 +468,8 @@ void BattleGroundAB::UpdatePlayerScore(Player* source, uint32 type, uint32 value
 
 Team BattleGroundAB::GetPrematureWinner()
 {
-    int32 hordeScore = m_teamScores[TEAM_INDEX_HORDE];
-    int32 allianceScore = m_teamScores[TEAM_INDEX_ALLIANCE];
+    int32 hordeScore = GetBgMap()->GetVariableManager().GetVariable(BG_AB_OP_RESOURCES_HORDE);
+    int32 allianceScore = GetBgMap()->GetVariableManager().GetVariable(BG_AB_OP_RESOURCES_ALLY);
 
     if (hordeScore > allianceScore)
         return HORDE;

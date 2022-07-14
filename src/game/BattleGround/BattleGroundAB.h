@@ -224,7 +224,6 @@ class BattleGroundAB : public BattleGround
 
         // General functions
         void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
-        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
         Team GetPrematureWinner() override;
 
         // Battleground event handlers
@@ -246,7 +245,6 @@ class BattleGroundAB : public BattleGround
         ABNodeStatus m_prevNodeStatus[BG_AB_MAX_NODES];     // store the previous node status
         ArathiBannerTimer m_bannerTimers[BG_AB_MAX_NODES];
 
-        uint8 m_capturedNodeCount[PVP_TEAM_COUNT];
         uint32 m_nodeVisualState[BG_AB_MAX_NODES];
         uint32 m_nodeTimers[BG_AB_MAX_NODES];
         uint32 m_lastTick[PVP_TEAM_COUNT];                  // timer that handles the points update
