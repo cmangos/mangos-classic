@@ -116,7 +116,10 @@ std::string WorldStateVariableManager::GetVariableList() const
 {
     std::string output;
     for (auto& data : m_variables)
-        output += "Id: " + std::to_string(data.first) + " Val: " + std::to_string(data.second.value) + "\n";
+    {
+        WorldStateName* name = sObjectMgr.GetWorldStateName(data.first);
+        output += "Id: " + std::to_string(data.first) + " Val: " + std::to_string(data.second.value) + "\n" + "Name:" + (name ? name->Name : std::string()) + "\n";
+    }
     return output;
 }
 
