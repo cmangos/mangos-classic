@@ -59,6 +59,7 @@ struct CapturePointSlider
 class Player;
 class GameObject;
 class Creature;
+class Object;
 class OutdoorPvP;
 
 typedef std::map<uint32 /*capture point entry*/, CapturePointSlider /*slider value and lock state*/> CapturePointSliderMap;
