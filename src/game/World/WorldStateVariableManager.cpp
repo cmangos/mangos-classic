@@ -55,7 +55,11 @@ WorldStateVariable const* WorldStateVariableManager::GetVariableData(int32 Id) c
 
 void WorldStateVariableManager::SetVariable(int32 Id, int32 value)
 {
-    m_variables[Id].value = value;
+    auto& variable = m_variables[Id];
+    if (variable.value == value)
+        return;
+
+    variable.value = value;
     if (m_variables[Id].send)
         BroadcastVariable(Id);
 }
