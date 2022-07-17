@@ -425,3 +425,6 @@ Defining a buddy could be done in several way:
                                             * dataint = worldstate variable id
                                             * dataint2 = new value
 
+54 SCRIPT_COMMAND_SET_SHEATHE               Sets source unit sheathe state to new value (UNIT_FIELD_BYTES_2, offset 1)
+                                            * datalong = new sheathe state - enum SheathState, SHEATH_STATE_UNARMED(0), SHEATH_STATE_MELEE(1), SHEATH_STATE_RANGED(2)
+

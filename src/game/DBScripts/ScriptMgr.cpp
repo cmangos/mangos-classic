@@ -902,6 +902,15 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 }
                 break;
             }
+            case SCRIPT_COMMAND_SET_SHEATHE:                // 54
+            {
+                if (tmp.setSheathe.sheatheState > SHEATH_STATE_RANGED)
+                {
+                    sLog.outErrorDb("Table `%s` has invalid sheathe state assigned %d", tablename, tmp.setSheathe.sheatheState);
+                    continue;
+                }
+                break;
+            }
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -3043,6 +3052,14 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
         case SCRIPT_COMMAND_SET_WORLDSTATE:                 // 53
         {
             m_map->GetVariableManager().SetVariable(m_script->textId[0], m_script->textId[1]);
+            break;
+        }
+        case SCRIPT_COMMAND_SET_SHEATHE:
+        {
+            if (LogIfNotUnit(pSource))
+                break;
+
+            static_cast<Unit*>(pSource)->SetSheath(SheathState(m_script->setSheathe.sheatheState));
             break;
         }
         default:
