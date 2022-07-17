@@ -126,7 +126,9 @@ void WorldState::Load()
                     uint64 respawnTime;
                     if (data.size())
                     {
-                        loadStream >> m_emeraldDragonsState >> respawnTime;
+                        uint32 state = 0xF;
+                        loadStream >> state >> respawnTime;
+                        m_emeraldDragonsState = (uint8)state; // done so that it reads an int, not a char
                         for (uint32 i = 0; i < 4; ++i)
                             loadStream >> m_emeraldDragonsChosenPositions[i];
                         if (respawnTime)
