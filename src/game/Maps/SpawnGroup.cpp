@@ -1192,6 +1192,14 @@ void FormationData::SetMovementInfo(MovementGeneratorType moveType, uint32 wande
     m_fEntry->MovementType = moveType;
     m_masterMotionType = moveType;
     m_lastWP = 0;
+    auto master = GetMaster();
+    if (master)
+    {
+        static_cast<Creature*>(master)->GetRespawnCoord(m_spawnPos.x, m_spawnPos.y, m_spawnPos.z, nullptr, &m_spawnPos.radius);
+
+        if (wanderOrPahtId)
+            m_spawnPos.radius = static_cast<float>(wanderOrPahtId);
+    }
 }
 
 void FormationData::Update()
