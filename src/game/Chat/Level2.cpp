@@ -648,7 +648,15 @@ bool ChatHandler::HandleGoCreatureCommand(char* args)
         {
             Creature* creature = nullptr;
             if (dbGuid)
+            {
+                // check static creature store
                 creature = map->GetCreature(ObjectGuid(HIGHGUID_UNIT, dbGuid));
+                if (!creature)
+                {
+                    // check creature with dynamic guid
+                    creature = map->GetCreature(dbGuid);
+                }
+            }
             /*else
                 creature = map->GetCreatureByEntry(data->id);*/
 
