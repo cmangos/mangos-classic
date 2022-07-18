@@ -27,7 +27,7 @@
 #include "Globals/ObjectMgr.h"
 #include "AI/ScriptDevAI/include/sc_grid_searchers.h"
 
-BattleGroundAV::BattleGroundAV(): m_honorMapComplete(0), m_repTowerDestruction(0), m_repCaptain(0), m_repBoss(0), m_repOwnedGrave(0), m_repOwnedMine(0), m_repSurviveCaptain(0), m_repSurviveTower(0)
+BattleGroundAV::BattleGroundAV(): m_mineYellTimer(BG_AV_MINE_YELL), m_honorMapComplete(0), m_repTowerDestruction(0), m_repCaptain(0), m_repBoss(0), m_repOwnedGrave(0), m_repOwnedMine(0), m_repSurviveCaptain(0), m_repSurviveTower(0)
 {
     m_startMessageIds[BG_STARTING_EVENT_FIRST]  = 0;
     m_startMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_AV_START_ONE_MINUTE;
@@ -131,6 +131,9 @@ void BattleGroundAV::HandleCreatureCreate(Creature* creature)
         case BG_AV_NPC_CAPTAIN_GALVANGAR:
         case BG_AV_NPC_STORMPIKE_HERALD:
         case BG_AV_NPC_FROSTWOLF_HERALD:
+        case BG_AV_NPC_HERALD:
+        case BG_AV_NPC_MORLOCH:
+        case BG_AV_NPC_TASKMASTER_SNIVVLE:
             m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
             break;
     }
@@ -266,20 +269,22 @@ void BattleGroundAV::HandleQuestComplete(uint32 questid, Player* player)
 // Method that updates team score
 void BattleGroundAV::UpdateScore(PvpTeamIndex teamIdx, int32 points)
 {
+    int32 worldStateId = teamIdx == TEAM_INDEX_ALLIANCE ? BG_AV_STATE_SCORE_A : BG_AV_STATE_SCORE_H;
+
     // note: to remove reinforcements points must be negative, for adding reinforcements points must be positive
-    m_teamScores[teamIdx] += points;                      // m_TeamScores is int32 - so no problems here
+    int32 newVal = std::max(GetBgMap()->GetVariableManager().GetVariable(worldStateId) + points, 0);
+    GetBgMap()->GetVariableManager().SetVariable(BG_AV_STATE_SCORE_A, newVal);
 
     if (points < 0)
     {
         // end battleground and set the winner
-        if (m_teamScores[teamIdx] < 1)
+        if (newVal < 1)
         {
-            m_teamScores[teamIdx] = 0;
             // other team will win:
             EndBattleGround((teamIdx == TEAM_INDEX_ALLIANCE) ? HORDE : ALLIANCE);
         }
         // inform the players about getting close to losing
-        else if (!m_wasInformedNearLose[teamIdx] && m_teamScores[teamIdx] < BG_AV_SCORE_NEAR_LOSE)
+        else if (!m_wasInformedNearLose[teamIdx] && newVal < BG_AV_SCORE_NEAR_LOSE)
         {
             SendMessageToAll((teamIdx == TEAM_INDEX_HORDE) ? LANG_BG_AV_H_NEAR_LOSE : LANG_BG_AV_A_NEAR_LOSE, CHAT_MSG_BG_SYSTEM_NEUTRAL);
 
@@ -287,14 +292,25 @@ void BattleGroundAV::UpdateScore(PvpTeamIndex teamIdx, int32 points)
             m_wasInformedNearLose[teamIdx] = true;
         }
     }
-
-    // must be called here, else it could display a negative value
-    UpdateWorldState((teamIdx == TEAM_INDEX_HORDE) ? BG_AV_STATE_SCORE_H : BG_AV_STATE_SCORE_A, m_teamScores[teamIdx]);
 }
 
 void BattleGroundAV::Update(uint32 diff)
 {
     BattleGround::Update(diff);
+
+    if (m_mineYellTimer)
+    {
+        if (m_mineYellTimer <= diff)
+        {
+            if (Creature* morloch = GetSingleCreatureFromStorage(BG_AV_NPC_MORLOCH))
+                SendBcdToTeam(YELL_MORLOCH_MINE, morloch, ALLIANCE);
+            if (Creature* snivvle = GetSingleCreatureFromStorage(BG_AV_NPC_TASKMASTER_SNIVVLE))
+                SendBcdToTeam(YELL_SNIVVLE_MINE, snivvle, HORDE);
+            m_mineYellTimer = 0;
+        }
+        else
+            m_mineYellTimer -= diff;
+    }
 
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
@@ -334,8 +350,8 @@ void BattleGroundAV::Update(uint32 diff)
 
 void BattleGroundAV::StartingEventOpenDoors()
 {
-    UpdateWorldState(BG_AV_STATE_SCORE_SHOW_H, WORLD_STATE_ADD);
-    UpdateWorldState(BG_AV_STATE_SCORE_SHOW_A, WORLD_STATE_ADD);
+    GetBgMap()->GetVariableManager().SetVariable(BG_AV_STATE_SCORE_SHOW_H, WORLD_STATE_ADD);
+    GetBgMap()->GetVariableManager().SetVariable(BG_AV_STATE_SCORE_SHOW_A, WORLD_STATE_ADD);
 
     OpenDoorEvent(BG_EVENT_DOOR);
 }
@@ -401,6 +417,21 @@ void BattleGroundAV::EndBattleGround(Team winner)
     }
 
     BattleGround::EndBattleGround(winner);
+
+    if (Creature* herald = GetSingleCreatureFromStorage(BG_AV_NPC_HERALD))
+    {
+        if (winner == ALLIANCE)
+        {
+            SendBcdToAll(YELL_FROSTWOLF_DEAD, herald);
+            SendBcdToAll(YELL_ALLIANCE_WINS, herald);
+        }
+        else
+        {
+            SendBcdToAll(YELL_STORMPIKE_DEAD, herald);
+            SendBcdToAll(YELL_HORDE_WINS, herald);
+        }
+    }
+
 }
 
 bool BattleGroundAV::HandleAreaTrigger(Player* source, uint32 trigger)
@@ -509,9 +540,9 @@ void BattleGroundAV::ChangeMineOwner(AVMineIds mineId, PvpTeamIndex newOwnerTeam
     DEBUG_LOG("BattleGroundAV: Mine id %i was claimed by team index %u", mineId, newOwnerTeamIdx);
 
     // update world states
-    UpdateWorldState(avMineWorldStates[mineId][m_mineOwner[mineId]], WORLD_STATE_REMOVE);
+    GetBgMap()->GetVariableManager().SetVariable(avMineWorldStates[mineId][m_mineOwner[mineId]], WORLD_STATE_REMOVE);
     m_mineOwner[mineId] = newOwnerTeamIdx;
-    UpdateWorldState(avMineWorldStates[mineId][m_mineOwner[mineId]], WORLD_STATE_ADD);
+    GetBgMap()->GetVariableManager().SetVariable(avMineWorldStates[mineId][m_mineOwner[mineId]], WORLD_STATE_ADD);
 
     SpawnEvent(BG_AV_MINE_EVENT + mineId, newOwnerTeamIdx, true);
     SpawnEvent(BG_AV_MINE_BOSSES + mineId, newOwnerTeamIdx, true);
@@ -698,37 +729,16 @@ void BattleGroundAV::ProcessPlayerAssaultsPoint(Player* player, AVNodeIds node)
     PopulateNode(node);
 }
 
-void BattleGroundAV::FillInitialWorldStates(WorldPacket& data, uint32& count)
-{
-    for (uint8 i = 0; i < BG_AV_MAX_NODES; ++i)
-        FillInitialWorldState(data, count, m_nodes[i].worldState, WORLD_STATE_ADD);
-
-    // team scores
-    FillInitialWorldState(data, count, BG_AV_STATE_SCORE_A, m_teamScores[TEAM_INDEX_ALLIANCE]);
-    FillInitialWorldState(data, count, BG_AV_STATE_SCORE_H, m_teamScores[TEAM_INDEX_HORDE]);
-
-    // score is shown only when the BG is started
-    if (GetStatus() == STATUS_IN_PROGRESS)
-    {
-        FillInitialWorldState(data, count, BG_AV_STATE_SCORE_SHOW_A, WORLD_STATE_ADD);
-        FillInitialWorldState(data, count, BG_AV_STATE_SCORE_SHOW_H, WORLD_STATE_ADD);
-    }
-
-    // mine world states
-    FillInitialWorldState(data, count, avMineWorldStates[BG_AV_IRONDEEP_MINE_ID][m_mineOwner[BG_AV_IRONDEEP_MINE_ID]], WORLD_STATE_ADD);
-    FillInitialWorldState(data, count, avMineWorldStates[BG_AV_COLDTOOTH_MINE_ID][m_mineOwner[BG_AV_COLDTOOTH_MINE_ID]], WORLD_STATE_ADD);
-}
-
 // Update node world state
 void BattleGroundAV::UpdateNodeWorldState(AVNodeIds node, uint32 newState)
 {
     if (m_nodes[node].prevOwner == TEAM_INDEX_NEUTRAL)      // currently only snowfall is supported as neutral node
-        UpdateWorldState(BG_AV_STATE_GY_SNOWFALL_N, WORLD_STATE_REMOVE);
+        GetBgMap()->GetVariableManager().SetVariable(BG_AV_STATE_GY_SNOWFALL_N, WORLD_STATE_REMOVE);
     else
-        UpdateWorldState(m_nodes[node].worldState, WORLD_STATE_REMOVE);
+        GetBgMap()->GetVariableManager().SetVariable(m_nodes[node].worldState, WORLD_STATE_REMOVE);
 
     m_nodes[node].worldState = newState;
-    UpdateWorldState(m_nodes[node].worldState, WORLD_STATE_ADD);
+    GetBgMap()->GetVariableManager().SetVariable(m_nodes[node].worldState, WORLD_STATE_ADD);
 }
 
 // Get text message id for each node
@@ -794,6 +804,7 @@ void BattleGroundAV::InitializeNode(AVNodeIds node)
     m_nodes[node].timer      = 0;
     m_nodes[node].graveyardId = avNodeDefaults[node].graveyardId;
     m_nodes[node].worldState = avNodeDefaults[node].defaultWorldState;
+    GetBgMap()->GetVariableManager().SetVariable(m_nodes[node].worldState, WORLD_STATE_ADD);
     m_activeEvents[node] = avNodeDefaults[node].initialOwner * BG_AV_MAX_STATES + m_nodes[node].state;
 
     if (avNodeDefaults[node].graveyardId)                                      // grave-creatures are special cause of a quest
@@ -838,13 +849,34 @@ void BattleGroundAV::Reset()
     m_repSurviveTower     = (isBgWeekend) ? BG_AV_REP_SURVIVING_TOWER_HOLIDAY : BG_AV_REP_SURVIVING_TOWER;
     m_repOwnedMine        = (isBgWeekend) ? BG_AV_REP_OWNED_MINE_HOLIDAY    : BG_AV_REP_OWNED_MINE;
 
+    // vanilla
+    for (uint32 i = 0; i < BG_AV_MAX_MINES; ++i)
+        for (uint32 k = 0; k < BG_AV_TEAMS_COUNT; ++k)
+            GetBgMap()->GetVariableManager().SetVariableData(avMineWorldStates[i][k], true, 0, 0);
+
+    for (auto& data : avNodeWorldStates)
+    {
+        GetBgMap()->GetVariableManager().SetVariableData(data.worldStateAlly, true, 0, 0);
+        GetBgMap()->GetVariableManager().SetVariableData(data.worldStateHorde, true, 0, 0);
+        GetBgMap()->GetVariableManager().SetVariableData(data.worldStateAllyGrey, true, 0, 0);
+        GetBgMap()->GetVariableManager().SetVariableData(data.worldStateHordeGrey, true, 0, 0);
+    }
+
+    // tbc
+    GetBgMap()->GetVariableManager().SetVariableData(BG_AV_STATE_SCORE_A, true, 0, 0);
+    GetBgMap()->GetVariableManager().SetVariableData(BG_AV_STATE_SCORE_H, true, 0, 0);
+    GetBgMap()->GetVariableManager().SetVariableData(BG_AV_STATE_SCORE_SHOW_H, true, 0, 0);
+    GetBgMap()->GetVariableManager().SetVariableData(BG_AV_STATE_SCORE_SHOW_A, true, 0, 0);
+
+    GetBgMap()->GetVariableManager().SetVariable(BG_AV_STATE_SCORE_A, BG_AV_SCORE_INITIAL_POINTS);
+    GetBgMap()->GetVariableManager().SetVariable(BG_AV_STATE_SCORE_H, BG_AV_SCORE_INITIAL_POINTS);
+
     // initialize team variables
     for (uint8 i = 0; i < PVP_TEAM_COUNT; ++i)
     {
         for (uint8 j = 0; j < 9; ++j)                       // 9 quests getting tracked
             m_teamQuestStatus[i][j] = 0;
 
-        m_teamScores[i]          = BG_AV_SCORE_INITIAL_POINTS;
         m_wasInformedNearLose[i] = false;
 
         m_enemyTowersDestroyed[i] = 0;
@@ -856,6 +888,7 @@ void BattleGroundAV::Reset()
     for (uint8 i = 0; i < BG_AV_MAX_MINES; ++i)
     {
         m_mineOwner[i] = TEAM_INDEX_NEUTRAL;
+        GetBgMap()->GetVariableManager().SetVariable(avMineWorldStates[i][TEAM_INDEX_NEUTRAL], WORLD_STATE_ADD);
         m_mineTimer[i] = BG_AV_MINE_TICK_TIMER;
 
         m_activeEvents[BG_AV_MINE_BOSSES + i] = TEAM_INDEX_NEUTRAL;
@@ -878,6 +911,8 @@ void BattleGroundAV::Reset()
     // setup graveyards
     GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(BG_AV_GRAVE_MAIN_ALLIANCE, BG_AV_ZONE_MAIN, ALLIANCE);
     GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(BG_AV_GRAVE_MAIN_HORDE, BG_AV_ZONE_MAIN, HORDE);
+
+    m_mineYellTimer = BG_AV_MINE_YELL;
 }
 
 // Handle battleground yells
@@ -902,8 +937,8 @@ void BattleGroundAV::DoSendYellToTeam(PvpTeamIndex teamIdx, int32 textId, uint8 
 
 Team BattleGroundAV::GetPrematureWinner()
 {
-    int32 hordeScore = m_teamScores[TEAM_INDEX_HORDE];
-    int32 allianceScore = m_teamScores[TEAM_INDEX_ALLIANCE];
+    int32 hordeScore = GetBgMap()->GetVariableManager().GetVariable(BG_AV_STATE_SCORE_H);
+    int32 allianceScore = GetBgMap()->GetVariableManager().GetVariable(BG_AV_STATE_SCORE_A);
 
     if (hordeScore > allianceScore)
         return HORDE;
