@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 # This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
 #
@@ -12,6 +13,12 @@
 
 ## Expected param 1 to be 'a' for all, else ask some questions
 ## optionally param 1 or param 2 is the path to game client
+
+if [ ! -d "$(pwd)/Data" ]
+then
+  echo "Data folder not found. Make sure you have copied the script to the client folder and the 'Data' folder has the correct case."
+  exit 1
+fi
 
 PREFIX="$(dirname $0)"
 
@@ -225,10 +232,23 @@ if [ "$USE_VMAPS" = "1" ]
 then
   echo "$(date): Start extraction of vmaps..." | tee -a $LOG_FILE
   $PREFIX/vmap_extractor $VMAP_RES $VMAP_OPT_RES | tee -a $DETAIL_LOG_FILE
+  exit_code="${PIPESTATUS[0]}"
+  if [[ "$exit_code" -ne "0" ]]; then
+    echo "$(date): Extraction of vmaps failed with errors. Aborting extraction. See the log file for more details."
+    exit "$exit_code"
+  fi
   echo "$(date): Extracting of vmaps finished" | tee -a $LOG_FILE
-  mkdir ${OUTPUT_PATH:-.}/vmaps
+  if [ ! -d "$(pwd)/vmaps" ]
+  then
+    mkdir ${OUTPUT_PATH:-.}/vmaps
+  fi
   echo "$(date): Start assembling of vmaps..." | tee -a $LOG_FILE
   $PREFIX/vmap_assembler ${OUTPUT_PATH:-.}/Buildings ${OUTPUT_PATH:-.}/vmaps | tee -a $DETAIL_LOG_FILE
+  exit_code="${PIPESTATUS[0]}"
+  if [[ "$exit_code" -ne "0" ]]; then
+    echo "$(date): Assembling of vmaps failed with errors. Aborting extraction. See the log file for more details."
+    exit "$exit_code"
+  fi
   echo "$(date): Assembling of vmaps finished" | tee -a $LOG_FILE
 
   echo | tee -a $LOG_FILE
