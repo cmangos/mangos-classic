@@ -410,6 +410,13 @@ Defining a buddy could be done in several way:
                                                 - 102: Set formation options
                                                        Set flag 0x1 for keep compact option (after a member death)
                                                        Set flag 0x2 for disabling pathfinding (not impemented yet)
+                                                - 150: Add formation to that group
+                                                       You either have to provide spawngroup id in datalong1 or source/target being already in its spawngroup
+                                                       dataint is formation type -> Random(0), Queue(1), Side bu side(2), Geese(3), Fanned out behind(4), Fanned out in front(5), Circle leader(6)
+                                                       dataint1 is formation options
+                                                       x is formation spread
+                                                - 151: Remove formation from spawngroup (all followers will stop following the leader)
+                                                       datalong1 spawngroup id
 
 52 SCRIPT_COMMAND_SET_GOSSIP_MENU           Sets a new gossip menu id for creature
                                             * datalong = new gossip menu id
