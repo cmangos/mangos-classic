@@ -756,7 +756,18 @@ void BattleGround::EndBattleGround(Team winner)
     // we must set it this way, because end time is sent in packet!
     m_endTime = TIME_TO_AUTOREMOVE;
 
-    for (auto m_Player : m_players)
+    auto& objectStore = GetBgMap()->GetObjectsStore();
+    for (auto itr = objectStore.begin<Creature>(); itr != objectStore.end<Creature>(); ++itr)
+    {
+        Creature* creature = itr->second;
+        if (creature->IsClientControlled())
+            continue;
+        creature->SetImmuneToNPC(true);
+        creature->SetImmuneToPlayer(true);
+        creature->SetStunned(true);
+    }
+
+    for (auto& m_Player : m_players)
     {
         Team team = m_Player.second.playerTeam;
 
