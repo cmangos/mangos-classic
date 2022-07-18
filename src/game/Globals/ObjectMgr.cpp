@@ -1011,7 +1011,7 @@ void ObjectMgr::LoadSpawnGroups()
             uint32 fType = fields[1].GetUInt32();
             fEntry->Spread = fields[2].GetFloat();
             fEntry->Options = fields[3].GetUInt32();
-            fEntry->MovementID = fields[4].GetUInt32();
+            fEntry->MovementIdOrWander = fields[4].GetUInt32();
             fEntry->MovementType = fields[5].GetUInt32();
             fEntry->Comment = fields[6].GetCppString();
 

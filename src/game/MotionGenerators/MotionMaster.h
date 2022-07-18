@@ -119,10 +119,10 @@ enum MMCleanFlag
 
 enum ForcedMovement
 {
-    FORCED_MOVEMENT_NONE,
-    FORCED_MOVEMENT_WALK,
-    FORCED_MOVEMENT_RUN,
-    FORCED_MOVEMENT_FLIGHT,
+    FORCED_MOVEMENT_NONE    = 0,
+    FORCED_MOVEMENT_WALK    = 1,
+    FORCED_MOVEMENT_RUN     = 2,
+    FORCED_MOVEMENT_FLIGHT  = 3,
 };
 
 class MotionMaster : private std::stack<MovementGenerator*>

@@ -490,7 +490,7 @@ FormationData::FormationData(CreatureGroup* gData, FormationEntrySPtr fEntry) :
 
 FormationData::~FormationData()
 {
-    //sLog.outDebug("Deleting formation (%u)!!!!!", m_groupData->GetGroupEntry().Id);
+    sLog.outDebug("Deleting formation (%u)!!!!!", m_groupData->GetGroupEntry().Id);
 }
 
 bool FormationData::SetFollowersMaster()
@@ -583,8 +583,14 @@ void FormationData::ClearMoveGen()
         Unit* slotUnit = slot->GetOwner();
         if (slotUnit && slotUnit->IsAlive())
         {
+            if (m_fEntry->IsDynamic && slot->IsFormationMaster())
+                continue;
             if (slot->IsFormationMaster())
             {
+                // do not change leader movement in dynamic state, script have to handle that
+                if (m_fEntry->IsDynamic)
+                    continue;
+
                 m_lastWP = slotUnit->GetMotionMaster()->getLastReachedWaypoint();
                 m_wpPathId = slotUnit->GetMotionMaster()->GetPathId();
             }
@@ -610,14 +616,14 @@ void FormationData::SetMasterMovement()
     newMaster->GetMotionMaster()->Clear(true, true);
     if (m_masterMotionType == WAYPOINT_MOTION_TYPE)
     {
-        newMaster->GetMotionMaster()->MoveWaypoint(m_fEntry->MovementID, PATH_FROM_WAYPOINT_PATH);
+        newMaster->GetMotionMaster()->MoveWaypoint(m_fEntry->MovementIdOrWander, PATH_FROM_WAYPOINT_PATH);
         newMaster->GetMotionMaster()->SetNextWaypoint(m_lastWP + 1);
         m_wpPathId = 0;
         m_lastWP = 0;
     }
     else if (m_masterMotionType == LINEAR_WP_MOTION_TYPE)
     {
-        newMaster->GetMotionMaster()->MoveLinearWP(m_fEntry->MovementID, PATH_FROM_WAYPOINT_PATH);
+        newMaster->GetMotionMaster()->MoveLinearWP(m_fEntry->MovementIdOrWander, PATH_FROM_WAYPOINT_PATH);
         newMaster->GetMotionMaster()->SetNextWaypoint(m_lastWP + 1);
         m_wpPathId = 0;
         m_lastWP = 0;
@@ -687,7 +693,11 @@ bool FormationData::TrySetNewMaster(Unit* masterCandidat /*= nullptr*/)
         StopFollower();
         SwitchSlotOwner(masterSlot, aliveSlot);
         FixSlotsPositions();
-        SetMasterMovement();
+
+        // will start master movement only if its not dynamic formation
+        if (!m_fEntry->IsDynamic)
+            SetMasterMovement();
+
         SetFollowersMaster();
         return true;
     }
@@ -746,6 +756,7 @@ void FormationData::Reset()
     {
         TrySetNewMaster(masterSlotItr->second->GetOwner());
     }
+    StartFollower();
 }
 
 void FormationData::OnDeath(Creature* creature)
@@ -1156,7 +1167,7 @@ std::string FormationData::to_string() const
     result << "Shape: "              << fType                << "\n";
     result << "Spread: "             << m_currentSpread      << "\n";
     result << "MovementType: "       << fMoveType            << "\n";
-    result << "MovementId: "         << m_fEntry->MovementID << "\n";
+    result << "MovementId: "         << m_fEntry->MovementIdOrWander << "\n";
     result << "Options: "            << fOptions             << "\n";
     result << "Comment: "            << m_fEntry->Comment    << "\n";
 
@@ -1172,6 +1183,15 @@ std::string FormationData::to_string() const
     }
 
     return result.str();
+}
+
+// Change movement data so it can resume it if leader change
+void FormationData::SetMovementInfo(MovementGeneratorType moveType, uint32 wanderOrPahtId)
+{
+    m_fEntry->MovementIdOrWander = wanderOrPahtId;
+    m_fEntry->MovementType = moveType;
+    m_masterMotionType = moveType;
+    m_lastWP = 0;
 }
 
 void FormationData::Update()

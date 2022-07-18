@@ -81,7 +81,7 @@ void MotionMaster::Initialize()
             auto creatureGroup = creature->GetCreatureGroup();
             if (creatureGroup && creatureGroup->GetFormationEntry() && creatureGroup->GetGroupEntry().GetFormationSlotId(m_owner->GetDbGuid()) == 0)
             {
-                m_currentPathId = creatureGroup->GetFormationEntry()->MovementID;
+                m_currentPathId = creatureGroup->GetFormationEntry()->MovementIdOrWander;
                 pathOrigin = WaypointPathOrigin::PATH_FROM_WAYPOINT_PATH;
             }
 

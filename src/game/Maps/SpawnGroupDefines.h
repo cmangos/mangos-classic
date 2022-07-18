@@ -143,7 +143,7 @@ struct FormationEntry
 {
     uint32 GroupId                  = 0;
     SpawnGroupFormationType Type    = SPAWN_GROUP_FORMATION_TYPE_RANDOM;
-    uint32 MovementID               = 0;      
+    uint32 MovementIdOrWander       = 0;      
     uint32 MovementType             = 0;
     float Spread                    = 3.0f;
     uint32 Options                  = 0;

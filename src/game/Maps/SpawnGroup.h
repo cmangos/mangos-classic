@@ -210,6 +210,9 @@ class FormationData
         FormationSlotDataSPtr SetFormationSlot(Creature* creature, SpawnGroupFormationSlotType slotType = SPAWN_GROUP_FORMATION_SLOT_TYPE_STATIC);
         std::string to_string() const;
 
+        FormationEntrySPtr GetFormationEntry() const { return m_fEntry; }
+        void SetMovementInfo(MovementGeneratorType moveType, uint32 pahtId);
+
     private:
         void SetMasterMovement();
         bool TrySetNewMaster(Unit* masterCandidat = nullptr);
