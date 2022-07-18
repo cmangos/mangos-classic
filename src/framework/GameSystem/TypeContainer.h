@@ -72,6 +72,18 @@ class TypeUnorderedMapContainer
             return TypeUnorderedMapContainer::find(i_elements, hdl, (SPECIFIC_TYPE*)nullptr);
         }
 
+        template<class SPECIFIC_TYPE>
+        typename std::unordered_map<KEY_TYPE, SPECIFIC_TYPE*>::iterator begin()
+        {
+            return i_elements._elements._element.begin();
+        }
+
+        template<class SPECIFIC_TYPE>
+        typename std::unordered_map<KEY_TYPE, SPECIFIC_TYPE*>::iterator end()
+        {
+            return i_elements._elements._element.end();
+        }
+
     private:
 
         ContainerUnorderedMap<OBJECT_TYPES, KEY_TYPE> i_elements;
