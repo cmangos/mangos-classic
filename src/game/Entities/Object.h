@@ -388,7 +388,7 @@ class Object
         uint32 GetGUIDHigh() const { return GetObjectGuid().GetHigh(); }
         PackedGuid const& GetPackGUID() const { return m_PackGUID; }
         uint32 GetDbGuid() const { return m_dbGuid; }
-        std::string GetGuidStr() const { return GetObjectGuid().GetString(); }
+        std::string GetGuidStr() const { return { GetObjectGuid().GetString() + " DBGuid: " + std::to_string(m_dbGuid)}; }
 
         uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY); }
         void SetEntry(uint32 entry) { SetUInt32Value(OBJECT_FIELD_ENTRY, entry); }
