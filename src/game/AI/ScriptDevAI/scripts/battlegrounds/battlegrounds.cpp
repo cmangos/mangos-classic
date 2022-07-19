@@ -155,6 +155,19 @@ struct FlagAuraBg : public AuraScript, public SpellScript
 
 struct FlagClickBg : public SpellScript
 {
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        switch (spell->m_spellInfo->Id)
+        {
+            case 23333:                                         // Warsong Flag
+            case 23335:                                         // Silverwing Flag
+                return spell->GetTrueCaster()->GetMapId() == 489 && spell->GetTrueCaster()->GetMap()->IsBattleGround() ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+            case 34976:                                         // Netherstorm Flag
+                return spell->GetTrueCaster()->GetMapId() == 566 && spell->GetTrueCaster()->GetMap()->IsBattleGround() ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+        }
+        return SPELL_CAST_OK;
+    }
+
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         Unit* target = spell->GetUnitTarget();
