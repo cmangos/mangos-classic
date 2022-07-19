@@ -14,12 +14,6 @@ set -e
 ## Expected param 1 to be 'a' for all, else ask some questions
 ## optionally param 1 or param 2 is the path to game client
 
-if [ ! -d "$(pwd)/Data" ]
-then
-  echo "Data folder not found. Make sure you have copied the script to the client folder and the 'Data' folder has the correct case."
-  exit 1
-fi
-
 PREFIX="$(dirname $0)"
 
 ## Normal log file (if not overwritten by second param)
@@ -37,6 +31,42 @@ USE_MMAPS_DELAY=""
 AD_RES=""
 VMAP_RES=""
 NUM_THREAD=""
+
+if [ "$1" != "a" ] && [ "x$1" != "x" ]
+then
+  CLIENT_PATH="$1"
+  OUTPUT_PATH="$2"
+elif [ "x$2" != "x" ]
+then
+  CLIENT_PATH="$2"
+  OUTPUT_PATH="$3"
+fi
+
+if [ "x${CLIENT_PATH}" != "x" ]
+then
+  if [ ! -d "${CLIENT_PATH}/Data" ]
+  then
+    echo "Data folder not found in provided client path [${CLIENT_PATH}]. Plese provide a correct client path."
+    exit 1
+  fi
+else
+  if [ ! -d "$(pwd)/Data" ]
+  then
+    echo "Data folder not found. Make sure you have copied the script to the client folder and the 'Data' folder has the correct case."
+    exit 1
+  fi
+fi
+
+if [ "x${OUTPUT_PATH}" != "x" ]
+then
+  if [ ! -d "${OUTPUT_PATH}" ]
+  then
+    echo "Provided OUTPUT_PATH=${OUTPUT_PATH} does not exist, please create it before"
+    exit 1
+  fi
+  LOG_FILE="${OUTPUT_PATH:-.}/${LOG_FILE}"
+  DETAIL_LOG_FILE="${OUTPUT_PATH:-.}/${DETAIL_LOG_FILE}"
+fi
 
 if [ "$1" = "a" ]
 then
@@ -85,16 +115,6 @@ else
       fi
     fi
   fi
-fi
-
-if [ "$1" != "a" ] && [ "x$1" != "x" ] && [ -d "$1" ]
-then
-  CLIENT_PATH="$1"
-  OUTPUT_PATH="$2"
-elif [ "x$2" != "x" ] && [ -d "$2" ]
-then
-  CLIENT_PATH="$2"
-  OUTPUT_PATH=$3
 fi
 
 if [ "x$CLIENT_PATH" != "x" ]
