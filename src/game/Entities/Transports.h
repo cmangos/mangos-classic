@@ -72,7 +72,7 @@ class GenericTransport : public GameObject
 class ElevatorTransport : public GenericTransport
 {
     public:
-        bool Create(uint32 guidlow, uint32 name_id, Map* map, float x, float y, float z, float ang,
+        bool Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map, float x, float y, float z, float ang,
             float rotation0 = 0.0f, float rotation1 = 0.0f, float rotation2 = 0.0f, float rotation3 = 0.0f, uint32 animprogress = GO_ANIMPROGRESS_DEFAULT, GOState go_state = GO_STATE_READY) override;
         void Update(const uint32 diff) override;
 

@@ -37,7 +37,7 @@ bool Totem::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* 
 {
     SetMap(cPos.GetMap());
 
-    if (!CreateFromProto(guidlow, cinfo))
+    if (!CreateFromProto(guidlow, guidlow, cinfo))
         return false;
 
     // special model selection case for totems

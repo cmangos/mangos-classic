@@ -63,7 +63,7 @@ void Corpse::RemoveFromWorld()
 
 bool Corpse::Create(uint32 guidlow)
 {
-    Object::_Create(guidlow, 0, HIGHGUID_CORPSE);
+    Object::_Create(guidlow, guidlow, 0, HIGHGUID_CORPSE);
     return true;
 }
 
@@ -161,7 +161,7 @@ bool Corpse::LoadFromDB(uint32 lowguid, Field* fields)
     float orientation   = fields[5].GetFloat();
     uint32 mapid        = fields[6].GetUInt32();
 
-    Object::_Create(lowguid, 0, HIGHGUID_CORPSE);
+    Object::_Create(lowguid, lowguid, 0, HIGHGUID_CORPSE);
 
     m_time = time_t(fields[7].GetUInt64());
     m_type = CorpseType(fields[8].GetUInt32());

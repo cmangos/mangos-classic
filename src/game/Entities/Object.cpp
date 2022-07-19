@@ -45,7 +45,7 @@
 #include "Spells/SpellMgr.h"
 #include "MotionGenerators/PathFinder.h"
 
-Object::Object(): m_updateFlag(0), m_itsNewObject(false)
+Object::Object(): m_updateFlag(0), m_itsNewObject(false), m_dbGuid(0)
 {
     m_objectTypeId      = TYPEID_OBJECT;
     m_objectType        = TYPEMASK_OBJECT;
@@ -88,12 +88,14 @@ void Object::_InitValues()
     m_objectUpdated = false;
 }
 
-void Object::_Create(uint32 guidlow, uint32 entry, HighGuid guidhigh)
+void Object::_Create(uint32 dbGuid, uint32 guidlow, uint32 entry, HighGuid guidhigh)
 {
     if (!m_uint32Values)
         _InitValues();
 
     ObjectGuid guid = ObjectGuid(guidhigh, entry, guidlow);
+    m_dbGuid = dbGuid;
+
     SetGuidValue(OBJECT_FIELD_GUID, guid);
     SetUInt32Value(OBJECT_FIELD_TYPE, m_objectType);
     m_PackGUID.Set(guid);
@@ -1132,7 +1134,7 @@ void WorldObject::Update(const uint32 diff)
 
 void WorldObject::_Create(uint32 guidlow, HighGuid guidhigh)
 {
-    Object::_Create(guidlow, 0, guidhigh);
+    Object::_Create(guidlow, guidlow, 0, guidhigh);
 }
 
 void WorldObject::Relocate(float x, float y, float z, float orientation)
@@ -1963,8 +1965,8 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map)
         float dist = settings.forcedOnTop ? 0.0f : CONTACT_DISTANCE;
         pos = CreatureCreatePos(settings.spawner, settings.spawner->GetOrientation(), dist, settings.ori);
     }
-
-    if (!creature->Create(map->GenerateLocalLowGuid(cinfo->GetHighGuid()), pos, cinfo))
+    uint32 lowGuid = map->GenerateLocalLowGuid(cinfo->GetHighGuid());
+    if (!creature->Create(lowGuid, lowGuid, pos, cinfo))
     {
         delete creature;
         return nullptr;

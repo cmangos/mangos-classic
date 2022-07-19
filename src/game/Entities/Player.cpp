@@ -733,7 +733,7 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
 {
     // FIXME: outfitId not used in player creating
 
-    Object::_Create(guidlow, 0, HIGHGUID_PLAYER);
+    Object::_Create(guidlow, guidlow, 0, HIGHGUID_PLAYER);
 
     m_name = name;
 
@@ -13961,7 +13961,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     //"health, power1, power2, power3, power4, power5, exploredZones, equipmentCache, ammoId, actionBars, fishingSteps FROM characters WHERE guid = '%u'", GUID_LOPART(m_guid));
     QueryResult* result = holder->GetResult(PLAYER_LOGIN_QUERY_LOADFROM);
 
-    Object::_Create(guid.GetCounter(), 0, HIGHGUID_PLAYER);
+    Object::_Create(guid.GetCounter(), guid.GetCounter(), 0, HIGHGUID_PLAYER);
 
     if (!result)
     {

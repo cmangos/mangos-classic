@@ -161,7 +161,7 @@ bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, 
         return false;
     }
 
-    Object::_Create(guidlow, 0, HIGHGUID_MO_TRANSPORT);
+    Object::_Create(guidlow, guidlow, 0, HIGHGUID_MO_TRANSPORT);
 
     GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(guidlow);
 
@@ -442,9 +442,9 @@ float Transport::CalculateSegmentPos(float now)
     return segmentPos / frame.NextDistFromPrev;
 }
 
-bool ElevatorTransport::Create(uint32 guidlow, uint32 name_id, Map* map, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, GOState go_state)
+bool ElevatorTransport::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, GOState go_state)
 {
-    if (GenericTransport::Create(guidlow, name_id, map, x, y, z, ang, rotation0, rotation1, rotation2, rotation3, animprogress, go_state))
+    if (GenericTransport::Create(dbGuid, guidlow, name_id, map, x, y, z, ang, rotation0, rotation1, rotation2, rotation3, animprogress, go_state))
     {
         m_pathProgress = 0;
         m_animationInfo = sTransportMgr.GetTransportAnimInfo(GetGOInfo()->id);

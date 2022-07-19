@@ -1170,7 +1170,7 @@ bool ChatHandler::HandleGameObjectAddCommand(char* args)
     }
 
     GameObject* pGameObj = GameObject::CreateGameObject(gInfo->id);
-    if (!pGameObj->Create(db_lowGUID, gInfo->id, map, x, y, z, o))
+    if (!pGameObj->Create(db_lowGUID, db_lowGUID, gInfo->id, map, x, y, z, o))
     {
         delete pGameObj;
         return false;
@@ -1621,7 +1621,7 @@ bool ChatHandler::HandleNpcAddCommand(char* args)
         return false;
     }
 
-    if (!pCreature->Create(lowguid, pos, cinfo))
+    if (!pCreature->Create(lowguid, lowguid, pos, cinfo))
     {
         delete pCreature;
         return false;
