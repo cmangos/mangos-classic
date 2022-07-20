@@ -277,3 +277,6 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|4 WH
 -- Hate to Half
 UPDATE spell_template SET AttributesServerside=AttributesServerside|0x4 WHERE Id IN(21789); -- not removed on evade
 
+-- Priest - Mind Vision Rank 2 should have unlimited range
+UPDATE spell_template SET EffectRadiusIndex1=0 WHERE Id IN(10909);
+
