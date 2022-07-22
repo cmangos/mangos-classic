@@ -280,3 +280,8 @@ UPDATE spell_template SET AttributesServerside=AttributesServerside|0x4 WHERE Id
 -- Priest - Mind Vision Rank 2 should have unlimited range
 UPDATE spell_template SET EffectRadiusIndex1=0 WHERE Id IN(10909);
 
+-- both shouldnt be removed on evade
+UPDATE spell_template SET AttributesServerside = 4 WHERE id IN (4044,27791);
+-- Land Mine Arming should not be removed on evade
+UPDATE spell_template SET AttributesServerside = 4 WHERE id IN (11816);
+
