@@ -5667,7 +5667,7 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
         return false;
     }
 
-    PSendSysMessage(LANG_MOVEGENS_LIST, (unit->GetTypeId() == TYPEID_PLAYER ? "Player" : "Creature"), unit->GetGUIDLow());
+    PSendSysMessage("%s movement generators stack:", unit->GetGuidStr().c_str());
 
     MotionMaster* mm = unit->GetMotionMaster();
     float x, y, z;
@@ -5728,6 +5728,9 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
             case FLEEING_MOTION_TYPE:  SendSysMessage(LANG_MOVEGENS_FEAR);    break;
             case DISTRACT_MOTION_TYPE: SendSysMessage(LANG_MOVEGENS_DISTRACT);  break;
             case EFFECT_MOTION_TYPE: SendSysMessage(LANG_MOVEGENS_EFFECT);  break;
+            case FORMATION_MOTION_TYPE:
+                PSendSysMessage("   Formation movement, following [%s]", unit->GetFormationSlot()->GetMaster()->GetGuidStr().c_str());
+                break;
             default:
                 PSendSysMessage(LANG_MOVEGENS_UNKNOWN, (*itr)->GetMovementGeneratorType());
                 break;
