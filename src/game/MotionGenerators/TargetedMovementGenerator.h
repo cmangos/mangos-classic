@@ -267,8 +267,20 @@ class FormationMovementGenerator : public FollowMovementGenerator
         float BuildPath(Unit& owner, PointsArray& path);
         bool HandleMasterDistanceCheck(Unit& owner, const uint32& time_diff);
         FormationSlotDataSPtr m_slot;
-        bool m_headingToMaster;
+
+        // used to smooth angle change
         float m_lastAngle;
+
+        // running to master
+        bool m_headingToMaster;
+
+        // distance from where the follower will be teleported to master
+        float m_tpDistance;
+
+        // distance from where the follower will run to master.
+        float m_moveToMasterDistance;
+
+        // reset position if this is interrupted
         Position m_resetPoint;
 };
 

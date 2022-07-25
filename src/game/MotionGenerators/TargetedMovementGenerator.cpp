@@ -1140,6 +1140,9 @@ FormationMovementGenerator::FormationMovementGenerator(FormationSlotDataSPtr& sD
 {
     if (!this->i_path)
         this->i_path = new PathFinder(sData->GetOwner());
+
+    m_tpDistance = std::max(sData->GetDistance() * 5.0f, 200.0f);
+    m_moveToMasterDistance = std::min(sData->GetDistance() * 3.0f, 100.0f);
 }
 
 FormationMovementGenerator::~FormationMovementGenerator()
@@ -1331,7 +1334,7 @@ bool FormationMovementGenerator::HandleMasterDistanceCheck(Unit& owner, const ui
     if (!m_headingToMaster || i_recheckDistance.Passed())
     {
         float distToMaster = owner.GetDistance(master);
-        if (distToMaster > 200)
+        if (distToMaster > m_tpDistance)
         {
             Position const& mPos = master->GetPosition();
             owner.NearTeleportTo(mPos.x, mPos.y, mPos.z, mPos.o);
@@ -1340,7 +1343,7 @@ bool FormationMovementGenerator::HandleMasterDistanceCheck(Unit& owner, const ui
             //sLog.outString("BIG TELEPORT TO MASTER!!");
             return true;
         }
-        else if (distToMaster > 40)
+        else if (distToMaster > m_moveToMasterDistance)
         {
             Position const& mPos = master->GetPosition();
             _addUnitStateMove(owner);
