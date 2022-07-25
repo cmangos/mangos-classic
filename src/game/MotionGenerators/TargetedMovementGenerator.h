@@ -192,7 +192,7 @@ class FollowMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Fol
 
         void Initialize(Unit& owner) override;
         void Finalize(Unit& owner) override;
-        void Interrupt(Unit& owner) override;
+        virtual void Interrupt(Unit& owner) override;
         void Reset(Unit& owner) override;
 
         bool GetResetPosition(Unit& owner, float& x, float& y, float& z, float& o) const override;
@@ -254,7 +254,9 @@ class FormationMovementGenerator : public FollowMovementGenerator
 
         MovementGeneratorType GetMovementGeneratorType() const override { return FORMATION_MOTION_TYPE; }
 
-        virtual bool Update(Unit&, const uint32&) override;
+        bool Update(Unit&, const uint32&) override;
+        void Interrupt(Unit& owner) override;
+        bool GetResetPosition(Unit&, float& x, float& y, float& z, float& o) const;
 
     protected:
         void HandleTargetedMovement(Unit& owner, const uint32& time_diff) override;
@@ -267,6 +269,7 @@ class FormationMovementGenerator : public FollowMovementGenerator
         FormationSlotDataSPtr m_slot;
         bool m_headingToMaster;
         float m_lastAngle;
+        Position m_resetPoint;
 };
 
 #endif

@@ -1160,6 +1160,30 @@ bool FormationMovementGenerator::Update(Unit& unit, const uint32& diff)
     return TargetedMovementGeneratorMedium::Update(unit, diff);
 }
 
+void FormationMovementGenerator::Interrupt(Unit& owner)
+{
+    // be sure we are not already interrupted before saving current pos
+    if (owner.hasUnitState(UNIT_STAT_FOLLOW_MOVE))
+    {
+        // save the current position in case of reset
+        m_resetPoint = owner.GetPosition(owner.GetTransport());
+    }
+    FollowMovementGenerator::Interrupt(owner);
+}
+
+bool FormationMovementGenerator::GetResetPosition(Unit&, float& x, float& y, float& z, float& o) const
+{
+    if (m_resetPoint.IsEmpty())
+        return false;
+
+    x = m_resetPoint.x;
+    y = m_resetPoint.y;
+    z = m_resetPoint.z;
+    o = m_resetPoint.o;
+
+    return true;
+}
+
 float FormationMovementGenerator::BuildPath(Unit& owner, PointsArray& path)
 {
     float speed = -1.0f;
