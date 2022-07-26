@@ -7653,18 +7653,6 @@ void Player::SendInitWorldStates(uint32 zoneid) const
             if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zoneid))
                 outdoorPvP->FillInitialWorldStates(data, count);
             break;
-        case 2597:                                      // AV
-            if (bg && bg->GetTypeId() == BATTLEGROUND_AV)
-                bg->FillInitialWorldStates(data, count);
-            break;
-        case 3277:                                      // WS
-            if (bg && bg->GetTypeId() == BATTLEGROUND_WS)
-                bg->FillInitialWorldStates(data, count);
-            break;
-        case 3358:                                      // AB
-            if (bg && bg->GetTypeId() == BATTLEGROUND_AB)
-                bg->FillInitialWorldStates(data, count);
-            break;
     }
 
     if (InstanceData* instanceData = GetMap()->GetInstanceData())
