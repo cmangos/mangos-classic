@@ -236,6 +236,12 @@ bool GameObject::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map,
 
     switch (GetGoType())
     {
+        case GAMEOBJECT_TYPE_DOOR:
+        case GAMEOBJECT_TYPE_BUTTON:
+            // safe to use door cos both have startOpen on same spot
+            SetGoState(goinfo->door.startOpen ? GO_STATE_ACTIVE : GO_STATE_READY);
+            m_lootState = GO_NOT_READY;
+            break;
         case GAMEOBJECT_TYPE_TRAP:
             // values from rogue detect traps aura
             if (goinfo->trap.stealthed)
