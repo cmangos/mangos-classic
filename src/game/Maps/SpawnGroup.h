@@ -91,6 +91,8 @@ class CreatureGroup : public SpawnGroup
 
         void Despawn() override;
 
+        bool IsOutOfCombat();
+
     private:
         void ClearRespawnTimes();
         FormationDataSPtr m_formationData;

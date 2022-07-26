@@ -444,6 +444,22 @@ void CreatureGroup::Despawn()
             creature->ForcedDespawn();
 }
 
+bool CreatureGroup::IsOutOfCombat()
+{
+    for (auto objItr : m_objects)
+    {
+        if (Creature* creature = m_map.GetCreature(objItr.first))
+        {
+            if (!creature->IsAlive())
+                continue;
+
+            if (creature->IsInCombat())
+                return false;
+        }
+    }
+    return true;
+}
+
 void CreatureGroup::ClearRespawnTimes()
 {
     time_t now = time(nullptr);
