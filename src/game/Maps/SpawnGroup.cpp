@@ -392,6 +392,14 @@ void CreatureGroup::TriggerLinkingEvent(uint32 event, Unit* target)
 
             ClearRespawnTimes();
             break;
+        case CREATURE_GROUP_EVENT_MEMBER_DIED:
+            for (auto const& data : m_objects)
+            {
+                uint32 dbGuid = data.first;
+                if (Creature* creature = m_map.GetCreature(dbGuid))
+                    creature->AI()->CreatureGroupMemberDied(target);
+            }
+            break;
     }
 }
 

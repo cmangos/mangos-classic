@@ -556,6 +556,13 @@ class UnitAI : public CombatActions
 
         // compatibility layer for removing script_waypoint from escort ai using waypoint_path
         virtual uint32 GetCurrentWaypointPath() const { return 0; }
+
+        //////////////////////////////////////////////////////////////////////////
+        // Some group Event/Action, not sure best place is here
+        //////////////////////////////////////////////////////////////////////////
+        // member of the group got killed
+        virtual void CreatureGroupMemberDied(Unit* /*killed*/) {}
+
     protected:
         virtual std::string GetAIName() { return "UnitAI"; }
         void DespawnGuids(GuidVector& spawns); // despawns all creature guids and clears contents
