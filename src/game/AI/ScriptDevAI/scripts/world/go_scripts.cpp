@@ -412,7 +412,7 @@ struct go_unadorned_spike : public GameObjectAI
 {
     go_unadorned_spike(GameObject* go) : GameObjectAI(go) {}
 
-    void OnLootStateChange() override
+    void OnLootStateChange(Unit* /*user*/) override
     {
         if (m_go->GetLootState() != GO_ACTIVATED)
             return;

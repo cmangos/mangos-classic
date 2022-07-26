@@ -784,7 +784,7 @@ class GameObject : public WorldObject
         void Use(Unit* user, SpellEntry const* spellInfo = nullptr);
 
         LootState GetLootState() const { return m_lootState; }
-        void SetLootState(LootState state);
+        void SetLootState(LootState state, Unit* user = nullptr);
 
         void AddToSkillupList(Player* player);
         bool IsInSkillupList(Player* player) const;
@@ -823,7 +823,7 @@ class GameObject : public WorldObject
         bool ActivateToQuest(Player* pTarget) const;
         void UseDoorOrButton(uint32 time_to_restore = 0, bool alternative = false);
         // 0 = use `gameobject`.`spawntimesecs`
-        void ResetDoorOrButton();
+        void ResetDoorOrButton(Unit* user = nullptr);
         void UseOpenableObject(bool open, uint32 withRestoreTime = 0, bool useAlternativeState = false);
 
         ReputationRank GetReactionTo(Unit const* unit) const override;

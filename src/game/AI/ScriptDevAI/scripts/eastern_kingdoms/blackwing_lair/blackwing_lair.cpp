@@ -738,7 +738,7 @@ struct go_ai_suppression : public GameObjectAI
 
     uint32 m_uiFumeTimer;
 
-    void OnLootStateChange() override
+    void OnLootStateChange(Unit* /*user*/) override
     {
         ScriptedInstance* pInstance = (ScriptedInstance*)m_go->GetMap()->GetInstanceData();
         if (!pInstance)

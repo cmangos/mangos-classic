@@ -210,7 +210,7 @@ struct DreadsteedQuestObjects : public GameObjectAI
         }
     }
 
-    void OnLootStateChange() override
+    void OnLootStateChange(Unit* /*user*/) override
     {
         if (m_go->GetLootState() == GO_JUST_DEACTIVATED)
             m_uiPulseTimer = 0;

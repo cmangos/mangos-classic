@@ -49,9 +49,10 @@ class GameObjectAI
 
         /**
         * Called when the GO has its state changed in GameObject::SetLootState (whatever the reason is)
-        * No params as LootState to which the GO is changed to is accessible in the GameObjectAI through GetLootState()
+        * LootState to which the GO is changed to is accessible in the GameObjectAI through GetLootState()
+        * User can be nullptr
         */
-        virtual void OnLootStateChange() {}
+        virtual void OnLootStateChange(Unit* user) {}
 
         /*
         * Called when a GO appears in the world to normal observers
