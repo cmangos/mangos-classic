@@ -433,7 +433,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                     continue;
                 }
 
-                if (info->type != GAMEOBJECT_TYPE_DOOR)
+                if (info->type != GAMEOBJECT_TYPE_DOOR && info->type != GAMEOBJECT_TYPE_BUTTON)
                 {
                     sLog.outErrorDb("Table `%s` has gameobject type (%u) non supported by command %s for script id %u", tablename, info->id, (tmp.command == SCRIPT_COMMAND_OPEN_DOOR ? "SCRIPT_COMMAND_OPEN_DOOR" : "SCRIPT_COMMAND_CLOSE_DOOR"), tmp.id);
                     continue;
@@ -1918,7 +1918,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 break;
             }
 
-            if (door->GetGoType() != GAMEOBJECT_TYPE_DOOR)
+            if (door->GetGoType() != GAMEOBJECT_TYPE_DOOR && door->GetGoType() != GAMEOBJECT_TYPE_BUTTON)
             {
                 sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u failed for non-door(GoType: %u).", m_table, m_script->id, m_script->command, door->GetGoType());
                 break;

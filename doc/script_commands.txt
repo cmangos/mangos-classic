@@ -220,12 +220,12 @@ Defining a buddy could be done in several way:
                                               (note, migrated from old where faction and modelid were 2 and 3 and now are in spawndatatemplate)
                                             * dataint4 = spawndatatemplate - if > 0 uses settings from creature_spawn_data_template
 
-11 SCRIPT_COMMAND_OPEN_DOOR                 source = any
+11 SCRIPT_COMMAND_OPEN_DOOR                 source = any, works on both doors and buttons
                                             * datalong = db_guid (can be skipped for buddy)
                                             * datalong2 = reset_delay
                                             * datalong3 = alternate state - bool 0 or 1
 
-12 SCRIPT_COMMAND_CLOSE_DOOR                source = any
+12 SCRIPT_COMMAND_CLOSE_DOOR                source = any, works on both doors and buttons
                                             * datalong = db_guid (can be skipped for buddy)
                                             * datalong2 = reset_delay
 
