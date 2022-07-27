@@ -55,12 +55,16 @@ struct npc_escortAI : public ScriptedAI
         bool AssistPlayerInCombat(Unit* who) override;
 
         uint32 GetCurrentWaypointPath() const override { return m_currentEscortWaypointPath; }
+
     protected:
         Player* GetPlayerForEscort() const { return m_creature->GetMap()->GetPlayer(m_playerGuid); }
         bool IsSD2EscortMovement(uint32 moveType) const;
         virtual void JustStartedEscort() {}
 
         void SetEscortWaypoints(uint32 pathId);
+
+        const Quest* m_questForEscort;                     // generally passed in Start() when regular escort script.
+
     private:
         bool IsPlayerOrGroupInRange();
 
@@ -71,7 +75,6 @@ struct npc_escortAI : public ScriptedAI
         uint32 m_playerCheckTimer;
         uint32 m_escortState;
 
-        const Quest* m_questForEscort;                     // generally passed in Start() when regular escort script.
 
         bool m_isRunning;                                  // all creatures are walking by default (has flag SPLINEFLAG_WALKMODE)
         bool m_canInstantRespawn;                          // if creature should respawn instantly after escort over (if not, database respawntime are used)
