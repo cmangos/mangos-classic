@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 # This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
