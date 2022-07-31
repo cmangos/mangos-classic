@@ -530,19 +530,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 13535:                                 // Tame Beast
-                {
-                    if (!m_originalCaster || m_originalCaster->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    if (Unit* channelTarget = m_originalCaster->GetChannelObject())
-                    {
-                        if (channelTarget->GetTypeId() == TYPEID_UNIT)
-                            m_originalCaster->CastSpell(channelTarget, 13481, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_originalCasterGUID, m_spellInfo);
-                    }
-
-                    return;
-                }
                 case 13567:                                 // Dummy Trigger
                 {
                     // can be used for different aura triggering, so select by aura

@@ -266,6 +266,11 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (6495,'spell_sentry_totem');
 
+-- Hunter
+INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(1515,'spell_tame_beast_channel'),
+(13535,'spell_tame_beast_dummy');
+
 -- Food and Drink
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (433, 'spell_food_animation'),

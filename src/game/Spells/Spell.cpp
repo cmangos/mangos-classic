@@ -5123,13 +5123,8 @@ SpellCastResult Spell::CheckCast(bool strict)
             {
                 // Spell can be triggered, we need to check original caster prior to caster
                 Unit* caster = GetAffectiveCaster();
-                Unit* tameTarget;
-
-                bool gmmode = m_triggeredBySpellInfo == nullptr;
-                if (gmmode)
-                    tameTarget = caster->GetTarget();
-                else
-                    tameTarget = m_caster->GetChannelObject();
+                Unit* tameTarget = m_targets.getUnitTarget();
+                bool gmmode = caster->IsPlayer() && static_cast<Player*>(caster)->IsGameMaster();
 
                 if (!caster || caster->GetTypeId() != TYPEID_PLAYER ||
                         !tameTarget || tameTarget->GetTypeId() == TYPEID_PLAYER)

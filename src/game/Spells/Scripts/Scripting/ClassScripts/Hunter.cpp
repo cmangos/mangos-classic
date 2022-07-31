@@ -17,8 +17,31 @@
 */
 
 #include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
+
+struct TameBeastChannel : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        data.caster = aura->GetCaster();
+        data.target = aura->GetCaster();
+    }
+};
+
+struct TameBeastDummy : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (Unit* channelTarget = spell->GetCaster()->GetChannelObject())
+        {
+            if (channelTarget->GetTypeId() == TYPEID_UNIT)
+                spell->GetCaster()->CastSpell(channelTarget, 13481, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
 
 void LoadHunterScripts()
 {
-
+    RegisterSpellScript<TameBeastChannel>("spell_tame_beast_channel");
+    RegisterSpellScript<TameBeastDummy>("spell_tame_beast_dummy");
 }
