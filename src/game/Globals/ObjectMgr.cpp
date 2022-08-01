@@ -910,7 +910,8 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
             spell.SpellId = fields[2].GetUInt32();
             spell.Flags = fields[3].GetUInt32();
 
-            if (!sSpellTemplate.LookupEntry<SpellEntry>(spell.SpellId))
+            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spell.SpellId);
+            if (!spellInfo)
             {
                 sLog.outErrorDb("LoadCreatureSpellLists: Invalid creature_spell_list %u spell %u does not exist. Skipping.", spell.Id, spell.SpellId);
                 continue;
@@ -938,6 +939,7 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
             spell.InitialMax = fields[9].GetUInt32();
             spell.RepeatMin = fields[10].GetUInt32();
             spell.RepeatMax = fields[11].GetUInt32();
+            spell.DisabledForAI = spellInfo->HasAttribute(SPELL_ATTR_EX_NO_AUTOCAST_AI);
             newContainer->spellLists[spell.Id].Spells.emplace(spell.Position, spell);
         } while (result->NextRow());
     }

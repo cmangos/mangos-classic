@@ -74,6 +74,7 @@ struct CreatureSpellListSpell
     uint32 InitialMax;
     uint32 RepeatMin;
     uint32 RepeatMax;
+    bool DisabledForAI;
 };
 
 struct CreatureSpellList
