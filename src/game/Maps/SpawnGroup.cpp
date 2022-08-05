@@ -119,15 +119,21 @@ void SpawnGroup::Spawn(bool force)
     if (!m_enabled && !force)
         return;
 
+    // duplicated code for optimization - way fewer cond fails
+    if ((m_entry.Flags & SPAWN_GROUP_DESPAWN_ON_COND_FAIL) != 0) // must be before count check
+    {
+        if (!IsWorldstateConditionSatisfied())
+        {
+            Despawn();
+            return;
+        }
+    }
+
     if (m_objects.size() >= m_entry.MaxCount)
         return;
 
     if (!IsWorldstateConditionSatisfied())
-    {
-        if ((m_entry.Flags & SPAWN_GROUP_DESPAWN_ON_COND_FAIL) != 0)
-            Despawn();
         return;
-    }
 
     if (m_entry.HasChancedSpawns && m_chosenSpawns.size() >= m_entry.MaxCount)
         return;
