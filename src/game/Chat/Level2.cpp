@@ -2129,10 +2129,31 @@ bool ChatHandler::HandleNpcFactionIdCommand(char* args)
 // set spawn dist of creature
 bool ChatHandler::HandleNpcSpawnDistCommand(char* args)
 {
-    if (!*args)
+    Creature* pCreature = getSelectedCreature();
+    if (!pCreature)
+    {
+        SendSysMessage(LANG_SELECT_CREATURE);
+        SetSentErrorMessage(true);
         return false;
+    }
 
-    float option = (float)atof(args);
+    float spawnDist = pCreature->GetRespawnRadius();
+    PSendSysMessage("Current spawn dist is %4.2f", spawnDist);
+
+    if (!*args)
+        return true;
+
+    float option;
+    try
+    {
+        option = (float)std::stod(args);
+    }
+    catch (std::invalid_argument)
+    {
+        // string was not a float representation
+        return false;
+    }
+
     if (option < 0.0f)
     {
         SendSysMessage(LANG_BAD_VALUE);
@@ -2142,10 +2163,6 @@ bool ChatHandler::HandleNpcSpawnDistCommand(char* args)
     MovementGeneratorType mtype = IDLE_MOTION_TYPE;
     if (option > 0.0f)
         mtype = RANDOM_MOTION_TYPE;
-
-    Creature* pCreature = getSelectedCreature();
-    if (!pCreature)
-        return false;
 
     pCreature->SetRespawnRadius(option);
     pCreature->SetDefaultMovementType(mtype);
