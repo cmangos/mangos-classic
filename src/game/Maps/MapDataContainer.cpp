@@ -18,9 +18,12 @@
 
 #include "MapDataContainer.h"
 #include "Globals/ObjectMgr.h"
+#include "AI/EventAI/CreatureEventAI.h"
+#include "AI/EventAI/CreatureEventAIMgr.h"
 
 MapDataContainer::MapDataContainer() : m_spellListContainer(sObjectMgr.GetCreatureSpellListContainer()),
-    m_spawnGroupContainer(sObjectMgr.GetSpawnGroupContainer())
+    m_spawnGroupContainer(sObjectMgr.GetSpawnGroupContainer()), m_CreatureEventAIEventEntryMap(sEventAIMgr.GetCreatureEventEntryAIMap()),
+    m_CreatureEventAIEventGuidMap(sEventAIMgr.GetCreatureEventGuidAIMap()), m_creatureEventAIComputedDataMap(sEventAIMgr.GetEAIComputedDataMap())
 {
 }
 
@@ -59,4 +62,26 @@ SpawnGroupEntry* MapDataContainer::GetSpawnGroupByGuid(uint32 dbGuid, uint32 hig
 std::shared_ptr<SpawnGroupEntryContainer> MapDataContainer::GetSpawnGroups() const
 {
     return m_spawnGroupContainer;
+}
+
+void MapDataContainer::SetEventAIContainers(std::shared_ptr<CreatureEventAI_Event_Map> entryContainer, std::shared_ptr<CreatureEventAI_Event_Map> guidContainer, std::shared_ptr<CreatureEventAI_EventComputedData_Map> computedContainer)
+{
+    m_CreatureEventAIEventEntryMap = entryContainer;
+    m_CreatureEventAIEventGuidMap = guidContainer;
+    m_creatureEventAIComputedDataMap = computedContainer;
+}
+
+std::shared_ptr<CreatureEventAI_Event_Map> MapDataContainer::GetCreatureEventEntryAIMap() const
+{
+    return m_CreatureEventAIEventEntryMap;
+}
+
+std::shared_ptr<CreatureEventAI_Event_Map> MapDataContainer::GetCreatureEventGuidAIMap() const
+{
+    return m_CreatureEventAIEventGuidMap;
+}
+
+std::shared_ptr<CreatureEventAI_EventComputedData_Map> MapDataContainer::GetEAIComputedDataMap() const
+{
+    return m_creatureEventAIComputedDataMap;
 }

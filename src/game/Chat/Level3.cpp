@@ -781,6 +781,16 @@ bool ChatHandler::HandleReloadEventAIScriptsCommand(char* /*args*/)
     sLog.outString("Re-Loading Scripts from `creature_ai_scripts`...");
     sEventAIMgr.LoadCreatureEventAI_Scripts();
     SendGlobalSysMessage("DB table `creature_ai_scripts` reloaded.");
+    auto containerEntry = sEventAIMgr.GetCreatureEventEntryAIMap();
+    auto containerGuid = sEventAIMgr.GetCreatureEventGuidAIMap();
+    auto containerComputed = sEventAIMgr.GetEAIComputedDataMap();
+    sMapMgr.DoForAllMaps([containerEntry, containerGuid, containerComputed](Map* map)
+    {
+        map->GetMessager().AddMessage([containerEntry, containerGuid, containerComputed](Map* map)
+        {
+            map->GetMapDataContainer().SetEventAIContainers(containerEntry, containerGuid, containerComputed);
+        });
+    });
     return true;
 }
 
