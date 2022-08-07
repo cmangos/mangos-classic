@@ -26,6 +26,13 @@ struct CreatureSpellListContainer;
 struct CreatureSpellList;
 struct SpawnGroupEntry;
 struct SpawnGroupEntryContainer;
+struct CreatureEventAI_Event;
+struct CreatureEventAI_EventComputedData;
+
+// Event_Map
+typedef std::vector<CreatureEventAI_Event> CreatureEventAI_Event_Vec;
+typedef std::unordered_map<uint32, CreatureEventAI_Event_Vec> CreatureEventAI_Event_Map;
+typedef std::unordered_map<uint32, CreatureEventAI_EventComputedData> CreatureEventAI_EventComputedData_Map;
 
 class MapDataContainer
 {
@@ -36,9 +43,18 @@ class MapDataContainer
         SpawnGroupEntry* GetSpawnGroup(uint32 Id) const;
         SpawnGroupEntry* GetSpawnGroupByGuid(uint32 dbGuid, uint32 high) const;
         std::shared_ptr<SpawnGroupEntryContainer> GetSpawnGroups() const;
+
+        void SetEventAIContainers(std::shared_ptr<CreatureEventAI_Event_Map> entryContainer, std::shared_ptr<CreatureEventAI_Event_Map> guidContainer, std::shared_ptr<CreatureEventAI_EventComputedData_Map> computedContainer);
+        std::shared_ptr<CreatureEventAI_Event_Map> GetCreatureEventEntryAIMap() const;
+        std::shared_ptr<CreatureEventAI_Event_Map> GetCreatureEventGuidAIMap() const;
+        std::shared_ptr<CreatureEventAI_EventComputedData_Map> GetEAIComputedDataMap() const;
     private:
         std::shared_ptr<CreatureSpellListContainer> m_spellListContainer;
         std::shared_ptr<SpawnGroupEntryContainer> m_spawnGroupContainer;
+
+        std::shared_ptr<CreatureEventAI_Event_Map>  m_CreatureEventAIEventEntryMap;
+        std::shared_ptr<CreatureEventAI_Event_Map>  m_CreatureEventAIEventGuidMap;
+        std::shared_ptr<CreatureEventAI_EventComputedData_Map>  m_creatureEventAIComputedDataMap;
 };
 
 #endif

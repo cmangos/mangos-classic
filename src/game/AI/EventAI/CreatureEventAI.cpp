@@ -104,13 +104,10 @@ void CreatureEventAI::InitAI()
     m_CreatureEventAIList.clear();
     m_distanceSpells.clear();
     m_mainSpells.clear();
-    // Need make copy for filter unneeded steps and safe in case table reload
-    CreatureEventAI_Event_Map::const_iterator creatureEventsItr = sEventAIMgr.GetCreatureEventAIMap().find(m_creature->GetEntry());
-    if (creatureEventsItr != sEventAIMgr.GetCreatureEventAIMap().end())
+
+    auto processMap = [&](const CreatureEventAI_Event_Vec& creatureEvent)
     {
         uint32 events_count = 0;
-
-        const CreatureEventAI_Event_Vec& creatureEvent = creatureEventsItr->second;
         for (const auto& i : creatureEvent)
         {
             // Debug check
@@ -127,30 +124,47 @@ void CreatureEventAI::InitAI()
         else
         {
             m_CreatureEventAIList.reserve(events_count);
-            for (const auto& i : creatureEvent)
+            for (const auto& aiEvent : creatureEvent)
             {
                 // Debug check
 #ifndef MANGOS_DEBUG
-                if (i.event_flags & EFLAG_DEBUG_ONLY)
+                if (aiEvent.event_flags & EFLAG_DEBUG_ONLY)
                     continue;
 #endif
                 // Indent for better compatibility with other cores
-                    m_CreatureEventAIList.push_back(CreatureEventAIHolder(i));
+                    m_CreatureEventAIList.push_back(CreatureEventAIHolder(aiEvent));
                     // Cache for fast use
-                    if (i.event_type == EVENT_T_OOC_LOS)
+                    if (aiEvent.event_type == EVENT_T_OOC_LOS)
                         m_HasOOCLoSEvent = true;
 
                     for (uint32 actionIdx = 0; actionIdx < MAX_ACTIONS; ++actionIdx)
-                        if (i.action[actionIdx].type == ACTION_T_CAST)
+                        if (aiEvent.action[actionIdx].type == ACTION_T_CAST)
                         {
-                            if (i.action[actionIdx].cast.castFlags & CAST_MAIN_SPELL)
-                                AddMainSpell(i.action[actionIdx].cast.spellId);
+                            if (aiEvent.action[actionIdx].cast.castFlags & CAST_MAIN_SPELL)
+                                AddMainSpell(aiEvent.action[actionIdx].cast.spellId);
 
-                            if (i.action[actionIdx].cast.castFlags & CAST_DISTANCE_YOURSELF)
-                                AddDistanceSpell(i.action[actionIdx].cast.spellId);
+                            if (aiEvent.action[actionIdx].cast.castFlags & CAST_DISTANCE_YOURSELF)
+                                AddDistanceSpell(aiEvent.action[actionIdx].cast.spellId);
                         }
             }
         }
+    };
+
+    // Need make copy for filter unneeded steps and safe in case table reload
+    auto creatureEventsItr = m_creature->GetMap()->GetMapDataContainer().GetCreatureEventEntryAIMap()->find(m_creature->GetEntry());
+    if (creatureEventsItr != m_creature->GetMap()->GetMapDataContainer().GetCreatureEventEntryAIMap()->end())
+    {
+        const CreatureEventAI_Event_Vec& creatureEvent = creatureEventsItr->second;
+        processMap(creatureEvent);
+    }
+
+    if (m_creature->GetDbGuid() == 5026)
+        printf("");
+    auto creatureEventsGuidItr = m_creature->GetMap()->GetMapDataContainer().GetCreatureEventGuidAIMap()->find(m_creature->GetDbGuid());
+    if (creatureEventsGuidItr != m_creature->GetMap()->GetMapDataContainer().GetCreatureEventGuidAIMap()->end())
+    {
+        const CreatureEventAI_Event_Vec& creatureEvent = creatureEventsGuidItr->second;
+        processMap(creatureEvent);
     }
 }
 
@@ -367,7 +381,7 @@ bool CreatureEventAI::CheckEvent(CreatureEventAIHolder& holder, Unit* actionInvo
             if (!m_creature->IsInCombat())
                 return false;
 
-            CreatureEventAI_EventComputedData const& data = (*sEventAIMgr.GetEAIComputedDataMap().find(event.event_id)).second; // always found
+            CreatureEventAI_EventComputedData const& data = m_creature->GetMap()->GetMapDataContainer().GetEAIComputedDataMap()->find(event.event_id)->second; // always found
             Unit* pUnit = DoSelectLowestHpFriendly(float(event.friendly_hp.radius), float(event.friendly_hp.hpDeficit), event.friendly_hp.isPercent, data.friendlyHp.targetSelf);
             if (!pUnit)
                 return false;

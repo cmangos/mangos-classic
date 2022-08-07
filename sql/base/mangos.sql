@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2795_01_mangos_waypoint_path_name` bit(1) DEFAULT NULL
+  `required_z2797_01_mangos_eai_dbguid_support` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -775,7 +775,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `creature_ai_scripts`;
 CREATE TABLE `creature_ai_scripts` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Identifier',
-  `creature_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Creature Template Identifier',
+  `creature_id` int(11) NOT NULL DEFAULT '0' COMMENT 'Creature Template Identifier',
   `event_type` tinyint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'Event Type',
   `event_inverse_phase_mask` int(11) NOT NULL DEFAULT '0' COMMENT 'Mask which phases this event will not trigger in',
   `event_chance` int(3) unsigned NOT NULL DEFAULT '100',

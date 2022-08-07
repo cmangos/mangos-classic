@@ -31,16 +31,18 @@ class CreatureEventAIMgr
         void LoadCreatureEventAI_Summons(bool check_entry_use);
         void LoadCreatureEventAI_Scripts();
 
-        CreatureEventAI_Event_Map  const& GetCreatureEventAIMap()       const { return m_CreatureEventAI_Event_Map; }
+        std::shared_ptr<CreatureEventAI_Event_Map> const& GetCreatureEventEntryAIMap() const { return m_CreatureEventAIEventEntryMap; }
+        std::shared_ptr<CreatureEventAI_Event_Map> const& GetCreatureEventGuidAIMap()  const { return m_CreatureEventAIEventGuidMap; }
         CreatureEventAI_Summon_Map const& GetCreatureEventAISummonMap() const { return m_CreatureEventAI_Summon_Map; }
-        CreatureEventAI_EventComputedData_Map const& GetEAIComputedDataMap() const { return m_creatureEventAI_ComputedDataMap; }
+        std::shared_ptr<CreatureEventAI_EventComputedData_Map> const& GetEAIComputedDataMap() const { return m_creatureEventAIComputedDataMap; }
 
     private:
         void CheckUnusedAISummons();
 
-        CreatureEventAI_Event_Map  m_CreatureEventAI_Event_Map;
-        CreatureEventAI_Summon_Map m_CreatureEventAI_Summon_Map;
-        CreatureEventAI_EventComputedData_Map m_creatureEventAI_ComputedDataMap;
+        std::shared_ptr<CreatureEventAI_Event_Map>  m_CreatureEventAIEventEntryMap;
+        std::shared_ptr<CreatureEventAI_Event_Map>  m_CreatureEventAIEventGuidMap;
+        CreatureEventAI_Summon_Map m_CreatureEventAI_Summon_Map; // deprecated
+        std::shared_ptr<CreatureEventAI_EventComputedData_Map> m_creatureEventAIComputedDataMap;
 };
 
 #define sEventAIMgr MaNGOS::Singleton<CreatureEventAIMgr>::Instance()
