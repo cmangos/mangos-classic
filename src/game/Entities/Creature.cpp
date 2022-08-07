@@ -2894,7 +2894,7 @@ void Creature::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* /*
         bool success = GetSpellCooldown(spellEntry.Id, cooldown);
         if (!success)
             success = sObjectMgr.GetCreatureCooldown(GetCreatureInfo()->Entry, spellEntry.Id, cooldown);
-        if (success)
+        if (success && cooldown) // lets see if this will one day become a problem, if it does, add -1 -1 defaults to creature spell lists
             recTime = cooldown;
     }
     uint32 categoryRecTime = spellEntry.CategoryRecoveryTime;
