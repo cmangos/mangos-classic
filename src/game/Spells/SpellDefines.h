@@ -181,6 +181,8 @@ enum SpellAttributesEx4
     SPELL_ATTR_EX4_ALLOW_CAST_WHILE_CASTING    = 0x00000080,// 7 Can use this spell while another is channeled/cast/autocast
     SPELL_ATTR_EX4_IGNORE_DAMAGE_TAKEN_MODIFIERS = 0x00000100,// 8
     SPELL_ATTR_EX4_COMBAT_FEEDBACK_WHEN_USABLE = 0x00000200,// 9 initially disabled / trigger activate from event (Execute, Riposte, Deep Freeze end other)
+    SPELL_ATTR_EX4_WEAPON_SPEED_COST_SCALING   = 0x00000400,// 10
+    SPELL_ATTR_EX4_NO_PARTIAL_IMMUNITY         = 0x00000800,// 11 Curse of Tongues - 1.12.0
 };
 
 enum SpellAttributesServerside

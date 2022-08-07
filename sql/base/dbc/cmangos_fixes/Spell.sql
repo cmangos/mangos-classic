@@ -285,3 +285,6 @@ UPDATE spell_template SET AttributesServerside = 4 WHERE id IN (4044,27791);
 -- Land Mine Arming should not be removed on evade
 UPDATE spell_template SET AttributesServerside = 4 WHERE id IN (11816);
 
+-- Curse of Tongues - 1.12.0 - unexported to client but present in tbc - "This spell will no longer debuff the target if they are immune to the spellcast slowing effect."
+UPDATE spell_template SET AttributesEx4=AttributesEx4|0x00000800 WHERE Id IN(1714,11719);
+
