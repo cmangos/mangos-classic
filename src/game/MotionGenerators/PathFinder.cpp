@@ -529,33 +529,63 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
 
     if (m_straightLine)
     {
-        dtResult = DT_SUCCESS;
-        pointCount = 1;
-        memcpy(&pathPoints[VERTEX_SIZE * 0], startPoint, sizeof(float) * 3); // first point
+        Vector3 startVec = Vector3(startPoint[0], startPoint[1], startPoint[2]);
+        Vector3 endVec = Vector3(endPoint[0], endPoint[1], endPoint[2]);
+        Vector3 pathDir = (endVec - startVec);
+        float pathLength = pathDir.magnitude();
 
-        // path has to be split into polygons with dist SMOOTH_PATH_STEP_SIZE between them
-        G3D::Vector3 startVec = G3D::Vector3(startPoint[0], startPoint[1], startPoint[2]);
-        G3D::Vector3 endVec = G3D::Vector3(endPoint[0], endPoint[1], endPoint[2]);
-        G3D::Vector3 diffVec = (endVec - startVec);
-        G3D::Vector3 prevVec = startVec;
-        float len = diffVec.length();
-        float stepSize = SMOOTH_PATH_STEP_SIZE;
-        // protection against buffer overflow - if too long straight line, smooth path could exceed cachedPoints array
-        if (ceilf(len / SMOOTH_PATH_STEP_SIZE) > m_pointPathLimit - 2)
-            stepSize = len / (m_pointPathLimit - 2);
-        diffVec *= stepSize / len;
-        while (len > stepSize)
+        // not sure about the exact limit value below but it should be ok
+        if (pathLength > 0.1f)
         {
-            len -= stepSize;
-            prevVec += diffVec;
-            pathPoints[VERTEX_SIZE * pointCount + 0] = prevVec.x;
-            pathPoints[VERTEX_SIZE * pointCount + 1] = prevVec.y;
-            pathPoints[VERTEX_SIZE * pointCount + 2] = prevVec.z;
-            ++pointCount;
-        }
+            float stepCountFloat = pathLength / SMOOTH_PATH_STEP_SIZE;
+            uint32 stepCount = uint32(stepCountFloat);
+            float stepPart = stepCountFloat - stepCount;
 
-        memcpy(&pathPoints[VERTEX_SIZE * pointCount], endPoint, sizeof(float) * 3); // last point
-        ++pointCount;
+            // merge last point with previous point if it is 30% less than SMOOTH_PATH_STEP_SIZE
+            if (stepCount > 1.0f && stepPart < 0.3f)
+                --stepCount;
+
+            Vector3 prevVec = startVec;
+            Vector3 diffVec = pathDir * (SMOOTH_PATH_STEP_SIZE / pathLength);
+
+            // make sure m_cachedPoints is big enough
+            if (stepCount > m_pointPathLimit - 2)
+            {
+                m_cachedPoints.resize((stepCount * VERTEX_SIZE) + (2 * VERTEX_SIZE));
+                pathPoints = m_cachedPoints.data();
+            }
+
+            // first point
+            pathPoints[0] = startPoint[0];
+            pathPoints[1] = startPoint[1];
+            pathPoints[2] = startPoint[2];
+            pointCount = 1;
+
+            float distanceToPoly;
+            for (uint32 step = 0; step < stepCount; ++step)
+            {
+                prevVec += diffVec; // move toward the end pos
+
+                uint32 posIndex = VERTEX_SIZE * pointCount;
+                pathPoints[posIndex + 0] = prevVec.x;
+                pathPoints[posIndex + 1] = prevVec.y;
+                pathPoints[posIndex + 2] = prevVec.z;
+                ++pointCount;
+
+                // fix height using detail data (be aware that here the Z is stored at posIndex + 1, not 2! Format is [y, z, x])
+                dtPolyRef poly = getPolyByLocation(&pathPoints[posIndex], &distanceToPoly);
+                if (poly != INVALID_POLYREF)
+                    m_navMeshQuery->getPolyHeight(poly, &pathPoints[posIndex], &pathPoints[posIndex + 1]);
+            }
+
+            // last point
+            pathPoints[VERTEX_SIZE * pointCount + 0] = endPoint[0];
+            pathPoints[VERTEX_SIZE * pointCount + 1] = endPoint[1];
+            pathPoints[VERTEX_SIZE * pointCount + 2] = endPoint[2];
+            ++pointCount;
+
+            dtResult = DT_SUCCESS;
+        }
     }
     else if (m_useStraightPath)
     {
