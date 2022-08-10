@@ -17,6 +17,7 @@
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "World/WorldState.h"
 #include "AI/ScriptDevAI/scripts/kalimdor/world_kalimdor.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum Quests
 {
@@ -196,6 +197,23 @@ bool QuestRewarded_war_effort(Player* /*player*/, GameObject* go, Quest const* q
     return true;
 }
 
+struct SilithusBossAI : public CombatAI
+{
+    SilithusBossAI(Creature* creature) : CombatAI(creature, 0) {}
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        AQSilithusBoss boss;
+        switch (m_creature->GetEntry())
+        {
+            case NPC_COLOSSUS_OF_ASHI: boss = AQ_SILITHUS_BOSS_ASHI; break;
+            case NPC_COLOSSUS_OF_REGAL: boss = AQ_SILITHUS_BOSS_REGAL; break;
+            case NPC_COLOSSUS_OF_ZORA: boss = AQ_SILITHUS_BOSS_ZORA; break;
+        }
+        sWorldState.SetSilithusBossKilled(boss);
+    }
+};
+
 void AddSC_war_effort()
 {
     Script* pNewScript = new Script;
@@ -206,5 +224,10 @@ void AddSC_war_effort()
     pNewScript = new Script;
     pNewScript->Name = "go_scarab_gong";
     pNewScript->pQuestRewardedGO = &QuestRewarded_war_effort;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_silithus_boss";
+    pNewScript->GetAI = &GetNewAIInstance<SilithusBossAI>;
     pNewScript->RegisterSelf();
 }
