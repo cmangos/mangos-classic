@@ -293,7 +293,7 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ BuildPolyPath :: (startPoly == endPoly)\n");
 
-        BuildShortcut();
+        BuildShortcut(); // todo move in straight line is different than build shortcut!
 
         m_pathPolyRefs[0] = startPoly;
         m_polyLength = 1;
@@ -1049,6 +1049,73 @@ dtStatus PathFinder::findSmoothPath(const float* startPos, const float* endPos,
 
     // this is most likely a loop
     return nsmoothPath < m_pointPathLimit ? DT_SUCCESS : DT_FAILURE;
+}
+
+void PathFinder::ComputePathToRandomPoint(Vector3 const& startPoint, float maxRange)
+{
+    clear();
+    m_type = PathType(PATHFIND_NOPATH);
+
+    // use only strightLine
+    m_straightLine = true;
+    m_forceDestination = false;
+
+    // update unit filter
+    updateFilter();
+
+    // be sure navmesh are set
+    SetCurrentNavMesh();
+
+    float angle = rand_norm_f() * 2 * M_PI_F;
+    float range = rand_norm_f() * maxRange;
+
+    float randomPoint[3];
+    randomPoint[2] = startPoint.x + range * cos(angle);
+    randomPoint[0] = startPoint.y + range * sin(angle);
+    randomPoint[1] = startPoint.z;
+
+    Vector3 currPos;
+    m_sourceUnit->GetPosition(currPos.x, currPos.y, currPos.z, m_sourceUnit->GetTransport());
+    Vector3 endPoint(randomPoint[2], randomPoint[0], randomPoint[1]);
+
+    // fast check to see if point is far enough
+    if ((currPos - endPoint).squaredMagnitude() < 0.01f)
+    {
+        m_type = PathType(PATHFIND_NOPATH);
+        //sLog.outDebug("PathFinder::GetPathToRandomPoint> too small distance from point start(%s) to end(%s) for %s", currPos.toString().c_str(), endPoint.toString().c_str(), m_sourceUnit->GetGuidStr().c_str());
+        return;
+    }
+
+    setStartPosition(currPos);
+    setEndPosition(endPoint);
+
+    // make sure navMesh works - we can run on map w/o mmap
+    // check if the start and end point have a .mmtile loaded (can we pass via not loaded tile on the way?)
+    if (!m_navMesh || !m_navMeshQuery || m_sourceUnit->hasUnitState(UNIT_STAT_IGNORE_PATHFINDING) ||
+        !HaveTile(currPos) || !HaveTile(endPoint))
+    {
+        BuildShortcut();
+        m_type = PathType(PATHFIND_NORMAL | PATHFIND_SHORTCUT);
+        //sLog.outString("PathFinder::GetPathToRandomPoint> Shortcut for %s\n", m_sourceUnit->GetGuidStr().c_str());
+        return;
+    }
+
+    float distanceToPoly;
+    dtPolyRef centerPoly = getPolyByLocation(randomPoint, &distanceToPoly);
+    if (centerPoly != INVALID_POLYREF)
+    {
+        // first we have to fix z value before hit test, z is in index 1 of randomPoint
+        dtStatus dtResult = m_navMeshQuery->getPolyHeight(centerPoly, randomPoint, &randomPoint[1]);
+        endPoint.z = randomPoint[1];
+        setEndPosition(endPoint);
+
+        if (dtResult == DT_SUCCESS)
+        {
+            // generate path
+            BuildPolyPath(currPos, endPoint);
+            //sLog.outDebug("PathFinder::GetPathToRandomPoint> path type %d size %d poly-size %d\n", m_type, m_pathPoints.size(), m_polyLength);
+        }
+    }
 }
 
 bool PathFinder::inRangeYZX(const float* v1, const float* v2, float r, float h) const

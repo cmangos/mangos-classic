@@ -69,6 +69,9 @@ class PathFinder
         bool calculate(float destX, float destY, float destZ, bool forceDest = false, bool straightLine = false); // transfers coorddinates from global to local space if on transport - use other func if coords are already in transport space
         bool calculate(Vector3 const& start, Vector3 const& dest, bool forceDest = false, bool straightLine = false);
 
+        // compute a straight path to some random point in max range
+        void ComputePathToRandomPoint(Vector3 const& startPoint, float maxRange);
+
         // option setters - use optional
         void setUseStrightPath(bool useStraightPath) { m_useStraightPath = useStraightPath; };
         void setPathLengthLimit(float distance) { m_pointPathLimit = std::min<uint32>(uint32(distance / SMOOTH_PATH_STEP_SIZE * 1.25f), MAX_POINT_PATH_LENGTH); };
