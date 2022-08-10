@@ -118,6 +118,10 @@ enum GameEvents
     // base perpetual state
     GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_5 = 124,
 
+    GAME_EVENT_ASHI_DEAD                = 125,
+    GAME_EVENT_REGAL_DEAD               = 126,
+    GAME_EVENT_ZORA_DEAD                = 127,
+
     // Scourge Invasion
     GAME_EVENT_SCOURGE_INVASION                         = 17,
     GAME_EVENT_SCOURGE_INVASION_WINTERSPRING            = 90,
@@ -190,6 +194,13 @@ enum AQPhase
     PHASE_5_DONE,
 };
 
+enum AQSilithusBoss
+{
+    AQ_SILITHUS_BOSS_ASHI  = 0,
+    AQ_SILITHUS_BOSS_REGAL = 1,
+    AQ_SILITHUS_BOSS_ZORA  = 2,
+};
+
 struct AhnQirajData
 {
     uint32 m_phase;
@@ -199,7 +210,8 @@ struct AhnQirajData
     std::mutex m_warEffortMutex;
     std::set<uint32> m_spawnedDbGuids;
     uint32 m_phase2Tier;
-    AhnQirajData() : m_phase(PHASE_0_DISABLED), m_timer(0), m_phase2Tier(0)
+    uint32 m_killedBosses;
+    AhnQirajData() : m_phase(PHASE_0_DISABLED), m_timer(0), m_phase2Tier(0), m_killedBosses(0)
     {
         memset(m_WarEffortCounters, 0, sizeof(m_WarEffortCounters));
     }
@@ -352,6 +364,7 @@ class WorldState
         void ChangeWarEffortGoSpawns(AQResources resource, int32 forcedTier = -1);
         void ChangeWarEffortPhase2Tier(uint32 remainingDays);
         void DespawnWarEffortGuids(std::set<std::pair<uint32, Team>>& guids);
+        void SetSilithusBossKilled(AQSilithusBoss boss);
         AQPhase GetAqPhase() { return (AQPhase)m_aqData.m_phase; }
         std::pair<AQResourceGroup, Team> GetResourceInfo(AQResources resource);
         std::pair<uint32, uint32> GetResourceCounterAndMax(AQResourceGroup group, Team team);
