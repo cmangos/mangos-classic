@@ -26,6 +26,8 @@ void AbstractRandomMovementGenerator::Initialize(Unit& owner)
 {
     owner.addUnitState(i_stateActive);
 
+    m_pathFinder = std::make_unique<PathFinder>(&owner);
+
     // Client-controlled unit should have control removed
     if (const Player* controllingClientPlayer = owner.GetClientControlling())
         controllingClientPlayer->UpdateClientControl(&owner, false);
@@ -127,18 +129,16 @@ int32 AbstractRandomMovementGenerator::_setLocation(Unit& owner)
     if (!_getLocation(owner, x, y, z))
         return 0;
 
-    PathFinder pf(&owner);
-
     if (i_pathLength != 0.0f)
-        pf.setPathLengthLimit(i_pathLength);
+        m_pathFinder->setPathLengthLimit(i_pathLength);
 
-    pf.calculate(x, y, z);
+    m_pathFinder->calculate(x, y, z);
 
-    if (pf.getPathType() & PATHFIND_NOPATH)
+    if (m_pathFinder->getPathType() & PATHFIND_NOPATH)
         return 0;
 
     Movement::MoveSplineInit init(owner);
-    init.MovebyPath(pf.getPath());
+    init.MovebyPath(m_pathFinder->getPath());
     init.SetWalk(i_walk);
 
     int32 duration = init.Launch();

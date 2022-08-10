@@ -22,6 +22,8 @@
 #include "MovementGenerator.h"
 #include "Entities/ObjectGuid.h"
 
+class PathFinder;
+
 class AbstractRandomMovementGenerator : public MovementGenerator
 {
     public:
@@ -48,6 +50,8 @@ class AbstractRandomMovementGenerator : public MovementGenerator
         float i_verticalZ;
         float i_pathLength;
         bool i_walk;
+
+        std::unique_ptr<PathFinder> m_pathFinder;
         ShortTimeTracker i_nextMoveTimer;
         uint32 i_nextMoveCount, i_nextMoveCountMax;
         uint32 i_nextMoveDelayMin, i_nextMoveDelayMax;
