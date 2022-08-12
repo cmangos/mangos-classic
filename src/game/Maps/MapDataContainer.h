@@ -21,6 +21,8 @@
 
 #include "Platform/Define.h"
 #include <memory>
+#include <vector>
+#include <unordered_map>
 
 struct CreatureSpellListContainer;
 struct CreatureSpellList;
