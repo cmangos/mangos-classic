@@ -237,11 +237,26 @@ struct SilithusBossAI : public CombatAI
 {
     SilithusBossAI(Creature* creature) : CombatAI(creature, 0) {}
 
+    void JustRespawned() override
+    {
+        CombatAI::JustRespawned();
+        int32 textId = 0;
+        switch (m_creature->GetEntry())
+        {
+            case NPC_COLOSSUS_OF_ASHI: textId = 11426; break;
+            case NPC_COLOSSUS_OF_REGAL: textId = 11424; break;
+            case NPC_COLOSSUS_OF_ZORA: textId = 11425; break;
+            default: break;
+        }
+        DoBroadcastText(textId, m_creature);
+    }
+
     void JustDied(Unit* /*killer*/) override
     {
         AQSilithusBoss boss;
         switch (m_creature->GetEntry())
         {
+            default:
             case NPC_COLOSSUS_OF_ASHI: boss = AQ_SILITHUS_BOSS_ASHI; break;
             case NPC_COLOSSUS_OF_REGAL: boss = AQ_SILITHUS_BOSS_REGAL; break;
             case NPC_COLOSSUS_OF_ZORA: boss = AQ_SILITHUS_BOSS_ZORA; break;
