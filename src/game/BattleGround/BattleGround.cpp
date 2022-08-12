@@ -107,15 +107,17 @@ namespace MaNGOS
     class BattleGroundBroadcastBuilder
     {
         public:
-            BattleGroundBroadcastBuilder(BroadcastText const* bcd, Creature const* source)
-                : i_source(source), i_bcd(bcd) {}
+            BattleGroundBroadcastBuilder(BroadcastText const* bcd, ChatMsg msgtype, Creature const* source, Unit const* target)
+                : i_msgtype(msgtype), i_source(source), i_bcd(bcd), i_target(target) {}
             void operator()(WorldPacket& data, int32 loc_idx)
             {
-                ChatHandler::BuildChatPacket(data, CHAT_MSG_MONSTER_YELL, i_bcd->GetText(loc_idx, i_source->getGender()).c_str(), i_bcd->languageId, CHAT_TAG_NONE, i_source->GetObjectGuid(), i_source->GetName());
+                ChatHandler::BuildChatPacket(data, i_msgtype, i_bcd->GetText(loc_idx, i_source ? i_source->getGender() : GENDER_NONE).c_str(), i_bcd->languageId, CHAT_TAG_NONE, i_source ? i_source->GetObjectGuid() : ObjectGuid(), i_source ? i_source->GetName() : "", i_target ? i_target->GetObjectGuid() : ObjectGuid());
             }
         private:
+            ChatMsg i_msgtype;
             Creature const* i_source;
             BroadcastText const* i_bcd;
+            Unit const* i_target;
     };
 
 
@@ -1722,16 +1724,16 @@ void BattleGround::SendYell2ToAll(int32 entry, uint32 language, Creature const* 
     BroadcastWorker(bg_do);
 }
 
-void BattleGround::SendBcdToAll(int32 bcdEntry, Creature const* source)
+void BattleGround::SendBcdToAll(int32 bcdEntry, ChatMsg msgtype, Creature const* source)
 {
-    MaNGOS::BattleGroundBroadcastBuilder bg_builder(sObjectMgr.GetBroadcastText(bcdEntry), source);
+    MaNGOS::BattleGroundBroadcastBuilder bg_builder(sObjectMgr.GetBroadcastText(bcdEntry), msgtype, source, nullptr);
     MaNGOS::LocalizedPacketDo<MaNGOS::BattleGroundBroadcastBuilder> bg_do(bg_builder);
     BroadcastWorker(bg_do);
 }
 
-void BattleGround::SendBcdToTeam(int32 bcdEntry, Creature const* source, Team team)
+void BattleGround::SendBcdToTeam(int32 bcdEntry, ChatMsg msgtype, Creature const* source, Team team)
 {
-    MaNGOS::BattleGroundBroadcastBuilder bg_builder(sObjectMgr.GetBroadcastText(bcdEntry), source);
+    MaNGOS::BattleGroundBroadcastBuilder bg_builder(sObjectMgr.GetBroadcastText(bcdEntry), msgtype, source, nullptr);
     MaNGOS::LocalizedPacketDo<MaNGOS::BattleGroundBroadcastBuilder> bg_do(bg_builder);
     auto lambda = [&](Player* player)
     {
