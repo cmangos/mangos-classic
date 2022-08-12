@@ -303,9 +303,9 @@ void BattleGroundAV::Update(uint32 diff)
         if (m_mineYellTimer <= diff)
         {
             if (Creature* morloch = GetSingleCreatureFromStorage(BG_AV_NPC_MORLOCH))
-                SendBcdToTeam(YELL_MORLOCH_MINE, morloch, ALLIANCE);
+                SendBcdToTeam(YELL_MORLOCH_MINE, CHAT_MSG_MONSTER_YELL, morloch, ALLIANCE);
             if (Creature* snivvle = GetSingleCreatureFromStorage(BG_AV_NPC_TASKMASTER_SNIVVLE))
-                SendBcdToTeam(YELL_SNIVVLE_MINE, snivvle, HORDE);
+                SendBcdToTeam(YELL_SNIVVLE_MINE, CHAT_MSG_MONSTER_YELL, snivvle, HORDE);
             m_mineYellTimer = 0;
         }
         else
@@ -422,13 +422,13 @@ void BattleGroundAV::EndBattleGround(Team winner)
     {
         if (winner == ALLIANCE)
         {
-            SendBcdToAll(YELL_FROSTWOLF_DEAD, herald);
-            SendBcdToAll(YELL_ALLIANCE_WINS, herald);
+            SendBcdToAll(YELL_FROSTWOLF_DEAD, CHAT_MSG_MONSTER_YELL, herald);
+            SendBcdToAll(YELL_ALLIANCE_WINS, CHAT_MSG_MONSTER_YELL, herald);
         }
         else
         {
-            SendBcdToAll(YELL_STORMPIKE_DEAD, herald);
-            SendBcdToAll(YELL_HORDE_WINS, herald);
+            SendBcdToAll(YELL_STORMPIKE_DEAD, CHAT_MSG_MONSTER_YELL, herald);
+            SendBcdToAll(YELL_HORDE_WINS, CHAT_MSG_MONSTER_YELL, herald);
         }
     }
 
