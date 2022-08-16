@@ -162,7 +162,7 @@ dtPolyRef PathFinder::getPathPolyByPosition(const dtPolyRef* polyPath, uint32 po
     return (minDist3d < 3.0f) ? nearestPoly : INVALID_POLYREF;
 }
 
-dtPolyRef PathFinder::getPolyByLocation(const float* point, float* distance) const
+dtPolyRef PathFinder::getPolyByLocation(const float* point, float* distance)
 {
     // first we check the current path
     // if the current path doesn't contain the current poly,
@@ -179,6 +179,7 @@ dtPolyRef PathFinder::getPolyByLocation(const float* point, float* distance) con
     if (dtStatusSucceed(dtResult) && polyRef != INVALID_POLYREF)
     {
         *distance = dtVdist(closestPoint, point);
+        m_pathPolyRefs.push_back(polyRef);
         return polyRef;
     }
 
@@ -191,6 +192,7 @@ dtPolyRef PathFinder::getPolyByLocation(const float* point, float* distance) con
     if (dtStatusSucceed(dtResult) && polyRef != INVALID_POLYREF)
     {
         *distance = dtVdist(closestPoint, point);
+        m_pathPolyRefs.push_back(polyRef);
         return polyRef;
     }
 
