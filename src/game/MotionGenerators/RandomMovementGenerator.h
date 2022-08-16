@@ -42,7 +42,6 @@ class AbstractRandomMovementGenerator : public MovementGenerator
         bool Update(Unit& owner, const uint32& diff) override;
 
     protected:
-        virtual bool _getLocation(Unit& owner, float& x, float& y, float& z);
         virtual int32 _setLocation(Unit& owner);
 
         float i_x, i_y, i_z;
@@ -102,10 +101,8 @@ class FleeingMovementGenerator : public AbstractRandomMovementGenerator
     public:
         explicit FleeingMovementGenerator(Unit const& source);
 
+        virtual int32 _setLocation(Unit& owner) override;
         MovementGeneratorType GetMovementGeneratorType() const override { return FLEEING_MOTION_TYPE; }
-
-    protected:
-        bool _getLocation(Unit& owner, float& x, float& y, float& z) override;
 };
 
 class PanicMovementGenerator : public FleeingMovementGenerator
