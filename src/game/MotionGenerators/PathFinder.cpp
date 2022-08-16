@@ -485,17 +485,40 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
             // raycast() sets hit to FLT_MAX if there is a ray between start and end
             if (hit != FLT_MAX)
             {
-                // the ray hit something, return no path instead of the incomplete one
-                clear();
-                m_polyLength = 2;
-                m_pathPoints.resize(2);
-                m_pathPoints[0] = getStartPosition();
+                // the ray hit something, adjust the end before compute path if need
                 float hitPos[3];
-                dtVlerp(hitPos, startPoint, endPoint, hit);
-                m_pathPoints[1] = G3D::Vector3(hitPos[2], hitPos[0], hitPos[1]);
+                float distanceToPoly;
 
-                m_type = PATHFIND_INCOMPLETE;
-                return;
+                // TODO: To get a better behavior in client we have to add bounding box size handling of unit.
+                //       Else it can appear partially on the wall.
+
+                dtVlerp(hitPos, startPoint, endPoint, hit);
+                dtPolyRef poly = getPolyByLocation(hitPos, &distanceToPoly);
+                if (poly != INVALID_POLYREF)
+                {
+                    // first we have to fix z value before hit test, z is in index 1 of hit position
+                    dtStatus dtResult = m_navMeshQuery->getPolyHeight(poly, hitPos, &hitPos[1]);
+                    Vector3 hitPosVec(hitPos[2], hitPos[0], hitPos[1]);
+                    if ((startPos - hitPosVec).squaredMagnitude() > 0.01)
+                    {
+                        setEndPosition(hitPosVec);
+                        BuildPointPath(startPoint, hitPos);
+                        m_type = PATHFIND_INCOMPLETE;
+
+                        //sLog.outString("PathFinder::BuildPolyPath> HIT for %s at %s", m_sourceUnit->GetGuidStr().c_str(), hitPosVec.toString().c_str());
+                        return;
+                    }
+                    //sLog.outString("PathFinder::BuildPolyPath> HIT with no path for %s at %s", m_sourceUnit->GetGuidStr().c_str(), hitPosVec.toString().c_str());
+                    m_type = PATHFIND_NOPATH;
+                    return;
+                }
+                else
+                {
+                    //Vector3 hitPosVec(hitPos[2], hitPos[0], hitPos[1]);
+                    //sLog.outString("PathFinder::BuildPolyPath> FAILED HIT for %s at %s", m_sourceUnit->GetGuidStr().c_str(), hitPosVec.toString().c_str());
+                    m_type = PATHFIND_NOPATH;
+                    return;
+                }
             }
         }
 
