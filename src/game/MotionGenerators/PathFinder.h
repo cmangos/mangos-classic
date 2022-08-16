@@ -47,6 +47,10 @@ class Unit;
 #define VERTEX_SIZE       3
 #define INVALID_POLYREF   0
 
+// bound box of poly search area
+static float NearPolySearchBound[VERTEX_SIZE] = { 5.0f, 5.0f, 5.0f };
+static float FarPolySearchBound[VERTEX_SIZE] = { 10.0f, 10.0f, 10.0f };
+
 enum PathType
 {
     PATHFIND_BLANK          = 0x0000,   // path not built yet

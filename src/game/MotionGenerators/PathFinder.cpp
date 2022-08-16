@@ -173,10 +173,9 @@ dtPolyRef PathFinder::getPolyByLocation(const float* point, float* distance) con
 
     // we don't have it in our old path
     // try to get it by findNearestPoly()
-    // first try with low search box
-    float extents[VERTEX_SIZE] = {5.0f, 5.0f, 5.0f};    // bounds of poly search area
+    // first try with NearPolySearchBound
     float closestPoint[VERTEX_SIZE] = {0.0f, 0.0f, 0.0f};
-    dtStatus dtResult = m_navMeshQuery->findNearestPoly(point, extents, &m_filter, &polyRef, closestPoint);
+    dtStatus dtResult = m_navMeshQuery->findNearestPoly(point, NearPolySearchBound, &m_filter, &polyRef, closestPoint);
     if (dtStatusSucceed(dtResult) && polyRef != INVALID_POLYREF)
     {
         *distance = dtVdist(closestPoint, point);
@@ -185,12 +184,10 @@ dtPolyRef PathFinder::getPolyByLocation(const float* point, float* distance) con
 
     // still nothing ..
     // try with bigger search box
-
     // From dtNavMeshQuery::findNearestPoly: "If the search extents overlaps more than
-    // 128 polygons it may return an invalid result". So use about 45 yards on Y.
-    extents[1] = DEFAULT_VISIBILITY_DISTANCE / 2.0f;
+    // 128 polygons it may return an invalid result".We just use FarPolySearchBound.
 
-    dtResult = m_navMeshQuery->findNearestPoly(point, extents, &m_filter, &polyRef, closestPoint);
+    dtResult = m_navMeshQuery->findNearestPoly(point, FarPolySearchBound, &m_filter, &polyRef, closestPoint);
     if (dtStatusSucceed(dtResult) && polyRef != INVALID_POLYREF)
     {
         *distance = dtVdist(closestPoint, point);
