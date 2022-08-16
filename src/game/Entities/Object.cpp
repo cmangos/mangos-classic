@@ -1604,7 +1604,7 @@ void WorldObject::MovePositionToFirstCollision(Position& pos, float dist, float 
         }
         UpdateAllowedPositionZ(dest.x, dest.y, dest.z);
         path.calculate(src, dest, false, true);
-        if (path.getPathType())
+        if ((path.getPathType() & PATHFIND_NOPATH) == 0)
         {
             G3D::Vector3 result = path.getPath().back();
             destX = result.x;
