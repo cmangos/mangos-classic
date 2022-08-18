@@ -488,8 +488,12 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
                 float hitPos[3];
                 float distanceToPoly;
 
-                // TODO: To get a better behavior in client we have to add bounding box size handling of unit.
-                //       Else it can appear partially on the wall.
+                hit = hit - m_sourceUnit->GetCollisionWidth();
+                if (hit < 0.1f)
+                {
+                    m_type = PATHFIND_NOPATH;
+                    return;
+                }
 
                 dtVlerp(hitPos, startPoint, endPoint, hit);
                 dtPolyRef poly = getPolyByLocation(hitPos, &distanceToPoly);
