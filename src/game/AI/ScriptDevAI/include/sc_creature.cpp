@@ -35,6 +35,7 @@ void ScriptedAI::GetAIInformation(ChatHandler& reader)
  */
 void ScriptedAI::EnterCombat(Unit* enemy)
 {
+    CreatureAI::EnterCombat(enemy);
     if (enemy)
         Aggro(enemy);
 }
