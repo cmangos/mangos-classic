@@ -586,7 +586,7 @@ bool MotionMaster::MoveFall()
     Movement::MoveSplineInit init(*m_owner);
     init.MoveTo(x, y, tz);
     init.SetFall();
-    Mutate(new EffectMovementGenerator(init, EVENT_JUMP));
+    Mutate(new EffectMovementGenerator(init, EVENT_FALL));
     return true;
 }
 
