@@ -2099,6 +2099,7 @@ enum MovementEvent
 {
     EVENT_CHARGE = 10000,
     EVENT_JUMP   = 10001, // TODO: Implement knockback using this
+    EVENT_FALL   = 10002,
 };
 
 #endif
