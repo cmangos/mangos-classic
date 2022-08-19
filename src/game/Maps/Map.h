@@ -199,6 +199,7 @@ class Map : public GridRefManager<NGridType>
         bool IsBattleGround() const { return i_mapEntry && i_mapEntry->IsBattleGround(); }
         bool IsContinent() const { return i_mapEntry && i_mapEntry->IsContinent(); }
         bool IsMountAllowed() const;
+        bool IsDynguidForced() const;
 
         // can't be nullptr for loaded map
         MapPersistentState* GetPersistentState() const { return m_persistentState; }

@@ -2633,6 +2633,18 @@ bool Map::IsMountAllowed() const
     return true;
 }
 
+bool Map::IsDynguidForced() const
+{
+    switch (GetId())
+    {
+        case 533: // Naxxramas
+        case 543: // Hellfire Ramparts
+            return true;
+        default: break;
+    }
+    return false;
+}
+
 void Map::OnEventHappened(uint16 event_id, bool activate, bool resume)
 {
     if (i_data)
