@@ -875,8 +875,17 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forc
             entry = group->GetGuidEntry(dbGuid);
     }
 
-    GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(entry);
-    if ((goinfo && (goinfo->ExtraFlags & GAMEOBJECT_EXTRA_FLAG_DYNGUID) != 0 || groupEntry) && dbGuid == newGuid)
+    bool dynguid = false;
+    if (map->IsDynguidForced())
+        dynguid = true;
+    if (!dynguid)
+    {
+        GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(entry);
+        if ((goinfo && (goinfo->ExtraFlags & GAMEOBJECT_EXTRA_FLAG_DYNGUID) != 0 || groupEntry) && dbGuid == newGuid)
+            dynguid = true;
+    }
+
+    if (dynguid)
         newGuid = map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT);
 
     if (uint32 randomEntry = sObjectMgr.GetRandomGameObjectEntry(dbGuid))

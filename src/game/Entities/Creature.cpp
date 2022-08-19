@@ -1568,7 +1568,16 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
             entry = group->GetGuidEntry(dbGuid);
     }
 
-    if (((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_DYNGUID) != 0 || groupEntry) && dbGuid == newGuid)
+    bool dynguid = false;
+    if (map->IsDynguidForced())
+        dynguid = true;
+    if (!dynguid)
+    {
+        if (((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_DYNGUID) != 0 || groupEntry) && dbGuid == newGuid)
+            dynguid = true;
+    }
+
+    if (dynguid)
         newGuid = map->GenerateLocalLowGuid(cinfo->GetHighGuid());
 
     GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(dbGuid);
