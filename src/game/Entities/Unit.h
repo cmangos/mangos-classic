@@ -2070,7 +2070,7 @@ class Unit : public WorldObject
         GameObject* GetGameObject(uint32 spellId) const;
         void AddGameObject(GameObject* gameObj);
         void AddWildGameObject(GameObject* gameObj);
-        void RemoveGameObject(GameObject* gameObj, bool del);
+        void RemoveGameObject(GameObject* gameObj, bool del, bool removeAura = true);
         void RemoveGameObject(uint32 spellid, bool del);
         void RemoveAllGameObjects();
 
