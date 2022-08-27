@@ -14,6 +14,8 @@
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include "AI/ScriptDevAI/include/sc_creature.h"
+#include "AI/ScriptDevAI/include/sc_instance.h"
 #include "Entities/Creature.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "Spells/Spell.h"
@@ -87,7 +89,7 @@ void CombatAI::KilledUnit(Unit* victim)
     if (!m_onKillCooldown && m_onDeathTexts.size() > 0)
     {
         m_onKillCooldown = true;
-        DoScriptText(m_onDeathTexts[urand(0, m_onDeathTexts.size() - 1)], m_creature, victim);
+        DoBroadcastText(m_onDeathTexts[urand(0, m_onDeathTexts.size() - 1)], m_creature, victim);
         ResetTimer(ACTION_ON_KILL_COOLDOWN, 10000);
     }
 }
