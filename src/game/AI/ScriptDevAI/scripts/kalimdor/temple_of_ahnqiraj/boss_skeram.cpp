@@ -30,7 +30,7 @@ EndScriptData
 enum
 {
     SAY_AGGRO                   = -1531000,
-    SAY_SLAY                    = -1531001,
+    SAY_SLAY                    = 11446,
     SAY_DEATH                   = -1531002,
 
     SPELL_ARCANE_EXPLOSION      = 26192,

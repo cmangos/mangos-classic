@@ -37,7 +37,7 @@ enum
     SAY_RAND_INTRO_2        = -1509023,
     SAY_RAND_INTRO_3        = -1509024,
     SAY_AGGRO               = -1509025,
-    SAY_SLAY                = -1509026,
+    SAY_SLAY                = 11450,
     SAY_DEATH               = -1509027,
 
     SPELL_CURSE_OF_TONGUES  = 25195,

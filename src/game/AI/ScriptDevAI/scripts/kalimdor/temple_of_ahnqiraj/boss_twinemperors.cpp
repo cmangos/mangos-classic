@@ -35,7 +35,7 @@ enum
     SAY_VEKLOR_AGGRO_2          = -1531020,
     SAY_VEKLOR_AGGRO_3          = -1531021,
     SAY_VEKLOR_AGGRO_4          = -1531022,
-    SAY_VEKLOR_SLAY             = -1531023,
+    SAY_VEKLOR_SLAY             = 11453,
     SAY_VEKLOR_DEATH            = -1531024,
     SAY_VEKLOR_SPECIAL          = -1531025,
 
