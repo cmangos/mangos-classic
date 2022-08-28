@@ -43,13 +43,14 @@ class CombatAI : public ScriptedAI
             AddOnKillText(value);
             AddOnKillText(fargs...);
         }
+        void AddOnKillSound(int32 soundId);
         void KilledUnit(Unit* /*victim*/) override;
 
         // virtual void ExecuteAction(uint32 action) {}
     private:
         ObjectGuid m_storedTarget;
 
-        std::vector<int32> m_onDeathTexts;
+        std::vector<std::pair<int32, bool>> m_onDeathReactions;
         bool m_onKillCooldown;
 
         bool m_stopTargeting;

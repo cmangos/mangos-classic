@@ -30,7 +30,7 @@
 enum
 {
     SAY_AGGRO                   = -1531008,
-    SAY_SLAY                    = -1531009,
+    SAY_SLAY                    = 11443,
     SAY_DEATH                   = -1531010,
 
     EMOTE_FRENZY                = -1000002,

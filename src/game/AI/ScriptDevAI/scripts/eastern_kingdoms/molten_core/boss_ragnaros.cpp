@@ -34,7 +34,7 @@ enum
     SAY_REINFORCEMENTS_2        = -1409014,
     SAY_HAMMER                  = -1409015,
     SAY_WRATH                   = -1409016,
-    SAY_KILL                    = -1409017,
+    SAY_KILL                    = 7626,
     SAY_MAGMABURST              = -1409018,
 
     SPELL_WRATH_OF_RAGNAROS     = 20566,
