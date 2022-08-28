@@ -714,6 +714,7 @@ void WorldSession::LogoutPlayer()
         // calls to GetMap in this case may cause crashes
         if (_player->IsInWorld())
         {
+            _player->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_LEAVE_WORLD);
             Map* _map = _player->GetMap();
             _map->Remove(_player, true);
         }
