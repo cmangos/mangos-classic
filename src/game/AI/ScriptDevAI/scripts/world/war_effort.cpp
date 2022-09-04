@@ -20,6 +20,7 @@
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
+#include "OutdoorPvP/OutdoorPvP.h"
 
 enum Quests
 {
