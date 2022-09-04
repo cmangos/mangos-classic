@@ -433,19 +433,45 @@ void BattleGroundWS::HandleGameObjectCreate(GameObject* go)
 // process click on dropped flag events
 bool BattleGroundWS::HandleEvent(uint32 eventId, Object* source, Object* target)
 {
-    if (!target || !target->IsGameObject())
-        return true;
-
-    GameObject* go = static_cast<GameObject*>(target);
-    if (!source->IsPlayer())
-        return true;
-
-    Player* srcPlayer = static_cast<Player*>(source);
-
     switch (eventId)
     {
+        case WS_EVENT_ALLIANCE_FLAG_DROPPED_PICKUP:
+        case WS_EVENT_HORDE_FLAG_DROPPED_PICKUP:
+        {
+            if (!source || !source->IsGameObject())
+                return true;
+
+            GameObject* go = static_cast<GameObject*>(source);
+            if (!target->IsPlayer())
+                return true;
+
+            Player* srcPlayer = static_cast<Player*>(target);
+
+            // only handles return, not pickup of dropped
+            Team team = srcPlayer->GetTeam();
+            PvpTeamIndex teamIdx = GetTeamIndexByTeamId(team);
+            PvpTeamIndex otherTeamIdx = GetOtherTeamIndex(teamIdx);
+            if (wsDroppedFlagId[teamIdx] != go->GetEntry())
+                return true;
+
+            ProcessDroppedFlagActions(srcPlayer, go);
+
+            // when clicked the flag despawns
+            go->SetLootState(GO_JUST_DEACTIVATED);
+            break;
+        }
         case WS_EVENT_ALLIANCE_FLAG_PICKUP:
         case WS_EVENT_HORDE_FLAG_PICKUP:
+        {
+            if (!target || !target->IsGameObject())
+                return true;
+
+            GameObject* go = static_cast<GameObject*>(target);
+            if (!source->IsPlayer())
+                return true;
+
+            Player* srcPlayer = static_cast<Player*>(source);
+
             if (go->GetGoType() == GAMEOBJECT_TYPE_FLAGDROP)
                 ProcessDroppedFlagActions(srcPlayer, go);
             else
@@ -454,6 +480,7 @@ bool BattleGroundWS::HandleEvent(uint32 eventId, Object* source, Object* target)
             // when clicked the flag despawns
             go->SetLootState(GO_JUST_DEACTIVATED);
             break;
+        }
     }
 
     return false;

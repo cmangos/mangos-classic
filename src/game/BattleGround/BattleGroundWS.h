@@ -117,6 +117,9 @@ enum WSEventIds
 
     WS_EVENT_ALLIANCE_FLAG_DROP         = 8506,             // not used; events used for flag handling; triggered from spell
     WS_EVENT_HORDE_FLAG_DROP            = 8507,
+
+    WS_EVENT_ALLIANCE_FLAG_DROPPED_PICKUP = 8623,
+    WS_EVENT_HORDE_FLAG_DROPPED_PICKUP  = 8624,
 };
 
 enum WSGameObjects
