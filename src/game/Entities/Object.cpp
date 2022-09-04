@@ -1610,6 +1610,9 @@ void WorldObject::MovePositionToFirstCollision(Position& pos, float dist, float 
             destX = result.x;
             destY = result.y;
             destZ = result.z;
+            // no collision detected - reset height
+            if (dest.z == result.z)
+                destZ -= halfHeight;
             if (transport) // transport produces offset, but we need global pos
                 transport->CalculatePassengerPosition(destX, destY, destZ);
         }
