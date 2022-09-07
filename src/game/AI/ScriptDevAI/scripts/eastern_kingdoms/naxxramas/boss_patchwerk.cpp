@@ -145,6 +145,9 @@ struct HatefulStrikePrimer : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
     {
+        if (!spell->GetCaster()->CanReachWithMeleeAttack(target))
+            return false;
+
         auto const& threatList = spell->GetCaster()->getThreatManager().getThreatList();
         uint32 i = 0;
         for (auto itr = threatList.begin(); itr != threatList.end() && i < 4; ++itr, ++i)
