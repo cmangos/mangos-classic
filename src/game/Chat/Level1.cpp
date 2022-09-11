@@ -1358,7 +1358,7 @@ bool ChatHandler::HandleLookupTeleCommand(char* args)
     return true;
 }
 
-// Enable\Dissable accept whispers (for GM)
+// Enable/Disable accept whispers (for GM)
 bool ChatHandler::HandleWhispersCommand(char* args)
 {
     if (!*args)

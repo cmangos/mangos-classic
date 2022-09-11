@@ -2512,6 +2512,23 @@ void Player::SetGMVisible(bool on)
     }
 }
 
+bool Player::isAllowedWhisperFrom(ObjectGuid guid)
+{
+    if (PlayerSocial* social = GetSocial())
+        if (social->HasFriend(guid))
+            return true;
+
+    if (Group* group = GetGroup())
+        if (group->IsMember(guid))
+            return true;
+
+    if (Guild* guild = sGuildMgr.GetGuildById(GetGuildId()))
+        if (guild->GetMemberSlot(guid))
+            return true;
+
+    return false;
+}
+
 ///- If the player is invited, remove him. If the group if then only 1 person, disband the group.
 void Player::UninviteFromGroup()
 {

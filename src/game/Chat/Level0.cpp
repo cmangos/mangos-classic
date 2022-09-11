@@ -282,3 +282,25 @@ bool ChatHandler::HandleServerMotdCommand(char* /*args*/)
     PSendSysMessage(LANG_MOTD_CURRENT, sWorld.GetMotd());
     return true;
 }
+
+bool ChatHandler::HandleWhisperRestrictionCommand(char* args)
+{
+    if (!*args)
+    {
+        PSendSysMessage("Whisper restriction is %s.", m_session->GetPlayer()->isEnabledWhisperRestriction() ? "ON" : "OFF");
+        return true;
+    }
+
+    bool value;
+    if (!ExtractOnOff(&args, value))
+    {
+        SendSysMessage(LANG_USE_BOL);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    m_session->GetPlayer()->SetWhisperRestriction(value);
+    PSendSysMessage("Whisper restriction is now %s.", value ? "ON. Only friends, group members, or guildmates may whisper you." : "OFF");
+
+    return true;
+}
