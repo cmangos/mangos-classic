@@ -4774,7 +4774,8 @@ void Aura::PeriodicTick()
 
             OnPeriodicCalculateAmount(pdamage);
 
-            if (target->IsImmuneToSchool(spellProto, (1 << GetEffIndex()))) // TODO: Check if we need to check for avoiding immune
+            // first aid confirmed to work through immune when selfcast
+            if (pCaster != target && target->IsImmuneToSchool(spellProto, (1 << GetEffIndex()))) // TODO: Check if we need to check for avoiding immune
             {
                 Unit::SendSpellOrDamageImmune(GetCasterGuid(), target, spellProto->Id);
                 break;
