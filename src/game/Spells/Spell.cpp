@@ -1371,7 +1371,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, 
         effectMask = notImmunedMask & ~target->effectMaskProcessed;
         if (!notImmunedMask ||
             unit->IsImmuneToDamage(GetSpellSchoolMask(m_spellInfo)) ||
-            unit->IsImmuneToSpell(m_spellInfo, unit == m_trueCaster, effectMask))
+            unit->IsImmuneToSpell(m_spellInfo, unit == m_trueCaster, effectMask, m_trueCaster))
         {
             Unit::SendSpellMiss(m_trueCaster, unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
 
@@ -4733,8 +4733,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
             }
 
-            if (IsPositiveSpell(m_spellInfo->Id) && affectedMask)
-                if (target->IsImmuneToSpell(m_spellInfo, target == m_trueCaster, affectedMask))
+            if (IsPositiveSpell(m_spellInfo->Id, m_trueCaster, target) && affectedMask)
+                if (target->IsImmuneToSpell(m_spellInfo, target == m_trueCaster, affectedMask, m_trueCaster))
                     return SPELL_FAILED_TARGET_AURASTATE;
 
             // Caster must be facing the targets back
