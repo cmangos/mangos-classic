@@ -66,9 +66,9 @@ struct boss_emerald_dragonAI : public ScriptedAI
     {
         m_uiEventCounter = 1;
 
-        m_uiSeepingFogTimer = urand(15000, 20000);
-        m_uiNoxiousBreathTimer = 8000;
-        m_uiTailsweepTimer = 4000;
+        m_uiSeepingFogTimer = 30000;
+        m_uiNoxiousBreathTimer = urand(9000, 12000);
+        m_uiTailsweepTimer = urand(10000, 20000);
     }
 
     void EnterCombat(Unit* pEnemy) override
@@ -85,10 +85,9 @@ struct boss_emerald_dragonAI : public ScriptedAI
             pVictim->CastSpell(pVictim, SPELL_MARK_OF_NATURE_PLAYER, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            pSummoned->AI()->AttackStart(pTarget);
+        summoned->AI()->AttackClosestEnemy();
     }
 
     void JustDied(Unit* killer) override
@@ -120,7 +119,7 @@ struct boss_emerald_dragonAI : public ScriptedAI
         {
             DoCastSpellIfCan(m_creature, SPELL_SEEPING_FOG_R, CAST_TRIGGERED);
             DoCastSpellIfCan(m_creature, SPELL_SEEPING_FOG_L, CAST_TRIGGERED);
-            m_uiSeepingFogTimer = urand(120000, 150000);    // Rather Guesswork, but one Fog has 2min duration, hence a bit longer
+            m_uiSeepingFogTimer = 60000;
         }
         else
             m_uiSeepingFogTimer -= uiDiff;
@@ -128,7 +127,7 @@ struct boss_emerald_dragonAI : public ScriptedAI
         if (m_uiNoxiousBreathTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_NOXIOUS_BREATH) == CAST_OK)
-                m_uiNoxiousBreathTimer = urand(14000, 20000);
+                m_uiNoxiousBreathTimer = urand(9000, 12000);
         }
         else
             m_uiNoxiousBreathTimer -= uiDiff;
@@ -136,7 +135,7 @@ struct boss_emerald_dragonAI : public ScriptedAI
         if (m_uiTailsweepTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_TAILSWEEP) == CAST_OK)
-                m_uiTailsweepTimer = urand(15000, 20000);
+                m_uiTailsweepTimer = urand(10000, 30000);
         }
         else
             m_uiTailsweepTimer -= uiDiff;
