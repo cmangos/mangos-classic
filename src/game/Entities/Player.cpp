@@ -19325,7 +19325,12 @@ void Player::_LoadSkills(QueryResult* result)
                     continue;
 
                 if (entry->flags & SKILL_FLAG_MAXIMIZED)
-                    value = max = GetSkillMaxForLevel();
+                {
+                    if (entry->flags & SKILL_FLAG_DISPLAY_AS_MONO)
+                        max = GetSkillMaxForLevel();
+                    
+                    value = max;
+                }
 
                 if (SkillTiersEntry const* steps = sSkillTiersStore.LookupEntry(entry->skillTierId))
                 {

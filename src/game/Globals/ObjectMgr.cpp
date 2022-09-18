@@ -8298,7 +8298,7 @@ SkillRangeType GetSkillRangeType(SkillLineEntry const* pSkill, bool racial)
         case SKILL_CATEGORY_PROFESSION:
         {
             // not set skills for professions and racial abilities
-            if (IsProfessionSkill(pSkill->id))
+            if (IsProfessionOrRidingSkill(pSkill->id))
                 return SKILL_RANGE_RANK;
             if (racial)
                 return SKILL_RANGE_NONE;
