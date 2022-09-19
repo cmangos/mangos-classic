@@ -2630,7 +2630,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 sender = MailSender(pSource);
             uint32 deliverDelay = m_script->textId[0] > 0 ? (uint32)m_script->textId[0] : 0;
 
-            MailDraft(m_script->sendMail.mailTemplateId).SendMailTo(static_cast<Player*>(pTarget), sender, MAIL_CHECK_MASK_HAS_BODY, deliverDelay);
+            MailDraft(m_script->sendMail.mailTemplateId).SetMoney(m_script->sendMail.money).SendMailTo(static_cast<Player*>(pTarget), sender, MAIL_CHECK_MASK_HAS_BODY, deliverDelay);
             break;
         }
         case SCRIPT_COMMAND_SET_HOVER:                      // 39

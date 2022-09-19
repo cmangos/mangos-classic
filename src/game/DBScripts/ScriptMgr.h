@@ -108,6 +108,7 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_SEND_MAIL                = 38,           // resSource WorldObject, can be nullptr, resTarget Player
     // datalong: Send mailTemplateId from resSource (if provided) to player resTarget
     // datalong2: AlternativeSenderEntry. Use as sender-Entry
+    // datalong3: Money
     // dataint1: Delay (>= 0) in Seconds
     SCRIPT_COMMAND_SET_HOVER                  = 39,           // resSource = Creature
     // datalong = bool 0=off, 1=on
@@ -392,6 +393,7 @@ struct ScriptInfo
         {
             uint32 mailTemplateId;                          // datalong
             uint32 altSender;                               // datalong2;
+            uint32 money;                                   // datalong3;
         } sendMail;
 
         struct                                              // SCRIPT_COMMAND_SET_HOVER (39)

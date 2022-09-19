@@ -354,6 +354,7 @@ Defining a buddy could be done in several way:
                                             * resultingSource = Creature OR NULL, resTarget must be Player
                                             * datalong = mailTemplateId
                                             * datalong2: AlternativeSenderEntry. Use as sender-Entry of the sent mail
+                                            * datalong3: Money
                                             * dataint1: Delay (>= 0) in Seconds
 
 39 SCRIPT_COMMAND_SET_FLY                   * resultingSource = Creature
