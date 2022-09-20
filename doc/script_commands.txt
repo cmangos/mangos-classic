@@ -259,8 +259,8 @@ Defining a buddy could be done in several way:
                                             * datalog = movie id
 
 20 SCRIPT_COMMAND_MOVEMENT                  resultingSource = Creature
-                                            * datalong = MovementType (0:idle, 1:random, 2:waypoint, 3:path, 4:linear)
-                                            * datalong2 = wanderDistance (for random movement), pathId (for waypoint movement)
+                                            * datalong = MovementType (0:idle, 1:random, 2:waypoint, 3:path, 4:linear, 18:fall)
+                                            * datalong2 = wanderDistance (for random movement), pathId (for waypoint movement), relayId (for jump movement)
                                             * datalong3 = 0x1 - timer for timed random movement or pass target to waypoint and path movegen (by default, source targets self)
                                             *             0x2 - for waypoint, path and linear path - uses pathId from waypoint_path table
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: RandomMovement around current position
