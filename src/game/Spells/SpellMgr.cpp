@@ -73,7 +73,7 @@ int32 GetSpellMaxDuration(SpellEntry const* spellInfo)
     return (du->Duration[2] == -1) ? -1 : abs(du->Duration[2]);
 }
 
-int32 CalculateSpellDuration(SpellEntry const* spellInfo, Unit const* caster)
+int32 CalculateSpellDuration(SpellEntry const* spellInfo, Unit const* caster, Unit const* target, AuraScript* auraScript)
 {
     int32 duration = GetSpellDuration(spellInfo);
 
@@ -81,8 +81,11 @@ int32 CalculateSpellDuration(SpellEntry const* spellInfo, Unit const* caster)
     {
         int32 maxduration = GetSpellMaxDuration(spellInfo);
 
-        if (duration != maxduration && caster->GetTypeId() == TYPEID_PLAYER)
+        if (duration != maxduration && caster->IsPlayer())
             duration += int32((maxduration - duration) * caster->GetComboPoints() / 5);
+
+        if (auraScript)
+            duration = auraScript->OnDurationCalculate(caster, target, duration);
 
         if (Player* modOwner = caster->GetSpellModOwner())
         {
@@ -92,6 +95,8 @@ int32 CalculateSpellDuration(SpellEntry const* spellInfo, Unit const* caster)
                 duration = 0;
         }
     }
+    else if (auraScript)
+        duration = auraScript->OnDurationCalculate(caster, target, duration);
 
     return duration;
 }

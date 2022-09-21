@@ -5259,7 +5259,7 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, Wor
 
     Unit* unitCaster = caster && caster->isType(TYPEMASK_UNIT) ? (Unit*)caster : nullptr;
 
-    m_duration = m_maxDuration = CalculateSpellDuration(spellproto, unitCaster);
+    m_duration = m_maxDuration = CalculateSpellDuration(spellproto, unitCaster, target, m_auraScript);
 
     if (m_maxDuration == -1 || (m_isPassive && spellproto->DurationIndex == 0))
         m_permanent = true;

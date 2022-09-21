@@ -8750,7 +8750,7 @@ void Unit::IncrDiminishing(DiminishingGroup group, bool pvp)
     m_Diminishing.push_back(DiminishingReturn(group, GetMap()->GetCurrentMSTime(), DIMINISHING_LEVEL_2));
 }
 
-void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32& duration, Unit* caster, DiminishingLevels Level, bool isReflected)
+void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32& duration, Unit* caster, DiminishingLevels Level, bool isReflected, SpellEntry const* spellInfo, bool hasAuraScript)
 {
     if (duration == -1 || group == DIMINISHING_NONE || (!isReflected && caster->CanAssist(this)))
         return;

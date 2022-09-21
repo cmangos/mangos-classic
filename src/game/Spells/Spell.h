@@ -588,6 +588,7 @@ class Spell
             bool   isCrit : 1;
             bool   executionless : 1;
             uint32 heartbeatResistChance;
+            uint32 effectDuration;
             uint32 diminishDuration; // Store duration after diminishing returns are applied
             DiminishingLevels diminishLevel;
             DiminishingGroup diminishGroup;

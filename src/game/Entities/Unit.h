@@ -1113,7 +1113,7 @@ class Unit : public WorldObject
          * @param Level The current level of diminishing returns for the group, decides the new duration
          * @param isReflected Whether the spell was reflected or not, used to determine if we should do any calculations at all.
          */
-        void ApplyDiminishingToDuration(DiminishingGroup  group, int32& duration, Unit* caster, DiminishingLevels Level, bool isReflected);
+        void ApplyDiminishingToDuration(DiminishingGroup group, int32& duration, Unit* caster, DiminishingLevels Level, bool isReflected, SpellEntry const* spellInfo, bool hasAuraScript);
         /**
          * Applies a diminishing return to the given group if apply is true,
          * otherwise lowers the level by one (?)

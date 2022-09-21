@@ -922,7 +922,8 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
     targetInfo.procReflect = false;
     targetInfo.isCrit = false;
     targetInfo.heartbeatResistChance = 0;
-    targetInfo.diminishDuration = m_duration;
+    targetInfo.effectDuration = CalculateSpellDuration(m_spellInfo, m_caster, target, m_auraScript);
+    targetInfo.diminishDuration = targetInfo.effectDuration;
     targetInfo.diminishLevel = DIMINISHING_LEVEL_1;
     targetInfo.diminishGroup = DIMINISHING_NONE;
     targetInfo.executionless = false;
@@ -1001,16 +1002,18 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
     if (Unit* realCaster = GetAffectiveCasterOrOwner())
     {
         bool isReflected = targetInfo.missCondition == SPELL_MISS_REFLECT && targetInfo.reflectResult == SPELL_MISS_NONE;
+        Unit* targetForDiminish = isReflected ? m_caster : target;
+        if (IsAuraApplyEffects(m_spellInfo, SpellEffectIndexMask(targetInfo.effectHitMask)))
+            targetInfo.effectDuration = targetForDiminish->CalculateAuraDuration(m_spellInfo, effectMask, targetInfo.effectDuration, realCaster);
         if ((targetInfo.missCondition == SPELL_MISS_NONE || isReflected) && CanSpellDiminish())
         {
-            Unit* targetForDiminish = isReflected ? m_caster : target;
             targetInfo.diminishGroup = GetDiminishingReturnsGroupForSpell(m_spellInfo, m_triggeredByAuraSpell != nullptr || (m_IsTriggeredSpell && m_CastItem));
             targetInfo.diminishLevel = targetForDiminish->GetDiminishing(targetInfo.diminishGroup);
 
-            if (m_duration > 0)
+            if (targetInfo.effectDuration > 0)
             {
-                int32 duration = m_duration;
-                targetForDiminish->ApplyDiminishingToDuration(targetInfo.diminishGroup, duration, realCaster, targetInfo.diminishLevel, isReflected);
+                int32 duration = targetInfo.effectDuration;
+                targetForDiminish->ApplyDiminishingToDuration(targetInfo.diminishGroup, duration, realCaster, targetInfo.diminishLevel, isReflected, m_spellInfo, m_auraScript);
                 targetInfo.diminishDuration = duration;
                 if (targetInfo.diminishDuration == 0 && targetInfo.diminishLevel == DIMINISHING_LEVEL_IMMUNE)
                     targetInfo.effectHitMask &= (~GetAuraEffectMask(m_spellInfo));
@@ -1414,10 +1417,10 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, 
             if (traveling) // if travelling, need to recalculate diminishing level and duration
             {
                 target->diminishLevel = unit->GetDiminishing(target->diminishGroup);
-                if (m_duration > 0)
+                if (target->effectDuration > 0)
                 {
-                    int32 duration = m_duration;
-                    unit->ApplyDiminishingToDuration(target->diminishGroup, duration, m_caster, target->diminishLevel, isReflected);
+                    int32 duration = target->effectDuration;
+                    unit->ApplyDiminishingToDuration(target->diminishGroup, duration, m_caster, target->diminishLevel, isReflected, m_spellInfo, m_auraScript);
                     target->diminishDuration = duration;
                 }
             }
@@ -3093,7 +3096,7 @@ SpellCastResult Spell::cast(bool skipCheck)
     // set to real guid to be sent later to the client
     m_targets.updateTradeSlotItem();
 
-    m_duration = CalculateSpellDuration(m_spellInfo, m_caster);
+    m_duration = CalculateSpellDuration(m_spellInfo, m_caster, nullptr, m_auraScript);
 
     FillTargetMap();
 
@@ -3904,7 +3907,10 @@ void Spell::WriteSpellGoTargets(WorldPacket& data)
         {
             // possibly SPELL_MISS_IMMUNE2 for this??
             if (IsChanneledSpell(m_spellInfo) && ihit.targetGUID == m_targets.getUnitTargetGuid()) // can happen due to DR
-                m_duration = 0;                            // cancel aura to avoid visual effect continue
+            {
+                m_duration = 0;                              // cancel aura to avoid visual effect continue
+                ihit.effectDuration = 0;
+            }
             ihit.missCondition = SPELL_MISS_IMMUNE2;
             ++miss;
         }
@@ -3917,7 +3923,10 @@ void Spell::WriteSpellGoTargets(WorldPacket& data)
         else
         {
             if (IsChanneledSpell(m_spellInfo) && (ihit.missCondition == SPELL_MISS_RESIST || ihit.missCondition == SPELL_MISS_REFLECT))
-                m_duration = 0;                             // cancel aura to avoid visual effect continue
+            {
+                m_duration = 0;                              // cancel aura to avoid visual effect continue
+                ihit.effectDuration = 0;
+            }
             ++miss;
         }
     }
