@@ -144,7 +144,7 @@ WorldSafeLocsEntry const* GraveyardManager::GetClosestGraveYard(float x, float y
     const uint32 areaId = sTerrainMgr.GetAreaId(mapId, x, y, z);
 
     WorldSafeLocsEntry const* graveyard = nullptr;
-    if (zoneId != 0)
+    if (areaId != 0)
     {
         auto bounds = m_graveyardMap.equal_range(GraveyardLinkKey(areaId, GRAVEYARD_AREALINK));
         graveyard = GetClosestGraveyardHelper(bounds, x, y, z, mapId, team);
