@@ -1084,17 +1084,29 @@ void ObjectMgr::LoadSpawnGroups()
 
             if (group.Type == SPAWN_GROUP_CREATURE)
             {
-                if (!GetCreatureData(guid.DbGuid))
+                CreatureData const* data = GetCreatureData(guid.DbGuid);
+                if (!data)
                 {
                     sLog.outErrorDb("LoadSpawnGroups: Invalid spawn_group_spawn guid %u. Skipping.", guid.DbGuid);
+                    continue;
+                }
+                if (!data->IsNotPartOfPoolOrEvent())
+                {
+                    sLog.outErrorDb("LoadSpawnGroups: spawn_group_spawn guid %u is part of pool or game event (incompatible). Skipping.", guid.DbGuid);
                     continue;
                 }
             }
             else
             {
-                if (!GetGOData(guid.DbGuid))
+                GameObjectData const* data = GetGOData(guid.DbGuid);
+                if (!data)
                 {
                     sLog.outErrorDb("LoadSpawnGroups: Invalid spawn_group_spawn guid %u. Skipping.", guid.DbGuid);
+                    continue;
+                }
+                if (!data->IsNotPartOfPoolOrEvent())
+                {
+                    sLog.outErrorDb("LoadSpawnGroups: spawn_group_spawn guid %u is part of pool or game event (incompatible). Skipping.", guid.DbGuid);
                     continue;
                 }
             }
