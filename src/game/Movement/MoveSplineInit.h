@@ -88,6 +88,8 @@ namespace Movement
             void SetVelocity(float vel);
 
             PointsArray& Path() { return args.path; }
+
+            void SetCombatSlowed() { args.slowed = true; }
         protected:
 
             MoveSplineInitArgs args;

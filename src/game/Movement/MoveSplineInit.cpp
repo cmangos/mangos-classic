@@ -83,7 +83,11 @@ namespace Movement
         moveFlags |= (MOVEFLAG_SPLINE_ENABLED | MOVEFLAG_FORWARD);
 
         if (args.velocity == 0.f) // ignore swim speed and flight speed because its not used in generic scripting - always possible to override
-            args.velocity = unit.GetSpeed(MovementInfo::GetSpeedType(MovementFlags(moveFlags &~ (MOVEFLAG_FLYING | MOVEFLAG_SWIMMING))));
+        {
+            args.velocity = unit.GetSpeed(MovementInfo::GetSpeedType(MovementFlags(moveFlags & ~(MOVEFLAG_FLYING | MOVEFLAG_SWIMMING))));
+            if (args.slowed)
+                args.velocity *= 0.5f;
+        }
 
         if (!args.Validate(&unit))
             return 0;

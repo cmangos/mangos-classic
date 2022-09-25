@@ -564,6 +564,8 @@ bool ChaseMovementGenerator::DispatchSplineToPosition(Unit& owner, float x, floa
     Movement::MoveSplineInit init(owner);
     init.MovebyPath(path);
     init.SetWalk(walk);
+    if (owner.IsSlowedInCombat() && !walk)
+        init.SetCombatSlowed();
     if (target)
         init.SetFacing(i_target.getTarget());
     init.Launch();

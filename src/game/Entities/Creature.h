@@ -51,7 +51,7 @@ enum CreatureFlagsExtra
     CREATURE_EXTRA_FLAG_NO_CRUSH               = 0x00000020,       // 32 creature can't do crush attacks
     CREATURE_EXTRA_FLAG_NO_XP_AT_KILL          = 0x00000040,       // 64 creature kill not provide XP
     CREATURE_EXTRA_FLAG_INVISIBLE              = 0x00000080,       // 128 creature is always invisible for player (mostly trigger creatures)
-    // CREATURE_EXTRA_FLAG_REUSE               = 0x00000100,       // 256
+    CREATURE_EXTRA_FLAG_NO_WOUNDED_SLOWDOWN    = 0x00000100,       // 256 creature does not slow down on low hp in combat
     CREATURE_EXTRA_FLAG_AGGRO_ZONE             = 0x00000200,       // 512 creature sets itself in combat with zone on aggro
     CREATURE_EXTRA_FLAG_GUARD                  = 0x00000400,       // 1024 creature is a guard
     CREATURE_EXTRA_FLAG_NO_CALL_ASSIST         = 0x00000800,       // 2048 creature shouldn't call for assistance on aggro
@@ -846,6 +846,10 @@ class Creature : public Unit
         bool IsIgnoringFeignDeath() const { return m_ignoringFeignDeath; }
         void SetIgnoreFeignDeath(bool state) { m_ignoringFeignDeath = state; }
 
+        void SetNoWoundedSlowdown(bool state) { m_noWoundedSlowdown = state; }
+        bool IsNoWoundedSlowdown() const { return m_noWoundedSlowdown; }
+        bool IsSlowedInCombat() const override;
+
         virtual void AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto = nullptr, bool permanent = false, uint32 forcedDuration = 0) override;
 
         // spell scripting persistency
@@ -932,6 +936,7 @@ class Creature : public Unit
         bool m_noXP;
         bool m_noLoot;
         bool m_noReputation;
+        bool m_noWoundedSlowdown;
         bool m_ignoringFeignDeath;
         bool m_noWeaponSkillGain;
 

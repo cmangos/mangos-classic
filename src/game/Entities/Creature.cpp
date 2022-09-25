@@ -145,7 +145,7 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_originalEntry(0), m_ai(nullptr),
     m_isInvisible(false), m_ignoreMMAP(false), m_forceAttackingCapability(false), m_countSpawns(false), m_noWeaponSkillGain(false),
     m_creatureInfo(nullptr),
-    m_noXP(false), m_noLoot(false), m_noReputation(false), m_ignoringFeignDeath(false),
+    m_noXP(false), m_noLoot(false), m_noReputation(false), m_noWoundedSlowdown(false), m_ignoringFeignDeath(false),
     m_immunitySet(UINT32_MAX),
     m_creatureGroup(nullptr)
 {
@@ -441,6 +441,7 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
     SetCanCallForAssistance((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_CALL_ASSIST) == 0);
     SetNoLoot(false);
     SetNoReputation(false);
+    SetNoWoundedSlowdown((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_WOUNDED_SLOWDOWN) != 0);
     SetIgnoreFeignDeath((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_IGNORE_FEIGN_DEATH) != 0);
     SetNoWeaponSkillGain((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_SKILL_GAINS) != 0);
 
@@ -2892,6 +2893,11 @@ void Creature::RegisterHitBySpell(uint32 spellId)
 void Creature::ResetSpellHitCounter()
 {
     m_hitBySpells.clear();
+}
+
+bool Creature::IsSlowedInCombat() const
+{
+    return !IsNoWoundedSlowdown() && HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT);
 }
 
 void Creature::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* /*itemProto*/, bool permanent, uint32 forcedDuration)

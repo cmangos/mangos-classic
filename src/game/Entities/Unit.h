@@ -2218,6 +2218,8 @@ class Unit : public WorldObject
         void SetFeignDeath(bool apply, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0, bool dynamic = true, bool success = true);
         virtual bool IsIgnoringFeignDeath() const { return false; }
 
+        virtual bool IsSlowedInCombat() const { return false; }
+
         void InterruptSpellsCastedOnMe(bool killDelayed = false);
 
         void AddComboPointHolder(uint32 lowguid) { m_ComboPointHolders.insert(lowguid); }

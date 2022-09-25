@@ -133,6 +133,9 @@ int32 AbstractRandomMovementGenerator::_setLocation(Unit& owner)
     init.MovebyPath(m_pathFinder->getPath());
     init.SetWalk(i_walk);
 
+    if (owner.IsSlowedInCombat())
+        init.SetCombatSlowed();
+
     int32 duration = init.Launch();
 
     if (duration)
