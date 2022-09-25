@@ -1550,6 +1550,15 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
     if (entry == 0)
         entry = GetCreatureConditionalSpawnEntry(dbGuid, map);
 
+    SpawnGroupEntry* groupEntry = map->GetMapDataContainer().GetSpawnGroupByGuid(dbGuid, TYPEID_UNIT); // use dynguid by default \o/
+    CreatureGroup* group = nullptr;
+    if (groupEntry)
+    {
+        group = static_cast<CreatureGroup*>(map->GetSpawnManager().GetSpawnGroup(groupEntry->Id));
+        if (!entry)
+            entry = group->GetGuidEntry(dbGuid);
+    }
+
     if (!entry)
         return false;
 
@@ -1558,15 +1567,6 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
     {
         sLog.outErrorDb("Creature (Entry: %u) not found in table `creature_template`, can't load. ", entry);
         return false;
-    }
-
-    SpawnGroupEntry* groupEntry = map->GetMapDataContainer().GetSpawnGroupByGuid(dbGuid, TYPEID_UNIT); // use dynguid by default \o/
-    CreatureGroup* group = nullptr;
-    if (groupEntry)
-    {
-        group = static_cast<CreatureGroup*>(map->GetSpawnManager().GetSpawnGroup(groupEntry->Id));
-        if (!entry)
-            entry = group->GetGuidEntry(dbGuid);
     }
 
     bool dynguid = false;
