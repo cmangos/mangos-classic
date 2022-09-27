@@ -347,9 +347,11 @@ void instance_stratholme::SetData(uint32 type, uint32 data)
         case TYPE_BARON:
             if (data == IN_PROGRESS)
             {
+                DoUseOpenableObject(GO_ZIGGURAT_DOOR_5, false);
+
                 // Close Slaughterhouse door if needed
                 if (m_auiEncounter[type] == FAIL)
-                    DoUseDoorOrButton(GO_PORT_GAUNTLET);
+                    DoUseOpenableObject(GO_PORT_GAUNTLET, false);
 
                 // If Aurius was given the medaillon wait 5s before summoning him
                 if (GetData(TYPE_AURIUS) == DONE)
@@ -410,12 +412,15 @@ void instance_stratholme::SetData(uint32 type, uint32 data)
                         }
                     }
                 }
-
-                // Open Slaughterhouse door again
-                DoUseDoorOrButton(GO_PORT_GAUNTLET);
             }
-            else if (data == FAIL)
-                DoUseDoorOrButton(GO_PORT_GAUNTLET);
+
+            if (data != IN_PROGRESS)
+            {
+                // Open Slaughterhouse door again
+                DoUseOpenableObject(GO_PORT_GAUNTLET, true);
+                // Open Baron door
+                DoUseOpenableObject(GO_ZIGGURAT_DOOR_5, true);
+            }
 
             m_auiEncounter[type] = data;
             break;
