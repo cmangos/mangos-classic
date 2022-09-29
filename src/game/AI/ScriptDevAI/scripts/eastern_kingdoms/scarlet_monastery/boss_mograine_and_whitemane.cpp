@@ -362,6 +362,12 @@ struct boss_high_inquisitor_whitemaneAI : public CombatAI
     }
     instance_scarlet_monastery* m_instance;
 
+    void JustRespawned() override
+    {
+        CombatAI::JustRespawned();
+        SetDeathPrevention(true);
+    }
+
     void EnterEvadeMode() override
     {
         SetCombatScriptStatus(false);
@@ -433,6 +439,7 @@ struct boss_high_inquisitor_whitemaneAI : public CombatAI
         SetCombatScriptStatus(false);
         SetCombatMovement(true, true);
         SetMeleeEnabled(true);
+        SetDeathPrevention(false);
     }
 
     void HandleSalute()
