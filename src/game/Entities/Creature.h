@@ -868,6 +868,8 @@ class Creature : public Unit
         void ClearCreatureGroup();
         CreatureGroup* GetCreatureGroup() const { return m_creatureGroup; }
 
+        void StartCooldown(Unit* owner);
+
         ObjectGuid GetKillerGuid() const { return m_killer; }
         void SetKillerGuid(ObjectGuid guid) { m_killer = guid; }
 
@@ -952,6 +954,8 @@ class Creature : public Unit
         CreatureGroup* m_creatureGroup;
 
         ObjectGuid m_killer;
+
+        bool m_imposedCooldown;
 
     private:
         GridReference<Creature> m_gridRef;
