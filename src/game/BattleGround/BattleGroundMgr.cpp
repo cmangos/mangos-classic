@@ -1301,7 +1301,7 @@ BattleGround* BattleGroundMgr::CreateNewBattleGround(BattleGroundTypeId bgTypeId
   @param    team 2 start location O
   @param    start max distance
 */
-uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, uint32 minPlayersPerTeam, uint32 maxPlayersPerTeam, uint32 levelMin, uint32 levelMax, char const* battleGroundName, uint32 mapId, float team1StartLocX, float team1StartLocY, float team1StartLocZ, float team1StartLocO, float team2StartLocX, float team2StartLocY, float team2StartLocZ, float team2StartLocO, float startMaxDist)
+uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, uint32 minPlayersPerTeam, uint32 maxPlayersPerTeam, uint32 levelMin, uint32 levelMax, char const* battleGroundName, uint32 mapId, float team1StartLocX, float team1StartLocY, float team1StartLocZ, float team1StartLocO, float team2StartLocX, float team2StartLocY, float team2StartLocZ, float team2StartLocO, float startMaxDist, uint32 playerSkinReflootId)
 {
     // Create the BG
     BattleGround* bg;
@@ -1324,6 +1324,7 @@ uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, uint32 m
     bg->SetTeamStartLoc(HORDE,    team2StartLocX, team2StartLocY, team2StartLocZ, team2StartLocO);
     bg->SetStartMaxDist(startMaxDist);
     bg->SetLevelRange(levelMin, levelMax);
+    bg->SetPlayerSkinRefLootId(playerSkinReflootId);
 
     // add bg to update list
     AddBattleGround(bg->GetInstanceId(), bg->GetTypeId(), bg);
@@ -1338,8 +1339,8 @@ uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, uint32 m
 void BattleGroundMgr::CreateInitialBattleGrounds()
 {
     uint32 count = 0;
-    //                                                0   1                 2                 3      4      5                6             7 
-    QueryResult* result = WorldDatabase.Query("SELECT id, MinPlayersPerTeam,MaxPlayersPerTeam,MinLvl,MaxLvl,AllianceStartLoc,HordeStartLoc,StartMaxDist FROM battleground_template");
+    //                                                0   1                 2                 3      4      5                6             7            8
+    QueryResult* result = WorldDatabase.Query("SELECT id, MinPlayersPerTeam,MaxPlayersPerTeam,MinLvl,MaxLvl,AllianceStartLoc,HordeStartLoc,StartMaxDist,PlayerSkinReflootId FROM battleground_template");
 
     if (!result)
     {
@@ -1413,9 +1414,18 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
         }
 
         float startMaxDist = fields[7].GetFloat();
+        uint32 playerSkinReflootId = fields[8].GetUInt32();
+        if (playerSkinReflootId && !sLootMgr.ExistsRefLootTemplate(playerSkinReflootId))
+        {
+            playerSkinReflootId = 0;
+            sLog.outErrorDb("Table `battleground_template` for id %u associated with nonexistent refloot id %u. Setting to 0.", bgTypeId, playerSkinReflootId);
+        }
+
+        if (playerSkinReflootId)
+            m_usedRefloot.insert(playerSkinReflootId);
 
         // sLog.outDetail("Creating battleground %s, %u-%u", bl->name[sWorld.GetDBClang()], MinLvl, MaxLvl);
-        if (!CreateBattleGround(bgTypeId, minPlayersPerTeam, maxPlayersPerTeam, minLvl, maxLvl, name, mapId, allianceStartLoc[0], allianceStartLoc[1], allianceStartLoc[2], allianceStartLoc[3], hordeStartLoc[0], hordeStartLoc[1], hordeStartLoc[2], hordeStartLoc[3], startMaxDist))
+        if (!CreateBattleGround(bgTypeId, minPlayersPerTeam, maxPlayersPerTeam, minLvl, maxLvl, name, mapId, allianceStartLoc[0], allianceStartLoc[1], allianceStartLoc[2], allianceStartLoc[3], hordeStartLoc[0], hordeStartLoc[1], hordeStartLoc[2], hordeStartLoc[3], startMaxDist, playerSkinReflootId))
             continue;
 
         ++count;

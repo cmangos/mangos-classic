@@ -210,7 +210,8 @@ bool ChatHandler::HandleReloadAllAreaCommand(char* /*args*/)
 bool ChatHandler::HandleReloadAllLootCommand(char* /*args*/)
 {
     sLog.outString("Re-Loading Loot Tables...");
-    LoadLootTables();
+    LootIdSet ids_set;
+    LoadLootTables(ids_set);
     SendGlobalSysMessage("DB tables `*_loot_template` reloaded.");
     return true;
 }
@@ -529,7 +530,9 @@ bool ChatHandler::HandleReloadLootTemplatesMailCommand(char* /*args*/)
 bool ChatHandler::HandleReloadLootTemplatesReferenceCommand(char* /*args*/)
 {
     sLog.outString("Re-Loading Loot Tables... (`reference_loot_template`)");
-    LoadLootTemplates_Reference();
+    LootIdSet ids_set;
+    LoadLootTemplates_Reference(ids_set);
+    CheckLootTemplates_Reference(ids_set);
     SendGlobalSysMessage("DB table `reference_loot_template` reloaded.");
     return true;
 }
