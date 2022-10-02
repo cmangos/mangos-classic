@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2797_01_mangos_eai_dbguid_support` bit(1) DEFAULT NULL
+  `required_z2798_01_mangos_battleground_reflooot` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -312,6 +312,7 @@ CREATE TABLE `battleground_template` (
   `AllianceStartLoc` mediumint(8) unsigned NOT NULL,
   `HordeStartLoc` mediumint(8) unsigned NOT NULL,
   `StartMaxDist` float NOT NULL,
+  `PlayerSkinReflootId` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'reference_loot_template entry',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
