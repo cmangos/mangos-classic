@@ -1826,46 +1826,6 @@ Loot::Loot(Player* player, Corpse* corpse, LootType type) :
         m_clientLootType = CLIENT_LOOT_CORPSE;
         if (uint32 refLootId = player->GetBattleGround()->GetPlayerSkinRefLootId())
             FillLoot(refLootId, LootTemplates_Reference, player, true);
-
-        if (plr && player->InBattleGround() && player->GetBattleGroundTypeId() == BATTLEGROUND_AV)
-        {
-            // not doable in current loot system - cant pass looted players rank - would need to be separate refloots
-            uint32 rank = plr->GetHonorHighestRankInfo().rank;
-            uint32 rankItem = 0;
-            if (rank < 6)
-                if (plr->GetTeam() == ALLIANCE)
-                    rankItem = 17326;
-                else
-                    rankItem = 17502;
-            else if (rank < 10)
-                if (plr->GetTeam() == ALLIANCE)
-                    rankItem = 17327;
-                else
-                    rankItem = 17503;
-            else if (plr->GetTeam() == ALLIANCE)
-                rankItem = 17328;
-            else
-                rankItem = 17504;
-
-            if (rankItem)
-            {
-                LootStoreItem storeitem = LootStoreItem(rankItem, 75, 0, 0, 0, 1);
-                AddItem(storeitem);
-            }
-
-            // Everyone can loot in AV.
-            for (auto& itr : player->GetBattleGround()->GetPlayers())
-            {
-                if (itr.second.playerTeam != player->GetTeam())
-                    continue;
-
-                for (auto lootItem : m_lootItems)
-                {
-                    if (lootItem->itemId == rankItem)
-                        lootItem->allowedGuid.emplace(itr.first);
-                }
-            }
-        }
         
         // It may need a better formula
         // Now it works like this: lvl10: ~6copper, lvl70: ~9silver

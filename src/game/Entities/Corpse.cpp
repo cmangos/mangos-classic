@@ -26,7 +26,8 @@
 
 Corpse::Corpse(CorpseType type) : WorldObject(),
     lootRecipient(nullptr),
-    lootForBody(false)
+    lootForBody(false),
+    m_rankSnapshot(0)
 {
     m_objectType |= TYPEMASK_CORPSE;
     m_objectTypeId = TYPEID_CORPSE;
@@ -93,6 +94,7 @@ bool Corpse::Create(uint32 guidlow, Player* owner)
     SetOwnerGuid(owner->GetObjectGuid());
 
     m_grid = MaNGOS::ComputeGridPair(GetPositionX(), GetPositionY());
+    m_rankSnapshot = owner->GetHonorRankInfo().rank;
 
     return true;
 }
@@ -270,4 +272,9 @@ bool Corpse::IsExpired(time_t t) const
     if (m_type == CORPSE_BONES)
         return m_time < t - 60 * MINUTE;
     return m_time < t - 3 * DAY;
+}
+
+Team Corpse::GetTeam() const
+{
+    return Player::TeamForRace(getRace());
 }

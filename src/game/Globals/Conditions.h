@@ -41,7 +41,7 @@ enum ConditionType
     CONDITION_QUESTREWARDED         = 8,                    // quest_id     0
     CONDITION_QUESTTAKEN            = 9,                    // quest_id     0,1,2   for condition true while quest active (0 any state, 1 if quest incomplete, 2 if quest completed).
     CONDITION_AD_COMMISSION_AURA    = 10,                   // 0            0,      for condition true while one from AD commission aura active
-    CONDITION_UNUSED_1              = 11,
+    CONDITION_PVP_RANK              = 11,                   // minrank      maxrank
     CONDITION_ACTIVE_GAME_EVENT     = 12,                   // event_id     0
     CONDITION_AREA_FLAG             = 13,                   // area_flag    area_flag_not
     CONDITION_RACE_CLASS            = 14,                   // race_mask    class_mask
@@ -111,8 +111,10 @@ enum ConditionRequirement
     CONDITION_REQ_TARGET_WORLDOBJECT,
     CONDITION_REQ_TARGET_GAMEOBJECT,
     CONDITION_REQ_TARGET_UNIT,
+    CONDITION_REQ_TARGET_UNIT_OR_CORPSE,
     CONDITION_REQ_TARGET_CREATURE,
     CONDITION_REQ_TARGET_PLAYER,
+    CONDITION_REQ_TARGET_PLAYER_OR_CORPSE,
     CONDITION_REQ_SOURCE_WORLDOBJECT,
     CONDITION_REQ_SOURCE_GAMEOBJECT,
     CONDITION_REQ_SOURCE_UNIT,

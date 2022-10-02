@@ -89,11 +89,15 @@ class Corpse : public WorldObject
         GridReference<Corpse>& GetGridRef() { return m_gridRef; }
 
         bool IsExpired(time_t t) const;
+        Team GetTeam() const;
+
+        uint8 GetRankSnapshot() const { return m_rankSnapshot; }
     private:
         GridReference<Corpse> m_gridRef;
 
         CorpseType m_type;
         time_t m_time;
         GridPair m_grid;                                    // gride for corpse position for fast search
+        uint8 m_rankSnapshot;
 };
 #endif

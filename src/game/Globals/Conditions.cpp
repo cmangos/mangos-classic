@@ -60,16 +60,16 @@ uint8 const ConditionTargetsInternal[] =
     CONDITION_REQ_TARGET_PLAYER,      //  2
     CONDITION_REQ_TARGET_PLAYER,      //  3
     CONDITION_REQ_ANY_WORLDOBJECT,    //  4
-    CONDITION_REQ_TARGET_PLAYER,      //  5
+    CONDITION_REQ_TARGET_PLAYER_OR_CORPSE, //  5
     CONDITION_REQ_TARGET_PLAYER,      //  6
     CONDITION_REQ_TARGET_PLAYER,      //  7
     CONDITION_REQ_TARGET_PLAYER,      //  8
     CONDITION_REQ_TARGET_PLAYER,      //  9
     CONDITION_REQ_TARGET_PLAYER,      //  10
-    CONDITION_REQ_NONE,               //  11
+    CONDITION_REQ_TARGET_PLAYER_OR_CORPSE, //  11
     CONDITION_REQ_NONE,               //  12
     CONDITION_REQ_ANY_WORLDOBJECT,    //  13
-    CONDITION_REQ_TARGET_UNIT,        //  14
+    CONDITION_REQ_TARGET_UNIT_OR_CORPSE, //  14
     CONDITION_REQ_TARGET_UNIT,        //  15
     CONDITION_REQ_NONE,               //  16
     CONDITION_REQ_TARGET_PLAYER,      //  17
@@ -189,7 +189,10 @@ bool inline ConditionEntry::Evaluate(WorldObject const* target, Map const* map, 
         {
             if (conditionSourceType == CONDITION_FROM_REFERING_LOOT && sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_AUCTION))
                 return true;
-            return uint32(static_cast<Player const*>(target)->GetTeam()) == m_value1;
+            if (target->IsPlayer())
+                return uint32(static_cast<Player const*>(target)->GetTeam()) == m_value1;
+            else
+                return uint32(static_cast<Corpse const*>(target)->GetTeam()) == m_value1;
         }
         case CONDITION_SKILL:
         {
@@ -211,6 +214,15 @@ bool inline ConditionEntry::Evaluate(WorldObject const* target, Map const* map, 
                 if ((aura.second->GetSpellProto()->HasAttribute(SPELL_ATTR_ALLOW_WHILE_MOUNTED) || aura.second->GetSpellProto()->HasAttribute(SPELL_ATTR_IS_ABILITY)) && aura.second->GetSpellProto()->SpellVisual == 3580)
                     return true;
             return false;
+        }
+        case CONDITION_PVP_RANK:
+        {
+            uint8 rank = 0;
+            if (target->IsPlayer())
+                rank = static_cast<Player const*>(target)->GetHonorRankInfo().rank;
+            else
+                rank = static_cast<Corpse const*>(target)->GetRankSnapshot();
+            return rank >= m_value1 && rank <= m_value2;
         }
         case CONDITION_ACTIVE_GAME_EVENT:
         {
@@ -500,12 +512,20 @@ bool ConditionEntry::CheckParamRequirements(WorldObject const* target, Map const
             if (target && target->IsUnit())
                 return true;
             return false;
+        case CONDITION_REQ_TARGET_UNIT_OR_CORPSE:
+            if (target && (target->IsUnit() || target->IsCorpse()))
+                return true;
+            return false;
         case CONDITION_REQ_TARGET_CREATURE:
             if (target && target->IsCreature())
                 return true;
             return false;
         case CONDITION_REQ_TARGET_PLAYER:
             if (target && target->IsPlayer())
+                return true;
+            return false;
+        case CONDITION_REQ_TARGET_PLAYER_OR_CORPSE:
+            if (target && (target->IsPlayer() || target->IsCorpse()))
                 return true;
             return false;
         case CONDITION_REQ_SOURCE_WORLDOBJECT:
