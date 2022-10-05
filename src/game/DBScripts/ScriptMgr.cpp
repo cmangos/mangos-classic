@@ -1832,8 +1832,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 if (!goData)
                     break;                                  // checked at load
 
-                // TODO - This was a change, was before current map of source
-                pGo = m_map->GetGameObject(ObjectGuid(HIGHGUID_GAMEOBJECT, goData->id, m_script->respawnGo.goGuid));
+                pGo = m_map->GetGameObject(m_script->respawnGo.goGuid);
             }
             else
             {
