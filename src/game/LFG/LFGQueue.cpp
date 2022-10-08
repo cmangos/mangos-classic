@@ -20,6 +20,9 @@
 #include "World/World.h"
 #include "LFG/LFGMgr.h"
 #include "WorldPacket.h"
+#include "Entities/Player.h"
+#include "Globals/ObjectMgr.h"
+#include "Groups/Group.h"
 
 std::array<LfgRoles, 3> PotentialRoles =
 {
