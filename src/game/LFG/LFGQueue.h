@@ -23,6 +23,7 @@
 #include "LFG/LFGDefines.h"
 #include "Entities/ObjectGuid.h"
 #include "Globals/SharedDefines.h"
+#include "Multithreading/Messager.h"
 
 class Player;
 

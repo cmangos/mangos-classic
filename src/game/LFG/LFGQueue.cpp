@@ -18,6 +18,8 @@
 
 #include "LFG/LFGQueue.h"
 #include "World/World.h"
+#include "LFG/LFGMgr.h"
+#include "WorldPacket.h"
 
 std::array<LfgRoles, 3> PotentialRoles =
 {
