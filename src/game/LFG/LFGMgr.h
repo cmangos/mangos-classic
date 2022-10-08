@@ -24,75 +24,18 @@
 
 #include "Policies/Singleton.h"
 #include "Common.h"
+#include "LFG/LFGDefines.h"
 
-enum LfgRoles
-{
-    LFG_ROLE_NONE   = 0x00,
-    LFG_ROLE_TANK   = 0x01,
-    LFG_ROLE_HEALER = 0x02,
-    LFG_ROLE_DPS    = 0x04
-};
+class Group;
 
-enum LfgRolePriority
-{
-    LFG_PRIORITY_NONE   = 0,
-    LFG_PRIORITY_LOW    = 1,
-    LFG_PRIORITY_NORMAL = 2,
-    LFG_PRIORITY_HIGH   = 3
-};
-
-enum PlayerLeaveMethod
-{
-    PLAYER_CLIENT_LEAVE = 0,
-    PLAYER_SYSTEM_LEAVE = 1
-};
-
-enum GroupLeaveMethod
-{
-    GROUP_CLIENT_LEAVE  = 0,
-    GROUP_SYSTEM_LEAVE  = 1
-};
-
-struct LFGPlayerQueueInfo
-{
-    LfgRoles roleMask;
-    uint32 team;
-    uint32 areaId;
-    uint32 timeInLFG;
-    bool hasQueuePriority;
-    std::string name;
-    std::list<std::pair<LfgRoles, LfgRolePriority>> rolePriority;
-
-    void CalculateRoles(Classes playerClass);
-    void CalculateTalentRoles(Player* player);
-    LfgRolePriority GetRolePriority(LfgRoles role);
-};
-
-struct LFGGroupQueueInfo
-{
-    uint32 availableRoles;
-    uint32 dpsCount;
-    uint32 team;
-    uint32 areaId;
-    uint32 groupTimer;
-};
-
-class LFGQueue
+class LFGMgr
 {
     public:
-        LFGQueue() {}
-        ~LFGQueue() {}
+        LFGMgr() {}
+        ~LFGMgr() {}
 
         void AddToQueue(Player* leader, uint32 queAreaID);
-        void RestoreOfflinePlayer(Player* player);
-        bool IsPlayerInQueue(ObjectGuid const& plrGuid) const;
-        bool IsGroupInQueue(uint32 groupId) const;
-        void RemovePlayerFromQueue(ObjectGuid const& plrGuid, PlayerLeaveMethod leaveMethod = PLAYER_CLIENT_LEAVE); // 0 == by default system (cmsg, leader leave), 1 == by lfg system (no need report text you left queu)
-        void RemoveGroupFromQueue(uint32 groupId, GroupLeaveMethod leaveMethod = GROUP_CLIENT_LEAVE);
-        void Update(uint32 diff);
-        void UpdateGroup(uint32 groupId);
-        void GetPlayerQueueInfo(LFGPlayerQueueInfo* info, ObjectGuid const& plrGuid);
-        void GetGroupQueueInfo(LFGGroupQueueInfo* info, uint32 groupId);
+        void UpdateGroup(Group* group, bool join, Player* player);
 
         static void BuildSetQueuePacket(WorldPacket& data, uint32 areaId, uint8 status);
         static void BuildMemberAddedPacket(WorldPacket& data, ObjectGuid plrGuid);
@@ -106,21 +49,8 @@ class LFGQueue
         static LfgRolePriority GetPriority(Classes playerClass, LfgRoles playerRoles);
 
         static uint32 GetMaximumDPSSlots() { return 3u; }
-
-    private:
-        typedef std::map<ObjectGuid, LFGPlayerQueueInfo> QueuedPlayersMap;
-        QueuedPlayersMap m_queuedPlayers;
-        QueuedPlayersMap m_offlinePlayers;
-
-        typedef std::map<uint32, LFGGroupQueueInfo> QueuedGroupsMap;
-        QueuedGroupsMap m_queuedGroups;
-
-        void FindInArea(std::list<ObjectGuid>& players, uint32 area, uint32 team, ObjectGuid const& exclude);
-        bool FindRoleToGroup(ObjectGuid playerGuid, Group* group, LfgRoles role);
-
-        uint32 m_groupSize = 5;
 };
 
-#define sLFGMgr MaNGOS::Singleton<LFGQueue>::Instance()
+#define sLFGMgr MaNGOS::Singleton<LFGMgr>::Instance()
 
 #endif

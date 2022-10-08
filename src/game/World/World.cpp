@@ -1515,7 +1515,6 @@ void World::Update(uint32 diff)
     auto postMapTime = std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::now());
 #endif
     sBattleGroundMgr.Update(diff);
-    sLFGMgr.Update(diff);
     sOutdoorPvPMgr.Update(diff);
     sWorldState.Update(diff);
 #ifdef BUILD_METRICS
@@ -1938,6 +1937,14 @@ bool World::RemoveBanAccount(BanMode mode, const std::string& source, const std:
         WarnAccount(account, source, message, "UNBAN");
     }
     return true;
+}
+
+void World::StartLFGQueueThread()
+{
+    m_lfgQueueThread = std::thread([&]()
+    {
+        m_lfgQueue.Update();
+    });
 }
 
 /// Update the game time

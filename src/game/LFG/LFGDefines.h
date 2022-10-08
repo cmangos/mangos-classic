@@ -16,8 +16,36 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MANGOSSERVER_LFGHANDLER_H
-#define MANGOSSERVER_LFGHANDLER_H
+#ifndef _LFG_DEFINES_H
+#define _LFG_DEFINES_H
+
+enum LfgRoles
+{
+    PLAYER_ROLE_NONE = 0x00,
+    PLAYER_ROLE_TANK = 0x01,
+    PLAYER_ROLE_HEALER = 0x02,
+    PLAYER_ROLE_DAMAGE = 0x04
+};
+
+enum LfgRolePriority
+{
+    LFG_PRIORITY_NONE = 0,
+    LFG_PRIORITY_LOW = 1,
+    LFG_PRIORITY_NORMAL = 2,
+    LFG_PRIORITY_HIGH = 3
+};
+
+enum PlayerLeaveMethod
+{
+    PLAYER_CLIENT_LEAVE = 0,
+    PLAYER_SYSTEM_LEAVE = 1
+};
+
+enum GroupLeaveMethod
+{
+    GROUP_CLIENT_LEAVE = 0,
+    GROUP_SYSTEM_LEAVE = 1
+};
 
 enum MeetingstoneQueueStatus
 {

@@ -1,0 +1,2 @@
+200 SCRIPT_COMMAND_MEETINGSTONE                      Resulting source or target must be player
+                                                     datalong - joins player into meetingstone queue for given areaId

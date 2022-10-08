@@ -149,6 +149,8 @@ int Master::Run()
         LoginDatabase.DirectPExecute("UPDATE realmlist SET realmflags = realmflags & ~(%u), population = 0, realmbuilds = '%s'  WHERE id = '%u'", REALM_FLAG_OFFLINE, builds.c_str(), realmID);
     }
 
+    sWorld.StartLFGQueueThread();
+
     MaNGOS::Thread* cliThread = nullptr;
 
 #ifdef _WIN32

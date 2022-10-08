@@ -26,7 +26,6 @@
 #include "BattleGround/BattleGround.h"
 #include "Server/DBCEnums.h"
 #include "Globals/SharedDefines.h"
-#include "LFG/LFGHandler.h"
 #include "LFG/LFGMgr.h"
 
 class WorldSession;
@@ -35,6 +34,7 @@ class BattleGround;
 class DungeonPersistentState;
 class Field;
 class Unit;
+struct LFGGroupQueueInfo;
 
 #define MAX_GROUP_SIZE 5
 #define MAX_RAID_SIZE 40

@@ -559,6 +559,8 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
 
     m_DetectInvTimer = 1 * IN_MILLISECONDS;
 
+    m_LFGAreaId = 0;
+
     for (auto& j : m_bgBattleGroundQueueID)
     {
         j.bgQueueTypeId  = BATTLEGROUND_QUEUE_NONE;

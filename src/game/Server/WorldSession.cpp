@@ -615,6 +615,12 @@ void WorldSession::LogoutPlayer()
         else if (_player->IsInCombat())
             _player->CombatStopWithPets(true, true);
 
+        if (_player->IsInLFG())
+            sWorld.GetLFGQueue().GetMessager().AddMessage([playerGuid = _player->GetObjectGuid()](LFGQueue* queue)
+        {
+            queue->RemovePlayerFromQueue(playerGuid, PLAYER_SYSTEM_LEAVE);
+        });
+
         // drop a flag if player is carrying it
         if (BattleGround* bg = _player->GetBattleGround())
             bg->EventPlayerLoggedOut(_player);

@@ -1672,6 +1672,11 @@ class Player : public Unit
         void UpdateLocalChannels(uint32 newZone);
         void LeaveLFGChannel();
 
+        // LFG
+        void SetLFGAreaId(uint32 areaId) { m_LFGAreaId = areaId; }
+        uint32 GetLFGAreaId() { return m_LFGAreaId; }
+        bool IsInLFG() { return m_LFGAreaId > 0; }
+
         void UpdateDefense();
         void UpdateWeaponSkill(WeaponAttackType attType);
         void UpdateCombatSkills(Unit* pVictim, WeaponAttackType attType, bool defence);
@@ -2499,6 +2504,8 @@ class Player : public Unit
         uint32 m_newZone;
 
         uint32 m_DetectInvTimer;
+
+        uint32 m_LFGAreaId;
 
         // Temporary removed pet cache
         uint32 m_temporaryUnsummonedPetNumber;
