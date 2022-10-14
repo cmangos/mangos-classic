@@ -485,7 +485,7 @@ struct TrainerSpellData
 #define CREATURE_Z_ATTACK_RANGE_MELEE  3
 #define CREATURE_Z_ATTACK_RANGE_RANGED 15
 
-#define MAX_VENDOR_ITEMS 150                                // Limitation in item count field size in SMSG_LIST_INVENTORY
+#define MAX_VENDOR_ITEMS 128                                // Limitation in item count field size in SMSG_LIST_INVENTORY - different in vanilla
 
 enum VirtualItemSlot
 {
