@@ -180,11 +180,12 @@ void LFGQueue::Update()
             {
                 ObjectGuid leaderGuid = leader->first;
                 ObjectGuid memberGuid = playersInArea.front();
+                uint32 areaId = leader->second.areaId;
 
                 RemovePlayerFromQueue(leaderGuid, PLAYER_SYSTEM_LEAVE);
                 RemovePlayerFromQueue(memberGuid, PLAYER_SYSTEM_LEAVE);
 
-                sWorld.GetMessager().AddMessage([leaderGuid, memberGuid, areaId = leader->second.areaId](World* world)
+                sWorld.GetMessager().AddMessage([leaderGuid, memberGuid, areaId](World* world)
                 {
                     Player* leader = sObjectMgr.GetPlayer(leaderGuid);
                     Player* member = sObjectMgr.GetPlayer(memberGuid);
