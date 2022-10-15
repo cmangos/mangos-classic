@@ -216,6 +216,8 @@ class FormationData
         FormationEntrySPtr GetFormationEntry() const { return m_fEntry; }
         void SetMovementInfo(MovementGeneratorType moveType, uint32 pahtId);
 
+        void ResetLastWP() { m_lastWP = 0; }
+
     private:
         void SetMasterMovement();
         bool TrySetNewMaster(Unit* masterCandidat = nullptr);
