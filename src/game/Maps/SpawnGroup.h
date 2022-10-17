@@ -93,6 +93,7 @@ class CreatureGroup : public SpawnGroup
         void Despawn(uint32 timeMSToDespawn, bool onlyAlive);
 
         bool IsOutOfCombat();
+        bool IsEvading();
 
     private:
         void ClearRespawnTimes();
@@ -198,6 +199,7 @@ class FormationData
         void Reset();
         void Disband();
         void OnDeath(Creature* creature);
+        void OnHome();
         void OnDelete(Creature* creature);
         void OnWPStartNode() { m_mirrorState = false; };
         void OnWPEndNode() { m_mirrorState = true; };
@@ -245,6 +247,7 @@ class FormationData
 
         bool m_mirrorState;
         bool m_followerStopped;
+        bool m_masterDied;
 
         uint32 m_realMasterDBGuid;
         uint32 m_slotGuid;

@@ -396,6 +396,10 @@ void CreatureGroup::TriggerLinkingEvent(uint32 event, Unit* target)
             }
             break;
         case CREATURE_GROUP_EVENT_HOME:
+            if (FormationData* formation = GetFormationData())
+                if (!IsEvading()) // on last evade complete
+                    formation->OnHome();
+
         case CREATURE_GROUP_EVENT_RESPAWN:
             if ((m_entry.Flags & CREATURE_GROUP_RESPAWN_TOGETHER) == 0)
                 return;
@@ -470,6 +474,22 @@ bool CreatureGroup::IsOutOfCombat()
     return true;
 }
 
+bool CreatureGroup::IsEvading()
+{
+    for (auto objItr : m_objects)
+    {
+        if (Creature* creature = m_map.GetCreature(objItr.first))
+        {
+            if (!creature->IsAlive())
+                continue;
+
+            if (creature->GetCombatManager().IsEvadingHome())
+                return true;
+        }
+    }
+    return false;
+}
+
 void CreatureGroup::ClearRespawnTimes()
 {
     time_t now = time(nullptr);
@@ -500,7 +520,7 @@ void GameObjectGroup::Despawn(uint32 timeMSToDespawn /*= 0*/)
 ////////////////////
 
 FormationData::FormationData(CreatureGroup* gData, FormationEntrySPtr fEntry) :
-    m_groupData(gData), m_fEntry(fEntry), m_mirrorState(false), m_lastWP(0), m_wpPathId(0), m_followerStopped(false)
+    m_groupData(gData), m_fEntry(fEntry), m_mirrorState(false), m_lastWP(0), m_wpPathId(0), m_followerStopped(false), m_masterDied(false)
 {
     for (auto const& sData : m_groupData->GetGroupEntry().DbGuids)
     {
@@ -742,6 +762,7 @@ bool FormationData::TrySetNewMaster(Unit* masterCandidat /*= nullptr*/)
 void FormationData::Reset()
 {
     m_mirrorState = false;
+    m_masterDied = false;
 
     SwitchFormation(m_fEntry->Type);
 
@@ -812,9 +833,23 @@ void FormationData::OnDeath(Creature* creature)
     creature->SetFormationSlot(nullptr);
 
     if (formationMaster)
-        TrySetNewMaster();
-    else if(HaveOption(SPAWN_GROUP_FORMATION_OPTION_KEEP_CONPACT))
+    {
+        if (!m_groupData->IsOutOfCombat()) // must be deferred to arrival home
+            m_masterDied = true;
+        else
+            TrySetNewMaster();
+    }
+    else if (HaveOption(SPAWN_GROUP_FORMATION_OPTION_KEEP_CONPACT))
         FixSlotsPositions();
+}
+
+void FormationData::OnHome()
+{
+    if (m_masterDied)
+    {
+        m_masterDied = false;
+        TrySetNewMaster();
+    }
 }
 
 void FormationData::OnDelete(Creature* creature)
