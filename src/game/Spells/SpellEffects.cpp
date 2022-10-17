@@ -5827,7 +5827,7 @@ void Spell::EffectSkinPlayerCorpse(SpellEffectIndex /*eff_idx*/)
         return;
     }
 
-    ((Player*)target)->RemovedInsignia((Player*)m_caster);
+    static_cast<Player*>(target)->RemovedInsignia(static_cast<Player*>(m_caster));
     m_spellLog.AddLog(uint32(SPELL_EFFECT_SKIN_PLAYER_CORPSE), target->GetObjectGuid());
 }
 
