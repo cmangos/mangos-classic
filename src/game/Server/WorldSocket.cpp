@@ -543,6 +543,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         if (!(m_session = new WorldSession(id, this, AccountTypes(security), mutetime, locale, account, accountFlags)))
             return false;
 
+        m_session->LoadGlobalAccountData();
         m_session->LoadTutorialsData();
         m_session->SetGameBuild(ClientBuild);
         m_session->SetOS(clientOS);
