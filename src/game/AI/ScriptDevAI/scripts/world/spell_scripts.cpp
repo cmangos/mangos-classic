@@ -33,9 +33,10 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "Spells/Scripts/SpellScript.h"
+#include "Grids/Cell.h"
+#include "Grids/CellImpl.h"
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
-#include "Grids/CellImpl.h"
 
 /* When you make a spell effect:
 - always check spell id and effect index
@@ -364,6 +365,81 @@ struct Stoned : public AuraScript
     }
 };
 
+struct GameobjectCallForHelpOnUsage : public SpellScript
+{
+    void OnSuccessfulStart(Spell* spell) const
+    {
+        UnitList targets;
+        MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck check(spell->GetCaster(), 12.f);
+        MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, check);
+        Cell::VisitAllObjects(spell->GetCaster(), searcher, 12.f);
+        for (Unit* attacker : targets)
+            if (attacker->AI())
+                attacker->AI()->AttackStart(spell->GetCaster());
+    }
+};
+
+struct BirthNoVisualInstantSpawn : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        spell->GetCaster()->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_DO_NOT_FADE_IN);
+    }
+};
+
+struct SleepVisualFlavor : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (apply)
+            target->SetStandState(UNIT_STAND_STATE_SLEEP);
+        else
+            target->SetStandState(UNIT_STAND_STATE_STAND);
+    }
+};
+
+enum spell_call_of_the_falcon
+{
+    YELL_KILL_FALCONER          = 17624, // Kill $n!
+    NPC_BLOODWARDER_FALCONER    = 17994,
+    NPC_BLOODFALCON             = 18155,
+    SPELL_CALL_OF_THE_FALCON    = 34853,
+};
+
+struct CallOfTheFalcon : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+        {
+            DoBroadcastText(YELL_KILL_FALCONER, aura->GetCaster(), aura->GetTarget());
+            aura->GetTarget()->CastSpell(nullptr, SPELL_CALL_OF_THE_FALCON, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
+struct MaximizePetLoyalty : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* unitTarget = spell->GetUnitTarget();
+        if (!unitTarget)
+            return;
+
+        Pet* pet = dynamic_cast<Pet*>(unitTarget);
+
+        if (!pet)
+            return;
+
+        if (pet->getPetType() != HUNTER_PET)
+            return;
+
+        pet->SetLoyaltyLevel(LoyaltyLevel(6));
+        pet->SetTP(300);
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -385,4 +461,5 @@ void AddSC_spell_scripts()
     RegisterSpellScript<HateToHalf>("spell_hate_to_half");
     RegisterSpellScript<HateToZero>("spell_hate_to_zero");
     RegisterSpellScript<Stoned>("spell_stoned");
+    RegisterSpellScript<GameobjectCallForHelpOnUsage>("spell_gameobject_call_for_help_on_usage");
 }

@@ -1464,14 +1464,6 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
             if (!GetGOInfo()->chest.lockId)
                 SetLootState(GO_JUST_DEACTIVATED);
 
-            UnitList targets;
-            MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck check(user, 5.f);
-            MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, check);
-            Cell::VisitAllObjects(this, searcher, 5.f);
-            for (Unit* attacker : targets)
-                if (attacker->IsCreature() && !static_cast<Creature*>(attacker)->IsCritter() && attacker->AI())
-                    attacker->AI()->AttackStart(user);
-
             return;
         }
         case GAMEOBJECT_TYPE_GENERIC:                       // 5
