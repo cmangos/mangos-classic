@@ -202,7 +202,7 @@ UPDATE spell_template SET AttributesEx2=AttributesEx2|0x00000004 WHERE Id IN(279
 -- equip only item spells with travel time
 UPDATE spell_template SET Speed=0 WHERE Id IN(14824,14825,14826,14827,14828,14829,29413,29414,29415,29416,29417,29418,44972);
 
-UPDATE `spell_template` SET `RangeIndex` = 0 WHERE `Id` IN (16613,16619,16630,16631);
+UPDATE `spell_template` SET `RangeIndex` = 1 WHERE `Id` IN (16613,16619,16630,16631);
 
 -- Toxic Gas - used by Garden Gas in Naxx, remove SPELL_ATTR_EX_CHANNELED_1 and CHANNEL_FLAG_MOVEMENT to prevent aura being removed
 UPDATE spell_template SET AttributesEx=0, ChannelInterruptFlags=0 WHERE Id=30074;
