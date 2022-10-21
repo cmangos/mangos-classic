@@ -267,31 +267,23 @@ UPDATE `spell_template` SET `MaxAffectedTargets` = 15 WHERE `Id` = 26052; -- Poi
 -- Ritual of summoning - LOS attribute - spell actually cast without target but needs GO type 18 rework
 UPDATE `spell_template` SET `AttributesEx2`=AttributesEx2|4 WHERE `id` IN(7720);
 
--- ==========================
--- SPELL_ATTR_SS_IGNORE_EVADE
--- ==========================
-UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|4 WHERE `Id` IN (
-28330 -- Flameshocker - Immolate Visual
-);
-
--- Hate to Half
-UPDATE spell_template SET AttributesServerside=AttributesServerside|0x4 WHERE Id IN(21789); -- not removed on evade
-
 -- Priest - Mind Vision Rank 2 should have unlimited range
 UPDATE spell_template SET EffectRadiusIndex1=0 WHERE Id IN(10909);
-
--- both shouldnt be removed on evade
-UPDATE spell_template SET AttributesServerside = 4 WHERE id IN (4044,27791);
--- Land Mine Arming should not be removed on evade
-UPDATE spell_template SET AttributesServerside = 4 WHERE id IN (11816);
 
 -- Curse of Tongues - 1.12.0 - unexported to client but present in tbc - "This spell will no longer debuff the target if they are immune to the spellcast slowing effect."
 UPDATE spell_template SET AttributesEx4=AttributesEx4|0x00000800 WHERE Id IN(1714,11719);
 
--- Bruise should not be removed on evade
-UPDATE spell_template SET AttributesServerside = 4 WHERE id IN (4133);
-
--- Viewing Room Student Transform - Effect should not be removed on evade - instance_scholomance::HandleDawnGambitEvent()
-UPDATE spell_template SET AttributesServerside = 4 WHERE id IN (18115);
+-- ============================================================
+-- SPELL_ATTR_SS_IGNORE_EVADE - IsSpellRemovedOnEvade()
+-- ============================================================
+UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00000004 WHERE `Id` IN (
+4044,  -- Target Dummy Passive
+4133,  -- Bruise
+11816, -- Land Mine Arming
+18115, -- Viewing Room Student Transform
+27791, -- Suicide (Suicide)
+21789, -- Hate to Half (Hate to Half)
+28330  -- Flameshocker - Immolate Visual
+);
 
 
