@@ -33,7 +33,11 @@ void WorldStateVariableManager::Initialize(uint32 completedEncounterMask)
     for (auto itr = bounds.first; itr != bounds.second; ++itr)
     {
         DungeonEncounterEntry const* encounter = (*itr).second->dbcEntry;
-        SetEncounterVariable(encounter->Id, ((1 << encounter->encounterIndex) & completedEncounterMask) == 1);
+
+        if (encounter->CompleteWorldStateID) // use official data whenever available
+            SetVariable(encounter->CompleteWorldStateID, ((1 << encounter->encounterIndex) & completedEncounterMask) == 1);
+        else // phase this out eventually
+            SetEncounterVariable(encounter->Id, ((1 << encounter->encounterIndex) & completedEncounterMask) == 1);
     }
 }
 

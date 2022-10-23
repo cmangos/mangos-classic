@@ -313,7 +313,12 @@ void DungeonPersistentState::UpdateEncounterState(EncounterCreditType type, uint
             m_completedEncountersMask |= 1 << dbcEntry->encounterIndex;
 
             if (Map* map = GetMap())
-                map->GetVariableManager().SetEncounterVariable(dbcEntry->Id, true);
+            {
+                if (dbcEntry->CompleteWorldStateID) // use official data whenever available
+                    map->GetVariableManager().SetVariable(dbcEntry->CompleteWorldStateID, true);
+                else // phase this out eventually
+                    map->GetVariableManager().SetEncounterVariable(dbcEntry->Id, true);
+            }                
 
             CharacterDatabase.PExecute("UPDATE instance SET encountersMask = '%u' WHERE id = '%u'", m_completedEncountersMask, GetInstanceId());
 

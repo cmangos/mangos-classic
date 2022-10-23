@@ -304,9 +304,10 @@ struct DungeonEncounterEntry
     uint32 Difficulty;                                      // 2        m_difficulty
     uint32 encounterData;                                   // 3        m_orderIndex
     uint32 encounterIndex;                                  // 4        m_Bit
-    char*  encounterName[16];                               // 5-20     m_name_lang
-    uint32 nameLangFlags;                                   // 21       m_name_lang_flags
-    uint32 spellIconID;                                     // 22       m_spellIconID
+    uint32 CompleteWorldStateID;                            // 5        m_CompleteWorldStateID - from 9.0.5
+    char*  encounterName[16];                               // 6-21     m_name_lang
+    uint32 nameLangFlags;                                   // 22       m_name_lang_flags
+    uint32 spellIconID;                                     // 23       m_spellIconID
 };
 
 struct DurabilityCostsEntry

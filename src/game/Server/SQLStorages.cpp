@@ -39,7 +39,7 @@ const char ConditionsFmt[] = "iiiiiiix";
 const char SpellScriptTargetFmt[] = "iiii";
 const char SpellEntryfmt[] = "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffffffiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiifffiiiissssssssssssssssiiiiiLiiiifffiiiii";
 const char SpellConefmt[] = "ii";
-const char DungeonEncounterFmt[] = "iiiiissssssssssssssssii";
+const char DungeonEncounterFmt[] = "iiiiiissssssssssssssssii";
 const char WorldSafeLocsFmt[] = "iiffffs";
 
 SQLStorage sCreatureStorage(CreatureInfosrcfmt, CreatureInfodstfmt, "entry", "creature_template");
