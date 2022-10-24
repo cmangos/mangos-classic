@@ -361,7 +361,7 @@ bool Group::AddMember(ObjectGuid guid, const char* name, uint8 joinMethod)
         {
             if (joinMethod != GROUP_LFG)
             {
-                sLFGMgr.UpdateGroup(this, true, player);
+                sLFGMgr.UpdateGroup(this, true, guid);
             }
         }
     }
@@ -460,7 +460,7 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 method)
         }
 
         if (!leftGroup && IsInLFG())
-            sLFGMgr.UpdateGroup(this, false, player);
+            sLFGMgr.UpdateGroup(this, false, guid);
 
         SendUpdate();
     }

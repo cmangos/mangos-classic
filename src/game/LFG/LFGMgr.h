@@ -35,7 +35,7 @@ class LFGMgr
         ~LFGMgr() {}
 
         void AddToQueue(Player* leader, uint32 queAreaID);
-        void UpdateGroup(Group* group, bool join, Player* player);
+        void UpdateGroup(Group* group, bool join, ObjectGuid playerGuid);
 
         static void BuildSetQueuePacket(WorldPacket& data, uint32 areaId, uint8 status);
         static void BuildMemberAddedPacket(WorldPacket& data, ObjectGuid plrGuid);
