@@ -86,7 +86,7 @@ inline float GetSpellMaxRange(SpellRangeEntry const* range) { return (range ? ra
 inline uint32 GetSpellRecoveryTime(SpellEntry const* spellInfo) { return spellInfo->RecoveryTime > spellInfo->CategoryRecoveryTime ? spellInfo->RecoveryTime : spellInfo->CategoryRecoveryTime; }
 int32 GetSpellDuration(SpellEntry const* spellInfo);
 int32 GetSpellMaxDuration(SpellEntry const* spellInfo);
-int32 CalculateSpellDuration(SpellEntry const* spellInfo, Unit const* caster = nullptr);
+int32 CalculateSpellDuration(SpellEntry const* spellInfo, Unit const* caster, Unit const* target, AuraScript* auraScript);
 uint16 GetSpellAuraMaxTicks(SpellEntry const* spellInfo);
 uint16 GetSpellAuraMaxTicks(uint32 spellId);
 WeaponAttackType GetWeaponAttackType(SpellEntry const* spellInfo);

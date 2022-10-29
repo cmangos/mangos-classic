@@ -68,7 +68,8 @@ void LFGQueue::Update()
         GetMessager().Execute(this);
 
         TimePoint now = sWorld.GetCurrentClockTime();
-        uint32 diff = (previously - now).count();
+        uint32 diff = (now - previously).count();
+        previously = now;
 
         if (m_queuedGroups.empty() && m_queuedPlayers.empty())
             continue;
@@ -215,6 +216,8 @@ void LFGQueue::Update()
                 });
             }
         }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 }
 

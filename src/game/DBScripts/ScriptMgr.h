@@ -62,7 +62,7 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_CREATE_ITEM              = 17,           // source or target must be player, datalong = item entry, datalong2 = amount
     SCRIPT_COMMAND_DESPAWN_SELF             = 18,           // resSource = Creature, datalong = despawn delay
     SCRIPT_COMMAND_PLAY_MOVIE               = 19,           // target can only be a player, datalog = movie id
-    SCRIPT_COMMAND_MOVEMENT                 = 20,           // resSource = Creature. datalong = MovementType (0:idle, 1:random or 2:waypoint), datalong2 = wander-distance/pathId, datalong3 = timer/passTarget, dataint1 = forcedMovement
+    SCRIPT_COMMAND_MOVEMENT                 = 20,           // resSource = Creature. datalong = MovementType (0:idle, 1:random, 2:waypoint, 3:path, 18:fall), datalong2 = wander-distance/pathId/relayId, datalong3 = timer/passTarget, dataint1 = forcedMovement
     // data_flags &  SCRIPT_FLAG_COMMAND_ADDITIONAL = Random-movement around current position
     SCRIPT_COMMAND_SET_ACTIVEOBJECT         = 21,           // resSource = WorldObject
     // datalong=bool 0=off, 1=on
@@ -108,6 +108,7 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_SEND_MAIL                = 38,           // resSource WorldObject, can be nullptr, resTarget Player
     // datalong: Send mailTemplateId from resSource (if provided) to player resTarget
     // datalong2: AlternativeSenderEntry. Use as sender-Entry
+    // datalong3: Money
     // dataint1: Delay (>= 0) in Seconds
     SCRIPT_COMMAND_SET_HOVER                  = 39,           // resSource = Creature
     // datalong = bool 0=off, 1=on
@@ -392,6 +393,7 @@ struct ScriptInfo
         {
             uint32 mailTemplateId;                          // datalong
             uint32 altSender;                               // datalong2;
+            uint32 money;                                   // datalong3;
         } sendMail;
 
         struct                                              // SCRIPT_COMMAND_SET_HOVER (39)

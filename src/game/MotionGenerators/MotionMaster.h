@@ -72,6 +72,7 @@ enum MovementGeneratorType
     EFFECT_MOTION_TYPE              = 15,                   // WrapperMovementGenerator.h
     TAXI_MOTION_TYPE                = 16,                   // WaypointMovementGenerator.h
     TIMED_RANDOM_MOTION_TYPE        = 17,                   // RandomMovementGenerator.h
+    FALL_MOTION_TYPE                = 18,                   // WrapperMovementGenerator.h
 
     EXTERNAL_WAYPOINT_MOVE          = 18,                   // Only used in UnitAI::MovementInform when a waypoint is reached. The pathId >= 0 is added as additonal value
     EXTERNAL_WAYPOINT_MOVE_START    = 19,                   // Only used in UnitAI::MovementInform when a waypoint is started. The pathId >= 0 is added as additional value

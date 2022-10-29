@@ -54,7 +54,7 @@ Pet::Pet(PetType type) :
     m_removed(false), m_happinessTimer(7500), m_loyaltyTimer(12000), m_petType(type), m_duration(0),
     m_loyaltyPoints(0), m_bonusdamage(0), m_loading(false),
     m_xpRequiredForNextLoyaltyLevel(0),
-    m_petModeFlags(PET_MODE_DEFAULT), m_originalCharminfo(nullptr), m_imposedCooldown(false)
+    m_petModeFlags(PET_MODE_DEFAULT), m_originalCharminfo(nullptr)
 {
     m_name = "Pet";
 
@@ -635,7 +635,6 @@ void Pet::SetDeathState(DeathState s)                       // overwrite virtual
 
         if (Unit* owner = GetOwner())
         {
-            StartCooldown(owner);
             if (getPetType() == GUARDIAN_PET)
                 owner->RemoveGuardian(this);
         }
@@ -2316,16 +2315,4 @@ void Pet::ForcedDespawn(uint32 timeMSToDespawn, bool onlyAlive)
     RemoveCorpse(true);                                     // force corpse removal in the same grid
 
     Unsummon(PET_SAVE_NOT_IN_SLOT, owner);
-}
-
-void Pet::StartCooldown(Unit* owner)
-{
-    if (!m_imposedCooldown)
-    {
-        m_imposedCooldown = true;
-        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(GetUInt32Value(UNIT_CREATED_BY_SPELL));
-        // Remove infinity cooldown
-        if (spellInfo && spellInfo->HasAttribute(SPELL_ATTR_COOLDOWN_ON_EVENT))
-            owner->AddCooldown(*spellInfo);
-    }
 }

@@ -270,12 +270,12 @@ LfgRoles LFGMgr::CalculateTalentRoles(Player* _player)
     return role;
 }
 
-void LFGMgr::UpdateGroup(Group* group, bool join, Player* player)
+void LFGMgr::UpdateGroup(Group* group, bool join, ObjectGuid playerGuid)
 {
     LFGGroupQueueInfo groupInfo;
     if (!group->IsFull())
         group->CalculateLFGRoles(groupInfo);
-    sWorld.GetLFGQueue().GetMessager().AddMessage([groupInfo, join, playerGuid = player->GetObjectGuid(), groupId = group->GetId()](LFGQueue* queue)
+    sWorld.GetLFGQueue().GetMessager().AddMessage([groupInfo, join, playerGuid, groupId = group->GetId()](LFGQueue* queue)
     {
         queue->UpdateGroup(groupInfo, join, playerGuid, groupId);
     });

@@ -147,6 +147,8 @@ World::~World()
 
     VMAP::VMapFactory::clear();
     MMAP::MMapFactory::clear();
+
+    m_lfgQueueThread.join();
 }
 
 /// Cleanups before world stop

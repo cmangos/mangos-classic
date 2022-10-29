@@ -63,4 +63,12 @@ class EffectMovementGenerator : public AbstractWrapperMovementGenerator
         MovementGeneratorType GetMovementGeneratorType() const override { return EFFECT_MOTION_TYPE; }
 };
 
+class FallMovementGenerator : public EffectMovementGenerator
+{
+    public:
+        using EffectMovementGenerator::EffectMovementGenerator;
+
+        MovementGeneratorType GetMovementGeneratorType() const override { return FALL_MOTION_TYPE; }
+};
+
 #endif

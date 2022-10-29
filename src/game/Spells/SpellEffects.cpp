@@ -1879,7 +1879,7 @@ void Spell::EffectApplyAura(SpellEffectIndex eff_idx)
 
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell: Aura is: %u", m_spellInfo->EffectApplyAuraName[eff_idx]);
 
-    Aura* aur = CreateAura(m_spellInfo, eff_idx, &damage, &m_currentBasePoints[eff_idx], m_spellAuraHolder, unitTarget, caster, m_CastItem);
+    Aura* aur = CreateAura(m_spellInfo, eff_idx, &damage, &m_currentBasePoints[eff_idx], m_spellAuraHolder, unitTarget, caster, m_CastItem, GetScriptValue());
     m_spellAuraHolder->AddAura(aur, eff_idx);
 }
 
@@ -2477,7 +2477,7 @@ void Spell::EffectApplyAreaAura(SpellEffectIndex eff_idx)
     if (!unitTarget->IsAlive())
         return;
 
-    Aura* aura = CreateAura(m_spellInfo, eff_idx, &damage, &m_currentBasePoints[eff_idx], m_spellAuraHolder, unitTarget, m_caster, m_CastItem);
+    Aura* aura = CreateAura(m_spellInfo, eff_idx, &damage, &m_currentBasePoints[eff_idx], m_spellAuraHolder, unitTarget, m_caster, m_CastItem, GetScriptValue());
     m_spellAuraHolder->AddAura(aura, eff_idx);
 }
 
@@ -3003,7 +3003,7 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
     }
 
     // set timer for unsummon
-    int32 duration = CalculateSpellDuration(m_spellInfo, m_caster);
+    int32 duration = CalculateSpellDuration(m_spellInfo, m_caster, nullptr, m_auraScript);
 
     // second direct cast unsummon guardian(s) (guardians without like functionality have cooldown > spawn time)
     if (!m_IsTriggeredSpell && m_caster->GetTypeId() == TYPEID_PLAYER)
