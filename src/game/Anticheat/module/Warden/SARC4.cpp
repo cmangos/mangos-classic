@@ -18,9 +18,15 @@
 
 #include "SARC4.hpp"
 #include <openssl/sha.h>
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+#include <openssl/provider.h>
+#endif
 
 SARC4::SARC4(size_t len) : m_ctx(EVP_CIPHER_CTX_new())
 {
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+    OSSL_PROVIDER_load(NULL, "legacy");
+#endif
     EVP_CIPHER_CTX_init(m_ctx);
     EVP_EncryptInit_ex(m_ctx, EVP_rc4(), nullptr, nullptr, nullptr);
     EVP_CIPHER_CTX_set_key_length(m_ctx, len);
@@ -28,6 +34,9 @@ SARC4::SARC4(size_t len) : m_ctx(EVP_CIPHER_CTX_new())
 
 SARC4::SARC4(const uint8 *seed, size_t len) : m_ctx(EVP_CIPHER_CTX_new())
 {
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+    OSSL_PROVIDER_load(NULL, "legacy");
+#endif
     EVP_CIPHER_CTX_init(m_ctx);
     EVP_EncryptInit_ex(m_ctx, EVP_rc4(), nullptr, nullptr, nullptr);
     EVP_CIPHER_CTX_set_key_length(m_ctx, len);
