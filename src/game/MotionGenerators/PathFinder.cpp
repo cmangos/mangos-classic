@@ -1113,6 +1113,7 @@ void PathFinder::ComputePathToRandomPoint(Vector3 const& startPoint, float maxRa
 
     float distanceToPoly;
     dtPolyRef centerPoly = getPolyByLocation(randomPoint, &distanceToPoly);
+    bool fail = true;
     if (centerPoly != INVALID_POLYREF)
     {
         // first we have to fix z value before hit test, z is in index 1 of randomPoint
@@ -1124,8 +1125,15 @@ void PathFinder::ComputePathToRandomPoint(Vector3 const& startPoint, float maxRa
         {
             // generate path
             BuildPolyPath(currPos, endPoint);
+            fail = false;
             //sLog.outDebug("PathFinder::GetPathToRandomPoint> path type %d size %d poly-size %d\n", m_type, m_pathPoints.size(), m_polyLength);
         }
+    }
+
+    // navmesh queries do not work in water - need to supplement with los check and just build a shortcut
+    if (fail && m_sourceUnit->IsInWater() && m_sourceUnit->CanSwim() && m_sourceUnit->GetMap()->IsInLineOfSight(currPos.x, currPos.y, currPos.z + m_sourceUnit->GetCollisionHeight(), endPoint.x, endPoint.y, endPoint.z + m_sourceUnit->GetCollisionHeight(), false))
+    {
+        BuildShortcut();
     }
 }
 
