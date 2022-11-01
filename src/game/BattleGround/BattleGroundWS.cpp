@@ -295,7 +295,6 @@ void BattleGroundWS::ProcessDroppedFlagActions(Player* player, GameObject* targe
 
         GetBgMap()->GetVariableManager().SetVariable(wsFlagPickedUp[otherTeamIdx], BG_WS_FLAG_STATE_ON_BASE);
         GetBgMap()->GetVariableManager().SetVariable(wsFlagHUDPickedUp[otherTeamIdx], BG_WS_FLAG_ICON_INVISIBLE);
-        m_flagOnRespawn[otherTeamIdx] = true;
 
         RespawnFlagAtBase(team, false);
         UpdatePlayerScore(player, SCORE_FLAG_RETURNS, 1);
