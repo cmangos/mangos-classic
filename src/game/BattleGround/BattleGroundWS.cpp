@@ -189,6 +189,7 @@ void BattleGroundWS::ProcessPlayerFlagScoreEvent(Player* player)
     GetBgMap()->GetVariableManager().SetVariable(pointsWorldState, GetBgMap()->GetVariableManager().GetVariable(pointsWorldState) + 1);
 
     GetBgMap()->GetVariableManager().SetVariable(wsFlagPickedUp[teamIdx], BG_WS_FLAG_STATE_ON_BASE);
+    GetBgMap()->GetVariableManager().SetVariable(wsFlagHUDPickedUp[teamIdx], BG_WS_FLAG_ICON_INVISIBLE);
 
     // despawn flags
     SpawnEvent(WS_EVENT_FLAG_A, 0, false);
@@ -242,7 +243,7 @@ void BattleGroundWS::HandlePlayerDroppedFlag(Player* player)
         GetBgMap()->GetVariableManager().SetVariable(wsFlagPickedUp[otherTeamIdx], BG_WS_FLAG_STATE_ON_GROUND);
         player->CastSpell(player, wsgFlagData[otherTeamIdx][BG_WS_FLAG_ACTION_DROPPED].spellId, TRIGGERED_OLD_TRIGGERED);
 
-        GetBgMap()->GetVariableManager().SetVariable(team == ALLIANCE ? BG_WS_STATE_FLAG_ALLIANCE : BG_WS_STATE_FLAG_HORDE, BG_WS_FLAG_ICON_INVISIBLE);
+        GetBgMap()->GetVariableManager().SetVariable(wsFlagHUDPickedUp[teamIdx], BG_WS_FLAG_ICON_INVISIBLE);
 
         SendMessageToAll(wsgFlagData[otherTeamIdx][BG_WS_FLAG_ACTION_DROPPED].messageId, wsgFlagData[otherTeamIdx][BG_WS_FLAG_ACTION_DROPPED].chatType, player);
 
@@ -264,6 +265,7 @@ void BattleGroundWS::ProcessFlagPickUpFromBase(Player* player, Team attackerTeam
     SpawnEvent(otherTeamIdx, 0, false);
     SetFlagCarrier(otherTeamIdx, player->GetObjectGuid());
     GetBgMap()->GetVariableManager().SetVariable(wsFlagPickedUp[otherTeamIdx], BG_WS_FLAG_STATE_ON_PLAYER);
+    GetBgMap()->GetVariableManager().SetVariable(wsFlagHUDPickedUp[otherTeamIdx], BG_WS_FLAG_ICON_VISIBLE);
 
     // not meant to be a triggered cast - clears a lot during cast like stealth
 
@@ -292,6 +294,7 @@ void BattleGroundWS::ProcessDroppedFlagActions(Player* player, GameObject* targe
         actionId = BG_WS_FLAG_ACTION_RETURNED;
 
         GetBgMap()->GetVariableManager().SetVariable(wsFlagPickedUp[otherTeamIdx], BG_WS_FLAG_STATE_ON_BASE);
+        GetBgMap()->GetVariableManager().SetVariable(wsFlagHUDPickedUp[otherTeamIdx], BG_WS_FLAG_ICON_INVISIBLE);
         m_flagOnRespawn[otherTeamIdx] = true;
 
         RespawnFlagAtBase(team, false);
@@ -315,6 +318,7 @@ void BattleGroundWS::ProcessDroppedFlagActions(Player* player, GameObject* targe
         SetFlagCarrier(otherTeamIdx, player->GetObjectGuid());
 
         GetBgMap()->GetVariableManager().SetVariable(wsFlagPickedUp[otherTeamIdx], BG_WS_FLAG_STATE_ON_PLAYER);
+        GetBgMap()->GetVariableManager().SetVariable(wsFlagHUDPickedUp[otherTeamIdx], BG_WS_FLAG_ICON_VISIBLE);
 
         // send messages and sounds
         SendMessageToAll(wsgFlagData[otherTeamIdx][actionId].messageId, wsgFlagData[teamIdx][actionId].chatType, player);
