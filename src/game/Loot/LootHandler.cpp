@@ -96,6 +96,30 @@ void WorldSession::HandleLootOpcode(WorldPacket& recv_data)
     if (!_player->IsAlive())
         return;
 
+    if (!_player->IsInWorld())
+        return;
+
+    if (!lguid.IsItem())
+    {
+        if (lguid.IsUnit())
+        {
+            if (Unit* unit = _player->GetMap()->GetUnit(lguid))
+            {
+                float range = std::max(5.f, unit->GetCombatReach() + (4.f / 3.f) + _player->GetCombatReach());
+                if (range * range < _player->GetDistance(unit, true, DIST_CALC_NONE))
+                    return;
+            }
+        }
+        else if (lguid.IsGameObject())
+        {
+            if (GameObject* go = _player->GetMap()->GetGameObject(lguid))
+            {
+                if (!go->IsAtInteractDistance(_player))
+                    return;
+            }
+        }
+    }
+
     if (Loot* loot = sLootMgr.GetLoot(_player, lguid))
     {
         // remove stealth aura
