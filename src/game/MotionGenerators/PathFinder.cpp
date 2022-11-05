@@ -574,7 +574,8 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
             Vector3 diffVec = pathDir * (SMOOTH_PATH_STEP_SIZE / pathLength);
 
             // little optimization
-            m_pathPoints.reserve(stepCount + 2);
+            m_pathPoints.clear();
+            m_pathPoints.resize(stepCount + 2);
 
             // first point
             m_pathPoints.push_back(startVec);
