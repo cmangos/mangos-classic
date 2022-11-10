@@ -317,6 +317,8 @@ void SpellTargetMgr::Initialize()
             if (!spellInfo->Effect[effIdxSource])
                 continue;
 
+            SpellEffectInfo& effectTargetingSource = SpellEffectInfoTable[spellInfo->Effect[effIdxSource]];
+
             SpellTargetImplicitType implicitEffectType = data.implicitType[effIdxSource];
             for (uint8 rightSource = 0; rightSource < 2; ++rightSource)
             {
@@ -338,6 +340,11 @@ void SpellTargetMgr::Initialize()
                 // start from first next target
                 for (uint32 effIdxTarget = effIdxSource; effIdxTarget < MAX_EFFECT_INDEX; ++effIdxTarget)
                 {
+                    if (!spellInfo->Effect[effIdxTarget])
+                        continue;
+
+                    SpellEffectInfo& effectTargetingTarget = SpellEffectInfoTable[spellInfo->Effect[effIdxTarget]];
+
                     SpellTargetImplicitType implicitEffectTypeTarget = data.implicitType[effIdxTarget];
                     for (uint8 rightTarget = effIdxSource == effIdxTarget ? rightSource + 1 : 0; rightTarget < 2; ++rightTarget)
                     {
@@ -377,7 +384,8 @@ void SpellTargetMgr::Initialize()
                                     case TARGET_TYPE_UNIT:
                                     case TARGET_TYPE_PLAYER:
                                     {
-                                        if (info.enumerator == TARGET_ENUMERATOR_SINGLE) // always ignore subsequent
+                                        // always ignore subsequent
+                                        if (info.enumerator == TARGET_ENUMERATOR_SINGLE && CanEffectConsumeTarget(info.type, effectTargetingSource.requiredTarget))
                                         {
                                             ignore = true;
                                             break;
@@ -472,6 +480,17 @@ bool SpellTargetMgr::CanEffectBeFilledWithMask(uint32 spellId, uint32 effIdx, ui
         case TARGET_TYPE_ITEM: return bool(mask & (TARGET_FLAG_LOCKED | TARGET_FLAG_ITEM));
         default: return false;
     }
+}
+
+bool SpellTargetMgr::CanEffectConsumeTarget(SpellTargetImplicitType targetType, SpellTargetImplicitType effectTargetType)
+{
+    switch (targetType)
+    {
+        // incomplete mapping - adjust as needed
+        case TARGET_TYPE_UNIT: if (effectTargetType == TARGET_TYPE_LOCATION_DEST) return false; // 43178
+        default: break;
+    }
+    return true;
 }
 
 float SpellTargetMgr::GetJumpRadius(uint32 spellId)

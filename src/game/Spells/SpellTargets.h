@@ -56,6 +56,7 @@ class SpellTargetMgr // thread safe
         static void Initialize(); // precalculates ignored targets and dynamic effect targeting
         static SpellTargetingData& GetSpellTargetingData(uint32 spellId);
         static bool CanEffectBeFilledWithMask(uint32 spellId, uint32 effIdx, uint32 mask);
+        static bool CanEffectConsumeTarget(SpellTargetImplicitType targetType, SpellTargetImplicitType effectTargetType);
 
         // temporary helpers
         static float GetJumpRadius(uint32 spellId);
