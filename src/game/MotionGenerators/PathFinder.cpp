@@ -575,7 +575,7 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
 
             // little optimization
             m_pathPoints.clear();
-            m_pathPoints.resize(stepCount + 2);
+            m_pathPoints.reserve(stepCount + 2);
 
             // first point
             m_pathPoints.push_back(startVec);
