@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `realmd_db_version`;
 CREATE TABLE `realmd_db_version` (
-  `required_z2778_01_realmd_anticheat` bit(1) DEFAULT NULL
+  `required_z2800_01_realmd_platform` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Last applied sql update to DB';
 
 --
@@ -59,6 +59,7 @@ CREATE TABLE `account` (
   `mutetime` bigint(40) unsigned NOT NULL DEFAULT '0',
   `locale` varchar(4) NOT NULL DEFAULT '',
   `os` VARCHAR(4) NOT NULL DEFAULT '0',
+  `platform` VARCHAR(4) NOT NULL DEFAULT '0',
   `token` text,
   `flags` INT UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),

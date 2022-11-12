@@ -82,6 +82,7 @@ class AuthSocket : public MaNGOS::Socket
         std::string _safelogin;
         std::string _token;
         std::string m_os;
+        std::string m_platform;
         std::string m_locale;
         std::string _safelocale;
         uint16 _build;

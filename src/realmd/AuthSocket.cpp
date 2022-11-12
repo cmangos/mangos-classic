@@ -350,6 +350,9 @@ bool AuthSocket::_HandleLogonChallenge()
     ch->os[3] = '\0';
     m_os = (char*)ch->os;
     std::reverse(m_os.begin(), m_os.end());
+    ch->platform[3] = '\0';
+    m_platform = (char*)ch->platform;
+    std::reverse(m_platform.begin(), m_platform.end());
 
     m_locale.resize(sizeof(ch->country));
     m_locale.assign(ch->country, (ch->country + sizeof(ch->country)));
@@ -585,7 +588,7 @@ bool AuthSocket::_HandleLogonProof()
         ///- Update the sessionkey, current ip and login time and reset number of failed logins in the account table for this account
         // No SQL injection (escaped user input) and IP address as received by socket
         const char* K_hex = srp.GetStrongSessionKey().AsHexStr();
-        LoginDatabase.PExecute("UPDATE account SET sessionkey = '%s', locale = '%s', failed_logins = 0, os = '%s' WHERE username = '%s'", K_hex, _safelocale.c_str(), m_os.c_str(), _safelogin.c_str());
+        LoginDatabase.PExecute("UPDATE account SET sessionkey = '%s', locale = '%s', failed_logins = 0, os = '%s', platform = '%s' WHERE username = '%s'", K_hex, _safelocale.c_str(), m_os.c_str(), m_platform.c_str(), _safelogin.c_str());
         if (QueryResult* loginfail = LoginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'", _safelogin.c_str()))
             LoginDatabase.PExecute("INSERT INTO account_logons(accountId,ip,loginTime,loginSource) VALUES('%u','%s',NOW(),'%u')", loginfail->Fetch()[0].GetUInt32(), m_address.c_str(), LOGIN_TYPE_REALMD);
         OPENSSL_free((void*)K_hex);

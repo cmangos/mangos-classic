@@ -100,7 +100,7 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, time_
     m_inQueue(false), m_playerLoading(false), m_kickSession(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_orderCounter(0), m_playerSave(true),
     m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetStorageLocaleIndexFor(locale)),
     m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED), m_sessionState(WORLD_SESSION_STATE_CREATED),
-    m_requestSocket(nullptr), m_accountFlags(accountFlags) {}
+    m_requestSocket(nullptr), m_accountFlags(accountFlags), m_clientOS(CLIENT_OS_UNKNOWN), m_clientPlatform(CLIENT_PLATFORM_UNKNOWN) {}
 
 /// WorldSession destructor
 WorldSession::~WorldSession()
