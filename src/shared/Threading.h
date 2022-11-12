@@ -37,7 +37,7 @@ namespace MaNGOS
                     delete this;
             }
         private:
-            std::atomic_long m_refs;
+            std::atomic_long m_refs { 0 };
     };
 
     enum Priority
