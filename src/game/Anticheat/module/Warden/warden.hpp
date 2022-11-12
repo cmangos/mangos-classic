@@ -76,8 +76,6 @@ class Warden
         void RequestChallenge();
         void HandleChallengeResponse(ByteBuffer &buff);
 
-        std::vector<std::shared_ptr<const Scan>> SelectScans(ScanFlags flags) const;
-
         void ReadScanResults(ByteBuffer &buff);
 
     protected:
@@ -87,6 +85,7 @@ class Warden
         static constexpr size_t KeyLength = 16;
 
         virtual uint32 GetScanFlags() const = 0;
+        std::vector<std::shared_ptr<const Scan>> SelectScans(ScanFlags flags) const;
 
         void BeginScanClock();
 

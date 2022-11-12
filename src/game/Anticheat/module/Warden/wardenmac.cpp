@@ -32,8 +32,7 @@ void WardenMac::LoadScriptedScans()
 
         MANGOS_ASSERT(macWarden->_hashString.size() <= 0xFF);
 
-        scan << static_cast<uint8>(WARDEN_SMSG_CHEAT_CHECKS_REQUEST)
-             << static_cast<uint8>(macWarden->_hashString.size());
+        scan << static_cast<uint8>(macWarden->_hashString.size());
 
         // skip null terminator this way
         scan.append(macWarden->_hashString.c_str(), macWarden->_hashString.size());
@@ -54,7 +53,7 @@ void WardenMac::LoadScriptedScans()
 }
 
 WardenMac::WardenMac(WorldSession *session, const BigNumber &K, SessionAnticheatInterface *anticheat)
-    : _fingerprintSaved(false), Warden(session, sWardenModuleMgr.GetMacModule(), K, anticheat)
+    : _fingerprintSaved(false), Warden(session, session->GetPlatform() == CLIENT_PLATFORM_X86 ? sWardenModuleMgr.GetMacModule() : nullptr, K, anticheat)
 {
     std::stringstream hash;
 
@@ -68,7 +67,8 @@ WardenMac::WardenMac(WorldSession *session, const BigNumber &K, SessionAnticheat
 
     Sha1Hash sha1;
     sha1.UpdateData(_hashString);
-    sha1.UpdateData(reinterpret_cast<const uint8 *>(&magic), sizeof(magic));
+    if (_module) // this constant is only used if there is a module
+        sha1.UpdateData(reinterpret_cast<const uint8*>(&magic), sizeof(magic));
     sha1.Finalize();
 
     memcpy(_hashSHA, sha1.GetDigest(), sizeof(_hashSHA));
@@ -77,6 +77,20 @@ WardenMac::WardenMac(WorldSession *session, const BigNumber &K, SessionAnticheat
     MD5_Init(&md5);
     MD5_Update(&md5, _hashString.c_str(), _hashString.size());
     MD5_Final(_hashMD5, &md5);
+
+    // PPC no module, begin string hashing requests directly
+    if (_module)
+    {
+        // at this point the client has our module loaded.  send whatever packets are necessary to initialize Warden
+        InitializeClient();
+
+        // send any initial hack scans that the scan manager may have for us
+        RequestScans(SelectScans(ScanFlags::InitialLogin));
+
+        // begin the scan clock (note that even if the clock expires before any initial scans are answered, no new
+        // checks will be requested until the reply is received).
+        BeginScanClock();
+    }
 }
 
 void WardenMac::Update(uint32 diff)
