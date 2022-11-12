@@ -503,6 +503,11 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         clientPlatform = CLIENT_PLATFORM_X86;
     else if (platform == "PPC" && clientOS == CLIENT_OS_MAC)
         clientPlatform = CLIENT_PLATFORM_PPC;
+    else
+    {
+        sLog.outError("WorldSocket::HandleAuthSession: Unrecognized platform '%s' for account '%s' from %s", platform.c_str(), account.c_str(), address.c_str());
+        return false;
+    }
 
     if (m_session)
     {
