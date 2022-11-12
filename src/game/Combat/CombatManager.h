@@ -47,6 +47,7 @@ class CombatManager
         void StopEvade(); // Stops either timer or evade state
         EvadeState GetEvadeState() const { return m_evadeState; }
         void SetEvadeState(EvadeState state); // Propagated to pets
+        void OnCombatStart();
 
         // combat timer handling
         uint32 GetCombatTimer() const { return m_combatTimer; }
@@ -64,6 +65,7 @@ class CombatManager
         // evade handling
         uint32 m_evadeTimer; // Used for evade during combat when mob is not running home and target isnt reachable
         EvadeState m_evadeState; // Used for evade during running home
+        uint32 m_combatTick;
 
         // combat timer handling
         uint32 m_combatTimer;
