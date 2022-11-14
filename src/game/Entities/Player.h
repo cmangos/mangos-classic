@@ -1679,8 +1679,8 @@ class Player : public Unit
 
         // LFG
         void SetLFGAreaId(uint32 areaId) { m_LFGAreaId = areaId; }
-        uint32 GetLFGAreaId() { return m_LFGAreaId; }
-        bool IsInLFG() { return m_LFGAreaId > 0; }
+        uint32 GetLFGAreaId() const { return m_LFGAreaId; }
+        bool IsInLFG() const { return m_LFGAreaId > 0; }
 
         void UpdateDefense();
         void UpdateWeaponSkill(WeaponAttackType attType);
