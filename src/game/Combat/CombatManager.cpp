@@ -22,7 +22,9 @@
 #include "Maps/Map.h"
 #include "World/World.h"
 
-CombatManager::CombatManager(Unit* owner) : m_owner(owner), m_evadeTimer(0), m_combatTick(1200), m_evadeState(EVADE_NONE), m_combatTimer(0), m_leashingDisabled(false), m_leashingCheck(nullptr), m_forcedCombat(false)
+#define COMBAT_MANAGER_TICK 1200
+
+CombatManager::CombatManager(Unit* owner) : m_owner(owner), m_evadeTimer(0), m_combatTick(COMBAT_MANAGER_TICK), m_evadeState(EVADE_NONE), m_combatTimer(0), m_leashingDisabled(false), m_leashingCheck(nullptr), m_forcedCombat(false)
 {
 
 }
@@ -58,9 +60,9 @@ void CombatManager::Update(const uint32 diff)
         }
 
         m_combatTick += diff;
-        if (m_combatTick >= 1200)
+        if (m_combatTick >= COMBAT_MANAGER_TICK)
         {
-            m_combatTick -= 1200;
+            m_combatTick -= COMBAT_MANAGER_TICK;
             if (!m_leashingDisabled)
             {
                 // disabled in instances except for players in BGs
@@ -168,7 +170,7 @@ void CombatManager::SetEvadeState(EvadeState state)
 
 void CombatManager::OnCombatStart()
 {
-    m_combatTick = 1200;
+    m_combatTick = COMBAT_MANAGER_TICK;
 }
 
 void CombatManager::TriggerCombatTimer(Unit* target)
