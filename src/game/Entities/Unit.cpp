@@ -5155,25 +5155,8 @@ void Unit::RemoveAurasOnCast(uint32 flag, SpellEntry const* castedSpellEntry)
 
         if (spellEntry->AuraInterruptFlags & flag && (spellEntry->Id != castedSpellEntry->Id || GetObjectGuid() != holder->GetCasterGuid()))
         {
-            auto auraCheck = [&](AuraType type) -> bool
-            {
-                bool foundType = false;
-                for (auto aura : holder->m_auras)
-                {
-                    if (aura)
-                    {
-                        if (aura->GetModifier()->m_auraname == type)
-                        {
-                            foundType = true;
-                            break;
-                        }
-                    }
-                }
-                return foundType;
-            };
-
-            if (!castedSpellEntry->HasAttribute(SPELL_ATTR_EX_ALLOW_WHILE_STEALTHED) || !auraCheck(SPELL_AURA_MOD_STEALTH))
-                if (!castedSpellEntry->HasAttribute(SPELL_ATTR_EX2_ALLOW_WHILE_INVISIBLE) || !auraCheck(SPELL_AURA_MOD_INVISIBILITY))
+            if (!castedSpellEntry->HasAttribute(SPELL_ATTR_EX_ALLOW_WHILE_STEALTHED) || holder->GetSpellProto()->Dispel != DISPEL_STEALTH)
+                if (!castedSpellEntry->HasAttribute(SPELL_ATTR_EX2_ALLOW_WHILE_INVISIBLE) || holder->GetSpellProto()->Dispel != DISPEL_INVISIBILITY)
                     removeThisHolder = true;
         }
 
