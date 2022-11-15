@@ -35,6 +35,7 @@
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Maps/InstanceData.h"
 #include "Entities/Object.h"
+#include "Entities/Transports.h"
 
 ScriptMapMapName sQuestEndScripts;
 ScriptMapMapName sQuestStartScripts;
@@ -1216,6 +1217,9 @@ bool ScriptAction::GetScriptCommandObject(const ObjectGuid guid, bool includeIte
         case HIGHGUID_CORPSE:
             resultObject = HashMapHolder<Corpse>::Find(guid);
             break;
+        case HIGHGUID_MO_TRANSPORT:
+            resultObject = m_map->GetTransport(guid);
+            break;
         case HIGHGUID_ITEM:
             // case HIGHGUID_CONTAINER: ==HIGHGUID_ITEM
         {
@@ -1225,7 +1229,7 @@ bool ScriptAction::GetScriptCommandObject(const ObjectGuid guid, bool includeIte
                     resultObject = player->GetItemByGuid(guid);
                 break;
             }
-            // else no break, but display error message
+            [[fallthrough]];
         }
         default:
             sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u with unsupported guid %s, skipping", m_table, m_script->id, m_script->command, guid.GetString().c_str());
