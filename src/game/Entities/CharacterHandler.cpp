@@ -799,6 +799,10 @@ void WorldSession::HandlePlayerReconnect()
     // stop logout timer if need
     LogoutRequest(0);
 
+    // if DC during cinematic - just stop it
+    if (_player->getCinematic() != 0)
+        _player->StopCinematic();
+
     // silently kick from chat channels player lists to allow reconnect correctly
     _player->CleanupChannels();
 
