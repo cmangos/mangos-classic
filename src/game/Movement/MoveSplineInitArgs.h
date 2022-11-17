@@ -60,7 +60,6 @@ namespace Movement
 
             /** Returns true to show that the arguments were configured correctly and MoveSpline initialization will succeed. */
             bool Validate(Unit* unit) const;
-        private:
             bool _checkPathBounds() const;
     };
 }

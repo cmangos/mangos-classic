@@ -281,6 +281,16 @@ bool FixedPathMovementGenerator::Move(Unit& unit) const
         init.SetWalk(!unit.hasUnitState(UNIT_STAT_RUNNING));
     if (m_flying)
         init.SetFly();
+    else
+    {
+        // non catmullrom
+        if (!unit.movespline->Finalized())
+            unit.UpdateSplinePosition(true);
+        Position pos = unit.GetPosition(unit.GetTransport());
+        init.Path()[0].x = pos.x; init.Path()[0].y = pos.y; init.Path()[0].z = pos.z;
+        if (!init.CheckBounds())
+            ERROR_DB_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Path movement non-catmullrom pathId %u point %u for %s has invalid out of bounds spline. Likely meant to be split into several. (by script action or waittime)", unit.GetMotionMaster()->GetPathId(), m_pathIndex, unit.GetName());
+    }
     if (m_orientation != 0.f)
         init.SetFacing(m_orientation);
     if (m_speed != 0.f)
