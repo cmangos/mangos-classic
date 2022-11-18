@@ -115,7 +115,8 @@ void WorldSession::HandleLootOpcode(WorldPacket& recv_data)
         {
             if (GameObject* go = _player->GetMap()->GetGameObject(lguid))
             {
-                if (!go->IsAtInteractDistance(_player))
+                float range = std::max(5.f, go->GetCombatReach() + (4.f / 3.f) + _player->GetCombatReach());
+                if (range * range < _player->GetDistance(go, true, DIST_CALC_NONE))
                     return;
             }
         }

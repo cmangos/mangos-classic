@@ -379,67 +379,6 @@ struct GameobjectCallForHelpOnUsage : public SpellScript
     }
 };
 
-struct BirthNoVisualInstantSpawn : public SpellScript
-{
-    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
-    {
-        spell->GetCaster()->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_DO_NOT_FADE_IN);
-    }
-};
-
-struct SleepVisualFlavor : public AuraScript
-{
-    void OnApply(Aura* aura, bool apply) const override
-    {
-        Unit* target = aura->GetTarget();
-        if (apply)
-            target->SetStandState(UNIT_STAND_STATE_SLEEP);
-        else
-            target->SetStandState(UNIT_STAND_STATE_STAND);
-    }
-};
-
-enum spell_call_of_the_falcon
-{
-    YELL_KILL_FALCONER          = 17624, // Kill $n!
-    NPC_BLOODWARDER_FALCONER    = 17994,
-    NPC_BLOODFALCON             = 18155,
-    SPELL_CALL_OF_THE_FALCON    = 34853,
-};
-
-struct CallOfTheFalcon : public AuraScript
-{
-    void OnApply(Aura* aura, bool apply) const override
-    {
-        if (apply)
-        {
-            DoBroadcastText(YELL_KILL_FALCONER, aura->GetCaster(), aura->GetTarget());
-            aura->GetTarget()->CastSpell(nullptr, SPELL_CALL_OF_THE_FALCON, TRIGGERED_OLD_TRIGGERED);
-        }
-    }
-};
-
-struct MaximizePetLoyalty : public SpellScript
-{
-    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
-    {
-        Unit* unitTarget = spell->GetUnitTarget();
-        if (!unitTarget)
-            return;
-
-        Pet* pet = dynamic_cast<Pet*>(unitTarget);
-
-        if (!pet)
-            return;
-
-        if (pet->getPetType() != HUNTER_PET)
-            return;
-
-        pet->SetLoyaltyLevel(LoyaltyLevel(6));
-        pet->SetTP(300);
-    }
-};
-
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
