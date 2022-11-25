@@ -2312,7 +2312,7 @@ class Unit : public WorldObject
         bool IsIgnoringRangedTargets() { return m_ignoreRangedTargets; }
 
         float GetAttackDistance(Unit const* target) const;
-        virtual uint32 GetDetectionRange() const { return 20.f; }
+        virtual uint32 GetDetectionRange() const { return 18.f; }
 
         virtual UnitAI* AI() { return nullptr; }
         virtual CombatData* GetCombatData() { return m_combatData; }
