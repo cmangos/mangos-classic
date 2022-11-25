@@ -859,6 +859,8 @@ class Creature : public Unit
 
         HighGuid GetParentHigh() const override { return HIGHGUID_UNIT; }
 
+        void Heartbeat() override;
+
         // Spell Lists
         CreatureSpellList const& GetSpellList() const { return m_spellList; }
         std::vector<uint32> GetCharmSpells() const;

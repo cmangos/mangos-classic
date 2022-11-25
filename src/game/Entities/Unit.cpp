@@ -10839,8 +10839,8 @@ class UnitVisitObjectsInRangeNotifyEvent : public BasicEvent
 
         bool Execute(uint64 /*e_time*/, uint32 /*p_time*/) override
         {
-            float radius = MAX_CREATURE_ATTACK_RADIUS * sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO);
-            if (m_owner.GetTypeId() == TYPEID_PLAYER)
+            float radius = std::max(m_owner.GetDetectionRange(), uint32(MAX_CREATURE_ATTACK_RADIUS)) * sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO);
+            if (m_owner.IsPlayer())
             {
                 MaNGOS::PlayerVisitObjectsNotifier notify(static_cast<Player&>(m_owner));
                 Cell::VisitAllObjects(&m_owner, notify, radius);
