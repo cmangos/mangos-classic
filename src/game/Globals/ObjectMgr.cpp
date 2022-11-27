@@ -5142,7 +5142,8 @@ void ObjectMgr::LoadInstanceTemplate()
             continue;
         }
 
-        if (!mapEntry->Instanceable())
+		std::set<uint32> exceptions = { 369,449,450 }; // vanilla only - in dbc in tbc
+        if (!mapEntry->Instanceable() && exceptions.find(i) == exceptions.end())
         {
             sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: non-instanceable mapid %d for template!", temp->map);
             sInstanceTemplate.EraseEntry(i);
