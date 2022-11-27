@@ -775,6 +775,14 @@ bool ConditionEntry::IsValid() const
                 sLog.outErrorDb("Quest condition (entry %u, type %u) has useless data in value2 (%u)!", m_entry, m_condition, m_value2);
             break;
         }
+        case CONDITION_PVP_RANK:
+        {
+            if (m_value1 > HONOR_RANK_COUNT)
+                sLog.outErrorDb("Quest condition (entry %u, type %u) has too high rank idx in value1 (%u)!", m_entry, m_condition, m_value1);
+            if (m_value2 > HONOR_RANK_COUNT)
+                sLog.outErrorDb("Quest condition (entry %u, type %u) has too high rank idx in value2 (%u)!", m_entry, m_condition, m_value2);
+            break;
+        }
         case CONDITION_ACTIVE_GAME_EVENT:
         {
             if (!sGameEventMgr.IsValidEvent(m_value1))
