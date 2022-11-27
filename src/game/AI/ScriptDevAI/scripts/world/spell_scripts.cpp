@@ -374,8 +374,16 @@ struct GameobjectCallForHelpOnUsage : public SpellScript
         MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, check);
         Cell::VisitAllObjects(spell->GetCaster(), searcher, 12.f);
         for (Unit* attacker : targets)
+        {
+            if (attacker->IsCreature() && static_cast<Creature*>(attacker)->IsCritter())
+                continue;
+
+            if (!spell->GetCaster()->IsEnemy(attacker))
+                continue;
+
             if (attacker->AI())
                 attacker->AI()->AttackStart(spell->GetCaster());
+        }
     }
 };
 
