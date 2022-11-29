@@ -59,6 +59,20 @@ void CombatManager::Update(const uint32 diff)
                 m_evadeTimer -= diff;
         }
 
+        if (!m_leashingDisabled)
+        {
+            if (m_combatTimer)
+            {
+                if (m_owner->IsPlayerControlled() || !m_owner->IsCrowdControlled())
+                {
+                    if (m_combatTimer <= diff)
+                        m_combatTimer = 0;
+                    else
+                        m_combatTimer -= diff;
+                }
+            }
+        }
+
         m_combatTick += diff;
         if (m_combatTick >= COMBAT_MANAGER_TICK)
         {
@@ -70,17 +84,8 @@ void CombatManager::Update(const uint32 diff)
                 {
                     if (!m_owner->GetMap()->IsDungeon() && m_owner->IsImmobilizedState())
                         m_owner->getThreatManager().DeleteOutOfRangeReferences();
-                    if (m_combatTimer)
-                    {
-                        if (m_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) || !m_owner->IsCrowdControlled())
-                        {
-                            if (m_combatTimer <= diff)
-                                m_combatTimer = 0;
-                            else
-                                m_combatTimer -= diff;
-                        }
-                    }
-                    else if (!m_forcedCombat)
+
+                    if (!m_combatTimer && !m_forcedCombat)
                     {
                         bool check = !m_owner->HasMaster();
                         if (!check)
