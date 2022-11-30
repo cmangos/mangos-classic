@@ -75,25 +75,25 @@ void BigNumber::SetRand(int numbits)
     BN_rand(_bn, numbits, 0, 1);
 }
 
-BigNumber BigNumber::operator=(const BigNumber& bn)
+BigNumber& BigNumber::operator=(const BigNumber& bn)
 {
     BN_copy(_bn, bn._bn);
     return *this;
 }
 
-BigNumber BigNumber::operator+=(const BigNumber& bn)
+BigNumber& BigNumber::operator+=(const BigNumber& bn)
 {
     BN_add(_bn, _bn, bn._bn);
     return *this;
 }
 
-BigNumber BigNumber::operator-=(const BigNumber& bn)
+BigNumber& BigNumber::operator-=(const BigNumber& bn)
 {
     BN_sub(_bn, _bn, bn._bn);
     return *this;
 }
 
-BigNumber BigNumber::operator*=(const BigNumber& bn)
+BigNumber& BigNumber::operator*=(const BigNumber& bn)
 {
     BN_CTX* bnctx = BN_CTX_new();
     BN_mul(_bn, _bn, bn._bn, bnctx);
@@ -102,7 +102,7 @@ BigNumber BigNumber::operator*=(const BigNumber& bn)
     return *this;
 }
 
-BigNumber BigNumber::operator/=(const BigNumber& bn)
+BigNumber& BigNumber::operator/=(const BigNumber& bn)
 {
     BN_CTX* bnctx = BN_CTX_new();
     BN_div(_bn, nullptr, _bn, bn._bn, bnctx);
@@ -111,7 +111,7 @@ BigNumber BigNumber::operator/=(const BigNumber& bn)
     return *this;
 }
 
-BigNumber BigNumber::operator%=(const BigNumber& bn)
+BigNumber& BigNumber::operator%=(const BigNumber& bn)
 {
     BN_CTX* bnctx = BN_CTX_new();
     BN_mod(_bn, _bn, bn._bn, bnctx);
