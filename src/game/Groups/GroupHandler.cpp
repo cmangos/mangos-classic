@@ -589,8 +589,7 @@ void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& recv_data)
         /********************/
 
         // everything is fine, do it
-        WorldPacket data(MSG_RAID_READY_CHECK, 8);
-        data << ObjectGuid(GetPlayer()->GetObjectGuid());
+        WorldPacket data(MSG_RAID_READY_CHECK, 0);
         group->BroadcastPacket(data, true, -1);
 
         group->OfflineReadyCheck();
@@ -605,10 +604,13 @@ void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& recv_data)
             return;
 
         // everything is fine, do it
-        WorldPacket data(MSG_RAID_READY_CHECK_CONFIRM, 9);
-        data << GetPlayer()->GetObjectGuid();
-        data << uint8(state);
-        group->BroadcastReadyCheck(data);
+        if (Player* gleader = sObjectMgr.GetPlayer(group->GetLeaderGuid()))
+        {
+            WorldPacket data(MSG_RAID_READY_CHECK, 9);
+            data << GetPlayer()->GetObjectGuid();
+            data << uint8(state);
+            gleader->GetSession()->SendPacket(data);
+        }
     }
 }
 
