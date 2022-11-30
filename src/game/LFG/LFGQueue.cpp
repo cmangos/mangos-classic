@@ -72,7 +72,10 @@ void LFGQueue::Update()
         previously = now;
 
         if (m_queuedGroups.empty() && m_queuedPlayers.empty())
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
             continue;
+        }
 
         // Iterate over QueuedPlayersMap to update players timers and remove offline/disconnected players.
         for (auto itr = m_queuedPlayers.begin(); itr != m_queuedPlayers.end();)
