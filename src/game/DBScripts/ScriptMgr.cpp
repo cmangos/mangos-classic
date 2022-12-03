@@ -1980,27 +1980,32 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
         case SCRIPT_COMMAND_CAST_SPELL:                     // 15
         {
             // Select Spell
-            uint32 spell = m_script->castSpell.spellId;
+            uint32 spellId = m_script->castSpell.spellId;
             uint32 filledCount = 0;
             while (filledCount < MAX_TEXT_ID && m_script->textId[filledCount])  // Count which dataint fields are filled
                 ++filledCount;
             if (filledCount > 0)
                 if (uint32 randomField = urand(0, filledCount))               // Random selection resulted in one of the dataint fields
-                    spell = m_script->textId[randomField - 1];
+                    spellId = m_script->textId[randomField - 1];
+
+            Unit* castTarget = static_cast<Unit*>(pTarget);
+            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
+            if (spellInfo->HasAttribute(SPELL_ATTR_EX_EXCLUDE_CASTER) && castTarget == pSource)
+                castTarget = nullptr; // TODO: Add mechanism to opt not sending target
 
             // TODO: when GO cast implemented, code below must be updated accordingly to also allow GO spell cast
-            if (pSource && pSource->GetTypeId() == TYPEID_GAMEOBJECT)
+            if (pSource && pSource->IsGameObject())
             {
                 if (LogIfNotUnit(pTarget))
                     break;
 
-                ((Unit*)pTarget)->CastSpell(((Unit*)pTarget), spell, TRIGGERED_OLD_TRIGGERED | TRIGGERED_DO_NOT_PROC, nullptr, nullptr, pSource->GetObjectGuid());
+                static_cast<Unit*>(pTarget)->CastSpell(castTarget, spellId, TRIGGERED_OLD_TRIGGERED | TRIGGERED_DO_NOT_PROC, nullptr, nullptr, pSource->GetObjectGuid());
                 break;
             }
 
             if (LogIfNotUnit(pSource))
                 break;
-            ((Unit*)pSource)->CastSpell(((Unit*)pTarget), spell, m_script->castSpell.castFlags | TRIGGERED_DO_NOT_PROC);
+            static_cast<Unit*>(pSource)->CastSpell(castTarget, spellId, m_script->castSpell.castFlags | TRIGGERED_DO_NOT_PROC);
             break;
         }
         case SCRIPT_COMMAND_PLAY_SOUND:                     // 16
