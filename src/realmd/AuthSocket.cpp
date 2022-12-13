@@ -180,6 +180,10 @@ std::array<uint8, 16> VersionChallenge = { { 0xBA, 0xA3, 0x1E, 0x99, 0xA0, 0x0B,
 AuthSocket::AuthSocket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler)
     : Socket(service, std::move(closeHandler)), _status(STATUS_CHALLENGE), _build(0), _accountSecurityLevel(SEC_PLAYER), m_timeoutTimer(service)
 {
+}
+
+bool AuthSocket::Open()
+{
     m_timeoutTimer.expires_from_now(boost::posix_time::seconds(30));
     m_timeoutTimer.async_wait([&] (const boost::system::error_code& error)
     {
@@ -191,6 +195,8 @@ AuthSocket::AuthSocket(boost::asio::io_service& service, std::function<void (Soc
         if (!IsClosed())
             Close();
     });
+
+    return Socket::Open();
 }
 
 /// Read the packet from the client
