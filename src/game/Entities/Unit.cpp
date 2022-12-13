@@ -2371,7 +2371,8 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
             currentAbsorb = RemainingDamage;
 
         bool preventedDeath = false;
-        (*i)->OnAbsorb(currentAbsorb, RemainingDamage, reflectSpell, reflectDamage, preventedDeath);
+        bool dropCharge = true;
+        (*i)->OnAbsorb(currentAbsorb, RemainingDamage, reflectSpell, reflectDamage, preventedDeath, dropCharge);
         if (preventedDeath)
             preventDeathAura = (*i);
 
@@ -2381,8 +2382,9 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
         {
             // Reduce shield amount
             mod->m_amount -= currentAbsorb;
-            if ((*i)->GetHolder()->DropAuraCharge())
-                mod->m_amount = 0;
+            if (dropCharge)
+                if ((*i)->GetHolder()->DropAuraCharge())
+                    mod->m_amount = 0;
             // Need remove it later
             if (mod->m_amount <= 0)
                 existExpired = true;
