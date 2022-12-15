@@ -23,7 +23,7 @@ Timer::Timer(uint32 id, std::function<void()> functor, uint32 timerMin, uint32 t
     : id(id), timer(urand(timerMin, timerMax)), disabled(disabled), functor(functor), initialMin(timerMin), initialMax(timerMax), initialDisabled(disabled)
     {}
 
-bool Timer::UpdateTimer(const uint32 diff)
+bool Timer::UpdateTimer(const uint32 diff, bool /*combat*/)
 {
     if (disabled)
         return false;
@@ -50,7 +50,7 @@ bool CombatTimer::UpdateTimer(const uint32 diff, bool combat)
     if (disabled)
         return false;
 
-    if (this->combat && !combat)
+    if (this->combat != combat)
         return false;
 
     if (timer <= diff)
@@ -69,19 +69,52 @@ void TimerManager::AddTimer(uint32 id, Timer&& timer)
     m_timers.emplace(id, timer);
 }
 
-void TimerManager::AddCustomAction(uint32 id, bool disabled, std::function<void()> functor)
+void TimerManager::AddCustomAction(uint32 id, bool disabled, std::function<void()> functor, TimerCombat timerCombat)
 {
-    m_timers.emplace(id, Timer(id, functor, 0, 0, disabled));
+    switch (timerCombat)
+    {
+        case TIMER_ALWAYS:
+            m_timers.emplace(id, Timer(id, functor, 0, 0, disabled));
+            break;
+        case TIMER_COMBAT_OOC:
+            m_timers.emplace(id, CombatTimer(id, functor, false, 0, 0, disabled));
+            break;
+        case TIMER_COMBAT_COMBAT:
+            m_timers.emplace(id, CombatTimer(id, functor, true, 0, 0, disabled));
+            break;
+    }    
 }
 
-void TimerManager::AddCustomAction(uint32 id, uint32 timer, std::function<void()> functor)
+void TimerManager::AddCustomAction(uint32 id, uint32 timer, std::function<void()> functor, TimerCombat timerCombat)
 {
-    m_timers.emplace(id, Timer(id, functor, timer, timer, false));
+    switch (timerCombat)
+    {
+        case TIMER_ALWAYS:
+            m_timers.emplace(id, Timer(id, functor, timer, timer, false));
+            break;
+        case TIMER_COMBAT_OOC:
+            m_timers.emplace(id, CombatTimer(id, functor, false, timer, timer, false));
+            break;
+        case TIMER_COMBAT_COMBAT:
+            m_timers.emplace(id, CombatTimer(id, functor, true, timer, timer, false));
+            break;
+    }
 }
 
-void TimerManager::AddCustomAction(uint32 id, uint32 timerMin, uint32 timerMax, std::function<void()> functor)
+void TimerManager::AddCustomAction(uint32 id, uint32 timerMin, uint32 timerMax, std::function<void()> functor, TimerCombat timerCombat)
 {
-    m_timers.emplace(id, Timer(id, functor, timerMin, timerMax, false));
+    switch (timerCombat)
+    {
+        case TIMER_ALWAYS:
+            m_timers.emplace(id, Timer(id, functor, timerMin, timerMax, false));
+            break;
+        case TIMER_COMBAT_OOC:
+            m_timers.emplace(id, CombatTimer(id, functor, false, timerMin, timerMax, false));
+            break;
+        case TIMER_COMBAT_COMBAT:
+            m_timers.emplace(id, CombatTimer(id, functor, true, timerMin, timerMax, false));
+            break;
+    }
 }
 
 void TimerManager::ResetTimer(uint32 index, uint32 timer)
@@ -146,10 +179,15 @@ void TimerManager::ResetIfNotStarted(uint32 index, uint32 timer)
 
 void TimerManager::UpdateTimers(const uint32 diff)
 {
+    UpdateTimers(diff, false);
+}
+
+void TimerManager::UpdateTimers(const uint32 diff, bool combat)
+{
     for (auto& data : m_timers)
     {
         Timer& timer = data.second;
-        if (timer.UpdateTimer(diff))
+        if (timer.UpdateTimer(diff, combat))
             timer.functor();
     }
 }

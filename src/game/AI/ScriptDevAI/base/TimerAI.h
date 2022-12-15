@@ -44,7 +44,7 @@ struct Timer
     uint32 initialMin, initialMax;
     bool initialDisabled;
 
-    virtual bool UpdateTimer(const uint32 diff);
+    virtual bool UpdateTimer(const uint32 diff, bool /*combat*/);
     void ResetTimer();
 };
 
@@ -57,6 +57,13 @@ struct CombatTimer : public Timer
     virtual bool UpdateTimer(const uint32 diff, bool combat);
 };
 
+enum TimerCombat
+{
+    TIMER_COMBAT_OOC    = 0,
+    TIMER_COMBAT_COMBAT = 1,
+    TIMER_ALWAYS        = 2
+};
+
 /*
 Not an AI in itself
 Used for adding unified timer support to any AI
@@ -67,16 +74,16 @@ class TimerManager
         TimerManager() {}
 
         // TODO: remove first function
-        void AddCustomAction(uint32 id, bool disabled, std::function<void()> functor);
-        void AddCustomAction(uint32 id, uint32 timer, std::function<void()> functor);
-        void AddCustomAction(uint32 id, std::chrono::milliseconds timer, std::function<void()> functor)
+        void AddCustomAction(uint32 id, bool disabled, std::function<void()> functor, TimerCombat timerCombat = TIMER_ALWAYS);
+        void AddCustomAction(uint32 id, uint32 timer, std::function<void()> functor, TimerCombat timerCombat = TIMER_ALWAYS);
+        void AddCustomAction(uint32 id, std::chrono::milliseconds timer, std::function<void()> functor, TimerCombat timerCombat = TIMER_ALWAYS)
         {
-            AddCustomAction(id, uint32(timer.count()), functor);
+            AddCustomAction(id, uint32(timer.count()), functor, timerCombat);
         }
-        void AddCustomAction(uint32 id, uint32 timerMin, uint32 timerMax, std::function<void()> functor);
-        void AddCustomAction(uint32 id, std::chrono::milliseconds timerMin, std::chrono::milliseconds timerMax, std::function<void()> functor)
+        void AddCustomAction(uint32 id, uint32 timerMin, uint32 timerMax, std::function<void()> functor, TimerCombat timerCombat = TIMER_ALWAYS);
+        void AddCustomAction(uint32 id, std::chrono::milliseconds timerMin, std::chrono::milliseconds timerMax, std::function<void()> functor, TimerCombat timerCombat = TIMER_ALWAYS)
         {
-            AddCustomAction(id, timerMin.count(), timerMax.count(), functor);
+            AddCustomAction(id, timerMin.count(), timerMax.count(), functor, timerCombat);
         }
 
         virtual void ResetTimer(uint32 index, uint32 timer);
@@ -101,7 +108,9 @@ class TimerManager
             ResetIfNotStarted(index, timer.count());
         }
 
+
         virtual void UpdateTimers(const uint32 diff);
+        virtual void UpdateTimers(const uint32 diff, bool combat);
         virtual void ResetAllTimers();
 
         virtual void GetAIInformation(ChatHandler& reader);
@@ -187,7 +196,7 @@ class CombatActions : public TimerManager
         inline void SetActionReadyStatus(uint32 index, bool state) { m_actionReadyStatus[index] = state; }
         inline bool GetActionReadyStatus(uint32 index) { return m_actionReadyStatus[index]; }
 
-        virtual void UpdateTimers(const uint32 diff, bool combat);
+        virtual void UpdateTimers(const uint32 diff, bool combat) override;
         virtual void ExecuteActions() = 0;
         virtual void ResetAllTimers() override;
 
