@@ -475,7 +475,7 @@ bool inline ConditionEntry::Evaluate(WorldObject const* target, Map const* map, 
         }
         case CONDITION_WORLDSTATE:
         {
-            int32 variable = map->GetVariableManager().GetVariable(m_value1);
+            uint32 variable = map->GetVariableManager().GetVariable(m_value1);
             switch (m_value2)
             {
                 case WORLDSTATE_EQUALS: return variable == m_value3;
