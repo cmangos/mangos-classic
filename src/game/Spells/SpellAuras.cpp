@@ -5774,7 +5774,7 @@ void SpellAuraHolder::Update(uint32 diff)
                 {
                     if (powertype == POWER_HEALTH)
                     {
-                        if (GetTarget()->GetHealth() <= manaPerSecond)
+                        if (GetTarget()->GetHealth() <= (uint32)manaPerSecond)
                         {
                             // cannot apply damage part so we have to cancel responsible aura
                             GetTarget()->RemoveAurasDueToSpell(GetId());
