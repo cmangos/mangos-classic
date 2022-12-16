@@ -212,7 +212,7 @@ void TimerManager::GetAIInformation(ChatHandler& reader)
 
 void CombatActions::UpdateTimers(const uint32 diff, bool combat)
 {
-    TimerManager::UpdateTimers(diff);
+    TimerManager::UpdateTimers(diff, combat);
     for (auto& data : m_CombatActions)
     {
         CombatTimer& timer = data.second;
