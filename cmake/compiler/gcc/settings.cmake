@@ -15,6 +15,11 @@ if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0 AND NOT MINGW)
   endif()
 endif()
 
+# Blacklist buggy GCC versions
+if(CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 11.2)
+  message(SEND_ERROR "GCC: This compiler version contains known issues, update required")
+endif()
+
 add_definitions(-DHAVE_SSE2)
 message(STATUS "GCC: SFMT enabled, SSE2 flags forced")
 
