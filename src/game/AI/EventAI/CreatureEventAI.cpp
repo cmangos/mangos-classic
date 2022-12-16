@@ -419,7 +419,7 @@ bool CreatureEventAI::CheckEvent(CreatureEventAIHolder& holder, Unit* actionInvo
                 pList = DoFindFriendlyMissingBuff((float)event.friendly_buff.radius, event.friendly_buff.spellId, false);
             }
             else if (event.friendly_buff.inCombat == 1)            
-                pList = DoFindFriendlyMissingBuff((float)event.friendly_buff.radius, event.friendly_buff.spellId, true);
+                pList = DoFindFriendlyMissingBuff((float)event.friendly_buff.radius, event.friendly_buff.spellId, m_creature->IsInCombat());
             else if (event.friendly_buff.inCombat == 2)
             {
                 if (m_creature->IsInCombat())
