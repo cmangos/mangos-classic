@@ -433,7 +433,7 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
             if (spellProcEvent && spellProcEvent->cooldown)
                 cooldown = spellProcEvent->cooldown;
             if (cooldown)
-                AddCooldown(*holder->GetSpellProto(), nullptr, false, cooldown * IN_MILLISECONDS);
+                holder->SetProcCooldown(std::chrono::seconds(cooldown), GetMap()->GetCurrentClockTime());
         }
 
         if (result != SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_OK)
@@ -524,6 +524,9 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
 
             anyAuraProc = true;
         }
+
+        if (procSuccess && execData.cooldown)
+            triggeredByHolder->SetProcCooldown(std::chrono::seconds(execData.cooldown), GetMap()->GetCurrentClockTime());
 
         // Remove charge (aura can be removed by triggers)
         if (useCharges && procSuccess && anyAuraProc && !triggeredByHolder->IsDeleted())
@@ -674,7 +677,7 @@ SpellAuraProcResult Unit::TriggerProccedSpell(Unit* target, std::array<int32, MA
     if (target && (target != this && !target->IsAlive()))
         return SPELL_AURA_PROC_FAILED;
 
-    if (!IsSpellReady(*spellInfo))
+    if (!triggeredByAura->GetHolder()->IsProcReady(GetMap()->GetCurrentClockTime()))
         return SPELL_AURA_PROC_FAILED;
 
     if (basepoints[EFFECT_INDEX_0] || basepoints[EFFECT_INDEX_1] || basepoints[EFFECT_INDEX_2])
@@ -687,7 +690,7 @@ SpellAuraProcResult Unit::TriggerProccedSpell(Unit* target, std::array<int32, MA
         CastSpell(target, spellInfo, TRIGGERED_OLD_TRIGGERED | TRIGGERED_INSTANT_CAST | TRIGGERED_DO_NOT_RESET_LEASH, castItem, triggeredByAura, originalCaster);
 
     if (cooldown)
-        AddCooldown(*spellInfo, nullptr, false, cooldown * IN_MILLISECONDS);
+        triggeredByAura->GetHolder()->SetProcCooldown(std::chrono::seconds(cooldown), GetMap()->GetCurrentClockTime());
 
     return SPELL_AURA_PROC_OK;
 }
