@@ -22,6 +22,7 @@
 #include "Common.h"
 #include <openssl/sha.h>
 #include <openssl/crypto.h>
+#include <openssl/evp.h>
 
 class BigNumber;
 
@@ -29,7 +30,13 @@ class Sha1Hash
 {
     public:
         Sha1Hash();
+        Sha1Hash(Sha1Hash const& other);        // copy
+        Sha1Hash(Sha1Hash&& other);             // move
+        Sha1Hash& operator=(Sha1Hash other);    // assign
         ~Sha1Hash();
+
+        void swap(Sha1Hash& other) throw();
+        friend void swap(Sha1Hash& left, Sha1Hash& right) { left.swap(right); }
 
         void UpdateBigNumbers(BigNumber* bn0, ...);
 
@@ -40,11 +47,11 @@ class Sha1Hash
         void Initialize();
         void Finalize();
 
-        uint8* GetDigest(void) { return mDigest; };
-        static int GetLength(void) { return SHA_DIGEST_LENGTH; };
+        uint8* GetDigest() { return m_digest; };
+        static int GetLength() { return SHA_DIGEST_LENGTH; };
 
     private:
-        SHA_CTX mC;
-        uint8 mDigest[SHA_DIGEST_LENGTH];
+        EVP_MD_CTX* m_ctx;
+        uint8 m_digest[SHA_DIGEST_LENGTH];
 };
 #endif
