@@ -170,12 +170,7 @@ int main(int argc, char* argv[])
         Log::WaitBeforeContinueIfNeed();
     }
 
-    DETAIL_LOG("%s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
-    if (SSLeay() < 0x009080bfL)
-    {
-        DETAIL_LOG("WARNING: Outdated version of OpenSSL lib. Logins to server may not work!");
-        DETAIL_LOG("WARNING: Minimal required version [OpenSSL 0.9.8k]");
-    }
+    DETAIL_LOG("%s (Library: %s)", OPENSSL_VERSION_TEXT, OpenSSL_version(OPENSSL_VERSION));
 
     sLog.outString();
     sLog.outString("<Ctrl-C> to stop.");
