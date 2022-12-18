@@ -39,12 +39,14 @@ WardenModule::WardenModule(std::string const &bin, std::string const &kf, std::s
     // compute md5 hash of encrypted/compressed data
     {
         // md5 hash
-        MD5_CTX ctx;
-        MD5_Init(&ctx);
-        MD5_Update(&ctx, &binary[0], binary.size());
+        EVP_MD_CTX* ctx = EVP_MD_CTX_new();
+        EVP_DigestInit_ex(ctx, EVP_md5(), nullptr);
+        EVP_DigestUpdate(ctx, &binary[0], binary.size());
 
         hash.resize(MD5_DIGEST_LENGTH);
-        MD5_Final(&hash[0], &ctx);
+        uint32 length = MD5_DIGEST_LENGTH;
+        EVP_DigestFinal_ex(ctx, &hash[0], &length);
+        EVP_MD_CTX_free(ctx);
     }
 
     std::ifstream k(kf, std::ios::binary | std::ios::ate);

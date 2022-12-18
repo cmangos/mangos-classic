@@ -41,6 +41,7 @@
 #include "Anticheat/Anticheat.hpp"
 
 #include <openssl/md5.h>
+#include <openssl/evp.h>
 
 #include <mutex>
 #include <deque>
@@ -1059,12 +1060,13 @@ void WorldSession::SendAccountDataTimes()
         }
         else
         {
-            MD5_CTX md5;
-            MD5_Init(&md5);
-            MD5_Update(&md5, itr.Data.c_str(), itr.Data.size());
-
+            EVP_MD_CTX* md5 = EVP_MD_CTX_new();
+            EVP_DigestInit_ex(md5, EVP_md5(), nullptr);
+            EVP_DigestUpdate(md5, itr.Data.c_str(), itr.Data.size());
             uint8 fileHash[MD5_DIGEST_LENGTH];
-            MD5_Final(fileHash, &md5);
+            uint32 length = MD5_DIGEST_LENGTH;
+            EVP_DigestFinal_ex(md5, fileHash, &length);
+            EVP_MD_CTX_free(md5);
             data.append(fileHash, MD5_DIGEST_LENGTH);
         }
     }

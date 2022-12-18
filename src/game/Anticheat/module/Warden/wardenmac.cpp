@@ -73,10 +73,12 @@ WardenMac::WardenMac(WorldSession *session, const BigNumber &K, SessionAnticheat
 
     memcpy(_hashSHA, sha1.GetDigest(), sizeof(_hashSHA));
 
-    MD5_CTX md5;
-    MD5_Init(&md5);
-    MD5_Update(&md5, _hashString.c_str(), _hashString.size());
-    MD5_Final(_hashMD5, &md5);
+    EVP_MD_CTX* md5 = EVP_MD_CTX_new();
+    EVP_DigestInit_ex(md5, EVP_md5(), nullptr);
+    EVP_DigestUpdate(md5, _hashString.c_str(), _hashString.size());
+    uint32 length = MD5_DIGEST_LENGTH;
+    EVP_DigestFinal_ex(md5, _hashMD5, &length);
+    EVP_MD_CTX_free(md5);
 
     // PPC no module, begin string hashing requests directly
     if (!_module)
