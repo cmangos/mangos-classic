@@ -254,6 +254,9 @@ void Creature::RemoveFromWorld()
                 StartCooldown(owner);
 
         ClearCreatureGroup();
+
+        if (AI())
+            AI()->RelinquishFollow(ObjectGuid());
     }
 
     Unit::RemoveFromWorld();

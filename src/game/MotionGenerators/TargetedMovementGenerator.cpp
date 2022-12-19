@@ -811,6 +811,8 @@ void FollowMovementGenerator::Initialize(Unit& owner)
 void FollowMovementGenerator::Finalize(Unit& owner)
 {
     owner.clearUnitState(UNIT_STAT_FOLLOW | UNIT_STAT_FOLLOW_MOVE);
+    if (owner.AI() && i_target.isValid())
+        owner.AI()->RelinquishFollow(i_target->GetObjectGuid());
 }
 
 void FollowMovementGenerator::Interrupt(Unit& owner)

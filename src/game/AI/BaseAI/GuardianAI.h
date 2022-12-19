@@ -46,10 +46,5 @@ class GuardianAI : public CreatureEventAI
         void OnUnsummon() override;
     protected:
         std::string GetAIName() override { return "GuardianAI"; }
-
-        void RelinquishFollowData();
-
-        float m_followAngle;
-        float m_followDist;
 };
 #endif

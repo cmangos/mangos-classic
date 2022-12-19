@@ -28,7 +28,7 @@ CreatureAI::CreatureAI(Creature* creature) : CreatureAI(creature, 0) { }
 CreatureAI::CreatureAI(Creature* creature, uint32 combatActions) :
     UnitAI(creature, combatActions),
     m_creature(creature),
-    m_deathPrevention(false), m_deathPrevented(false)
+    m_deathPrevention(false), m_deathPrevented(false), m_followAngle(0.f), m_followDist(0.f)
 {
     m_dismountOnAggro = !(m_creature->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_MOUNTED_COMBAT);
 
@@ -169,7 +169,7 @@ void CreatureAI::DoCallForHelp(float radius)
     m_creature->CallForHelp(radius);
 }
 
-void CreatureAI::OnCallForHelp(Unit* caller, Unit* enemy)
+void CreatureAI::OnCallForHelp(Unit* enemy)
 {
     if (FactionTemplateEntry const* factionTemplate = m_creature->GetFactionTemplateEntry())
     {
@@ -219,4 +219,24 @@ void CreatureAI::TimedFleeingEnded()
         EnterEvadeMode();
     }
     SetAIOrder(ORDER_NONE);
+}
+
+void CreatureAI::RequestFollow(Unit* followee)
+{
+    if (followee->IsPlayer())
+    {
+        auto data = static_cast<Player*>(followee)->RequestFollowData(m_creature->GetObjectGuid());
+        m_followAngle = data.first;
+        m_followDist = data.second;
+        m_requestedFollower = followee->GetObjectGuid();
+    }
+    m_creature->GetMotionMaster()->MoveFollow(followee, m_followDist, m_followAngle);
+}
+
+void CreatureAI::RelinquishFollow(ObjectGuid follower)
+{
+    if (m_requestedFollower && (!follower || m_requestedFollower == follower))
+        if (Unit* owner = m_creature->GetMap()->GetUnit(m_requestedFollower))
+            if (owner->IsPlayer())
+                static_cast<Player*>(owner)->RelinquishFollowData(m_creature->GetObjectGuid());
 }

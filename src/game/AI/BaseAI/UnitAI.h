@@ -417,7 +417,7 @@ class UnitAI : public CombatActions
         /*
          * Notifies AI on being called for help
          */
-        virtual void OnCallForHelp(Unit* caller, Unit* enemy) {}
+        virtual void OnCallForHelp(Unit* enemy) {}
 
         /*
          * Notifies AI on pet/totem unsummon - warning: works only for pets/totems
@@ -562,6 +562,9 @@ class UnitAI : public CombatActions
         //////////////////////////////////////////////////////////////////////////
         // member of the group got killed
         virtual void CreatureGroupMemberDied(Unit* /*killed*/) {}
+
+        virtual void RequestFollow(Unit* followee) {}
+        virtual void RelinquishFollow(ObjectGuid follower) {}
 
     protected:
         virtual std::string GetAIName() { return "UnitAI"; }

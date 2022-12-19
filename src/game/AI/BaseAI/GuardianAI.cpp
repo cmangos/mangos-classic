@@ -22,7 +22,7 @@
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
 
-GuardianAI::GuardianAI(Creature* creature) : CreatureEventAI(creature), m_followAngle(PET_FOLLOW_ANGLE), m_followDist(PET_FOLLOW_DIST)
+GuardianAI::GuardianAI(Creature* creature) : CreatureEventAI(creature)
 {
     Unit* owner = creature->GetOwner();
     MANGOS_ASSERT(owner);
@@ -39,18 +39,7 @@ void GuardianAI::JustRespawned()
     CreatureEventAI::JustRespawned();
 
     if (GetDefaultMovement() == FOLLOW_MOTION_TYPE)
-    {
-        if (Unit* owner = m_unit->GetOwner())
-        {
-            if (owner->IsPlayer())
-            {
-                auto data = static_cast<Player*>(owner)->RequestFollowData(m_creature->GetObjectGuid());
-                m_followAngle = data.first;
-                m_followDist = data.second;
-            }
-        }
-        m_creature->GetMotionMaster()->MoveFollow(owner, m_followDist, m_followAngle);
-    }
+        RequestFollow(owner);
 }
 
 void GuardianAI::UpdateAI(const uint32 diff)
@@ -98,20 +87,13 @@ void GuardianAI::CombatStop()
 void GuardianAI::JustDied(Unit* killer)
 {
     CreatureEventAI::JustDied(killer);
-    RelinquishFollowData();
+    RelinquishFollow(m_unit->GetOwnerGuid());
 }
 
 void GuardianAI::OnUnsummon()
 {
     CreatureEventAI::OnUnsummon();
-    RelinquishFollowData();
-}
-
-void GuardianAI::RelinquishFollowData()
-{
-    if (Unit* owner = m_creature->GetOwner())
-        if (owner->IsPlayer())
-            static_cast<Player*>(owner)->RelinquishFollowData(m_creature->GetObjectGuid());
+    RelinquishFollow(m_unit->GetOwnerGuid());
 }
 
 void GuardianAI::EnterEvadeMode()
