@@ -25,13 +25,14 @@ if(BUILD_EXTRACTORS AND NOT (BZip2_FOUND OR BZIP2_FOUND))
 endif()
 
 # zlib
-FetchContent_Declare(
+if (WIN32)
+  FetchContent_Declare(
     zlib
     GIT_REPOSITORY "https://github.com/madler/zlib.git"
     GIT_TAG "v1.2.12"
-)
-FetchContent_GetProperties(zlib)
-if(NOT zlib_POPULATED)
+  )
+  FetchContent_GetProperties(zlib)
+  if(NOT zlib_POPULATED)
     message(STATUS "Setting up zlib ...")
     FetchContent_Populate(zlib)
     # patch provided cmake to avoid unneeded target install and deprecation warning.
@@ -42,6 +43,12 @@ if(NOT zlib_POPULATED)
     add_subdirectory(${zlib_SOURCE_DIR} ${zlib_BINARY_DIR})
     target_include_directories(zlib PUBLIC ${zlib_SOURCE_DIR} ${zlib_BINARY_DIR})
     message(STATUS "zlib ${ZLIB_FULL_VERSION} successfully installed!")
+  endif()
+elseif (UNIX)
+  find_package(ZLIB REQUIRED)
+  add_library(zlib INTERFACE)
+  target_include_directories(zlib INTERFACE ${ZLIB_INCLUDE_DIRS})
+  target_link_libraries(zlib INTERFACE ${ZLIB_LIBRARIES})
 endif()
 
 if (BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER)
