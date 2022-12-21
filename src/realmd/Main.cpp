@@ -35,6 +35,9 @@
 
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+#include <openssl/provider.h>
+#endif
 
 #include <boost/program_options.hpp>
 #include <boost/version.hpp>
@@ -171,6 +174,22 @@ int main(int argc, char* argv[])
     }
 
     DETAIL_LOG("%s (Library: %s)", OPENSSL_VERSION_TEXT, OpenSSL_version(OPENSSL_VERSION));
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+    // Load OpenSSL 3.0+ providers
+    OSSL_PROVIDER* openssl_legacy = OSSL_PROVIDER_load(nullptr, "legacy");
+    if (!openssl_legacy)
+    {
+        sLog.outError("OpenSSL3: Failed to load Legacy provider");
+        return 1;
+    }
+    OSSL_PROVIDER* openssl_default = OSSL_PROVIDER_load(nullptr, "default");
+    if (!openssl_default)
+    {
+        sLog.outError("OpenSSL3: Failed to load Default provider");
+        OSSL_PROVIDER_unload(openssl_legacy);
+        return 1;
+    }
+#endif
 
     sLog.outString();
     sLog.outString("<Ctrl-C> to stop.");
