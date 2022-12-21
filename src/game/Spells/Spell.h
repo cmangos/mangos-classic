@@ -536,6 +536,7 @@ class Spell
         bool m_ignoreCosts;
         bool m_ignoreCooldowns;
         bool m_ignoreConcurrentCasts;
+        bool m_ignoreCasterAuraState;
         bool m_hideInCombatLog;
         bool m_resetLeash;
         bool m_channelOnly;
