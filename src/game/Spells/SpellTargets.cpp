@@ -514,8 +514,6 @@ SpellTargetFilterScheme SpellTargetMgr::GetSpellTargetingFilterScheme(SpellTarge
         case 30469: // Nether Beam - Netherspite - Picks closest target
         case 41294: // Fixate - Reliquary of Souls - Picks closest target
             return SCHEME_CLOSEST;
-        case 28307:
-            return SCHEME_HIGHEST_HP;
         case 42005: // Bloodboil (spell hits only the 5 furthest away targets)
             return SCHEME_FURTHEST;
     }
