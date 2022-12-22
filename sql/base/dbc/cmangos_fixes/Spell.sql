@@ -286,4 +286,7 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 28330  -- Flameshocker - Immolate Visual
 );
 
+-- Stop interrupt on damage taken for these 2 spells
+UPDATE `spell_template` SET `InterruptFlags` = 15 WHERE `Id` in (8016,7901);
+
 
