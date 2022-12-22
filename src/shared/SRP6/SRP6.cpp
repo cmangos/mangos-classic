@@ -17,6 +17,7 @@
  */
 
 #include "Common.h"
+#include "Auth/CryptoHash.h"
 #include "Auth/HMACSHA1.h"
 #include "Auth/base32.h"
 #include "SRP6.h"
@@ -58,12 +59,12 @@ void SRP6::CalculateProof(std::string username)
     sha.Initialize();
     sha.UpdateData(username);
     sha.Finalize();
-    uint8 t4[SHA_DIGEST_LENGTH];
-    memcpy(t4, sha.GetDigest(), SHA_DIGEST_LENGTH);
+    uint8 t4[Sha1Hash::GetLength()];
+    memcpy(t4, sha.GetDigest(), Sha1Hash::GetLength());
 
     sha.Initialize();
     sha.UpdateBigNumbers(&t3, nullptr);
-    sha.UpdateData(t4, SHA_DIGEST_LENGTH);
+    sha.UpdateData(t4, Sha1Hash::GetLength());
     sha.UpdateBigNumbers(&s, &A, &B, &K, nullptr);
     sha.Finalize();
     M.SetBinary(sha.GetDigest(), 20);
@@ -108,19 +109,19 @@ bool SRP6::CalculateVerifier(const std::string& rI, const char* salt)
     I.SetHexStr(rI.c_str());
 
     // in case of leading zeros in the rI hash, restore them
-    uint8 mDigest[SHA_DIGEST_LENGTH];
-    memset(mDigest, 0, SHA_DIGEST_LENGTH);
-    if (I.GetNumBytes() <= SHA_DIGEST_LENGTH)
+    uint8 mDigest[Sha1Hash::GetLength()];
+    memset(mDigest, 0, Sha1Hash::GetLength());
+    if (I.GetNumBytes() <= Sha1Hash::GetLength())
     {
         auto const vect_I = I.AsByteArray();
         memcpy(mDigest, vect_I.data(), vect_I.size());
     }
 
-    std::reverse(mDigest, mDigest + SHA_DIGEST_LENGTH);
+    std::reverse(mDigest, mDigest + Sha1Hash::GetLength());
 
     Sha1Hash sha;
     sha.UpdateData(s.AsByteArray());
-    sha.UpdateData(mDigest, SHA_DIGEST_LENGTH);
+    sha.UpdateData(mDigest, Sha1Hash::GetLength());
     sha.Finalize();
     BigNumber x;
     x.SetBinary(sha.GetDigest(), Sha1Hash::GetLength());

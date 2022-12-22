@@ -21,7 +21,7 @@
 
 #include "Common.h"
 #include "Auth/BigNumber.h"
-#include "Auth/Sha1.h"
+#include "Auth/CryptoHash.h"
 #include "ByteBuffer.h"
 
 #define HMAC_RES_SIZE 20

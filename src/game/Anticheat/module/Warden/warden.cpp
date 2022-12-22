@@ -28,9 +28,6 @@
 #include "WardenMac.hpp"
 #include "WardenScanMgr.hpp"
 
-#include <openssl/md5.h>
-#include <openssl/sha.h>
-
 #include <zlib.h>
 
 #include <algorithm>
@@ -345,7 +342,7 @@ void Warden::StopScanClock()
 
 uint32 Warden::BuildChecksum(const uint8* data, size_t size)
 {
-    uint8 hash[SHA_DIGEST_LENGTH];
+    uint8 hash[Sha1Hash::GetLength()];
     SHA1(data, size, hash);
 
     uint32 checkSum = 0;

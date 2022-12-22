@@ -8,10 +8,9 @@
 #include "WardenModule.hpp"
 
 #include "Platform/Define.h"
-#include "SARC4.hpp"
+#include "Auth/CryptoHash.h"
 
 #include <zlib.h>
-#include <openssl/md5.h>
 
 #include <string>
 #include <vector>
@@ -37,17 +36,11 @@ WardenModule::WardenModule(std::string const &bin, std::string const &kf, std::s
     b.close();
 
     // compute md5 hash of encrypted/compressed data
-    {
-        // md5 hash
-        EVP_MD_CTX* ctx = EVP_MD_CTX_new();
-        EVP_DigestInit_ex(ctx, EVP_md5(), nullptr);
-        EVP_DigestUpdate(ctx, &binary[0], binary.size());
-
-        hash.resize(MD5_DIGEST_LENGTH);
-        uint32 length = MD5_DIGEST_LENGTH;
-        EVP_DigestFinal_ex(ctx, &hash[0], &length);
-        EVP_MD_CTX_free(ctx);
-    }
+    MD5Hash md5;
+    md5.UpdateData(&binary[0], binary.size());
+    md5.Finalize();
+    hash.resize(md5.GetLength());
+    std::memcpy(hash.data(), md5.GetDigest(), md5.GetLength());
 
     std::ifstream k(kf, std::ios::binary | std::ios::ate);
 

@@ -18,6 +18,7 @@
 #include "Chat/Chat.h"
 #include "Server/WorldSession.h"
 #include "Auth/BigNumber.h"
+#include "Auth/CryptoHash.h"
 #include "Auth/HMACSHA1.h"
 #include "ByteBuffer.h"
 #include "Database/DatabaseEnv.h"
@@ -741,7 +742,7 @@ void WardenWin::LoadScriptedScans()
         return false;
     },
         // TODO: Replace the magic number below with combined driver string lengths
-        (sizeof(uint8) + sizeof(uint32) + SHA_DIGEST_LENGTH + sizeof(uint8)) * HypervisorCount + 21,
+        (sizeof(uint8) + sizeof(uint32) + Sha1Hash::GetLength() + sizeof(uint8)) * HypervisorCount + 21,
         sizeof(uint8) * HypervisorCount,
         "Hypervisor check",
         WinAllBuild | InitialLogin));
@@ -781,7 +782,7 @@ void WardenWin::LoadScriptedScans()
 
         // if this is not found, it means someone has tampered with the function
         return !found;
-    }, sizeof(uint8) + sizeof(uint32) + SHA_DIGEST_LENGTH + sizeof(uint32) + sizeof(uint8), sizeof(uint8),
+    }, sizeof(uint8) + sizeof(uint32) + Sha1Hash::GetLength() + sizeof(uint32) + sizeof(uint8), sizeof(uint8),
         "Warden Memory Read check",
         WinAllBuild));
 

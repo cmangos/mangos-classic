@@ -28,7 +28,7 @@
 #include "Server/Opcodes.h"
 #include "Server/PacketLog.h"
 #include "Database/DatabaseEnv.h"
-#include "Auth/Sha1.h"
+#include "Auth/CryptoHash.h"
 #include "Server/WorldSession.h"
 #include "Log.h"
 #include "Server/DBCStores.h"

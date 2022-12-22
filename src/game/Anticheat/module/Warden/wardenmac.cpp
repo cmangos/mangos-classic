@@ -10,12 +10,10 @@
 #include "WardenScanMgr.hpp"
 #include "Server/WorldSession.h"
 #include "Auth/BigNumber.h"
-#include "Auth/Sha1.h"
+#include "Auth/CryptoHash.h"
 #include "World/World.h"
 #include "../config.hpp"
 #include "Log.h"
-
-#include <openssl/md5.h>
 
 #include <memory>
 #include <vector>
@@ -42,14 +40,14 @@ void WardenMac::LoadScriptedScans()
     {
         auto const macWarden = reinterpret_cast<const WardenMac *>(warden);
 
-        uint8 sha[SHA_DIGEST_LENGTH];
-        uint8 md5[MD5_DIGEST_LENGTH];
+        uint8 sha[Sha1Hash::GetLength()];
+        uint8 md5[MD5Hash::GetLength()];
 
         buff.read(sha, sizeof(sha));
         buff.read(md5, sizeof(md5));
 
         return !!memcmp(sha, macWarden->_hashSHA, sizeof(sha)) || !!memcmp(md5, macWarden->_hashMD5, sizeof(md5));
-    }, 128, sizeof(uint8) + SHA_DIGEST_LENGTH + MD5_DIGEST_LENGTH, "Mac string hash check"));
+    }, 128, sizeof(uint8) + Sha1Hash::GetLength() + MD5Hash::GetLength(), "Mac string hash check"));
 }
 
 WardenMac::WardenMac(WorldSession *session, const BigNumber &K, SessionAnticheatInterface *anticheat)
@@ -73,12 +71,10 @@ WardenMac::WardenMac(WorldSession *session, const BigNumber &K, SessionAnticheat
 
     memcpy(_hashSHA, sha1.GetDigest(), sizeof(_hashSHA));
 
-    EVP_MD_CTX* md5 = EVP_MD_CTX_new();
-    EVP_DigestInit_ex(md5, EVP_md5(), nullptr);
-    EVP_DigestUpdate(md5, _hashString.c_str(), _hashString.size());
-    uint32 length = MD5_DIGEST_LENGTH;
-    EVP_DigestFinal_ex(md5, _hashMD5, &length);
-    EVP_MD_CTX_free(md5);
+    MD5Hash md5;
+    md5.UpdateData(_hashString);
+    md5.Finalize();
+    std::memcpy(_hashMD5, md5.GetDigest(), md5.GetLength());
 
     // PPC no module, begin string hashing requests directly
     if (!_module)

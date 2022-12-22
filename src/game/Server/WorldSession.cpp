@@ -22,6 +22,7 @@
 
 #include "Server/WorldSocket.h"                                    // must be first to make ACE happy with ACE includes in it
 #include "Common.h"
+#include "Auth/CryptoHash.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
 #include "Server/Opcodes.h"
@@ -39,9 +40,6 @@
 #include "GMTickets/GMTicketMgr.h"
 #include "Loot/LootMgr.h"
 #include "Anticheat/Anticheat.hpp"
-
-#include <openssl/md5.h>
-#include <openssl/evp.h>
 
 #include <mutex>
 #include <deque>
@@ -1050,24 +1048,20 @@ const uint8 emptyArray[16] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 
 void WorldSession::SendAccountDataTimes()
 {
-    WorldPacket data(SMSG_ACCOUNT_DATA_TIMES, NUM_ACCOUNT_DATA_TYPES * MD5_DIGEST_LENGTH);
+    WorldPacket data(SMSG_ACCOUNT_DATA_TIMES, NUM_ACCOUNT_DATA_TYPES * MD5Hash::GetLength());
     for (AccountData const& itr : m_accountData)
     {
         if (itr.Data.empty())
         {
-            for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+            for (int i = 0; i < MD5Hash::GetLength(); i++)
                 data << uint8(0);
         }
         else
         {
-            EVP_MD_CTX* md5 = EVP_MD_CTX_new();
-            EVP_DigestInit_ex(md5, EVP_md5(), nullptr);
-            EVP_DigestUpdate(md5, itr.Data.c_str(), itr.Data.size());
-            uint8 fileHash[MD5_DIGEST_LENGTH];
-            uint32 length = MD5_DIGEST_LENGTH;
-            EVP_DigestFinal_ex(md5, fileHash, &length);
-            EVP_MD_CTX_free(md5);
-            data.append(fileHash, MD5_DIGEST_LENGTH);
+            MD5Hash md5;
+            md5.UpdateData(itr.Data);
+            md5.Finalize();
+            data.append(md5.GetDigest(), MD5Hash::GetLength());
         }
     }
     SendPacket(data);
