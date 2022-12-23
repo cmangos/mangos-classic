@@ -691,7 +691,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                                     action.cast.target = TARGET_T_HOSTILE;
                                 }
                             }
-                            if (spellInfo->HasAttribute(SPELL_ATTR_EX_EXCLUDE_CASTER) && action.cast.target != TARGET_T_NONE)
+                            if (spellInfo->HasAttribute(SPELL_ATTR_EX_EXCLUDE_CASTER) && action.cast.target == TARGET_T_SELF)
                             {
                                 sLog.outErrorEventAI("Event %u Action %u uses SpellID %u that must not target caster (target is %u). Resetting to TARGET_T_NONE.", eventId, j + 1, action.cast.spellId, action.cast.target);
                                 action.cast.target = TARGET_T_NONE;
