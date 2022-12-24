@@ -21,6 +21,7 @@ enum
     NPC_DREAMSCYTH        = 5721,
     NPC_WEAVER            = 5720,
     NPC_JAMMALAN          = 5710,
+    NPC_OGOM              = 5711,
     NPC_AVATAR_OF_HAKKAR  = 8443,
     NPC_SHADE_OF_ERANIKUS = 5709,
 
