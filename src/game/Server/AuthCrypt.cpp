@@ -17,10 +17,8 @@
  */
 
 #include "AuthCrypt.h"
-#include "CryptoHash.h"
-#include "HMACSHA1.h"
 #include "Log.h"
-#include "BigNumber.h"
+#include "Auth/BigNumber.h"
 
 AuthCrypt::AuthCrypt() : _initialized(false) {}
 

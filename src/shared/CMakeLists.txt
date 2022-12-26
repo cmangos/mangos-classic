@@ -19,8 +19,6 @@
 set(LIBRARY_NAME shared)
 
 set(SRC_GRP_AUTH
-    Auth/AuthCrypt.cpp
-    Auth/AuthCrypt.h
     Auth/BigNumber.cpp
     Auth/BigNumber.h
     Auth/HMACSHA1.cpp
