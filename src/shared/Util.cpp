@@ -187,6 +187,27 @@ void stripLineInvisibleChars(std::string& str)
         str.erase(wpos, str.size());
 }
 
+tm TimeBreakdown(time_t time)
+{
+    tm timeLocal = *localtime(&time);
+    return timeLocal;
+}
+
+time_t GetLocalHourTimestamp(time_t time, uint8 hour, bool onlyAfterTime)
+{
+    tm timeLocal = TimeBreakdown(time);
+    timeLocal.tm_hour = 0;
+    timeLocal.tm_min = 0;
+    timeLocal.tm_sec = 0;
+    time_t midnightLocal = mktime(&timeLocal);
+    time_t hourLocal = midnightLocal + hour * HOUR;
+
+    if (onlyAfterTime && hourLocal <= time)
+        hourLocal += DAY;
+
+    return hourLocal;
+}
+
 std::string secsToTimeString(time_t timeInSecs, bool shortText, bool hoursOnly)
 {
     time_t secs    = timeInSecs % MINUTE;
@@ -256,6 +277,21 @@ std::string TimeToTimestampStr(time_t t)
     if (snRes < 0 || snRes >= sizeof(buf))
         return "";
     return std::string(buf);
+}
+
+time_t timeBitFieldsToSecs(uint32 packedDate)
+{
+    tm lt;
+    memset(&lt, 0, sizeof(lt));
+
+    lt.tm_min = packedDate & 0x3F;
+    lt.tm_hour = (packedDate >> 6) & 0x1F;
+    lt.tm_wday = (packedDate >> 11) & 7;
+    lt.tm_mday = ((packedDate >> 14) & 0x3F) + 1;
+    lt.tm_mon = (packedDate >> 20) & 0xF;
+    lt.tm_year = ((packedDate >> 24) & 0x1F) + 100;
+
+    return time_t(mktime(&lt));
 }
 
 /// Check if the string is a valid ip address representation
@@ -405,6 +441,52 @@ bool WStrToUtf8(const std::wstring& wstr, std::string& utf8str)
 }
 
 typedef wchar_t const* const* wstrlist;
+
+std::wstring GetMainPartOfName(const std::wstring& wname, uint32 declension)
+{
+    // supported only Cyrillic cases
+    if (wname.empty() || !isCyrillicCharacter(wname[0]) || declension > 5)
+        return wname;
+
+    // Important: end length must be <= MAX_INTERNAL_PLAYER_NAME-MAX_PLAYER_NAME (3 currently)
+
+    static wchar_t const a_End[]    = { wchar_t(1), wchar_t(0x0430), wchar_t(0x0000)};
+    static wchar_t const o_End[]    = { wchar_t(1), wchar_t(0x043E), wchar_t(0x0000)};
+    static wchar_t const ya_End[]   = { wchar_t(1), wchar_t(0x044F), wchar_t(0x0000)};
+    static wchar_t const ie_End[]   = { wchar_t(1), wchar_t(0x0435), wchar_t(0x0000)};
+    static wchar_t const i_End[]    = { wchar_t(1), wchar_t(0x0438), wchar_t(0x0000)};
+    static wchar_t const yeru_End[] = { wchar_t(1), wchar_t(0x044B), wchar_t(0x0000)};
+    static wchar_t const u_End[]    = { wchar_t(1), wchar_t(0x0443), wchar_t(0x0000)};
+    static wchar_t const yu_End[]   = { wchar_t(1), wchar_t(0x044E), wchar_t(0x0000)};
+    static wchar_t const oj_End[]   = { wchar_t(2), wchar_t(0x043E), wchar_t(0x0439), wchar_t(0x0000)};
+    static wchar_t const ie_j_End[] = { wchar_t(2), wchar_t(0x0435), wchar_t(0x0439), wchar_t(0x0000)};
+    static wchar_t const io_j_End[] = { wchar_t(2), wchar_t(0x0451), wchar_t(0x0439), wchar_t(0x0000)};
+    static wchar_t const o_m_End[]  = { wchar_t(2), wchar_t(0x043E), wchar_t(0x043C), wchar_t(0x0000)};
+    static wchar_t const io_m_End[] = { wchar_t(2), wchar_t(0x0451), wchar_t(0x043C), wchar_t(0x0000)};
+    static wchar_t const ie_m_End[] = { wchar_t(2), wchar_t(0x0435), wchar_t(0x043C), wchar_t(0x0000)};
+    static wchar_t const soft_End[] = { wchar_t(1), wchar_t(0x044C), wchar_t(0x0000)};
+    static wchar_t const j_End[]    = { wchar_t(1), wchar_t(0x0439), wchar_t(0x0000)};
+
+    static wchar_t const* const dropEnds[6][8] =
+    {
+        { &a_End[1],  &o_End[1],    &ya_End[1],   &ie_End[1],  &soft_End[1], &j_End[1],    nullptr,    nullptr },
+        { &a_End[1],  &ya_End[1],   &yeru_End[1], &i_End[1],   nullptr,      nullptr,      nullptr,    nullptr },
+        { &ie_End[1], &u_End[1],    &yu_End[1],   &i_End[1],   nullptr,      nullptr,      nullptr,    nullptr },
+        { &u_End[1],  &yu_End[1],   &o_End[1],    &ie_End[1],  &soft_End[1], &ya_End[1],   &a_End[1],  nullptr },
+        { &oj_End[1], &io_j_End[1], &ie_j_End[1], &o_m_End[1], &io_m_End[1], &ie_m_End[1], &yu_End[1], nullptr },
+        { &ie_End[1], &i_End[1],    nullptr,      nullptr,     nullptr,      nullptr,      nullptr,    nullptr }
+    };
+
+    for (wchar_t const * const* itr = &dropEnds[declension][0]; *itr; ++itr)
+    {
+        size_t len = size_t((*itr)[-1]);                    // get length from string size field
+
+        if (wname.substr(wname.size() - len, len) == *itr)
+            return wname.substr(0, wname.size() - len);
+    }
+
+    return wname;
+}
 
 bool utf8ToConsole(const std::string& utf8str, std::string& conStr)
 {

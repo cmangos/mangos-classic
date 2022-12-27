@@ -33,9 +33,11 @@ float GetFloatValueFromArray(Tokens const& data, uint16 index);
 
 void stripLineInvisibleChars(std::string& str);
 
+time_t GetLocalHourTimestamp(time_t time, uint8 hour, bool onlyAfterTime = true);
 std::string secsToTimeString(time_t timeInSecs, bool shortText = false, bool hoursOnly = false);
 uint32 TimeStringToSecs(const std::string& timestring);
 std::string TimeToTimestampStr(time_t t);
+time_t timeBitFieldsToSecs(uint32 packedDate);
 
 inline uint32 secsToTimeBitFields(time_t secs)
 {
@@ -376,6 +378,8 @@ inline void wstrToLower(std::wstring& str)
 {
     std::transform(str.begin(), str.end(), str.begin(), wcharToLower);
 }
+
+std::wstring GetMainPartOfName(const std::wstring& wname, uint32 declension);
 
 bool utf8ToConsole(const std::string& utf8str, std::string& conStr);
 bool consoleToUtf8(const std::string& conStr, std::string& utf8str);
