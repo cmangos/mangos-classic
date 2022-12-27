@@ -29,7 +29,7 @@
 #include "RealmList.h"
 #include "AuthSocket.h"
 #include "AuthCodes.h"
-#include "SRP6/SRP6.h"
+#include "Auth/SRP6.h"
 #include "CommonDefines.h"
 
 #include <openssl/md5.h>

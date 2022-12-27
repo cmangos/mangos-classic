@@ -26,7 +26,7 @@
 #include "Common.h"
 #include "Auth/BigNumber.h"
 #include "Auth/CryptoHash.h"
-#include "SRP6/SRP6.h"
+#include "Auth/SRP6.h"
 #include "ByteBuffer.h"
 
 #include "Network/Socket.hpp"

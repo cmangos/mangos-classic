@@ -25,6 +25,8 @@ set(SRC_GRP_AUTH
     Auth/HMACSHA1.h
     Auth/SARC4.cpp
     Auth/SARC4.h
+    Auth/SRP6.cpp
+    Auth/SRP6.h
     Auth/CryptoHash.h
     Auth/base32.cpp
     Auth/base32.h
@@ -110,11 +112,6 @@ set(SRC_GRP_UTIL
     CommonDefines.h
 )
 
-set(SRC_GRP_SRP
-    SRP6/SRP6.cpp
-    SRP6/SRP6.h
-)
-
 set(LIBRARY_SRCS
     ${SRC_GRP_AUTH}
     ${SRC_GRP_CONFIG}
@@ -123,7 +120,6 @@ set(LIBRARY_SRCS
     ${SRC_GRP_LOG}
     ${SRC_GRP_METRIC}
     ${SRC_GRP_UTIL}
-    ${SRC_GRP_SRP}
     ${SRC_GRP_NETWORK}
     ${SRC_GRP_MT}
     Common.cpp
@@ -175,11 +171,6 @@ endif()
 source_group("Util"
   FILES
     ${SRC_GRP_UTIL}
-)
-
-source_group("SRP"
-  FILES
-    ${SRC_GRP_SRP}
 )
 
 source_group("Multithreading"

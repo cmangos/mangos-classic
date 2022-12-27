@@ -24,7 +24,7 @@
 #include "Policies/Singleton.h"
 #include "Util.h"
 #include "Auth/CryptoHash.h"
-#include "SRP6/SRP6.h"
+#include "Auth/SRP6.h"
 
 extern DatabaseType LoginDatabase;
 
