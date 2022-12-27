@@ -79,6 +79,8 @@ set(SRC_GRP_LOG
 set(SRC_GRP_MT
     Multithreading/Messager.h
     Multithreading/Messager.cpp
+    Multithreading/Threading.cpp
+    Multithreading/Threading.h
 )
 
 if(BUILD_METRICS)
@@ -128,8 +130,6 @@ set(LIBRARY_SRCS
     revision_sql.h
     revision.h
     SystemConfig.h
-    Threading.cpp
-    Threading.h
 )
 
 # define header files
