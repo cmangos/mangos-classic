@@ -54,6 +54,7 @@ LogFilterData logFilterData[LOG_FILTER_COUNT] =
     { "pathfinding",         "LogFilter_Pathfinding",        true  },
     { "map_loading",         "LogFilter_MapLoading",         true  },
     { "event_ai_dev",        "LogFilter_EventAiDev",         true  },
+    { "",                    "",                             true  },
     { "db_scripts_dev",      "LogFilter_DbScriptDev",        true  },
 };
 
