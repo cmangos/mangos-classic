@@ -43,7 +43,7 @@
 #include <string>
 
 #ifdef _WIN32
-#include "ServiceWin32.h"
+#include "Platform/ServiceWin32.h"
 char serviceName[] = "mangosd";
 char serviceLongName[] = "MaNGOS world service";
 char serviceDescription[] = "Massive Network Game Object Server";
@@ -55,7 +55,7 @@ char serviceDescription[] = "Massive Network Game Object Server";
  */
 int m_ServiceStatus = -1;
 #else
-#include "PosixDaemon.h"
+#include "Platform/PosixDaemon.h"
 #endif
 
 DatabaseType WorldDatabase;                                 ///< Accessor to the world database

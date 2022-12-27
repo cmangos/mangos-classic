@@ -20,10 +20,6 @@
     \ingroup mangosd
 */
 
-#ifndef _WIN32
-#include "PosixDaemon.h"
-#endif
-
 #include "Common.h"
 #include "Master.h"
 #include "Server/WorldSocket.h"
@@ -49,8 +45,10 @@
 #include <memory>
 
 #ifdef _WIN32
-#include "ServiceWin32.h"
+#include "Platform/ServiceWin32.h"
 extern int m_ServiceStatus;
+#else
+#include "Platform/PosixDaemon.h"
 #endif
 
 INSTANTIATE_SINGLETON_1(Master);
