@@ -93,11 +93,13 @@ if(BUILD_METRICS)
 endif()
 
 set(SRC_GRP_NETWORK
-    Network/PacketBuffer.cpp
-    Network/Socket.cpp
+    Network/Listener.cpp
     Network/Listener.hpp
+    Network/NetworkThread.cpp
     Network/NetworkThread.hpp
+    Network/PacketBuffer.cpp
     Network/PacketBuffer.hpp
+    Network/Socket.cpp
     Network/Socket.hpp
 )
 
@@ -193,6 +195,11 @@ if(BUILD_METRICS)
         ${SRC_GRP_METRIC}
     )
 endif()
+
+source_group("Network"
+  FILES
+    ${SRC_GRP_NETWORK}
+)
 
 source_group("Platform"
   FILES
