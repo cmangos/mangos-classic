@@ -22,7 +22,7 @@
 #include "Common.h"
 #include <memory>
 #include "ObjectGuid.h"
-#include "Timer.h"
+#include "Util/Timer.h"
 
 
 #define TIMER_UPDATE_PLAYER_TIMELAPS 1000

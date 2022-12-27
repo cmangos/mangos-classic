@@ -19,7 +19,7 @@
 #ifndef MANGOS_LOOTMGR_H
 #define MANGOS_LOOTMGR_H
 
-#include "ByteBuffer.h"
+#include "Util/ByteBuffer.h"
 #include "Entities/ObjectGuid.h"
 #include "Globals/SharedDefines.h"
 

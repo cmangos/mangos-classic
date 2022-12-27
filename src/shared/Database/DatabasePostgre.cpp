@@ -18,13 +18,13 @@
 
 #ifdef DO_POSTGRESQL
 
-#include "Util.h"
+#include "Util/Util.h"
 #include "Policies/Singleton.h"
 #include "Platform/Define.h"
 #include "Multithreading/Threading.h"
 #include "DatabaseEnv.h"
 #include "Database/SqlOperations.h"
-#include "Timer.h"
+#include "Util/Timer.h"
 
 size_t DatabasePostgre::db_count = 0;
 

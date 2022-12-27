@@ -8,7 +8,7 @@
 #ifndef __WARDENSCAN_HPP_
 #define __WARDENSCAN_HPP_
 
-#include "ByteBuffer.h"
+#include "Util/ByteBuffer.h"
 
 #include <openssl/sha.h>
 

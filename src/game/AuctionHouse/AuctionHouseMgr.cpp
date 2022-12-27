@@ -20,7 +20,7 @@
 #include "Database/DatabaseEnv.h"
 #include "Server/SQLStorages.h"
 #include "Server/DBCStores.h"
-#include "ProgressBar.h"
+#include "Util/ProgressBar.h"
 
 #include "Accounts/AccountMgr.h"
 #include "Entities/Item.h"

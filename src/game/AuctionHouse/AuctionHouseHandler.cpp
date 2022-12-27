@@ -26,7 +26,7 @@
 #include "Entities/Player.h"
 #include "AuctionHouse/AuctionHouseMgr.h"
 #include "Mails/Mail.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Chat/Chat.h"
 
 // please DO NOT use iterator++, because it is slower than ++iterator!!!

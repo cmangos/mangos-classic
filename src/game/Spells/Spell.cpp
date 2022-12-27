@@ -40,7 +40,7 @@
 #include "Loot/LootMgr.h"
 #include "VMapFactory.h"
 #include "BattleGround/BattleGround.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Chat/Chat.h"
 #include "Server/SQLStorages.h"
 #include "MotionGenerators/PathFinder.h"

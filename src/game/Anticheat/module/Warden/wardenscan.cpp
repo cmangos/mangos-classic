@@ -8,8 +8,8 @@
 #include "WardenScan.hpp"
 #include "WardenWin.hpp"
 #include "WardenModule.hpp"
-#include "ByteBuffer.h"
-#include "Util.h"
+#include "Util/ByteBuffer.h"
+#include "Util/Util.h"
 #include "Auth/CryptoHash.h"
 #include "Auth/HMACSHA1.h"
 

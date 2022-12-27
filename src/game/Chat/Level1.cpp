@@ -35,7 +35,7 @@
 #include "Maps/GridDefines.h"
 #include "Maps/MapPersistentStateMgr.h"
 #include "Mails/Mail.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Anticheat/Anticheat.hpp"
 #include "Spells/SpellMgr.h"

@@ -20,7 +20,7 @@
 #define MANGOSSERVER_WORLDPACKET_H
 
 #include "Common.h"
-#include "ByteBuffer.h"
+#include "Util/ByteBuffer.h"
 #include "Server/Opcodes.h"
 #include <chrono>
 

@@ -17,7 +17,7 @@
  */
 
 #include "Common.h"
-#include "ProgressBar.h"
+#include "Util/ProgressBar.h"
 #include "Globals/SharedDefines.h"
 #include "Entities/Player.h"
 #include "Maps/Map.h"

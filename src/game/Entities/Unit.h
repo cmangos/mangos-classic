@@ -42,7 +42,7 @@
 #include "MotionGenerators/MotionMaster.h"
 #include "Server/DBCStructure.h"
 #include "Server/WorldPacket.h"
-#include "Timer.h"
+#include "Util/Timer.h"
 #include "AI/BaseAI/UnitAI.h"
 #include "Spells/SpellDefines.h"
 #include "PlayerDefines.h"

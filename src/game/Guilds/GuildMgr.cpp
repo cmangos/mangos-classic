@@ -22,7 +22,7 @@
 #include "Entities/ObjectGuid.h"
 #include "Database/DatabaseEnv.h"
 #include "Policies/Singleton.h"
-#include "ProgressBar.h"
+#include "Util/ProgressBar.h"
 #include "World/World.h"
 
 INSTANTIATE_SINGLETON_1(GuildMgr);

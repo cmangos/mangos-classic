@@ -41,7 +41,7 @@
 #include "BattleGround/BattleGround.h"
 #include "Tools/Language.h"
 #include "Social/SocialMgr.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Entities/TemporarySpawn.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Tools/Formulas.h"

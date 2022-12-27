@@ -4,7 +4,7 @@
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "system.h"
-#include "ProgressBar.h"
+#include "Util/ProgressBar.h"
 #include "Globals/ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
 #include "MotionGenerators/WaypointManager.h"

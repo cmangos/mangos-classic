@@ -59,7 +59,7 @@
 #include "Maps/MapPersistentStateMgr.h"
 #include "MotionGenerators/WaypointManager.h"
 #include "GMTickets/GMTicketMgr.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Tools/CharacterDatabaseCleaner.h"
 #include "Entities/CreatureLinkingMgr.h"
 #include "Weather/Weather.h"

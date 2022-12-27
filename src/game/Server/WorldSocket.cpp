@@ -19,11 +19,11 @@
 #include "Server/WorldSocket.h"
 #include "Common.h"
 
-#include "Util.h"
+#include "Util/Util.h"
 #include "World/World.h"
 #include "Server/WorldPacket.h"
 #include "Globals/SharedDefines.h"
-#include "ByteBuffer.h"
+#include "Util/ByteBuffer.h"
 #include "Addons/AddonHandler.h"
 #include "Server/Opcodes.h"
 #include "Server/PacketLog.h"
@@ -32,7 +32,7 @@
 #include "Server/WorldSession.h"
 #include "Log.h"
 #include "Server/DBCStores.h"
-#include "CommonDefines.h"
+#include "Util/CommonDefines.h"
 #include "Anticheat/Anticheat.hpp"
 
 #include <chrono>

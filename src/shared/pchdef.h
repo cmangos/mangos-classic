@@ -21,14 +21,14 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <chrono>
-#include "Errors.h"
+#include "Util/Errors.h"
 #include "Multithreading/Threading.h"
 #include <thread>
 #include <boost/asio.hpp>
 #include "Common.h"
 #include "Log.h"
-#include "ByteBuffer.h"
-#include "ProgressBar.h"
+#include "Util/ByteBuffer.h"
+#include "Util/ProgressBar.h"
 #include "Server/WorldPacket.h"
 #include "Config/Config.h"
 #include "Database/DatabaseEnv.h"

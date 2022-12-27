@@ -18,8 +18,8 @@
 
 #include <stdio.h>
 
-#include "ProgressBar.h"
-#include "Errors.h"
+#include "Util/ProgressBar.h"
+#include "Util/Errors.h"
 
 bool BarGoLink::m_showOutput = true;
 

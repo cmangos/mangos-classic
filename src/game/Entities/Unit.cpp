@@ -34,7 +34,7 @@
 #include "AI/CreatureAISelector.h"
 #include "Entities/TemporarySpawn.h"
 #include "Entities/Pet.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Entities/Totem.h"
 #include "BattleGround/BattleGround.h"
 #include "Maps/InstanceData.h"

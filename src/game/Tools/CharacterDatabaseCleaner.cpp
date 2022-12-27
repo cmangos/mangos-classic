@@ -21,7 +21,7 @@
 #include "World/World.h"
 #include "Database/DatabaseEnv.h"
 #include "Server/DBCStores.h"
-#include "ProgressBar.h"
+#include "Util/ProgressBar.h"
 #include "Server/SQLStorages.h"
 
 void CharacterDatabaseCleaner::CleanDatabase()

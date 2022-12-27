@@ -22,7 +22,7 @@
 #include "Entities/ObjectGuid.h"
 #include "Entities/Player.h"
 #include "Policies/Singleton.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Auth/CryptoHash.h"
 #include "Auth/SRP6.h"
 

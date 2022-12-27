@@ -19,7 +19,7 @@
 #include "Pools/PoolManager.h"
 #include "Globals/ObjectMgr.h"
 #include "Entities/ObjectGuid.h"
-#include "ProgressBar.h"
+#include "Util/ProgressBar.h"
 #include "Log.h"
 #include "Maps/MapPersistentStateMgr.h"
 #include "World/World.h"

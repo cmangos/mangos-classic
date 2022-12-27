@@ -21,7 +21,7 @@
 
 #include "Common.h"
 #include "ObjectDefines.h"
-#include "ByteBuffer.h"
+#include "Util/ByteBuffer.h"
 #include "Entities/UpdateFields.h"
 #include "Entities/UpdateData.h"
 #include "Entities/ObjectGuid.h"

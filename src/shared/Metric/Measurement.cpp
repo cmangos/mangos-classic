@@ -19,7 +19,7 @@
 #include <chrono>
 
 #include "Measurement.h"
-#include "Errors.h"
+#include "Util/Errors.h"
 
 Measurement::Measurement(std::string measurement, std::map<std::string, std::string> tags, std::map<std::string, boost::any> fields,uint64 timestamp)
     : _measurement(measurement), _tags(tags), _fields(fields)

@@ -44,7 +44,7 @@
 #include "Guilds/Guild.h"
 #include "Guilds/GuildMgr.h"
 #include "Entities/Pet.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Entities/Transports.h"
 #include "Weather/Weather.h"
 #include "BattleGround/BattleGround.h"

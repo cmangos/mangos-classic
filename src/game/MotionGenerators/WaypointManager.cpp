@@ -20,7 +20,7 @@
 #include "Database/DatabaseEnv.h"
 #include "Maps/GridDefines.h"
 #include "Policies/Singleton.h"
-#include "ProgressBar.h"
+#include "Util/ProgressBar.h"
 #include "Maps/MapManager.h"
 #include "Globals/ObjectMgr.h"
 

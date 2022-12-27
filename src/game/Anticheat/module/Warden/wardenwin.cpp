@@ -20,7 +20,7 @@
 #include "Auth/BigNumber.h"
 #include "Auth/CryptoHash.h"
 #include "Auth/HMACSHA1.h"
-#include "ByteBuffer.h"
+#include "Util/ByteBuffer.h"
 #include "Database/DatabaseEnv.h"
 #include "Entities/Player.h"
 #include "Log.h"

@@ -36,7 +36,7 @@
 #include "Maps/MapPersistentStateMgr.h"
 #include "BattleGround/BattleGround.h"
 #include "OutdoorPvP/OutdoorPvP.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "vmap/GameObjectModel.h"
 #include "Server/SQLStorages.h"

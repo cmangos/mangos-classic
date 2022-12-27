@@ -128,16 +128,16 @@ elseif(UNIX)
 endif()
 
 set(SRC_GRP_UTIL
-    ByteBuffer.cpp
-    ByteBuffer.h
-    Errors.h
-    ProgressBar.cpp
-    ProgressBar.h
-    Timer.h
-    Util.cpp
-    Util.h
-    ProducerConsumerQueue.h
-    CommonDefines.h
+    Util/ByteBuffer.cpp
+    Util/ByteBuffer.h
+    Util/Errors.h
+    Util/ProgressBar.cpp
+    Util/ProgressBar.h
+    Util/Timer.h
+    Util/Util.cpp
+    Util/Util.h
+    Util/ProducerConsumerQueue.h
+    Util/CommonDefines.h
 )
 
 set(LIBRARY_SRCS
@@ -150,7 +150,7 @@ set(LIBRARY_SRCS
     ${SRC_GRP_MT}
     ${SRC_GRP_NETWORK}
     ${SRC_GRP_PLATFORM}
-    ${SRC_GRP_UTIL}    
+    ${SRC_GRP_UTIL}
     Common.cpp
     Common.h
     revision_sql.h

@@ -21,7 +21,7 @@
 
 #include "Common.h"
 #include "Log.h"
-#include "Errors.h"
+#include "Util/Errors.h"
 
 #include "Database/Field.h"
 #include "Database/QueryResult.h"

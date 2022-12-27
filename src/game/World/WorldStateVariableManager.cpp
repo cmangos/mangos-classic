@@ -17,7 +17,7 @@
 */
 
 #include "World/WorldStateVariableManager.h"
-#include "ByteBuffer.h"
+#include "Util/ByteBuffer.h"
 #include "Maps/Map.h"
 #include "Maps/MapReference.h"
 #include "Entities/Player.h"

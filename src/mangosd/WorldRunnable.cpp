@@ -23,7 +23,7 @@
 #include "Common.h"
 #include "World/World.h"
 #include "WorldRunnable.h"
-#include "Timer.h"
+#include "Util/Timer.h"
 #include "Globals/ObjectAccessor.h"
 #include "Maps/MapManager.h"
 

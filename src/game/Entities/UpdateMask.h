@@ -19,7 +19,7 @@
 #ifndef __UPDATEMASK_H
 #define __UPDATEMASK_H
 
-#include "Errors.h"
+#include "Util/Errors.h"
 
 class UpdateMask
 {

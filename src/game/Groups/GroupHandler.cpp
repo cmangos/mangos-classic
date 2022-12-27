@@ -28,7 +28,7 @@
 #include "Entities/Player.h"
 #include "Groups/Group.h"
 #include "Social/SocialMgr.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Anticheat/Anticheat.hpp"
 
 /* differeces from off:

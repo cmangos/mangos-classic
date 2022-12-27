@@ -30,7 +30,7 @@
 #include "SystemConfig.h"
 #include "revision.h"
 #include "revision_sql.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Network/Listener.hpp"
 
 #include <openssl/opensslv.h>

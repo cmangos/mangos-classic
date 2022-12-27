@@ -22,7 +22,7 @@
 #include "CreatureEventAI.h"
 #include "CreatureEventAIMgr.h"
 #include "Globals/ObjectMgr.h"
-#include "ProgressBar.h"
+#include "Util/ProgressBar.h"
 #include "Policies/Singleton.h"
 #include "Maps/GridDefines.h"
 #include "Spells/SpellMgr.h"

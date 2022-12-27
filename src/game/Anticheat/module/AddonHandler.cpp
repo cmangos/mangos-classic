@@ -10,7 +10,7 @@
 #include "Server/WorldPacket.h"
 #include "Log.h"
 
-#include "Util.h"
+#include "Util/Util.h"
 #include "Database/DatabaseEnv.h"
 
 #include <zlib.h>

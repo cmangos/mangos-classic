@@ -23,7 +23,7 @@
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "Config/Config.h"
-#include "ProgressBar.h"
+#include "Util/ProgressBar.h"
 #include "Log.h"
 #include "Master.h"
 #include "SystemConfig.h"

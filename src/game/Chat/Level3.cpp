@@ -44,7 +44,7 @@
 #include "SystemConfig.h"
 #include "Config/Config.h"
 #include "Mails/Mail.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Entities/ItemEnchantmentMgr.h"
 #include "BattleGround/BattleGroundMgr.h"
 #include "Maps/MapPersistentStateMgr.h"

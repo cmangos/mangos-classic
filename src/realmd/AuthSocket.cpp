@@ -30,13 +30,13 @@
 #include "AuthSocket.h"
 #include "AuthCodes.h"
 #include "Auth/SRP6.h"
-#include "CommonDefines.h"
+#include "Util/CommonDefines.h"
 
 #include <openssl/md5.h>
 #include <ctime>
 #include <utility>
 
-//#include "Util.h" -- for commented utf8ToUpperOnlyLatin
+//#include "Util/Util.h" -- for commented utf8ToUpperOnlyLatin
 
 extern DatabaseType LoginDatabase;
 

@@ -18,9 +18,9 @@
 
 #include "Loot/LootMgr.h"
 #include "Log.h"
-#include "ProgressBar.h"
+#include "Util/ProgressBar.h"
 #include "World/World.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Globals/SharedDefines.h"
 #include "Globals/ObjectAccessor.h"
 #include "Globals/ObjectMgr.h"

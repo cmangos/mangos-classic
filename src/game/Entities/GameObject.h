@@ -22,7 +22,7 @@
 #include "Common.h"
 #include "Globals/SharedDefines.h"
 #include "Entities/Object.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "AI/BaseAI/GameObjectAI.h"
 #include "Spells/SpellDefines.h"
 #include "Spells/SpellAuras.h"

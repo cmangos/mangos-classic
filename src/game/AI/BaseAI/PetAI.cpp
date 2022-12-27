@@ -17,7 +17,7 @@
  */
 
 #include "PetAI.h"
-#include "Errors.h"
+#include "Util/Errors.h"
 #include "Entities/Pet.h"
 #include "Entities/Player.h"
 #include "Server/DBCStores.h"
@@ -25,7 +25,7 @@
 #include "Spells/SpellMgr.h"
 #include "Entities/Creature.h"
 #include "World/World.h"
-#include "Util.h"
+#include "Util/Util.h"
 
 int PetAI::Permissible(const Creature* creature)
 {

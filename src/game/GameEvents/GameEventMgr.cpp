@@ -21,7 +21,7 @@
 #include "Globals/ObjectMgr.h"
 #include "Entities/ObjectGuid.h"
 #include "Pools/PoolManager.h"
-#include "ProgressBar.h"
+#include "Util/ProgressBar.h"
 #include "Tools/Language.h"
 #include "Log.h"
 #include "Maps/MapManager.h"

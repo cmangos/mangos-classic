@@ -27,7 +27,7 @@
 #include "Auth/BigNumber.h"
 #include "Auth/CryptoHash.h"
 #include "Auth/SRP6.h"
-#include "ByteBuffer.h"
+#include "Util/ByteBuffer.h"
 
 #include "Network/Socket.hpp"
 

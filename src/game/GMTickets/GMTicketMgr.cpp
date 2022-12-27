@@ -22,7 +22,7 @@
 #include "GMTickets/GMTicketMgr.h"
 #include "Globals/ObjectMgr.h"
 #include "Entities/ObjectGuid.h"
-#include "ProgressBar.h"
+#include "Util/ProgressBar.h"
 #include "Policies/Singleton.h"
 #include "Entities/Player.h"
 #include "Chat/Chat.h"

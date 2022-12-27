@@ -24,14 +24,14 @@
 #include "Grids/CellImpl.h"
 #include "Maps/Map.h"
 #include "Maps/MapManager.h"
-#include "Timer.h"
+#include "Util/Timer.h"
 #include "Grids/GridNotifiersImpl.h"
 #include "Globals/ObjectMgr.h"
 #include "GameEvents/GameEventMgr.h"
 #include "World/World.h"
 #include "Groups/Group.h"
 #include "Maps/InstanceData.h"
-#include "ProgressBar.h"
+#include "Util/ProgressBar.h"
 
 #include <list>
 #include <cstdarg>

@@ -18,7 +18,7 @@
 
 #include "ObjectVisibility.h"
 
-#include "Util.h"
+#include "Util/Util.h"
 #include "Entities/Player.h"
 #include "Entities/GameObject.h"
 

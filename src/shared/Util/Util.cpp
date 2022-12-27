@@ -16,8 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "Util.h"
-#include "Timer.h"
+#include "Util/Util.h"
+#include "Util/Timer.h"
 #include <utf8.h>
 #include "TSS.h"
 

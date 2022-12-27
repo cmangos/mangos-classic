@@ -23,7 +23,7 @@
 #include "Common.h"
 #include "RealmList.h"
 #include "AuthCodes.h"
-#include "Util.h"                                           // for Tokens typedef
+#include "Util/Util.h"                                           // for Tokens typedef
 #include "Policies/Singleton.h"
 #include "Database/DatabaseEnv.h"
 

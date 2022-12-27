@@ -27,7 +27,7 @@
 #include "Globals/ObjectMgr.h"
 #include "Server/WorldSession.h"
 #include "Config/Config.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Accounts/AccountMgr.h"
 #include "CliRunnable.h"
 #include "Maps/MapManager.h"

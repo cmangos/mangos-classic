@@ -40,7 +40,7 @@
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "AI/BaseAI/CreatureAI.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
 #include "Grids/CellImpl.h"

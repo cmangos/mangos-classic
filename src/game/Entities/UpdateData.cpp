@@ -20,7 +20,7 @@
 
 #include "Common.h"
 #include "Entities/UpdateData.h"
-#include "ByteBuffer.h"
+#include "Util/ByteBuffer.h"
 #include "Server/WorldPacket.h"
 #include "Log.h"
 #include "Server/Opcodes.h"

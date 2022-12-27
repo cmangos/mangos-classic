@@ -23,7 +23,7 @@
 #include "Entities/Unit.h"
 #include "Globals/SharedDefines.h"
 #include "Server/DBCEnums.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Entities/CreatureSpellList.h"
 
 #include <list>
