@@ -26,7 +26,7 @@
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
 #include "Server/Opcodes.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "Entities/Player.h"
 #include "Globals/ObjectMgr.h"

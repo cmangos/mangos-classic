@@ -25,7 +25,7 @@
 #include "Entities/Player.h"
 #include "Maps/Map.h"
 #include "World/World.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Log.h"
 #include "Util.h"
 #include "ProgressBar.h"

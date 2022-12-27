@@ -10,7 +10,7 @@
 
 #include "warden.hpp"
 #include "WardenScan.hpp"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 
 #include <openssl/md5.h>
 

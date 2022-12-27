@@ -18,7 +18,7 @@
 
 #include "Entities/Creature.h"
 #include "Database/DatabaseEnv.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "World/World.h"
 #include "Globals/ObjectMgr.h"
 #include "Globals/ObjectAccessor.h"

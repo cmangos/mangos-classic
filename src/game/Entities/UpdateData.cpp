@@ -21,7 +21,7 @@
 #include "Common.h"
 #include "Entities/UpdateData.h"
 #include "ByteBuffer.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Log.h"
 #include "Server/Opcodes.h"
 #include "World/World.h"

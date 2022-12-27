@@ -18,7 +18,7 @@
 
 #include "Entities/Object.h"
 #include "Globals/SharedDefines.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Server/Opcodes.h"
 #include "Log.h"
 #include "World/World.h"

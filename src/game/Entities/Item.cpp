@@ -19,7 +19,7 @@
 #include "Entities/Item.h"
 #include "Globals/ObjectMgr.h"
 #include "Entities/ObjectGuid.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Database/DatabaseEnv.h"
 #include "Entities/ItemEnchantmentMgr.h"
 #include "Server/SQLStorages.h"

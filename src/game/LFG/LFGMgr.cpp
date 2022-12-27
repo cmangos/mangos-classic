@@ -24,7 +24,7 @@
 #include "Globals/ObjectMgr.h"
 #include "Chat/Chat.h"
 #include "World/World.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "Tools/Language.h"
 #include "Groups/Group.h"

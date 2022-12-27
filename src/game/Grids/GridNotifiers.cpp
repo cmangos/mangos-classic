@@ -17,7 +17,7 @@
  */
 
 #include "Grids/GridNotifiers.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "Entities/UpdateData.h"
 #include "Maps/MapPersistentStateMgr.h"

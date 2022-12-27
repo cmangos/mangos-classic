@@ -17,8 +17,8 @@
  */
 
 #include "Common.h"
+#include "Server/WorldPacket.h"
 #include "Server/DBCStores.h"
-#include "WorldPacket.h"
 #include "Entities/Player.h"
 #include "Server/Opcodes.h"
 #include "Chat/Chat.h"

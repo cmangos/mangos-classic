@@ -41,7 +41,7 @@
 #include "Utilities/EventProcessor.h"
 #include "MotionGenerators/MotionMaster.h"
 #include "Server/DBCStructure.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Timer.h"
 #include "AI/BaseAI/UnitAI.h"
 #include "Spells/SpellDefines.h"

@@ -23,7 +23,7 @@
 #include "Entities/GameObject.h"
 #include "BattleGroundMgr.h"
 #include "Tools/Language.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Globals/ObjectMgr.h"
 
 BattleGroundAB::BattleGroundAB(): m_isInformedNearVictory(false), m_honorTicks(0), m_reputationTics(0)

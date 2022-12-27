@@ -17,7 +17,7 @@
 
 #include "PacketLog.h"
 #include "Timer.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Config/Config.h"
 #include "Globals/SharedDefines.h"
 

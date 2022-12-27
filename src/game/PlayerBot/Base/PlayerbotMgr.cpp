@@ -17,7 +17,7 @@
  */
 
 #include "Config/Config.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "PlayerbotAI.h"
 #include "PlayerbotMgr.h"
 #include "../config.h"

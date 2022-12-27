@@ -7,7 +7,7 @@
 
 #include "libanticheat.hpp"
 #include "config.hpp"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Log.h"
 
 #include "Util.h"

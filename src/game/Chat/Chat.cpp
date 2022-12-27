@@ -19,7 +19,7 @@
 #include "Chat/Chat.h"
 #include "Tools/Language.h"
 #include "Database/DatabaseEnv.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "Server/Opcodes.h"
 #include "Log.h"

@@ -33,7 +33,7 @@
 #include "Entities/Item.h"
 #include "Entities/Player.h"
 #include "World/World.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "Server/Opcodes.h"
 #include "Chat/Chat.h"

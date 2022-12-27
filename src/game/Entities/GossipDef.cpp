@@ -20,7 +20,7 @@
 #include "Quests/QuestDef.h"
 #include "Globals/ObjectMgr.h"
 #include "Server/Opcodes.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "Tools/Formulas.h"
 

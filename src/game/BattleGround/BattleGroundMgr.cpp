@@ -29,7 +29,7 @@
 #include "ProgressBar.h"
 #include "Chat/Chat.h"
 #include "World/World.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Tools/Language.h"
 #include "GameEvents/GameEventMgr.h"
 

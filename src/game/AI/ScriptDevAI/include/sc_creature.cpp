@@ -5,7 +5,7 @@
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "Entities/Item.h"
 #include "Spells/Spell.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Globals/ObjectMgr.h"
 #include "Grids/Cell.h"
 #include "Grids/CellImpl.h"

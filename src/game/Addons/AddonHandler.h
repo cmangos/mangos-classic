@@ -21,7 +21,7 @@
 
 #include "Common.h"
 #include "Policies/Singleton.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 
 class AddonHandler
 {

@@ -18,7 +18,7 @@
 
 #include "Common.h"
 #include "Server/DBCStores.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "Globals/ObjectMgr.h"
 #include "Spells/SpellMgr.h"

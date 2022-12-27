@@ -21,7 +21,7 @@
 
 #include "Util.h"
 #include "World/World.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Globals/SharedDefines.h"
 #include "ByteBuffer.h"
 #include "Addons/AddonHandler.h"

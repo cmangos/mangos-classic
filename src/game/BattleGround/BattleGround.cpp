@@ -30,7 +30,7 @@
 #include "Globals/ObjectMgr.h"
 #include "Globals/ObjectAccessor.h"
 #include "Mails/Mail.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Tools/Formulas.h"
 #include "Grids/GridNotifiersImpl.h"
 #include "Chat/Chat.h"

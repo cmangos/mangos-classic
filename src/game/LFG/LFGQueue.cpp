@@ -19,7 +19,7 @@
 #include "LFG/LFGQueue.h"
 #include "World/World.h"
 #include "LFG/LFGMgr.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Entities/Player.h"
 #include "Globals/ObjectMgr.h"
 #include "Groups/Group.h"
