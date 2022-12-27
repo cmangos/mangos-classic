@@ -412,7 +412,7 @@ void utf8truncate(std::string& utf8str, size_t len)
         Utf8toWStr(utf8str, wstr, len);
         WStrToUtf8(wstr, utf8str);
     }
-    catch (std::exception)
+    catch (const std::exception&)
     {
         utf8str = "";
     }
