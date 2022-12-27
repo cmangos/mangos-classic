@@ -22,6 +22,7 @@
 #include "Common.h"
 #include "ByteBuffer.h"
 #include "Server/Opcodes.h"
+#include <chrono>
 
 // Note: m_opcode and size stored in platfom dependent format
 // ignore endianess until send, and converted at receive
@@ -37,6 +38,10 @@ class WorldPacket : public ByteBuffer
         WorldPacket(const WorldPacket& packet)              : ByteBuffer(packet), m_opcode(packet.m_opcode)
         {
         }
+        WorldPacket(const WorldPacket& packet, std::chrono::steady_clock::time_point receivedTime) : ByteBuffer(packet),
+            m_opcode(packet.m_opcode), m_receivedTime(receivedTime)
+        {
+        }
 
         void Initialize(Opcodes opcode, size_t newres = 200)
         {
@@ -49,7 +54,11 @@ class WorldPacket : public ByteBuffer
         void SetOpcode(Opcodes opcode) { m_opcode = opcode; }
         inline const char* GetOpcodeName() const { return LookupOpcodeName(m_opcode); }
 
+        std::chrono::steady_clock::time_point GetReceivedTime() const { return m_receivedTime; }
+        void SetReceivedTime(std::chrono::steady_clock::time_point receivedTime) { m_receivedTime = receivedTime; }
+
     protected:
         Opcodes m_opcode;
+        std::chrono::steady_clock::time_point m_receivedTime; // only set for a specific set of opcodes, for performance reasons.
 };
 #endif
