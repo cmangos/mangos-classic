@@ -20,7 +20,7 @@
 #define MANGOS_SYSTEMCONFIG_H
 
 #ifndef _PACKAGENAME
-#define _PACKAGENAME "CMaNGOS Classic"
+#define _PACKAGENAME "CMaNGOS"
 #endif
 
 #include "revision.h"

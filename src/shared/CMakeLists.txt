@@ -132,6 +132,7 @@ set(LIBRARY_SRCS
     Filesystem.h
     revision_sql.h
     revision.h
+    SystemConfig.h
     Threading.cpp
     Threading.h
 )
