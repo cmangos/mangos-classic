@@ -181,7 +181,7 @@ void SummonCultists(Unit* shard)
     for (const auto pSummonerShield : summonerShieldList)
         pSummonerShield->ForcedDespawn();
 
-    // We don't have all positions sniffed from the Cultists, so why not using this code which placing them almost perfectly into the circle while blizzards positions are sometimes way off?
+    // We don't have all positions sniffed from the Cultists, so why not using this code which placing them almost perfectly into the circle while B's positions are sometimes way off?
     if (GameObject* gameObject = GetClosestGameObjectWithEntry(shard, GO_SUMMON_CIRCLE, CONTACT_DISTANCE))
     {
         for (int i = 0; i < 4; ++i)

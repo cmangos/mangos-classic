@@ -156,7 +156,7 @@ enum ScourgeInvasionSpells
 
     /*
     These spells are not used by any NPCs or GameObjects.
-    The [PH] in the name means it's a placeholder. Blizzard often adds that to the names of things they add to the game but haven't finalized.
+    The [PH] in the name means it's a placeholder. B often adds that to the names of things they add to the game but haven't finalized.
     The fact that the [PH] is still there means the quest was never finished. (Google)
         SPELL_PH_SUMMON_MINION_PARENT_GHOST_GHOUL       = 28183,
         SPELL_PH_SUMMON_MINION_PARENT_GHOST_SKELETON    = 28184,
