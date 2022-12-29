@@ -1646,7 +1646,15 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 }
                 return;
             }
-
+			case SMSG_QUEST_CONFIRM_ACCEPT:
+			{
+				WorldPacket p(packet);
+				uint32 quest;
+				p >> quest;
+				WorldPacket* const qcap = new WorldPacket(CMSG_QUEST_CONFIRM_ACCEPT, 4);
+				*qcap << quest;
+				m_bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(qcap)));
+			}
         /* uncomment this and your bots will tell you all their outgoing packet opcode names
            case SMSG_MONSTER_MOVE:
            case SMSG_UPDATE_WORLD_STATE:
@@ -6155,7 +6163,35 @@ bool PlayerbotAI::AddQuest(const uint32 entry, WorldObject* questgiver)
     {
         m_bot->AddQuest(qInfo, questgiver);
 
-        std::string questTitle  = qInfo->GetTitle();
+		if (qInfo->HasQuestFlag(QUEST_FLAGS_PARTY_ACCEPT))
+		{
+			sLog.outString("This is a party quest QuestHandler 168");
+			if (Group* pGroup = m_bot->GetGroup())
+			{
+				for (GroupReference* itr = pGroup->GetFirstMember(); itr != nullptr; itr = itr->next())
+				{
+					Player* pPlayer = itr->getSource();
+
+					sLog.outString("Checking if I should send request. Player:% s.Questhandler 177", pPlayer->GetName());
+					if (!pPlayer || pPlayer == m_bot || !pPlayer->IsInWorld()) // not self
+						continue;
+					sLog.outString("I should send request. Player: %s. Questhandler 176", pPlayer->GetName());
+
+					if (pPlayer->CanTakeQuest(qInfo, true))
+					{
+						sLog.outString("Player can take quest. Player: %s. Questhandler 176", pPlayer->GetName());
+						pPlayer->SetDividerGuid(m_bot->GetObjectGuid());
+
+						// need confirmation that any gossip window will close
+						pPlayer->GetPlayerMenu()->CloseGossip();
+
+						sLog.outString("asking player to confirm quest. Player: %s. Questhandler 183", pPlayer->GetName());
+						m_bot->SendQuestConfirmAccept(qInfo, pPlayer);
+					}
+				}
+			}
+		}
+		std::string questTitle  = qInfo->GetTitle();
         QuestLocalization(questTitle, entry);
 
         out << "|cffffff00Quest taken " << "|cff808080|Hquest:" << entry << ':' << qInfo->GetQuestLevel() << "|h[" << questTitle << "]|h|r";
