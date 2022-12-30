@@ -951,6 +951,7 @@ class WorldObject : public Object
         bool IsPositionValid() const;
         void UpdateGroundPositionZ(float x, float y, float& z) const;
         virtual void UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap = nullptr) const;
+        virtual void AdjustZForCollision(float x, float y, float& z, float halfHeight) const {}
 
         void MovePositionToFirstCollision(Position &pos, float dist, float angle);
         void GetFirstCollisionPosition(Position&pos, float dist, float angle)

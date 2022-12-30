@@ -11764,6 +11764,16 @@ void Unit::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap /*=null
     }
 }
 
+void Unit::AdjustZForCollision(float x, float y, float& z, float halfHeight) const
+{
+    if (CanFly())
+    {
+        float groundZ = GetMap()->GetHeight(GetPhaseMask(), x, y, z);
+        if (z - halfHeight < groundZ)
+            z = groundZ;
+    }
+}
+
 uint32 Unit::GetSpellRank(SpellEntry const* spellInfo)
 {
     uint32 spellRank = GetLevel();

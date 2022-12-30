@@ -2332,6 +2332,7 @@ class Unit : public WorldObject
 
         // WorldObject overrides
         void UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap = nullptr) const override;
+        void AdjustZForCollision(float x, float y, float& z, float halfHeight) const override;
 
         virtual uint32 GetSpellRank(SpellEntry const* spellInfo);
 
