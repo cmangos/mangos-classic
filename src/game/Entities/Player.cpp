@@ -5592,7 +5592,7 @@ void Player::UpdateSkillTrainedSpells(uint16 id, uint16 currVal)
             // Update training: skill removal mode, wipe all dependent spells regardless of training method
             if (!currVal)
             {
-                removeSpell(pAbility->spellId, false, false, false);
+                removeSpell(pAbility->spellId, false, false, true);
                 continue;
             }
 
