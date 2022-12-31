@@ -50,4 +50,10 @@ static constexpr float const DEFAULT_COLLISION_WIDTH        = 0.5097f;          
 static constexpr float const MAX_STEALTH_DETECT_RANGE       = 45.0f;
 static constexpr float const GRID_ACTIVATION_RANGE          = 45.0f;
 
+struct AreaNameInfo
+{
+    const char* areaName;
+    const char* wmoNameOverride;
+};
+
 #endif

@@ -968,7 +968,7 @@ class WorldObject : public Object
 
         uint32 GetZoneId() const;
         uint32 GetAreaId() const;
-        char const* GetAreaName(LocaleConstant locale) const;
+        AreaNameInfo GetAreaName(LocaleConstant locale) const;
         void GetZoneAndAreaId(uint32& zoneid, uint32& areaid) const;
 
         InstanceData* GetInstanceData() const;
