@@ -58,6 +58,7 @@ enum SpellListFlags
 {
     SPELL_LIST_FLAG_SUPPORT_ACTION  = 1,
     SPELL_LIST_FLAG_RANGED_ACTION   = 2, // previously known as main ranged spell in EAI
+    SPELL_LIST_FLAG_CATEGORY_COOLDOWN = 4, // imposes category cooldown instead of normal cooldown
 };
 
 struct CreatureSpellListSpell
