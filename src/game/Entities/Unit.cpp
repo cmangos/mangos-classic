@@ -9348,6 +9348,11 @@ void Unit::RemoveFromWorld()
         BreakCharmOutgoing();
         BreakCharmIncoming();
         RemoveGuardians(IsPlayer() || IsCreature() && static_cast<Creature*>(this)->IsTotem());
+        // Remove non-guardian pet
+        if (Pet* pet = GetPet())
+        {
+            pet->Unsummon(PET_SAVE_AS_DELETED, this);
+        }
         RemoveMiniPet();
         RemoveAllGameObjects();
         RemoveAllDynObjects();
