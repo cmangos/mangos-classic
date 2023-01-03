@@ -3182,7 +3182,7 @@ void PlayerbotAI::TurnInQuests(WorldObject* questgiver)
             QuestStatus status = m_bot->GetQuestStatus(questID);
 
             // if quest is complete, turn it in
-            if (status == QUEST_STATUS_COMPLETE)
+            if (status == QUEST_STATUS_COMPLETE || (pQuest->IsAutoComplete() && m_bot->CanTakeQuest(pQuest, false)))
             {
                 // if bot hasn't already turned quest in
                 if (!m_bot->GetQuestRewardStatus(questID))
