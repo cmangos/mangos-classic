@@ -536,7 +536,9 @@ struct npc_cork_gizeltonAI : public npc_escortAI
                     m_creature->GetMotionMaster()->SetNextWaypoint(WAYPOINT_PATH_POINT_AFTER_ESCORT_2);
                     m_creature->SetWalk(false);
                     End(); // normal movement resumes - caravan doesnt despawn - it loops through zone
-                    break;                }
+                    SouthQuest = false;
+                    break;                
+                }
         }
     }
 
