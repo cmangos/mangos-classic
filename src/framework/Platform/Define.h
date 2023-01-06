@@ -24,15 +24,21 @@
 #include <cstdint>
 #include <sys/types.h>
 
-#define MANGOS_LITTLEENDIAN 0
-#define MANGOS_BIGENDIAN    1
+#include <boost/predef/other/endian.h>
 
+#define MANGOS_LITTLE_ENDIAN 0
+#define MANGOS_BIG_ENDIAN    1
+
+// Since C++20 there will be standard defines for target platform endianess, we use Boost ones meanwhile
+// TODO: Review and fix endianess usages
 #if !defined(MANGOS_ENDIAN)
-#  if defined (ACE_BIG_ENDIAN)
-#    define MANGOS_ENDIAN MANGOS_BIGENDIAN
-#  else // ACE_BYTE_ORDER != ACE_BIG_ENDIAN
-#    define MANGOS_ENDIAN MANGOS_LITTLEENDIAN
-#  endif // ACE_BYTE_ORDER
+#  if BOOST_ENDIAN_BIG_BYTE || BOOST_ENDIAN_BIG_WORD
+#    define MANGOS_ENDIAN MANGOS_BIG_ENDIAN
+#  elif BOOST_ENDIAN_LITTLE_BYTE || BOOST_ENDIAN_LITTLE_WORD
+#    define MANGOS_ENDIAN MANGOS_LITTLE_ENDIAN
+#  else
+#    error "Unknown endianess"
+#  endif
 #endif // MANGOS_ENDIAN
 
 #define MANGOS_PATH_MAX 1024

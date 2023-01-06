@@ -7421,7 +7421,7 @@ void ObjectMgr::LoadSpellTemplate()
 
         // DBC not support uint64 fields but SpellEntry have SpellFamilyFlags mapped at 2 uint32 fields
         // uint32 field already converted to bigendian if need, but must be swapped for correct uint64 bigendian view
-#if MANGOS_ENDIAN == MANGOS_BIGENDIAN
+#if MANGOS_ENDIAN == MANGOS_BIG_ENDIAN
         std::swap(*((uint32*)(&spell->SpellFamilyFlags)), *(((uint32*)(&spell->SpellFamilyFlags)) + 1));
 #endif
     }
