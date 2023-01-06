@@ -35,8 +35,6 @@
 #  endif // ACE_BYTE_ORDER
 #endif // MANGOS_ENDIAN
 
-#define MANGOS_SCRIPT_NAME "mangosscript"
-
 #define MANGOS_PATH_MAX 1024
 
 #if PLATFORM == PLATFORM_WINDOWS
@@ -46,8 +44,8 @@
 #    define _WIN32_WINNT 0x0603
 #  endif
 typedef HMODULE MANGOS_LIBRARY_HANDLE;
-#  define MANGOS_SCRIPT_SUFFIX ".dll"
-#  define MANGOS_SCRIPT_PREFIX ""
+#  define MANGOS_DYNAMIC_LIBRARY_SUFFIX ".dll"
+#  define MANGOS_DYNAMIC_LIBRARY_PREFIX ""
 #  define MANGOS_LOAD_LIBRARY(libname)     LoadLibraryA(libname)
 #  define MANGOS_CLOSE_LIBRARY(hlib)       FreeLibrary(hlib)
 #  define MANGOS_GET_PROC_ADDR(hlib, name) GetProcAddress(hlib, name)
@@ -61,11 +59,11 @@ typedef void* MANGOS_LIBRARY_HANDLE;
 #  define MANGOS_GET_PROC_ADDR(hlib, name) dlsym(hlib, name)
 #  define MANGOS_EXPORT export
 #  if PLATFORM == PLATFORM_APPLE
-#    define MANGOS_SCRIPT_SUFFIX ".dylib"
+#    define MANGOS_DYNAMIC_LIBRARY_SUFFIX ".dylib"
 #  else
-#    define MANGOS_SCRIPT_SUFFIX ".so"
+#    define MANGOS_DYNAMIC_LIBRARY_SUFFIX ".so"
 #  endif
-#  define MANGOS_SCRIPT_PREFIX "lib"
+#  define MANGOS_DYNAMIC_LIBRARY_PREFIX "lib"
 #  if defined(__APPLE_CC__) && defined(BIG_ENDIAN) // TODO:: more work to do with byte order. Have to be rechecked after boost integration.
 #    if (defined (__ppc__) || defined (__powerpc__))
 #      define MANGOS_IMPORT __attribute__ ((longcall))
