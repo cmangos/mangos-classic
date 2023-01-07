@@ -104,6 +104,8 @@ set(SRC_GRP_NETWORK
 )
 
 set(SRC_GRP_PLATFORM
+    Platform/CompilerDefs.h
+    Platform/Define.h
     Platform/Filesystem.h
 )
 
