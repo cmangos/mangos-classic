@@ -20,7 +20,7 @@
 #define _BYTEBUFFER_H
 
 #include "Common.h"
-#include "Utilities/ByteConverter.h"
+#include "Util/ByteConverter.h"
 #include <utf8.h>
 
 class ByteBufferException

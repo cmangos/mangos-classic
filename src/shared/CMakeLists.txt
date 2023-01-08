@@ -134,6 +134,7 @@ endif()
 set(SRC_GRP_UTIL
     Util/ByteBuffer.cpp
     Util/ByteBuffer.h
+    Util/ByteConverter.h
     Util/Errors.h
     Util/ProgressBar.cpp
     Util/ProgressBar.h

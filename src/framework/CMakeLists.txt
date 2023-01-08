@@ -43,7 +43,6 @@ set(SRC_GRP_POLICIES
 )
 
 set(SRC_GRP_UTIL
-    Utilities/ByteConverter.h
     Utilities/Callback.h
     Utilities/EventProcessor.cpp
     Utilities/EventProcessor.h
