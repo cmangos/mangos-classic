@@ -1898,7 +1898,7 @@ bool ChatHandler::HandleGoWarpCommand(char* args)
         return false;
 
     char dir = arg1[0];
-    int32 value = (int32)atoi(arg2);
+    float value = (float)atof(arg2);
     float x = player->GetPositionX();
     float y = player->GetPositionY();
     float z = player->GetPositionZ();
