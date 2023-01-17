@@ -1371,6 +1371,12 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
             p >> guid;      // 8 corpse guid
             p >> loot_type; // 1 loot type
+			// This means it's a loot error response.
+			if (loot_type == 0 && p.size() == 10)
+			{
+				sLog.outError("Loot error, wont release");
+				return;
+			}
             p >> gold;      // 4 gold
             p >> items;     // 1 items count
 

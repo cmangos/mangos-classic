@@ -19903,11 +19903,12 @@ void Player::DoLoot()
 
 void Player::SendLootError(ObjectGuid guid, LootError error) const
 {
-    WorldPacket data(SMSG_LOOT_RESPONSE, 10);
-    data << uint64(guid);
-    data << uint8(0);
-    data << uint8(error);
-    SendDirectMessage(data);
+	WorldPacket data(SMSG_LOOT_RESPONSE, 10);
+	sLog.outError("Loot error guid: %i, error: %i, name: %s ", guid.GetRawValue(), error, GetName());
+	data << uint64(guid);
+	data << uint8(0);
+	data << uint8(error);
+	SendDirectMessage(data);
 }
 
 void Player::ForceHealAndPowerUpdateInZone()
