@@ -10,7 +10,7 @@ env:
   BUILD_DIR: ${{github.workspace}}/bin/builddir
   BOOST_TOOLSET: "msvc"
   BOOST_VERSION: "1.79.0"
-  BOOST_INSTALL_DIR: "${{github.workspace}}/bin"
+  BOOST_PLATFORM_VERSION: "2022"
 
 jobs:
   build:
@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: ${{env.REPO_DIR}}
 
@@ -31,33 +31,24 @@ jobs:
           cmake -E make_directory ${{ env.BUILD_DIR }}
 
       # install dependencies
-      - name: Cache Windows boost
-        uses: actions/cache@v2
-        id: cache-boost
-        with:
-          path: "${{env.BOOST_INSTALL_DIR}}/boost"
-          key: ${{ runner.os }}-${{ hashFiles('.github/workflows/windows.yml') }}
-
-      - if: steps.cache-boost.outputs.cache-hit != 'true'
-        name: Install boost
-        uses: MarkusJx/install-boost@v2.3.0
+      - name: Install boost
+        uses: MarkusJx/install-boost@v2.4.1
         id: install-boost
         with:
           # REQUIRED: Specify the required boost version
           # A list of supported versions can be found here:
-          # https://github.com/actions/boost-versions/blob/main/versions-manifest.json
+          # https://github.com/MarkusJx/prebuilt-boost/blob/main/versions-manifest.json
           boost_version: ${{env.BOOST_VERSION}}
-          # OPTIONAL: Specify a toolset on windows
+          # OPTIONAL: Specify a platform version
+          platform_version: ${{env.BOOST_PLATFORM_VERSION}}
+          # OPTIONAL: Specify a toolset
           toolset: ${{env.BOOST_TOOLSET}}
-          # OPTIONAL: Specify a custon install location
-          boost_install_dir: ${{env.BOOST_INSTALL_DIR}}
-          platform_version: 2022
           # NOTE: If a boost version matching all requirements cannot be found,
           # this build step will fail
-
+          
       - name: Configure
         env:
-          BOOST_ROOT: "${{env.BOOST_INSTALL_DIR}}/boost/boost"
+          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         run: cmake -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
 
       - name: Build
@@ -71,7 +62,7 @@ jobs:
           7z a -tzip ${{env.ARCHIVE_FILENAME}} x64_Release
 
       - name: Archive this artefact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: snapshot
           path: "${{env.BUILD_DIR}}/bin/${{env.ARCHIVE_FILENAME}}"
