@@ -29,12 +29,19 @@ using namespace std::chrono_literals;
 
 class ChatHandler;
 
+enum TimerCombat
+{
+    TIMER_COMBAT_OOC    = 0,
+    TIMER_COMBAT_COMBAT = 1,
+    TIMER_ALWAYS        = 2
+};
+
 /*
 Timer data class used for execution of TimerAI events
 */
 struct Timer
 {
-    Timer(uint32 id, std::function<void()> functor, uint32 timerMin, uint32 timerMax, bool disabled = false);
+    Timer(uint32 id, std::function<void()> functor, uint32 timerMin, uint32 timerMax, TimerCombat combatSetting, bool disabled = false);
     uint32 id;
     uint32 timer;
     bool disabled;
@@ -43,30 +50,10 @@ struct Timer
     // initial settings
     uint32 initialMin, initialMax;
     bool initialDisabled;
+    TimerCombat combatSetting;
 
-    virtual bool UpdateTimer(const uint32 diff, bool /*combat*/);
+    bool UpdateTimer(const uint32 diff, bool combat);
     void ResetTimer();
-};
-
-struct CombatTimer : public Timer
-{
-    using Timer::Timer;
-
-    virtual bool UpdateTimer(const uint32 diff, bool combat) override;
-};
-
-struct OOCTimer : public Timer
-{
-    using Timer::Timer;
-
-    virtual bool UpdateTimer(const uint32 diff, bool combat) override;
-};
-
-enum TimerCombat
-{
-    TIMER_COMBAT_OOC    = 0,
-    TIMER_COMBAT_COMBAT = 1,
-    TIMER_ALWAYS        = 2
 };
 
 /*
@@ -210,7 +197,7 @@ class CombatActions : public TimerManager
         size_t GetCombatActionCount() { return m_actionReadyStatus.size(); }
 
     private:
-        std::map<uint32, CombatTimer> m_combatActions;
+        std::map<uint32, Timer> m_combatActions;
         std::vector<bool> m_actionReadyStatus;
         std::map<uint32, bool> m_timerlessActionSettings;
         std::map<uint32, uint32> m_spellAction;

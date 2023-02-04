@@ -19,13 +19,16 @@
 #include "Log.h"
 #include <string>
 
-Timer::Timer(uint32 id, std::function<void()> functor, uint32 timerMin, uint32 timerMax, bool disabled)
-    : id(id), timer(urand(timerMin, timerMax)), disabled(disabled), functor(functor), initialMin(timerMin), initialMax(timerMax), initialDisabled(disabled)
+Timer::Timer(uint32 id, std::function<void()> functor, uint32 timerMin, uint32 timerMax, TimerCombat combatSetting, bool disabled)
+    : id(id), timer(urand(timerMin, timerMax)), disabled(disabled), functor(functor), initialMin(timerMin), initialMax(timerMax), initialDisabled(disabled), combatSetting(combatSetting)
     {}
 
-bool Timer::UpdateTimer(const uint32 diff, bool /*combat*/)
+bool Timer::UpdateTimer(const uint32 diff, bool combat)
 {
     if (disabled)
+        return false;
+
+    if (combatSetting != TIMER_ALWAYS && combatSetting != combat)
         return false;
 
     if (timer <= diff)
@@ -45,44 +48,6 @@ void Timer::ResetTimer()
     disabled = initialDisabled;
 }
 
-bool CombatTimer::UpdateTimer(const uint32 diff, bool combat)
-{
-    if (disabled)
-        return false;
-
-    if (!combat)
-        return false;
-
-    if (timer <= diff)
-    {
-        timer = 0;
-        disabled = true;
-        return true;
-    }
-    else timer -= diff;
-
-    return false;
-}
-
-bool OOCTimer::UpdateTimer(const uint32 diff, bool combat)
-{
-    if (disabled)
-        return false;
-
-    if (combat)
-        return false;
-
-    if (timer <= diff)
-    {
-        timer = 0;
-        disabled = true;
-        return true;
-    }
-    else timer -= diff;
-
-    return false;
-}
-
 void TimerManager::AddTimer(uint32 id, Timer&& timer)
 {
     m_timers.emplace(id, timer);
@@ -90,50 +55,17 @@ void TimerManager::AddTimer(uint32 id, Timer&& timer)
 
 void TimerManager::AddCustomAction(uint32 id, bool disabled, std::function<void()> functor, TimerCombat timerCombat)
 {
-    switch (timerCombat)
-    {
-        case TIMER_ALWAYS:
-            m_timers.emplace(id, Timer(id, functor, 0, 0, disabled));
-            break;
-        case TIMER_COMBAT_OOC:
-            m_timers.emplace(id, OOCTimer(id, functor, 0, 0, disabled));
-            break;
-        case TIMER_COMBAT_COMBAT:
-            m_timers.emplace(id, CombatTimer(id, functor, 0, 0, disabled));
-            break;
-    }    
+    m_timers.emplace(id, Timer(id, functor, 0, 0, timerCombat, disabled));  
 }
 
 void TimerManager::AddCustomAction(uint32 id, uint32 timer, std::function<void()> functor, TimerCombat timerCombat)
 {
-    switch (timerCombat)
-    {
-        case TIMER_ALWAYS:
-            m_timers.emplace(id, Timer(id, functor, timer, timer, false));
-            break;
-        case TIMER_COMBAT_OOC:
-            m_timers.emplace(id, OOCTimer(id, functor, timer, timer, false));
-            break;
-        case TIMER_COMBAT_COMBAT:
-            m_timers.emplace(id, CombatTimer(id, functor, timer, timer, false));
-            break;
-    }
+    m_timers.emplace(id, Timer(id, functor, timer, timer, timerCombat, false));
 }
 
 void TimerManager::AddCustomAction(uint32 id, uint32 timerMin, uint32 timerMax, std::function<void()> functor, TimerCombat timerCombat)
 {
-    switch (timerCombat)
-    {
-        case TIMER_ALWAYS:
-            m_timers.emplace(id, Timer(id, functor, timerMin, timerMax, false));
-            break;
-        case TIMER_COMBAT_OOC:
-            m_timers.emplace(id, OOCTimer(id, functor, timerMin, timerMax, false));
-            break;
-        case TIMER_COMBAT_COMBAT:
-            m_timers.emplace(id, CombatTimer(id, functor, timerMin, timerMax, false));
-            break;
-    }
+    m_timers.emplace(id, Timer(id, functor, timerMin, timerMax, timerCombat, false));
 }
 
 void TimerManager::ResetTimer(uint32 index, uint32 timer)
@@ -234,7 +166,7 @@ void CombatActions::UpdateTimers(const uint32 diff, bool combat)
     TimerManager::UpdateTimers(diff, combat);
     for (auto& data : m_combatActions)
     {
-        CombatTimer& timer = data.second;
+        Timer& timer = data.second;
         if (timer.UpdateTimer(diff, combat))
             timer.functor();
     }
@@ -257,19 +189,19 @@ void CombatActions::ResetAllTimers()
 
 void CombatActions::AddCombatAction(uint32 id, bool disabled)
 {
-    m_combatActions.emplace(id, CombatTimer(id, [&, id] { m_actionReadyStatus[id] = true; }, 0, 0, disabled));
+    m_combatActions.emplace(id, Timer(id, [&, id] { m_actionReadyStatus[id] = true; }, 0, 0, TIMER_COMBAT_COMBAT, disabled));
     m_actionReadyStatus[id] = !disabled;
 }
 
 void CombatActions::AddCombatAction(uint32 id, uint32 timer)
 {
-    m_combatActions.emplace(id, CombatTimer(id, [&, id] { m_actionReadyStatus[id] = true; }, timer, timer, false));
+    m_combatActions.emplace(id, Timer(id, [&, id] { m_actionReadyStatus[id] = true; }, timer, timer, TIMER_COMBAT_COMBAT, false));
     m_actionReadyStatus[id] = false;
 }
 
 void CombatActions::AddCombatAction(uint32 id, uint32 timerMin, uint32 timerMax)
 {
-    m_combatActions.emplace(id, CombatTimer(id, [&, id] { m_actionReadyStatus[id] = true; }, timerMin, timerMax, false));
+    m_combatActions.emplace(id, Timer(id, [&, id] { m_actionReadyStatus[id] = true; }, timerMin, timerMax, TIMER_COMBAT_COMBAT, false));
     m_actionReadyStatus[id] = false;
 }
 
