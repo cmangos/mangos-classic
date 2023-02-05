@@ -17,15 +17,45 @@
 #ifndef BOSS_AI_H
 #define BOSS_AI_H
 
+#include "AI/ScriptDevAI/include/sc_instance.h"
 #include "Entities/Creature.h"
 #include "AI/ScriptDevAI/include/sc_creature.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
+
+enum InstanceActions
+{
+    INSTANCE_CLOSE_ENTRANCE_DOOR = 250,
+};
 
 class BossAI : public CombatAI
 {
     public:
         BossAI(Creature* creature, uint32 combatActions) : CombatAI(creature, combatActions)
-        {}
+        {
+            AddCustomAction(INSTANCE_CLOSE_ENTRANCE_DOOR, true, [&]()
+            {
+                OpenEntrances(false);
+            });
+        }
+
+        void OpenEntrances(bool open = true)
+        {
+            ScriptedInstance* instance = dynamic_cast<ScriptedInstance*>(m_creature->GetInstanceData());
+            if (!instance)
+                return;
+
+            for (auto& id : m_entranceObjects)
+                instance->DoUseOpenableObject(id, open);
+        }
+        void OpenExits()
+        {
+            ScriptedInstance* instance = dynamic_cast<ScriptedInstance*>(m_creature->GetInstanceData());
+            if (!instance)
+                return;
+
+            for (auto& id : m_exitObjects)
+                instance->DoUseOpenableObject(id, true);
+        }
         /**
         * Adds one or more Broadcast Texts to possibly emit when Unit dies
         * This function is not called if JustDied is overridden. Add CombatAI::JustDied(); to your overriding function.
@@ -56,6 +86,21 @@ class BossAI : public CombatAI
         void JustDied(Unit* killer = nullptr) override;
         void JustReachedHome() override;
         void Aggro(Unit* who = nullptr) override;
+        void AddEntranceObject(uint32 value);
+        template <typename... Targs>
+        void AddEntranceObject(uint32 value, Targs... fargs)
+        {
+            AddEntranceObject(value);
+            AddEntranceObject(fargs...);
+        }
+        void AddExitObject(uint32 value);
+        template <typename... Targs>
+        void AddExitObject(uint32 value, Targs... fargs)
+        {
+            AddExitObject(value);
+            AddExitObject(fargs...);
+        }
+        void SetGateDelay(std::chrono::milliseconds delay) { m_gateDelay = delay; }
 
         std::chrono::seconds TimeSinceEncounterStart()
         {
@@ -64,6 +109,10 @@ class BossAI : public CombatAI
     private:
         std::vector<uint32> m_onKilledTexts;
         std::vector<uint32> m_onAggroTexts;
+
+        std::vector<uint32> m_entranceObjects;
+        std::vector<uint32> m_exitObjects;
+        std::chrono::milliseconds m_gateDelay = 3s;
 
         uint32 m_instanceDataType = -1;
 

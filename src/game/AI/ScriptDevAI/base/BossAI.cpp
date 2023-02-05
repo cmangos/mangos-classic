@@ -41,6 +41,8 @@ void BossAI::JustDied(Unit* killer)
     if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
         instance->SetData(m_instanceDataType, DONE);
     CombatAI::JustDied(killer);
+    OpenEntrances();
+    OpenExits();
 }
 
 void BossAI::JustReachedHome()
@@ -49,6 +51,7 @@ void BossAI::JustReachedHome()
         return;
     if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
         instance->SetData(m_instanceDataType, FAIL);
+    OpenEntrances();
 }
 
 void BossAI::Aggro(Unit* who)
@@ -59,6 +62,19 @@ void BossAI::Aggro(Unit* who)
         DoBroadcastText(m_onAggroTexts[urand(0, m_onAggroTexts.size() - 1)], m_creature, who);
     if (m_instanceDataType == -1)
         return;
-    if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
-        instance->SetData(m_instanceDataType, IN_PROGRESS);
+    ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData());
+    if (!instance)
+        return;
+    instance->SetData(m_instanceDataType, IN_PROGRESS);
+    ResetTimer(INSTANCE_CLOSE_ENTRANCE_DOOR, m_gateDelay);
+}
+
+void BossAI::AddEntranceObject(uint32 value)
+{
+    m_entranceObjects.push_back(value);
+}
+
+void BossAI::AddExitObject(uint32 value)
+{
+    m_exitObjects.push_back(value);
 }
