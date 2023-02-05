@@ -72,6 +72,7 @@ bool Totem::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* 
         SetSpellList(cinfo->Entry * 100 + 0);
 
     SetAOEImmune(true);
+    SetChainImmune(true);
 
     return true;
 }

@@ -215,6 +215,7 @@ enum SpellTargets
 {
     SPELL_TARGETS_ASSISTABLE,
     SPELL_TARGETS_AOE_ATTACKABLE,
+    SPELL_TARGETS_CHAIN_ATTACKABLE,
     SPELL_TARGETS_ALL
 };
 
@@ -1048,8 +1049,17 @@ namespace MaNGOS
                 if (!itr->getSource()->IsInMap(i_originalCaster) || itr->getSource()->IsTaxiFlying())
                     continue;
 
-                if (itr->getSource()->IsAOEImmune())
-                    continue;
+                switch (i_TargetType)
+                {
+                    case SPELL_TARGETS_CHAIN_ATTACKABLE:
+                        if (itr->getSource()->IsChainImmune())
+                            continue;
+                        break;
+                    case SPELL_TARGETS_AOE_ATTACKABLE:
+                        if (itr->getSource()->IsAOEImmune())
+                            continue;
+                        break;
+                }
 
                 switch (i_TargetType)
                 {

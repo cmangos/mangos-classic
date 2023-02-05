@@ -426,6 +426,7 @@ Unit::Unit() :
     m_comboPoints = 0;
 
     m_aoeImmune = false;
+    m_chainImmune = false;
 }
 
 Unit::~Unit()

@@ -2074,7 +2074,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             {
                 case TARGET_UNIT_ENEMY_NEAR_CASTER:
                 {
-                    FillAreaTargets(tempTargetUnitMap, max_range, 0.f, PUSH_SELF_CENTER, SPELL_TARGETS_AOE_ATTACKABLE);
+                    FillAreaTargets(tempTargetUnitMap, max_range, 0.f, PUSH_SELF_CENTER, SPELL_TARGETS_CHAIN_ATTACKABLE);
                     break;
                 }
                 case TARGET_UNIT_NEAR_CASTER: // TODO: Rename TARGET_UNIT_NEAR_CASTER to something better and find real difference with TARGET_UNIT_FRIEND_NEAR_CASTER.
@@ -2176,7 +2176,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 // Filling target map
                 UnitList tempAoeList;
                 {
-                    FillAreaTargets(tempAoeList, maxRadiusTarget, cone, m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CHAIN_FROM_CASTER) ? PUSH_SELF_CENTER : PUSH_TARGET_CENTER, SPELL_TARGETS_AOE_ATTACKABLE);
+                    SpellNotifyPushType pushType = PUSH_TARGET_CENTER;
+                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CHAIN_FROM_CASTER))
+                        pushType = PUSH_SELF_CENTER;
+                    FillAreaTargets(tempAoeList, maxRadiusTarget, cone, pushType, SPELL_TARGETS_CHAIN_ATTACKABLE);
                     tempAoeList.erase(std::remove(tempAoeList.begin(), tempAoeList.end(), newUnitTarget), tempAoeList.end());
 
                     for (auto itr = tempAoeList.begin(); itr != tempAoeList.end();)
