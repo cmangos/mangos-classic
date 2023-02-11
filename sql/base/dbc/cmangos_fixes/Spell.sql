@@ -279,8 +279,12 @@ UPDATE spell_template SET AttributesEx4=AttributesEx4|0x00000800 WHERE Id IN(171
 UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00000004 WHERE `Id` IN (
 4044,  -- Target Dummy Passive
 4133,  -- Bruise
+6742,  -- Bloodlust
 11816, -- Land Mine Arming
+13879, -- Magma Splash
+17205, -- Winterfall Firewater
 18115, -- Viewing Room Student Transform
+23378, -- Magma Splash
 27791, -- Suicide (Suicide)
 21789, -- Hate to Half (Hate to Half)
 28330  -- Flameshocker - Immolate Visual
