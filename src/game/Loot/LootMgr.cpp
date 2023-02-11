@@ -222,6 +222,37 @@ void LootStore::LoadAndCollectLootIds(LootIdSet& ids_set)
         ids_set.insert(tab->first);
 }
 
+void LootStore::LoadAndCheckReferenceNames()
+{
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT entry, name FROM `reference_loot_template_names`"));
+    if (result)
+    {
+        std::set<uint32> foundIds;
+        for (auto& data : m_LootTemplates)
+            foundIds.insert(data.first);
+
+        do
+        {
+            Field* fields = result->Fetch();
+
+            uint32 entry = fields[0].GetUInt32();
+            std::string name = fields[1].GetCppString();
+
+            if (foundIds.find(entry) != foundIds.end())
+                foundIds.erase(entry);
+            else
+            {
+                sLog.outErrorDb("Table reference_loot_template_names for entry %u has name but no entry", entry);
+                continue;
+            }
+        }
+        while (result->NextRow());
+
+        for (uint32 entry : foundIds)
+            sLog.outErrorDb("Table reference_loot_template has entry %u but no name", entry);
+    }
+}
+
 void LootStore::CheckLootRefs(LootIdSet* ref_set) const
 {
     for (const auto& m_LootTemplate : m_LootTemplates)
@@ -2821,6 +2852,7 @@ void LoadLootTemplates_Skinning()
 void LoadLootTemplates_Reference(LootIdSet& ids_set)
 {    
     LootTemplates_Reference.LoadAndCollectLootIds(ids_set);
+    LootTemplates_Reference.LoadAndCheckReferenceNames();
 }
 
 void CheckLootTemplates_Reference(LootIdSet& ids_set)
