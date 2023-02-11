@@ -11769,7 +11769,7 @@ void Unit::AdjustZForCollision(float x, float y, float& z, float halfHeight) con
 {
     if (CanFly())
     {
-        float groundZ = GetMap()->GetHeight(GetPhaseMask(), x, y, z);
+        float groundZ = GetMap()->GetHeight(x, y, z);
         if (z - halfHeight < groundZ)
             z = groundZ;
     }
