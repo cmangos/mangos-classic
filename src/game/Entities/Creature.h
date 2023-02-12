@@ -278,7 +278,7 @@ struct CreatureDataAddon
 {
     uint32 guidOrEntry;
     uint32 mount;
-    uint32 bytes1;
+    uint8  standState;
     uint8  sheath_state;                                    // SheathState
     uint8  flags;                                           // UnitBytes2_Flags
     uint32 emote;

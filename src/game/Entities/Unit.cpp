@@ -7930,7 +7930,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         CreatureDataAddon const* cainfo = creature->GetCreatureAddon();
         if (cainfo)
         {
-            if (getStandState() == cainfo->bytes1)
+            if (getStandState() == cainfo->standState)
                 SetStandState(UNIT_STAND_STATE_STAND);
             if (cainfo->emote && GetUInt32Value(UNIT_NPC_EMOTESTATE) == cainfo->emote)
                 HandleEmoteState(0);
