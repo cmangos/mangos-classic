@@ -89,7 +89,7 @@ namespace Movement
 
             PointsArray& Path() { return args.path; }
 
-            void SetCombatSlowed() { args.slowed = true; }
+            void SetCombatSlowed(float slowed) { args.slowed = slowed; }
             bool CheckBounds() const { return args._checkPathBounds(); }
         protected:
 
