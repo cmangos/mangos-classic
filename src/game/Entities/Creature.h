@@ -280,7 +280,6 @@ struct CreatureDataAddon
     uint32 mount;
     uint8  standState;
     uint8  sheath_state;                                    // SheathState
-    uint8  flags;                                           // UnitBytes2_Flags
     uint32 emote;
     uint32 move_flags;
     uint32 const* auras;                                    // loaded as char* "spell1 spell2 ... "
