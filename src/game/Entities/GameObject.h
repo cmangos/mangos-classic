@@ -579,7 +579,7 @@ struct GameObjectData
     int32 spawntimesecsmin;
     int32 spawntimesecsmax;
     uint32 animprogress;
-    GOState go_state;
+    int32 goState;
     uint8 spawnMask;
     uint16 gameEvent;
     uint16 GuidPoolId;

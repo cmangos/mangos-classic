@@ -1825,16 +1825,16 @@ void ObjectMgr::LoadGameObjects()
 {
     uint32 count = 0;
 
-    //                                                0                           1   2    3           4           5           6
-    QueryResult* result = WorldDatabase.Query("SELECT gameobject.guid, gameobject.id, map, round(position_x, 20), round(position_y, 20), round(position_z, 20), round(orientation, 20),"
-                          //   7          8          9          10         11             12               13            14     15         16
-                          "round(rotation0, 20), round(rotation1, 20), round(rotation2, 20), round(rotation3, 20), spawntimesecsmin, spawntimesecsmax, animprogress, state, spawnMask, event,"
-                          //   17                          18
+    //                                                                            0                           1   2    3           4           5           6
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT gameobject.guid, gameobject.id, map, round(position_x, 20), round(position_y, 20), round(position_z, 20), round(orientation, 20),"
+                          //             7                     8                     9                    10                     11                12         13     14
+                          "round(rotation0, 20), round(rotation1, 20), round(rotation2, 20), round(rotation3, 20), spawntimesecsmin, spawntimesecsmax, spawnMask, event,"
+                          //   15                          16
                           "pool_gameobject.pool_entry, pool_gameobject_template.pool_entry "
                           "FROM gameobject "
                           "LEFT OUTER JOIN game_event_gameobject ON gameobject.guid = game_event_gameobject.guid "
                           "LEFT OUTER JOIN pool_gameobject ON gameobject.guid = pool_gameobject.guid "
-                          "LEFT OUTER JOIN pool_gameobject_template ON gameobject.id = pool_gameobject_template.id");
+                          "LEFT OUTER JOIN pool_gameobject_template ON gameobject.id = pool_gameobject_template.id"));
 
     if (!result)
     {
@@ -1890,12 +1890,13 @@ void ObjectMgr::LoadGameObjects()
         data.rotation3        = fields[10].GetFloat();
         data.spawntimesecsmin = fields[11].GetInt32();
         data.spawntimesecsmax = fields[12].GetInt32();
-        data.animprogress     = fields[13].GetUInt32();
-        uint32 go_state       = fields[14].GetUInt32();
-        data.spawnMask        = fields[15].GetUInt8();
-        data.gameEvent        = fields[16].GetInt16();
-        data.GuidPoolId       = fields[17].GetInt16();
-        data.EntryPoolId      = fields[18].GetInt16();
+        data.spawnMask        = fields[13].GetUInt8();
+        data.gameEvent        = fields[14].GetInt16();
+        data.GuidPoolId       = fields[15].GetInt16();
+        data.EntryPoolId      = fields[16].GetInt16();
+
+        data.animprogress     = GO_ANIMPROGRESS_DEFAULT;
+        data.goState          = -1;
 
         MapEntry const* mapEntry = sMapStore.LookupEntry(data.mapid);
         if (!mapEntry)
@@ -1921,13 +1922,6 @@ void ObjectMgr::LoadGameObjects()
                             guid, data.id, uint32(data.spawntimesecsmax), uint32(data.spawntimesecsmin), uint32(data.spawntimesecsmin));
             data.spawntimesecsmax = data.spawntimesecsmin;
         }
-
-        if (go_state >= MAX_GO_STATE)
-        {
-            sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with invalid `state` (%u) value, skip", guid, data.id, go_state);
-            continue;
-        }
-        data.go_state       = GOState(go_state);
 
         if (data.rotation0 < -1.0f || data.rotation0 > 1.0f)
         {
@@ -1979,10 +1973,31 @@ void ObjectMgr::LoadGameObjects()
     }
     while (result->NextRow());
 
-    delete result;
-
     sLog.outString(">> Loaded " SIZEFMTD " gameobjects", mGameObjectDataMap.size());
     sLog.outString();
+
+    result.reset(WorldDatabase.PQuery("SELECT guid, animprogress, state FROM gameobject_addon"));
+    do
+    {
+        Field* fields = result->Fetch();
+        uint32 guid = fields[0].GetUInt32();
+        auto itr = mGameObjectDataMap.find(guid);
+        if (itr == mGameObjectDataMap.end())
+            continue;
+
+        GameObjectData& data = itr->second;
+
+        data.animprogress = fields[1].GetUInt32();
+        int32 state = fields[2].GetInt32();
+
+        if (data.goState != -1 && data.goState >= MAX_GO_STATE)
+        {
+            sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with invalid `state` (%u) value, skip", guid, data.id, data.goState);
+            continue;
+        }
+        data.goState = state;
+    }
+    while (result->NextRow());
 }
 
 void ObjectMgr::LoadGameObjectSpawnEntry()
