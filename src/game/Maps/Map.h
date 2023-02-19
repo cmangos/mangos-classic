@@ -256,13 +256,20 @@ class Map : public GridRefManager<NGridType>
         Unit* GetUnit(ObjectGuid guid);                     // only use if sure that need objects at current map, specially for player case
         WorldObject* GetWorldObject(ObjectGuid guid);       // only use if sure that need objects at current map, specially for player case
         // dbguid methods
-        Creature* GetCreature(uint32 dbguid);
-        std::vector<Creature*> GetCreatures(uint32 dbguid);
-        GameObject* GetGameObject(uint32 dbguid);
-        std::vector<GameObject*> GetGameObjects(uint32 dbguid);
+        Creature* GetCreature(uint32 dbguid) const;
+        GameObject* GetGameObject(uint32 dbguid) const;
+        std::vector<WorldObject*> const* GetWorldObjects(std::string& stringId) const;
+        std::vector<Creature*> const* GetCreatures(std::string& stringId) const;
+        std::vector<GameObject*> const* GetGameObjects(std::string& stringId) const;
+        std::vector<WorldObject*> const* GetWorldObjects(uint32 stringId) const;
+        std::vector<Creature*> const* GetCreatures(uint32 stringId) const;
+        std::vector<GameObject*> const* GetGameObjects(uint32 stringId) const;
 
         void AddDbGuidObject(WorldObject* obj);
         void RemoveDbGuidObject(WorldObject* obj);
+
+        void AddStringIdObject(uint32 stringId, WorldObject* obj);
+        void RemoveStringIdObject(uint32 stringId, WorldObject* obj);
 
         typedef TypeUnorderedMapContainer<AllMapStoredObjectTypes, ObjectGuid> MapStoredObjectTypesContainer;
         MapStoredObjectTypesContainer& GetObjectsStore() { return m_objectsStore; }
@@ -471,6 +478,15 @@ class Map : public GridRefManager<NGridType>
 
         // spawning
         SpawnManager m_spawnManager;
+
+        struct StringIdMapStorage
+        {
+            std::vector<WorldObject*> worldObjects;
+            std::vector<Creature*> creatures;
+            std::vector<GameObject*> gameobjects;
+        };
+
+        std::unordered_map<uint32, StringIdMapStorage> m_objectsPerStringId;
 
         MapDataContainer m_dataContainer;
         std::shared_ptr<CreatureSpellListContainer> m_spellListContainer;

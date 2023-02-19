@@ -716,6 +716,14 @@ bool ChatHandler::HandleReloadSpellThreatsCommand(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleReloadStringIds(char* /*args*/)
+{
+    sLog.outString("Re-Loading String Id Definitions...");
+    sScriptMgr.LoadStringIds();
+    SendGlobalSysMessage("DB table `string_id` (string id definitions) reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleReloadTaxiShortcuts(char* /*args*/)
 {
     sLog.outString("Re-Loading taxi flight shortcuts...");

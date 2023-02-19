@@ -1113,6 +1113,55 @@ void ScriptMgr::LoadScriptMap(ScriptMapType scriptType, bool reload)
     }
 }
 
+void ScriptMgr::LoadStringIds(bool reload)
+{
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Id, Name FROM string_id"));
+    uint32 count = 0;
+
+    if (!result)
+    {
+        BarGoLink bar(1);
+        bar.step();
+        sLog.outString(">> Loaded %u script definitions from table string_id", count);
+        sLog.outString();
+        return;
+    }
+    
+    auto stringIdMap = std::make_shared<StringIdMap>();
+    auto stringIdsByString = std::make_shared<StringIdMapByString>();
+
+    BarGoLink bar(result->GetRowCount());
+
+    do
+    {
+        bar.step();
+
+        Field* fields = result->Fetch();
+
+        StringId stringId;
+        stringId.Id = fields[0].GetInt32();
+        stringId.Name = fields[1].GetCppString();
+
+        stringIdMap->emplace(stringId.Id, stringId);
+        stringIdsByString->emplace(stringId.Name, stringId);
+    }
+    while(result->NextRow());        
+
+    m_stringIds = stringIdMap;
+    m_stringIdsByString = stringIdsByString;
+
+    if (reload)
+    {
+        sMapMgr.DoForAllMaps([stringIdMap, stringIdsByString](Map* map)
+        {
+            map->GetMessager().AddMessage([stringIdMap, stringIdsByString](Map* map)
+            {
+                map->GetMapDataContainer().SetStringIdMaps(stringIdMap, stringIdsByString);
+            });
+        });
+    }
+}
+
 void ScriptMgr::LoadDbScriptStrings()
 {
     CheckScriptTexts(SCRIPT_TYPE_QUEST_END);
@@ -3276,4 +3325,9 @@ bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool
         execParam = Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_TARGET;
 
     return map->ScriptsStart(SCRIPT_TYPE_EVENT, id, source, target, execParam);
+}
+
+bool ScriptMgr::ExistsStringId(uint32 stringId)
+{
+    return m_stringIds->find(stringId) != m_stringIds->end();
 }

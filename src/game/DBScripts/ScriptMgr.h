@@ -651,6 +651,8 @@ class ScriptMgr
 
         void LoadScriptMap(ScriptMapType scriptType, bool reload = false);
 
+        void LoadStringIds(bool reload = false);
+
         void LoadDbScriptStrings();
         void LoadDbScriptRandomTemplates();
         void CheckRandomStringTemplates(std::set<int32>& ids);
@@ -671,6 +673,8 @@ class ScriptMgr
         static void CollectPossibleEventIds(std::set<uint32>& eventIds);
 
         std::shared_ptr<ScriptMapMapName> GetScriptMap(ScriptMapType scriptMapType);
+
+        bool ExistsStringId(uint32 stringId);
     private:
         void LoadScripts(ScriptMapType scriptType);
         void CheckScriptTexts(ScriptMapType scriptType);
@@ -689,6 +693,10 @@ class ScriptMgr
         ScriptNameMap           m_scriptNames;
 
         std::shared_ptr<ScriptMapMapName> m_scriptMaps[SCRIPT_TYPE_MAX];
+
+        // SCRIPT_ID
+        std::shared_ptr<StringIdMap> m_stringIds;
+        std::shared_ptr<StringIdMapByString> m_stringIdsByString;
 };
 
 // Starters for events

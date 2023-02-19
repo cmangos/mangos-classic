@@ -1107,6 +1107,36 @@ void Object::ForceValuesUpdateAtIndex(uint16 index)
     }
 }
 
+void WorldObject::SetStringId(uint32 stringId, bool apply)
+{
+    if (apply)
+        m_stringIds.insert(stringId);
+    else
+        m_stringIds.erase(stringId);
+
+    if (IsInWorld())
+    {
+        if (apply)
+            GetMap()->AddStringIdObject(stringId, this);
+        else
+            GetMap()->RemoveStringIdObject(stringId, this);
+    }
+}
+
+void WorldObject::AddStringId(std::string& stringId)
+{
+    uint32 stringIdId = GetMap()->GetMapDataContainer().GetStringId(stringId);
+    if (stringIdId)
+        SetStringId(stringIdId, true);
+}
+
+void WorldObject::RemoveStringId(std::string& stringId)
+{
+    uint32 stringIdId = GetMap()->GetMapDataContainer().GetStringId(stringId);
+    if (stringIdId)
+        SetStringId(stringIdId, false);
+}
+
 WorldObject::WorldObject() :
     m_isOnEventNotified(false),
     m_currMap(nullptr), m_mapId(0),
@@ -1901,6 +1931,10 @@ void WorldObject::AddToWorld()
     if (m_isOnEventNotified)
         m_currMap->AddToOnEventNotified(this);
 
+    if (!m_stringIds.empty())
+        for (uint32 stringId : m_stringIds)
+            m_currMap->AddStringIdObject(stringId, this);
+
     Object::AddToWorld();
 }
 
@@ -1908,6 +1942,10 @@ void WorldObject::RemoveFromWorld()
 {
     if (m_isOnEventNotified)
         m_currMap->RemoveFromOnEventNotified(this);
+
+    if (!m_stringIds.empty())
+        for (uint32 stringId : m_stringIds)
+            m_currMap->RemoveStringIdObject(stringId, this);
 
     Object::RemoveFromWorld();
 }
@@ -2040,6 +2078,8 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map)
                 //creature->m_movementInfo.AddMovementFlag(MovementFlags(MOVEFLAG_FLYING | MOVEFLAG_SWIMMING | MOVEFLAG_CAN_FLY | MOVEFLAG_ROOT));
             }
             relayId = templateData->relayId;
+            if (templateData->stringId)
+                creature->SetStringId(templateData->stringId, true);
         }
     }
 

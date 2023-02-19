@@ -160,6 +160,8 @@ struct CreatureInfo
     uint32  SpellList;
     uint32  EquipmentTemplateId;
     uint32  Civilian;
+    uint32  StringID1;
+    uint32  StringID2;
     char const* AIName;
     uint32  ScriptID;
 
@@ -228,6 +230,7 @@ struct CreatureSpawnTemplate
     uint32 curMana;
     uint32 spawnFlags;
     uint32 relayId;
+    uint32 stringId;
 
     bool IsRunning() const { return (spawnFlags & SPAWN_FLAG_RUN_ON_SPAWN) != 0; }
     bool IsHovering() const { return (spawnFlags & SPAWN_FLAG_HOVER) != 0; }
