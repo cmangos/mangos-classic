@@ -22,8 +22,9 @@
 #include "Common.h"
 #include "Entities/ObjectGuid.h"
 #include "Server/DBCEnums.h"
+#include "DBScripts/ScriptMgrDefines.h"
 
-#include <atomic>
+#include <memory>
 
 class Map;
 class Object;
@@ -592,9 +593,7 @@ struct ScriptInfo
 class ScriptAction
 {
     public:
-        ScriptAction(const char* _table, Map* _map, ObjectGuid _sourceGuid, ObjectGuid _targetGuid, ObjectGuid _ownerGuid, ScriptInfo const* _script) :
-            m_table(_table), m_map(_map), m_sourceGuid(_sourceGuid), m_targetGuid(_targetGuid), m_ownerGuid(_ownerGuid), m_script(_script)
-        {}
+        ScriptAction(ScriptMapType scriptType, Map* _map, ObjectGuid _sourceGuid, ObjectGuid _targetGuid, ObjectGuid _ownerGuid, std::shared_ptr<ScriptInfo> _script);
 
         bool HandleScriptStep();                            // return true IF AND ONLY IF the script should be terminated
         bool ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTarget, Object* pSourceOrItem);
@@ -614,12 +613,13 @@ class ScriptAction
         }
 
     private:
+        ScriptMapType m_scriptType;
         const char* m_table;                                // of which table the script was started
         Map* m_map;                                         // Map on which the action will be executed
         ObjectGuid m_sourceGuid;
         ObjectGuid m_targetGuid;
         ObjectGuid m_ownerGuid;                             // owner of source if source is item
-        ScriptInfo const* m_script;                         // pointer to static script data
+        std::shared_ptr<ScriptInfo> m_script;               // pointer to script data
 
         // Helper functions
         bool GetScriptCommandObject(const ObjectGuid guid, bool includeItem, Object*& resultObject) const;
@@ -631,20 +631,9 @@ class ScriptAction
         Player* GetPlayerTargetOrSourceAndLog(WorldObject* pSource, WorldObject* pTarget) const;
 };
 
-typedef std::multimap < uint32 /*delay*/, ScriptInfo > ScriptMap;
+typedef std::multimap < uint32 /*delay*/, std::shared_ptr<ScriptInfo>> ScriptMap;
 typedef std::map < uint32 /*id*/, ScriptMap > ScriptMapMap;
 typedef std::pair<const char*, ScriptMapMap> ScriptMapMapName;
-
-extern ScriptMapMapName sQuestEndScripts;
-extern ScriptMapMapName sQuestStartScripts;
-extern ScriptMapMapName sSpellScripts;
-extern ScriptMapMapName sGameObjectScripts;
-extern ScriptMapMapName sGameObjectTemplateScripts;
-extern ScriptMapMapName sEventScripts;
-extern ScriptMapMapName sGossipScripts;
-extern ScriptMapMapName sCreatureDeathScripts;
-extern ScriptMapMapName sCreatureMovementScripts;
-extern ScriptMapMapName sRelayScripts;
 
 class ScriptMgr
 {
@@ -659,16 +648,7 @@ class ScriptMgr
         ScriptMgr();
         ~ScriptMgr() {};
 
-        void LoadGameObjectScripts();
-        void LoadGameObjectTemplateScripts();
-        void LoadQuestEndScripts();
-        void LoadQuestStartScripts();
-        void LoadEventScripts();
-        void LoadSpellScripts();
-        void LoadGossipScripts();
-        void LoadCreatureDeathScripts();
-        void LoadCreatureMovementScripts();
-        void LoadRelayScripts();
+        void LoadScriptMap(ScriptMapType scriptType, bool reload = false);
 
         void LoadDbScriptStrings();
         void LoadDbScriptRandomTemplates();
@@ -685,17 +665,14 @@ class ScriptMgr
         int32 GetRandomScriptStringFromTemplate(uint32 id);
         int32 GetRandomRelayDbscriptFromTemplate(uint32 id);
 
-        uint32 IncreaseScheduledScriptsCount() { return (uint32)++m_scheduledScripts; }
-        uint32 DecreaseScheduledScriptCount() { return (uint32)--m_scheduledScripts; }
-        uint32 DecreaseScheduledScriptCount(size_t count) { return (uint32)(m_scheduledScripts -= count); }
-        bool IsScriptScheduled() const { return m_scheduledScripts > 0; }
         static bool CanSpellEffectStartDBScript(SpellEntry const* spellinfo, SpellEffectIndex effIdx);
 
         static void CollectPossibleEventIds(std::set<uint32>& eventIds);
 
+        std::shared_ptr<ScriptMapMapName> GetScriptMap(ScriptMapType scriptMapType);
     private:
-        void LoadScripts(ScriptMapMapName& scripts, const char* tablename);
-        void CheckScriptTexts(ScriptMapMapName const& scripts);
+        void LoadScripts(ScriptMapType scriptType);
+        void CheckScriptTexts(ScriptMapType scriptType);
 
         typedef std::vector<std::string> ScriptNameMap;
         typedef std::unordered_map<uint32, uint32> AreaTriggerScriptMap;
@@ -710,8 +687,7 @@ class ScriptMgr
         ScriptTemplateMap       m_scriptTemplatesExplicitlyChanced[MAX_TYPE];
         ScriptNameMap           m_scriptNames;
 
-        // atomic op counter for active scripts amount
-        std::atomic_long m_scheduledScripts;
+        std::shared_ptr<ScriptMapMapName> m_scriptMaps[SCRIPT_TYPE_MAX];
 };
 
 // Starters for events

@@ -37,22 +37,27 @@
 #include "Entities/Object.h"
 #include "Entities/Transports.h"
 
-ScriptMapMapName sQuestEndScripts;
-ScriptMapMapName sQuestStartScripts;
-ScriptMapMapName sSpellScripts;
-ScriptMapMapName sGameObjectScripts;
-ScriptMapMapName sGameObjectTemplateScripts;
-ScriptMapMapName sEventScripts;
-ScriptMapMapName sGossipScripts;
-ScriptMapMapName sCreatureDeathScripts;
-ScriptMapMapName sCreatureMovementScripts;
-ScriptMapMapName sRelayScripts;
+#include <string_view>
 
 INSTANTIATE_SINGLETON_1(ScriptMgr);
 
+constexpr std::array<std::string_view, SCRIPT_TYPE_MAX> scriptTableNames
+{
+    "dbscripts_on_quest_end",
+    "dbscripts_on_quest_start",
+    "dbscripts_on_spell",
+    "dbscripts_on_go_use",
+    "dbscripts_on_go_template_use",
+    "dbscripts_on_event",
+    "dbscripts_on_gossip",
+    "dbscripts_on_creature_death",
+    "dbscripts_on_creature_movement",
+    "dbscripts_on_relay",
+    "internal_use",
+};
+
 ScriptMgr::ScriptMgr()
 {
-    m_scheduledScripts = 0;
 }
 
 // /////////////////////////////////////////////////////////
@@ -100,16 +105,17 @@ bool ScriptMgr::CanSpellEffectStartDBScript(SpellEntry const* spellinfo, SpellEf
     return true;
 }
 
-void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
+void ScriptMgr::LoadScripts(ScriptMapType scriptType)
 {
-    if (IsScriptScheduled())                                // function don't must be called in time scripts use.
-        return;
+    ScriptMapMapName scripts;
+
+    const char* tablename = scriptTableNames[scriptType].data();
 
     scripts.first = tablename;
     scripts.second.clear();                                 // need for reload support
 
-    //                                                 0   1      2        3         4          5          6            7              8           9        10        11        12               13 14 15 16 17     18            19
-    QueryResult* result = WorldDatabase.PQuery("SELECT id, delay, command, datalong, datalong2, datalong3, buddy_entry, search_radius, data_flags, dataint, dataint2, dataint3, dataint4, datafloat, x, y, z, o, speed, condition_id FROM %s ORDER BY priority", tablename);
+    //                                                                0   1      2        3         4          5          6            7              8           9        10        11        12               13 14 15 16 17     18            19
+    std::unique_ptr<QueryResult> result(WorldDatabase.PQuery("SELECT id, delay, command, datalong, datalong2, datalong3, buddy_entry, search_radius, data_flags, dataint, dataint2, dataint3, dataint4, datafloat, x, y, z, o, speed, condition_id FROM %s ORDER BY priority", tablename));
 
     uint32 count = 0;
 
@@ -752,11 +758,12 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
             }
             case SCRIPT_COMMAND_START_RELAY_SCRIPT:         // 45
             {
-                if (strcmp(scripts.first, "dbscripts_on_relay") != 0) // Relay scripts are done first and checked after load
+                if (scriptType != SCRIPT_TYPE_RELAY) // Relay scripts are done first and checked after load
                 {
                     if (tmp.relayScript.relayId)
                     {
-                        if (sRelayScripts.second.find(tmp.relayScript.relayId) == sRelayScripts.second.end())
+                        auto relayScript = GetScriptMap(SCRIPT_TYPE_RELAY);
+                        if (relayScript->second.find(tmp.relayScript.relayId) == relayScript->second.end())
                         {
                             sLog.outErrorDb("Table `dbscripts_on_relay` uses nonexistent relay ID %u in SCRIPT_COMMAND_START_RELAY_SCRIPT for script id %u.", tmp.relayScript.relayId, tmp.id);
                             continue;
@@ -934,182 +941,190 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
             ScriptMap emptyMap;
             scripts.second[tmp.id] = emptyMap;
         }
-        scripts.second[tmp.id].emplace(tmp.delay, tmp);
+        scripts.second[tmp.id].emplace(tmp.delay, std::make_shared<ScriptInfo>(tmp));
 
         ++count;
     }
     while (result->NextRow());
 
-    delete result;
+    m_scriptMaps[scriptType] = std::make_shared<ScriptMapMapName>(scripts);
 
     sLog.outString(">> Loaded %u script definitions from table %s", count, tablename);
     sLog.outString();
 }
 
-void ScriptMgr::LoadGameObjectScripts()
+void ScriptMgr::LoadScriptMap(ScriptMapType scriptType, bool reload)
 {
-    LoadScripts(sGameObjectScripts, "dbscripts_on_go_use");
+    LoadScripts(scriptType);
 
-    // check ids
-    for (ScriptMapMap::const_iterator itr = sGameObjectScripts.second.begin(); itr != sGameObjectScripts.second.end(); ++itr)
+    switch (scriptType)
     {
-        if (!sObjectMgr.GetGOData(itr->first))
-            sLog.outErrorDb("Table `dbscripts_on_go_use` has not existing gameobject (GUID: %u) as script id", itr->first);
-    }
-}
-
-void ScriptMgr::LoadGameObjectTemplateScripts()
-{
-    LoadScripts(sGameObjectTemplateScripts, "dbscripts_on_go_template_use");
-
-    // check ids
-    for (ScriptMapMap::const_iterator itr = sGameObjectTemplateScripts.second.begin(); itr != sGameObjectTemplateScripts.second.end(); ++itr)
-    {
-        if (!sObjectMgr.GetGameObjectInfo(itr->first))
-            sLog.outErrorDb("Table `dbscripts_on_go_template_use` has not existing gameobject (Entry: %u) as script id", itr->first);
-    }
-}
-
-void ScriptMgr::LoadQuestEndScripts()
-{
-    LoadScripts(sQuestEndScripts, "dbscripts_on_quest_end");
-
-    // check ids
-    for (ScriptMapMap::const_iterator itr = sQuestEndScripts.second.begin(); itr != sQuestEndScripts.second.end(); ++itr)
-    {
-        if (!sObjectMgr.GetQuestTemplate(itr->first))
-            sLog.outErrorDb("Table `dbscripts_on_quest_end` has not existing quest (Id: %u) as script id", itr->first);
-    }
-}
-
-void ScriptMgr::LoadQuestStartScripts()
-{
-    LoadScripts(sQuestStartScripts, "dbscripts_on_quest_start");
-
-    // check ids
-    for (ScriptMapMap::const_iterator itr = sQuestStartScripts.second.begin(); itr != sQuestStartScripts.second.end(); ++itr)
-    {
-        if (!sObjectMgr.GetQuestTemplate(itr->first))
-            sLog.outErrorDb("Table `dbscripts_on_quest_start` has not existing quest (Id: %u) as script id", itr->first);
-    }
-}
-
-void ScriptMgr::LoadSpellScripts()
-{
-    LoadScripts(sSpellScripts, "dbscripts_on_spell");
-
-    // check ids
-    for (ScriptMapMap::const_iterator itr = sSpellScripts.second.begin(); itr != sSpellScripts.second.end(); ++itr)
-    {
-        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(itr->first);
-        if (!spellInfo)
+        case SCRIPT_TYPE_QUEST_END:
         {
-            sLog.outErrorDb("Table `dbscripts_on_spell` has not existing spell (Id: %u) as script id", itr->first);
-            continue;
-        }
-
-        // check for correct spellEffect
-        bool found = false;
-        for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
-        {
-            if (GetSpellStartDBScriptPriority(spellInfo, SpellEffectIndex(i)))
+            auto questEndScripts = GetScriptMap(scriptType);
+            // check ids
+            for (auto itr = questEndScripts->second.begin(); itr != questEndScripts->second.end(); ++itr)
             {
-                found =  true;
-                break;
+                if (!sObjectMgr.GetQuestTemplate(itr->first))
+                    sLog.outErrorDb("Table `dbscripts_on_quest_end` has not existing quest (Id: %u) as script id", itr->first);
             }
+            break;
         }
-
-        if (!found)
-            sLog.outErrorDb("Table `dbscripts_on_spell` has unsupported spell (Id: %u)", itr->first);
-    }
-}
-
-void ScriptMgr::LoadEventScripts()
-{
-    LoadScripts(sEventScripts, "dbscripts_on_event");
-
-    std::set<uint32> eventIds;                              // Store possible event ids
-    CollectPossibleEventIds(eventIds);
-
-    // Then check if all scripts are in above list of possible script entries
-    for (ScriptMapMap::const_iterator itr = sEventScripts.second.begin(); itr != sEventScripts.second.end(); ++itr)
-    {
-        std::set<uint32>::const_iterator itr2 = eventIds.find(itr->first);
-        if (itr2 == eventIds.end())
-            sLog.outErrorDb("Table `dbscripts_on_event` has script (Id: %u) not referring to any fitting gameobject_template or any spell effect %u or path taxi node data",
-                            itr->first, SPELL_EFFECT_SEND_EVENT);
-    }
-}
-
-void ScriptMgr::LoadGossipScripts()
-{
-    LoadScripts(sGossipScripts, "dbscripts_on_gossip");
-
-    // checks are done in LoadGossipMenuItems and LoadGossipMenu
-}
-
-void ScriptMgr::LoadCreatureMovementScripts()
-{
-    LoadScripts(sCreatureMovementScripts, "dbscripts_on_creature_movement");
-
-    // checks are done in WaypointManager::Load
-}
-
-void ScriptMgr::LoadCreatureDeathScripts()
-{
-    LoadScripts(sCreatureDeathScripts, "dbscripts_on_creature_death");
-
-    // check ids
-    for (ScriptMapMap::const_iterator itr = sCreatureDeathScripts.second.begin(); itr != sCreatureDeathScripts.second.end(); ++itr)
-    {
-        if (!sObjectMgr.GetCreatureTemplate(itr->first))
-            sLog.outErrorDb("Table `dbscripts_on_creature_death` has not existing creature (Entry: %u) as script id", itr->first);
-    }
-}
-
-void ScriptMgr::LoadRelayScripts()
-{
-    LoadScripts(sRelayScripts, "dbscripts_on_relay");
-
-    // check ids
-    for (ScriptMapMap::const_iterator itr = sRelayScripts.second.begin(); itr != sRelayScripts.second.end(); ++itr)
-    {
-        for (auto& data : itr->second) // need to check after load is complete, because of nesting
+        case SCRIPT_TYPE_QUEST_START:
         {
-            if (data.second.command == SCRIPT_COMMAND_START_RELAY_SCRIPT)
+            auto questStartScripts = GetScriptMap(scriptType);
+            // check ids
+            for (auto itr = questStartScripts->second.begin(); itr != questStartScripts->second.end(); ++itr)
             {
-                bool hasErrored = false;
-                if (data.second.relayScript.relayId)
+                if (!sObjectMgr.GetQuestTemplate(itr->first))
+                    sLog.outErrorDb("Table `dbscripts_on_quest_start` has not existing quest (Id: %u) as script id", itr->first);
+            }
+            break;
+        }
+        case SCRIPT_TYPE_SPELL:
+        {
+            auto spellScripts = GetScriptMap(scriptType);
+            // check ids
+            for (auto itr = spellScripts->second.begin(); itr != spellScripts->second.end(); ++itr)
+            {
+                SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(itr->first);
+                if (!spellInfo)
                 {
-                    if (sRelayScripts.second.find(data.second.relayScript.relayId) == sRelayScripts.second.end())
+                    sLog.outErrorDb("Table `dbscripts_on_spell` has not existing spell (Id: %u) as script id", itr->first);
+                    continue;
+                }
+
+                // check for correct spellEffect
+                bool found = false;
+                for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+                {
+                    if (GetSpellStartDBScriptPriority(spellInfo, SpellEffectIndex(i)))
                     {
-                        sLog.outErrorDb("Table `dbscripts_on_relay` uses nonexistent relay ID %u in SCRIPT_COMMAND_START_RELAY_SCRIPT for script id %u.", data.second.relayScript.relayId, data.second.id);
-                        hasErrored = true;
+                        found = true;
+                        break;
                     }
                 }
 
-                if (hasErrored)
-                    continue;
+                if (!found)
+                    sLog.outErrorDb("Table `dbscripts_on_spell` has unsupported spell (Id: %u)", itr->first);
             }
+            break;
+        }
+        case SCRIPT_TYPE_GAMEOBJECT:
+        {
+            auto goScripts = GetScriptMap(scriptType);
+            // check ids
+            for (auto itr = goScripts->second.begin(); itr != goScripts->second.end(); ++itr)
+            {
+                if (!sObjectMgr.GetGOData(itr->first))
+                    sLog.outErrorDb("Table `dbscripts_on_go_use` has not existing gameobject (GUID: %u) as script id", itr->first);
+            }
+            break;
+        }
+        case SCRIPT_TYPE_GAMEOBJECT_TEMPLATE:
+        {
+            auto goTemplateScripts = GetScriptMap(scriptType);
+            // check ids
+            for (auto itr = goTemplateScripts->second.begin(); itr != goTemplateScripts->second.end(); ++itr)
+            {
+                if (!sObjectMgr.GetGameObjectInfo(itr->first))
+                    sLog.outErrorDb("Table `dbscripts_on_go_template_use` has not existing gameobject (Entry: %u) as script id", itr->first);
+            }
+            break;
+        }
+        case SCRIPT_TYPE_EVENT:
+        {
+            std::set<uint32> eventIds; // Store possible event ids
+            CollectPossibleEventIds(eventIds);
+
+            auto eventScripts = GetScriptMap(scriptType);
+
+            // Then check if all scripts are in above list of possible script entries
+            for (auto itr = eventScripts->second.begin(); itr != eventScripts->second.end(); ++itr)
+            {
+                std::set<uint32>::const_iterator itr2 = eventIds.find(itr->first);
+                if (itr2 == eventIds.end())
+                    sLog.outErrorDb("Table `dbscripts_on_event` has script (Id: %u) not referring to any fitting gameobject_template or any spell effect %u or path taxi node data",
+                        itr->first, SPELL_EFFECT_SEND_EVENT);
+            }
+            break;
+        }
+        case SCRIPT_TYPE_GOSSIP:
+        {
+            break;
+        }
+        case SCRIPT_TYPE_CREATURE_DEATH:
+        {
+            // check ids
+            auto deathScripts = GetScriptMap(scriptType);
+            for (auto itr = deathScripts->second.begin(); itr != deathScripts->second.end(); ++itr)
+            {
+                if (!sObjectMgr.GetCreatureTemplate(itr->first))
+                    sLog.outErrorDb("Table `dbscripts_on_creature_death` has not existing creature (Entry: %u) as script id", itr->first);
+            }
+            break;
+        }
+        case SCRIPT_TYPE_CREATURE_MOVEMENT:
+        {
+            break;
+        }
+        case SCRIPT_TYPE_RELAY:
+        {
+            // check ids
+            auto relayScripts = GetScriptMap(scriptType);
+            for (auto itr = relayScripts->second.begin(); itr != relayScripts->second.end(); ++itr)
+            {
+                for (auto& data : itr->second) // need to check after load is complete, because of nesting
+                {
+                    if (data.second->command == SCRIPT_COMMAND_START_RELAY_SCRIPT)
+                    {
+                        bool hasErrored = false;
+                        if (data.second->relayScript.relayId)
+                        {
+                            if (relayScripts->second.find(data.second->relayScript.relayId) == relayScripts->second.end())
+                            {
+                                sLog.outErrorDb("Table `dbscripts_on_relay` uses nonexistent relay ID %u in SCRIPT_COMMAND_START_RELAY_SCRIPT for script id %u.", data.second->relayScript.relayId, data.second->id);
+                                hasErrored = true;
+                            }
+                        }
+
+                        if (hasErrored)
+                            continue;
+                    }
+                }
+            }
+
+            // String templates are checked on string loading
+            CheckRandomRelayTemplates();
+            break;
         }
     }
 
-    // String templates are checked on string loading
-    CheckRandomRelayTemplates();
+    if (reload)
+    {
+        auto scriptMap = GetScriptMap(scriptType);
+        sMapMgr.DoForAllMaps([scriptType, scriptMap](Map* map)
+        {
+            map->GetMessager().AddMessage([scriptType, scriptMap](Map* map)
+            {
+                map->GetMapDataContainer().SetScriptMap(scriptType, scriptMap);
+            });
+        });
+    }
 }
 
 void ScriptMgr::LoadDbScriptStrings()
 {
-    CheckScriptTexts(sQuestEndScripts);
-    CheckScriptTexts(sQuestStartScripts);
-    CheckScriptTexts(sSpellScripts);
-    CheckScriptTexts(sGameObjectScripts);
-    CheckScriptTexts(sGameObjectTemplateScripts);
-    CheckScriptTexts(sEventScripts);
-    CheckScriptTexts(sGossipScripts);
-    CheckScriptTexts(sCreatureDeathScripts);
-    CheckScriptTexts(sCreatureMovementScripts);
-    CheckScriptTexts(sRelayScripts);
+    CheckScriptTexts(SCRIPT_TYPE_QUEST_END);
+    CheckScriptTexts(SCRIPT_TYPE_QUEST_START);
+    CheckScriptTexts(SCRIPT_TYPE_SPELL);
+    CheckScriptTexts(SCRIPT_TYPE_GAMEOBJECT);
+    CheckScriptTexts(SCRIPT_TYPE_GAMEOBJECT_TEMPLATE);
+    CheckScriptTexts(SCRIPT_TYPE_EVENT);
+    CheckScriptTexts(SCRIPT_TYPE_GOSSIP);
+    CheckScriptTexts(SCRIPT_TYPE_CREATURE_DEATH);
+    CheckScriptTexts(SCRIPT_TYPE_CREATURE_MOVEMENT);
+    CheckScriptTexts(SCRIPT_TYPE_RELAY);
 }
 
 void ScriptMgr::LoadDbScriptRandomTemplates()
@@ -1153,33 +1168,35 @@ void ScriptMgr::CheckRandomStringTemplates(std::set<int32>& ids)
 
 void ScriptMgr::CheckRandomRelayTemplates()
 {
+    auto relayScripts = GetScriptMap(SCRIPT_TYPE_RELAY);
     for (auto& templateData : m_scriptTemplates[RELAY_TEMPLATE])
         for (auto& data : templateData.second)
-            if (data.first && sRelayScripts.second.find(data.first) == sRelayScripts.second.end())
+            if (data.first && relayScripts->second.find(data.first) == relayScripts->second.end())
                 sLog.outErrorDb("Table `dbscript_random_templates` entry (%u) uses nonexistent relay ID (%u).", templateData.first, data.first);
 }
 
-void ScriptMgr::CheckScriptTexts(ScriptMapMapName const& scripts)
+void ScriptMgr::CheckScriptTexts(ScriptMapType scriptType)
 {
-    for (ScriptMapMap::const_iterator itrMM = scripts.second.begin(); itrMM != scripts.second.end(); ++itrMM)
+    ScriptMapMapName const& scripts = *GetScriptMap(scriptType).get();
+    for (auto itrMM = scripts.second.begin(); itrMM != scripts.second.end(); ++itrMM)
     {
         for (ScriptMap::const_iterator itrM = itrMM->second.begin(); itrM != itrMM->second.end(); ++itrM)
         {
-            if (itrM->second.command == SCRIPT_COMMAND_TALK)
+            if (itrM->second->command == SCRIPT_COMMAND_TALK)
             {
-                for (int i : itrM->second.textId)
+                for (int i : itrM->second->textId)
                 {
                     if (i && !sObjectMgr.GetBroadcastText(i))
                         sLog.outErrorDb("Table `broadcast_text` is missing string id %u, used in database script table %s id %u.", i, scripts.first, itrMM->first);
                 }
 
-                if (itrM->second.talk.stringTemplateId)
+                if (itrM->second->talk.stringTemplateId)
                 {
-                    auto& vector = m_scriptTemplates[STRING_TEMPLATE][itrM->second.talk.stringTemplateId];
+                    auto& vector = m_scriptTemplates[STRING_TEMPLATE][itrM->second->talk.stringTemplateId];
                     for (auto& data : vector)
                     {
                         if (!sObjectMgr.GetBroadcastText(data.first))
-                            sLog.outErrorDb("Table `broadcast_text` is missing string id %d, used in database script template table dbscript_random_templates id %u.", data.first, itrM->second.talk.stringTemplateId);
+                            sLog.outErrorDb("Table `broadcast_text` is missing string id %d, used in database script template table dbscript_random_templates id %u.", data.first, itrM->second->talk.stringTemplateId);
                     }
                 }
             }
@@ -1534,6 +1551,12 @@ Player* ScriptAction::GetPlayerTargetOrSourceAndLog(WorldObject* pSource, WorldO
     }
 
     return pTarget && pTarget->GetTypeId() == TYPEID_PLAYER ? (Player*)pTarget : (Player*)pSource;
+}
+
+ScriptAction::ScriptAction(ScriptMapType scriptType, Map* _map, ObjectGuid _sourceGuid, ObjectGuid _targetGuid, ObjectGuid _ownerGuid, std::shared_ptr<ScriptInfo> _script)
+    : m_scriptType(scriptType), m_table(scriptTableNames[scriptType].data()), m_map(_map), m_sourceGuid(_sourceGuid), m_targetGuid(_targetGuid), m_ownerGuid(_ownerGuid), m_script(_script)
+{
+
 }
 
 /// Handle one Script Step
@@ -2750,7 +2773,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 chosenId = m_script->relayScript.relayId;
 
             if (chosenId)
-                m_map->ScriptsStart(sRelayScripts, chosenId, pSource, pTarget);
+                m_map->ScriptsStart(SCRIPT_TYPE_RELAY, chosenId, pSource, pTarget);
             break;
         }
         case SCRIPT_COMMAND_CAST_CUSTOM_SPELL:              // 46
@@ -3205,6 +3228,11 @@ void ScriptMgr::CollectPossibleEventIds(std::set<uint32>& eventIds)
     }
 }
 
+std::shared_ptr<ScriptMapMapName> ScriptMgr::GetScriptMap(ScriptMapType scriptMapType)
+{
+    return m_scriptMaps[scriptMapType];
+}
+
 // Starters for events
 bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool isStart/*=true*/)
 {
@@ -3243,5 +3271,5 @@ bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool
     else if (target && target->isType(TYPEMASK_CREATURE_OR_GAMEOBJECT))
         execParam = Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_TARGET;
 
-    return map->ScriptsStart(sEventScripts, id, source, target, execParam);
+    return map->ScriptsStart(SCRIPT_TYPE_EVENT, id, source, target, execParam);
 }

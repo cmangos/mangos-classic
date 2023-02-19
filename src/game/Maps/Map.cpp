@@ -48,9 +48,6 @@ Map::~Map()
 {
     UnloadAll(true);
 
-    if (!m_scriptSchedule.empty())
-        sScriptMgr.DecreaseScheduledScriptCount(m_scriptSchedule.size());
-
     if (m_persistentState)
         m_persistentState->SetUsedByMapState(nullptr);         // field pointer can be deleted after this
 
@@ -1912,13 +1909,14 @@ bool Map::CanEnter(Player* player)
 }
 
 /// Put scripts in the execution queue
-bool Map::ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* source, Object* target, ScriptExecutionParam execParams /*=SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE_TARGET*/)
+bool Map::ScriptsStart(ScriptMapType scriptType, uint32 id, Object* source, Object* target, ScriptExecutionParam execParams /*=SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE_TARGET*/)
 {
     MANGOS_ASSERT(source);
 
     ///- Find the script map
-    ScriptMapMap::const_iterator scriptInfoMapMapItr = scripts.second.find(id);
-    if (scriptInfoMapMapItr == scripts.second.end())
+    auto scriptMapMap = GetMapDataContainer().GetScriptMap(scriptType);
+    ScriptMapMap::const_iterator scriptInfoMapMapItr = scriptMapMap->second.find(id);
+    if (scriptInfoMapMapItr == scriptMapMap->second.end())
         return false;
 
     // prepare static data
@@ -1930,11 +1928,11 @@ bool Map::ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* sourc
     {
         for (ScriptScheduleMap::const_iterator searchItr = m_scriptSchedule.begin(); searchItr != m_scriptSchedule.end(); ++searchItr)
         {
-            if (searchItr->second.IsSameScript(scripts.first, id,
+            if (searchItr->second.IsSameScript(scriptMapMap->first, id,
                                                execParams & SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE ? sourceGuid : ObjectGuid(),
                                                execParams & SCRIPT_EXEC_PARAM_UNIQUE_BY_TARGET ? targetGuid : ObjectGuid(), ownerGuid))
             {
-                DETAIL_FILTER_LOG(LOG_FILTER_DB_SCRIPT, "DB-SCRIPTS: Process table `%s` id %u. Skip script as script already started for source %s, target %s - ScriptsStartParams %u", scripts.first, id, sourceGuid.GetString().c_str(), targetGuid.GetString().c_str(), execParams);
+                DETAIL_FILTER_LOG(LOG_FILTER_DB_SCRIPT, "DB-SCRIPTS: Process table `%s` id %u. Skip script as script already started for source %s, target %s - ScriptsStartParams %u", scriptMapMap->first, id, sourceGuid.GetString().c_str(), targetGuid.GetString().c_str(), execParams);
                 return true;
             }
         }
@@ -1948,11 +1946,11 @@ bool Map::ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* sourc
     while (scriptInfoItr != scriptMap.end())
     {
         auto const& scriptInfo = scriptInfoItr->second;
-        if (scriptInfo.delay > 0)
+        if (scriptInfo->delay > 0)
             break;
 
         // fire script with 0 delay directly
-        ScriptAction sa(scripts.first, this, sourceGuid, targetGuid, ownerGuid, &scriptInfo);
+        ScriptAction sa(scriptType, this, sourceGuid, targetGuid, ownerGuid, scriptInfo);
         if (sa.HandleScriptStep())
             return true;                    // script failed we should not continue further (command 31 or any error occured)
 
@@ -1963,9 +1961,8 @@ bool Map::ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* sourc
     for (; scriptInfoItr != scriptMap.end(); ++scriptInfoItr)
     {
         auto const& scriptInfo = scriptInfoItr->second;
-        ScriptAction sa(scripts.first, this, sourceGuid, targetGuid, ownerGuid, &scriptInfo);
+        ScriptAction sa(scriptType, this, sourceGuid, targetGuid, ownerGuid, scriptInfo);
         m_scriptSchedule.emplace(GetCurrentClockTime() + std::chrono::milliseconds(scriptInfoItr->first), sa);
-        sScriptMgr.IncreaseScheduledScriptsCount();
     }
 
     return true;
@@ -1980,12 +1977,11 @@ void Map::ScriptCommandStart(ScriptInfo const& script, uint32 delay, Object* sou
     ObjectGuid targetGuid = target ? target->GetObjectGuid() : ObjectGuid();
     ObjectGuid ownerGuid  = source->isType(TYPEMASK_ITEM) ? ((Item*)source)->GetOwnerGuid() : ObjectGuid();
 
-    ScriptAction sa("Internal Activate Command used for spell", this, sourceGuid, targetGuid, ownerGuid, &script);
+    ScriptAction sa(SCRIPT_TYPE_INTERNAL, this, sourceGuid, targetGuid, ownerGuid, std::make_shared<ScriptInfo>(script));
 
     if (delay)
     {
         m_scriptSchedule.emplace(GetCurrentClockTime() + std::chrono::milliseconds(delay), sa);
-        sScriptMgr.IncreaseScheduledScriptsCount();
     }
     else
         sa.HandleScriptStep();
@@ -2014,20 +2010,14 @@ void Map::ScriptsProcess()
             for (ScriptScheduleMap::iterator rmItr = m_scriptSchedule.begin(); rmItr != m_scriptSchedule.end();)
             {
                 if (rmItr->second.IsSameScript(tableName, id, sourceGuid, targetGuid, ownerGuid))
-                {
                     m_scriptSchedule.erase(rmItr++);
-                    sScriptMgr.DecreaseScheduledScriptCount();
-                }
                 else
                     ++rmItr;
             }
         }
         else
-        {
             m_scriptSchedule.erase(iter);
 
-            sScriptMgr.DecreaseScheduledScriptCount();
-        }
         iter = m_scriptSchedule.begin();
     }
 }

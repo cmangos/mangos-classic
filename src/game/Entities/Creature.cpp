@@ -1657,7 +1657,7 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
     AIM_Initialize();
 
     if (data && data->spawnTemplate->relayId)
-        GetMap()->ScriptsStart(sRelayScripts, data->spawnTemplate->relayId, this, nullptr);
+        GetMap()->ScriptsStart(SCRIPT_TYPE_RELAY, data->spawnTemplate->relayId, this, nullptr);
 
     // Creature Linking, Initial load is handled like respawn
     if (m_isCreatureLinkingTrigger && IsAlive())

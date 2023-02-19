@@ -20,9 +20,11 @@
 #define MAP_DATA_CONTAINER_H
 
 #include "Platform/Define.h"
+#include "DBScripts/ScriptMgrDefines.h"
 #include <memory>
 #include <vector>
 #include <unordered_map>
+#include <map>
 
 struct CreatureSpellListContainer;
 struct CreatureSpellList;
@@ -30,11 +32,17 @@ struct SpawnGroupEntry;
 struct SpawnGroupEntryContainer;
 struct CreatureEventAI_Event;
 struct CreatureEventAI_EventComputedData;
+struct ScriptInfo;
 
 // Event_Map
 typedef std::vector<CreatureEventAI_Event> CreatureEventAI_Event_Vec;
 typedef std::unordered_map<uint32, CreatureEventAI_Event_Vec> CreatureEventAI_Event_Map;
 typedef std::unordered_map<uint32, CreatureEventAI_EventComputedData> CreatureEventAI_EventComputedData_Map;
+
+// Scripts
+typedef std::multimap < uint32 /*delay*/, std::shared_ptr<ScriptInfo>> ScriptMap;
+typedef std::map < uint32 /*id*/, ScriptMap > ScriptMapMap;
+typedef std::pair<const char*, ScriptMapMap> ScriptMapMapName;
 
 class MapDataContainer
 {
@@ -50,6 +58,9 @@ class MapDataContainer
         std::shared_ptr<CreatureEventAI_Event_Map> GetCreatureEventEntryAIMap() const;
         std::shared_ptr<CreatureEventAI_Event_Map> GetCreatureEventGuidAIMap() const;
         std::shared_ptr<CreatureEventAI_EventComputedData_Map> GetEAIComputedDataMap() const;
+
+        void SetScriptMap(ScriptMapType scriptMapType, std::shared_ptr<ScriptMapMapName> scriptMap);
+        std::shared_ptr<ScriptMapMapName> GetScriptMap(ScriptMapType scriptMapType);
     private:
         std::shared_ptr<CreatureSpellListContainer> m_spellListContainer;
         std::shared_ptr<SpawnGroupEntryContainer> m_spawnGroupContainer;
@@ -57,6 +68,8 @@ class MapDataContainer
         std::shared_ptr<CreatureEventAI_Event_Map>  m_CreatureEventAIEventEntryMap;
         std::shared_ptr<CreatureEventAI_Event_Map>  m_CreatureEventAIEventGuidMap;
         std::shared_ptr<CreatureEventAI_EventComputedData_Map>  m_creatureEventAIComputedDataMap;
+
+        std::shared_ptr<ScriptMapMapName> m_scriptMaps[SCRIPT_TYPE_MAX];
 };
 
 #endif

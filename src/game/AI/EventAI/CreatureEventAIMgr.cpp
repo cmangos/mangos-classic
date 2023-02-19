@@ -953,7 +953,8 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     case ACTION_T_START_RELAY_SCRIPT:
                         if (action.relayScript.relayId > 0)
                         {
-                            if (sRelayScripts.second.find(action.relayScript.relayId) == sRelayScripts.second.end())
+                            auto relayScripts = sScriptMgr.GetScriptMap(SCRIPT_TYPE_RELAY);
+                            if (relayScripts->second.find(action.relayScript.relayId) == relayScripts->second.end())
                             {
                                 sLog.outErrorEventAI("Event %u Action %u references invalid dbscript_on_relay id %u", eventId, j + 1, action.relayScript.relayId);
                             }

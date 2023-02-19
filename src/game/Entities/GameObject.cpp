@@ -1390,7 +1390,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
 
     bool scriptReturnValue = user->GetTypeId() == TYPEID_PLAYER && sScriptDevAIMgr.OnGameObjectUse((Player*)user, this);
     if (!scriptReturnValue)
-        GetMap()->ScriptsStart(sGameObjectTemplateScripts, GetEntry(), spellCaster, this);
+        GetMap()->ScriptsStart(SCRIPT_TYPE_GAMEOBJECT_TEMPLATE, GetEntry(), spellCaster, this);
 
     if (AI())
         AI()->OnUse(user, spellInfo);
@@ -1406,7 +1406,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
 
             // activate script
             if (!scriptReturnValue)
-                GetMap()->ScriptsStart(sGameObjectScripts, GetDbGuid(), spellCaster, this);
+                GetMap()->ScriptsStart(SCRIPT_TYPE_GAMEOBJECT, GetDbGuid(), spellCaster, this);
             return;
         }
         case GAMEOBJECT_TYPE_BUTTON:                        // 1
@@ -1429,7 +1429,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
 
             // activate script
             if (!scriptReturnValue)
-                GetMap()->ScriptsStart(sGameObjectScripts, GetDbGuid(), spellCaster, this);
+                GetMap()->ScriptsStart(SCRIPT_TYPE_GAMEOBJECT, GetDbGuid(), spellCaster, this);
 
             return;
         }
@@ -1606,7 +1606,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
 
             // activate script
             if (!scriptReturnValue)
-                GetMap()->ScriptsStart(sGameObjectScripts, GetDbGuid(), spellCaster, this);
+                GetMap()->ScriptsStart(SCRIPT_TYPE_GAMEOBJECT, GetDbGuid(), spellCaster, this);
             else
                 return;
 
