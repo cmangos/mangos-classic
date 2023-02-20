@@ -30,6 +30,13 @@ set(EXECUTABLE_SRCS
 if(WIN32)
   # add resource file to windows build
   set(EXECUTABLE_SRCS ${EXECUTABLE_SRCS} realmd.rc)
+  if(MSVC)
+    set(EXECUTABLE_SRCS
+      ${EXECUTABLE_SRCS}
+      ${CMAKE_SOURCE_DIR}/src/shared/Platform/WheatyExceptionReport.cpp
+      ${CMAKE_SOURCE_DIR}/src/shared/Platform/WheatyExceptionReport.h
+     )
+  endif()
 endif()
 
 add_executable(${EXECUTABLE_NAME}

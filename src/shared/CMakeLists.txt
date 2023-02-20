@@ -111,13 +111,6 @@ set(SRC_GRP_PLATFORM
 
 # OS specific files
 if(WIN32)
-  if(MSVC)
-    set(SRC_GRP_PLATFORM
-      ${SRC_GRP_PLATFORM}
-      Platform/WheatyExceptionReport.cpp
-      Platform/WheatyExceptionReport.h
-     )
-  endif()
   set(SRC_GRP_PLATFORM
       ${SRC_GRP_PLATFORM}
       Platform/ServiceWin32.cpp

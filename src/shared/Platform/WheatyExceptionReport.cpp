@@ -4,7 +4,7 @@
 // FILE: WheatyExceptionReport.CPP
 //==========================================
 #include "WheatyExceptionReport.h"
-#include "Errors.h"
+#include "Util/Errors.h"
 #include "revision.h"
 #include <algorithm>
 
