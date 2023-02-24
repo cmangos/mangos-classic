@@ -28,7 +28,7 @@ bool Timer::UpdateTimer(const uint32 diff, bool combat)
     if (disabled)
         return false;
 
-    if (combatSetting != TIMER_ALWAYS && combatSetting != combat)
+    if (combatSetting != TIMER_ALWAYS && bool(combatSetting) != combat)
         return false;
 
     if (timer <= diff)
