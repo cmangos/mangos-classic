@@ -59,7 +59,7 @@ enum ScriptCommand                                          // resSource, resTar
     // datalong=spellid
     // datalong2=castFlags, enum TriggerCastFlags
     // dataint1-4 optional for random selected spell
-    SCRIPT_COMMAND_PLAY_SOUND               = 16,           // resSource = WorldObject, target=any/player, datalong (sound_id), datalong2 (bitmask: 0/1=target-player, 0/2=with distance dependent, 0/4=map wide, 0/8=zone wide; so 1|2 = 3 is target with distance dependent)
+    SCRIPT_COMMAND_PLAY_SOUND               = 16,           // resSource = WorldObject, target=any/player, datalong (sound_id), datalong2 (bitmask: 0/1=target-player, 0/2=with distance dependent, 0/4=map wide, 0/8=zone wide, 0/16=area wide; so 1|2 = 3 is target with distance dependent), 8+16 does not work together
     SCRIPT_COMMAND_CREATE_ITEM              = 17,           // source or target must be player, datalong = item entry, datalong2 = amount
     SCRIPT_COMMAND_DESPAWN_SELF             = 18,           // resSource = Creature, datalong = despawn delay
     SCRIPT_COMMAND_PLAY_MOVIE               = 19,           // target can only be a player, datalog = movie id
@@ -267,6 +267,7 @@ struct ScriptInfo
         {
             uint32 soundId;                                 // datalong
             uint32 flags;                                   // datalong2
+            uint32 playParameter;                           // datalong3
         } playSound;
 
         struct                                              // SCRIPT_COMMAND_CREATE_ITEM (17)
