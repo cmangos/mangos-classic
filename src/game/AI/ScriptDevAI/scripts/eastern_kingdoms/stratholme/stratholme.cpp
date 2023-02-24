@@ -64,7 +64,7 @@ void instance_stratholme::OnPlayerEnter(Player* player)
     else if (GetData(TYPE_BARON_RUN) == FAIL)
     {
         if (Creature* ysida = player->SummonCreature(NPC_YSIDA, stratholmeLocation[8].m_fX, stratholmeLocation[8].m_fY, stratholmeLocation[8].m_fZ, stratholmeLocation[8].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0))
-            ysida->SetDeadByDefault(true);
+            ysida->CastSpell(nullptr, 29266, TRIGGERED_OLD_TRIGGERED); // Guesswork - Feign Death
     }
 }
 

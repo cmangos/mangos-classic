@@ -140,7 +140,6 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_respawnTime(0), m_respawnDelay(25), m_respawnOverriden(false), m_respawnOverrideOnce(false), m_corpseDelay(60), m_canAggro(false),
     m_respawnradius(5.0f), m_interactionPauseTimer(0), m_subtype(subtype), m_defaultMovementType(IDLE_MOTION_TYPE),
     m_equipmentId(0), m_detectionRange(20.f), m_AlreadyCallAssistance(false), m_canCallForAssistance(true),
-    m_isDeadByDefault(false),
     m_temporaryFactionFlags(TEMPFACTION_NONE),
     m_originalEntry(0), m_ai(nullptr),
     m_isInvisible(false), m_ignoreMMAP(false), m_forceAttackingCapability(false), m_countSpawns(false), m_noWeaponSkillGain(false),
@@ -267,7 +266,7 @@ void Creature::RemoveCorpse(bool inPlace)
     if (!inPlace && !IsInWorld())
        return;
 
-    if ((GetDeathState() != CORPSE && !m_isDeadByDefault) || (GetDeathState() != ALIVE && m_isDeadByDefault))
+    if ((GetDeathState() != CORPSE))
         return;
 
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Removing corpse of %s ", GetGuidStr().c_str());
@@ -511,16 +510,12 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
         SelectLevel();
         if (data)
         {
-            uint32 curhealth = data->curhealth > 1 ? data->curhealth : GetMaxHealth();
-            if (data->spawnTemplate->curHealth > 0)
-                curhealth = data->spawnTemplate->curHealth;
+            uint32 curhealth = data->spawnTemplate->curHealth > 0 ? data->spawnTemplate->curHealth : GetMaxHealth();
             SetHealth(m_deathState == ALIVE ? curhealth : 0);
             if (GetPowerType() == POWER_MANA)
             {
                 uint32 curmana;
-                uint32 newPossibleData = data->curmana;
-                if (data->spawnTemplate->curMana > 0)
-                    newPossibleData = data->spawnTemplate->curMana;
+                uint32 newPossibleData = data->spawnTemplate->curMana;
                 if (IsRegeneratingPower()) // bypass so that 0 mana is possible TODO: change this to -1 in DB
                     curmana = newPossibleData ? newPossibleData : GetMaxPower(POWER_MANA);
                 else
@@ -640,8 +635,6 @@ uint32 Creature::ChooseDisplayId(const CreatureInfo* cinfo, const CreatureData* 
     {
         if (data->spawnTemplate->modelId)
             return data->spawnTemplate->modelId;
-        if (data->modelid_override)
-            return data->modelid_override;
     }
 
     // use defaults from the template
@@ -706,16 +699,7 @@ void Creature::Update(const uint32 diff)
                 RemoveAllAuras();
 
                 SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
-                if (m_isDeadByDefault)
-                {
-                    SetDeathState(JUST_DIED);
-                    SetHealth(0);
-                    i_motionMaster.Clear();
-                    clearUnitState(static_cast<uint32>(UNIT_STAT_ALL_STATE));
-                    LoadCreatureAddon(true);
-                }
-                else
-                    SetDeathState(JUST_ALIVED);
+                SetDeathState(JUST_ALIVED);
 
                 // Call AI respawn virtual function
                 if (AI())
@@ -745,23 +729,13 @@ void Creature::Update(const uint32 diff)
             if (m_loot)
                 m_loot->Update();
 
-            if (!m_isDeadByDefault)
-                if (IsCorpseExpired())
-                    RemoveCorpse();
+            if (IsCorpseExpired())
+                RemoveCorpse();
 
             break;
         }
         case ALIVE:
         {
-            if (m_isDeadByDefault)
-            {
-                if (IsCorpseExpired())
-                {
-                    RemoveCorpse();
-                    break;
-                }
-            }
-
             Unit::Update(diff);
 
             // creature can be dead after Unit::Update call
@@ -1206,7 +1180,11 @@ void Creature::SaveToDB(uint32 mapid)
     // data->guid = guid don't must be update at save
     data.id = GetEntry();
     data.mapid = mapid;
+<<<<<<< HEAD
     data.modelid_override = displayId;
+=======
+    data.spawnMask = spawnMask;
+>>>>>>> 4191dd9b2d ([s2462] Creature: Drop redundant creature table columns)
     data.equipmentId = GetEquipmentId();
     data.posX = GetPositionX();
     data.posY = GetPositionY();
@@ -1216,10 +1194,6 @@ void Creature::SaveToDB(uint32 mapid)
     data.spawntimesecsmax = m_respawnDelay;
     // prevent add data integrity problems
     data.spawndist = GetDefaultMovementType() == IDLE_MOTION_TYPE ? 0 : m_respawnradius;
-    data.currentwaypoint = 0;
-    data.curhealth = 0;
-    data.curmana = 0;
-    data.is_dead = m_isDeadByDefault;
     // prevent add data integrity problems
     data.movementType = !m_respawnradius && GetDefaultMovementType() == RANDOM_MOTION_TYPE
                         ? IDLE_MOTION_TYPE : GetDefaultMovementType();
@@ -1236,8 +1210,12 @@ void Creature::SaveToDB(uint32 mapid)
        << GetGUIDLow() << ","
        << data.id << ","
        << data.mapid << ","
+<<<<<<< HEAD
        << static_cast<uint32>(data.spawnMask) << ","
        << data.modelid_override << ","
+=======
+       << static_cast<uint32>(data.spawnMask) << ","       // cast to prevent save as symbol
+>>>>>>> 4191dd9b2d ([s2462] Creature: Drop redundant creature table columns)
        << data.equipmentId << ","
        << data.posX << ","
        << data.posY << ","
@@ -1246,10 +1224,6 @@ void Creature::SaveToDB(uint32 mapid)
        << data.spawntimesecsmin << ","                     // respawn time minimum
        << data.spawntimesecsmax << ","                     // respawn time maximum
        << static_cast<float>(data.spawndist) << ","        // spawn distance (float)
-       << data.currentwaypoint << ","                      // currentwaypoint
-       << data.curhealth << ","                            // curhealth
-       << data.curmana << ","                              // curmana
-       << (data.is_dead  ? 1 : 0) << ","                   // is_dead
        << static_cast<uint32>(data.movementType) << ")";   // default movement generator type, cast to prevent save as symbol
 
     WorldDatabase.PExecuteLog("%s", ss.str().c_str());
@@ -1611,8 +1585,7 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
     m_respawnDelay = data->GetRandomRespawnTime();
     if (!IsUsingNewSpawningSystem())
         m_corpseDelay = std::min(m_respawnDelay * 9 / 10, m_corpseDelay); // set corpse delay to 90% of the respawn delay
-    m_isDeadByDefault = data->is_dead;
-    m_deathState = m_isDeadByDefault ? DEAD : ALIVE;
+    m_deathState = ALIVE;
 
     m_respawnTime  = map->GetPersistentState()->GetCreatureRespawnTime(dbGuid);
 
@@ -1780,7 +1753,7 @@ void Creature::DeleteFromDB(uint32 lowguid, CreatureData const* data)
 
 void Creature::SetDeathState(DeathState s)
 {
-    if ((s == JUST_DIED && !m_isDeadByDefault) || (s == JUST_ALIVED && m_isDeadByDefault))
+    if (s == JUST_DIED)
     {
         if (!m_respawnOverriden)
         {
@@ -2037,7 +2010,7 @@ bool Creature::IsVisibleInGridForPlayer(Player* pl) const
     // Live player (or with not release body see live creatures or death creatures with corpse disappearing time > 0
     if (pl->IsAlive() || !pl->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
     {
-        return (IsAlive() || !IsCorpseExpired() || (m_isDeadByDefault && m_deathState == CORPSE));
+        return (IsAlive() || !IsCorpseExpired());
     }
 
     // Dead player see live creatures near own corpse

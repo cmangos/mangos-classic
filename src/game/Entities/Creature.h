@@ -238,7 +238,6 @@ struct CreatureData
 {
     uint32 id;                                              // entry in creature_template
     uint16 mapid;
-    uint32 modelid_override;                                // overrides any model defined in creature_template
     int32 equipmentId;
     float posX;
     float posY;
@@ -247,10 +246,6 @@ struct CreatureData
     uint32 spawntimesecsmin;
     uint32 spawntimesecsmax;
     float spawndist;
-    uint32 currentwaypoint;
-    uint32 curhealth;
-    uint32 curmana;
-    bool  is_dead;
     uint8 movementType;
     uint8 spawnMask;
     int16 gameEvent;
@@ -742,7 +737,6 @@ class Creature : public Unit
         bool IsVisibleInGridForPlayer(Player* pl) const override;
 
         void RemoveCorpse(bool inPlace = false);
-        bool IsDeadByDefault() const { return m_isDeadByDefault; };
 
         virtual void ForcedDespawn(uint32 timeMSToDespawn = 0, bool onlyAlive = false);
 
@@ -793,8 +787,6 @@ class Creature : public Unit
         void GetRespawnCoord(float& x, float& y, float& z, float* ori = nullptr, float* dist = nullptr) const;
         Position const& GetRespawnPosition() const { return m_respawnPos; }
         void ResetRespawnCoord();
-
-        void SetDeadByDefault(bool death_state) { m_isDeadByDefault = death_state; }
 
         void SetFactionTemporary(uint32 factionId, uint32 tempFactionFlags = TEMPFACTION_ALL);
         void ClearTemporaryFaction();
@@ -926,7 +918,6 @@ class Creature : public Unit
         // below fields has potential for optimization
         bool m_AlreadyCallAssistance;
         bool m_canCallForAssistance;
-        bool m_isDeadByDefault;
         uint32 m_temporaryFactionFlags;                     // used for real faction changes (not auras etc)
 
         uint32 m_originalEntry;
