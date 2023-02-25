@@ -944,7 +944,7 @@ CREATE TABLE `creature_spawn_data_template` (
   `UnitFlags` bigint NOT NULL DEFAULT '-1',
   `Faction` int unsigned NOT NULL DEFAULT '0',
   `ModelId` mediumint unsigned NOT NULL DEFAULT '0',
-  `EquipmentId` mediumint NOT NULL DEFAULT '0',
+  `EquipmentId` mediumint NOT NULL DEFAULT '-1',
   `CurHealth` int unsigned NOT NULL DEFAULT '0',
   `CurMana` int unsigned NOT NULL DEFAULT '0',
   `SpawnFlags` int unsigned NOT NULL DEFAULT '0',
