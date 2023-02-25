@@ -43,6 +43,12 @@
 
 #include <cassert>
 
+namespace
+{
+    // Minimum falling distance required to launch a FallMovement generator.
+    constexpr float g_moveFallMinFallDistance = 0.5f;
+}
+
 inline bool isStatic(MovementGenerator* mv)
 {
     return (mv == &si_idleMovement);
@@ -580,7 +586,7 @@ bool MotionMaster::MoveFall(ObjectGuid guid/* = ObjectGuid()*/, uint32 relayId/*
     }
 
     // Abort too if the ground is very near
-    if (fabs(z - tz) < MOVE_FALL_MIN_FALL_DISTANCE)
+    if (fabs(z - tz) < g_moveFallMinFallDistance)
         return false;
 
     Movement::MoveSplineInit init(*m_owner);
