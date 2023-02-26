@@ -76,6 +76,12 @@ void CheckDbscript(WaypointNode& node, uint32 entry, uint32 point, std::set<uint
                 sLog.outErrorDb("Table %s entry %u point %u has no delay but changes movegen. Adding delay to point.", tablename.data(), entry, point);
                 break;
             }
+            else if (scriptInfo.command == SCRIPT_COMMAND_SET_RUN)
+            {
+                delay = true;
+                sLog.outErrorDb("Table %s entry %u point %u has no delay but changes run state. Adding delay to point.", tablename.data(), entry, point);
+                break;
+            }
             else if (scriptInfo.command == SCRIPT_COMMAND_START_RELAY_SCRIPT)
             {
                 auto iter = relayScripts->second.find(scriptInfo.relayScript.relayId);
