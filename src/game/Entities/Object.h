@@ -1177,6 +1177,7 @@ class WorldObject : public Object
 
         void AddStringId(std::string& stringId);
         void RemoveStringId(std::string& stringId);
+        bool HasStringId(uint32 stringId);
 
     protected:
         explicit WorldObject();

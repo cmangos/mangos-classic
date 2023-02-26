@@ -1006,9 +1006,9 @@ void ObjectMgr::LoadSpawnGroups()
             entry.Flags = fields[5].GetUInt32();
             entry.StringId = fields[6].GetUInt32();
 
-            if (!sScriptMgr.ExistsStringId(entry.StringId))
+            if (entry.StringId && !sScriptMgr.ExistsStringId(entry.StringId))
             {
-                sLog.outErrorDb("Table spawn_group entry %u stringId %u does not exist. Setting to 0.", entry, entry.StringId);
+                sLog.outErrorDb("Table spawn_group entry %u stringId %u does not exist. Setting to 0.", entry.Id, entry.StringId);
                 entry.StringId = 0;
             }
 
@@ -1559,7 +1559,7 @@ void ObjectMgr::LoadCreatureSpawnDataTemplates()
         uint32 relayId = fields[9].GetUInt32();
         uint32 stringId = fields[10].GetUInt32();
 
-        if (!sScriptMgr.ExistsStringId(stringId))
+        if (stringId && !sScriptMgr.ExistsStringId(stringId))
         {
             stringId = 0;
             sLog.outErrorDb("Table creature_spawn_data_template entry %u stringId %u does not exist. Setting to 0.", entry, stringId);
@@ -1993,7 +1993,7 @@ void ObjectMgr::LoadGameObjects()
     sLog.outString(">> Loaded " SIZEFMTD " gameobjects", mGameObjectDataMap.size());
     sLog.outString();
 
-    result.reset(WorldDatabase.PQuery("SELECT guid, animprogress, state FROM gameobject_addon"));
+    result.reset(WorldDatabase.PQuery("SELECT guid, animprogress, state, stringId FROM gameobject_addon"));
     do
     {
         Field* fields = result->Fetch();
@@ -2014,7 +2014,7 @@ void ObjectMgr::LoadGameObjects()
             continue;
         }
 
-        if (!sScriptMgr.ExistsStringId(stringId))
+        if (stringId && !sScriptMgr.ExistsStringId(stringId))
         {
             stringId = 0;
             sLog.outErrorDb("Table gameobject_addon guid %u stringId %u does not exist. Setting to 0.", guid, stringId);

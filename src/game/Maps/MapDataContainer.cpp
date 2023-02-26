@@ -24,7 +24,8 @@
 
 MapDataContainer::MapDataContainer() : m_spellListContainer(sObjectMgr.GetCreatureSpellListContainer()),
     m_spawnGroupContainer(sObjectMgr.GetSpawnGroupContainer()), m_CreatureEventAIEventEntryMap(sEventAIMgr.GetCreatureEventEntryAIMap()),
-    m_CreatureEventAIEventGuidMap(sEventAIMgr.GetCreatureEventGuidAIMap()), m_creatureEventAIComputedDataMap(sEventAIMgr.GetEAIComputedDataMap())
+    m_CreatureEventAIEventGuidMap(sEventAIMgr.GetCreatureEventGuidAIMap()), m_creatureEventAIComputedDataMap(sEventAIMgr.GetEAIComputedDataMap()),
+    m_stringIds(sScriptMgr.GetStringIdMap()), m_stringIdsByString(sScriptMgr.GetStringIdByStringMap())
 {
     for (uint32 i = 0; i < SCRIPT_TYPE_MAX; ++i)
         SetScriptMap(ScriptMapType(i), sScriptMgr.GetScriptMap(ScriptMapType(i)));

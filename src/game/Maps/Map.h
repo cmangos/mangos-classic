@@ -258,9 +258,9 @@ class Map : public GridRefManager<NGridType>
         // dbguid methods
         Creature* GetCreature(uint32 dbguid) const;
         GameObject* GetGameObject(uint32 dbguid) const;
-        std::vector<WorldObject*> const* GetWorldObjects(std::string& stringId) const;
-        std::vector<Creature*> const* GetCreatures(std::string& stringId) const;
-        std::vector<GameObject*> const* GetGameObjects(std::string& stringId) const;
+        std::vector<WorldObject*> const* GetWorldObjects(std::string stringId) const;
+        std::vector<Creature*> const* GetCreatures(std::string stringId) const;
+        std::vector<GameObject*> const* GetGameObjects(std::string stringId) const;
         std::vector<WorldObject*> const* GetWorldObjects(uint32 stringId) const;
         std::vector<Creature*> const* GetCreatures(uint32 stringId) const;
         std::vector<GameObject*> const* GetGameObjects(uint32 stringId) const;

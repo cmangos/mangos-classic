@@ -157,8 +157,9 @@ enum ScriptInfoDataFlags
     SCRIPT_FLAG_BUDDY_BY_SPAWN_GROUP        = 0x100,        // buddy is from spawn group
     SCRIPT_FLAG_ALL_ELIGIBLE_BUDDIES        = 0x200,        // multisource/multitarget - will execute for each eligible
     SCRIPT_FLAG_BUDDY_BY_GO                 = 0x400,        // take the buddy by GO (for commands which can target both creature and GO)
+    SCRIPT_FLAG_BUDDY_BY_STRING_ID          = 0x800,        // takes buddy from string id - creature or go
 };
-#define MAX_SCRIPT_FLAG_VALID               (2 * SCRIPT_FLAG_BUDDY_BY_GO - 1)
+#define MAX_SCRIPT_FLAG_VALID               (2 * SCRIPT_FLAG_BUDDY_BY_STRING_ID - 1)
 
 struct ScriptInfo
 {
@@ -675,6 +676,8 @@ class ScriptMgr
         std::shared_ptr<ScriptMapMapName> GetScriptMap(ScriptMapType scriptMapType);
 
         bool ExistsStringId(uint32 stringId);
+        std::shared_ptr<StringIdMap> GetStringIdMap() { return m_stringIds; }
+        std::shared_ptr<StringIdMapByString> GetStringIdByStringMap() { return m_stringIdsByString; }
     private:
         void LoadScripts(ScriptMapType scriptType);
         void CheckScriptTexts(ScriptMapType scriptType);

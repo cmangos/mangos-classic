@@ -165,7 +165,7 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
         }
 
         // generic command args check
-        if (tmp.buddyEntry && !(tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_GUID))
+        if (tmp.buddyEntry && !(tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_GUID) && (tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_STRING_ID) == 0)
         {
             if (tmp.IsCreatureBuddy() && !ObjectMgr::GetCreatureTemplate(tmp.buddyEntry))
             {
@@ -208,7 +208,7 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
                     CreatureData const* data = sObjectMgr.GetCreatureData(tmp.searchRadiusOrGuid);
                     if (!data)
                     {
-                        sLog.outErrorDb("Table `%s` has buddy defined by guid (SCRIPT_FLAG_BUDDY_BY_GUID %u set) but no npc spawned with guid %u, skipping.", tablename, SCRIPT_FLAG_BUDDY_BY_GUID,  tmp.searchRadiusOrGuid);
+                        sLog.outErrorDb("Table `%s` for script id %u has buddy defined by guid (SCRIPT_FLAG_BUDDY_BY_GUID %u set) but no npc spawned with guid %u, skipping.", tablename, tmp.id, SCRIPT_FLAG_BUDDY_BY_GUID,  tmp.searchRadiusOrGuid);
                         continue;
                     }
                 }
@@ -217,7 +217,7 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
                     GameObjectData const* data = sObjectMgr.GetGOData(tmp.searchRadiusOrGuid);
                     if (!data)
                     {
-                        sLog.outErrorDb("Table `%s` has go-buddy defined by guid (SCRIPT_FLAG_BUDDY_BY_GUID %u set) but no go spawned with guid %u, skipping.", tablename, SCRIPT_FLAG_BUDDY_BY_GUID,  tmp.searchRadiusOrGuid);
+                        sLog.outErrorDb("Table `%s` for script id %u has go-buddy defined by guid (SCRIPT_FLAG_BUDDY_BY_GUID %u set) but no go spawned with guid %u, skipping.", tablename, tmp.id, SCRIPT_FLAG_BUDDY_BY_GUID,  tmp.searchRadiusOrGuid);
                         continue;
                     }
                 }
@@ -229,7 +229,7 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
                     auto pool = sPoolMgr.GetPoolCreatures(tmp.searchRadiusOrGuid);
                     if (pool.isEmpty())
                     {
-                        sLog.outErrorDb("Table `%s` has go-buddy defined by pool (SCRIPT_FLAG_BUDDY_BY_POOL %u set) but pool %u is empty, skipping.", tablename, tmp.data_flags, tmp.searchRadiusOrGuid);
+                        sLog.outErrorDb("Table `%s` for script id %u has go-buddy defined by pool (SCRIPT_FLAG_BUDDY_BY_POOL %u set) but pool %u is empty, skipping.", tablename, tmp.id, tmp.data_flags, tmp.searchRadiusOrGuid);
                         continue;
                     }
                 }
@@ -238,7 +238,7 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
                     auto pool = sPoolMgr.GetPoolGameObjects(tmp.searchRadiusOrGuid);
                     if (pool.isEmpty())
                     {
-                        sLog.outErrorDb("Table `%s` has go-buddy defined by pool (SCRIPT_FLAG_BUDDY_BY_POOL %u set) but pool %u is empty, skipping.", tablename, tmp.data_flags, tmp.searchRadiusOrGuid);
+                        sLog.outErrorDb("Table `%s` for script id %u has go-buddy defined by pool (SCRIPT_FLAG_BUDDY_BY_POOL %u set) but pool %u is empty, skipping.", tablename, tmp.id, tmp.data_flags, tmp.searchRadiusOrGuid);
                         continue;
                     }
                 }
@@ -248,7 +248,16 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
                 uint32 groupEntry = tmp.searchRadiusOrGuid;
                 if (sObjectMgr.GetSpawnGroupContainer()->spawnGroupMap.find(groupEntry) == sObjectMgr.GetSpawnGroupContainer()->spawnGroupMap.end())
                 {
-                    sLog.outErrorDb("Table `%s` has go-buddy defined by group (SCRIPT_FLAG_BUDDY_BY_SPAWN_GROUP %u set) but group %u is empty, skipping.", tablename, tmp.data_flags, tmp.searchRadiusOrGuid);
+                    sLog.outErrorDb("Table `%s` for script id %u has go-buddy defined by group (SCRIPT_FLAG_BUDDY_BY_SPAWN_GROUP %u set) but group %u is empty, skipping.", tablename, tmp.id, tmp.data_flags, tmp.searchRadiusOrGuid);
+                    continue;
+                }
+            }
+            else if (tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_STRING_ID)
+            {
+                uint32 stringId = tmp.buddyEntry;
+                if (stringId && !sScriptMgr.ExistsStringId(stringId))
+                {
+                    sLog.outErrorDb("Table `%s` has buddy defined by stringId (SCRIPT_FLAG_BUDDY_BY_STRING_ID) but stringId does not exist, skipping.", tablename, tmp.id, stringId);
                     continue;
                 }
             }
@@ -1440,6 +1449,37 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* originalSource, WorldObj
                 if ((m_script->data_flags & SCRIPT_FLAG_ALL_ELIGIBLE_BUDDIES) == 0 && closest)
                     buddies.push_back(closest);
             }
+        }
+        else if (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_STRING_ID)
+        {
+            WorldObject* origin = originalSource ? originalSource : originalTarget;
+            if (origin->GetTypeId() == TYPEID_PLAYER && originalSource && originalSource->GetTypeId() != TYPEID_PLAYER)
+                origin = originalTarget;
+            auto worldObjects = m_map->GetWorldObjects(m_script->buddyEntry);
+            if (worldObjects == nullptr)
+                return false;
+            if ((m_script->data_flags & SCRIPT_FLAG_ALL_ELIGIBLE_BUDDIES) != 0)
+            {
+                for (WorldObject* wo : *worldObjects)
+                    buddies.push_back(wo);
+            }
+            else
+            {
+                WorldObject* closest = nullptr;
+                for (WorldObject* wo : *worldObjects)
+                {
+                    if (!closest)
+                        closest = wo;
+                    else if (origin->GetDistance(wo, true, DIST_CALC_NONE) < origin->GetDistance(closest, true, DIST_CALC_NONE))
+                        closest = wo;
+                }
+                if (closest)
+                    buddies.push_back(closest);
+            }
+            if (m_script->searchRadiusOrGuid > 0)
+                for (WorldObject* buddy : buddies)
+                    if (buddy->IsWithinDist(origin, m_script->searchRadiusOrGuid))
+                        buddies.erase(std::remove(buddies.begin(), buddies.end(), buddy), buddies.end());
         }
         else                                                // Buddy by entry
         {

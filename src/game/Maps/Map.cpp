@@ -2198,17 +2198,17 @@ GameObject* Map::GetGameObject(uint32 dbguid) const
     return static_cast<GameObject*>((*itr).second.front());
 }
 
-std::vector<WorldObject*> const* Map::GetWorldObjects(std::string& stringId) const
+std::vector<WorldObject*> const* Map::GetWorldObjects(std::string stringId) const
 {
     return GetWorldObjects(GetMapDataContainer().GetStringId(stringId));
 }
 
-std::vector<Creature*> const* Map::GetCreatures(std::string& stringId) const
+std::vector<Creature*> const* Map::GetCreatures(std::string stringId) const
 {
     return GetCreatures(GetMapDataContainer().GetStringId(stringId));
 }
 
-std::vector<GameObject*> const* Map::GetGameObjects(std::string& stringId) const
+std::vector<GameObject*> const* Map::GetGameObjects(std::string stringId) const
 {
     return GetGameObjects(GetMapDataContainer().GetStringId(stringId));
 }
