@@ -170,7 +170,7 @@ void Warden::SendModuleToClient()
 
 std::vector<std::shared_ptr<const Scan>> Warden::SelectScans(ScanFlags flags) const
 {
-    return std::move(sWardenScanMgr.GetRandomScans(static_cast<ScanFlags>(flags | GetScanFlags())));
+    return sWardenScanMgr.GetRandomScans(static_cast<ScanFlags>(flags | GetScanFlags()));
 }
 
 void Warden::EnqueueScans(std::vector<std::shared_ptr<const Scan>> &&scans)
@@ -207,7 +207,7 @@ void Warden::RequestScans(std::vector<std::shared_ptr<const Scan>> &&scans)
         if (request + (*i)->requestSize > MaxRequest || reply + (*i)->replySize > MaxReply ||
             _pendingScans.size() >= sAnticheatConfig.GetWardenScanCount())
         {
-            _enqueuedScans = std::move(std::vector<std::shared_ptr<const Scan>>(i, _enqueuedScans.end()));
+            _enqueuedScans = std::vector<std::shared_ptr<const Scan>>(i, _enqueuedScans.end());
             queueUpdated = true;
             break;
         }

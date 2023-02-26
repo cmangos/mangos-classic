@@ -292,5 +292,5 @@ std::vector<std::shared_ptr<const Scan>> WardenScanMgr::GetRandomScans(ScanFlags
         reply += scan->replySize;
     }
 
-    return std::move(matches);
+    return matches;
 }

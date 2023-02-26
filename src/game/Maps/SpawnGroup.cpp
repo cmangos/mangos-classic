@@ -1184,7 +1184,7 @@ FormationSlotDataSPtr FormationData::SetFormationSlot(Creature* creature, SpawnG
     if (auto currentSlot = creature->GetFormationSlot())
     {
         // no more work to do
-        return std::move(currentSlot);
+        return currentSlot;
     }
 
     // add it in the corresponding slot
