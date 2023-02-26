@@ -402,10 +402,10 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
     }
     else if (data)
     {
-        // override, -1 means no equipment
-        if (data->spawnTemplate->equipmentId != 0)
+        // override, 0 means no equipment
+        if (data->spawnTemplate->equipmentId != -1)
         {
-            if (data->spawnTemplate->equipmentId != -1)
+            if (data->spawnTemplate->equipmentId != 0)
                 LoadEquipment(data->spawnTemplate->equipmentId);
         }
         else if (data->equipmentId != -1)
