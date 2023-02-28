@@ -395,7 +395,7 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
         else if (eventData->entry_id)
             LoadEquipment(cinfo->EquipmentTemplateId, true);     // use changed entry default template
     }
-    else if (!data || (data->equipmentId == 0 && data->spawnTemplate->equipmentId == 0))
+    else if (!data || (data->equipmentId == 0 && data->spawnTemplate->equipmentId == -1))
     {
         // use default from the template
         LoadEquipment(cinfo->EquipmentTemplateId, true);
