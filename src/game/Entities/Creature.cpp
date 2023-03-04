@@ -1180,11 +1180,7 @@ void Creature::SaveToDB(uint32 mapid)
     // data->guid = guid don't must be update at save
     data.id = GetEntry();
     data.mapid = mapid;
-<<<<<<< HEAD
-    data.modelid_override = displayId;
-=======
-    data.spawnMask = spawnMask;
->>>>>>> 4191dd9b2d ([s2462] Creature: Drop redundant creature table columns)
+    data.spawnMask = 1;
     data.equipmentId = GetEquipmentId();
     data.posX = GetPositionX();
     data.posY = GetPositionY();
@@ -1198,7 +1194,6 @@ void Creature::SaveToDB(uint32 mapid)
     data.movementType = !m_respawnradius && GetDefaultMovementType() == RANDOM_MOTION_TYPE
                         ? IDLE_MOTION_TYPE : GetDefaultMovementType();
     data.spawnTemplate = sObjectMgr.GetCreatureSpawnTemplate(0);
-    data.spawnMask = 1;
 
     // updated in DB
     WorldDatabase.BeginTransaction();
@@ -1210,12 +1205,7 @@ void Creature::SaveToDB(uint32 mapid)
        << GetGUIDLow() << ","
        << data.id << ","
        << data.mapid << ","
-<<<<<<< HEAD
-       << static_cast<uint32>(data.spawnMask) << ","
-       << data.modelid_override << ","
-=======
        << static_cast<uint32>(data.spawnMask) << ","       // cast to prevent save as symbol
->>>>>>> 4191dd9b2d ([s2462] Creature: Drop redundant creature table columns)
        << data.equipmentId << ","
        << data.posX << ","
        << data.posY << ","
