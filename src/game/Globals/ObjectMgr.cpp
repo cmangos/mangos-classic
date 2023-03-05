@@ -1527,7 +1527,7 @@ void ObjectMgr::LoadCreatureSpawnDataTemplates()
 {
     m_creatureSpawnTemplateMap.clear();
 
-    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Entry, NpcFlags, UnitFlags, Faction, ModelId, EquipmentId, CurHealth, CurMana, SpawnFlags, RelayId FROM creature_spawn_data_template"));
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Entry, NpcFlags, UnitFlags, Faction, ModelId, EquipmentId, CurHealth, CurMana, SpawnFlags, RelayId, StringId, Name FROM creature_spawn_data_template"));
     if (!result)
     {
         BarGoLink bar(1);
@@ -1547,17 +1547,21 @@ void ObjectMgr::LoadCreatureSpawnDataTemplates()
 
         Field* fields = result->Fetch();
 
-        uint32 entry =      fields[0].GetUInt32();
-        int32 npcFlags =    int32(fields[1].GetUInt32());
-        int64 unitFlags =   int64(fields[2].GetUInt64());
-        uint32 faction =    fields[3].GetUInt32();
-        uint32 modelId =    fields[4].GetUInt32();
-        int32 equipmentId = fields[5].GetInt32();
-        uint32 curHealth =  fields[6].GetUInt32();
-        uint32 curMana =    fields[7].GetUInt32();
-        uint32 spawnFlags = fields[8].GetUInt32();
-        uint32 relayId = fields[9].GetUInt32();
-        uint32 stringId = fields[10].GetUInt32();
+        uint32 entry        = fields[0].GetUInt32();
+        int32 npcFlags      = int32(fields[1].GetUInt32());
+        int64 unitFlags     = int64(fields[2].GetUInt64());
+        uint32 faction      = fields[3].GetUInt32();
+        uint32 modelId      = fields[4].GetUInt32();
+        int32 equipmentId   = fields[5].GetInt32();
+        uint32 curHealth    = fields[6].GetUInt32();
+        uint32 curMana      = fields[7].GetUInt32();
+        uint32 spawnFlags   = fields[8].GetUInt32();
+        uint32 relayId      = fields[9].GetUInt32();
+        uint32 stringId     = fields[10].GetUInt32();
+        std::string name    = fields[11].GetCppString();
+
+        if (name.empty())
+            sLog.outErrorDb("Table creature_spawn_data_template for entry %u has empty name", entry);
 
         if (stringId && !sScriptMgr.ExistsStringId(stringId))
         {
