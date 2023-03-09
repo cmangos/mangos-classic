@@ -518,10 +518,11 @@ struct npc_cork_gizeltonAI : public npc_escortAI
                     m_creature->GetMotionMaster()->MoveWaypoint(WAYPOINT_PATH_ID, PATH_FROM_WAYPOINT_PATH);
                     m_creature->GetMotionMaster()->SetNextWaypoint(WAYPOINT_PATH_POINT_AFTER_ESCORT_1);
                     m_creature->SetWalk(false);
-                    End(); // normal movement resumes - caravan doesnt despawn - it loops through zone
-                    break;
-                    // The second escort quest is also handled by NPC Cork though it is given by NPC Rigger
+                    End(); // normal movement resumes - caravan doesnt despawn - it loops through zone                    
+                   
                 }
+                break;
+                // The second escort quest is also handled by NPC Cork though it is given by NPC Rigger
             case 21:
                 if (SouthQuest)
                 {
@@ -536,9 +537,9 @@ struct npc_cork_gizeltonAI : public npc_escortAI
                     m_creature->GetMotionMaster()->SetNextWaypoint(WAYPOINT_PATH_POINT_AFTER_ESCORT_2);
                     m_creature->SetWalk(false);
                     End(); // normal movement resumes - caravan doesnt despawn - it loops through zone
-                    SouthQuest = false;
-                    break;                
+                    SouthQuest = false;                                    
                 }
+                break;
         }
     }
 
