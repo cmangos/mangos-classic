@@ -247,7 +247,10 @@ struct npc_captured_arkonarinAI : public npc_escortAI
                     DoBroadcastText(SAY_ESCORT_START, m_creature, pPlayer);
                     m_creature->HandleEmote(EMOTE_ONESHOT_TALK);
                 }
-                break;           
+                break;    
+            case 37:
+                m_bCanAttack = true;
+                break;
             case 83:
                 SetEscortPaused(true);
                 break;
