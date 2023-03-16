@@ -2137,7 +2137,7 @@ GameObject* WorldObject::SpawnGameObject(uint32 dbGuid, Map* map, uint32 forcedE
         return nullptr;
 
     GameObject* gameobject = GameObject::CreateGameObject(forcedEntry ? forcedEntry : data->id);
-    if (!gameobject->LoadFromDB(dbGuid, map, map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), forcedEntry))
+    if (!gameobject->LoadFromDB(dbGuid, map, 0, forcedEntry))
     {
         delete gameobject;
         return nullptr;
@@ -2156,19 +2156,12 @@ Creature* WorldObject::SpawnCreature(uint32 dbGuid, Map* map, uint32 forcedEntry
 
     uint32 entry = forcedEntry ? forcedEntry : data->id;
 
-    CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(entry);
-    if (!cinfo)
-    {
-        sLog.outErrorDb("Creature (Entry: %u) not found in table `creature_template`, can't load. ", entry);
-        return nullptr;
-    }
-
     if (data->spawnMask && !map->CanSpawn(TYPEID_UNIT, dbGuid))
         return nullptr;
 
     Creature* creature = new Creature;
     // DEBUG_LOG("Spawning creature %u",*itr);
-    if (!creature->LoadFromDB(dbGuid, map, map->GenerateLocalLowGuid(cinfo->GetHighGuid()), forcedEntry))
+    if (!creature->LoadFromDB(dbGuid, map, 0, forcedEntry))
     {
         delete creature;
         return nullptr;

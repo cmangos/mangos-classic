@@ -886,7 +886,7 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forc
             dynguid = true;
     }
 
-    if (dynguid)
+    if (dynguid || newGuid == 0)
         newGuid = map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT);
 
     if (uint32 randomEntry = sObjectMgr.GetRandomGameObjectEntry(dbGuid))
