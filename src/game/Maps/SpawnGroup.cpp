@@ -122,9 +122,9 @@ void SpawnGroup::Spawn(bool force)
     // duplicated code for optimization - way fewer cond fails
     if ((m_entry.Flags & SPAWN_GROUP_DESPAWN_ON_COND_FAIL) != 0) // must be before count check
     {
-        if (!IsWorldstateConditionSatisfied())
+        if (!m_objects.empty() && !IsWorldstateConditionSatisfied())
         {
-            Despawn();
+            Despawn(0, 1); // respawn delay 1 to immediately be available for spawn on next condition success
             return;
         }
     }
@@ -399,7 +399,7 @@ void CreatureGroup::TriggerLinkingEvent(uint32 event, Unit* target)
             if (FormationData* formation = GetFormationData())
                 if (!IsEvading()) // on last evade complete
                     formation->OnHome();
-
+            [[fallthrough]];
         case CREATURE_GROUP_EVENT_RESPAWN:
             if ((m_entry.Flags & CREATURE_GROUP_RESPAWN_TOGETHER) == 0)
                 return;
@@ -451,11 +451,17 @@ void CreatureGroup::MoveHome()
     }
 }
 
-void CreatureGroup::Despawn(uint32 timeMSToDespawn, bool onlyAlive)
+void CreatureGroup::Despawn(uint32 timeMSToDespawn, bool onlyAlive, uint32 forcedDespawnTime)
 {
     for (SpawnGroupDbGuids const& sgEntry : m_entry.DbGuids)
+    {
         if (Creature* creature = m_map.GetCreature(sgEntry.DbGuid))
+        {
+            if (forcedDespawnTime)
+                creature->SetRespawnDelay(forcedDespawnTime, true);
             creature->ForcedDespawn(timeMSToDespawn, onlyAlive);
+        }
+    }
 }
 
 bool CreatureGroup::IsOutOfCombat()
@@ -508,11 +514,17 @@ void GameObjectGroup::RemoveObject(WorldObject* wo)
     m_map.GetPersistentState()->RemoveGameobjectFromGrid(wo->GetDbGuid(), data);
 }
 
-void GameObjectGroup::Despawn(uint32 timeMSToDespawn /*= 0*/)
+void GameObjectGroup::Despawn(uint32 timeMSToDespawn /*= 0*/, uint32 forcedDespawnTime /*= 0*/)
 {
     for (auto objItr : m_objects)
+    {
         if (GameObject* go = m_map.GetGameObject(objItr.first))
+        {
+            if (forcedDespawnTime)
+                go->SetRespawnDelay(forcedDespawnTime, true);
             go->ForcedDespawn(timeMSToDespawn);
+        }
+    }
 }
 
 ////////////////////

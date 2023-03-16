@@ -47,7 +47,7 @@ class SpawnGroup
         virtual void Update();
         uint32 GetEligibleEntry(std::map<uint32, uint32>& existingEntries, std::map<uint32, uint32>& minEntries);
         virtual void Spawn(bool force);
-        virtual void Despawn(uint32 timeMSToDespawn = 0) = 0;
+        virtual void Despawn(uint32 timeMSToDespawn = 0, uint32 forcedDespawnTime = 0) = 0;
         std::string to_string() const;
         uint32 GetObjectTypeId() const { return m_objectTypeId; }
         void SetEnabled(bool enabled) { m_enabled = enabled; }
@@ -89,8 +89,8 @@ class CreatureGroup : public SpawnGroup
 
         void MoveHome();
 
-        void Despawn(uint32 timeMSToDespawn = 0) override { Despawn(timeMSToDespawn, true); };
-        void Despawn(uint32 timeMSToDespawn, bool onlyAlive);
+        void Despawn(uint32 timeMSToDespawn = 0, uint32 forcedDespawnTime = 0) override { Despawn(timeMSToDespawn, true, forcedDespawnTime); };
+        void Despawn(uint32 timeMSToDespawn, bool onlyAlive, uint32 forcedDespawnTime);
 
         bool IsOutOfCombat();
         bool IsEvading();
@@ -111,7 +111,7 @@ class GameObjectGroup : public SpawnGroup
         GameObjectGroup(SpawnGroupEntry const& entry, Map& map);
         void RemoveObject(WorldObject* wo) override;
 
-        void Despawn(uint32 timeMSToDespawn = 0) override;
+        void Despawn(uint32 timeMSToDespawn = 0, uint32 forcedDespawnTime = 0) override;
 };
 
 class FormationSlotData
