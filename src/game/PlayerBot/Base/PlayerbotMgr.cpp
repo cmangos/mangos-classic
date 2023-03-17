@@ -357,13 +357,20 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                     // auto accept every available quest this NPC has
                     bot->PrepareQuestMenu(objGUID);
                     QuestMenu& questMenu = bot->GetPlayerMenu()->GetQuestMenu();
-                    for (uint32 iI = 0; iI < questMenu.MenuItemCount(); ++iI)
-                    {
-                        QuestMenuItem const& qItem = questMenu.GetItem(iI);
-                        uint32 questID = qItem.m_qId;
-                        if (!bot->GetPlayerbotAI()->AddQuest(questID, obj))
-                            DEBUG_LOG("Couldn't take quest");
-                    }
+					if (questMenu.MenuItemCount() == 0)
+					{
+						obj->Use(bot);
+					}
+					else
+					{
+						for (uint32 iI = 0; iI < questMenu.MenuItemCount(); ++iI)
+						{
+							QuestMenuItem const& qItem = questMenu.GetItem(iI);
+							uint32 questID = qItem.m_qId;
+							if (!bot->GetPlayerbotAI()->AddQuest(questID, obj))
+								DEBUG_LOG("Couldn't take quest");
+						}
+					}
                 }
             }
         }
@@ -663,7 +670,67 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             }
             return;
         }
+		case CMSG_GOSSIP_SELECT_OPTION:
+		{
+			WorldPacket p(packet);
+			p.rpos(0);  // reset reader
+			uint32 gossipListId;
+			ObjectGuid guid;
+			std::string code;
 
+			p >> guid >> gossipListId;
+
+			
+			for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+			{
+				Player* const bot = it->second;
+
+
+				sLog.outError("Trying to take gossip option for: %s", bot->GetName());
+
+				//DOING STUFF
+				if (bot->GetPlayerMenu()->GossipOptionCoded(gossipListId))
+				{
+					//recv_data >> code;
+					sLog.outError("Gossip code: %s", code.c_str());
+					DEBUG_LOG("Gossip code: %s", code.c_str());
+				}
+
+				uint32 sender = bot->GetPlayerMenu()->GossipOptionSender(gossipListId);
+				uint32 action = bot->GetPlayerMenu()->GossipOptionAction(gossipListId);
+
+				if (guid.IsAnyTypeCreature())
+				{
+					Creature* pCreature = bot->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
+
+					if (!pCreature)
+					{
+						DEBUG_LOG("WORLD: HandleGossipSelectOptionOpcode - %s not found or you can't interact with it.", guid.GetString().c_str());
+						return;
+					}
+
+					if (!sScriptDevAIMgr.OnGossipSelect(bot, pCreature, sender, action, code.empty() ? nullptr : code.c_str()))
+						bot->OnGossipSelect(pCreature, gossipListId);
+				}
+				else if (guid.IsGameObject())
+				{
+					GameObject* pGo = bot->GetGameObjectIfCanInteractWith(guid);
+
+					if (!pGo)
+					{
+						DEBUG_LOG("WORLD: HandleGossipSelectOptionOpcode - %s not found or you can't interact with it.", guid.GetString().c_str());
+						return;
+					}
+
+					if (!sScriptDevAIMgr.OnGossipSelect(bot, pGo, sender, action, code.empty() ? nullptr : code.c_str()))
+						bot->OnGossipSelect(pGo, gossipListId);
+				}
+
+				//END DOING STUFF
+			}
+
+			return;
+		}
         /*
         case CMSG_NAME_QUERY:
         case MSG_MOVE_START_FORWARD:
@@ -780,7 +847,57 @@ void PlayerbotMgr::HandleMasterOutgoingPacket(const WorldPacket& packet)
                 }
                 break;
             }
-            // maybe our bots should only start looting after the master loots?
+			case SMSG_GOSSIP_MESSAGE:
+			{
+				DEBUG_LOG("PlayerbotMgr: CMSG_GAMEOBJ_USE");
+
+				WorldPacket p(packet);
+				p.rpos(0);     // reset reader
+				ObjectGuid objGUID;
+				p >> objGUID;
+
+				for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+				{
+					Player* const bot = it->second;
+
+					// If player and bot are on different maps: then player was teleported by GameObject
+					// let's return and let playerbot summon do its job by teleporting bots
+					Map* masterMap = m_master->IsInWorld() ? m_master->GetMap() : nullptr;
+					if (!masterMap || bot->GetMap() != masterMap || m_master->IsBeingTeleported())
+						return;
+
+					GameObject* obj = masterMap->GetGameObject(objGUID);
+					if (!obj)
+						return;
+
+					// add other go types here, i.e.:
+					// GAMEOBJECT_TYPE_CHEST - loot quest items of chest
+					if (obj->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER)
+					{
+						bot->GetPlayerbotAI()->TurnInQuests(obj);
+
+						// auto accept every available quest this NPC has
+						bot->PrepareQuestMenu(objGUID);
+						QuestMenu& questMenu = bot->GetPlayerMenu()->GetQuestMenu();
+						if (questMenu.MenuItemCount() == 0)
+						{
+							obj->Use(bot);
+						}
+						else
+						{
+							for (uint32 iI = 0; iI < questMenu.MenuItemCount(); ++iI)
+							{
+								QuestMenuItem const& qItem = questMenu.GetItem(iI);
+								uint32 questID = qItem.m_qId;
+								if (!bot->GetPlayerbotAI()->AddQuest(questID, obj))
+									DEBUG_LOG("Couldn't take quest");
+							}
+						}
+					}
+				}
+			}
+			break;
+			// maybe our bots should only start looting after the master loots?
             //case SMSG_LOOT_RELEASE_RESPONSE: {}
             case SMSG_NAME_QUERY_RESPONSE:
             case SMSG_MONSTER_MOVE:
