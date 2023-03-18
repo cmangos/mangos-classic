@@ -49,7 +49,7 @@ void WorldSession::HandleAttackSwingOpcode(WorldPacket& recv_data)
     if (!mover->CanAttackNow(enemy))
     {
         // stop attack state at client
-        mover->SendMeleeAttackStop(nullptr);
+        mover->SendMeleeAttackStop(*enemy);
         return;
     }
 

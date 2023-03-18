@@ -1293,8 +1293,8 @@ class Unit : public WorldObject
         bool HasBreakableByDamageCrowdControlAura(Unit* excludeCasterChannel = nullptr, uint32 excludeAuraApplyMSTimeCutoff = 0) const;
         bool HasBreakableByDamageAuraType(AuraType type, uint32 excludeAura, uint32 excludeAuraApplyMSTimeCutoff) const;
         bool HasAuraPetShouldAvoidBreaking(Unit* excludeCasterChannel = nullptr, uint32 excludeAuraApplyMSTimeCutoff = 0) const;
-        void SendMeleeAttackStop(Unit* victim) const;
-        void SendMeleeAttackStart(Unit* pVictim) const;
+        void SendMeleeAttackStop(const Unit& victim) const;
+        void SendMeleeAttackStart(const Unit& victim) const;
 
         void addUnitState(uint32 f) { m_state |= f; }
         bool hasUnitState(uint32 f) const { return (m_state & f) != 0; }
