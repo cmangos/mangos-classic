@@ -1069,7 +1069,7 @@ class ObjectMgr
 
         void AddVendorItem(uint32 entry, uint32 item, uint32 maxcount, uint32 incrtime);
         bool RemoveVendorItem(uint32 entry, uint32 item);
-        bool IsVendorItemValid(bool isTemplate, char const* tableName, uint32 vendor_entry, uint32 item_id, uint32 maxcount, uint32 incrtime, uint16 conditionId, Player* pl = nullptr, std::set<uint32>* skip_vendors = nullptr) const;
+        bool IsVendorItemValid(bool isTemplate, char const* tableName, uint32 vendor_entry, uint32 item_id, uint32 maxcount, uint32 incrtime, uint16 conditionId, Player* pl = nullptr) const;
 
         ItemRequiredTargetMapBounds GetItemRequiredTargetMapBounds(uint32 uiItemEntry) const
         {
