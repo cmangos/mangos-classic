@@ -1772,8 +1772,7 @@ Item* PlayerbotAI::FindMount(uint32 matchingRidingSkill) const
             const SpellEntry* const spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
             if (spellInfo)
             {
-                Spell* spell = new Spell(m_bot, spellInfo, false);
-                if (spell && spell->CheckCast(false) != SPELL_CAST_OK)
+                if (Spell(m_bot, spellInfo, false).CheckCast(false) != SPELL_CAST_OK)
                     continue;
             }
 
@@ -1812,8 +1811,7 @@ Item* PlayerbotAI::FindMount(uint32 matchingRidingSkill) const
                     const SpellEntry* const spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
                     if (spellInfo)
                     {
-                        Spell* spell = new Spell(m_bot, spellInfo, false);
-                        if (spell && spell->CheckCast(false) != SPELL_CAST_OK)
+                        if (Spell(m_bot, spellInfo, false).CheckCast(false) != SPELL_CAST_OK)
                             continue;
                     }
 
@@ -4183,24 +4181,20 @@ SpellCastResult PlayerbotAI::CheckBotCast(const SpellEntry* sInfo)
         return SPELL_FAILED_ERROR;
 
     // check DoLoot() spells before casting
-    Spell* tmp_spell = new Spell(m_bot, sInfo, false);
-    if (tmp_spell)
-    {
-        if (m_lootCurrent.IsCreature())
-        {
-            if (Creature* obj = m_bot->GetMap()->GetCreature(m_lootCurrent))
-                tmp_spell->m_targets.setUnitTarget(obj);
-        }
-        else if (m_lootCurrent.IsGameObject())
-        {
-            if (GameObject* obj = m_bot->GetMap()->GetGameObject(m_lootCurrent))
-                tmp_spell->m_targets.setGOTarget(obj);
-        }
+    Spell tmp_spell(m_bot, sInfo, false);
 
-        // DEBUG_LOG("CheckBotCast SpellCastResult(%u)",res);
-        return tmp_spell->CheckCast(false);
+    if (m_lootCurrent.IsCreature())
+    {
+        if (Creature* obj = m_bot->GetMap()->GetCreature(m_lootCurrent))
+            tmp_spell.m_targets.setUnitTarget(obj);
     }
-    return SPELL_FAILED_ERROR;
+    else if (m_lootCurrent.IsGameObject())
+    {
+        if (GameObject* obj = m_bot->GetMap()->GetGameObject(m_lootCurrent))
+           tmp_spell.m_targets.setGOTarget(obj);
+    }
+
+    return tmp_spell.CheckCast(false);
 }
 
 SpellCastResult PlayerbotAI::CastSpell(const char* args)
@@ -4243,8 +4237,7 @@ SpellCastResult PlayerbotAI::CastSpell(uint32 spellId)
 
     // Power check
     // We use Spell::CheckPower() instead of UnitAI::CanCastSpell() because bots are players and have more requirements than mere units
-    Spell* tmp_spell = new Spell(m_bot, pSpellInfo, false);
-    SpellCastResult res = tmp_spell->CheckPower(true);
+    SpellCastResult res = Spell(m_bot, pSpellInfo, false).CheckPower(true); //Find out if it really should be strict
     if (res != SPELL_CAST_OK)
         return res;
 
