@@ -453,15 +453,25 @@ void CreatureGroup::MoveHome()
 
 void CreatureGroup::Despawn(uint32 timeMSToDespawn, bool onlyAlive, uint32 forcedDespawnTime)
 {
-    for (SpawnGroupDbGuids const& sgEntry : m_entry.DbGuids)
+    time_t when = time(nullptr) + forcedDespawnTime;
+    for (auto objItr : m_objects)
     {
-        if (Creature* creature = m_map.GetCreature(sgEntry.DbGuid))
+        uint32 dbGuid = objItr.first;
+        if (Creature* creature = m_map.GetCreature(dbGuid))
         {
             if (forcedDespawnTime)
                 creature->SetRespawnDelay(forcedDespawnTime, true);
             creature->ForcedDespawn(timeMSToDespawn, onlyAlive);
         }
+        else if (timeMSToDespawn == 0)
+        {
+            CreatureData const* data = sObjectMgr.GetCreatureData(dbGuid);
+            m_map.GetPersistentState()->RemoveCreatureFromGrid(dbGuid, data);
+            m_map.GetPersistentState()->SaveObjectRespawnTime(GetObjectTypeId(), dbGuid, when);
+        }
     }
+    if (timeMSToDespawn == 0) // only when instant - clears grid unloaded cases
+        m_objects.clear();
 }
 
 bool CreatureGroup::IsOutOfCombat()
@@ -516,15 +526,25 @@ void GameObjectGroup::RemoveObject(WorldObject* wo)
 
 void GameObjectGroup::Despawn(uint32 timeMSToDespawn /*= 0*/, uint32 forcedDespawnTime /*= 0*/)
 {
+    time_t when = time(nullptr) + forcedDespawnTime;
     for (auto objItr : m_objects)
     {
-        if (GameObject* go = m_map.GetGameObject(objItr.first))
+        uint32 dbGuid = objItr.first;
+        if (GameObject* go = m_map.GetGameObject(dbGuid))
         {
             if (forcedDespawnTime)
                 go->SetRespawnDelay(forcedDespawnTime, true);
             go->ForcedDespawn(timeMSToDespawn);
         }
+        else if (timeMSToDespawn == 0)
+        {
+            CreatureData const* data = sObjectMgr.GetCreatureData(dbGuid);
+            m_map.GetPersistentState()->RemoveCreatureFromGrid(dbGuid, data);
+            m_map.GetPersistentState()->SaveObjectRespawnTime(GetObjectTypeId(), dbGuid, when);
+        }
     }
+    if (timeMSToDespawn == 0) // only when instant - clears grid unloaded cases
+        m_objects.clear();
 }
 
 ////////////////////
