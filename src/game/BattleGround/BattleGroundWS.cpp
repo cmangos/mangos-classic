@@ -171,7 +171,7 @@ void BattleGroundWS::ProcessPlayerFlagScoreEvent(Player* player)
     ClearFlagCarrier(otherTeamIdx); // must be before aura remove to prevent 2 events (drop+capture) at the same time
 
     // Horde flag in base (but not respawned yet)
-    GetBgMap()->GetVariableManager().SetVariable(wsFlagPickedUp[teamIdx], BG_WS_FLAG_STATE_ON_BASE);
+    GetBgMap()->GetVariableManager().SetVariable(wsFlagPickedUp[otherTeamIdx], BG_WS_FLAG_STATE_ON_BASE);
     m_flagOnRespawn[otherTeamIdx] = true;
 
     // Drop Horde Flag from Player
@@ -243,7 +243,7 @@ void BattleGroundWS::HandlePlayerDroppedFlag(Player* player)
         GetBgMap()->GetVariableManager().SetVariable(wsFlagPickedUp[otherTeamIdx], BG_WS_FLAG_STATE_ON_GROUND);
         player->CastSpell(player, wsgFlagData[otherTeamIdx][BG_WS_FLAG_ACTION_DROPPED].spellId, TRIGGERED_OLD_TRIGGERED);
 
-        GetBgMap()->GetVariableManager().SetVariable(wsFlagHUDPickedUp[teamIdx], BG_WS_FLAG_ICON_INVISIBLE);
+        GetBgMap()->GetVariableManager().SetVariable(wsFlagHUDPickedUp[otherTeamIdx], BG_WS_FLAG_ICON_INVISIBLE);
 
         SendMessageToAll(wsgFlagData[otherTeamIdx][BG_WS_FLAG_ACTION_DROPPED].messageId, wsgFlagData[otherTeamIdx][BG_WS_FLAG_ACTION_DROPPED].chatType, player);
 
@@ -293,8 +293,8 @@ void BattleGroundWS::ProcessDroppedFlagActions(Player* player, GameObject* targe
 
         actionId = BG_WS_FLAG_ACTION_RETURNED;
 
-        GetBgMap()->GetVariableManager().SetVariable(wsFlagPickedUp[otherTeamIdx], BG_WS_FLAG_STATE_ON_BASE);
-        GetBgMap()->GetVariableManager().SetVariable(wsFlagHUDPickedUp[otherTeamIdx], BG_WS_FLAG_ICON_INVISIBLE);
+        GetBgMap()->GetVariableManager().SetVariable(wsFlagPickedUp[teamIdx], BG_WS_FLAG_STATE_ON_BASE);
+        GetBgMap()->GetVariableManager().SetVariable(wsFlagHUDPickedUp[teamIdx], BG_WS_FLAG_ICON_INVISIBLE);
 
         RespawnFlagAtBase(team, false);
         UpdatePlayerScore(player, SCORE_FLAG_RETURNS, 1);
