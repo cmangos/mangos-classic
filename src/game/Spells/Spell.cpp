@@ -2816,6 +2816,8 @@ SpellCastResult Spell::CheckScriptTargeting(SpellEffectIndex effIndex, uint32 ch
             // not report target not existence for triggered spells
             return foundButOutOfRange ? SPELL_FAILED_OUT_OF_RANGE : SPELL_FAILED_BAD_TARGETS;
         }
+        else if (foundButOutOfRange)
+            return SPELL_FAILED_OUT_OF_RANGE;
     }
     return SPELL_CAST_OK;
 }

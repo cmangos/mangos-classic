@@ -652,22 +652,27 @@ namespace MaNGOS
     class AllGameObjectEntriesListInObjectRangeCheck
     {
         public:
-            AllGameObjectEntriesListInObjectRangeCheck(WorldObject const& obj, std::set<uint32>& entries, float range, bool is3D = true) : i_obj(obj), i_entries(entries), i_range(range), i_is3D(is3D) {}
+            AllGameObjectEntriesListInObjectRangeCheck(WorldObject const& obj, std::set<uint32>& entries, float range, bool is3D = true) : i_obj(obj), i_entries(entries), i_range(range), i_is3D(is3D), i_foundOutOfRange(false) {}
             WorldObject const& GetFocusObject() const { return i_obj; }
             bool operator()(GameObject* go)
             {
-                if (go->IsSpawned() && i_entries.find(go->GetEntry()) != i_entries.end() && i_obj.IsWithinDistInMap(go, i_range, i_is3D))
-                    return true;
-
+                if (i_entries.find(go->GetEntry()) != i_entries.end())
+                {
+                    if (i_obj.IsWithinDistInMap(go, i_range, i_is3D))
+                        return true;
+                    i_foundOutOfRange = true;
+                }
                 return false;
             }
 
             std::vector<uint32> i_ranges;
+            bool FoundOutOfRange() const { return i_foundOutOfRange; }
         private:
             WorldObject const& i_obj;
             std::set<uint32>& i_entries;
             float  i_range;
             bool   i_is3D;
+            bool   i_foundOutOfRange;
 
             // prevent clone this object
             AllGameObjectEntriesListInObjectRangeCheck(AllGameObjectEntriesListInObjectRangeCheck const&);
