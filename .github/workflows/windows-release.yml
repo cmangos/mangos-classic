@@ -88,13 +88,13 @@ jobs:
 
       - name: Archive files
         run: |
-          cd bin
+          cd ${{env.BUILD_DIR}}/bin
           7z a -tzip ${{env.ARCHIVE_FILENAME}} "x64_${{env.BUILD_TYPE}}"
       - name: Archive this artefact
         uses: actions/upload-artifact@v2
         with:
           name: snapshot-${{matrix.TYPE}}
-          path: "bin/${{env.ARCHIVE_FILENAME}}"
+          path: "${{env.BUILD_DIR}}/bin/${{env.ARCHIVE_FILENAME}}"
 
   upload:
     runs-on: windows-2022
