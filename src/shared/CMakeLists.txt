@@ -104,6 +104,8 @@ set(SRC_GRP_NETWORK
 )
 
 set(SRC_GRP_PLATFORM
+    Platform/CompilerDefs.h
+    Platform/Define.h
     Platform/Filesystem.h
 )
 
@@ -132,6 +134,7 @@ endif()
 set(SRC_GRP_UTIL
     Util/ByteBuffer.cpp
     Util/ByteBuffer.h
+    Util/ByteConverter.h
     Util/Errors.h
     Util/ProgressBar.cpp
     Util/ProgressBar.h

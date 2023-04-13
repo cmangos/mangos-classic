@@ -426,6 +426,7 @@ Unit::Unit() :
     m_comboPoints = 0;
 
     m_aoeImmune = false;
+    m_chainImmune = false;
 }
 
 Unit::~Unit()
@@ -1347,7 +1348,7 @@ void Unit::JustKilledCreature(Unit* killer, Creature* victim, Player* responsibl
         outdoorPvP->HandleCreatureDeath(victim);
 
     // Start creature death script
-    victim->GetMap()->ScriptsStart(sCreatureDeathScripts, victim->GetEntry(), victim, responsiblePlayer ? responsiblePlayer : killer);
+    victim->GetMap()->ScriptsStart(SCRIPT_TYPE_CREATURE_DEATH, victim->GetEntry(), victim, responsiblePlayer ? responsiblePlayer : killer);
 
     if (victim->IsLinkingEventTrigger())
         victim->GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_DIE, victim);
@@ -7929,7 +7930,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         CreatureDataAddon const* cainfo = creature->GetCreatureAddon();
         if (cainfo)
         {
-            if (getStandState() == cainfo->bytes1)
+            if (getStandState() == cainfo->standState)
                 SetStandState(UNIT_STAND_STATE_STAND);
             if (cainfo->emote && GetUInt32Value(UNIT_NPC_EMOTESTATE) == cainfo->emote)
                 HandleEmoteState(0);
@@ -9348,6 +9349,11 @@ void Unit::RemoveFromWorld()
         BreakCharmOutgoing();
         BreakCharmIncoming();
         RemoveGuardians(IsPlayer() || IsCreature() && static_cast<Creature*>(this)->IsTotem());
+        // Remove non-guardian pet
+        if (Pet* pet = GetPet())
+        {
+            pet->Unsummon(PET_SAVE_AS_DELETED, this);
+        }
         RemoveMiniPet();
         RemoveAllGameObjects();
         RemoveAllDynObjects();
@@ -11496,8 +11502,7 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
         }
     }
 
-    Creature* charmedCreature = nullptr;
-    CharmInfo* charmInfo = charmed->GetCharmInfo();
+    const Position charmStartPosition = charmed->GetCharmInfo()->GetCharmStartPosition();
 
     // if charm expires mid evade clear evade since movement is also cleared
     // TODO: maybe should be done on HomeMovementGenerator::MovementExpires
@@ -11506,7 +11511,7 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
     if (charmed->GetTypeId() == TYPEID_UNIT)
     {
         // now we have to clean threat list to be able to restore normal creature behavior
-        charmedCreature = static_cast<Creature*>(charmed);
+        Creature* charmedCreature = static_cast<Creature*>(charmed);
         if (!charmedCreature->IsPet())
         {
             charmedCreature->ClearTemporaryFaction();
@@ -11515,7 +11520,7 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
             charmed->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
             charmed->InterruptSpell(CURRENT_MELEE_SPELL);
 
-            charmInfo->ResetCharmState();
+            charmed->GetCharmInfo()->ResetCharmState();
             charmed->DeleteCharmInfo();
 
             charmed->RemoveUnattackableTargets();
@@ -11529,7 +11534,7 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
             if (Unit* owner = charmedCreature->GetOwner())
                 charmed->setFaction(owner->GetFaction());
 
-            charmInfo->ResetCharmState();
+            charmed->GetCharmInfo()->ResetCharmState();
 
             // as possessed is a pet we have to restore original charminfo so Pet::DeleteCharmInfo will take care of that
             charmed->DeleteCharmInfo();
@@ -11548,7 +11553,7 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
         else
             charmedPlayer->setFactionForRace(charmedPlayer->getRace());
 
-        charmInfo->ResetCharmState();
+        charmed->GetCharmInfo()->ResetCharmState();
         charmedPlayer->DeleteCharmInfo();
 
         charmedPlayer->ForceHealAndPowerUpdateInZone();
@@ -11585,9 +11590,8 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
 
             if (charmed->GetTypeId() == TYPEID_UNIT)
             {
-                Position const& pos = charmInfo->GetCharmStartPosition();
-                if (!pos.IsEmpty())
-                    static_cast<Creature*>(charmed)->SetCombatStartPosition(pos);
+                if (!charmStartPosition.IsEmpty())
+                    static_cast<Creature*>(charmed)->SetCombatStartPosition(charmStartPosition);
             }
         }
     }
@@ -11755,6 +11759,16 @@ void Unit::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap /*=null
     {
         float groundZ = atMap->GetHeight(x, y, z);
         if (z < groundZ)
+            z = groundZ;
+    }
+}
+
+void Unit::AdjustZForCollision(float x, float y, float& z, float halfHeight) const
+{
+    if (CanFly())
+    {
+        float groundZ = GetMap()->GetHeight(x, y, z);
+        if (z - halfHeight < groundZ)
             z = groundZ;
     }
 }

@@ -1383,7 +1383,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             if (gold > 0)
             {
                 WorldPacket* const packet = new WorldPacket(CMSG_LOOT_MONEY, 0);
-                m_bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(packet)));
+                m_bot->GetSession()->QueuePacket(std::unique_ptr<WorldPacket>(packet));
             }
 
             for (uint8 i = 0; i < items; ++i)
@@ -1427,7 +1427,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
                     WorldPacket* const packet = new WorldPacket(CMSG_AUTOSTORE_LOOT_ITEM, 1);
                     *packet << itemindex;
-                    m_bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(packet)));
+                    m_bot->GetSession()->QueuePacket(std::unique_ptr<WorldPacket>(packet));
                 }
                 else
                 {
@@ -1443,7 +1443,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             m_lootCurrent = ObjectGuid();
             WorldPacket* const packet = new WorldPacket(CMSG_LOOT_RELEASE, 8);
             *packet << guid;
-            m_bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(packet)));
+            m_bot->GetSession()->QueuePacket(std::unique_ptr<WorldPacket>(packet));
 
             return;
         }
@@ -1644,10 +1644,10 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 {
                     // simulate client canceling trade before worldport
                     WorldPacket* const pt1 = new WorldPacket(CMSG_CANCEL_TRADE);
-                    m_bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(pt1)));
+                    m_bot->GetSession()->QueuePacket(std::unique_ptr<WorldPacket>(pt1));
 
                     WorldPacket* const p = new WorldPacket(MSG_MOVE_WORLDPORT_ACK);
-                    m_bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(p)));
+                    m_bot->GetSession()->QueuePacket(std::unique_ptr<WorldPacket>(p));
                     SetState(BOTSTATE_NORMAL);
                 }
                 return;
@@ -4161,7 +4161,7 @@ void PlayerbotAI::SendWhisper(const std::string& text, Player& player) const
     *packet << uint32(LANG_UNIVERSAL);
     *packet << player.GetName();
     *packet << text;
-    m_bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(packet))); // queue the packet to get around race condition
+    m_bot->GetSession()->QueuePacket(std::unique_ptr<WorldPacket>(packet)); // queue the packet to get around race condition
 }
 
 bool PlayerbotAI::canObeyCommandFrom(const Player& player) const

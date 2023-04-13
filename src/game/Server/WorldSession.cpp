@@ -1241,7 +1241,7 @@ void WorldSession::SendKickReason(uint8 reason, std::string const& string) const
 
 void WorldSession::InitializeAnticheat(const BigNumber& K)
 {
-    m_anticheat = std::move(sAnticheatLib->NewSession(this, K));
+    m_anticheat = sAnticheatLib->NewSession(this, K);
 }
 
 void WorldSession::AssignAnticheat()

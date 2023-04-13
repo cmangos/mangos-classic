@@ -124,7 +124,7 @@ void PointMovementGenerator::MovementInform(Unit& unit)
     }
 
     if (m_relayId)
-        unit.GetMap()->ScriptsStart(sRelayScripts, m_relayId, &unit, m_guid ? unit.GetMap()->GetWorldObject(m_guid) : nullptr);
+        unit.GetMap()->ScriptsStart(SCRIPT_TYPE_RELAY, m_relayId, &unit, m_guid ? unit.GetMap()->GetWorldObject(m_guid) : nullptr);
 }
 
 void RetreatMovementGenerator::Initialize(Unit& unit)

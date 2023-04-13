@@ -20,11 +20,14 @@
 #include "Globals/ObjectMgr.h"
 #include "AI/EventAI/CreatureEventAI.h"
 #include "AI/EventAI/CreatureEventAIMgr.h"
+#include "DBScripts/ScriptMgr.h"
 
 MapDataContainer::MapDataContainer() : m_spellListContainer(sObjectMgr.GetCreatureSpellListContainer()),
     m_spawnGroupContainer(sObjectMgr.GetSpawnGroupContainer()), m_CreatureEventAIEventEntryMap(sEventAIMgr.GetCreatureEventEntryAIMap()),
     m_CreatureEventAIEventGuidMap(sEventAIMgr.GetCreatureEventGuidAIMap()), m_creatureEventAIComputedDataMap(sEventAIMgr.GetEAIComputedDataMap())
 {
+    for (uint32 i = 0; i < SCRIPT_TYPE_MAX; ++i)
+        SetScriptMap(ScriptMapType(i), sScriptMgr.GetScriptMap(ScriptMapType(i)));
 }
 
 void MapDataContainer::SetCreatureSpellListContainer(std::shared_ptr<CreatureSpellListContainer> container)
@@ -84,4 +87,14 @@ std::shared_ptr<CreatureEventAI_Event_Map> MapDataContainer::GetCreatureEventGui
 std::shared_ptr<CreatureEventAI_EventComputedData_Map> MapDataContainer::GetEAIComputedDataMap() const
 {
     return m_creatureEventAIComputedDataMap;
+}
+
+void MapDataContainer::SetScriptMap(ScriptMapType scriptMapType, std::shared_ptr<ScriptMapMapName> scriptMap)
+{
+    m_scriptMaps[scriptMapType] = scriptMap;
+}
+
+std::shared_ptr<ScriptMapMapName> MapDataContainer::GetScriptMap(ScriptMapType scriptMapType)
+{
+    return m_scriptMaps[scriptMapType];
 }

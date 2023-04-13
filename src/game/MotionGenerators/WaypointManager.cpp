@@ -46,8 +46,10 @@ char const* waypointKeyColumn[] =
 
 void CheckDbscript(WaypointNode& node, uint32 entry, uint32 point, std::set<uint32>& movementScriptSet, std::string const& tablename)
 {
-    auto iter = sCreatureMovementScripts.second.find(node.script_id);
-    if (iter == sCreatureMovementScripts.second.end())
+    auto creatureMovementScripts = sScriptMgr.GetScriptMap(SCRIPT_TYPE_CREATURE_MOVEMENT);
+    auto relayScripts = sScriptMgr.GetScriptMap(SCRIPT_TYPE_RELAY);
+    auto iter = creatureMovementScripts->second.find(node.script_id);
+    if (iter == creatureMovementScripts->second.end())
     {
         sLog.outErrorDb("Table %s for entry %u, point %u have script_id %u that does not exist in `dbscripts_on_creature_movement`, ignoring", tablename.data(), entry, point, node.script_id);
         return;
@@ -58,47 +60,54 @@ void CheckDbscript(WaypointNode& node, uint32 entry, uint32 point, std::set<uint
         bool delay = false;
         for (auto& item : data.second)
         {
-            if (item.second.delay != 0)
+            ScriptInfo const& scriptInfo = *item.second.get();
+            if (scriptInfo.delay != 0)
                 break;
 
-            if (item.second.command == SCRIPT_COMMAND_DESPAWN_SELF && item.second.delay == 0 && item.second.despawn.despawnDelay == 0)
+            if (scriptInfo.command == SCRIPT_COMMAND_DESPAWN_SELF && scriptInfo.delay == 0 && scriptInfo.despawn.despawnDelay == 0)
             {
                 delay = true;
                 sLog.outErrorDb("Table %s entry %u point %u has no delay and no delay despawn script. Adding delay to point.", tablename.data(), entry, point);
                 break;
             }
-            else if (item.second.command == SCRIPT_COMMAND_MOVEMENT)
+            else if (scriptInfo.command == SCRIPT_COMMAND_MOVEMENT)
             {
                 delay = true;
                 sLog.outErrorDb("Table %s entry %u point %u has no delay but changes movegen. Adding delay to point.", tablename.data(), entry, point);
                 break;
             }
-            else if (item.second.command == SCRIPT_COMMAND_START_RELAY_SCRIPT)
+            else if (scriptInfo.command == SCRIPT_COMMAND_SET_RUN)
             {
-                auto iter = sRelayScripts.second.find(item.second.relayScript.relayId);
-                if (iter == sRelayScripts.second.end())
+                delay = true;
+                sLog.outErrorDb("Table %s entry %u point %u has no delay but changes run state. Adding delay to point.", tablename.data(), entry, point);
+                break;
+            }
+            else if (scriptInfo.command == SCRIPT_COMMAND_START_RELAY_SCRIPT)
+            {
+                auto iter = relayScripts->second.find(scriptInfo.relayScript.relayId);
+                if (iter == relayScripts->second.end())
                 {
-                    if (item.second.relayScript.templateId)
+                    if (scriptInfo.relayScript.templateId)
                     {
                         ScriptMgr::ScriptTemplateVector scriptTemplate;
-                        sScriptMgr.GetScriptRelayTemplate(item.second.relayScript.templateId, scriptTemplate);
+                        sScriptMgr.GetScriptRelayTemplate(scriptInfo.relayScript.templateId, scriptTemplate);
                         for (auto& item : scriptTemplate)
                         {
-                            auto iter = sRelayScripts.second.find(item.first);
-                            if (iter != sRelayScripts.second.end())
+                            auto iter = relayScripts->second.find(item.first);
+                            if (iter != relayScripts->second.end())
                             {
                                 auto& data = *iter;
                                 for (auto& item : data.second)
                                 {
-                                    if (item.second.delay != 0)
+                                    if (scriptInfo.delay != 0)
                                         break;
-                                    if (item.second.command == SCRIPT_COMMAND_DESPAWN_SELF && item.second.delay == 0 && item.second.despawn.despawnDelay == 0)
+                                    if (scriptInfo.command == SCRIPT_COMMAND_DESPAWN_SELF && scriptInfo.delay == 0 && scriptInfo.despawn.despawnDelay == 0)
                                     {
                                         delay = true;
                                         sLog.outErrorDb("Table %s entry %u point %u has no delay and no delay despawn script. Adding delay to point.", tablename.data(), entry, point);
                                         break;
                                     }
-                                    else if (item.second.command == SCRIPT_COMMAND_MOVEMENT)
+                                    else if (scriptInfo.command == SCRIPT_COMMAND_MOVEMENT)
                                     {
                                         delay = true;
                                         sLog.outErrorDb("Table %s entry %u point %u has no delay but changes movegen. Adding delay to point.", tablename.data(), entry, point);
@@ -118,15 +127,15 @@ void CheckDbscript(WaypointNode& node, uint32 entry, uint32 point, std::set<uint
                     auto& data = *iter;
                     for (auto& item : data.second)
                     {
-                        if (item.second.delay != 0)
+                        if (scriptInfo.delay != 0)
                             break;
-                        if (item.second.command == SCRIPT_COMMAND_DESPAWN_SELF && item.second.delay == 0 && item.second.despawn.despawnDelay == 0)
+                        if (scriptInfo.command == SCRIPT_COMMAND_DESPAWN_SELF && scriptInfo.delay == 0 && scriptInfo.despawn.despawnDelay == 0)
                         {
                             delay = true;
                             sLog.outErrorDb("Table %s entry %u point %u has no delay and no delay despawn script. Adding delay to point.", tablename.data(), entry, point);
                             break;
                         }
-                        else if (item.second.command == SCRIPT_COMMAND_MOVEMENT)
+                        else if (scriptInfo.command == SCRIPT_COMMAND_MOVEMENT)
                         {
                             delay = true;
                             sLog.outErrorDb("Table %s entry %u point %u has no delay but changes movegen. Adding delay to point.", tablename.data(), entry, point);
@@ -153,7 +162,8 @@ void WaypointManager::Load()
 
     std::set<uint32> movementScriptSet;
 
-    for (ScriptMapMap::const_iterator itr = sCreatureMovementScripts.second.begin(); itr != sCreatureMovementScripts.second.end(); ++itr)
+    auto creatureMovementScripts = sScriptMgr.GetScriptMap(SCRIPT_TYPE_CREATURE_MOVEMENT);
+    for (auto itr = creatureMovementScripts->second.begin(); itr != creatureMovementScripts->second.end(); ++itr)
         movementScriptSet.insert(itr->first);
 
     // /////////////////////////////////////////////////////
@@ -735,5 +745,6 @@ bool WaypointManager::SetNodeScriptId(uint32 entry, uint32 dbGuid, uint32 point,
     if (find != path->end())
         find->second.script_id = scriptId;
 
-    return sCreatureMovementScripts.second.find(scriptId) != sCreatureMovementScripts.second.end();
+    auto creatureMovementScripts = sScriptMgr.GetScriptMap(SCRIPT_TYPE_CREATURE_MOVEMENT);
+    return creatureMovementScripts->second.find(scriptId) != creatureMovementScripts->second.end();
 }

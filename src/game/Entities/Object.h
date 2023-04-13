@@ -951,6 +951,7 @@ class WorldObject : public Object
         bool IsPositionValid() const;
         void UpdateGroundPositionZ(float x, float y, float& z) const;
         virtual void UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap = nullptr) const;
+        virtual void AdjustZForCollision(float x, float y, float& z, float halfHeight) const {}
 
         void MovePositionToFirstCollision(Position &pos, float dist, float angle);
         void GetFirstCollisionPosition(Position&pos, float dist, float angle)
@@ -967,7 +968,7 @@ class WorldObject : public Object
 
         uint32 GetZoneId() const;
         uint32 GetAreaId() const;
-        char const* GetAreaName(LocaleConstant locale) const;
+        AreaNameInfo GetAreaName(LocaleConstant locale) const;
         void GetZoneAndAreaId(uint32& zoneid, uint32& areaid) const;
 
         InstanceData* GetInstanceData() const;

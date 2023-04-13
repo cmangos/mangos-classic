@@ -89,6 +89,11 @@ void instance_sunken_temple::OnCreatureCreate(Creature* pCreature)
             ++m_uiProtectorsRemaining;
             break;
         case NPC_JAMMALAN:
+        case NPC_OGOM:
+            if (GetData(TYPE_PROTECTORS) == DONE)
+                pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            break;
         case NPC_ATALARION:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
@@ -112,7 +117,9 @@ void instance_sunken_temple::OnCreatureEvade(Creature* pCreature)
         case NPC_AVATAR_OF_HAKKAR:
             SetData(TYPE_AVATAR, FAIL);
             break;
-        // Shade of Eranikus: prevent it to become unattackable after a wipe
+        // Prevent it to become unattackable after a wipe
+        case NPC_JAMMALAN:
+        case NPC_OGOM:
         case NPC_SHADE_OF_ERANIKUS:
             pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             break;
@@ -162,6 +169,12 @@ void instance_sunken_temple::SetData(uint32 uiType, uint32 uiData)
                     DoUseDoorOrButton(GO_JAMMALAN_BARRIER);
                     // Intro yell
                     DoOrSimulateScriptTextForThisInstance(SAY_JAMMALAN_INTRO, NPC_JAMMALAN);
+
+                    if (Creature* jammalan = GetSingleCreatureFromStorage(NPC_JAMMALAN))
+                        jammalan->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+
+                    if (Creature* ogom = GetSingleCreatureFromStorage(NPC_OGOM))
+                        ogom->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                 }
             }
             break;

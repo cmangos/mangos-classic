@@ -41,6 +41,7 @@ struct npc_escortAI : public ScriptedAI
         virtual void WaypointStart(uint32 /*pointId*/) {}
 
         void Start(bool run = false, const Player* player = nullptr, const Quest* quest = nullptr, bool instantRespawn = false, bool canLoopPath = false, uint32 waypointPath = 0);
+        void End(); // resets data on successful end for special mobs
 
         void SetRun(bool run = true);
         void SetEscortPaused(bool paused);

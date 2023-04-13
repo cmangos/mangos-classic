@@ -46,7 +46,7 @@ add_library(vmaplib STATIC
 )
 
 target_link_libraries(vmaplib
-#  PUBLIC shared
+  PUBLIC shared
   PUBLIC g3dlite
   PUBLIC detour
   PUBLIC recast

@@ -45,7 +45,7 @@ namespace ByteConverter
     }
 }
 
-#if MANGOS_ENDIAN == MANGOS_BIGENDIAN
+#if MANGOS_ENDIAN == MANGOS_BIG_ENDIAN
 template<typename T> inline void EndianConvert(T& val) { ByteConverter::apply<T>(&val); }
 template<typename T> inline void EndianConvertReverse(T&) { }
 #else

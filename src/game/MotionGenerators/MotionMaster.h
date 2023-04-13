@@ -45,9 +45,6 @@ namespace G3D
 #define PET_FOLLOW_DIST  1.0f
 #define PET_FOLLOW_ANGLE (M_PI_F / 2.0f)
 
-// define minimum falling distance required to launch MoveFall generator
-static float MOVE_FALL_MIN_FALL_DISTANCE = 0.5f;
-
 // values 0 ... MAX_DB_MOTION_TYPE-1 used in DB
 enum MovementGeneratorType
 {

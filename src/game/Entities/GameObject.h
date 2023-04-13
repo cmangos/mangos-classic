@@ -579,7 +579,7 @@ struct GameObjectData
     int32 spawntimesecsmin;
     int32 spawntimesecsmax;
     uint32 animprogress;
-    GOState go_state;
+    int32 goState;
     uint8 spawnMask;
     uint16 gameEvent;
     uint16 GuidPoolId;
@@ -867,6 +867,8 @@ class GameObject : public WorldObject
         float GetStationaryY() const { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionY(); return 0.f; }
         float GetStationaryZ() const { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionZ(); return 0.f; }
         float GetStationaryO() const { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionO(); return GetOrientation(); }
+
+        std::pair<float, float> GetClosestChairSlotPosition(Unit* user) const;
 
         SpellCastResult CastSpell(Unit* temporaryCaster, Unit* Victim, uint32 spellId, uint32 triggeredFlags, Item* castItem = nullptr, Aura* triggeredByAura = nullptr, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = nullptr);
 

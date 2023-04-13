@@ -1224,7 +1224,7 @@ void UnitAI::UpdateSpellLists()
                     success = true;
                     OnSpellCast(sSpellTemplate.LookupEntry<SpellEntry>(spellId), target);
                     if (scriptId)
-                        m_unit->GetMap()->ScriptsStart(sRelayScripts, scriptId, m_unit, target);
+                        m_unit->GetMap()->ScriptsStart(SCRIPT_TYPE_RELAY, scriptId, m_unit, target);
                     break;
                 }
                 itr = eligibleSpells.erase(itr);

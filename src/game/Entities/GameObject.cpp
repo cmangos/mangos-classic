@@ -175,7 +175,7 @@ void GameObject::RemoveFromWorld()
     WorldObject::RemoveFromWorld();
 }
 
-bool GameObject::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, GOState go_state)
+bool GameObject::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, GOState goState)
 {
     MANGOS_ASSERT(map);
     Relocate(x, y, z, ang);
@@ -229,7 +229,7 @@ bool GameObject::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map,
     SetEntry(goinfo->id);
     SetDisplayId(goinfo->displayId);
 
-    SetGoState(go_state);
+    SetGoState(goState);
     SetGoType(GameobjectTypes(goinfo->type));
 
     SetGoAnimProgress(animprogress);
@@ -272,6 +272,9 @@ bool GameObject::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map,
             break;
         case GAMEOBJECT_TYPE_QUESTGIVER:
             SetUInt32Value(GAMEOBJECT_DYN_FLAGS, GO_DYNFLAG_LO_ACTIVATE);
+            break;
+        case GAMEOBJECT_TYPE_AURA_GENERATOR:
+            SetGoState(goinfo->auraGenerator.startOpen ? GO_STATE_ACTIVE : GO_STATE_READY);
             break;
         default:
             break;
@@ -811,8 +814,6 @@ void GameObject::SaveToDB(uint32 mapid) const
     data.rotation3 = GetFloatValue(GAMEOBJECT_ROTATION + 3);
     data.spawntimesecsmin = m_spawnedByDefault ? (int32)m_respawnDelay : -(int32)m_respawnDelay;
     data.spawntimesecsmax = m_spawnedByDefault ? (int32)m_respawnDelay : -(int32)m_respawnDelay;
-    data.animprogress = GetGoAnimProgress();
-    data.go_state = GetGoState();
     data.spawnMask = 1;
 
     // updated in DB
@@ -831,9 +832,7 @@ void GameObject::SaveToDB(uint32 mapid) const
        << GetFloatValue(GAMEOBJECT_ROTATION + 2) << ", "
        << GetFloatValue(GAMEOBJECT_ROTATION + 3) << ", "
        << m_respawnDelay << ", "
-       << m_respawnDelay << ", " // TODO: Add variance
-       << uint32(GetGoAnimProgress()) << ", "
-       << uint32(GetGoState()) << ")";
+       << m_respawnDelay << ")";
 
     WorldDatabase.BeginTransaction();
     WorldDatabase.PExecuteLog("DELETE FROM gameobject WHERE guid = '%u'", GetGUIDLow());
@@ -864,7 +863,6 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forc
     float rotation3 = data->rotation3;
 
     uint32 animprogress = data->animprogress;
-    GOState go_state = data->go_state;
 
     SpawnGroupEntry* groupEntry = map->GetMapDataContainer().GetSpawnGroupByGuid(dbGuid, TYPEID_GAMEOBJECT); // use dynguid by default \o/
     GameObjectGroup* group = nullptr;
@@ -891,8 +889,11 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forc
     if (uint32 randomEntry = sObjectMgr.GetRandomGameObjectEntry(dbGuid))
         entry = randomEntry;
 
-    if (!Create(dbGuid, newGuid, entry, map, x, y, z, ang, rotation0, rotation1, rotation2, rotation3, animprogress, go_state))
+    if (!Create(dbGuid, newGuid, entry, map, x, y, z, ang, rotation0, rotation1, rotation2, rotation3, animprogress, GO_STATE_READY))
         return false;
+
+    if (data->goState != -1)
+        SetGoState(GOState(data->goState));
 
     if (group)
         SetGameObjectGroup(group);
@@ -1389,7 +1390,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
 
     bool scriptReturnValue = user->GetTypeId() == TYPEID_PLAYER && sScriptDevAIMgr.OnGameObjectUse((Player*)user, this);
     if (!scriptReturnValue)
-        GetMap()->ScriptsStart(sGameObjectTemplateScripts, GetEntry(), spellCaster, this);
+        GetMap()->ScriptsStart(SCRIPT_TYPE_GAMEOBJECT_TEMPLATE, GetEntry(), spellCaster, this);
 
     if (AI())
         AI()->OnUse(user, spellInfo);
@@ -1405,7 +1406,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
 
             // activate script
             if (!scriptReturnValue)
-                GetMap()->ScriptsStart(sGameObjectScripts, GetDbGuid(), spellCaster, this);
+                GetMap()->ScriptsStart(SCRIPT_TYPE_GAMEOBJECT, GetDbGuid(), spellCaster, this);
             return;
         }
         case GAMEOBJECT_TYPE_BUTTON:                        // 1
@@ -1428,7 +1429,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
 
             // activate script
             if (!scriptReturnValue)
-                GetMap()->ScriptsStart(sGameObjectScripts, GetDbGuid(), spellCaster, this);
+                GetMap()->ScriptsStart(SCRIPT_TYPE_GAMEOBJECT, GetDbGuid(), spellCaster, this);
 
             return;
         }
@@ -1529,52 +1530,10 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
             Player* player = (Player*)user;
 
             // a chair may have n slots. we have to calculate their positions and teleport the player to the nearest one
-
-            // check if the db is sane
-            if (info->chair.slots > 0)
-            {
-                float lowestDist = DEFAULT_VISIBILITY_DISTANCE;
-
-                float x_lowest = GetPositionX();
-                float y_lowest = GetPositionY();
-
-                // the object orientation + 1/2 pi
-                // every slot will be on that straight line
-                float orthogonalOrientation = GetOrientation() + M_PI_F * 0.5f;
-                // find nearest slot
-                for (uint32 i = 0; i < info->chair.slots; ++i)
-                {
-                    // the distance between this slot and the center of the go - imagine a 1D space
-                    float relativeDistance = (info->size * i) - (info->size * (info->chair.slots - 1) / 2.0f);
-
-                    float x_i = GetPositionX() + relativeDistance * cos(orthogonalOrientation);
-                    float y_i = GetPositionY() + relativeDistance * sin(orthogonalOrientation);
-
-                    // calculate the distance between the player and this slot
-                    float thisDistance = player->GetDistance2d(x_i, y_i);
-
-                    /* debug code. It will spawn a npc on each slot to visualize them.
-                    Creature* helper = player->SummonCreature(14496, x_i, y_i, GetPositionZ(), GetOrientation(), TEMPSPAWN_TIMED_OR_DEAD_DESPAWN, 10000);
-                    std::ostringstream output;
-                    output << i << ": thisDist: " << thisDistance;
-                    helper->MonsterSay(output.str().c_str(), LANG_UNIVERSAL);
-                    */
-
-                    if (thisDistance <= lowestDist)
-                    {
-                        lowestDist = thisDistance;
-                        x_lowest = x_i;
-                        y_lowest = y_i;
-                    }
-                }
-                player->TeleportTo(GetMapId(), x_lowest, y_lowest, GetPositionZ(), GetOrientation(), TELE_TO_NOT_LEAVE_TRANSPORT | TELE_TO_NOT_LEAVE_COMBAT | TELE_TO_NOT_UNSUMMON_PET);
-            }
-            else
-            {
-                // fallback, will always work
-                player->TeleportTo(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation(), TELE_TO_NOT_LEAVE_TRANSPORT | TELE_TO_NOT_LEAVE_COMBAT | TELE_TO_NOT_UNSUMMON_PET);
-            }
-            player->SetStandState(UNIT_STAND_STATE_SIT_LOW_CHAIR + info->chair.height);
+            float slotX, slotY;
+            std::tie(slotX, slotY) = GetClosestChairSlotPosition(user);
+            user->NearTeleportTo(slotX, slotY, GetPositionZ(), GetOrientation());
+            user->SetStandState(UNIT_STAND_STATE_SIT_LOW_CHAIR + info->chair.height);
             return;
         }
         case GAMEOBJECT_TYPE_SPELL_FOCUS:                   // 8
@@ -1647,7 +1606,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
 
             // activate script
             if (!scriptReturnValue)
-                GetMap()->ScriptsStart(sGameObjectScripts, GetDbGuid(), spellCaster, this);
+                GetMap()->ScriptsStart(SCRIPT_TYPE_GAMEOBJECT, GetDbGuid(), spellCaster, this);
             else
                 return;
 
@@ -2436,16 +2395,24 @@ float GameObject::GetInteractionDistance() const
 {
     switch (GetGoType())
     {
-        // TODO: find out how the client calculates the maximal usage distance to spellless working
-        // gameobjects like mailboxes - 10.0 is a just an abitrary chosen number
-        case GAMEOBJECT_TYPE_MAILBOX:
+        case GAMEOBJECT_TYPE_QUESTGIVER:
+        case GAMEOBJECT_TYPE_TEXT:
+        case GAMEOBJECT_TYPE_FLAGSTAND:
+        case GAMEOBJECT_TYPE_FLAGDROP:
+        case GAMEOBJECT_TYPE_MINI_GAME:
+            return 5.55556f;
+        case GAMEOBJECT_TYPE_BINDER:
             return 10.0f;
-        case GAMEOBJECT_TYPE_FISHINGHOLE:
+        case GAMEOBJECT_TYPE_CHAIR:
+            return 100.0f;
         case GAMEOBJECT_TYPE_FISHINGNODE:
-            return 20.0f + CONTACT_DISTANCE; // max spell range
-        default:
-            return INTERACTION_DISTANCE;
+            return 100.0f;
+        case GAMEOBJECT_TYPE_AREADAMAGE:
+            return 0.0f;
+        default: break;
     }
+
+    return INTERACTION_DISTANCE;
 }
 
 void GameObject::SetInUse(bool use)
@@ -2522,6 +2489,51 @@ void GameObject::AIM_Initialize()
 
     if (InstanceData* iData = GetMap()->GetInstanceData())
         iData->OnObjectSpawn(this);
+}
+
+std::pair<float, float> GameObject::GetClosestChairSlotPosition(Unit* user) const
+{
+    float outX, outY;
+    // check if the db is sane
+    if (GetGOInfo()->chair.slots > 0)
+    {
+        float lowestDist = DEFAULT_VISIBILITY_DISTANCE;
+
+        float x_lowest = GetPositionX();
+        float y_lowest = GetPositionY();
+
+        // the object orientation + 1/2 pi
+        // every slot will be on that straight line
+        float orthogonalOrientation = GetOrientation() + M_PI_F * 0.5f;
+        // find nearest slot
+        for (uint32 i = 0; i < GetGOInfo()->chair.slots; ++i)
+        {
+            // the distance between this slot and the center of the go - imagine a 1D space
+            float relativeDistance = (GetGOInfo()->size * i) - (GetGOInfo()->size * (GetGOInfo()->chair.slots - 1) / 2.0f);
+
+            float slotX = GetPositionX() + relativeDistance * cos(orthogonalOrientation);
+            float slotY = GetPositionY() + relativeDistance * sin(orthogonalOrientation);
+
+            // calculate the distance between the user and this slot
+            float thisDistance = user->GetDistance2d(slotX, slotY, DIST_CALC_NONE);
+
+            if (thisDistance <= lowestDist)
+            {
+                lowestDist = thisDistance;
+                x_lowest = slotX;
+                y_lowest = slotY;
+            }
+        }
+        outX = x_lowest;
+        outY = y_lowest;
+    }
+    else
+    {
+        outX = GetPositionX();
+        outY = GetPositionY();
+    }
+
+    return {outX, outY};
 }
 
 SpellCastResult GameObject::CastSpell(Unit* temporaryCaster, Unit* Victim, uint32 spellId, uint32 triggeredFlags, Item* castItem, Aura* triggeredByAura, ObjectGuid originalCaster, SpellEntry const* triggeredBy)

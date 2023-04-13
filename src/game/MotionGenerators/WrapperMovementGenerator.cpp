@@ -137,7 +137,7 @@ void AbstractWrapperMovementGenerator::Inform(Unit& owner)
     }
 
     if (m_relayId)
-        owner.GetMap()->ScriptsStart(sRelayScripts, m_relayId, &owner, m_guid ? owner.GetMap()->GetWorldObject(m_guid) : nullptr);
+        owner.GetMap()->ScriptsStart(SCRIPT_TYPE_RELAY, m_relayId, &owner, m_guid ? owner.GetMap()->GetWorldObject(m_guid) : nullptr);
 }
 
 void EffectMovementGenerator::Initialize(Unit& owner)

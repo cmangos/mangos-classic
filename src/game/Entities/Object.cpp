@@ -1176,7 +1176,7 @@ uint32 WorldObject::GetAreaId() const
     return GetTerrain()->GetAreaId(m_position.x, m_position.y, m_position.z);
 }
 
-char const* WorldObject::GetAreaName(LocaleConstant locale) const
+AreaNameInfo WorldObject::GetAreaName(LocaleConstant locale) const
 {
     return GetTerrain()->GetAreaName(m_position.x, m_position.y, m_position.z, locale);
 }
@@ -1612,7 +1612,7 @@ void WorldObject::MovePositionToFirstCollision(Position& pos, float dist, float 
             destZ = result.z;
             // no collision detected - reset height
             if (dest.z == result.z)
-                destZ -= halfHeight;
+                AdjustZForCollision(destX, destY, destZ, halfHeight);
             if (transport) // transport produces offset, but we need global pos
                 transport->CalculatePassengerPosition(destX, destY, destZ);
         }
@@ -2059,7 +2059,7 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map)
     creature->Summon(settings.spawnType, settings.despawnTime);                  // Also initializes the AI and MMGen
 
     if (relayId)
-        map->ScriptsStart(sRelayScripts, relayId, creature, settings.dbscriptTarget);
+        map->ScriptsStart(SCRIPT_TYPE_RELAY, relayId, creature, settings.dbscriptTarget);
 
     if (settings.corpseDespawnTime)
         creature->SetCorpseDelay(settings.corpseDespawnTime);

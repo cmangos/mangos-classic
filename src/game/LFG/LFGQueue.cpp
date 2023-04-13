@@ -400,14 +400,16 @@ void LFGQueue::RemovePlayerFromQueue(ObjectGuid playerGuid, PlayerLeaveMethod le
             {
                 Player* player = sObjectMgr.GetPlayer(playerGuid);
 
-                if (player && player->GetSession())
+                if (player)
                 {
-                    WorldPacket data;
-                    LFGMgr::BuildSetQueuePacket(data, 0, MEETINGSTONE_STATUS_LEAVE_QUEUE);
-                    player->GetSession()->SendPacket(data);
+                    if (player->GetSession())
+                    {
+                        WorldPacket data;
+                        LFGMgr::BuildSetQueuePacket(data, 0, MEETINGSTONE_STATUS_LEAVE_QUEUE);
+                        player->GetSession()->SendPacket(data);
+                    }
+                    player->SetLFGAreaId(0);
                 }
-
-                player->SetLFGAreaId(0);
             });
         }
 

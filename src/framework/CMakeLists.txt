@@ -34,11 +34,6 @@ set(SRC_GRP_GAMESYSTEM
     GameSystem/TypeContainerVisitor.h
 )
 
-set(SRC_GRP_PLATFORM
-    Platform/CompilerDefs.h
-    Platform/Define.h
-)
-
 set(SRC_GRP_POLICIES
     Policies/CreationPolicy.h
     Policies/ObjectLifeTime.cpp
@@ -48,7 +43,6 @@ set(SRC_GRP_POLICIES
 )
 
 set(SRC_GRP_UTIL
-    Utilities/ByteConverter.h
     Utilities/Callback.h
     Utilities/EventProcessor.cpp
     Utilities/EventProcessor.h
@@ -64,7 +58,6 @@ set(SRC_GRP_LINKED_REFERENCE
 set(LIBRARY_SRCS
     ${SRC_GRP_DYNAMIC}
     ${SRC_GRP_GAMESYSTEM}
-    ${SRC_GRP_PLATFORM}
     ${SRC_GRP_POLICIES}
     ${SRC_GRP_UTIL}
     ${SRC_GRP_LINKED_REFERENCE}
@@ -78,11 +71,6 @@ source_group("Dynamic"
 source_group("GameSystem"
   FILES
     ${SRC_GRP_GAMESYSTEM}
-)
-
-source_group("Platform"
-  FILES
-    ${SRC_GRP_PLATFORM}
 )
 
 source_group("Policies"
@@ -102,6 +90,10 @@ source_group("Utilities\\LinkedReference"
 
 add_library(${LIBRARY_NAME} STATIC
   ${LIBRARY_SRCS}
+)
+
+target_link_libraries(${LIBRARY_NAME}
+  PUBLIC shared
 )
 
 target_include_directories(${LIBRARY_NAME}

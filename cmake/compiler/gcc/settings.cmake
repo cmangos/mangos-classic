@@ -16,8 +16,8 @@ if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0 AND NOT MINGW)
 endif()
 
 # Blacklist buggy GCC versions
-if(CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 11.2)
-  message(SEND_ERROR "GCC: This compiler version contains known issues, update required")
+if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 11 AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12 AND NOT MINGW)
+  message(WARNING "GCC: This version is known to be affected by internal compiler bugs, do upgrade if build fails")
 endif()
 
 add_definitions(-DHAVE_SSE2)

@@ -2001,6 +2001,8 @@ class Unit : public WorldObject
         SpellImmuneList m_spellImmune[MAX_SPELL_IMMUNITY];
         bool IsAOEImmune() const { return m_aoeImmune; }
         void SetAOEImmune(bool state) { m_aoeImmune = state; }
+        bool IsChainImmune() const { return m_chainImmune; }
+        void SetChainImmune(bool state) { m_chainImmune = state; }
 
         // Threat related methods
         bool CanHaveThreatList(bool ignoreAliveState = false) const;
@@ -2332,6 +2334,7 @@ class Unit : public WorldObject
 
         // WorldObject overrides
         void UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap = nullptr) const override;
+        void AdjustZForCollision(float x, float y, float& z, float halfHeight) const override;
 
         virtual uint32 GetSpellRank(SpellEntry const* spellInfo);
 
@@ -2548,6 +2551,7 @@ class Unit : public WorldObject
         uint32 m_damageByOthers;
 
         bool m_aoeImmune;
+        bool m_chainImmune;
 
     private:                                                // Error traps for some wrong args using
         // this will catch and prevent build for any cases when all optional args skipped and instead triggered used non boolean type

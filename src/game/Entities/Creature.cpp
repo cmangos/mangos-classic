@@ -140,7 +140,6 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_respawnTime(0), m_respawnDelay(25), m_respawnOverriden(false), m_respawnOverrideOnce(false), m_corpseDelay(60), m_canAggro(false),
     m_respawnradius(5.0f), m_interactionPauseTimer(0), m_subtype(subtype), m_defaultMovementType(IDLE_MOTION_TYPE),
     m_equipmentId(0), m_detectionRange(20.f), m_AlreadyCallAssistance(false), m_canCallForAssistance(true),
-    m_isDeadByDefault(false),
     m_temporaryFactionFlags(TEMPFACTION_NONE),
     m_originalEntry(0), m_ai(nullptr),
     m_isInvisible(false), m_ignoreMMAP(false), m_forceAttackingCapability(false), m_countSpawns(false), m_noWeaponSkillGain(false),
@@ -267,7 +266,7 @@ void Creature::RemoveCorpse(bool inPlace)
     if (!inPlace && !IsInWorld())
        return;
 
-    if ((GetDeathState() != CORPSE && !m_isDeadByDefault) || (GetDeathState() != ALIVE && m_isDeadByDefault))
+    if ((GetDeathState() != CORPSE))
         return;
 
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Removing corpse of %s ", GetGuidStr().c_str());
@@ -396,17 +395,17 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
         else if (eventData->entry_id)
             LoadEquipment(cinfo->EquipmentTemplateId, true);     // use changed entry default template
     }
-    else if (!data || (data->equipmentId == 0 && data->spawnTemplate->equipmentId == 0))
+    else if (!data || (data->equipmentId == 0 && data->spawnTemplate->equipmentId == -1))
     {
         // use default from the template
         LoadEquipment(cinfo->EquipmentTemplateId, true);
     }
     else if (data)
     {
-        // override, -1 means no equipment
-        if (data->spawnTemplate->equipmentId != 0)
+        // override, 0 means no equipment
+        if (data->spawnTemplate->equipmentId != -1)
         {
-            if (data->spawnTemplate->equipmentId != -1)
+            if (data->spawnTemplate->equipmentId != 0)
                 LoadEquipment(data->spawnTemplate->equipmentId);
         }
         else if (data->equipmentId != -1)
@@ -511,16 +510,12 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
         SelectLevel();
         if (data)
         {
-            uint32 curhealth = data->curhealth > 1 ? data->curhealth : GetMaxHealth();
-            if (data->spawnTemplate->curHealth > 0)
-                curhealth = data->spawnTemplate->curHealth;
+            uint32 curhealth = data->spawnTemplate->curHealth > 0 ? data->spawnTemplate->curHealth : GetMaxHealth();
             SetHealth(m_deathState == ALIVE ? curhealth : 0);
             if (GetPowerType() == POWER_MANA)
             {
                 uint32 curmana;
-                uint32 newPossibleData = data->curmana;
-                if (data->spawnTemplate->curMana > 0)
-                    newPossibleData = data->spawnTemplate->curMana;
+                uint32 newPossibleData = data->spawnTemplate->curMana;
                 if (IsRegeneratingPower()) // bypass so that 0 mana is possible TODO: change this to -1 in DB
                     curmana = newPossibleData ? newPossibleData : GetMaxPower(POWER_MANA);
                 else
@@ -596,7 +591,10 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
         SetSpellList(Entry * 100 + 0);
     UpdateImmunitiesSet(0);
     if (IsCritter()) // meant to be also settable per creature immunity set
+    {
         SetAOEImmune(true);
+        SetChainImmune(true);
+    }
 
     // if eventData set then event active and need apply spell_start
     if (eventData)
@@ -637,8 +635,6 @@ uint32 Creature::ChooseDisplayId(const CreatureInfo* cinfo, const CreatureData* 
     {
         if (data->spawnTemplate->modelId)
             return data->spawnTemplate->modelId;
-        if (data->modelid_override)
-            return data->modelid_override;
     }
 
     // use defaults from the template
@@ -703,16 +699,7 @@ void Creature::Update(const uint32 diff)
                 RemoveAllAuras();
 
                 SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
-                if (m_isDeadByDefault)
-                {
-                    SetDeathState(JUST_DIED);
-                    SetHealth(0);
-                    i_motionMaster.Clear();
-                    clearUnitState(static_cast<uint32>(UNIT_STAT_ALL_STATE));
-                    LoadCreatureAddon(true);
-                }
-                else
-                    SetDeathState(JUST_ALIVED);
+                SetDeathState(JUST_ALIVED);
 
                 // Call AI respawn virtual function
                 if (AI())
@@ -742,23 +729,13 @@ void Creature::Update(const uint32 diff)
             if (m_loot)
                 m_loot->Update();
 
-            if (!m_isDeadByDefault)
-                if (IsCorpseExpired())
-                    RemoveCorpse();
+            if (IsCorpseExpired())
+                RemoveCorpse();
 
             break;
         }
         case ALIVE:
         {
-            if (m_isDeadByDefault)
-            {
-                if (IsCorpseExpired())
-                {
-                    RemoveCorpse();
-                    break;
-                }
-            }
-
             Unit::Update(diff);
 
             // creature can be dead after Unit::Update call
@@ -1203,7 +1180,7 @@ void Creature::SaveToDB(uint32 mapid)
     // data->guid = guid don't must be update at save
     data.id = GetEntry();
     data.mapid = mapid;
-    data.modelid_override = displayId;
+    data.spawnMask = 1;
     data.equipmentId = GetEquipmentId();
     data.posX = GetPositionX();
     data.posY = GetPositionY();
@@ -1213,15 +1190,10 @@ void Creature::SaveToDB(uint32 mapid)
     data.spawntimesecsmax = m_respawnDelay;
     // prevent add data integrity problems
     data.spawndist = GetDefaultMovementType() == IDLE_MOTION_TYPE ? 0 : m_respawnradius;
-    data.currentwaypoint = 0;
-    data.curhealth = 0;
-    data.curmana = 0;
-    data.is_dead = m_isDeadByDefault;
     // prevent add data integrity problems
     data.movementType = !m_respawnradius && GetDefaultMovementType() == RANDOM_MOTION_TYPE
                         ? IDLE_MOTION_TYPE : GetDefaultMovementType();
     data.spawnTemplate = sObjectMgr.GetCreatureSpawnTemplate(0);
-    data.spawnMask = 1;
 
     // updated in DB
     WorldDatabase.BeginTransaction();
@@ -1233,8 +1205,7 @@ void Creature::SaveToDB(uint32 mapid)
        << GetGUIDLow() << ","
        << data.id << ","
        << data.mapid << ","
-       << static_cast<uint32>(data.spawnMask) << ","
-       << data.modelid_override << ","
+       << static_cast<uint32>(data.spawnMask) << ","       // cast to prevent save as symbol
        << data.equipmentId << ","
        << data.posX << ","
        << data.posY << ","
@@ -1243,10 +1214,6 @@ void Creature::SaveToDB(uint32 mapid)
        << data.spawntimesecsmin << ","                     // respawn time minimum
        << data.spawntimesecsmax << ","                     // respawn time maximum
        << static_cast<float>(data.spawndist) << ","        // spawn distance (float)
-       << data.currentwaypoint << ","                      // currentwaypoint
-       << data.curhealth << ","                            // curhealth
-       << data.curmana << ","                              // curmana
-       << (data.is_dead  ? 1 : 0) << ","                   // is_dead
        << static_cast<uint32>(data.movementType) << ")";   // default movement generator type, cast to prevent save as symbol
 
     WorldDatabase.PExecuteLog("%s", ss.str().c_str());
@@ -1497,17 +1464,17 @@ std::vector<uint32> Creature::GetCharmSpells() const
     return spells;
 }
 
-bool Creature::GetSpellCooldown(uint32 spellId, uint32& cooldown) const
+Creature::CooldownResult Creature::GetSpellCooldown(uint32 spellId, uint32& cooldown) const
 {
     for (auto& data : m_spellList.Spells)
     {
         if (data.second.SpellId == spellId)
         {
             cooldown = urand(data.second.RepeatMin, data.second.RepeatMax);
-            return true;
+            return (data.second.Flags & SPELL_LIST_FLAG_CATEGORY_COOLDOWN) ? COOLDOWN_RESULT_CATEGORY_FOUND : COOLDOWN_RESULT_FOUND;
         }
     }
-    return false;
+    return COOLDOWN_RESULT_NOT_FOUND;
 }
 
 void Creature::SetCreatureGroup(CreatureGroup* group)
@@ -1608,8 +1575,7 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
     m_respawnDelay = data->GetRandomRespawnTime();
     if (!IsUsingNewSpawningSystem())
         m_corpseDelay = std::min(m_respawnDelay * 9 / 10, m_corpseDelay); // set corpse delay to 90% of the respawn delay
-    m_isDeadByDefault = data->is_dead;
-    m_deathState = m_isDeadByDefault ? DEAD : ALIVE;
+    m_deathState = ALIVE;
 
     m_respawnTime  = map->GetPersistentState()->GetCreatureRespawnTime(dbGuid);
 
@@ -1654,7 +1620,7 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
     AIM_Initialize();
 
     if (data && data->spawnTemplate->relayId)
-        GetMap()->ScriptsStart(sRelayScripts, data->spawnTemplate->relayId, this, nullptr);
+        GetMap()->ScriptsStart(SCRIPT_TYPE_RELAY, data->spawnTemplate->relayId, this, nullptr);
 
     // Creature Linking, Initial load is handled like respawn
     if (m_isCreatureLinkingTrigger && IsAlive())
@@ -1777,7 +1743,7 @@ void Creature::DeleteFromDB(uint32 lowguid, CreatureData const* data)
 
 void Creature::SetDeathState(DeathState s)
 {
-    if ((s == JUST_DIED && !m_isDeadByDefault) || (s == JUST_ALIVED && m_isDeadByDefault))
+    if (s == JUST_DIED)
     {
         if (!m_respawnOverriden)
         {
@@ -2034,7 +2000,7 @@ bool Creature::IsVisibleInGridForPlayer(Player* pl) const
     // Live player (or with not release body see live creatures or death creatures with corpse disappearing time > 0
     if (pl->IsAlive() || !pl->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
     {
-        return (IsAlive() || !IsCorpseExpired() || (m_isDeadByDefault && m_deathState == CORPSE));
+        return (IsAlive() || !IsCorpseExpired());
     }
 
     // Dead player see live creatures near own corpse
@@ -2174,18 +2140,8 @@ bool Creature::LoadCreatureAddon(bool reload)
     if (cainfo->mount != 0)
         Mount(cainfo->mount);
 
-    if (cainfo->bytes1 != 0)
-    {
-        // 0 StandState
-        // 1 LoyaltyLevel  Pet only, so always 0 for default creature
-        // 2 ShapeshiftForm     Must be determined/set by shapeshift spell/aura
-        // 3 VisFlags
-
-        SetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_STAND_STATE, uint8(cainfo->bytes1 & 0xFF));
-        // SetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_PET_LOYALTY, uint8((cainfo->bytes1 >> 8) & 0xFF));
-        // SetByteValue(UNIT_FIELD_BYTES_2, UNIT_BYTES_2_OFFSET_PET_FLAGS, 0);
-        SetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_VIS_FLAGS, uint8((cainfo->bytes1 >> 24) & 0xFF));
-    }
+    if (cainfo->standState != 0)
+        SetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_STAND_STATE, uint8(cainfo->standState));
 
     // UNIT_FIELD_BYTES_2
     // 0 SheathState
@@ -2193,9 +2149,6 @@ bool Creature::LoadCreatureAddon(bool reload)
     // 2 UnitRename         Pet only, so always 0 for default creature
     // 3 Unknown
     SetByteValue(UNIT_FIELD_BYTES_2, UNIT_BYTES_2_OFFSET_SHEATH_STATE, cainfo->sheath_state);
-
-    if (cainfo->flags != 0)
-        SetByteValue(UNIT_FIELD_BYTES_2, UNIT_BYTES_2_OFFSET_MISC_FLAGS, cainfo->flags);
 
     // SetByteValue(UNIT_FIELD_BYTES_2, UNIT_BYTES_2_OFFSET_PET_FLAGS, 0);
     // SetByteValue(UNIT_FIELD_BYTES_2, UNIT_BYTES_2_OFFSET_UNKNOWN, 0);
@@ -2922,16 +2875,22 @@ bool Creature::IsSlowedInCombat() const
 void Creature::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* /*itemProto*/, bool permanent, uint32 forcedDuration)
 {
     uint32 recTime = forcedDuration ? forcedDuration : spellEntry.RecoveryTime;
+    uint32 categoryRecTime = spellEntry.CategoryRecoveryTime;
     if (!forcedDuration)
     {
         uint32 cooldown = 0;
-        bool success = GetSpellCooldown(spellEntry.Id, cooldown);
+        Creature::CooldownResult result = GetSpellCooldown(spellEntry.Id, cooldown);
+        bool success = result != COOLDOWN_RESULT_NOT_FOUND;
         if (!success)
             success = sObjectMgr.GetCreatureCooldown(GetCreatureInfo()->Entry, spellEntry.Id, cooldown);
         if (success && cooldown) // lets see if this will one day become a problem, if it does, add -1 -1 defaults to creature spell lists
-            recTime = cooldown;
+        {
+            if (result == COOLDOWN_RESULT_FOUND)
+                recTime = cooldown;
+            else if (result == COOLDOWN_RESULT_CATEGORY_FOUND)
+                categoryRecTime = cooldown;
+        }
     }
-    uint32 categoryRecTime = spellEntry.CategoryRecoveryTime;
     if (recTime || categoryRecTime)
     {
         if (Player* modOwner = GetSpellModOwner())
