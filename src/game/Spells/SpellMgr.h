@@ -1777,7 +1777,7 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
                 return true;
             if (entry->Id == 15366 || entry2->Id == 15366) // Songflower Serenade - stacks with everything
                 return true;
-            if (entry->Id == 24425 || entry2->Id == 24425) // Spirit of Zandalar - shouldnt stack with itself
+            if (entry->Id == 24425 && entry2->Id == 24425) // Spirit of Zandalar - shouldnt stack with itself
                 return false;
             if (entry->EffectMiscValue[i] != entry2->EffectMiscValue[similar])
                 break;
