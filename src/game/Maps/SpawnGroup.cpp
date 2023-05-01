@@ -538,8 +538,8 @@ void GameObjectGroup::Despawn(uint32 timeMSToDespawn /*= 0*/, uint32 forcedDespa
         }
         else if (timeMSToDespawn == 0)
         {
-            CreatureData const* data = sObjectMgr.GetCreatureData(dbGuid);
-            m_map.GetPersistentState()->RemoveCreatureFromGrid(dbGuid, data);
+            GameObjectData const* data = sObjectMgr.GetGOData(dbGuid);
+            m_map.GetPersistentState()->RemoveGameobjectFromGrid(dbGuid, data);
             m_map.GetPersistentState()->SaveObjectRespawnTime(GetObjectTypeId(), dbGuid, when);
         }
     }
