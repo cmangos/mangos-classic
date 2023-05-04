@@ -396,7 +396,7 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
         else if (eventData->entry_id)
             LoadEquipment(cinfo->EquipmentTemplateId, true);     // use changed entry default template
     }
-    else if (!data || (data->equipmentId == 0 && data->spawnTemplate->equipmentId == -1))
+    else if (!data || (data->spawnTemplate->equipmentId == -1))
     {
         // use default from the template
         LoadEquipment(cinfo->EquipmentTemplateId, true);
@@ -409,8 +409,6 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
             if (data->spawnTemplate->equipmentId != 0)
                 LoadEquipment(data->spawnTemplate->equipmentId);
         }
-        else if (data->equipmentId != -1)
-            LoadEquipment(data->equipmentId);
     }
 
     SetName(normalInfo->Name);                              // at normal entry always
@@ -1191,7 +1189,6 @@ void Creature::SaveToDB(uint32 mapid)
     data.id = GetEntry();
     data.mapid = mapid;
     data.spawnMask = 1;
-    data.equipmentId = GetEquipmentId();
     data.posX = GetPositionX();
     data.posY = GetPositionY();
     data.posZ = GetPositionZ();
@@ -1216,7 +1213,6 @@ void Creature::SaveToDB(uint32 mapid)
        << data.id << ","
        << data.mapid << ","
        << static_cast<uint32>(data.spawnMask) << ","       // cast to prevent save as symbol
-       << data.equipmentId << ","
        << data.posX << ","
        << data.posY << ","
        << data.posZ << ","
