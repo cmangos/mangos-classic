@@ -46,6 +46,7 @@ char const* conditionSourceToStr[] =
     "trainer's spell check",         // CONDITION_FROM_TRAINER
     "areatrigger teleport check",    // CONDITION_FROM_AREATRIGGER_TELEPORT
     "quest template",                // CONDITION_FROM_QUEST
+    "world state"                    // CONDITION_FROM_WORLDSTATE
 };
 
 // Stores what params need to be provided to each condition type.
@@ -97,6 +98,7 @@ uint8 const ConditionTargetsInternal[] =
     CONDITION_REQ_MAP_OR_WORLDOBJECT, //  39
     CONDITION_REQ_NONE,               //  40
     CONDITION_REQ_NONE,               //  41
+    CONDITION_REQ_NONE                //  42
 };
 
 // Starts from 4th element so that -3 will return first element.
