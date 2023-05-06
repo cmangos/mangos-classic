@@ -563,8 +563,8 @@ class UnitAI : public CombatActions
         // member of the group got killed
         virtual void CreatureGroupMemberDied(Unit* /*killed*/) {}
 
-        virtual void RequestFollow(Unit* followee) {}
-        virtual void RelinquishFollow(ObjectGuid follower) {}
+        virtual void RequestFollow(Unit* /*followee*/) {}
+        virtual void RelinquishFollow(ObjectGuid /*follower*/) {}
 
     protected:
         virtual std::string GetAIName() { return "UnitAI"; }

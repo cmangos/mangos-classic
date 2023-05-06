@@ -614,7 +614,7 @@ bool WaypointMovementGenerator<Creature>::SetNextWaypoint(uint32 pointId)
     return true;
 }
 
-void LinearWPMovementGenerator<Creature>::SwitchToNextNode(Creature& creature, WaypointPath::const_iterator& nodeItr)
+void LinearWPMovementGenerator<Creature>::SwitchToNextNode(Creature& /*creature*/, WaypointPath::const_iterator& nodeItr)
 {
     // switch to next node
     if (!m_driveWayBack)
