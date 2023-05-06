@@ -158,10 +158,10 @@ struct CreatureInfo
     VisibilityDistanceType visibilityDistanceType;
     uint32  CorpseDelay;
     uint32  SpellList;
-    uint32  EquipmentTemplateId;
-    uint32  Civilian;
     uint32  StringID1;
     uint32  StringID2;
+    uint32  EquipmentTemplateId;
+    uint32  Civilian;
     char const* AIName;
     uint32  ScriptID;
 

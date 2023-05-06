@@ -973,6 +973,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Creature Stats...");
     sObjectMgr.LoadCreatureClassLvlStats();
 
+    sLog.outString("Loading String Ids...");
+    sScriptMgr.LoadStringIds(); // must be before LoadCreatureSpawnDataTemplates
+
     sLog.outString("Loading Creature templates...");
     sObjectMgr.LoadCreatureTemplates();
 
@@ -1008,9 +1011,6 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Creature Conditional Spawn Data...");  // must be after LoadCreatureTemplates and before LoadCreatures
     sObjectMgr.LoadCreatureConditionalSpawn();
-
-    sLog.outString("Loading String Ids...");
-    sScriptMgr.LoadStringIds(); // must be before LoadCreatureSpawnDataTemplates
 
     sLog.outString("Loading Creature Spawn Template Data..."); // must be before LoadCreatures
     sObjectMgr.LoadCreatureSpawnDataTemplates();
