@@ -17,7 +17,6 @@
  */
 
 #include "Grids/GridStates.h"
-#include "Grids/ObjectGridLoader.h"
 #include "Log.h"
 
 void
@@ -59,9 +58,6 @@ RemovalState::Update(Map& m, NGridType& grid, GridInfo& info, const uint32& x, c
         info.UpdateTimeTracker(t_diff);
         if (info.getTimeTracker().Passed())
         {
-            ObjectGridStoper stoper(grid);
-            stoper.StopN();
-
             if (!m.UnloadGrid(x, y, false))
             {
                 DEBUG_LOG("Grid[%u,%u] for map %u differed unloading due to players or active objects nearby", x, y, m.GetId());

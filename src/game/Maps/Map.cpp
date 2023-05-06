@@ -1053,6 +1053,10 @@ bool Map::UnloadGrid(const uint32& x, const uint32& y, bool pForce)
             return false;
 
         DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Unloading grid[%u,%u] for map %u", x, y, i_id);
+
+        ObjectGridStoper stoper(*grid);
+        stoper.StopN();
+
         ObjectGridUnloader unloader(*grid);
 
         // Finish remove and delete all creatures with delayed remove before moving to respawn grids
