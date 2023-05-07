@@ -552,7 +552,7 @@ void GameObjectGroup::Despawn(uint32 timeMSToDespawn /*= 0*/, uint32 forcedDespa
 ////////////////////
 
 FormationData::FormationData(CreatureGroup* gData, FormationEntrySPtr fEntry) :
-    m_groupData(gData), m_fEntry(fEntry), m_mirrorState(false), m_lastWP(0), m_wpPathId(0), m_followerStopped(false), m_masterDied(false)
+    m_groupData(gData), m_fEntry(fEntry), m_mirrorState(false), m_followerStopped(false), m_masterDied(false), m_lastWP(0), m_wpPathId(0)
 {
     for (auto const& sData : m_groupData->GetGroupEntry().DbGuids)
     {

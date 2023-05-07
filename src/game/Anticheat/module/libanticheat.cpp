@@ -666,8 +666,8 @@ bool AnticheatLib::ChatCommand(ChatHandler *handler, const std::string &origArgs
 #endif
 
 SessionAnticheat::SessionAnticheat(WorldSession *session, const BigNumber &K) :
-    _session(session), _warden(CreateWarden(session, K, this)), _inWorld(false),_fingerprint(0), _tickTimer(0),
-    _cheatsReported(0), _kickTimer(0), _banTimer(0), _banAccount(false), _banIP(false), _worldEnterTime(0),
+    _session(session), _warden(CreateWarden(session, K, this)), _inWorld(false), _worldEnterTime(0), _tickTimer(0),
+    _cheatsReported(0), _kickTimer(0), _banTimer(0), _banAccount(false), _banIP(false), _fingerprint(0),
     _antispam(sAntispamMgr.GetSession(session->GetAccountId()))
 {
     memset(_cheatOccuranceTick, 0, sizeof(_cheatOccuranceTick));

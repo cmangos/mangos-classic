@@ -24,7 +24,7 @@
 
 #define COMBAT_MANAGER_TICK 1200
 
-CombatManager::CombatManager(Unit* owner) : m_owner(owner), m_evadeTimer(0), m_combatTick(COMBAT_MANAGER_TICK), m_evadeState(EVADE_NONE), m_combatTimer(0), m_leashingDisabled(false), m_leashingCheck(nullptr), m_forcedCombat(false)
+CombatManager::CombatManager(Unit* owner) : m_owner(owner), m_evadeTimer(0), m_evadeState(EVADE_NONE), m_combatTick(COMBAT_MANAGER_TICK), m_combatTimer(0), m_leashingDisabled(false), m_leashingCheck(nullptr), m_forcedCombat(false)
 {
 
 }

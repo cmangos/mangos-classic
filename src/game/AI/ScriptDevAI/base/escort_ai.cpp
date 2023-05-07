@@ -17,9 +17,10 @@ EndScriptData */
 const float MAX_PLAYER_DISTANCE = 66.0f;
 
 npc_escortAI::npc_escortAI(Creature* creature) : ScriptedAI(creature),
+    m_questForEscort(nullptr),
+    m_playerGuid(),
     m_playerCheckTimer(1000),
     m_escortState(STATE_ESCORT_NONE),
-    m_questForEscort(nullptr),
     m_isRunning(false),
     m_canInstantRespawn(false),
     m_canReturnToStart(false),

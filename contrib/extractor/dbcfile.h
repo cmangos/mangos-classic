@@ -77,7 +77,7 @@ class DBCFile
                     return reinterpret_cast<char*>(file.stringTable + stringOffset);
                 }
             private:
-                Record(DBCFile& file, unsigned char* offset): file(file), offset(offset) {}
+                Record(DBCFile& file, unsigned char* offset): offset(offset), file(file) {}
                 unsigned char* offset;
                 DBCFile& file;
 

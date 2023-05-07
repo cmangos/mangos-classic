@@ -118,10 +118,10 @@ class FormationSlotData
 {
     public:
         FormationSlotData(uint32 slotId, uint32 _ownerDBGuid, CreatureGroup* creatureGrp, SpawnGroupFormationSlotType type = SpawnGroupFormationSlotType::SPAWN_GROUP_FORMATION_SLOT_TYPE_STATIC)
-            : m_slotId(slotId), m_realOwnerGuid(_ownerDBGuid), m_creatureGroup(creatureGrp), m_slotType(type), m_owner(nullptr),
-            m_realAngle(0), m_realDistance(1), m_recomputePosition(true), m_angleVariation(0), m_distanceVariation(0),
-            m_maxAngleVariation(0), m_maxDistanceVariation(0), m_angleVariationDest(0), m_distanceVariationDest(0),
-            m_canFollow(true)
+            : m_slotId(slotId), m_realOwnerGuid(_ownerDBGuid), m_creatureGroup(creatureGrp), m_owner(nullptr),
+            m_realAngle(0), m_realDistance(1), m_angleVariation(0), m_distanceVariation(0), m_maxAngleVariation(0),
+            m_maxDistanceVariation(0), m_angleVariationDest(0), m_distanceVariationDest(0), m_recomputePosition(true),
+            m_canFollow(true), m_slotType(type)
         {}
 
         uint32 GetSlotId() const { return m_slotId; }

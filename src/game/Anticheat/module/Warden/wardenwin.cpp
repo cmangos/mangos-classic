@@ -1098,9 +1098,9 @@ void WardenWin::BuildTimingInit(const std::string &module, uint32 offset, bool s
 }
 
 WardenWin::WardenWin(WorldSession *session, const BigNumber &K, SessionAnticheatInterface *anticheat) :
-    _wardenAddress(0), Warden(session, sWardenModuleMgr.GetWindowsModule(), K, anticheat),
-    _lastClientTime(0), _lastHardwareActionTime(0), _lastTimeCheckServer(0), _sysInfoSaved(false),
-    _proxifierFound(false), _hypervisors(""), _endSceneFound(false), _endSceneAddress(0)
+    Warden(session, sWardenModuleMgr.GetWindowsModule(), K, anticheat), _wardenAddress(0),
+    _sysInfoSaved(false), _proxifierFound(false), _hypervisors(""), _lastClientTime(0),
+    _lastHardwareActionTime(0), _lastTimeCheckServer(0), _endSceneFound(false), _endSceneAddress(0)
 {
     memset(&_sysInfo, 0, sizeof(_sysInfo));
 }

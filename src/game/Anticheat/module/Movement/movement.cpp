@@ -97,10 +97,10 @@ extern float computeFallElevation(float time, bool slowFall, float initialSpeed)
 namespace NamreebAnticheat
 {
 Movement::Movement(Player* me) :
-    _me(me), _jumpInitialSpeed(0.f), _inKnockBack(false),
     _anticheat(reinterpret_cast<SessionAnticheat *>(me->GetSession()->GetAnticheat())),
-    _serverInitTime(0), _clientInitTime(0), _justTeleported(false), _totalDistanceTraveled(0.f),
-    overSpeedDistanceTick(0.f), overSpeedDistanceTotal(0.f), _wasMovingOther(false)
+    _me(me), _totalDistanceTraveled(0.f), _wasMovingOther(false), _justTeleported(false),
+    _serverInitTime(0), _clientInitTime(0), _jumpInitialSpeed(0.f), _inKnockBack(false),
+    overSpeedDistanceTick(0.f), overSpeedDistanceTotal(0.f)
 {
     memset(clientSpeeds, 0, sizeof(clientSpeeds));
 
