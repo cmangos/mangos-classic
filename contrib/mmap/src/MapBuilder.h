@@ -56,7 +56,7 @@ namespace MMAP
 
     class TaskQueue;
 
-    typedef std::map<uint32, std::set<uint32>*> TileList;
+    typedef std::map<uint32, std::set<uint32>> TileList;
     typedef std::set<uint32> MapSet;
     typedef std::unique_ptr<TaskQueue> TaskQueueUPtr;
 
@@ -112,7 +112,7 @@ namespace MMAP
 
             // detect maps and tiles
             void discoverTiles();
-            std::set<uint32>* getTileList(uint32 mapID);
+            std::set<uint32>& getTileList(uint32 mapID);
 
             void buildNavMesh(uint32 mapID, dtNavMesh*& navMesh);
 

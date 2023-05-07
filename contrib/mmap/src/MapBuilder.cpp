@@ -96,12 +96,6 @@ namespace MMAP
     /**************************************************************************/
     MapBuilder::~MapBuilder()
     {
-        for (TileList::iterator it = m_tiles.begin(); it != m_tiles.end(); ++it)
-        {
-            (*it).second->clear();
-            delete (*it).second;
-        }
-
         delete m_terrainBuilder;
         delete m_rcContext;
     }
@@ -152,7 +146,7 @@ namespace MMAP
             mapID = uint32(atoi(files[i].substr(0, 3).c_str()));
             if (m_tiles.find(mapID) == m_tiles.end())
             {
-                m_tiles.insert(std::pair<uint32, std::set<uint32>*>(mapID, new std::set<uint32>));
+                m_tiles.emplace(mapID, std::set<uint32>{});
                 count++;
             }
         }
@@ -163,8 +157,11 @@ namespace MMAP
         for (uint32 i = 0; i < files.size(); ++i)
         {
             mapID = uint32(atoi(files[i].substr(0, 3).c_str()));
-            m_tiles.insert(std::pair<uint32, std::set<uint32>*>(mapID, new std::set<uint32>));
-            count++;
+            if (m_tiles.find(mapID) == m_tiles.end())
+            {
+                m_tiles.emplace(mapID, std::set<uint32>{});
+                count++;
+            }
         }
         printf("found %u.\n", count);
 
@@ -172,7 +169,7 @@ namespace MMAP
         printf("Discovering tiles... ");
         for (TileList::iterator itr = m_tiles.begin(); itr != m_tiles.end(); ++itr)
         {
-            std::set<uint32>* tiles = (*itr).second;
+            std::set<uint32>& tiles = (*itr).second;
             mapID = (*itr).first;
 
             sprintf(filter, "%03u*.vmtile", mapID);
@@ -184,7 +181,7 @@ namespace MMAP
                 tileY = uint32(atoi(files[i].substr(4, 2).c_str()));
                 tileID = StaticMapTree::packTileID(tileY, tileX);
 
-                tiles->insert(tileID);
+                tiles.insert(tileID);
                 count++;
             }
 
@@ -197,7 +194,7 @@ namespace MMAP
                 tileX = uint32(atoi(files[i].substr(5, 2).c_str()));
                 tileID = StaticMapTree::packTileID(tileX, tileY);
 
-                if (tiles->insert(tileID).second)
+                if (tiles.insert(tileID).second)
                     count++;
             }
         }
@@ -205,15 +202,13 @@ namespace MMAP
     }
 
     /**************************************************************************/
-    std::set<uint32>* MapBuilder::getTileList(uint32 mapID)
+    std::set<uint32>& MapBuilder::getTileList(uint32 mapID)
     {
         TileList::iterator itr = m_tiles.find(mapID);
         if (itr != m_tiles.end())
             return (*itr).second;
 
-        std::set<uint32>* tiles = new std::set<uint32>();
-        m_tiles.insert(std::pair<uint32, std::set<uint32>*>(mapID, tiles));
-        return tiles;
+        return m_tiles.emplace(mapID, std::set<uint32>{}).first->second;
     }
 
     /**************************************************************************/
@@ -536,10 +531,10 @@ namespace MMAP
     {
         printf("Building map %03u:                                    \n", mapID);
 
-        std::set<uint32>* tiles = getTileList(mapID);
+        std::set<uint32>& tiles = getTileList(mapID);
 
         // make sure we process maps which don't have tiles
-        if (!tiles->size())
+        if (!tiles.size())
         {
             // convert coord bounds to grid bounds
             uint32 minX, minY, maxX, maxY;
@@ -548,10 +543,10 @@ namespace MMAP
             // add all tiles within bounds to tile list.
             for (uint32 i = minX; i <= maxX; ++i)
                 for (uint32 j = minY; j <= maxY; ++j)
-                    tiles->insert(StaticMapTree::packTileID(i, j));
+                    tiles.insert(StaticMapTree::packTileID(i, j));
         }
 
-        if (!tiles->size())
+        if (!tiles.size())
             return;
 
         // build navMesh
@@ -564,10 +559,10 @@ namespace MMAP
         }
 
         // now start building mmtiles for each tile
-        printf("[Map %03i] We have %u tiles.                          \n", mapID, uint32(tiles->size()));
+        printf("[Map %03i] We have %u tiles.                          \n", mapID, uint32(tiles.size()));
 
         uint32 currentTile = 0;
-        for (std::set<uint32>::iterator it = tiles->begin(); it != tiles->end(); ++it)
+        for (std::set<uint32>::iterator it = tiles.begin(); it != tiles.end(); ++it)
         {
             currentTile++;
             uint32 tileX, tileY;
@@ -594,7 +589,7 @@ namespace MMAP
             auto builder = [=]()
             {
                 // build tile with copy version of the navmesh
-                buildTile(mapID, tileX, tileY, navMeshCopy, currentTile, uint32(tiles->size()));
+                buildTile(mapID, tileX, tileY, navMeshCopy, currentTile, uint32(tiles.size()));
 
                 // free this navmesh
                 dtFreeNavMesh(navMeshCopy);
@@ -648,23 +643,23 @@ namespace MMAP
     /**************************************************************************/
     void MapBuilder::buildNavMesh(uint32 mapID, dtNavMesh*& navMesh)
     {
-        std::set<uint32>* tiles = getTileList(mapID);
+        std::set<uint32>& tiles = getTileList(mapID);
 
         // old code for non-statically assigned bitmask sizes:
         ///*** calculate number of bits needed to store tiles & polys ***/
-        //int tileBits = dtIlog2(dtNextPow2(tiles->size()));
+        //int tileBits = dtIlog2(dtNextPow2(tiles.size()));
         //if (tileBits < 1) tileBits = 1;                                     // need at least one bit!
         //int polyBits = sizeof(dtPolyRef)*8 - SALT_MIN_BITS - tileBits;
 
         int polyBits = DT_POLY_BITS;
 
-        int maxTiles = tiles->size();
+        int maxTiles = tiles.size();
         int maxPolysPerTile = 1 << polyBits;
 
         /***          calculate bounds of map         ***/
 
         uint32 tileXMin = 64, tileYMin = 64, tileXMax = 0, tileYMax = 0, tileX, tileY;
-        for (std::set<uint32>::iterator it = tiles->begin(); it != tiles->end(); ++it)
+        for (std::set<uint32>::iterator it = tiles.begin(); it != tiles.end(); ++it)
         {
             StaticMapTree::unpackTileID((*it), tileX, tileY);
 
