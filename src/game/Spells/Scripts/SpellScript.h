@@ -21,6 +21,7 @@
 
 #include "Spells/Spell.h"
 #include <map>
+#include <memory>
 #include <functional>
 
 class DynamicObject;
@@ -148,8 +149,8 @@ class SpellScriptMgr
 
         static std::map<uint32, SpellScript*> m_spellScriptMap;
         static std::map<uint32, AuraScript*> m_auraScriptMap;
-        static std::map<std::string, SpellScript*> m_spellScriptStringMap;
-        static std::map<std::string, AuraScript*> m_auraScriptStringMap;
+        static std::map<std::string, std::unique_ptr<SpellScript>> m_spellScriptStringMap;
+        static std::map<std::string, std::unique_ptr<AuraScript>> m_auraScriptStringMap;
 };
 
 // note - linux name mangling bugs out if two script templates have same class name - avoid it
