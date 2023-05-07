@@ -15,6 +15,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <memory>
 
 INSTANTIATE_SINGLETON_1(WardenScanMgr);
 
@@ -62,7 +63,7 @@ bool BuildRawData(const std::string &hexData, std::vector<uint8> &out)
 
 void WardenScanMgr::loadFromDB()
 {
-    auto result = WorldDatabase.Query("SELECT id,type,str,data,address,length,result,flags,comment FROM warden_scans");
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT id,type,str,data,address,length,result,flags,comment FROM warden_scans"));
 
     // copy any non-database scans into a placeholder
     std::vector<std::shared_ptr<const Scan> > new_scans;
