@@ -137,8 +137,6 @@ void AnticheatConfig::loadConfigSettings()
     setConfig(CONFIG_UINT32_AC_WARDEN_MINIMUM_LEVEL, "Warden.MinimumLevel", 25);
     setConfig(CONFIG_UINT32_AC_WARDEN_MINIMUM_ADVANCED_LEVEL, "Warden.MinimumAdvancedLevel", 18);
     setConfig(CONFIG_UINT32_AC_WARDEN_SUSPICIOUS_ENDSCENE_HOOK_ACTION, "Warden.SuspiciousEndSceneHookAction", 1);
-    setConfig(CONFIG_UINT32_AC_MOVEMENT_CHEAT_BAD_FALL_RESET_THRESHOLD, "Warden.SuspiciousEndSceneHookAction", 1);
-    setConfig(CONFIG_UINT32_AC_MOVEMENT_CHEAT_BAD_FALL_RESET_PENALTY, "Warden.SuspiciousEndSceneHookAction", 1);
     setConfig(CONFIG_BOOL_AC_MOVEMENT_CHEAT_BAD_FALL_RESET_ENABLED, "Movement.BadFallReset.Enable", true);
     setConfig(CONFIG_UINT32_AC_MOVEMENT_CHEAT_BAD_FALL_RESET_THRESHOLD, "Movement.BadFallReset.Threshold", 1);
     setConfig(CONFIG_UINT32_AC_MOVEMENT_CHEAT_BAD_FALL_RESET_PENALTY, "Movement.BadFallReset.Penalty", CHEAT_ACTION_INFO_LOG | CHEAT_ACTION_PROMPT_LOG | CHEAT_ACTION_KICK);
