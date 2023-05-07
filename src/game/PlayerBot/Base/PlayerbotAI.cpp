@@ -1366,67 +1366,72 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             WorldPacket p(packet); // (8+1+4+1+1+4+4+4+4+4+1)
             ObjectGuid guid;
             uint8 loot_type;
-            uint32 gold;
-            uint8 items;
 
             p >> guid;      // 8 corpse guid
             p >> loot_type; // 1 loot type
-            p >> gold;      // 4 gold
-            p >> items;     // 1 items count
 
-            if (gold > 0)
+            if (loot_type != 0)
             {
-                WorldPacket* const packet = new WorldPacket(CMSG_LOOT_MONEY, 0);
-                m_bot->GetSession()->QueuePacket(std::unique_ptr<WorldPacket>(packet));
-            }
+                uint32 gold;
+                uint8 items;
 
-            for (uint8 i = 0; i < items; ++i)
-            {
-                uint32 itemid;
-                uint32 itemcount;
-                uint8 lootslot_type;
-                uint8 itemindex;
+                p >> gold;      // 4 gold
+                p >> items;     // 1 items count
 
-                p >> itemindex;         // 1 counter
-                p >> itemid;            // 4 itemid
-                p >> itemcount;         // 4 item stack count
-                p.read_skip<uint32>();  // 4 item model
-                p.read_skip<uint32>();  // 4 randomSuffix
-                p.read_skip<uint32>();  // 4 randomPropertyId
-                p >> lootslot_type;     // 1 LootSlotType
-
-                ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(itemid);
-                if (!pProto)
-                    continue;
-
-                if (lootslot_type != LOOT_SLOT_NORMAL)
-                    continue;
-
-                // skinning or collect loot flag = just auto loot everything for getting object
-                // corpse = run checks
-                if (loot_type == LOOT_SKINNING || HasCollectFlag(COLLECT_FLAG_LOOT) ||
-                        (loot_type == LOOT_CORPSE && (IsInQuestItemList(itemid) || IsItemUseful(itemid))))
+                if (gold > 0)
                 {
-                    ItemPosCountVec dest;
-                    if (m_bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemid, itemcount) == EQUIP_ERR_INVENTORY_FULL)
-                    {
-                        if (m_debugWhisper)
-                            TellMaster("I can't take %; my inventory is full.", pProto->Name1);
-                        m_inventory_full = true;
-                        continue;
-                    }
-
-                    if (m_debugWhisper)
-                        TellMaster("Store loot item %s", pProto->Name1);
-
-                    WorldPacket* const packet = new WorldPacket(CMSG_AUTOSTORE_LOOT_ITEM, 1);
-                    *packet << itemindex;
+                    WorldPacket* const packet = new WorldPacket(CMSG_LOOT_MONEY, 0);
                     m_bot->GetSession()->QueuePacket(std::unique_ptr<WorldPacket>(packet));
                 }
-                else
+
+                for (uint8 i = 0; i < items; ++i)
                 {
-                    if (m_debugWhisper)
-                        TellMaster("Skipping loot item %s", pProto->Name1);
+                    uint32 itemid;
+                    uint32 itemcount;
+                    uint8 lootslot_type;
+                    uint8 itemindex;
+
+                    p >> itemindex;         // 1 counter
+                    p >> itemid;            // 4 itemid
+                    p >> itemcount;         // 4 item stack count
+                    p.read_skip<uint32>();  // 4 item model
+                    p.read_skip<uint32>();  // 4 randomSuffix
+                    p.read_skip<uint32>();  // 4 randomPropertyId
+                    p >> lootslot_type;     // 1 LootSlotType
+
+                    ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(itemid);
+                    if (!pProto)
+                        continue;
+
+                    if (lootslot_type != LOOT_SLOT_NORMAL)
+                        continue;
+
+                    // skinning or collect loot flag = just auto loot everything for getting object
+                    // corpse = run checks
+                    if (loot_type == LOOT_SKINNING || HasCollectFlag(COLLECT_FLAG_LOOT) ||
+                            (loot_type == LOOT_CORPSE && (IsInQuestItemList(itemid) || IsItemUseful(itemid))))
+                    {
+                        ItemPosCountVec dest;
+                        if (m_bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemid, itemcount) == EQUIP_ERR_INVENTORY_FULL)
+                        {
+                            if (m_debugWhisper)
+                                TellMaster("I can't take %; my inventory is full.", pProto->Name1);
+                            m_inventory_full = true;
+                            continue;
+                        }
+
+                        if (m_debugWhisper)
+                            TellMaster("Store loot item %s", pProto->Name1);
+
+                        WorldPacket* const packet = new WorldPacket(CMSG_AUTOSTORE_LOOT_ITEM, 1);
+                        *packet << itemindex;
+                        m_bot->GetSession()->QueuePacket(std::unique_ptr<WorldPacket>(packet));
+                    }
+                    else
+                    {
+                        if (m_debugWhisper)
+                            TellMaster("Skipping loot item %s", pProto->Name1);
+                    }
                 }
             }
 
