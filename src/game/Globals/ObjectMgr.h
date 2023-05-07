@@ -306,7 +306,7 @@ struct DungeonEncounter
     uint32 lastEncounterDungeon;
 };
 
-typedef std::multimap<uint32, DungeonEncounter const*> DungeonEncounterMap;
+typedef std::multimap<uint32, DungeonEncounter> DungeonEncounterMap;
 typedef std::pair<DungeonEncounterMap::const_iterator, DungeonEncounterMap::const_iterator> DungeonEncounterMapBounds;
 
 struct TaxiShortcutData

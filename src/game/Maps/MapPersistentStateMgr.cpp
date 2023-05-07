@@ -306,9 +306,9 @@ void DungeonPersistentState::UpdateEncounterState(EncounterCreditType type, uint
 
     for (DungeonEncounterMap::const_iterator iter = bounds.first; iter != bounds.second; ++iter)
     {
-        DungeonEncounterEntry const* dbcEntry = iter->second->dbcEntry;
+        DungeonEncounterEntry const* dbcEntry = iter->second.dbcEntry;
 
-        if (iter->second->creditType == type && dbcEntry->mapId == GetMapId())
+        if (iter->second.creditType == type && dbcEntry->mapId == GetMapId())
         {
             m_completedEncountersMask |= 1 << dbcEntry->encounterIndex;
 
@@ -323,7 +323,7 @@ void DungeonPersistentState::UpdateEncounterState(EncounterCreditType type, uint
             CharacterDatabase.PExecute("UPDATE instance SET encountersMask = '%u' WHERE id = '%u'", m_completedEncountersMask, GetInstanceId());
 
             DEBUG_LOG("DungeonPersistentState: Dungeon %s (Id %u) completed encounter %s", GetMap()->GetMapName(), GetInstanceId(), dbcEntry->encounterName[sWorld.GetDefaultDbcLocale()]);
-            if (/*uint32 dungeonId =*/ iter->second->lastEncounterDungeon)
+            if (/*uint32 dungeonId =*/ iter->second.lastEncounterDungeon)
             {
                 DEBUG_LOG("DungeonPersistentState:: Dungeon %s (Instance-Id %u) completed last encounter %s", GetMap()->GetMapName(), GetInstanceId(), dbcEntry->encounterName[sWorld.GetDefaultDbcLocale()]);
                 // Place LFG reward here
