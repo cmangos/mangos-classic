@@ -37,6 +37,8 @@ struct PeriodicTriggerData
 
 struct SpellScript
 {
+    virtual ~SpellScript() = default;
+
     // called on spell init
     virtual void OnInit(Spell* /*spell*/) const {}
     // called on success during Spell::Prepare
@@ -78,6 +80,8 @@ struct AuraCalcData
 
 struct AuraScript
 {
+    virtual ~AuraScript() = default;
+
     // called on SpellAuraHolder creation - caster can be nullptr
     virtual void OnHolderInit(SpellAuraHolder* /*holder*/, WorldObject* /*caster*/) const {}
     // called after end of aura object constructor
