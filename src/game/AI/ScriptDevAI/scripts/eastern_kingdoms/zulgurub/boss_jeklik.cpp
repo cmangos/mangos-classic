@@ -240,7 +240,7 @@ struct boss_jeklikAI : public CombatAI
         }
     }
 
-    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
     {
         if (spellInfo->Id == SPELL_SUMMON_FRENZIED_BATS)
             DoScriptText(SAY_SHRIEK, m_creature);

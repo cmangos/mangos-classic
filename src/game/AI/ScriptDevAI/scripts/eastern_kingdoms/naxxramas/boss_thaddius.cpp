@@ -689,7 +689,7 @@ struct ThaddiusCharge : public AuraScript
         }
     }
 
-    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& /*data*/) const override
     {
         if (Unit* target = aura->GetTarget())
         {

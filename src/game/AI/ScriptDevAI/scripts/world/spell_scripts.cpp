@@ -193,7 +193,7 @@ struct DrinkAnimation : public AuraScript
 
 struct spell_effect_summon_no_follow_movement : public SpellScript
 {
-    void OnSummon(Spell* spell, Creature* summon) const override
+    void OnSummon(Spell* /*spell*/, Creature* summon) const override
     {
         summon->AI()->SetFollowMovement(false);
     }
@@ -237,7 +237,7 @@ struct TribalDeath : public SpellScript
         return true;
     }
 
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         uint32 spellId = 0;
         switch (spell->m_spellInfo->Id)

@@ -55,7 +55,7 @@ struct boss_broodlordAI : public CombatAI
         AddCombatAction(BROODLORD_KNOCK_AWAY, 12000u);
         AddCombatAction(BROODLORD_BLAST_WAVE, 20000u);
         AddCombatAction(BROODLORD_MORTAL_STRIKE, 30000u);
-        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float y, float z)
+        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float /*x*/, float /*y*/, float z)
         {
             return z < 448.60f;
         });        
