@@ -53,7 +53,7 @@ MACRO(DisableWarnings)
     set(SearchWarningsFlag2 "/Wall")
   else()
     set(DisableWarningsFlag "-w")
-    set(SearchWarningsFlag1 "-[+W?]pedentic")
+    set(SearchWarningsFlag1 "-[+W?]pedantic")
     set(SearchWarningsFlag2 "-Wall")
   endif()
   foreach(temp_flag

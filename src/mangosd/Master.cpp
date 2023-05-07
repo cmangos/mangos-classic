@@ -219,7 +219,7 @@ int Master::Run()
         int32 networkThreadWorker = sConfig.GetIntDefault("Network.Threads", 1);
         if (networkThreadWorker <= 0)
         {
-            sLog.outError("Invalid network tread workers setting in mangosd.conf. (%d) should be > 0", networkThreadWorker);
+            sLog.outError("Invalid network thread workers setting in mangosd.conf. (%d) should be > 0", networkThreadWorker);
             networkThreadWorker = 1;
         }
         MaNGOS::Listener<WorldSocket> listener(sConfig.GetStringDefault("BindIP", "0.0.0.0"), int32(sWorld.getConfig(CONFIG_UINT32_PORT_WORLD)), networkThreadWorker);

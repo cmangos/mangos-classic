@@ -25,7 +25,7 @@
 namespace MMAP
 {
     // ######################## MMapFactory ########################
-    // our global singelton copy
+    // our global singleton copy
     MMapManager* g_MMapManager = nullptr;
 
     // stores list of mapids which do not use pathfinding

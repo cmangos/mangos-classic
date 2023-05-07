@@ -1255,7 +1255,7 @@ std::string FormationData::to_string() const
         "[0]Random",
         "[1]Single file",
         "[2]Side by side",
-        "[3]Like a geese",
+        "[3]Like geese",
         "[4]Fanned out behind",
         "[5]Fanned out in front",
         "[6]Circle the leader"

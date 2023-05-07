@@ -86,8 +86,8 @@ namespace MMAP
 
     typedef std::unordered_map<uint32, MMapData*> MMapDataSet;
 
-    // singelton class
-    // holds all all access to mmap loading unloading and meshes
+    // singleton class
+    // holds all access to mmap loading unloading and meshes
     class MMapManager
     {
         public:
@@ -123,7 +123,7 @@ namespace MMAP
 
     // static class
     // holds all mmap global data
-    // access point to MMapManager singelton
+    // access point to MMapManager singleton
     class MMapFactory
     {
         public:

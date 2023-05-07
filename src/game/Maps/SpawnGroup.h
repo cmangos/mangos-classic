@@ -100,7 +100,7 @@ class CreatureGroup : public SpawnGroup
         FormationDataSPtr m_formationData;
 };
 
-struct RespawnPosistion
+struct RespawnPosition
 {
     float x, y, z, radius;
 };
@@ -243,7 +243,7 @@ class FormationData
         SpawnGroupFormationType m_currentFormationShape;
         FormationSlotMap m_slotsMap;
         MovementGeneratorType m_masterMotionType;
-        RespawnPosistion m_spawnPos;
+        RespawnPosition m_spawnPos;
 
         bool m_mirrorState;
         bool m_followerStopped;

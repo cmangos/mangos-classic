@@ -1484,7 +1484,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     target->CastSpell(target, 29105, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 return;
             }
-            case 30238:                                     // Lordaeron's Bleesing
+            case 30238:                                     // Lordaeron's Blessing
             {
                 target->RemoveAurasDueToSpell(31906);
                 return;
