@@ -29,6 +29,39 @@
 #include "World/World.h"
 #include "Maps/InstanceData.h"
 
+namespace
+{
+    const char* GetMoveTypeStr(MovementGeneratorType mType)
+    {
+        switch (mType)
+        {
+            case IDLE_MOTION_TYPE:                return "IDLE_MOTION_TYPE";
+            case RANDOM_MOTION_TYPE:              return "RANDOM_MOTION_TYPE";
+            case WAYPOINT_MOTION_TYPE:            return "WAYPOINT_MOTION_TYPE";
+            case LINEAR_WP_MOTION_TYPE:           return "LINEAR_WP_MOTION_TYPE";
+            case PATH_MOTION_TYPE:                return "PATH_MOTION_TYPE";
+            case DISTRACT_MOTION_TYPE:            return "DISTRACT_MOTION_TYPE";
+            case STAY_MOTION_TYPE:                return "STAY_MOTION_TYPE";
+            case FOLLOW_MOTION_TYPE:              return "FOLLOW_MOTION_TYPE";
+            case CHASE_MOTION_TYPE:               return "CHASE_MOTION_TYPE";
+            case RETREAT_MOTION_TYPE:             return "RETREAT_MOTION_TYPE";
+            case TIMED_FLEEING_MOTION_TYPE:       return "TIMED_FLEEING_MOTION_TYPE";
+            case POINT_MOTION_TYPE:               return "POINT_MOTION_TYPE";
+            case HOME_MOTION_TYPE:                return "HOME_MOTION_TYPE";
+            case FLEEING_MOTION_TYPE:             return "FLEEING_MOTION_TYPE";
+            case CONFUSED_MOTION_TYPE:            return "CONFUSED_MOTION_TYPE";
+            case EFFECT_MOTION_TYPE:              return "EFFECT_MOTION_TYPE";
+            case TAXI_MOTION_TYPE:                return "TAXI_MOTION_TYPE";
+            case TIMED_RANDOM_MOTION_TYPE:        return "TIMED_RANDOM_MOTION_TYPE";
+            case EXTERNAL_WAYPOINT_MOVE:          return "EXTERNAL_WAYPOINT_MOVE";
+            case EXTERNAL_WAYPOINT_MOVE_START:    return "EXTERNAL_WAYPOINT_MOVE_START";
+            case EXTERNAL_WAYPOINT_FINISHED_LAST: return "EXTERNAL_WAYPOINT_FINISHED_LAST";
+            case FORMATION_MOTION_TYPE:           return "FORMATION_MOTION_TYPE";
+            default:                              return "UKNOWN_MOTION_TYPE";
+        }
+    }
+}
+
 SpawnGroup::SpawnGroup(SpawnGroupEntry const& entry, Map& map, uint32 typeId) : m_entry(entry), m_map(map), m_objectTypeId(typeId), m_enabled(m_entry.EnabledByDefault)
 {
 }
