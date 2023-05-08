@@ -44,6 +44,8 @@
  #include "Metric/Metric.h"
 #endif
 
+#include <time.h>
+
 Map::~Map()
 {
     UnloadAll(true);
@@ -81,6 +83,16 @@ TimePoint Map::GetCurrentClockTime() const
 uint32 Map::GetCurrentDiff() const
 {
     return World::GetCurrentDiff();
+}
+
+time_t Map::GetCurrentTime_t() const
+{
+    return m_curTime;
+}
+
+tm Map::GetCurrentTime_tm() const
+{
+    return m_curTimeTm;
 }
 
 GenericTransport* Map::GetTransport(ObjectGuid guid)
@@ -657,6 +669,13 @@ void Map::Update(const uint32& t_diff)
 });
 #endif
 
+    m_curTime = time(nullptr);
+
+#ifdef _MSC_VER
+    localtime_s(&m_curTimeTm, &m_curTime);
+#else
+    localtime_r(&m_curTime, &m_curTimeTm);
+#endif
 
     uint64 count = 0;
 

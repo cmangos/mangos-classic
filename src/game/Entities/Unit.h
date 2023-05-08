@@ -1337,6 +1337,7 @@ class Unit : public WorldObject
         uint32 GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 + power); }
         uint32 GetMaxPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_MAXPOWER1 + power); }
         float GetPowerPercent() const { return (GetMaxPower(GetPowerType()) == 0) ? 0.0f : (GetPower(GetPowerType()) * 100.0f) / GetMaxPower(GetPowerType()); }
+        float GetPowerPercent(Powers power) const { return (GetMaxPower(power) == 0) ? 0.0f : (GetPower(power) * 100.0f) / GetMaxPower(power); }
         void SetPower(Powers power, uint32 val);
         void SetMaxPower(Powers power, uint32 val);
         int32 ModifyPower(Powers power, int32 dVal);
@@ -1640,6 +1641,31 @@ class Unit : public WorldObject
         }
         bool HasAuraTypeWithCaster(AuraType auratype, ObjectGuid caster) const;
         bool HasMechanicMaskOrDispelMaskAura(uint32 dispelMask, uint32 mechanicMask, Unit const* caster) const;
+        bool HasNegativeAuraWithInterruptFlag(SpellAuraInterruptFlags flag) const;
+        template<typename Func>
+        bool HasAuraHolder(Func func) const
+        {
+            auto const& Auras = GetSpellAuraHolderMap();
+            for (auto itr = Auras.begin(); itr != Auras.end(); ++itr)
+            {
+                SpellAuraHolder* holder = itr->second;
+                if (func(holder))
+                    return true;
+            }
+            return false;
+        }
+
+        template<typename Func>
+        bool HasAura(Func func, AuraType type) const
+        {
+            auto const& Auras = GetAurasByType(type);
+            for (auto itr = Auras.begin(); itr != Auras.end(); ++itr)
+            {
+                if (func(*itr))
+                    return true;
+            }
+            return false;
+        }
 
         virtual bool HasSpell(uint32 /*spellID*/) const { return false; }
 
@@ -1717,10 +1743,13 @@ class Unit : public WorldObject
         static void CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry const* spellInfo, bool triggered, bool success = true);
         bool CanInitiateAttack() const;
 
-        Unit* SelectAttackingTarget(AttackingTarget target, uint32 position, uint32 spellId, uint32 selectFlags = 0, SelectAttackingTargetParams params = SelectAttackingTargetParams()) const;
-        Unit* SelectAttackingTarget(AttackingTarget target, uint32 position, SpellEntry const* spellInfo = nullptr, uint32 selectFlags = 0, SelectAttackingTargetParams params = SelectAttackingTargetParams()) const;
-        void SelectAttackingTargets(std::vector<Unit*>& selectedTargets, AttackingTarget target, uint32 position, uint32 spellId, uint32 selectFlags = 0, SelectAttackingTargetParams params = SelectAttackingTargetParams()) const;
-        void SelectAttackingTargets(std::vector<Unit*>& selectedTargets, AttackingTarget target, uint32 position, SpellEntry const* spellInfo = nullptr, uint32 selectFlags = 0, SelectAttackingTargetParams params = SelectAttackingTargetParams()) const;
+        Unit* SelectAttackingTarget(AttackingTarget target, uint32 position, uint32 spellId, uint32 selectFlags = 0, SelectAttackingTargetParams params = SelectAttackingTargetParams(), int32 unitConditionId = 0) const;
+        Unit* SelectAttackingTarget(AttackingTarget target, uint32 position, SpellEntry const* spellInfo = nullptr, uint32 selectFlags = 0, SelectAttackingTargetParams params = SelectAttackingTargetParams(), int32 unitConditionId = 0) const;
+        void SelectAttackingTargets(std::vector<Unit*>& selectedTargets, AttackingTarget target, uint32 position, uint32 spellId, uint32 selectFlags = 0, SelectAttackingTargetParams params = SelectAttackingTargetParams(), int32 unitConditionId = 0) const;
+        void SelectAttackingTargets(std::vector<Unit*>& selectedTargets, AttackingTarget target, uint32 position, SpellEntry const* spellInfo = nullptr, uint32 selectFlags = 0, SelectAttackingTargetParams params = SelectAttackingTargetParams(), int32 unitConditionId = 0) const;
+
+        // grid searcher include hiding
+        bool IsUnitConditionSatisfied(int32 unitConditionId, Unit const* otherUnit) const;
 
         void NearTeleportTo(float x, float y, float z, float orientation, bool casting = false, bool transportLeave = false);
         // do not use - kept only for cinematics
@@ -1822,6 +1851,8 @@ class Unit : public WorldObject
         Pet* FindGuardianWithEntry(uint32 entry);
         uint32 CountGuardiansWithEntry(uint32 entry);
 
+        bool HasAnyPet() const;
+
         CharmInfo* GetCharmInfo() const { return m_charmInfo; }
         virtual CharmInfo* InitCharmInfo(Unit* charm);
         virtual void DeleteCharmInfo() { delete m_charmInfo; m_charmInfo = nullptr; }
@@ -1907,6 +1938,7 @@ class Unit : public WorldObject
         void InterruptNonMeleeSpells(bool withDelayed, uint32 spell_id = 0);
         void InterruptSpellsWithChannelFlags(uint32 flags);
         void InterruptSpellsAndAurasWithInterruptFlags(uint32 flags);
+        bool IsInterruptible() const;
 
         Spell* GetCurrentSpell(CurrentSpellTypes spellType) const { return m_currentSpells[spellType]; }
         Spell* FindCurrentSpellBySpellId(uint32 spell_id) const;
@@ -2019,6 +2051,7 @@ class Unit : public WorldObject
         void addHatedBy(HostileReference* pHostileReference) { GetCombatData()->hostileRefManager.insertFirst(pHostileReference); };
         void removeHatedBy(HostileReference* /*pHostileReference*/) { /* nothing to do yet */ }
         HostileRefManager& getHostileRefManager() { return GetCombatData()->hostileRefManager; }
+        HostileRefManager const& getHostileRefManager() const { return GetCombatData()->hostileRefManager; }
         void SetNoThreatState(bool state) { m_noThreat = state; }
         bool GetNoThreatState() { return m_noThreat; }
 
@@ -2192,6 +2225,7 @@ class Unit : public WorldObject
         void removeFollower(FollowerReference* /*pRef*/) { /* nothing to do yet */ }
 
         MotionMaster* GetMotionMaster() { return &i_motionMaster; }
+        MotionMaster const* GetMotionMaster() const { return &i_motionMaster; }
 
         bool IsStopped() const { return !(hasUnitState(UNIT_STAT_MOVING)); }
         void StopMoving(bool forceSendStop = false);
@@ -2318,6 +2352,7 @@ class Unit : public WorldObject
 
         virtual UnitAI* AI() { return nullptr; }
         virtual CombatData* GetCombatData() { return m_combatData; }
+        virtual CombatData const* GetCombatData() const { return m_combatData; }
 
         virtual void SetBaseWalkSpeed(float speed) { m_baseSpeedWalk = speed; }
         virtual void SetBaseRunSpeed(float speed, bool force = true) { m_baseSpeedRun = speed; }
@@ -2368,7 +2403,7 @@ class Unit : public WorldObject
         virtual bool IsNoWeaponSkillGain() const { return false; }
 
     protected:
-        bool MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spellInfo, uint32 selectFlags, SelectAttackingTargetParams params) const;
+        bool MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spellInfo, uint32 selectFlags, SelectAttackingTargetParams params, int32 unitConditionId) const;
 
         struct WeaponDamageInfo
         {

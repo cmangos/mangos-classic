@@ -340,6 +340,8 @@ class Map : public GridRefManager<NGridType>
         uint32 GetCurrentMSTime() const;
         TimePoint GetCurrentClockTime() const;
         uint32 GetCurrentDiff() const;
+        time_t GetCurrentTime_t() const;
+        tm GetCurrentTime_tm() const;
 
         void CreatePlayerOnClient(Player* player);
 
@@ -431,6 +433,8 @@ class Map : public GridRefManager<NGridType>
         GraveyardManager m_graveyardManager;
     private:
         time_t i_gridExpiry;
+        time_t m_curTime;
+        tm m_curTimeTm;
 
         NGridType* i_grids[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
 

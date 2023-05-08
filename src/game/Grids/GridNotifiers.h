@@ -871,6 +871,28 @@ namespace MaNGOS
             bool i_targetSelf;
     };
 
+    class FriendlyEligibleUnitConditionCheck
+    {
+        public:
+            FriendlyEligibleUnitConditionCheck(Unit const* obj, float range, int32 unitConditionId) : i_obj(obj), i_range(range), i_unitConditionId(unitConditionId){}
+            WorldObject const& GetFocusObject() const { return *i_obj; }
+            bool operator()(Unit* u)
+            {
+                if (!u->IsAlive())
+                    return false;
+
+                if (i_obj->CanAssist(u) && i_obj->IsWithinCombatDistInMap(u, i_range))
+                {
+                    return u->IsUnitConditionSatisfied(i_unitConditionId, i_obj);
+                }
+                return false;
+            }
+        private:
+            Unit const* i_obj;
+            float i_range;
+            int32 i_unitConditionId;
+    };
+
     class FriendlyEligibleDispelInRangeCheck
     {
         public:
@@ -953,10 +975,11 @@ namespace MaNGOS
             float i_range;
     };
 
-    class AnyFriendlyUnitInObjectRangeCheck
+    class AnySpellAssistableUnitInObjectRangeCheck
     {
         public:
-            AnyFriendlyUnitInObjectRangeCheck(WorldObject const* obj, SpellEntry const* spellInfo, float range) : i_obj(obj), i_spellInfo(spellInfo), i_range(range) {}
+            AnySpellAssistableUnitInObjectRangeCheck(WorldObject const* obj, SpellEntry const* spellInfo, float range)
+                : i_obj(obj), i_spellInfo(spellInfo), i_range(range) {}
             WorldObject const& GetFocusObject() const { return *i_obj; }
             bool operator()(Unit* u)
             {
@@ -966,6 +989,22 @@ namespace MaNGOS
             WorldObject const* i_obj;
             SpellEntry const* i_spellInfo;
             float i_range;
+    };
+    
+    class AnyFriendlyUnitInObjectRangeCheck
+    {
+        public:
+            AnyFriendlyUnitInObjectRangeCheck(WorldObject const* obj, float range)
+                : i_obj(obj), i_range(range) {}
+            WorldObject const& GetFocusObject() const { return *i_obj; }
+            bool operator()(Unit* u)
+            {
+                return u->IsAlive() && i_obj->IsWithinDistInMap(u, i_range, true);
+            }
+        private:
+            WorldObject const* i_obj;
+            float i_range;
+            bool i_ignorePhase;
     };
 
     class AnyFriendlyOrGroupMemberUnitInUnitRangeCheck

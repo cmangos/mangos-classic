@@ -437,6 +437,7 @@ class UnitAI : public CombatActions
 
         // Returns friendly unit with the most amount of hp missing from max hp - ignoreSelf - some spells cant target self
         Unit* DoSelectLowestHpFriendly(float range, float minMissing = 1.f, bool percent = false, bool targetSelf = true) const;
+        Unit* DoSelectConditionalFriendly(float range, int32 unitConditionId) const;
         float CalculateSpellRange(SpellEntry const* spellInfo) const;
         CreatureList DoFindFriendlyEligibleDispel(uint32 spellId, bool self = true) const;
         CreatureList DoFindFriendlyEligibleDispel(SpellEntry const* spellInfo, bool self = true) const;

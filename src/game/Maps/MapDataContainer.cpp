@@ -21,11 +21,15 @@
 #include "AI/EventAI/CreatureEventAI.h"
 #include "AI/EventAI/CreatureEventAIMgr.h"
 #include "DBScripts/ScriptMgr.h"
+#include "Globals/UnitCondition.h"
+#include "World/WorldStateExpression.h"
+#include "Globals/CombatCondition.h"
 
 MapDataContainer::MapDataContainer() : m_spellListContainer(sObjectMgr.GetCreatureSpellListContainer()),
     m_spawnGroupContainer(sObjectMgr.GetSpawnGroupContainer()), m_CreatureEventAIEventEntryMap(sEventAIMgr.GetCreatureEventEntryAIMap()),
     m_CreatureEventAIEventGuidMap(sEventAIMgr.GetCreatureEventGuidAIMap()), m_creatureEventAIComputedDataMap(sEventAIMgr.GetEAIComputedDataMap()),
-    m_stringIds(sScriptMgr.GetStringIdMap()), m_stringIdsByString(sScriptMgr.GetStringIdByStringMap())
+    m_stringIds(sScriptMgr.GetStringIdMap()), m_stringIdsByString(sScriptMgr.GetStringIdByStringMap()),
+    m_unitConditions(sObjectMgr.GetUnitConditions()), m_worldStateExpressions(sObjectMgr.GetWorldStateExpressions()), m_combatConditions(sObjectMgr.GetCombatConditions())
 {
     for (uint32 i = 0; i < SCRIPT_TYPE_MAX; ++i)
         SetScriptMap(ScriptMapType(i), sScriptMgr.GetScriptMap(ScriptMapType(i)));
@@ -107,6 +111,36 @@ uint32 MapDataContainer::GetStringId(std::string& stringId) const
         return 0;
 
     return itr->second.Id;
+}
+
+void MapDataContainer::SetUnitConditions(std::shared_ptr<std::map<int32, UnitConditionEntry>> unitConditions)
+{
+    m_unitConditions = unitConditions;
+}
+
+void MapDataContainer::SetCombatConditions(std::shared_ptr<std::map<int32, WorldStateExpressionEntry>> worldStateExpressions)
+{
+    m_worldStateExpressions = worldStateExpressions;
+}
+
+void MapDataContainer::SetWorldStateExpressions(std::shared_ptr<std::map<int32, CombatConditionEntry>> combatConditions)
+{
+    m_combatConditions = combatConditions;
+}
+
+std::shared_ptr<std::map<int32, UnitConditionEntry>> MapDataContainer::GetUnitConditions() const
+{
+    return m_unitConditions;
+}
+
+std::shared_ptr<std::map<int32, WorldStateExpressionEntry>> MapDataContainer::GetWorldStateExpressions() const
+{
+    return m_worldStateExpressions;
+}
+
+std::shared_ptr<std::map<int32, CombatConditionEntry>> MapDataContainer::GetCombatConditions() const
+{
+    return m_combatConditions;
 }
 
 void MapDataContainer::SetStringIdMaps(std::shared_ptr<StringIdMap> stringIds, std::shared_ptr<StringIdMapByString> stringIdsByString)

@@ -128,6 +128,21 @@ bool ConditionEntry::Meets(WorldObject const* target, Map const* map, WorldObjec
     return result;
 }
 
+bool ConditionEntry::CheckOp(ConditionOperation op, int32 value, int32 operand)
+{
+    switch (op)
+    {
+        case ConditionOperation::EQUAL_TO: return value == operand;
+        case ConditionOperation::NOT_EQUAL_TO: return value != operand;
+        case ConditionOperation::LESS_THAN: return value < operand;
+        case ConditionOperation::LESS_THAN_OR_EQUAL_TO: return value <= operand;
+        case ConditionOperation::GREATER_THAN: return value > operand;
+        case ConditionOperation::GREATER_THAN_OR_EQUAL_TO: return value >= operand;
+        default: break;
+    }
+    return false;
+}
+
 // Actual evaluation of the condition done here.
 bool inline ConditionEntry::Evaluate(WorldObject const* target, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const
 {
@@ -477,17 +492,8 @@ bool inline ConditionEntry::Evaluate(WorldObject const* target, Map const* map, 
         }
         case CONDITION_WORLDSTATE:
         {
-            uint32 variable = map->GetVariableManager().GetVariable(m_value1);
-            switch (m_value2)
-            {
-                case WORLDSTATE_EQUALS: return variable == m_value3;
-                case WORLDSTATE_GREATER: return variable > m_value3;
-                case WORLDSTATE_GREATER_EQUAL: return variable >= m_value3;
-                case WORLDSTATE_LESS: return variable < m_value3;
-                case WORLDSTATE_LESS_EQUAL: return variable <= m_value3;
-                default: break;
-            }
-            return false;
+            int32 value = map->GetVariableManager().GetVariable(m_value1);
+            return CheckOp(ConditionOperation(m_value2), value, m_value3);
         }
         default:
             break;
@@ -955,7 +961,7 @@ bool ConditionEntry::IsValid() const
         case CONDITION_WORLD_SCRIPT:
             break;
         case CONDITION_WORLDSTATE:
-            if (m_value2 > WORLDSTATE_SIGN_MAX)
+            if (m_value2 > uint32(ConditionOperation::MAX))
             {
                 sLog.outErrorDb("Worldstate condition (entry %u, type %u) has invalid sign %u. Skipping.", m_entry, m_condition, m_value2);
                 return false;

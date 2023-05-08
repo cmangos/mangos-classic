@@ -66,6 +66,20 @@ class ByteBuffer
             byteBuffer.clear();
         }
 
+        // reserve/resize tag
+        struct Reserve { };
+        struct Resize { };
+
+        ByteBuffer(size_t size, Reserve) : _rpos(0), _wpos(0)
+        {
+            _storage.reserve(size);
+        }
+
+        ByteBuffer(size_t size, Resize) : _rpos(0), _wpos(size)
+        {
+            _storage.resize(size);
+        }
+
         ByteBuffer& operator=(const ByteBuffer&) = default;
 
         ByteBuffer& operator=(ByteBuffer&& byteBuffer) noexcept

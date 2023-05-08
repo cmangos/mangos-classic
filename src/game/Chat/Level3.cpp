@@ -59,6 +59,10 @@
 #endif
 #include "Server/PacketLog.h"
 
+#include "Globals/UnitCondition.h"
+#include "Globals/CombatCondition.h"
+#include "World/WorldStateExpression.h"
+
 #ifdef BUILD_AHBOT
 #include "AuctionHouseBot/AuctionHouseBot.h"
 
@@ -1008,7 +1012,9 @@ bool ChatHandler::HandleReloadCreatureCooldownsCommand(char* /*args*/)
 bool ChatHandler::HandleReloadCreatureSpellLists(char* /*args*/)
 {
     sLog.outString("Reloading creature spell lists...");
+    auto conditionsAndExpressions = sObjectMgr.LoadConditionsAndExpressions();
     auto result = sObjectMgr.LoadCreatureSpellLists();
+    auto [unitConditions, worldstateExpressions, combatConditions] = conditionsAndExpressions;
     SendGlobalSysMessage("Reloaded creature spell lists.");
     if (result)
     {

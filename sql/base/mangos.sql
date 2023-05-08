@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2809_01_mangos_creature_equip_drop` bit(1) DEFAULT NULL
+  `required_z2810_01_mangos_spell_list_conditions` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1421,6 +1421,7 @@ Id INT NOT NULL COMMENT 'List ID',
 Position INT NOT NULL COMMENT 'Position on list',
 SpellId INT NOT NULL COMMENT 'Spell ID',
 Flags INT NOT NULL COMMENT 'Spell Flags',
+`CombatCondition` INT(11) NOT NULL DEFAULT -1,
 TargetId INT NOT NULL COMMENT 'Targeting ID',
 ScriptId INT NOT NULL COMMENT 'Dbscript to be launched on success',
 Availability INT NOT NULL COMMENT 'Chance on spawn for spell to be included',
@@ -1440,6 +1441,7 @@ Type INT NOT NULL COMMENT 'Type of targeting ID',
 Param1 INT NOT NULL COMMENT 'First parameter',
 Param2 INT NOT NULL COMMENT 'Second parameter',
 Param3 INT NOT NULL COMMENT 'Third parameter',
+`UnitCondition` INT(11) NOT NULL DEFAULT -1,
 Comments VARCHAR(255) NOT NULL COMMENT 'Description of target',
 PRIMARY KEY(Id)
 );

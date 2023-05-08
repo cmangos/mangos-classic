@@ -50,6 +50,10 @@
 #include "Loot/LootMgr.h"
 #include "World/WorldState.h"
 
+#include "Globals/UnitCondition.h"
+#include "Globals/CombatCondition.h"
+#include "World/WorldStateExpression.h"
+
 #include <limits>
 #include <cstdarg>
 
@@ -128,7 +132,10 @@ ObjectMgr::ObjectMgr() :
     m_GroupIds("Group ids"),
     m_FirstTemporaryCreatureGuid(1),
     m_FirstTemporaryGameObjectGuid(1),
-    m_Dbc2StorageLocaleIndex(DEFAULT_LOCALE)
+    m_Dbc2StorageLocaleIndex(DEFAULT_LOCALE),
+    m_unitConditionMgr(std::make_unique<UnitConditionMgr>()),
+    m_worldStateExpressionMgr(std::make_unique<WorldStateExpressionMgr>()),
+    m_combatConditionMgr(std::make_unique<CombatConditionMgr>(*m_unitConditionMgr, *m_worldStateExpressionMgr))
 {
 }
 
@@ -862,7 +869,7 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
     std::shared_ptr<CreatureSpellListContainer> newContainer = std::make_shared<CreatureSpellListContainer>();
     uint32 count = 0;
 
-    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Id, Type, Param1, Param2, Param3, Comments FROM creature_spell_targeting"));
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Id, Type, Param1, Param2, Param3, UnitCondition, Comments FROM creature_spell_targeting"));
     if (result)
     {
         do
@@ -882,7 +889,8 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
             target.Param1 = fields[2].GetUInt32();
             target.Param2 = fields[3].GetUInt32();
             target.Param3 = fields[4].GetUInt32();
-            target.Comment = fields[5].GetCppString();
+            target.UnitCondition = fields[5].GetInt32();
+            target.Comment = fields[6].GetCppString();
             newContainer->targeting[target.Id] = target;
         } while (result->NextRow());
     }
@@ -909,7 +917,7 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
         } while (result->NextRow());
     }
 
-    result.reset(WorldDatabase.Query("SELECT Id, Position, SpellId, Flags, TargetId, ScriptId, Availability, Probability, InitialMin, InitialMax, RepeatMin, RepeatMax FROM creature_spell_list"));
+    result.reset(WorldDatabase.Query("SELECT Id, Position, SpellId, Flags, CombatCondition, TargetId, ScriptId, Availability, Probability, InitialMin, InitialMax, RepeatMin, RepeatMax FROM creature_spell_list"));
     if (result)
     {
         do
@@ -920,6 +928,7 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
             spell.Position = fields[1].GetUInt32();
             spell.SpellId = fields[2].GetUInt32();
             spell.Flags = fields[3].GetUInt32();
+            spell.CombatCondition = fields[4].GetUInt32();
 
             SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spell.SpellId);
             if (!spellInfo && spell.SpellId != 2) // 2 is attack which is hardcoded in client
@@ -934,7 +943,7 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
                 continue;
             }
 
-            uint32 targetId = fields[4].GetUInt32();
+            uint32 targetId = fields[5].GetUInt32();
             auto itr = newContainer->targeting.find(targetId);
             if (itr == newContainer->targeting.end())
             {
@@ -943,13 +952,13 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
             }
             spell.Target = &(*itr).second;
 
-            spell.ScriptId = fields[5].GetUInt32();
-            spell.Availability = fields[6].GetUInt32();
-            spell.Probability = fields[7].GetUInt32();
-            spell.InitialMin = fields[8].GetUInt32();
-            spell.InitialMax = fields[9].GetUInt32();
-            spell.RepeatMin = fields[10].GetUInt32();
-            spell.RepeatMax = fields[11].GetUInt32();
+            spell.ScriptId = fields[6].GetUInt32();
+            spell.Availability = fields[7].GetUInt32();
+            spell.Probability = fields[8].GetUInt32();
+            spell.InitialMin = fields[9].GetUInt32();
+            spell.InitialMax = fields[10].GetUInt32();
+            spell.RepeatMin = fields[11].GetUInt32();
+            spell.RepeatMax = fields[12].GetUInt32();
             spell.DisabledForAI = !spellInfo || spellInfo->HasAttribute(SPELL_ATTR_EX_NO_AUTOCAST_AI);
             newContainer->spellLists[spell.Id].Spells.emplace(spell.Position, spell);
         } while (result->NextRow());
@@ -1321,8 +1330,8 @@ void ObjectMgr::LoadSpawnGroups()
         }
     }
 
-    m_spawnGroupEntries = newContainer;
-    sLog.outString(">> Loaded %u spawn_group definitions", uint32(m_spawnGroupEntries->spawnGroupMap.size()));
+    m_spawnGroupContainer = newContainer;
+    sLog.outString(">> Loaded %u spawn_group definitions", uint32(m_spawnGroupContainer->spawnGroupMap.size()));
     sLog.outString();
 }
 
@@ -7597,6 +7606,29 @@ void ObjectMgr::LoadBroadcastTextLocales()
     sLog.outString();
 }
 
+std::tuple<std::shared_ptr<std::map<int32, UnitConditionEntry>>, std::shared_ptr<std::map<int32, WorldStateExpressionEntry>>, std::shared_ptr<std::map<int32, CombatConditionEntry>>> ObjectMgr::LoadConditionsAndExpressions()
+{
+    auto unitConditions = m_unitConditionMgr->Load();
+    auto worldstateExpressions = m_worldStateExpressionMgr->Load();
+    auto combatConditions = m_combatConditionMgr->Load();
+    return { unitConditions , worldstateExpressions, combatConditions };
+}
+
+std::shared_ptr<std::map<int32, UnitConditionEntry>> ObjectMgr::GetUnitConditions()
+{
+    return m_unitConditionMgr->Get();
+}
+
+std::shared_ptr<std::map<int32, WorldStateExpressionEntry>> ObjectMgr::GetWorldStateExpressions()
+{
+    return m_worldStateExpressionMgr->Get();
+}
+
+std::shared_ptr<std::map<int32, CombatConditionEntry>> ObjectMgr::GetCombatConditions()
+{
+    return m_combatConditionMgr->Get();
+}
+
 void ObjectMgr::DeleteCreatureData(uint32 guid)
 {
     // remove mapid*cellid -> guid_set map
@@ -8323,6 +8355,21 @@ bool ObjectMgr::IsConditionSatisfied(uint32 conditionId, WorldObject const* targ
         return condition->Meets(target, map, source, conditionSourceType);
 
     return false;
+}
+
+bool ObjectMgr::IsWorldStateExpressionSatisfied(int32 expressionId, Unit const* source)
+{
+    return m_worldStateExpressionMgr->Meets(source, expressionId);
+}
+
+bool ObjectMgr::IsUnitConditionSatisfied(int32 conditionId, Unit const* source, Unit const* target)
+{
+    return m_unitConditionMgr->Meets(source, target, conditionId);
+}
+
+bool ObjectMgr::IsCombatConditionSatisfied(int32 conditionId, Unit const* source, float range)
+{
+    return m_combatConditionMgr->Meets(source, conditionId, range);
 }
 
 SkillRangeType GetSkillRangeType(SkillLineEntry const* pSkill, bool racial)

@@ -35,10 +35,20 @@
 #include "Maps/SpawnGroupDefines.h"
 
 #include <map>
+#include <climits>
+#include <memory>
+#include <tuple>
 
 class Group;
 class Item;
 class SQLStorage;
+class UnitConditionMgr;
+class CombatConditionMgr;
+class WorldStateExpressionMgr;
+
+struct UnitConditionEntry;
+struct CombatConditionEntry;
+struct WorldStateExpressionEntry;
 
 struct GameTele
 {
@@ -738,6 +748,11 @@ class ObjectMgr
         void LoadBroadcastText();
         void LoadBroadcastTextLocales();
 
+        std::tuple<std::shared_ptr<std::map<int32, UnitConditionEntry>>, std::shared_ptr<std::map<int32, WorldStateExpressionEntry>>, std::shared_ptr<std::map<int32, CombatConditionEntry>>> LoadConditionsAndExpressions();
+        std::shared_ptr<std::map<int32, UnitConditionEntry>> GetUnitConditions();
+        std::shared_ptr<std::map<int32, WorldStateExpressionEntry>> GetWorldStateExpressions();
+        std::shared_ptr<std::map<int32, CombatConditionEntry>> GetCombatConditions();
+
         /// @param _map Map* of the map for which to load active entities. If nullptr active entities on continents are loaded
         void LoadActiveEntities(Map* _map);
 
@@ -1009,7 +1024,11 @@ class ObjectMgr
 
         // Check if a player meets condition conditionId
         bool IsConditionSatisfied(uint32 conditionId, WorldObject const* target, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const;
-        
+
+        bool IsWorldStateExpressionSatisfied(int32 expressionId, Unit const* source);
+        bool IsUnitConditionSatisfied(int32 conditionId, Unit const* source, Unit const* target);
+        bool IsCombatConditionSatisfied(int32 expressionId, Unit const* source, float range);
+
         GameTele const* GetGameTele(uint32 id) const
         {
             GameTeleMap::const_iterator itr = m_GameTeleMap.find(id);
@@ -1174,7 +1193,7 @@ class ObjectMgr
 
         CreatureSpellList* GetCreatureSpellList(uint32 Id) const; // only for starttime checks - else use Map
         std::shared_ptr<CreatureSpellListContainer> GetCreatureSpellListContainer() { return m_spellListContainer; }
-        std::shared_ptr<SpawnGroupEntryContainer> GetSpawnGroupContainer() { return m_spawnGroupEntries; }
+        std::shared_ptr<SpawnGroupEntryContainer> GetSpawnGroupContainer() { return m_spawnGroupContainer; }
 
         bool HasWorldStateName(int32 Id) const;
         WorldStateName* GetWorldStateName(int32 Id);
@@ -1336,9 +1355,13 @@ class ObjectMgr
 
         std::shared_ptr<CreatureSpellListContainer> m_spellListContainer;
 
-        std::shared_ptr<SpawnGroupEntryContainer> m_spawnGroupEntries;
+        std::shared_ptr<SpawnGroupEntryContainer> m_spawnGroupContainer;
 
         std::map<int32, WorldStateName> m_worldStateNames;
+
+        std::unique_ptr<UnitConditionMgr> m_unitConditionMgr;
+        std::unique_ptr<WorldStateExpressionMgr> m_worldStateExpressionMgr;
+        std::unique_ptr<CombatConditionMgr> m_combatConditionMgr;
 };
 
 #define sObjectMgr MaNGOS::Singleton<ObjectMgr>::Instance()

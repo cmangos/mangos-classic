@@ -982,6 +982,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Creature immunities...");
     sObjectMgr.LoadCreatureImmunities();
 
+    sLog.outString("Loading Combat Conditions, Unit Conditions and Worldstate Expressions...");
+    sObjectMgr.LoadConditionsAndExpressions();
+
     sLog.outString("Loading Creature spell lists...");
     sObjectMgr.LoadCreatureSpellLists();
 
