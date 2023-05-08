@@ -344,8 +344,7 @@ namespace MMAP
         DETAIL_LOG("MMAP:loadGameObject: Loaded file %s [size=%u]", fileName, fileHeader.size);
         delete[] fileName;
 
-        MMapGOData* mmap_data = new MMapGOData(mesh);
-        m_loadedModels.insert(std::pair<uint32, MMapGOData*>(displayId, mmap_data));
+        m_loadedModels.emplace(displayId, std::make_unique<MMapGOData>(mesh));
         return true;
     }
 
@@ -499,18 +498,18 @@ namespace MMAP
             return nullptr;
 
         auto threadId = std::this_thread::get_id();
-        MMapGOData* mmap = m_loadedModels[displayId];
-        if (mmap->navMeshGOQueries.find(threadId) == mmap->navMeshGOQueries.end())
+        const auto& mmapGOData = m_loadedModels[displayId];
+        if (mmapGOData->navMeshGOQueries.find(threadId) == mmapGOData->navMeshGOQueries.end())
         {
             std::lock_guard<std::mutex> guard(m_modelsMutex);
-            if (mmap->navMeshGOQueries.find(threadId) == mmap->navMeshGOQueries.end())
+            if (mmapGOData->navMeshGOQueries.find(threadId) == mmapGOData->navMeshGOQueries.end())
             {
                 // allocate mesh query
                 std::stringstream ss;
                 ss << threadId;
                 dtNavMeshQuery* query = dtAllocNavMeshQuery();
                 MANGOS_ASSERT(query);
-                if (dtStatusFailed(query->init(mmap->navMesh, 2048)))
+                if (dtStatusFailed(query->init(mmapGOData->navMesh, 2048)))
                 {
                     dtFreeNavMeshQuery(query);
                     sLog.outError("MMAP:GetNavMeshQuery: Failed to initialize dtNavMeshQuery for displayid %03u tid %s", displayId, ss.str().data());
@@ -518,10 +517,10 @@ namespace MMAP
                 }
 
                 DETAIL_LOG("MMAP:GetNavMeshQuery: created dtNavMeshQuery for displayid %03u tid %s", displayId, ss.str().data());
-                mmap->navMeshGOQueries.insert(std::pair<std::thread::id, dtNavMeshQuery*>(threadId, query));
+                mmapGOData->navMeshGOQueries.insert(std::pair<std::thread::id, dtNavMeshQuery*>(threadId, query));
             }
         }
 
-        return mmap->navMeshGOQueries[threadId];
+        return mmapGOData->navMeshGOQueries[threadId];
     }
 }
