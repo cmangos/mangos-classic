@@ -1177,12 +1177,13 @@ class WorldObject : public Object
 
         void AddStringId(std::string& stringId);
         void RemoveStringId(std::string& stringId);
-        bool HasStringId(uint32 stringId) const;
+        bool HasStringId(std::string& stringId) const;
+
+        bool HasStringId(uint32 stringId) const; // not to be used in sd2
+        void SetStringId(uint32 stringId, bool apply); // not to be used outside of scriptmgr
 
     protected:
         explicit WorldObject();
-
-        void SetStringId(uint32 stringId, bool apply);
 
         // these functions are used mostly for Relocate() and Corpse/Player specific stuff...
         // use them ONLY in LoadFromDB()/Create() funcs and nowhere else!

@@ -928,6 +928,19 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
                 }
                 break;
             }
+            case SCRIPT_COMMAND_SET_STRING_ID:              // 55
+            {
+                if (!ExistsStringId(tmp.stringId.stringId))
+                {
+                    sLog.outErrorDb("Table `%s` has invalid string_id id assigned %d", tablename, tmp.stringId.stringId);
+                    continue;
+                }
+                if (tmp.stringId.apply > 1)
+                {
+                    sLog.outErrorDb("Table `%s` has invalid apply (0 or 1) assigned %d", tablename, tmp.stringId.apply);
+                    continue;
+                }
+            }
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -3200,6 +3213,11 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 break;
 
             static_cast<Unit*>(pSource)->SetSheath(SheathState(m_script->setSheathe.sheatheState));
+            break;
+        }
+        case SCRIPT_COMMAND_SET_STRING_ID:
+        {
+            pSource->SetStringId(m_script->stringId.stringId, m_script->stringId.apply);
             break;
         }
         default:

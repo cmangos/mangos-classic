@@ -137,7 +137,8 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_SPAWN_GROUP              = 51,           // dalalong = command
     SCRIPT_COMMAND_SET_GOSSIP_MENU          = 52,           // datalong = gossip_menu_id
     SCRIPT_COMMAND_SET_WORLDSTATE           = 53,           // dataint = worldstate id, dataint2 = new value, 
-    SCRIPT_COMMAND_SET_SHEATHE              = 54,           // dataint = worldstate id, dataint2 = new value, 
+    SCRIPT_COMMAND_SET_SHEATHE              = 54,           // dataint = worldstate id, dataint2 = new value,
+    SCRIPT_COMMAND_SET_STRING_ID            = 55,           // datalong = string_id id, datalong2 = 0 unapply, 1 apply
     SCRIPT_COMMAND_MEETINGSTONE             = 200,          // datalong = area id - vanilla only
 };
 
@@ -470,6 +471,12 @@ struct ScriptInfo
         {
             uint32 sheatheState;                            // datalong
         } setSheathe;
+
+        struct                                              // SCRIPT_COMMAND_SET_STRING_ID (55)
+        {
+            uint32 stringId;                                // datalong
+            uint32 apply;                                   // datalong2
+        } stringId;
 
         struct
         {

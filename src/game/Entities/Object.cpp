@@ -1137,6 +1137,11 @@ void WorldObject::RemoveStringId(std::string& stringId)
         SetStringId(stringIdId, false);
 }
 
+bool WorldObject::HasStringId(std::string& stringId) const
+{
+    return HasStringId(GetMap()->GetMapDataContainer().GetStringId(stringId));
+}
+
 bool WorldObject::HasStringId(uint32 stringId) const
 {
     return m_stringIds.find(stringId) != m_stringIds.end();
