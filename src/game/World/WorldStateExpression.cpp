@@ -200,7 +200,7 @@ static int32(* const WorldStateExpressionFunctions[WSE_FUNCTION_MAX])(Unit const
         return 0;
     },
 
-        // WSE_FUNCTION_WORLD_STATE_EXPRESSION
+    // WSE_FUNCTION_WORLD_STATE_EXPRESSION
     [](Unit const* unit, uint32 arg1, uint32 /*arg2*/) -> int32
     {
         return sObjectMgr.IsWorldStateExpressionSatisfied(arg1, unit);
