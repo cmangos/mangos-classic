@@ -12117,8 +12117,8 @@ bool Unit::MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spell
         }
     }
 
-    if (unitConditionId)
-        sObjectMgr.IsUnitConditionSatisfied(unitConditionId, target, this);
+    if (unitConditionId && !sObjectMgr.IsUnitConditionSatisfied(unitConditionId, target, this))
+        return false;
 
     return true;
 }
