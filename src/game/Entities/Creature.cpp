@@ -144,7 +144,7 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_originalEntry(0), m_gameEventVendorId(0),
     m_immunitySet(UINT32_MAX), m_ai(nullptr),
     m_isInvisible(false), m_ignoreMMAP(false), m_forceAttackingCapability(false),
-    m_noXP(false), m_noLoot(false), m_noReputation(false), m_noWoundedSlowdown(false), m_ignoringFeignDeath(false), m_noWeaponSkillGain(false),
+    m_settings(this),
     m_countSpawns(false),
     m_creatureGroup(nullptr), m_imposedCooldown(false),
     m_creatureInfo(nullptr)
@@ -442,13 +442,8 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
     SetCanBlock(!(cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_BLOCK));
     SetCanDualWield((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_DUAL_WIELD_FORCED));
     SetForceAttackingCapability((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_FORCE_ATTACKING_CAPABILITY) != 0);
-    SetNoXP((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_XP_AT_KILL) != 0);
     SetCanCallForAssistance((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_CALL_ASSIST) == 0);
-    SetNoLoot(false);
     SetNoReputation(false);
-    SetNoWoundedSlowdown((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_WOUNDED_SLOWDOWN) != 0);
-    SetIgnoreFeignDeath((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_IGNORE_FEIGN_DEATH) != 0);
-    SetNoWeaponSkillGain((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_SKILL_GAINS) != 0);
 
     SetDetectionRange(cinfo->Detection);
 
@@ -607,6 +602,9 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
 
     if (data && data->spawnTemplate->stringId)
         SetStringId(data->spawnTemplate->stringId, true);
+
+    // static flags implementation
+    m_settings.ResetStaticFlags(CreatureStaticFlags(GetCreatureInfo()->StaticFlags), CreatureStaticFlags2(GetCreatureInfo()->StaticFlags2), CreatureStaticFlags3(GetCreatureInfo()->StaticFlags3), CreatureStaticFlags4(GetCreatureInfo()->StaticFlags4));
 
     return true;
 }
@@ -2793,6 +2791,88 @@ void Creature::LockOutSpells(SpellSchoolMask schoolMask, uint32 duration)
     WorldObject::LockOutSpells(schoolMask, duration);
 }
 
+void Creature::SetNoRewards()
+{
+    SetNoXP(true);
+    SetNoLoot(true);
+    SetNoReputation(true);
+}
+
+bool Creature::IsNoXp()
+{
+    return m_settings.HasFlag(CreatureStaticFlags::NO_XP);
+}
+
+void Creature::SetNoXP(bool state)
+{
+    if (state)
+        m_settings.SetFlag(CreatureStaticFlags::NO_XP);
+    else
+        m_settings.RemoveFlag(CreatureStaticFlags::NO_XP);
+}
+
+bool Creature::IsNoLoot()
+{
+    return m_settings.HasFlag(CreatureStaticFlags::NO_LOOT);
+}
+
+void Creature::SetNoLoot(bool state)
+{
+    if (state)
+        m_settings.SetFlag(CreatureStaticFlags::NO_LOOT);
+    else
+        m_settings.RemoveFlag(CreatureStaticFlags::NO_LOOT);
+}
+
+bool Creature::IsIgnoringFeignDeath() const
+{
+    return m_settings.HasFlag(CreatureStaticFlags2::IGNORE_FEIGN_DEATH);
+}
+
+void Creature::SetIgnoreFeignDeath(bool state)
+{
+    if (state)
+        m_settings.SetFlag(CreatureStaticFlags2::IGNORE_FEIGN_DEATH);
+    else
+        m_settings.RemoveFlag(CreatureStaticFlags2::IGNORE_FEIGN_DEATH);
+}
+
+void Creature::SetNoWoundedSlowdown(bool state)
+{
+    if (state)
+        m_settings.SetFlag(CreatureStaticFlags2::NO_WOUNDED_SLOWDOWN);
+    else
+        m_settings.RemoveFlag(CreatureStaticFlags2::NO_WOUNDED_SLOWDOWN);
+}
+
+bool Creature::IsNoWoundedSlowdown() const
+{
+    return m_settings.HasFlag(CreatureStaticFlags2::NO_WOUNDED_SLOWDOWN);
+}
+
+bool Creature::IsSlowedInCombat() const
+{
+    return !IsNoWoundedSlowdown() && HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT);
+}
+
+void Creature::SetNoWeaponSkillGain(bool state)
+{
+    if (state)
+        m_settings.SetFlag(CreatureStaticFlags2::NO_SKILL_GAINS);
+    else
+        m_settings.RemoveFlag(CreatureStaticFlags2::NO_SKILL_GAINS);
+}
+
+bool Creature::IsNoWeaponSkillGain() const
+{
+    return m_settings.HasFlag(CreatureStaticFlags2::NO_SKILL_GAINS);
+}
+
+bool Creature::IsPreventingDeath() const
+{
+    return m_settings.HasFlag(CreatureStaticFlags::UNKILLABLE);
+}
+
 bool Creature::IsCorpseExpired() const
 {
     auto now = GetMap()->GetCurrentClockTime();
@@ -2878,11 +2958,6 @@ void Creature::Heartbeat()
 
     if (GetDetectionRange() > MAX_CREATURE_ATTACK_RADIUS && CanAggro())
         ScheduleAINotify(0);
-}
-
-bool Creature::IsSlowedInCombat() const
-{
-    return !IsNoWoundedSlowdown() && HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT);
 }
 
 void Creature::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* /*itemProto*/, bool permanent, uint32 forcedDuration)

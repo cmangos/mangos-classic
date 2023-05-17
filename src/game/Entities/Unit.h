@@ -2401,6 +2401,7 @@ class Unit : public WorldObject
         void SetFormationSlot(FormationSlotDataSPtr fSlot) { m_formationSlot = fSlot; }
 
         virtual bool IsNoWeaponSkillGain() const { return false; }
+        virtual bool IsPreventingDeath() const { return false; }
 
     protected:
         bool MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spellInfo, uint32 selectFlags, SelectAttackingTargetParams params, int32 unitConditionId) const;

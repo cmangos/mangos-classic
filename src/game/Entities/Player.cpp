@@ -18740,7 +18740,7 @@ bool Player::isHonorOrXPTarget(Unit* pVictim) const
     {
         Creature* npc = static_cast<Creature*>(pVictim);
 
-        if (npc->IsTotem() || npc->IsPet() || npc->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_XP_AT_KILL)
+        if (npc->IsTotem() || npc->IsPet() || npc->IsNoXp())
             return false;
     }
     return true;
