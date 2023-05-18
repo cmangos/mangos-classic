@@ -18,6 +18,7 @@
 
 #include "Entities/CreatureSettings.h"
 #include "Entities/Creature.h"
+#include "AI/BaseAI/CreatureAI.h"
 
 static_assert(std::is_enum_v<CreatureStaticFlags>, "Not enum type");
 

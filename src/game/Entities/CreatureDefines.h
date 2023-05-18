@@ -27,7 +27,7 @@
 enum class CreatureStaticFlags : uint32
 {
     MOUNTABLE                   = 0x00000001,
-    NO_XP                       = 0x00000002, // CREATURE_FLAG_EXTRA_NO_XP
+    NO_XP                       = 0x00000002,
     NO_LOOT                     = 0x00000004,
     UNKILLABLE                  = 0x00000008,
     TAMEABLE                    = 0x00000010, // CREATURE_TYPE_FLAG_TAMEABLE
@@ -68,11 +68,11 @@ enum class CreatureStaticFlags2 : uint32
     FORCE_PARTY_MEMBERS_INTO_COMBAT     = 0x00000002, // Original description: Force Raid Combat
     LOCK_TAPPERS_TO_RAID_ON_DEATH       = 0x00000004, // "Lock Tappers To Raid On Death", toggleable by 'Set "RAID_LOCK_ON_DEATH" flag for unit(s)' action, CREATURE_FLAG_EXTRA_INSTANCE_BIND
     SPELL_ATTACKABLE                    = 0x00000008, // CREATURE_TYPE_FLAG_SPELL_ATTACKABLE, original description(not valid anymore?): No Harmful Vertex Coloring
-    NO_CRUSHING_BLOWS                   = 0x00000010, // CREATURE_FLAG_EXTRA_NO_CRUSHING_BLOWS
+    NO_CRUSHING_BLOWS                   = 0x00000010,
     NO_OWNER_THREAT                     = 0x00000020,
     NO_WOUNDED_SLOWDOWN                 = 0x00000040,
     USE_CREATOR_BONUSES                 = 0x00000080,
-    IGNORE_FEIGN_DEATH                  = 0x00000100, // CREATURE_FLAG_EXTRA_IGNORE_FEIGN_DEATH
+    IGNORE_FEIGN_DEATH                  = 0x00000100,
     IGNORE_SANCTUARY                    = 0x00000200,
     ACTION_TRIGGERS_WHILE_CHARMED       = 0x00000400,
     INTERACT_WHILE_DEAD                 = 0x00000800, // CREATURE_TYPE_FLAG_INTERACT_WHILE_DEAD
@@ -94,7 +94,7 @@ enum class CreatureStaticFlags2 : uint32
     SERVER_ONLY                         = 0x08000000,
     CAN_SAFE_FALL                       = 0x10000000, // Original description: No Collision
     CAN_ASSIST                          = 0x20000000, // CREATURE_TYPE_FLAG_CAN_ASSIST, original description: Player Can Heal/Buff
-    NO_SKILL_GAINS                      = 0x40000000, // CREATURE_FLAG_EXTRA_NO_SKILL_GAINS
+    NO_SKILL_GAINS                      = 0x40000000,
     NO_PET_BAR                          = 0x80000000  // CREATURE_TYPE_FLAG_NO_PET_BAR
 };
 
