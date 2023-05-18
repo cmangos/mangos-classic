@@ -1522,6 +1522,10 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
         return false;
     }
 
+    // Creature can be loaded already in map if grid has been unloaded while creature walk to another grid
+    if (map->GetCreature(dbGuid))
+        return false;
+
     uint32 entry = forcedEntry ? forcedEntry : data->id;
 
     // get data for dual spawn instances
@@ -1562,10 +1566,6 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
 
     if (dynguid || newGuid == 0)
         newGuid = map->GenerateLocalLowGuid(cinfo->GetHighGuid());
-
-    // Creature can be loaded already in map if grid has been unloaded while creature walk to another grid
-    if (map->GetCreature(dbGuid))
-        return false;
 
     CreatureCreatePos pos(map, data->posX, data->posY, data->posZ, data->orientation);
 
