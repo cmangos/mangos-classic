@@ -102,8 +102,6 @@ CreatureEventAI::CreatureEventAI(Creature* creature) : CreatureAI(creature),
 void CreatureEventAI::InitAI()
 {
     m_CreatureEventAIList.clear();
-    m_distanceSpells.clear();
-    m_mainSpells.clear();
 
     auto processMap = [&](const CreatureEventAI_Event_Vec& creatureEvent)
     {
