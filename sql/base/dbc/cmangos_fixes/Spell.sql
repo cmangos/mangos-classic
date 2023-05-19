@@ -280,6 +280,7 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 4044,  -- Target Dummy Passive
 4133,  -- Bruise
 6742,  -- Bloodlust
+8852,  -- Moss Hide
 11816, -- Land Mine Arming
 13879, -- Magma Splash
 17205, -- Winterfall Firewater
