@@ -486,8 +486,8 @@ class UnitAI : public CombatActions
         void AttackSpecificEnemy(std::function<void(Unit*,Unit*&)> check);
         virtual void AttackClosestEnemy();
 
-        void SetRootSelf(bool apply, bool combatOnly = false); // must call parent JustDied if this is used
-        void ClearSelfRoot();
+        void SetAIImmobilizedState(bool apply, bool combatOnly = false); // must call parent JustDied if this is used
+        void ClearCombatOnlyRoot();
 
         virtual void HandleDelayedInstantAnimation(SpellEntry const* spellInfo);
         virtual bool IsTargetingRestricted() { return GetCombatScriptStatus(); }
@@ -590,7 +590,7 @@ class UnitAI : public CombatActions
         bool m_dismountOnAggro;
 
         bool m_meleeEnabled;                              // If we allow melee auto attack
-        bool m_selfRooted;
+        bool m_combatOnlyRoot;
 
         ReactStates m_reactState;
 

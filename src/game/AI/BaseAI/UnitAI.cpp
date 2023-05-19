@@ -47,7 +47,7 @@ UnitAI::UnitAI(Unit* unit, uint32 combatActions) :
     m_combatMovementStarted(false),
     m_dismountOnAggro(true),
     m_meleeEnabled(true),
-    m_selfRooted(false),
+    m_combatOnlyRoot(false),
     m_reactState(REACT_AGGRESSIVE),
     m_combatScriptHappening(false),
     m_currentAIOrder(ORDER_NONE),
@@ -112,7 +112,7 @@ void UnitAI::EnterCombat(Unit*)
 
 void UnitAI::EnterEvadeMode()
 {
-    ClearSelfRoot();
+    ClearCombatOnlyRoot();
     m_unit->RemoveAllAurasOnEvade();
     m_unit->CombatStopWithPets(true);
 
@@ -131,7 +131,7 @@ void UnitAI::EnterEvadeMode()
 
 void UnitAI::JustDied(Unit* killer)
 {
-    ClearSelfRoot();
+    ClearCombatOnlyRoot();
 }
 
 void UnitAI::AttackedBy(Unit* attacker)
@@ -895,19 +895,25 @@ void UnitAI::AttackClosestEnemy()
     });
 }
 
-void UnitAI::SetRootSelf(bool apply, bool combatOnly)
+void UnitAI::SetAIImmobilizedState(bool apply, bool combatOnly)
 {
     if (combatOnly)
-        m_selfRooted = apply;
+        m_combatOnlyRoot = apply;
+
+    if (apply)
+        m_unit->addUnitState(UNIT_STAT_AI_ROOT);
+    else
+        m_unit->clearUnitState(UNIT_STAT_AI_ROOT);
+
     m_unit->SetImmobilizedState(apply);
 }
 
-void UnitAI::ClearSelfRoot()
+void UnitAI::ClearCombatOnlyRoot()
 {
-    if (m_selfRooted)
+    if (m_combatOnlyRoot)
     {
         m_unit->SetImmobilizedState(false);
-        m_selfRooted = false;
+        m_combatOnlyRoot = false;
     }
 }
 
