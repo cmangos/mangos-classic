@@ -866,6 +866,9 @@ bool Creature::AIM_Initialize()
     if (InstanceData* mapInstance = GetInstanceData())
         mapInstance->OnCreatureRespawn(this);
 
+    if (GetSettings().HasFlag(CreatureStaticFlags::CREATOR_LOOT))
+        SetLootRecipient(GetCreator());
+
     return true;
 }
 
@@ -1808,7 +1811,10 @@ void Creature::SetDeathState(DeathState s)
 
         ResetSpellHitCounter();
 
-        SetLootRecipient(nullptr);
+        if (GetSettings().HasFlag(CreatureStaticFlags::CREATOR_LOOT))
+            SetLootRecipient(GetCreator());
+        else
+            SetLootRecipient(nullptr);
         if (GetTemporaryFactionFlags() & TEMPFACTION_RESTORE_RESPAWN)
             ClearTemporaryFaction();
 
