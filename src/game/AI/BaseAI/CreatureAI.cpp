@@ -31,6 +31,7 @@ CreatureAI::CreatureAI(Creature* creature, uint32 combatActions) :
     m_deathPrevented(false), m_followAngle(0.f), m_followDist(0.f)
 {
     m_dismountOnAggro = !(m_creature->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_MOUNTED_COMBAT);
+    SetMeleeEnabled(!m_creature->GetSettings().HasFlag(CreatureStaticFlags::NO_MELEE_FLEE));
 
     SetMeleeEnabled(!(m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE));
     if (m_creature->IsNoAggroOnSight())
@@ -50,7 +51,7 @@ void CreatureAI::EnterCombat(Unit* enemy)
 {
     UnitAI::EnterCombat(enemy);
     // TODO: Monitor this condition to see if it conflicts with any pets
-    if (m_creature->IsCritter() && !m_creature->IsPet() && !m_creature->IsInPanic() && enemy && enemy->IsPlayerControlled())
+    if (m_creature->GetSettings().HasFlag(CreatureStaticFlags::NO_MELEE_FLEE) && !m_creature->IsRooted() && !m_creature->IsInPanic() && enemy && enemy->IsPlayerControlled())
     {
         DoFlee(30000);
         SetAIOrder(ORDER_CRITTER_FLEE); // mark as critter flee for custom handling

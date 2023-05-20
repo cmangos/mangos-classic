@@ -46,7 +46,7 @@ enum class CreatureStaticFlags : uint32
     COMBAT_PING                 = 0x00020000,
     AQUATIC                     = 0x00040000, // aka Water Only, creature_template_movement.Ground = 0
     AMPHIBIOUS                  = 0x00080000, // creature_template_movement.Swim = 1
-    NO_MELEE                    = 0x00100000, // "No Melee (Flee)" Prevents melee(does not prevent chasing, does not make creature passive). Not sure what 'Flee' means but another flag is named NO_MELEE_APPROACH
+    NO_MELEE_FLEE               = 0x00100000, // Prevents melee and makes npc flee if it enters combat - also misused to just prevent melee on npcs that cant move
     VISIBLE_TO_GHOSTS           = 0x00200000, // CREATURE_TYPE_FLAG_VISIBLE_TO_GHOSTS
     PVP_ENABLING                = 0x00400000, // Old UNIT_FLAG_PVP_ENABLING, now UNIT_BYTES_2_OFFSET_PVP_FLAG from UNIT_FIELD_BYTES_2
     DO_NOT_PLAY_WOUND_ANIM      = 0x00800000, // CREATURE_TYPE_FLAG_DO_NOT_PLAY_WOUND_ANIM
