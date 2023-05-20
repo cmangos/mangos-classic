@@ -166,7 +166,7 @@ int32 UnitConditionMgr::getConditionValue(Unit const* source, Unit const* target
         case UnitCondition::HAS_HARMFUL_AURA_SCHOOL:
             return source->HasAuraHolder([value](SpellAuraHolder* holder)
             {
-                return !holder->IsPositive() && GetSpellSchoolMask(holder->GetSpellProto()) & (1 << value);
+                return !holder->IsPositive() && holder->GetSpellProto()->GetSchoolMask() & (1 << value);
             }) ? value : 0;
         case UnitCondition::DAMAGE_PHYSICAL: break;
         case UnitCondition::DAMAGE_HOLY: break;
