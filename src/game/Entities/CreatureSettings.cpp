@@ -108,7 +108,8 @@ void CreatureSettings::updateFlag(CreatureStaticFlags flag, bool apply)
     {
         case CreatureStaticFlags::UNKILLABLE:
             if (apply)
-                static_cast<CreatureAI*>(m_owner->AI())->ResetDeathPrevented();
+                if (UnitAI* ai = m_owner->AI())
+                    static_cast<CreatureAI*>(ai)->ResetDeathPrevented();
             break;
         case CreatureStaticFlags::NO_MELEE_FLEE:
             m_owner->AI()->SetMeleeEnabled(!apply);
