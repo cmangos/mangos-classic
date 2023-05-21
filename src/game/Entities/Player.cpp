@@ -6448,10 +6448,10 @@ void Player::UpdateHonor()
     SetHonorLastWeekStandingPos(sObjectMgr.GetHonorStandingPositionByGUID(GetGUIDLow(), GetTeam()));
 
     // RANK POINTS
-    HonorStanding* standing = sObjectMgr.GetHonorStandingByGUID(GetGUIDLow(), GetTeam());
+    HonorStanding standing = sObjectMgr.GetHonorStandingByGUID(GetGUIDLow(), GetTeam());
     float rankP = GetStoredHonor();
     if (standing)
-        rankP += standing->rpEarning;
+        rankP += standing.rpEarning;
 
     SetRankPoints(rankP);
 
