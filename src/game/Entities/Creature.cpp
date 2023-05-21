@@ -1526,8 +1526,11 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
     }
 
     // Creature can be loaded already in map if grid has been unloaded while creature walk to another grid
-    if (map->GetCreature(dbGuid))
-        return false;
+    {
+        Creature* existing = map->GetCreature(dbGuid);
+        if (existing && existing->IsAlive())
+            return false;
+    }
 
     uint32 entry = forcedEntry ? forcedEntry : data->id;
 
