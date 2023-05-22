@@ -151,13 +151,13 @@ namespace MaNGOS
             for (uint8 i = 1; i <= 13; i++)
             {
                 honor = 0.0f;
-                tempSt = sObjectMgr.GetHonorStandingByPosition(sc.BRK[i], team);
+                std::optional<HonorStanding> tempSt = sObjectMgr.GetHonorStandingByPosition(sc.BRK[i], team);
                 if (tempSt)
                 {
-                    honor += tempSt.honorPoints;
+                    honor += tempSt.value().honorPoints;
                     tempSt = sObjectMgr.GetHonorStandingByPosition(sc.BRK[i] + 1, team);
                     if (tempSt)
-                        honor += tempSt.honorPoints;
+                        honor += tempSt.value().honorPoints;
                 }
 
                 sc.FX[i] = honor ? honor / 2 : 0;

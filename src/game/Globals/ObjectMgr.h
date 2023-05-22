@@ -38,6 +38,7 @@
 #include <climits>
 #include <memory>
 #include <tuple>
+#include <optional>
 
 class Group;
 class Item;
@@ -421,11 +422,6 @@ class HonorStanding
         {
             return honorPoints > rhs.honorPoints;
         }
-	
-        operator bool() const
-        {
-            return honorPoints || honorKills || guid || rpEarning;
-        }	
 };
 
 typedef std::list<HonorStanding> HonorStandingList;
@@ -772,8 +768,8 @@ class ObjectMgr
             return itr != mFishingBaseForArea.end() ? itr->second : 0;
         }
 
-        static HonorStanding GetHonorStandingByGUID(uint32 guid, uint32 side);
-        static HonorStanding GetHonorStandingByPosition(uint32 position, uint32 side);
+        static std::optional<HonorStanding> GetHonorStandingByGUID(uint32 guid, uint32 side);
+        static std::optional<HonorStanding> GetHonorStandingByPosition(uint32 position, uint32 side);
         HonorStandingList GetStandingListBySide(uint32 side);
         uint32 GetHonorStandingPositionByGUID(uint32 guid, uint32 side);
         void UpdateHonorStandingByGuid(uint32 guid, HonorStanding standing, uint32 side) ;

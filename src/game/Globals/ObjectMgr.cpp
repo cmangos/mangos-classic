@@ -3681,7 +3681,7 @@ HonorStandingList ObjectMgr::GetStandingListBySide(uint32 side)
     }
 }
 
-HonorStanding ObjectMgr::GetHonorStandingByGUID(uint32 guid, uint32 side)
+std::optional<HonorStanding> ObjectMgr::GetHonorStandingByGUID(uint32 guid, uint32 side)
 {
     HonorStandingList standingList = sObjectMgr.GetStandingListBySide(side);
 
@@ -3689,11 +3689,11 @@ HonorStanding ObjectMgr::GetHonorStandingByGUID(uint32 guid, uint32 side)
         if (itr->guid == guid)
             return *itr;
 
-    return HonorStanding();
+    return {};
 }
 
 
-HonorStanding ObjectMgr::GetHonorStandingByPosition(uint32 position, uint32 side)
+std::optional<HonorStanding> ObjectMgr::GetHonorStandingByPosition(uint32 position, uint32 side)
 {
     HonorStandingList standingList = sObjectMgr.GetStandingListBySide(side);
     uint32 pos = 1;
@@ -3705,7 +3705,7 @@ HonorStanding ObjectMgr::GetHonorStandingByPosition(uint32 position, uint32 side
         pos++;
     }
 
-    return HonorStanding();
+    return {};
 }
 
 uint32 ObjectMgr::GetHonorStandingPositionByGUID(uint32 guid, uint32 side)
