@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2812_01_mangos_visibility` bit(1) DEFAULT NULL
+  `required_z2813_01_mangos_trainer_ability` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -4517,6 +4517,9 @@ CREATE TABLE `npc_trainer` (
   `reqskill` smallint(5) unsigned NOT NULL DEFAULT '0',
   `reqskillvalue` smallint(5) unsigned NOT NULL DEFAULT '0',
   `reqlevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `ReqAbility1` INT(11) UNSIGNED DEFAULT NULL,
+  `ReqAbility2` INT(11) UNSIGNED DEFAULT NULL,
+  `ReqAbility3` INT(11) UNSIGNED DEFAULT NULL,
   `condition_id` INT(11) unsigned NOT NULL default '0',
   UNIQUE KEY `entry_spell` (`entry`,`spell`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -4542,6 +4545,9 @@ CREATE TABLE `npc_trainer_template` (
   `reqskill` smallint(5) unsigned NOT NULL DEFAULT '0',
   `reqskillvalue` smallint(5) unsigned NOT NULL DEFAULT '0',
   `reqlevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `ReqAbility1` INT(11) UNSIGNED DEFAULT NULL,
+  `ReqAbility2` INT(11) UNSIGNED DEFAULT NULL,
+  `ReqAbility3` INT(11) UNSIGNED DEFAULT NULL,
   `condition_id` INT(11) unsigned NOT NULL default '0',
   UNIQUE KEY `entry_spell` (`entry`,`spell`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

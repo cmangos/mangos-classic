@@ -29,6 +29,7 @@
 
 #include <list>
 #include <memory>
+#include <optional>
 
 struct SpellEntry;
 
@@ -442,6 +443,7 @@ struct TrainerSpell
     uint32 reqSkillValue;
     uint32 reqLevel;
     uint32 learnedSpell;
+    std::array<std::optional<uint32>, 3> reqAbility;
     uint32 conditionId;
     bool isProvidedReqLevel;
 

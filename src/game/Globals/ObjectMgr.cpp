@@ -8545,7 +8545,7 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
 
     std::set<uint32> skip_trainers;
 
-    QueryResult* result = WorldDatabase.PQuery("SELECT entry, spell,spellcost,reqskill,reqskillvalue,reqlevel,condition_id FROM %s", tableName);
+    std::unique_ptr<QueryResult> result(WorldDatabase.PQuery("SELECT entry, spell,spellcost,reqskill,reqskillvalue,reqlevel,ReqAbility1,ReqAbility2,ReqAbility3,condition_id FROM %s", tableName));
 
     if (!result)
     {
@@ -8648,7 +8648,13 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
         trainerSpell.reqSkill      = fields[3].GetUInt32();
         trainerSpell.reqSkillValue = fields[4].GetUInt32();
         trainerSpell.reqLevel      = fields[5].GetUInt32();
-        trainerSpell.conditionId   = fields[6].GetUInt16();
+        if (!fields[6].IsNULL())
+            trainerSpell.reqAbility[0] = fields[6].GetUInt32();
+        if (!fields[7].IsNULL())
+            trainerSpell.reqAbility[1] = fields[7].GetUInt32();
+        if (!fields[8].IsNULL())
+            trainerSpell.reqAbility[2] = fields[8].GetUInt32();
+        trainerSpell.conditionId   = fields[9].GetUInt16();
 
         trainerSpell.isProvidedReqLevel = trainerSpell.reqLevel > 0;
 
@@ -8693,7 +8699,6 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
         ++count;
     }
     while (result->NextRow());
-    delete result;
 
     sLog.outString(">> Loaded %d trainer %sspells", count, isTemplates ? "template " : "");
     sLog.outString();
