@@ -562,7 +562,9 @@ void GameObjectGroup::RemoveObject(WorldObject* wo)
 void GameObjectGroup::Despawn(uint32 timeMSToDespawn /*= 0*/, uint32 forcedDespawnTime /*= 0*/)
 {
     time_t when = time(nullptr) + forcedDespawnTime;
-    for (auto objItr : m_objects)
+    auto objects = m_objects;
+
+    for (auto objItr : objects)
     {
         uint32 dbGuid = objItr.first;
         if (GameObject* go = m_map.GetGameObject(dbGuid))
