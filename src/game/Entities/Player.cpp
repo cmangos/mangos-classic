@@ -3963,6 +3963,11 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
         if (trainer_spell->reqSkill && GetSkillValueBase(trainer_spell->reqSkill) < trainer_spell->reqSkillValue)
             return TRAINER_SPELL_RED;
 
+    for (uint32 i = 0; i < 3; ++i)
+        if (trainer_spell->reqAbility[i])
+            if (!HasSpell(*trainer_spell->reqAbility[i]))
+                return TRAINER_SPELL_RED;
+
     // exist, already checked at loading
     SpellEntry const* spell = sSpellTemplate.LookupEntry<SpellEntry>(trainer_spell->learnedSpell);
 
