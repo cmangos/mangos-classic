@@ -154,10 +154,10 @@ namespace MaNGOS
                 std::optional<HonorStanding> tempSt = sObjectMgr.GetHonorStandingByPosition(sc.BRK[i], team);
                 if (tempSt)
                 {
-                    honor += tempSt.value().honorPoints;
+                    honor += tempSt->honorPoints;
                     tempSt = sObjectMgr.GetHonorStandingByPosition(sc.BRK[i] + 1, team);
                     if (tempSt)
-                        honor += tempSt.value().honorPoints;
+                        honor += tempSt->honorPoints;
                 }
 
                 sc.FX[i] = honor ? honor / 2 : 0;
