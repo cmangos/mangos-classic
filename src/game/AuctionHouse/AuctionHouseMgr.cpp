@@ -667,7 +667,7 @@ AuctionEntry* AuctionHouseObject::AddAuction(AuctionHouseEntry const* auctionHou
     AH->itemTemplate = newItem->GetEntry();
     AH->itemCount = newItem->GetCount();
     AH->itemRandomPropertyId = newItem->GetItemRandomPropertyId();
-    AH->owner = pl ? pl->GetGUIDLow() : 0;
+    AH->owner = pl ? pl->GetGUIDLow() : 7;
     AH->startbid = bid;
     AH->bidder = 0;
     AH->bid = 0;
