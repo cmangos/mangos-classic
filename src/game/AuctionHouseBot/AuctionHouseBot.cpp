@@ -241,7 +241,7 @@ void AuctionHouseBot::Update()
         for (AuctionHouseObject::AuctionEntryMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
         {
             AuctionEntry* auction = itr->second;
-            if (auction->owner == 0 && auction->bid == 0)
+            if (auction->owner == 7 && auction->bid == 0)
                 continue; // ignore bidding/buying auctions that were created by ahbot and not bidded on by player
             Item* item = sAuctionMgr.GetAItem(auction->itemGuidLow);
             if (!item)
