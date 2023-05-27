@@ -160,7 +160,6 @@ struct CreatureInfo
     uint32  VendorTemplateId;
     uint32  GossipMenuId;
     uint32  InteractionPauseTimer;
-    VisibilityDistanceType visibilityDistanceType;
     uint32  CorpseDelay;
     uint32  SpellList;
     uint32  StringID1;

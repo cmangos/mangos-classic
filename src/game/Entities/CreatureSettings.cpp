@@ -32,6 +32,14 @@ void CreatureSettings::ResetStaticFlags(CreatureStaticFlags staticFlags, Creatur
     m_flags2 = staticFlags2;
     m_flags3 = staticFlags3;
     m_flags4 = staticFlags4;
+
+    // Check if visibility distance different
+    if (HasFlag(CreatureStaticFlags::LARGE_AOI))
+        m_owner->GetVisibilityData().SetVisibilityDistanceOverride(VisibilityDistanceType::Large);
+    if (HasFlag(CreatureStaticFlags3::GIGANTIC_AOI))
+        m_owner->GetVisibilityData().SetVisibilityDistanceOverride(VisibilityDistanceType::Gigantic);
+    if (HasFlag(CreatureStaticFlags3::INFINITE_AOI))
+        m_owner->GetVisibilityData().SetVisibilityDistanceOverride(VisibilityDistanceType::Infinite);
 }
 
 void CreatureSettings::SetFlag(CreatureStaticFlags flag)
