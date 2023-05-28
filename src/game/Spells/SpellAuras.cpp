@@ -1786,45 +1786,46 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
     Powers PowerType = POWER_MANA;
     Unit* target = GetTarget();
+    uint32 displayId = 0;
 
     switch (form)
     {
         case FORM_CAT:
             if (Player::TeamForRace(target->getRace()) == ALLIANCE)
-                m_modifier.m_amount = 892;
+                displayId = 892;
             else
-                m_modifier.m_amount = 8571;
+                displayId = 8571;
             PowerType = POWER_ENERGY;
             break;
         case FORM_TRAVEL:
-            m_modifier.m_amount = 632;
+            displayId = 632;
             break;
         case FORM_AQUA:
-            m_modifier.m_amount = 2428;
+            displayId = 2428;
             break;
         case FORM_BEAR:
             if (Player::TeamForRace(target->getRace()) == ALLIANCE)
-                m_modifier.m_amount = 2281;
+                displayId = 2281;
             else
-                m_modifier.m_amount = 2289;
+                displayId = 2289;
             PowerType = POWER_RAGE;
             break;
         case FORM_GHOUL:
             if (Player::TeamForRace(target->getRace()) == ALLIANCE)
-                m_modifier.m_amount = 10045;
+                displayId = 10045;
             break;
         case FORM_DIREBEAR:
             if (Player::TeamForRace(target->getRace()) == ALLIANCE)
-                m_modifier.m_amount = 2281;
+                displayId = 2281;
             else
-                m_modifier.m_amount = 2289;
+                displayId = 2289;
             PowerType = POWER_RAGE;
             break;
         case FORM_CREATUREBEAR:
-            m_modifier.m_amount = 902;
+            displayId = 902;
             break;
         case FORM_GHOSTWOLF:
-            m_modifier.m_amount = 4613;
+            displayId = 4613;
             break;
         case FORM_MOONKIN:
             if (GetId() == 24809)       // Specific case for spell Spirit Shade Visual in Lethon encounter (spell use moonkin form value for some reason)
@@ -1833,14 +1834,14 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                 if (caster->GetTypeId() != TYPEID_PLAYER)
                     return;
 
-                m_modifier.m_amount = caster->GetNativeDisplayId();
+                displayId = caster->GetNativeDisplayId();
             }
             else
             {
                 if (Player::TeamForRace(target->getRace()) == ALLIANCE)
-                    m_modifier.m_amount = 15374;
+                    displayId = 15374;
                 else
-                    m_modifier.m_amount = 15375;
+                    displayId = 15375;
             }
             break;
         case FORM_AMBIENT:
@@ -1848,7 +1849,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         case FORM_STEALTH:
             break;
         case FORM_TREE:
-            m_modifier.m_amount = 864;
+            displayId = 864;
             break;
         case FORM_BATTLESTANCE:
         case FORM_BERSERKERSTANCE:
@@ -1856,7 +1857,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             PowerType = POWER_RAGE;
             break;
         case FORM_SPIRITOFREDEMPTION:
-            m_modifier.m_amount = 16031;
+            displayId = 16031;
             break;
         default:
             break;
@@ -1921,8 +1922,8 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         // remove other shapeshift before applying a new one
         target->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT, GetHolder());
 
-        if (m_modifier.m_amount > 0)
-            target->SetDisplayId(m_modifier.m_amount);
+        if (displayId > 0)
+            target->SetDisplayId(displayId);
 
         if (PowerType != POWER_MANA)
         {
