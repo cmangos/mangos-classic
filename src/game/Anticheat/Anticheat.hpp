@@ -5,11 +5,11 @@
 #ifndef __ANTICHEAT_HPP_
 #define __ANTICHEAT_HPP_
 
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Auth/BigNumber.h"
 #include "Server/Opcodes.h"
 #include "Chat/Chat.h"
-#include "Util.h"
+#include "Util/Util.h"
 
 #include <memory>
 #include <string>

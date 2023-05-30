@@ -215,6 +215,7 @@ enum SpellTargets
 {
     SPELL_TARGETS_ASSISTABLE,
     SPELL_TARGETS_AOE_ATTACKABLE,
+    SPELL_TARGETS_CHAIN_ATTACKABLE,
     SPELL_TARGETS_ALL
 };
 
@@ -536,6 +537,7 @@ class Spell
         bool m_ignoreCosts;
         bool m_ignoreCooldowns;
         bool m_ignoreConcurrentCasts;
+        bool m_ignoreCasterAuraState;
         bool m_hideInCombatLog;
         bool m_resetLeash;
         bool m_channelOnly;
@@ -610,6 +612,7 @@ class Spell
 
         static void SelectMountByAreaAndSkill(Unit* target, SpellEntry const* parentSpell, uint32 spellId75, uint32 spellId150, uint32 spellId225, uint32 spellId300, uint32 spellIdSpecial);
 
+        bool IsInterruptible() const;
         bool CanBeInterrupted() const { return m_spellState <= SPELL_STATE_DELAYED || m_spellState == SPELL_STATE_CHANNELING; }
 
         void RegisterAuraProc(Aura* aura);
@@ -1047,8 +1050,17 @@ namespace MaNGOS
                 if (!itr->getSource()->IsInMap(i_originalCaster) || itr->getSource()->IsTaxiFlying())
                     continue;
 
-                if (itr->getSource()->IsAOEImmune())
-                    continue;
+                switch (i_TargetType)
+                {
+                    case SPELL_TARGETS_CHAIN_ATTACKABLE:
+                        if (itr->getSource()->IsChainImmune())
+                            continue;
+                        break;
+                    case SPELL_TARGETS_AOE_ATTACKABLE:
+                        if (itr->getSource()->IsAOEImmune())
+                            continue;
+                        break;
+                }
 
                 switch (i_TargetType)
                 {
@@ -1056,6 +1068,7 @@ namespace MaNGOS
                         if (!i_originalCaster->CanAssistSpell(itr->getSource(), i_spell.m_spellInfo))
                             continue;
                         break;
+                    case SPELL_TARGETS_CHAIN_ATTACKABLE:
                     case SPELL_TARGETS_AOE_ATTACKABLE:
                     {
                         if (!i_originalCaster->CanAttackSpell(itr->getSource(), i_spell.m_spellInfo, true))

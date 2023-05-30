@@ -17,7 +17,7 @@
  */
 
 #include "Grids/GridNotifiers.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "Entities/UpdateData.h"
 #include "Maps/MapPersistentStateMgr.h"
@@ -251,7 +251,7 @@ void MaNGOS::CallOfHelpCreatureInRangeDo::operator()(Creature* u)
         return;
 
     if (u->AI())
-        u->AI()->OnCallForHelp(i_funit, i_enemy);
+        u->AI()->OnCallForHelp(i_enemy);
 }
 
 bool MaNGOS::AnyAssistCreatureInRangeCheck::operator()(Creature* u)

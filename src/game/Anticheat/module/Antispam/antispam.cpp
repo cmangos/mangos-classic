@@ -15,7 +15,7 @@
 #include "Entities/Player.h"
 #include "Chat/Chat.h"
 #include "World/World.h"
-#include "Timer.h"
+#include "Util/Timer.h"
 #include "Database/DatabaseEnv.h"
 #include "Tools/Language.h"
 

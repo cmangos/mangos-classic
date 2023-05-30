@@ -25,15 +25,19 @@ if(BUILD_EXTRACTORS AND NOT (BZip2_FOUND OR BZIP2_FOUND))
 endif()
 
 # zlib
-FetchContent_Declare(
+find_package(ZLIB)
+if (NOT ZLIB_FOUND OR ZLIB_VERSION_STRING VERSION_LESS 1.2.13)
+  FetchContent_Declare(
     zlib
     GIT_REPOSITORY "https://github.com/madler/zlib.git"
-    GIT_TAG "v1.2.12"
-)
-FetchContent_GetProperties(zlib)
-if(NOT zlib_POPULATED)
+    GIT_TAG "v1.2.13"
+  )
+  FetchContent_GetProperties(zlib)
+  if(NOT zlib_POPULATED)
     message(STATUS "Setting up zlib ...")
     FetchContent_Populate(zlib)
+    set(SKIP_INSTALL_ALL true)
+    set(BUILD_SHARED false)
     # patch provided cmake to avoid unneeded target install and deprecation warning.
     #file(COPY_FILE "patch-zlib-CMakeLists.txt" "${zlib_SOURCE_DIR}/CMakeLists.txt" ONLY_IF_DIFFERENT) #not working on cmake < 3.21 so replaced with 3 next lines
     file(COPY "patch-zlib-CMakeLists.txt" DESTINATION "${zlib_SOURCE_DIR}")
@@ -42,6 +46,11 @@ if(NOT zlib_POPULATED)
     add_subdirectory(${zlib_SOURCE_DIR} ${zlib_BINARY_DIR})
     target_include_directories(zlib PUBLIC ${zlib_SOURCE_DIR} ${zlib_BINARY_DIR})
     message(STATUS "zlib ${ZLIB_FULL_VERSION} successfully installed!")
+  endif()
+else()
+  add_library(zlib INTERFACE)
+  target_include_directories(zlib INTERFACE ${ZLIB_INCLUDE_DIRS})
+  target_link_libraries(zlib INTERFACE ${ZLIB_LIBRARIES})
 endif()
 
 if (BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER)

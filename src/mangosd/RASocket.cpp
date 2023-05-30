@@ -26,7 +26,7 @@
 #include "RASocket.h"
 #include "World/World.h"
 #include "Config/Config.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Accounts/AccountMgr.h"
 #include "Tools/Language.h"
 #include "Globals/ObjectMgr.h"

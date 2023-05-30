@@ -19,7 +19,7 @@
 #ifndef __UPDATEDATA_H
 #define __UPDATEDATA_H
 
-#include "ByteBuffer.h"
+#include "Util/ByteBuffer.h"
 #include "Entities/ObjectGuid.h"
 
 class WorldPacket;

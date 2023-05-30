@@ -17,7 +17,7 @@
  */
 
 #include "Common.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "World/World.h"
 #include "Globals/ObjectMgr.h"
@@ -215,6 +215,8 @@ void WorldSession::HandleGuildAcceptOpcode(WorldPacket& /*recvPacket*/)
 void WorldSession::HandleGuildDeclineOpcode(WorldPacket& /*recvPacket*/)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_GUILD_DECLINE");
+    if (_player->GetGuildId())
+        return;
 
     if (_player->GetGuildIdInvited() != 0)
     {
@@ -234,7 +236,6 @@ void WorldSession::HandleGuildDeclineOpcode(WorldPacket& /*recvPacket*/)
     }
 
     GetPlayer()->SetGuildIdInvited(0);
-    GetPlayer()->SetInGuild(0);
 }
 
 void WorldSession::HandleGuildInfoOpcode(WorldPacket& /*recvPacket*/)

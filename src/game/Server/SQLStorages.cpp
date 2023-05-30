@@ -18,16 +18,16 @@
 
 #include "Server/SQLStorages.h"
 
-const char CreatureInfosrcfmt[] = "issiiiiiiifiiiiliiiiiffiiiiiiiffffffiiiiffffiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiss";
-const char CreatureInfodstfmt[] = "issiiiiiiifiiiiliiiiiffiiiiiiiffffffiiiiffffiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiisi";
-const char CreatureDataAddonInfofmt[] = "iiibbiis";
+const char CreatureInfosrcfmt[] = "issiiiiiiifiiiiliiiiiiiiiffiiiiiiiffffffiiiiffffiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiss";
+const char CreatureInfodstfmt[] = "issiiiiiiifiiiiliiiiiiiiiffiiiiiiiffffffiiiiffffiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiisi";
+const char CreatureDataAddonInfofmt[] = "iibbiis";
 const char CreatureConditionalSpawnSrcFmt[] = "iiix";
 const char CreatureConditionalSpawnDstFmt[] = "iii";
 const char CreatureModelfmt[] = "iffffbii";
-const char CreatureInfoAddonInfofmt[] = "iiibbiis";
+const char CreatureInfoAddonInfofmt[] = "iibbiis";
 const char EquipmentInfofmt[] = "iiii";
-const char GameObjectInfosrcfmt[] = "iiisiiifiiiiiiiiiiiiiiiiiiiiiiiiiiis";
-const char GameObjectInfodstfmt[] = "iiisiiifiiiiiiiiiiiiiiiiiiiiiiiiiiii";
+const char GameObjectInfosrcfmt[] = "iiisiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiis";
+const char GameObjectInfodstfmt[] = "iiisiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiii";
 const char ItemPrototypesrcfmt[] = "iiisiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffiffiffiffiffiiiiiiiiiifiiifiiiiiifiiiiiifiiiiiifiiiiiifiiiisiiiiiiiiiiiiiisiiiiii";
 const char ItemPrototypedstfmt[] = "iiisiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffiffiffiffiffiiiiiiiiiifiiifiiiiiifiiiiiifiiiiiifiiiiiifiiiisiiiiiiiiiiiiiiiiiiiii";
 const char PageTextfmt[] = "isi";
@@ -39,7 +39,7 @@ const char ConditionsFmt[] = "iiiiiiix";
 const char SpellScriptTargetFmt[] = "iiii";
 const char SpellEntryfmt[] = "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffffffiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiifffiiiissssssssssssssssiiiiiLiiiifffiiiii";
 const char SpellConefmt[] = "ii";
-const char DungeonEncounterFmt[] = "iiiiissssssssssssssssii";
+const char DungeonEncounterFmt[] = "iiiiiissssssssssssssssii";
 const char WorldSafeLocsFmt[] = "iiffffs";
 
 SQLStorage sCreatureStorage(CreatureInfosrcfmt, CreatureInfodstfmt, "entry", "creature_template");

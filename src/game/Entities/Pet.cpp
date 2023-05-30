@@ -19,7 +19,7 @@
 #include "Entities/Pet.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Globals/ObjectMgr.h"
 #include "Spells/SpellMgr.h"
 #include "Tools/Formulas.h"

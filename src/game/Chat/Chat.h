@@ -314,6 +314,9 @@ class ChatHandler
 
         bool HandleDebugPacketLog(char* args);
         bool HandleDebugDbscript(char* args);
+        bool HandleDebugDbscriptTargeted(char* args);
+        bool HandleDebugDbscriptSourced(char* args);
+        bool HandleDebugDbscriptGuided(char* args);
 
         bool HandleSD2HelpCommand(char* args);
         bool HandleSD2ScriptCommand(char* args);
@@ -469,7 +472,6 @@ class ChatHandler
         bool HandleNpcPlayEmoteCommand(char* args);
         bool HandleNpcSayCommand(char* args);
         bool HandleNpcListSpells(char* args);
-        bool HandleNpcSetDeathStateCommand(char* args);
         bool HandleNpcShowLootCommand(char* args);
         bool HandleNpcSetModelCommand(char* args);
         bool HandleNpcSetMoveTypeCommand(char* args);
@@ -594,6 +596,7 @@ class ChatHandler
         bool HandleReloadSpellScriptTargetCommand(char* args);
         bool HandleReloadSpellTargetPositionCommand(char* args);
         bool HandleReloadSpellThreatsCommand(char* args);
+        bool HandleReloadStringIds(char* args);
         bool HandleReloadTaxiShortcuts(char* args);
         bool HandleReloadSpellPetAurasCommand(char* args);
         bool HandleReloadExpectedSpamRecords(char* args);

@@ -20,9 +20,9 @@
 #include "Log.h"
 #include "Policies/Singleton.h"
 #include "Config/Config.h"
-#include "Util.h"
-#include "ByteBuffer.h"
-#include "ProgressBar.h"
+#include "Util/Util.h"
+#include "Util/ByteBuffer.h"
+#include "Util/ProgressBar.h"
 
 #include <fstream>
 #include <iostream>
@@ -54,6 +54,7 @@ LogFilterData logFilterData[LOG_FILTER_COUNT] =
     { "pathfinding",         "LogFilter_Pathfinding",        true  },
     { "map_loading",         "LogFilter_MapLoading",         true  },
     { "event_ai_dev",        "LogFilter_EventAiDev",         true  },
+    { "",                    "",                             true  },
     { "db_scripts_dev",      "LogFilter_DbScriptDev",        true  },
 };
 
@@ -266,6 +267,7 @@ void Log::Initialize()
     charLogfile = openLogFile("CharLogFile", "CharLogTimestamp", "a");
     dberLogfile = openLogFile("DBErrorLogFile", nullptr, "a");
     eventAiErLogfile = openLogFile("EventAIErrorLogFile", nullptr, "a");
+    scriptErrLogFile = openLogFile("SD2ErrorLogFile", nullptr, "a");
     raLogfile = openLogFile("RaLogFile", nullptr, "a");
     worldLogfile = openLogFile("WorldLogFile", "WorldLogTimestamp", "a");
     scriptErrLogFile = openLogFile("SD2ErrorLogFile", nullptr, "a");

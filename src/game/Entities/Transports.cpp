@@ -24,9 +24,9 @@
 #include "Entities/ObjectGuid.h"
 #include "MotionGenerators/Path.h"
 
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Server/DBCStores.h"
-#include "ProgressBar.h"
+#include "Util/ProgressBar.h"
 
 #include "Movement/MoveSpline.h"
 
@@ -118,7 +118,7 @@ void MapManager::LoadTransports()
     sLog.outString();
 }
 
-Transport::Transport(TransportTemplate const& transportTemplate) : GenericTransport(), m_transportTemplate(transportTemplate), m_isMoving(true), m_pendingStop(false)
+Transport::Transport(TransportTemplate const& transportTemplate) : GenericTransport(), m_isMoving(true), m_pendingStop(false), m_transportTemplate(transportTemplate)
 {
     m_updateFlag = (UPDATEFLAG_TRANSPORT | UPDATEFLAG_ALL | UPDATEFLAG_HAS_POSITION);
 }

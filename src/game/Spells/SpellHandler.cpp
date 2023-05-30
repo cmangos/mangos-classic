@@ -18,7 +18,7 @@
 
 #include "Common.h"
 #include "Server/DBCStores.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "Globals/ObjectMgr.h"
 #include "Spells/SpellMgr.h"
@@ -299,6 +299,15 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
     // client checks this but needs recheck
     if (obj->GetGOInfo()->CannotBeUsedUnderImmunity() && _player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE))
         return;
+
+    // code meant to be in CanUseNow
+    if (obj->GetGoType() == GAMEOBJECT_TYPE_CHAIR)
+    {
+        float x, y;
+        std::tie(x, y) = obj->GetClosestChairSlotPosition(_player);
+        if (_player->GetDistance(x, y, obj->GetPositionZ(), DIST_CALC_NONE) > 3.f * 3.f)
+            return;
+    }
 
     obj->Use(_player);
 }

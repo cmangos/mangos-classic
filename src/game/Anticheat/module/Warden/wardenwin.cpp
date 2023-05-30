@@ -18,8 +18,9 @@
 #include "Chat/Chat.h"
 #include "Server/WorldSession.h"
 #include "Auth/BigNumber.h"
+#include "Auth/CryptoHash.h"
 #include "Auth/HMACSHA1.h"
-#include "ByteBuffer.h"
+#include "Util/ByteBuffer.h"
 #include "Database/DatabaseEnv.h"
 #include "Entities/Player.h"
 #include "Log.h"
@@ -741,7 +742,7 @@ void WardenWin::LoadScriptedScans()
         return false;
     },
         // TODO: Replace the magic number below with combined driver string lengths
-        (sizeof(uint8) + sizeof(uint32) + SHA_DIGEST_LENGTH + sizeof(uint8)) * HypervisorCount + 21,
+        (sizeof(uint8) + sizeof(uint32) + Sha1Hash::GetLength() + sizeof(uint8)) * HypervisorCount + 21,
         sizeof(uint8) * HypervisorCount,
         "Hypervisor check",
         WinAllBuild | InitialLogin));
@@ -781,7 +782,7 @@ void WardenWin::LoadScriptedScans()
 
         // if this is not found, it means someone has tampered with the function
         return !found;
-    }, sizeof(uint8) + sizeof(uint32) + SHA_DIGEST_LENGTH + sizeof(uint32) + sizeof(uint8), sizeof(uint8),
+    }, sizeof(uint8) + sizeof(uint32) + Sha1Hash::GetLength() + sizeof(uint32) + sizeof(uint8), sizeof(uint8),
         "Warden Memory Read check",
         WinAllBuild));
 
@@ -1097,9 +1098,9 @@ void WardenWin::BuildTimingInit(const std::string &module, uint32 offset, bool s
 }
 
 WardenWin::WardenWin(WorldSession *session, const BigNumber &K, SessionAnticheatInterface *anticheat) :
-    _wardenAddress(0), Warden(session, sWardenModuleMgr.GetWindowsModule(), K, anticheat),
-    _lastClientTime(0), _lastHardwareActionTime(0), _lastTimeCheckServer(0), _sysInfoSaved(false),
-    _proxifierFound(false), _hypervisors(""), _endSceneFound(false), _endSceneAddress(0)
+    Warden(session, sWardenModuleMgr.GetWindowsModule(), K, anticheat), _wardenAddress(0),
+    _sysInfoSaved(false), _proxifierFound(false), _hypervisors(""), _lastClientTime(0),
+    _lastHardwareActionTime(0), _lastTimeCheckServer(0), _endSceneFound(false), _endSceneAddress(0)
 {
     memset(&_sysInfo, 0, sizeof(_sysInfo));
 }

@@ -38,7 +38,7 @@ void instance_dire_maul::Initialize()
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 }
 
-void instance_dire_maul::Update(uint32 uiDiff)
+void instance_dire_maul::Update(uint32 /*uiDiff*/)
 {
     if (GetData(TYPE_DREADSTEED) == IN_PROGRESS)
     {

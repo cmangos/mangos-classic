@@ -20,21 +20,17 @@
     \ingroup mangosd
 */
 
-#ifndef _WIN32
-#include "PosixDaemon.h"
-#endif
-
 #include "Common.h"
 #include "Master.h"
 #include "Server/WorldSocket.h"
 #include "WorldRunnable.h"
 #include "World/World.h"
 #include "Log.h"
-#include "Timer.h"
+#include "Util/Timer.h"
 #include "SystemConfig.h"
 #include "CliRunnable.h"
 #include "RASocket.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "revision_sql.h"
 #include "MaNGOSsoap.h"
 #include "Mails/MassMailMgr.h"
@@ -49,8 +45,10 @@
 #include <memory>
 
 #ifdef _WIN32
-#include "ServiceWin32.h"
+#include "Platform/ServiceWin32.h"
 extern int m_ServiceStatus;
+#else
+#include "Platform/PosixDaemon.h"
 #endif
 
 INSTANTIATE_SINGLETON_1(Master);
@@ -221,7 +219,7 @@ int Master::Run()
         int32 networkThreadWorker = sConfig.GetIntDefault("Network.Threads", 1);
         if (networkThreadWorker <= 0)
         {
-            sLog.outError("Invalid network tread workers setting in mangosd.conf. (%d) should be > 0", networkThreadWorker);
+            sLog.outError("Invalid network thread workers setting in mangosd.conf. (%d) should be > 0", networkThreadWorker);
             networkThreadWorker = 1;
         }
         MaNGOS::Listener<WorldSocket> listener(sConfig.GetStringDefault("BindIP", "0.0.0.0"), int32(sWorld.getConfig(CONFIG_UINT32_PORT_WORLD)), networkThreadWorker);

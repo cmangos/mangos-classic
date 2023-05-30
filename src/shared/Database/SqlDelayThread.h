@@ -19,7 +19,7 @@
 #ifndef __SQLDELAYTHREAD_H
 #define __SQLDELAYTHREAD_H
 
-#include "Threading.h"
+#include "Multithreading/Threading.h"
 #include "SqlOperations.h"
 
 #include <atomic>

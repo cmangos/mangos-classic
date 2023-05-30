@@ -29,14 +29,15 @@
 #include "RealmList.h"
 #include "AuthSocket.h"
 #include "AuthCodes.h"
-#include "SRP6/SRP6.h"
-#include "CommonDefines.h"
+#include "Auth/SRP6.h"
+#include "Util/CommonDefines.h"
 
 #include <openssl/md5.h>
 #include <ctime>
+#include <memory>
 #include <utility>
 
-//#include "Util.h" -- for commented utf8ToUpperOnlyLatin
+//#include "Util/Util.h" -- for commented utf8ToUpperOnlyLatin
 
 extern DatabaseType LoginDatabase;
 
@@ -180,6 +181,10 @@ std::array<uint8, 16> VersionChallenge = { { 0xBA, 0xA3, 0x1E, 0x99, 0xA0, 0x0B,
 AuthSocket::AuthSocket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler)
     : Socket(service, std::move(closeHandler)), _status(STATUS_CHALLENGE), _build(0), _accountSecurityLevel(SEC_PLAYER), m_timeoutTimer(service)
 {
+}
+
+bool AuthSocket::Open()
+{
     m_timeoutTimer.expires_from_now(boost::posix_time::seconds(30));
     m_timeoutTimer.async_wait([&] (const boost::system::error_code& error)
     {
@@ -191,6 +196,8 @@ AuthSocket::AuthSocket(boost::asio::io_service& service, std::function<void (Soc
         if (!IsClosed())
             Close();
     });
+
+    return Socket::Open();
 }
 
 /// Read the packet from the client
@@ -350,6 +357,9 @@ bool AuthSocket::_HandleLogonChallenge()
     ch->os[3] = '\0';
     m_os = (char*)ch->os;
     std::reverse(m_os.begin(), m_os.end());
+    ch->platform[3] = '\0';
+    m_platform = (char*)ch->platform;
+    std::reverse(m_platform.begin(), m_platform.end());
 
     m_locale.resize(sizeof(ch->country));
     m_locale.assign(ch->country, (ch->country + sizeof(ch->country)));
@@ -585,8 +595,9 @@ bool AuthSocket::_HandleLogonProof()
         ///- Update the sessionkey, current ip and login time and reset number of failed logins in the account table for this account
         // No SQL injection (escaped user input) and IP address as received by socket
         const char* K_hex = srp.GetStrongSessionKey().AsHexStr();
-        LoginDatabase.PExecute("UPDATE account SET sessionkey = '%s', locale = '%s', failed_logins = 0, os = '%s' WHERE username = '%s'", K_hex, _safelocale.c_str(), m_os.c_str(), _safelogin.c_str());
-        if (QueryResult* loginfail = LoginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'", _safelogin.c_str()))
+        LoginDatabase.PExecute("UPDATE account SET sessionkey = '%s', locale = '%s', failed_logins = 0, os = '%s', platform = '%s' WHERE username = '%s'", K_hex, _safelocale.c_str(), m_os.c_str(), m_platform.c_str(), _safelogin.c_str());
+        std::unique_ptr<QueryResult> loginfail(LoginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'", _safelogin.c_str()));
+        if (loginfail)
             LoginDatabase.PExecute("INSERT INTO account_logons(accountId,ip,loginTime,loginSource) VALUES('%u','%s',NOW(),'%u')", loginfail->Fetch()[0].GetUInt32(), m_address.c_str(), LOGIN_TYPE_REALMD);
         OPENSSL_free((void*)K_hex);
 
@@ -753,7 +764,7 @@ bool AuthSocket::_HandleReconnectProof()
     sha.UpdateBigNumbers(&t1, &_reconnectProof, &K, nullptr);
     sha.Finalize();
 
-    if (!memcmp(sha.GetDigest(), lp.R2, SHA_DIGEST_LENGTH))
+    if (!memcmp(sha.GetDigest(), lp.R2, Sha1Hash::GetLength()))
     {
         if (!VerifyVersion(lp.R1, sizeof(lp.R1), lp.R3, true))
         {

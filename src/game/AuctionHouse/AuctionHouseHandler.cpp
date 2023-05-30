@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "Server/Opcodes.h"
 #include "Log.h"
@@ -26,7 +26,7 @@
 #include "Entities/Player.h"
 #include "AuctionHouse/AuctionHouseMgr.h"
 #include "Mails/Mail.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Chat/Chat.h"
 
 // please DO NOT use iterator++, because it is slower than ++iterator!!!

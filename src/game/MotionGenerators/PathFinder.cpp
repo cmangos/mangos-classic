@@ -33,9 +33,11 @@
 #include <limits>
 ////////////////// PathFinder //////////////////
 PathFinder::PathFinder(const Unit* owner, bool ignoreNormalization) :
-    m_polyLength(0), m_type(PATHFIND_BLANK),
-    m_useStraightPath(false), m_forceDestination(false), m_straightLine(false), m_pointPathLimit(MAX_POINT_PATH_LENGTH), // TODO: Fix legitimate long paths
-    m_sourceUnit(owner), m_navMesh(nullptr), m_navMeshQuery(nullptr), m_cachedPoints(m_pointPathLimit * VERTEX_SIZE), m_pathPolyRefs(m_pointPathLimit), m_smoothPathPolyRefs(m_pointPathLimit), m_defaultMapId(m_sourceUnit->GetMapId()), m_ignoreNormalization(ignoreNormalization)
+    m_type(PATHFIND_BLANK), m_useStraightPath(false), m_forceDestination(false), m_straightLine(false),
+    m_pointPathLimit(MAX_POINT_PATH_LENGTH), // TODO: Fix legitimate long paths
+    m_cachedPoints(m_pointPathLimit * VERTEX_SIZE), m_pathPolyRefs(m_pointPathLimit), m_polyLength(0),
+    m_smoothPathPolyRefs(m_pointPathLimit), m_sourceUnit(owner), m_navMesh(nullptr), m_navMeshQuery(nullptr),
+    m_defaultMapId(m_sourceUnit->GetMapId()), m_ignoreNormalization(ignoreNormalization)
 {
     DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ PathFinder::PathInfo for %u \n", m_sourceUnit->GetGUIDLow());
 
@@ -574,6 +576,7 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
             Vector3 diffVec = pathDir * (SMOOTH_PATH_STEP_SIZE / pathLength);
 
             // little optimization
+            m_pathPoints.clear();
             m_pathPoints.reserve(stepCount + 2);
 
             // first point
@@ -1113,6 +1116,7 @@ void PathFinder::ComputePathToRandomPoint(Vector3 const& startPoint, float maxRa
 
     float distanceToPoly;
     dtPolyRef centerPoly = getPolyByLocation(randomPoint, &distanceToPoly);
+    bool fail = true;
     if (centerPoly != INVALID_POLYREF)
     {
         // first we have to fix z value before hit test, z is in index 1 of randomPoint
@@ -1124,8 +1128,15 @@ void PathFinder::ComputePathToRandomPoint(Vector3 const& startPoint, float maxRa
         {
             // generate path
             BuildPolyPath(currPos, endPoint);
+            fail = false;
             //sLog.outDebug("PathFinder::GetPathToRandomPoint> path type %d size %d poly-size %d\n", m_type, m_pathPoints.size(), m_polyLength);
         }
+    }
+
+    // navmesh queries do not work in water - need to supplement with los check and just build a shortcut
+    if (fail && m_sourceUnit->IsInWater() && m_sourceUnit->CanSwim() && m_sourceUnit->GetMap()->IsInLineOfSight(currPos.x, currPos.y, currPos.z + m_sourceUnit->GetCollisionHeight(), endPoint.x, endPoint.y, endPoint.z + m_sourceUnit->GetCollisionHeight(), false))
+    {
+        BuildShortcut();
     }
 }
 

@@ -20,7 +20,7 @@
 #define MANGOS_GRIDNOTIFIERSIMPL_H
 
 #include "Grids/GridNotifiers.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Entities/Player.h"
 #include "AI/BaseAI/UnitAI.h"
 #include "Spells/SpellAuras.h"

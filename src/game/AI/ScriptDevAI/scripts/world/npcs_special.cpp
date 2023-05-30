@@ -1094,14 +1094,6 @@ struct npc_advanced_target_dummyAI : public ScriptedAI
 
     uint32 m_dieTimer;
 
-    void JustRespawned() override
-    {
-        if (!m_creature->GetSpawner())
-            return;
-
-        m_creature->SetLootRecipient(m_creature->GetSpawner());
-    }
-
     void UpdateAI(const uint32 diff) override
     {
         if (m_dieTimer)

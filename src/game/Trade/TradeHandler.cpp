@@ -17,7 +17,7 @@
  */
 
 #include "Common.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "World/World.h"
 #include "Globals/ObjectAccessor.h"

@@ -565,7 +565,7 @@ bool ChaseMovementGenerator::DispatchSplineToPosition(Unit& owner, float x, floa
     init.MovebyPath(path);
     init.SetWalk(walk);
     if (owner.IsSlowedInCombat() && !walk)
-        init.SetCombatSlowed();
+        init.SetCombatSlowed(std::min(owner.GetHealthPercent(), 20.f) * 0.02 + 0.4f);
     if (target)
         init.SetFacing(i_target.getTarget());
     init.Launch();
@@ -811,6 +811,8 @@ void FollowMovementGenerator::Initialize(Unit& owner)
 void FollowMovementGenerator::Finalize(Unit& owner)
 {
     owner.clearUnitState(UNIT_STAT_FOLLOW | UNIT_STAT_FOLLOW_MOVE);
+    if (owner.AI() && i_target.isValid())
+        owner.AI()->RelinquishFollow(i_target->GetObjectGuid());
 }
 
 void FollowMovementGenerator::Interrupt(Unit& owner)
@@ -1138,7 +1140,7 @@ void FollowMovementGenerator::HandleFinalizedMovement(Unit& owner)
 
 FormationMovementGenerator::FormationMovementGenerator(FormationSlotDataSPtr& sData, bool main) :
     FollowMovementGenerator(*sData->GetMaster(), sData->GetDistance(), sData->GetDistance(), main, false, false),
-    m_slot(sData), m_headingToMaster(false), m_lastAngle(0)
+    m_slot(sData), m_lastAngle(0), m_headingToMaster(false)
 {
     if (!this->i_path)
         this->i_path = new PathFinder(sData->GetOwner());

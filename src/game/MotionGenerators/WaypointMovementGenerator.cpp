@@ -183,7 +183,7 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
     if (node.script_id)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature movement start script %u at point %u for %s.", node.script_id, i_currentNode, creature.GetGuidStr().c_str());
-        creature.GetMap()->ScriptsStart(sCreatureMovementScripts, node.script_id, &creature, m_guid ? creature.GetMap()->GetWorldObject(m_guid) : &creature);
+        creature.GetMap()->ScriptsStart(SCRIPT_TYPE_CREATURE_MOVEMENT, node.script_id, &creature, m_guid ? creature.GetMap()->GetWorldObject(m_guid) : &creature);
     }
 
     // Inform script
@@ -614,7 +614,7 @@ bool WaypointMovementGenerator<Creature>::SetNextWaypoint(uint32 pointId)
     return true;
 }
 
-void LinearWPMovementGenerator<Creature>::SwitchToNextNode(Creature& creature, WaypointPath::const_iterator& nodeItr)
+void LinearWPMovementGenerator<Creature>::SwitchToNextNode(Creature& /*creature*/, WaypointPath::const_iterator& nodeItr)
 {
     // switch to next node
     if (!m_driveWayBack)

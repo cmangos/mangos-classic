@@ -21,7 +21,7 @@
 
 #include "CreatureAI.h"
 #include "Entities/ObjectGuid.h"
-#include "Timer.h"
+#include "Util/Timer.h"
 
 class Creature;
 class Spell;
@@ -49,14 +49,9 @@ class PetAI : public CreatureAI
     private:
         void UpdateAllies();
 
-        void RelinquishFollowData();
-
         bool inCombat;
 
         GuidSet m_AllySet;
         uint32 m_updateAlliesTimer;
-
-        float m_followAngle;
-        float m_followDist;
 };
 #endif

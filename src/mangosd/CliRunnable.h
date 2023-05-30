@@ -24,7 +24,7 @@
 #define __CLIRUNNABLE_H
 
 #include "Common.h"
-#include "Threading.h"
+#include "Multithreading/Threading.h"
 
 /// Command Line Interface handling thread
 class CliRunnable : public MaNGOS::Runnable

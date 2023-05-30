@@ -24,18 +24,16 @@ EndScriptData
 */
 
 /* ContentData
-spell 10848
-spell 17327
-spell 19512
 spell 21050
 spell 26275
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "Spells/Scripts/SpellScript.h"
+#include "Grids/Cell.h"
+#include "Grids/CellImpl.h"
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
-#include "Grids/CellImpl.h"
 
 /* When you make a spell effect:
 - always check spell id and effect index
@@ -44,16 +42,6 @@ EndContentData */
 
 enum
 {
-    // quest 6124/6129
-    SPELL_APPLY_SALVE                   = 19512,
-    SPELL_SICKLY_AURA                   = 19502,
-
-    NPC_SICKLY_DEER                     = 12298,
-    NPC_SICKLY_GAZELLE                  = 12296,
-
-    NPC_CURED_DEER                      = 12299,
-    NPC_CURED_GAZELLE                   = 12297,
-
     // npcs that are only interactable while dead
     SPELL_SHROUD_OF_DEATH               = 10848,
     SPELL_SPIRIT_PARTICLES              = 17327,
@@ -95,28 +83,6 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
 {
     switch (uiSpellId)
     {
-        case SPELL_APPLY_SALVE:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                if (pCaster->GetTypeId() != TYPEID_PLAYER)
-                    return true;
-
-                if (pCreatureTarget->GetEntry() != NPC_SICKLY_DEER && pCreatureTarget->GetEntry() != NPC_SICKLY_GAZELLE)
-                    return true;
-
-                // Update entry, remove aura, set the kill credit and despawn
-                uint32 uiUpdateEntry = pCreatureTarget->GetEntry() == NPC_SICKLY_DEER ? NPC_CURED_DEER : NPC_CURED_GAZELLE;
-                pCreatureTarget->RemoveAurasDueToSpell(SPELL_SICKLY_AURA);
-                pCreatureTarget->UpdateEntry(uiUpdateEntry);
-                ((Player*)pCaster)->KilledMonsterCredit(uiUpdateEntry);
-                pCreatureTarget->SetImmuneToPlayer(true);
-                pCreatureTarget->ForcedDespawn(20000);
-
-                return true;
-            }
-            return true;
-        }
         case SPELL_MELODIOUS_RAPTURE:
         {
             if (uiEffIndex == EFFECT_INDEX_0)
@@ -227,7 +193,7 @@ struct DrinkAnimation : public AuraScript
 
 struct spell_effect_summon_no_follow_movement : public SpellScript
 {
-    void OnSummon(Spell* spell, Creature* summon) const override
+    void OnSummon(Spell* /*spell*/, Creature* summon) const override
     {
         summon->AI()->SetFollowMovement(false);
     }
@@ -271,7 +237,7 @@ struct TribalDeath : public SpellScript
         return true;
     }
 
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         uint32 spellId = 0;
         switch (spell->m_spellInfo->Id)
@@ -364,6 +330,28 @@ struct Stoned : public AuraScript
     }
 };
 
+struct GameobjectCallForHelpOnUsage : public SpellScript
+{
+    void OnSuccessfulStart(Spell* spell) const
+    {
+        UnitList targets;
+        MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck check(spell->GetCaster(), 12.f);
+        MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, check);
+        Cell::VisitAllObjects(spell->GetCaster(), searcher, 12.f);
+        for (Unit* attacker : targets)
+        {
+            if (attacker->IsCreature() && static_cast<Creature*>(attacker)->IsCritter())
+                continue;
+
+            if (!spell->GetCaster()->IsEnemy(attacker))
+                continue;
+
+            if (attacker->AI())
+                attacker->AI()->AttackStart(spell->GetCaster());
+        }
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -385,4 +373,5 @@ void AddSC_spell_scripts()
     RegisterSpellScript<HateToHalf>("spell_hate_to_half");
     RegisterSpellScript<HateToZero>("spell_hate_to_zero");
     RegisterSpellScript<Stoned>("spell_stoned");
+    RegisterSpellScript<GameobjectCallForHelpOnUsage>("spell_gameobject_call_for_help_on_usage");
 }

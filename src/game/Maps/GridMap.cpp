@@ -27,7 +27,7 @@
 #include "MotionGenerators/MoveMap.h"
 #include "World/World.h"
 #include "Policies/Singleton.h"
-#include "Util.h"
+#include "Util/Util.h"
 
 #include <mutex>
 
@@ -923,33 +923,45 @@ bool TerrainInfo::GetAreaInfo(float x, float y, float z, uint32& flags, int32& a
 // Return:    char const* (name of area or uknown if it fail to get one)
 // Parameter: float x, y, z (object position)
 // Parameter: uint32 langIndex (language index for specific locale)
-char const* TerrainInfo::GetAreaName(float x, float y, float z, uint32 langIndex) const
+AreaNameInfo TerrainInfo::GetAreaName(float x, float y, float z, uint32 langIndex) const
 {
     static const char* fallbackName = "<unknown>";
-    const char* areaName = fallbackName;
+    AreaNameInfo nameInfo;
+    nameInfo.areaName = fallbackName;
+    nameInfo.wmoNameOverride = nullptr;
     int32 adtId, rootId, groupId;
     uint32 mogpFlags = 0;
 
     if (GetAreaInfo(x, y, z, mogpFlags, adtId, rootId, groupId))
     {
         // getting data from WMOAreaTable.dbc using vmap data
-        auto wmoEntries = GetWMOAreaTableEntriesByTripple(rootId, adtId, groupId);
+        auto wmoEntries = GetWMOAreaTableEntriesByTripple(rootId, adtId, groupId);            
 
-        if (!wmoEntries.empty())
+        auto getAreaName = [](auto wmoEntries, AreaNameInfo& nameInfo, uint32 langIndex)
         {
             if (wmoEntries.front()->Name[langIndex][0] != '\0')
-                areaName = wmoEntries.front()->Name[langIndex];
-            else
+                nameInfo.wmoNameOverride = wmoEntries.front()->Name[langIndex];
+            if (wmoEntries.front()->areaId)
             {
                 // if nothing is in previous entry that mean we should get it from parent area id
                 auto aEntry = GetAreaEntryByAreaID(wmoEntries.front()->areaId);
                 if (aEntry && aEntry->area_name[langIndex][0] != '\0')
-                    areaName = aEntry->area_name[langIndex];
+                    nameInfo.areaName = aEntry->area_name[langIndex];
             }
+        };
+
+        if (!wmoEntries.empty())
+            getAreaName(wmoEntries, nameInfo, langIndex);
+
+        if (nameInfo.areaName == fallbackName)
+        {
+            wmoEntries = GetWMOAreaTableEntriesByTripple(rootId, adtId, -1);
+            if (!wmoEntries.empty())
+                getAreaName(wmoEntries, nameInfo, langIndex);
         }
     }
 
-    if (areaName == fallbackName)
+    if (nameInfo.areaName == fallbackName)
     {
         // getting data from AreaTable.dbc using map data
         uint16 areaflag;
@@ -959,10 +971,11 @@ char const* TerrainInfo::GetAreaName(float x, float y, float z, uint32 langIndex
             AreaTableEntry const* entry = GetAreaEntryByAreaFlagAndMap(areaflag, m_mapId);
 
             if (entry && entry->area_name[langIndex][0] != '\0')
-                areaName = entry->area_name[langIndex];
+                nameInfo.areaName = entry->area_name[langIndex];
         }
     }
-    return areaName;
+
+    return nameInfo;
 }
 
 uint16 TerrainInfo::GetAreaFlag(float x, float y, float z, bool* isOutdoors) const

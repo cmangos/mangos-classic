@@ -19,20 +19,20 @@
 #include "Server/WorldSocket.h"
 #include "Common.h"
 
-#include "Util.h"
+#include "Util/Util.h"
 #include "World/World.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Globals/SharedDefines.h"
-#include "ByteBuffer.h"
+#include "Util/ByteBuffer.h"
 #include "Addons/AddonHandler.h"
 #include "Server/Opcodes.h"
 #include "Server/PacketLog.h"
 #include "Database/DatabaseEnv.h"
-#include "Auth/Sha1.h"
+#include "Auth/CryptoHash.h"
 #include "Server/WorldSession.h"
 #include "Log.h"
 #include "Server/DBCStores.h"
-#include "CommonDefines.h"
+#include "Util/CommonDefines.h"
 #include "Anticheat/Anticheat.hpp"
 
 #include <chrono>
@@ -343,7 +343,8 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
                              "mutetime, "                //7
                              "locale, "                  //8
                              "os, "                      //9
-                             "flags "                    //10
+                             "flags, "                   //10
+                             "platform "                 //11
                              "FROM account a "
                              "WHERE username = '%s'",
                              safe_account.c_str());
@@ -408,6 +409,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     os = fields[9].GetString();
 
     uint32 accountFlags = fields[10].GetUInt32();
+    std::string platform = fields[11].GetString();
 
     delete result;
 
@@ -495,6 +497,18 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     m_crypt.Init(&K);
 
     m_session = sWorld.FindSession(id);
+
+    ClientPlatformType clientPlatform;
+    if (platform == "x86")
+        clientPlatform = CLIENT_PLATFORM_X86;
+    else if (platform == "PPC" && clientOS == CLIENT_OS_MAC)
+        clientPlatform = CLIENT_PLATFORM_PPC;
+    else
+    {
+        sLog.outError("WorldSocket::HandleAuthSession: Unrecognized platform '%s' for account '%s' from %s", platform.c_str(), account.c_str(), address.c_str());
+        return false;
+    }
+
     if (m_session)
     {
         // Session exist so player is reconnecting
@@ -517,6 +531,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
         m_session->SetGameBuild(ClientBuild);
         m_session->SetOS(clientOS);
+        m_session->SetPlatform(clientPlatform);
 
         std::unique_ptr<SessionAnticheatInterface> anticheat = sAnticheatLib->NewSession(m_session, K);
 
@@ -547,6 +562,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         m_session->LoadTutorialsData();
         m_session->SetGameBuild(ClientBuild);
         m_session->SetOS(clientOS);
+        m_session->SetPlatform(clientPlatform);
         m_session->InitializeAnticheat(K);
 
         // when false, the client sent invalid addon data.  kick!

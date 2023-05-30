@@ -40,7 +40,6 @@ class CreatureAI : public UnitAI
 
         void DoFakeDeath(uint32 spellId = 0);
         void SetDeathPrevention(bool state);
-        bool IsPreventingDeath() const override { return m_deathPrevention; }
         void ResetDeathPrevented() { m_deathPrevented = false; }
 
         bool DoRetreat() override;
@@ -57,11 +56,19 @@ class CreatureAI : public UnitAI
 
         void TimedFleeingEnded() override;
 
-        void OnCallForHelp(Unit* caller, Unit* enemy) override;
+        void OnCallForHelp(Unit* enemy) override;
+
+        // Starts follow and in case of player engages player based formation
+        virtual void RequestFollow(Unit* followee) override;
+        virtual void RelinquishFollow(ObjectGuid follower) override;
     protected:
+
         Creature* m_creature;
-        bool m_deathPrevention;
         bool m_deathPrevented;
+
+        float m_followAngle;
+        float m_followDist;
+        ObjectGuid m_requestedFollower;
 };
 
 #endif

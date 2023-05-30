@@ -46,10 +46,10 @@
 #include <unordered_set>
 #include <chrono>
 
-#include "Filesystem.h"
+#include "Platform/Filesystem.h"
 
-#include "Errors.h"
-#include "Threading.h"
+#include "Util/Errors.h"
+#include "Multithreading/Threading.h"
 
 // included to use sleep_for()
 #include <thread>

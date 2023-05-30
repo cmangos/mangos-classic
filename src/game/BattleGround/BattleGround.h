@@ -22,7 +22,7 @@
 #include "Common.h"
 #include "Globals/SharedDefines.h"
 #include "Maps/Map.h"
-#include "ByteBuffer.h"
+#include "Util/ByteBuffer.h"
 #include "Entities/ObjectGuid.h"
 
 // magic event-numbers

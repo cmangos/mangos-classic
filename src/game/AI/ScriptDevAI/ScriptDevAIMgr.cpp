@@ -8,7 +8,7 @@
 #include "Database/DatabaseEnv.h"
 #include "Server/DBCStores.h"
 #include "Globals/ObjectMgr.h"
-#include "ProgressBar.h"
+#include "Util/ProgressBar.h"
 #include "system/system.h"
 #include "ScriptDevAIMgr.h"
 #include "include/sc_creature.h"

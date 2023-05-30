@@ -19,7 +19,7 @@
 #include "Spells/SpellMgr.h"
 #include "Globals/ObjectMgr.h"
 #include "Spells/SpellAuraDefines.h"
-#include "ProgressBar.h"
+#include "Util/ProgressBar.h"
 #include "Server/DBCStores.h"
 #include "Server/SQLStorages.h"
 #include "Chat/Chat.h"
@@ -2118,6 +2118,15 @@ void SpellMgr::LoadSpellScriptTarget()
                 if (!sObjectMgr.GetCreatureData(itr->targetEntry))
                 {
                     sLog.outErrorDb("Table `spell_script_target`: creature entry %u does not exist.", itr->targetEntry);
+                    sSpellScriptTargetStorage.EraseEntry(itr->spellId);
+                }
+                break;
+            }
+            case SPELL_TARGET_TYPE_STRING_ID:
+            {
+                if (!sScriptMgr.ExistsStringId(itr->targetEntry))
+                {
+                    sLog.outErrorDb("Table `spell_script_target`: stringId %u does not exist.", itr->targetEntry);
                     sSpellScriptTargetStorage.EraseEntry(itr->spellId);
                 }
                 break;

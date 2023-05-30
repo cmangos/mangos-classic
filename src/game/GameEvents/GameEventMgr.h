@@ -110,7 +110,7 @@ class GameEventMgr
         template<typename T>
         int16 GetGameEventId(uint32 guid_or_poolid);
 
-        GameEventCreatureData const* GetCreatureUpdateDataForActiveEvent(uint32 lowguid) const;
+        GameEventCreatureData const* GetCreatureUpdateDataForActiveEvent(uint32 dbGuid) const;
 
         void WeeklyEventTimerRecalculation();
     private:

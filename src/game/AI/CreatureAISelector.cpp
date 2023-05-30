@@ -51,7 +51,7 @@ namespace FactorySelector
         // select by NPC flags
         if (creature->IsPet())
         {
-            if (static_cast<Pet*>(creature)->isControlled())
+            if (creature->IsPlayerControlled() && static_cast<Pet*>(creature)->isControlled())
                 ai_factory = ai_registry.GetRegistryItem("PetAI");
             else                            // For guardians and creature pets in general
                 ai_factory = ai_registry.GetRegistryItem("GuardianAI");

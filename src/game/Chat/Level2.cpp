@@ -40,7 +40,7 @@
 #include "GMTickets/GMTicketMgr.h"
 #include "MotionGenerators/WaypointManager.h"
 #include "Server/DBCStores.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
 #include "Grids/CellImpl.h"
@@ -2159,7 +2159,7 @@ bool ChatHandler::HandleNpcSpawnDistCommand(char* args)
     {
         option = (float)std::stod(args);
     }
-    catch (std::invalid_argument)
+    catch (const std::invalid_argument&)
     {
         // string was not a float representation
         return false;
@@ -2297,36 +2297,6 @@ bool ChatHandler::HandleNpcTameCommand(char* /*args*/)
     }
 
     player->CastSpell(creatureTarget, 13481, TRIGGERED_OLD_TRIGGERED);         // Tame Beast, triggered effect
-    return true;
-}
-
-// npc deathstate handling
-bool ChatHandler::HandleNpcSetDeathStateCommand(char* args)
-{
-    bool value;
-    if (!ExtractOnOff(&args, value))
-    {
-        SendSysMessage(LANG_USE_BOL);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    Creature* pCreature = getSelectedCreature();
-    if (!pCreature || !pCreature->HasStaticDBSpawnData())
-    {
-        SendSysMessage(LANG_SELECT_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    if (value)
-        pCreature->SetDeadByDefault(true);
-    else
-        pCreature->SetDeadByDefault(false);
-
-    pCreature->SaveToDB();
-    pCreature->Respawn();
-
     return true;
 }
 
@@ -2801,7 +2771,7 @@ bool ChatHandler::HandlePInfoCommand(char* args)
 }
 
 /// Helper function
-inline Creature* Helper_CreateWaypointFor(Creature* wpOwner, WaypointPathOrigin wpOrigin, int32 pathId, uint32 wpId, WaypointNode const* wpNode, CreatureInfo const* waypointInfo)
+inline Creature* Helper_CreateWaypointFor(Creature* wpOwner, WaypointPathOrigin wpOrigin, int32 pathId, uint32 wpId, WaypointNode const* wpNode)
 {
     TempSpawnSettings settings;
     settings.spawner = wpOwner;
@@ -2992,7 +2962,7 @@ bool ChatHandler::HandleWpAddCommand(char* args)
     WaypointPath const* wpPath = sWaypointMgr.GetPathFromOrigin(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), wpPathId, wpDestination);
     for (const auto& itr : *wpPath)
     {
-        if (!Helper_CreateWaypointFor(wpOwner, wpDestination, wpPathId, itr.first, &itr.second, waypointInfo))
+        if (!Helper_CreateWaypointFor(wpOwner, wpDestination, wpPathId, itr.first, &itr.second))
         {
             PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, VISUAL_WAYPOINT);
             SetSentErrorMessage(true);
@@ -3167,7 +3137,7 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
     // If no visual WP was selected, but we are not going to remove it
     if (!targetCreature && subCmd != "del")
     {
-        targetCreature = Helper_CreateWaypointFor(wpOwner, wpSource, wpPathId, wpId, &(point->second), waypointInfo);
+        targetCreature = Helper_CreateWaypointFor(wpOwner, wpSource, wpPathId, wpId, &(point->second));
         if (!targetCreature)
         {
             PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, VISUAL_WAYPOINT);
@@ -3414,7 +3384,7 @@ bool ChatHandler::HandleWpShowCommand(char* args)
 
         for (WaypointPath::const_iterator pItr = wpPath->begin(); pItr != wpPath->end(); ++pItr)
         {
-            if (!Helper_CreateWaypointFor(wpOwner, wpOrigin, wpPathId, pItr->first, &(pItr->second), waypointInfo))
+            if (!Helper_CreateWaypointFor(wpOwner, wpOrigin, wpPathId, pItr->first, &(pItr->second)))
             {
                 PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, VISUAL_WAYPOINT);
                 SetSentErrorMessage(true);
@@ -3427,7 +3397,7 @@ bool ChatHandler::HandleWpShowCommand(char* args)
 
     if (subCmd == "first")
     {
-        if (!Helper_CreateWaypointFor(wpOwner, wpOrigin, wpPathId, wpPath->begin()->first, &(wpPath->begin()->second), waypointInfo))
+        if (!Helper_CreateWaypointFor(wpOwner, wpOrigin, wpPathId, wpPath->begin()->first, &(wpPath->begin()->second)))
         {
             PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, VISUAL_WAYPOINT);
             SetSentErrorMessage(true);
@@ -3440,7 +3410,7 @@ bool ChatHandler::HandleWpShowCommand(char* args)
 
     if (subCmd == "last")
     {
-        if (!Helper_CreateWaypointFor(wpOwner, wpOrigin, wpPathId, wpPath->rbegin()->first, &(wpPath->rbegin()->second), waypointInfo))
+        if (!Helper_CreateWaypointFor(wpOwner, wpOrigin, wpPathId, wpPath->rbegin()->first, &(wpPath->rbegin()->second)))
         {
             PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, VISUAL_WAYPOINT);
             SetSentErrorMessage(true);

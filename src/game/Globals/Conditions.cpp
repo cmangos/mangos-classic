@@ -46,6 +46,7 @@ char const* conditionSourceToStr[] =
     "trainer's spell check",         // CONDITION_FROM_TRAINER
     "areatrigger teleport check",    // CONDITION_FROM_AREATRIGGER_TELEPORT
     "quest template",                // CONDITION_FROM_QUEST
+    "world state"                    // CONDITION_FROM_WORLDSTATE
 };
 
 // Stores what params need to be provided to each condition type.
@@ -97,6 +98,7 @@ uint8 const ConditionTargetsInternal[] =
     CONDITION_REQ_MAP_OR_WORLDOBJECT, //  39
     CONDITION_REQ_NONE,               //  40
     CONDITION_REQ_NONE,               //  41
+    CONDITION_REQ_NONE                //  42
 };
 
 // Starts from 4th element so that -3 will return first element.
@@ -124,6 +126,21 @@ bool ConditionEntry::Meets(WorldObject const* target, Map const* map, WorldObjec
         result = !result;
 
     return result;
+}
+
+bool ConditionEntry::CheckOp(ConditionOperation op, int32 value, int32 operand)
+{
+    switch (op)
+    {
+        case ConditionOperation::EQUAL_TO: return value == operand;
+        case ConditionOperation::NOT_EQUAL_TO: return value != operand;
+        case ConditionOperation::LESS_THAN: return value < operand;
+        case ConditionOperation::LESS_THAN_OR_EQUAL_TO: return value <= operand;
+        case ConditionOperation::GREATER_THAN: return value > operand;
+        case ConditionOperation::GREATER_THAN_OR_EQUAL_TO: return value >= operand;
+        default: break;
+    }
+    return false;
 }
 
 // Actual evaluation of the condition done here.
@@ -475,17 +492,8 @@ bool inline ConditionEntry::Evaluate(WorldObject const* target, Map const* map, 
         }
         case CONDITION_WORLDSTATE:
         {
-            int32 variable = map->GetVariableManager().GetVariable(m_value1);
-            switch (m_value2)
-            {
-                case WORLDSTATE_EQUALS: return variable == m_value3;
-                case WORLDSTATE_GREATER: return variable > m_value3;
-                case WORLDSTATE_GREATER_EQUAL: return variable >= m_value3;
-                case WORLDSTATE_LESS: return variable < m_value3;
-                case WORLDSTATE_LESS_EQUAL: return variable <= m_value3;
-                default: break;
-            }
-            return false;
+            int32 value = map->GetVariableManager().GetVariable(m_value1);
+            return CheckOp(ConditionOperation(m_value2), value, m_value3);
         }
         default:
             break;
@@ -775,6 +783,14 @@ bool ConditionEntry::IsValid() const
                 sLog.outErrorDb("Quest condition (entry %u, type %u) has useless data in value2 (%u)!", m_entry, m_condition, m_value2);
             break;
         }
+        case CONDITION_PVP_RANK:
+        {
+            if (m_value1 > HONOR_RANK_COUNT)
+                sLog.outErrorDb("Quest condition (entry %u, type %u) has too high rank idx in value1 (%u)!", m_entry, m_condition, m_value1);
+            if (m_value2 > HONOR_RANK_COUNT)
+                sLog.outErrorDb("Quest condition (entry %u, type %u) has too high rank idx in value2 (%u)!", m_entry, m_condition, m_value2);
+            break;
+        }
         case CONDITION_ACTIVE_GAME_EVENT:
         {
             if (!sGameEventMgr.IsValidEvent(m_value1))
@@ -945,7 +961,7 @@ bool ConditionEntry::IsValid() const
         case CONDITION_WORLD_SCRIPT:
             break;
         case CONDITION_WORLDSTATE:
-            if (m_value2 > WORLDSTATE_SIGN_MAX)
+            if (m_value2 > uint32(ConditionOperation::MAX))
             {
                 sLog.outErrorDb("Worldstate condition (entry %u, type %u) has invalid sign %u. Skipping.", m_entry, m_condition, m_value2);
                 return false;

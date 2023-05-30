@@ -20,7 +20,7 @@
 #include "Database/DatabaseEnv.h"
 #include "Server/SQLStorages.h"
 #include "Server/DBCStores.h"
-#include "ProgressBar.h"
+#include "Util/ProgressBar.h"
 
 #include "Accounts/AccountMgr.h"
 #include "Entities/Item.h"
@@ -30,7 +30,7 @@
 #include "Entities/ObjectGuid.h"
 #include "Entities/Player.h"
 #include "World/World.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "Mails/Mail.h"
 

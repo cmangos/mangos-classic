@@ -9,7 +9,7 @@
 #define __ANTISPAM_HPP_
 
 #include "Entities/ObjectGuid.h"
-#include "Timer.h"
+#include "Util/Timer.h"
 
 #include "../priority.hpp"
 #include "../cyclic.hpp"

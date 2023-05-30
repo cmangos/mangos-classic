@@ -18,8 +18,8 @@
 
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
+#include "Server/WorldPacket.h"
 #include "Server/DBCStores.h"
-#include "WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "World/World.h"
 #include "Globals/ObjectMgr.h"
@@ -35,7 +35,7 @@
 #include "Maps/GridDefines.h"
 #include "Maps/MapPersistentStateMgr.h"
 #include "Mails/Mail.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Anticheat/Anticheat.hpp"
 #include "Spells/SpellMgr.h"
@@ -337,10 +337,15 @@ bool ChatHandler::HandleGPSCommand(char* args)
     }
     else PSendSysMessage("no VMAP available for area info");
 
+    AreaNameInfo nameInfo = obj->GetAreaName(GetSessionDbcLocale());
+    std::string wmoAreaOverride = "";
+    if (nameInfo.wmoNameOverride)
+        wmoAreaOverride = "WMOArea Override: (" + std::string(nameInfo.wmoNameOverride) + ")";
+
     PSendSysMessage(LANG_MAP_POSITION,
                     obj->GetMapId(), (mapEntry ? mapEntry->name[GetSessionDbcLocale()] : "<unknown>"),
                     zone_id, (zoneEntry ? zoneEntry->area_name[GetSessionDbcLocale()] : "<unknown>"),
-                    area_id, obj->GetAreaName(GetSessionDbcLocale()),
+                    area_id, nameInfo.areaName, wmoAreaOverride.c_str(),
                     obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(),
                     cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(), obj->GetInstanceId(),
                     zone_x, zone_y, ground_z, floor_z, have_map, have_vmap);
@@ -356,10 +361,14 @@ bool ChatHandler::HandleGPSCommand(char* args)
               (obj->GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), obj->GetName(),
               (obj->GetTypeId() == TYPEID_PLAYER ? "GUID" : "Entry"), (obj->GetTypeId() == TYPEID_PLAYER ? obj->GetGUIDLow() : obj->GetEntry()));
 
+    nameInfo = obj->GetAreaName(sWorld.GetDefaultDbcLocale());
+    wmoAreaOverride = "";
+    if (nameInfo.wmoNameOverride)
+        wmoAreaOverride = "WMOArea Override: " + std::string(nameInfo.wmoNameOverride);
     DEBUG_LOG(GetMangosString(LANG_MAP_POSITION),
               obj->GetMapId(), (mapEntry ? mapEntry->name[sWorld.GetDefaultDbcLocale()] : "<unknown>"),
               zone_id, (zoneEntry ? zoneEntry->area_name[sWorld.GetDefaultDbcLocale()] : "<unknown>"),
-              area_id, obj->GetAreaName(sWorld.GetDefaultDbcLocale()),
+              area_id, nameInfo.areaName, wmoAreaOverride.c_str(),
               obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(),
               cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(), obj->GetInstanceId(),
               zone_x, zone_y, ground_z, floor_z, have_map, have_vmap);

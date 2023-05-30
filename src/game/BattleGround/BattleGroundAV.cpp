@@ -23,7 +23,7 @@
 #include "Entities/Creature.h"
 #include "Entities/GameObject.h"
 #include "Tools/Language.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Globals/ObjectMgr.h"
 #include "AI/ScriptDevAI/include/sc_grid_searchers.h"
 

@@ -49,7 +49,11 @@ struct npc_dorius_stonetenderAI : public npc_escortAI
 {
     npc_dorius_stonetenderAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
-    void Reset() override { }
+    void Reset() override
+    {
+        if (!HasEscortState(STATE_ESCORT_ESCORTING))
+            m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+    }
 
     void Aggro(Unit* pWho) override
     {

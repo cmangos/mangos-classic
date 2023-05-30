@@ -20,7 +20,7 @@
 #include "Globals/ObjectMgr.h"
 #include "Log.h"
 #include "Policies/Singleton.h"
-#include "ProgressBar.h"
+#include "Util/ProgressBar.h"
 #include "SystemConfig.h"
 #include "World/World.h"
 

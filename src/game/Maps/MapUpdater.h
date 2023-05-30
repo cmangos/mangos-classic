@@ -20,7 +20,7 @@
 #define _MAP_UPDATER_H_INCLUDED
 
 #include "Platform/Define.h"
-#include "ProducerConsumerQueue.h"
+#include "Util/ProducerConsumerQueue.h"
 
 #include <mutex>
 #include <thread>

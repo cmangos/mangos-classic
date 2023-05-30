@@ -17,7 +17,7 @@
  */
 
 #include "Common.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Log.h"
 #include "Entities/Player.h"
 #include "Globals/ObjectAccessor.h"
@@ -26,6 +26,7 @@
 #include "Loot/LootMgr.h"
 #include "Entities/Object.h"
 #include "Groups/Group.h"
+#include "Entities/GameObject.h"
 
 void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
 {
@@ -95,6 +96,49 @@ void WorldSession::HandleLootOpcode(WorldPacket& recv_data)
     // Check possible cheat
     if (!_player->IsAlive())
         return;
+
+    if (!_player->IsInWorld())
+        return;
+
+    if (!_player->IsStandState())
+    {
+        _player->SendLootError(lguid, LOOT_ERROR_NOTSTANDING);
+        return;
+    }
+
+    if (_player->IsStunned())
+    {
+        _player->SendLootError(lguid, LOOT_ERROR_STUNNED);
+        return;
+    }
+
+    if (!lguid.IsItem())
+    {
+        if (lguid.IsUnit())
+        {
+            if (Unit* unit = _player->GetMap()->GetUnit(lguid))
+            {
+                float range = std::max(5.f, unit->GetCombatReach() + (4.f / 3.f) + _player->GetCombatReach());
+                if (range * range < _player->GetDistance(unit, true, DIST_CALC_NONE))
+                {
+                    _player->SendLootError(lguid, LOOT_ERROR_TOO_FAR);
+                    return;
+                }
+            }
+        }
+        else if (lguid.IsGameObject())
+        {
+            if (GameObject* go = _player->GetMap()->GetGameObject(lguid))
+            {
+                float range = std::max(5.f, go->GetCombatReach() + (4.f / 3.f) + _player->GetCombatReach());
+                if (range * range < _player->GetDistance(go, true, DIST_CALC_NONE))
+                {
+                    _player->SendLootError(lguid, LOOT_ERROR_TOO_FAR);
+                    return;
+                }
+            }
+        }
+    }
 
     if (Loot* loot = sLootMgr.GetLoot(_player, lguid))
     {

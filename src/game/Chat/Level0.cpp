@@ -27,7 +27,7 @@
 #include "Accounts/AccountMgr.h"
 #include "SystemConfig.h"
 #include "revision.h"
-#include "Util.h"
+#include "Util/Util.h"
 
 bool ChatHandler::HandleHelpCommand(char* args)
 {

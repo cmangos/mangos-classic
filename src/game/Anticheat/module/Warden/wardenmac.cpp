@@ -10,12 +10,10 @@
 #include "WardenScanMgr.hpp"
 #include "Server/WorldSession.h"
 #include "Auth/BigNumber.h"
-#include "Auth/Sha1.h"
+#include "Auth/CryptoHash.h"
 #include "World/World.h"
 #include "../config.hpp"
 #include "Log.h"
-
-#include <openssl/md5.h>
 
 #include <memory>
 #include <vector>
@@ -32,8 +30,7 @@ void WardenMac::LoadScriptedScans()
 
         MANGOS_ASSERT(macWarden->_hashString.size() <= 0xFF);
 
-        scan << static_cast<uint8>(WARDEN_SMSG_CHEAT_CHECKS_REQUEST)
-             << static_cast<uint8>(macWarden->_hashString.size());
+        scan << static_cast<uint8>(macWarden->_hashString.size());
 
         // skip null terminator this way
         scan.append(macWarden->_hashString.c_str(), macWarden->_hashString.size());
@@ -43,18 +40,18 @@ void WardenMac::LoadScriptedScans()
     {
         auto const macWarden = reinterpret_cast<const WardenMac *>(warden);
 
-        uint8 sha[SHA_DIGEST_LENGTH];
-        uint8 md5[MD5_DIGEST_LENGTH];
+        uint8 sha[Sha1Hash::GetLength()];
+        uint8 md5[MD5Hash::GetLength()];
 
         buff.read(sha, sizeof(sha));
         buff.read(md5, sizeof(md5));
 
         return !!memcmp(sha, macWarden->_hashSHA, sizeof(sha)) || !!memcmp(md5, macWarden->_hashMD5, sizeof(md5));
-    }, 128, sizeof(uint8) + SHA_DIGEST_LENGTH + MD5_DIGEST_LENGTH, "Mac string hash check"));
+    }, 128, sizeof(uint8) + Sha1Hash::GetLength() + MD5Hash::GetLength(), "Mac string hash check"));
 }
 
 WardenMac::WardenMac(WorldSession *session, const BigNumber &K, SessionAnticheatInterface *anticheat)
-    : _fingerprintSaved(false), Warden(session, sWardenModuleMgr.GetMacModule(), K, anticheat)
+    : Warden(session, session->GetPlatform() == CLIENT_PLATFORM_X86 ? sWardenModuleMgr.GetMacModule() : nullptr, K, anticheat), _fingerprintSaved(false)
 {
     std::stringstream hash;
 
@@ -68,15 +65,30 @@ WardenMac::WardenMac(WorldSession *session, const BigNumber &K, SessionAnticheat
 
     Sha1Hash sha1;
     sha1.UpdateData(_hashString);
-    sha1.UpdateData(reinterpret_cast<const uint8 *>(&magic), sizeof(magic));
+    if (_module) // this constant is only used if there is a module
+        sha1.UpdateData(reinterpret_cast<const uint8*>(&magic), sizeof(magic));
     sha1.Finalize();
 
     memcpy(_hashSHA, sha1.GetDigest(), sizeof(_hashSHA));
 
-    MD5_CTX md5;
-    MD5_Init(&md5);
-    MD5_Update(&md5, _hashString.c_str(), _hashString.size());
-    MD5_Final(_hashMD5, &md5);
+    MD5Hash md5;
+    md5.UpdateData(_hashString);
+    md5.Finalize();
+    std::memcpy(_hashMD5, md5.GetDigest(), md5.GetLength());
+
+    // PPC no module, begin string hashing requests directly
+    if (!_module)
+    {
+        // at this point the client has our module loaded.  send whatever packets are necessary to initialize Warden
+        InitializeClient();
+
+        // send any initial hack scans that the scan manager may have for us
+        RequestScans(SelectScans(ScanFlags::InitialLogin));
+
+        // begin the scan clock (note that even if the clock expires before any initial scans are answered, no new
+        // checks will be requested until the reply is received).
+        BeginScanClock();
+    }
 }
 
 void WardenMac::Update(uint32 diff)

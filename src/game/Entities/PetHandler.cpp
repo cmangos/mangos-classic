@@ -17,7 +17,7 @@
  */
 
 #include "Common.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "Globals/ObjectMgr.h"
 #include "Spells/SpellMgr.h"
@@ -25,7 +25,7 @@
 #include "Server/Opcodes.h"
 #include "Spells/Spell.h"
 #include "AI/BaseAI/CreatureAI.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Entities/Pet.h"
 #include "MotionGenerators/PathFinder.h"
 

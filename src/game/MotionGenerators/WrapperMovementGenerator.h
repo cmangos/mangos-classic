@@ -25,8 +25,8 @@
 class AbstractWrapperMovementGenerator : virtual public MovementGenerator
 {
     public:
-        AbstractWrapperMovementGenerator(Movement::MoveSplineInit& spline, uint32 id = 0, bool delayed = false, bool resident = true) :
-            i_spline(spline), i_id(id), i_delayed(delayed), i_resident(resident), i_dispatched(false), i_informed(false), i_useTimer(false), i_timerSet(false){}
+        AbstractWrapperMovementGenerator(Movement::MoveSplineInit& spline, uint32 id = 0, bool delayed = false, bool resident = true, ObjectGuid guid = ObjectGuid(), uint32 relayId = 0) :
+            i_spline(spline), i_id(id), i_delayed(delayed), i_resident(resident), i_dispatched(false), i_informed(false), i_useTimer(false), i_timerSet(false), m_guid(guid), m_relayId(relayId) {}
 
         void Initialize(Unit& owner) override;
         void Finalize(Unit& owner) override;
@@ -45,13 +45,15 @@ class AbstractWrapperMovementGenerator : virtual public MovementGenerator
         uint32 i_id;
         bool i_delayed, i_resident, i_dispatched, i_informed, i_useTimer, i_timerSet;
         ShortTimeTracker m_delayTimer;
+        ObjectGuid m_guid;
+        uint32 m_relayId;
 };
 
 class EffectMovementGenerator : public AbstractWrapperMovementGenerator
 {
     public:
-        EffectMovementGenerator(Movement::MoveSplineInit& spline, uint32 id = 0, bool delayed = false) :
-            AbstractWrapperMovementGenerator(spline, id, delayed, false) {}
+        EffectMovementGenerator(Movement::MoveSplineInit& spline, uint32 id = 0, bool delayed = false, ObjectGuid guid = ObjectGuid(), uint32 relayId = 0) :
+            AbstractWrapperMovementGenerator(spline, id, delayed, false, guid, relayId) {}
 
         void Initialize(Unit& owner) override;
         void Finalize(Unit& owner) override;

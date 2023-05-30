@@ -19,7 +19,7 @@
 #include "Entities/Unit.h"
 #include "Log.h"
 #include "Server/Opcodes.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "World/World.h"
 #include "Globals/ObjectMgr.h"
@@ -34,7 +34,7 @@
 #include "AI/CreatureAISelector.h"
 #include "Entities/TemporarySpawn.h"
 #include "Entities/Pet.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Entities/Totem.h"
 #include "BattleGround/BattleGround.h"
 #include "Maps/InstanceData.h"
@@ -426,6 +426,7 @@ Unit::Unit() :
     m_comboPoints = 0;
 
     m_aoeImmune = false;
+    m_chainImmune = false;
 }
 
 Unit::~Unit()
@@ -965,7 +966,7 @@ uint32 Unit::DealDamage(Unit* dealer, Unit* victim, uint32 damage, CleanDamage c
         }
     }
 
-    if (victim->AI() && victim->AI()->IsPreventingDeath() && damagetype != INSTAKILL && health <= damage)
+    if (victim->IsPreventingDeath() && damagetype != INSTAKILL && health <= damage)
         damage = health - 1;
 
     if (health <= damage)
@@ -1347,7 +1348,7 @@ void Unit::JustKilledCreature(Unit* killer, Creature* victim, Player* responsibl
         outdoorPvP->HandleCreatureDeath(victim);
 
     // Start creature death script
-    victim->GetMap()->ScriptsStart(sCreatureDeathScripts, victim->GetEntry(), victim, responsiblePlayer ? responsiblePlayer : killer);
+    victim->GetMap()->ScriptsStart(SCRIPT_TYPE_CREATURE_DEATH, victim->GetEntry(), victim, responsiblePlayer ? responsiblePlayer : killer);
 
     if (victim->IsLinkingEventTrigger())
         victim->GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_DIE, victim);
@@ -2371,7 +2372,8 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
             currentAbsorb = RemainingDamage;
 
         bool preventedDeath = false;
-        (*i)->OnAbsorb(currentAbsorb, RemainingDamage, reflectSpell, reflectDamage, preventedDeath);
+        bool dropCharge = true;
+        (*i)->OnAbsorb(currentAbsorb, RemainingDamage, reflectSpell, reflectDamage, preventedDeath, dropCharge);
         if (preventedDeath)
             preventDeathAura = (*i);
 
@@ -2381,8 +2383,9 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
         {
             // Reduce shield amount
             mod->m_amount -= currentAbsorb;
-            if ((*i)->GetHolder()->DropAuraCharge())
-                mod->m_amount = 0;
+            if (dropCharge)
+                if ((*i)->GetHolder()->DropAuraCharge())
+                    mod->m_amount = 0;
             // Need remove it later
             if (mod->m_amount <= 0)
                 existExpired = true;
@@ -2724,24 +2727,24 @@ float Unit::CalculateLevelPenalty(SpellEntry const* spellProto) const
     return spellProto->spellLevel < 20 && spellProto->spellLevel > 0 ? (1.0f - ((20.0f - spellProto->spellLevel) * 0.0375f)) : 1.0f;
 }
 
-void Unit::SendMeleeAttackStart(Unit* pVictim) const
+void Unit::SendMeleeAttackStart(const Unit& victim) const
 {
     WorldPacket data(SMSG_ATTACKSTART, 8 + 8);
     data << GetObjectGuid();
-    data << pVictim->GetObjectGuid();
+    data << victim.GetObjectGuid();
 
     SendMessageToSet(data, true);
     DETAIL_FILTER_LOG(LOG_FILTER_COMBAT, "WORLD: Sent SMSG_ATTACKSTART");
 }
 
-void Unit::SendMeleeAttackStop(Unit* victim) const
+void Unit::SendMeleeAttackStop(const Unit& victim) const
 {
     WorldPacket data(SMSG_ATTACKSTOP, (4 + 16));            // we guess size
     data << GetPackGUID();
-    data << (victim ? victim->GetPackGUID() : PackedGuid());
+    data << victim.GetPackGUID();
     data << uint32(IsDead() ? 1 : 0);
     SendMessageToSet(data, true);
-    DETAIL_FILTER_LOG(LOG_FILTER_COMBAT, "%s stopped attacking %s", GetGuidStr().c_str(), victim->GetGuidStr().c_str());
+    DETAIL_FILTER_LOG(LOG_FILTER_COMBAT, "%s stopped attacking %s", GetGuidStr().c_str(), victim.GetGuidStr().c_str());
 }
 
 SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell, uint32* heartbeatResistChance/* = nullptr*/)
@@ -3036,7 +3039,7 @@ bool Unit::CanCrushInCombat() const
 {
     if (!CanCrush())
         return false;
-    if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_CRUSH)
+    if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->GetSettings().HasFlag(CreatureStaticFlags2::NO_CRUSHING_BLOWS))
         return false;
     return true;
 }
@@ -4333,6 +4336,15 @@ void Unit::InterruptSpellsAndAurasWithInterruptFlags(uint32 flags)
     RemoveAurasWithInterruptFlags(flags);
 }
 
+bool Unit::IsInterruptible() const
+{
+    // TODO: Maybe need to check for immunities and static flags
+    for (uint32 i = 0; i < CURRENT_MAX_SPELL; ++i)
+        if (m_currentSpells[i] && m_currentSpells[i]->IsInterruptible())
+            return true;
+    return false;
+}
+
 Spell* Unit::FindCurrentSpellBySpellId(uint32 spell_id) const
 {
     for (auto m_currentSpell : m_currentSpells)
@@ -5155,25 +5167,8 @@ void Unit::RemoveAurasOnCast(uint32 flag, SpellEntry const* castedSpellEntry)
 
         if (spellEntry->AuraInterruptFlags & flag && (spellEntry->Id != castedSpellEntry->Id || GetObjectGuid() != holder->GetCasterGuid()))
         {
-            auto auraCheck = [&](AuraType type) -> bool
-            {
-                bool foundType = false;
-                for (auto aura : holder->m_auras)
-                {
-                    if (aura)
-                    {
-                        if (aura->GetModifier()->m_auraname == type)
-                        {
-                            foundType = true;
-                            break;
-                        }
-                    }
-                }
-                return foundType;
-            };
-
-            if (!castedSpellEntry->HasAttribute(SPELL_ATTR_EX_ALLOW_WHILE_STEALTHED) || !auraCheck(SPELL_AURA_MOD_STEALTH))
-                if (!castedSpellEntry->HasAttribute(SPELL_ATTR_EX2_ALLOW_WHILE_INVISIBLE) || !auraCheck(SPELL_AURA_MOD_INVISIBILITY))
+            if (!castedSpellEntry->HasAttribute(SPELL_ATTR_EX_ALLOW_WHILE_STEALTHED) || holder->GetSpellProto()->Dispel != DISPEL_STEALTH)
+                if (!castedSpellEntry->HasAttribute(SPELL_ATTR_EX2_ALLOW_WHILE_INVISIBLE) || holder->GetSpellProto()->Dispel != DISPEL_INVISIBILITY)
                     removeThisHolder = true;
         }
 
@@ -5500,6 +5495,18 @@ bool Unit::HasMechanicMaskOrDispelMaskAura(uint32 dispelMask, uint32 mechanicMas
         if (dispelMask && holder->IsDispellableByMask(dispelMask, caster, nullptr))
             return true;
         if (mechanicMask && holder->HasMechanicMask(mechanicMask))
+            return true;
+    }
+    return false;
+}
+
+bool Unit::HasNegativeAuraWithInterruptFlag(SpellAuraInterruptFlags flag) const
+{
+    Unit::SpellAuraHolderMap const& Auras = GetSpellAuraHolderMap();
+    for (auto itr = Auras.begin(); itr != Auras.end(); ++itr)
+    {
+        SpellAuraHolder* holder = itr->second;
+        if (holder->GetSpellProto()->AuraInterruptFlags & flag && holder->IsPositive())
             return true;
     }
     return false;
@@ -6280,7 +6287,7 @@ void Unit::MeleeAttackStart(Unit* victim)
     {
         addUnitState(UNIT_STAT_MELEE_ATTACKING);
         if (victim)
-            SendMeleeAttackStart(victim);
+            SendMeleeAttackStart(*victim);
     }
 }
 
@@ -6291,7 +6298,7 @@ void Unit::MeleeAttackStop(Unit* victim)
         clearUnitState(UNIT_STAT_MELEE_ATTACKING);
         InterruptSpell(CURRENT_MELEE_SPELL);
         if (victim)
-            SendMeleeAttackStop(victim);
+            SendMeleeAttackStop(*victim);
     }
 }
 
@@ -6722,6 +6729,11 @@ uint32 Unit::CountGuardiansWithEntry(uint32 entry)
                 count++;
 
     return count;
+}
+
+bool Unit::HasAnyPet() const
+{
+    return !m_guardianPets.empty() || GetPetGuid() || GetCritterGuid();
 }
 
 Unit* Unit::_GetTotem(TotemSlot slot) const
@@ -7931,6 +7943,9 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
             if (IsNonCombatSpell(spell->m_spellInfo))
                 InterruptSpell(CurrentSpellTypes(i), false);
 
+    if (notInCombat)
+        GetCombatManager().OnCombatStart();
+
     if (creatureNotInCombat)
     {
         Creature* creature = static_cast<Creature*>(this);
@@ -7941,7 +7956,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         CreatureDataAddon const* cainfo = creature->GetCreatureAddon();
         if (cainfo)
         {
-            if (getStandState() == cainfo->bytes1)
+            if (getStandState() == cainfo->standState)
                 SetStandState(UNIT_STAND_STATE_STAND);
             if (cainfo->emote && GetUInt32Value(UNIT_NPC_EMOTESTATE) == cainfo->emote)
                 HandleEmoteState(0);
@@ -7991,7 +8006,7 @@ void Unit::EngageInCombatWithAggressor(Unit* aggressor)
 {
     MANGOS_ASSERT(aggressor);
     SetInCombatWithAggressor(aggressor);
-    aggressor->SetInCombatWithAggressor(this);
+    aggressor->SetInCombatWithVictim(this);
     GetCombatManager().TriggerCombatTimer(aggressor);
 }
 
@@ -8824,7 +8839,7 @@ void Unit::IncrDiminishing(DiminishingGroup group, bool pvp)
     m_Diminishing.push_back(DiminishingReturn(group, GetMap()->GetCurrentMSTime(), DIMINISHING_LEVEL_2));
 }
 
-void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32& duration, Unit* caster, DiminishingLevels Level, bool isReflected, SpellEntry const* spellInfo, bool hasAuraScript)
+void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32& duration, Unit* caster, DiminishingLevels Level, bool isReflected, SpellEntry const* /*spellInfo*/, bool hasAuraScript)
 {
     if (duration == -1 || group == DIMINISHING_NONE || (!isReflected && caster->CanAssist(this)))
         return;
@@ -9360,6 +9375,11 @@ void Unit::RemoveFromWorld()
         BreakCharmOutgoing();
         BreakCharmIncoming();
         RemoveGuardians(IsPlayer() || IsCreature() && static_cast<Creature*>(this)->IsTotem());
+        // Remove non-guardian pet
+        if (Pet* pet = GetPet())
+        {
+            pet->Unsummon(PET_SAVE_AS_DELETED, this);
+        }
         RemoveMiniPet();
         RemoveAllGameObjects();
         RemoveAllDynObjects();
@@ -10349,8 +10369,8 @@ Unit* Unit::SelectRandomFriendlyTarget(Unit* except /*= nullptr*/, float radius 
 {
     UnitList targets;
 
-    MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(this, nullptr, radius);
-    MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
+    MaNGOS::AnySpellAssistableUnitInObjectRangeCheck u_check(this, nullptr, radius);
+    MaNGOS::UnitListSearcher<MaNGOS::AnySpellAssistableUnitInObjectRangeCheck> searcher(targets, u_check);
 
     Cell::VisitAllObjects(this, searcher, radius);
 
@@ -10543,6 +10563,11 @@ void Unit::RemoveAurasAtMechanicImmunity(uint32 mechMask, uint32 exceptSpellId, 
         else
             ++iter;
     }
+}
+
+bool Unit::IsUnitConditionSatisfied(int32 unitConditionId, Unit const* otherUnit) const
+{
+    return sObjectMgr.IsUnitConditionSatisfied(unitConditionId, this, otherUnit);
 }
 
 void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool casting /*= false*/, bool transportLeave /*= false*/)
@@ -10853,8 +10878,8 @@ class UnitVisitObjectsInRangeNotifyEvent : public BasicEvent
 
         bool Execute(uint64 /*e_time*/, uint32 /*p_time*/) override
         {
-            float radius = MAX_CREATURE_ATTACK_RADIUS * sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO);
-            if (m_owner.GetTypeId() == TYPEID_PLAYER)
+            float radius = std::max(m_owner.GetDetectionRange(), uint32(MAX_CREATURE_ATTACK_RADIUS)) * sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO);
+            if (m_owner.IsPlayer())
             {
                 MaNGOS::PlayerVisitObjectsNotifier notify(static_cast<Player&>(m_owner));
                 Cell::VisitAllObjects(&m_owner, notify, radius);
@@ -11508,8 +11533,7 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
         }
     }
 
-    Creature* charmedCreature = nullptr;
-    CharmInfo* charmInfo = charmed->GetCharmInfo();
+    const Position charmStartPosition = charmed->GetCharmInfo()->GetCharmStartPosition();
 
     // if charm expires mid evade clear evade since movement is also cleared
     // TODO: maybe should be done on HomeMovementGenerator::MovementExpires
@@ -11518,7 +11542,7 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
     if (charmed->GetTypeId() == TYPEID_UNIT)
     {
         // now we have to clean threat list to be able to restore normal creature behavior
-        charmedCreature = static_cast<Creature*>(charmed);
+        Creature* charmedCreature = static_cast<Creature*>(charmed);
         if (!charmedCreature->IsPet())
         {
             charmedCreature->ClearTemporaryFaction();
@@ -11527,7 +11551,7 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
             charmed->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
             charmed->InterruptSpell(CURRENT_MELEE_SPELL);
 
-            charmInfo->ResetCharmState();
+            charmed->GetCharmInfo()->ResetCharmState();
             charmed->DeleteCharmInfo();
 
             charmed->RemoveUnattackableTargets();
@@ -11541,7 +11565,7 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
             if (Unit* owner = charmedCreature->GetOwner())
                 charmed->setFaction(owner->GetFaction());
 
-            charmInfo->ResetCharmState();
+            charmed->GetCharmInfo()->ResetCharmState();
 
             // as possessed is a pet we have to restore original charminfo so Pet::DeleteCharmInfo will take care of that
             charmed->DeleteCharmInfo();
@@ -11560,7 +11584,7 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
         else
             charmedPlayer->setFactionForRace(charmedPlayer->getRace());
 
-        charmInfo->ResetCharmState();
+        charmed->GetCharmInfo()->ResetCharmState();
         charmedPlayer->DeleteCharmInfo();
 
         charmedPlayer->ForceHealAndPowerUpdateInZone();
@@ -11597,9 +11621,8 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
 
             if (charmed->GetTypeId() == TYPEID_UNIT)
             {
-                Position const& pos = charmInfo->GetCharmStartPosition();
-                if (!pos.IsEmpty())
-                    static_cast<Creature*>(charmed)->SetCombatStartPosition(pos);
+                if (!charmStartPosition.IsEmpty())
+                    static_cast<Creature*>(charmed)->SetCombatStartPosition(charmStartPosition);
             }
         }
     }
@@ -11688,29 +11711,29 @@ float Unit::GetAttackDistance(Unit const* target) const
     if (leveldif < -25)
         leveldif = -25;
 
-    // "The aggro radius of a mob having the same level as the player is roughly 20 yards"
-    float RetDistance = GetDetectionRange();
-    if (RetDistance == 0.f)
+    // "The aggro radius of a mob having the same level as the player is roughly 18 yards"
+    float attackDistance = GetDetectionRange();
+    if (attackDistance == 0.f)
         return 0.0f;
 
     // "Aggro Radius varies with level difference at a rate of roughly 1 yard/level"
     // radius grow if playlevel < creaturelevel
-    RetDistance -= (float)leveldif;
+    attackDistance -= (float)leveldif;
 
     // detect range auras
-    RetDistance += GetTotalAuraModifier(SPELL_AURA_MOD_DETECT_RANGE);
+    attackDistance += GetTotalAuraModifier(SPELL_AURA_MOD_DETECT_RANGE);
 
     // detected range auras
-    RetDistance += target->GetTotalAuraModifier(SPELL_AURA_MOD_DETECTED_RANGE);
+    attackDistance += target->GetTotalAuraModifier(SPELL_AURA_MOD_DETECTED_RANGE);
 
     // "Minimum Aggro Radius for a mob seems to be combat range (5 yards)"
-    if (RetDistance < 5)
-        RetDistance = 5;
+    if (attackDistance < 5)
+        attackDistance = 5;
 
     if (target->IsPlayerControlled() && target->IsCreature() && !target->IsClientControlled()) // player pets do not aggro from so afar
-        RetDistance = RetDistance * 0.65f;
+        attackDistance = attackDistance * 0.65f;
 
-    return (RetDistance * aggroRate);
+    return (attackDistance * aggroRate);
 }
 
 void Unit::InterruptSpellsCastedOnMe(bool killDelayed)
@@ -11767,6 +11790,16 @@ void Unit::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap /*=null
     {
         float groundZ = atMap->GetHeight(x, y, z);
         if (z < groundZ)
+            z = groundZ;
+    }
+}
+
+void Unit::AdjustZForCollision(float x, float y, float& z, float halfHeight) const
+{
+    if (CanFly())
+    {
+        float groundZ = GetMap()->GetHeight(x, y, z);
+        if (z - halfHeight < groundZ)
             z = groundZ;
     }
 }
@@ -11976,7 +12009,7 @@ uint32 Unit::GetModifierXpBasedOnDamageReceived(uint32 xp)
     return xp;
 }
 
-bool Unit::MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spellInfo, uint32 selectFlags, SelectAttackingTargetParams params) const
+bool Unit::MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spellInfo, uint32 selectFlags, SelectAttackingTargetParams params, int32 unitConditionId) const
 {
     if (selectFlags)
     {
@@ -12084,15 +12117,18 @@ bool Unit::MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spell
         }
     }
 
+    if (unitConditionId && !sObjectMgr.IsUnitConditionSatisfied(unitConditionId, target, this))
+        return false;
+
     return true;
 }
 
-Unit* Unit::SelectAttackingTarget(AttackingTarget target, uint32 position, uint32 spellId, uint32 selectFlags, SelectAttackingTargetParams params /*= SelectAttackingTargetParams()*/) const
+Unit* Unit::SelectAttackingTarget(AttackingTarget target, uint32 position, uint32 spellId, uint32 selectFlags, SelectAttackingTargetParams params /*= SelectAttackingTargetParams()*/, int32 unitConditionId/* = 0*/) const
 {
-    return SelectAttackingTarget(target, position, sSpellTemplate.LookupEntry<SpellEntry>(spellId), selectFlags, params);
+    return SelectAttackingTarget(target, position, sSpellTemplate.LookupEntry<SpellEntry>(spellId), selectFlags, params, unitConditionId);
 }
 
-Unit* Unit::SelectAttackingTarget(AttackingTarget target, uint32 position, SpellEntry const* spellInfo /*= nullptr*/, uint32 selectFlags/*= 0*/, SelectAttackingTargetParams params /*= SelectAttackingTargetParams()*/) const
+Unit* Unit::SelectAttackingTarget(AttackingTarget target, uint32 position, SpellEntry const* spellInfo /*= nullptr*/, uint32 selectFlags/*= 0*/, SelectAttackingTargetParams params /*= SelectAttackingTargetParams()*/, int32 unitConditionId/* = 0*/) const
 {
     if (!CanHaveThreatList())
         return nullptr;
@@ -12117,7 +12153,7 @@ Unit* Unit::SelectAttackingTarget(AttackingTarget target, uint32 position, Spell
             {
                 if (Unit* pTarget = GetMap()->GetUnit((*itr)->getUnitGuid()))
                 {
-                    if ((!selectFlags && !spellInfo) || MeetsSelectAttackingRequirement(pTarget, spellInfo, selectFlags, params))
+                    if ((!selectFlags && !spellInfo) || MeetsSelectAttackingRequirement(pTarget, spellInfo, selectFlags, params, unitConditionId))
                         suitableUnits.push_back(pTarget);
                 }
             }
@@ -12136,7 +12172,7 @@ Unit* Unit::SelectAttackingTarget(AttackingTarget target, uint32 position, Spell
             {
                 if (Unit* pTarget = GetMap()->GetUnit((*itr)->getUnitGuid()))
                 {
-                    if ((!selectFlags && !spellInfo) || MeetsSelectAttackingRequirement(pTarget, spellInfo, selectFlags, params))
+                    if ((!selectFlags && !spellInfo) || MeetsSelectAttackingRequirement(pTarget, spellInfo, selectFlags, params, unitConditionId))
                         return pTarget;
                 }
             }
@@ -12154,7 +12190,7 @@ Unit* Unit::SelectAttackingTarget(AttackingTarget target, uint32 position, Spell
             {
                 if (Unit* pTarget = GetMap()->GetUnit((*itr)->getUnitGuid()))
                 {
-                    if ((!selectFlags && !spellInfo) || MeetsSelectAttackingRequirement(pTarget, spellInfo, selectFlags, params))
+                    if ((!selectFlags && !spellInfo) || MeetsSelectAttackingRequirement(pTarget, spellInfo, selectFlags, params, unitConditionId))
                         return pTarget;
                 }
             }
@@ -12170,7 +12206,7 @@ Unit* Unit::SelectAttackingTarget(AttackingTarget target, uint32 position, Spell
             {
                 if (Unit* pTarget = GetMap()->GetUnit((*itr)->getUnitGuid()))
                 {
-                    if ((!selectFlags && !spellInfo) || MeetsSelectAttackingRequirement(pTarget, spellInfo, selectFlags, params))
+                    if ((!selectFlags && !spellInfo) || MeetsSelectAttackingRequirement(pTarget, spellInfo, selectFlags, params, unitConditionId))
                         suitableUnits.push_back(pTarget);
                 }
             }
@@ -12202,12 +12238,12 @@ Unit* Unit::SelectAttackingTarget(AttackingTarget target, uint32 position, Spell
     return nullptr;
 }
 
-void Unit::SelectAttackingTargets(std::vector<Unit*>& selectedTargets, AttackingTarget target, uint32 position, uint32 spellId, uint32 selectFlags/*= 0*/, SelectAttackingTargetParams params /*= SelectAttackingTargetParams()*/) const
+void Unit::SelectAttackingTargets(std::vector<Unit*>& selectedTargets, AttackingTarget target, uint32 position, uint32 spellId, uint32 selectFlags/*= 0*/, SelectAttackingTargetParams params /*= SelectAttackingTargetParams()*/, int32 unitConditionId/* = 0*/) const
 {
-    SelectAttackingTargets(selectedTargets, target, position, sSpellTemplate.LookupEntry<SpellEntry>(spellId), selectFlags, params);
+    SelectAttackingTargets(selectedTargets, target, position, sSpellTemplate.LookupEntry<SpellEntry>(spellId), selectFlags, params, unitConditionId);
 }
 
-void Unit::SelectAttackingTargets(std::vector<Unit*>& selectedTargets, AttackingTarget target, uint32 position, SpellEntry const* spellInfo /*= nullptr*/, uint32 selectFlags/*= 0*/, SelectAttackingTargetParams params /*= SelectAttackingTargetParams()*/) const
+void Unit::SelectAttackingTargets(std::vector<Unit*>& selectedTargets, AttackingTarget target, uint32 position, SpellEntry const* spellInfo /*= nullptr*/, uint32 selectFlags/*= 0*/, SelectAttackingTargetParams params /*= SelectAttackingTargetParams()*/, int32 unitConditionId/* = 0*/) const
 {
     if (!CanHaveThreatList())
         return;
@@ -12229,7 +12265,7 @@ void Unit::SelectAttackingTargets(std::vector<Unit*>& selectedTargets, Attacking
             {
                 if (Unit* pTarget = GetMap()->GetUnit((*itr)->getUnitGuid()))
                 {
-                    if ((!selectFlags && !spellInfo) || MeetsSelectAttackingRequirement(pTarget, spellInfo, selectFlags, params))
+                    if ((!selectFlags && !spellInfo) || MeetsSelectAttackingRequirement(pTarget, spellInfo, selectFlags, params, unitConditionId))
                         selectedTargets.push_back(pTarget);
                 }
             }

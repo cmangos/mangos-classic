@@ -21,7 +21,7 @@
 
 #include "Common.h"
 #include "Entities/ObjectGuid.h"
-#include "ByteBuffer.h"
+#include "Util/ByteBuffer.h"
 
 class Map;
 class Unit;

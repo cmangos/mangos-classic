@@ -17,7 +17,7 @@
  */
 
 #include "Config/Config.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "PlayerbotAI.h"
 #include "PlayerbotMgr.h"
 #include "../config.h"
@@ -851,11 +851,11 @@ void PlayerbotMgr::OnBotLogin(Player* const bot)
     // simulate client taking control
     WorldPacket* const pCMSG_SET_ACTIVE_MOVER = new WorldPacket(CMSG_SET_ACTIVE_MOVER, 8);
     *pCMSG_SET_ACTIVE_MOVER << bot->GetObjectGuid();
-    bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(pCMSG_SET_ACTIVE_MOVER)));
+    bot->GetSession()->QueuePacket(std::unique_ptr<WorldPacket>(pCMSG_SET_ACTIVE_MOVER));
 
     WorldPacket* const pMSG_MOVE_FALL_LAND = new WorldPacket(MSG_MOVE_FALL_LAND, 28);
     *pMSG_MOVE_FALL_LAND << bot->GetMover()->m_movementInfo;
-    bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(pMSG_MOVE_FALL_LAND)));
+    bot->GetSession()->QueuePacket(std::unique_ptr<WorldPacket>(pMSG_MOVE_FALL_LAND));
 
     // give the bot some AI, object is owned by the player class
     PlayerbotAI* ai = new PlayerbotAI(*this, bot, m_confDebugWhisper);

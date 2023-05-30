@@ -24,7 +24,7 @@
 #include "Entities/ItemPrototype.h"
 #include "Globals/SharedDefines.h"
 #include "Loot/LootMgr.h"
-#include "Util.h"
+#include "Util/Util.h"
 
 struct AuctionHouseBotItemData
 {

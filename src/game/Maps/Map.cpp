@@ -44,12 +44,11 @@
  #include "Metric/Metric.h"
 #endif
 
+#include <time.h>
+
 Map::~Map()
 {
     UnloadAll(true);
-
-    if (!m_scriptSchedule.empty())
-        sScriptMgr.DecreaseScheduledScriptCount(m_scriptSchedule.size());
 
     if (m_persistentState)
         m_persistentState->SetUsedByMapState(nullptr);         // field pointer can be deleted after this
@@ -84,6 +83,16 @@ TimePoint Map::GetCurrentClockTime() const
 uint32 Map::GetCurrentDiff() const
 {
     return World::GetCurrentDiff();
+}
+
+time_t Map::GetCurrentTime_t() const
+{
+    return m_curTime;
+}
+
+tm Map::GetCurrentTime_tm() const
+{
+    return m_curTimeTm;
 }
 
 GenericTransport* Map::GetTransport(ObjectGuid guid)
@@ -660,6 +669,13 @@ void Map::Update(const uint32& t_diff)
 });
 #endif
 
+    m_curTime = time(nullptr);
+
+#ifdef _MSC_VER
+    localtime_s(&m_curTimeTm, &m_curTime);
+#else
+    localtime_r(&m_curTime, &m_curTimeTm);
+#endif
 
     uint64 count = 0;
 
@@ -1056,6 +1072,10 @@ bool Map::UnloadGrid(const uint32& x, const uint32& y, bool pForce)
             return false;
 
         DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Unloading grid[%u,%u] for map %u", x, y, i_id);
+
+        ObjectGridStoper stoper(*grid);
+        stoper.StopN();
+
         ObjectGridUnloader unloader(*grid);
 
         // Finish remove and delete all creatures with delayed remove before moving to respawn grids
@@ -1069,6 +1089,12 @@ bool Map::UnloadGrid(const uint32& x, const uint32& y, bool pForce)
         RemoveAllObjectsInRemoveList();
 
         unloader.UnloadN();
+
+        // Unloading a grid can also add creatures to the list of objects to be
+        // removed, for example guardian pets. Remove these now to avoid they
+        // wouldn't actually be removed because the grid is already unloaded.
+        RemoveAllObjectsInRemoveList();
+
         delete getNGrid(x, y);
         setNGrid(nullptr, x, y);
     }
@@ -1906,13 +1932,14 @@ bool Map::CanEnter(Player* player)
 }
 
 /// Put scripts in the execution queue
-bool Map::ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* source, Object* target, ScriptExecutionParam execParams /*=SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE_TARGET*/)
+bool Map::ScriptsStart(ScriptMapType scriptType, uint32 id, Object* source, Object* target, ScriptExecutionParam execParams /*=SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE_TARGET*/)
 {
     MANGOS_ASSERT(source);
 
     ///- Find the script map
-    ScriptMapMap::const_iterator scriptInfoMapMapItr = scripts.second.find(id);
-    if (scriptInfoMapMapItr == scripts.second.end())
+    auto scriptMapMap = GetMapDataContainer().GetScriptMap(scriptType);
+    ScriptMapMap::const_iterator scriptInfoMapMapItr = scriptMapMap->second.find(id);
+    if (scriptInfoMapMapItr == scriptMapMap->second.end())
         return false;
 
     // prepare static data
@@ -1924,11 +1951,11 @@ bool Map::ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* sourc
     {
         for (ScriptScheduleMap::const_iterator searchItr = m_scriptSchedule.begin(); searchItr != m_scriptSchedule.end(); ++searchItr)
         {
-            if (searchItr->second.IsSameScript(scripts.first, id,
+            if (searchItr->second.IsSameScript(scriptMapMap->first, id,
                                                execParams & SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE ? sourceGuid : ObjectGuid(),
                                                execParams & SCRIPT_EXEC_PARAM_UNIQUE_BY_TARGET ? targetGuid : ObjectGuid(), ownerGuid))
             {
-                DETAIL_FILTER_LOG(LOG_FILTER_DB_SCRIPT, "DB-SCRIPTS: Process table `%s` id %u. Skip script as script already started for source %s, target %s - ScriptsStartParams %u", scripts.first, id, sourceGuid.GetString().c_str(), targetGuid.GetString().c_str(), execParams);
+                DETAIL_FILTER_LOG(LOG_FILTER_DB_SCRIPT, "DB-SCRIPTS: Process table `%s` id %u. Skip script as script already started for source %s, target %s - ScriptsStartParams %u", scriptMapMap->first, id, sourceGuid.GetString().c_str(), targetGuid.GetString().c_str(), execParams);
                 return true;
             }
         }
@@ -1942,11 +1969,11 @@ bool Map::ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* sourc
     while (scriptInfoItr != scriptMap.end())
     {
         auto const& scriptInfo = scriptInfoItr->second;
-        if (scriptInfo.delay > 0)
+        if (scriptInfo->delay > 0)
             break;
 
         // fire script with 0 delay directly
-        ScriptAction sa(scripts.first, this, sourceGuid, targetGuid, ownerGuid, &scriptInfo);
+        ScriptAction sa(scriptType, this, sourceGuid, targetGuid, ownerGuid, scriptInfo);
         if (sa.HandleScriptStep())
             return true;                    // script failed we should not continue further (command 31 or any error occured)
 
@@ -1957,9 +1984,8 @@ bool Map::ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* sourc
     for (; scriptInfoItr != scriptMap.end(); ++scriptInfoItr)
     {
         auto const& scriptInfo = scriptInfoItr->second;
-        ScriptAction sa(scripts.first, this, sourceGuid, targetGuid, ownerGuid, &scriptInfo);
+        ScriptAction sa(scriptType, this, sourceGuid, targetGuid, ownerGuid, scriptInfo);
         m_scriptSchedule.emplace(GetCurrentClockTime() + std::chrono::milliseconds(scriptInfoItr->first), sa);
-        sScriptMgr.IncreaseScheduledScriptsCount();
     }
 
     return true;
@@ -1974,12 +2000,11 @@ void Map::ScriptCommandStart(ScriptInfo const& script, uint32 delay, Object* sou
     ObjectGuid targetGuid = target ? target->GetObjectGuid() : ObjectGuid();
     ObjectGuid ownerGuid  = source->isType(TYPEMASK_ITEM) ? ((Item*)source)->GetOwnerGuid() : ObjectGuid();
 
-    ScriptAction sa("Internal Activate Command used for spell", this, sourceGuid, targetGuid, ownerGuid, &script);
+    ScriptAction sa(SCRIPT_TYPE_INTERNAL, this, sourceGuid, targetGuid, ownerGuid, std::make_shared<ScriptInfo>(script));
 
     if (delay)
     {
         m_scriptSchedule.emplace(GetCurrentClockTime() + std::chrono::milliseconds(delay), sa);
-        sScriptMgr.IncreaseScheduledScriptsCount();
     }
     else
         sa.HandleScriptStep();
@@ -2008,20 +2033,14 @@ void Map::ScriptsProcess()
             for (ScriptScheduleMap::iterator rmItr = m_scriptSchedule.begin(); rmItr != m_scriptSchedule.end();)
             {
                 if (rmItr->second.IsSameScript(tableName, id, sourceGuid, targetGuid, ownerGuid))
-                {
                     m_scriptSchedule.erase(rmItr++);
-                    sScriptMgr.DecreaseScheduledScriptCount();
-                }
                 else
                     ++rmItr;
             }
         }
         else
-        {
             m_scriptSchedule.erase(iter);
 
-            sScriptMgr.DecreaseScheduledScriptCount();
-        }
         iter = m_scriptSchedule.begin();
     }
 }
@@ -2173,7 +2192,7 @@ void Map::SendObjectUpdates()
     }
 }
 
-Creature* Map::GetCreature(uint32 dbguid)
+Creature* Map::GetCreature(uint32 dbguid) const
 {
     auto itr = m_dbGuidObjects.find(std::make_pair(HIGHGUID_UNIT, dbguid));
     if (itr == m_dbGuidObjects.end())
@@ -2190,7 +2209,7 @@ Creature* Map::GetCreature(uint32 dbguid)
     return static_cast<Creature*>((*itr).second.front());
 }
 
-GameObject* Map::GetGameObject(uint32 dbguid)
+GameObject* Map::GetGameObject(uint32 dbguid) const
 {
     auto itr = m_dbGuidObjects.find(std::make_pair(HIGHGUID_GAMEOBJECT, dbguid));
     if (itr == m_dbGuidObjects.end())
@@ -2202,6 +2221,48 @@ GameObject* Map::GetGameObject(uint32 dbguid)
     return static_cast<GameObject*>((*itr).second.front());
 }
 
+std::vector<WorldObject*> const* Map::GetWorldObjects(std::string stringId) const
+{
+    return GetWorldObjects(GetMapDataContainer().GetStringId(stringId));
+}
+
+std::vector<Creature*> const* Map::GetCreatures(std::string stringId) const
+{
+    return GetCreatures(GetMapDataContainer().GetStringId(stringId));
+}
+
+std::vector<GameObject*> const* Map::GetGameObjects(std::string stringId) const
+{
+    return GetGameObjects(GetMapDataContainer().GetStringId(stringId));
+}
+
+std::vector<WorldObject*> const* Map::GetWorldObjects(uint32 stringId) const
+{
+    auto itr = m_objectsPerStringId.find(stringId);
+    if (itr == m_objectsPerStringId.end())
+        return nullptr;
+
+    return &(itr->second.worldObjects);
+}
+
+std::vector<Creature*> const* Map::GetCreatures(uint32 stringId) const
+{
+    auto itr = m_objectsPerStringId.find(stringId);
+    if (itr == m_objectsPerStringId.end())
+        return nullptr;
+
+    return &(itr->second.creatures);
+}
+
+std::vector<GameObject*> const* Map::GetGameObjects(uint32 stringId) const
+{
+    auto itr = m_objectsPerStringId.find(stringId);
+    if (itr == m_objectsPerStringId.end())
+        return nullptr;
+
+    return &(itr->second.gameobjects);
+}
+
 void Map::AddDbGuidObject(WorldObject* obj)
 {
     m_dbGuidObjects[std::make_pair(HighGuid(obj->GetParentHigh()), obj->GetDbGuid())].push_back(obj);
@@ -2211,6 +2272,26 @@ void Map::RemoveDbGuidObject(WorldObject* obj)
 {
     auto& vec = m_dbGuidObjects[std::make_pair(HighGuid(obj->GetParentHigh()), obj->GetDbGuid())];
     vec.erase(std::remove(vec.begin(), vec.end(), obj), vec.end());
+}
+
+void Map::AddStringIdObject(uint32 stringId, WorldObject* obj)
+{
+    auto& data = m_objectsPerStringId[stringId];
+    data.worldObjects.push_back(obj);
+    if (obj->IsCreature())
+        data.creatures.push_back(static_cast<Creature*>(obj));
+    else if (obj->IsGameObject())
+        data.gameobjects.push_back(static_cast<GameObject*>(obj));
+}
+
+void Map::RemoveStringIdObject(uint32 stringId, WorldObject* obj)
+{
+    auto& data = m_objectsPerStringId[stringId];
+    data.worldObjects.erase(std::remove(data.worldObjects.begin(), data.worldObjects.end(), obj), data.worldObjects.end());
+    if (obj->IsCreature())
+        data.creatures.erase(std::remove(data.creatures.begin(), data.creatures.end(), static_cast<Creature*>(obj)), data.creatures.end());
+    else if (obj->IsGameObject())
+        data.gameobjects.erase(std::remove(data.gameobjects.begin(), data.gameobjects.end(), static_cast<GameObject*>(obj)), data.gameobjects.end());
 }
 
 uint32 Map::GenerateLocalLowGuid(HighGuid guidhigh)

@@ -20,7 +20,7 @@
 #define MANGOS_SYSTEMCONFIG_H
 
 #ifndef _PACKAGENAME
-#define _PACKAGENAME "CMaNGOS Classic"
+#define _PACKAGENAME "CMaNGOS"
 #endif
 
 #include "revision.h"
@@ -43,7 +43,7 @@
 # define _REALMDCONFVERSION 2021031501
 #endif
 
-#if MANGOS_ENDIAN == MANGOS_BIGENDIAN
+#if MANGOS_ENDIAN == MANGOS_BIG_ENDIAN
 # define _ENDIAN_STRING "big-endian"
 #else
 # define _ENDIAN_STRING "little-endian"

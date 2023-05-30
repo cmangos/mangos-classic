@@ -8,7 +8,7 @@
 #ifndef __WARDENSCAN_HPP_
 #define __WARDENSCAN_HPP_
 
-#include "ByteBuffer.h"
+#include "Util/ByteBuffer.h"
 
 #include <openssl/sha.h>
 
@@ -76,6 +76,7 @@ class Scan
         size_t replySize;       // maximum size of reply
 
         Scan() = delete;
+        virtual ~Scan() = default;
 
         void Build(const Warden *warden, std::vector<std::string> &strings, ByteBuffer &scan) const { _builder(warden, strings, scan); }
 

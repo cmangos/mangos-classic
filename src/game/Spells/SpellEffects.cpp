@@ -18,7 +18,7 @@
 
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Server/Opcodes.h"
 #include "Log.h"
 #include "World/World.h"
@@ -41,7 +41,7 @@
 #include "BattleGround/BattleGround.h"
 #include "Tools/Language.h"
 #include "Social/SocialMgr.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Entities/TemporarySpawn.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Tools/Formulas.h"
@@ -1628,9 +1628,9 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell ScriptStart spellid %u in EffectDummy", m_spellInfo->Id);
     if (effectTargetType == TARGET_TYPE_UNIT || effectTargetType == TARGET_TYPE_UNIT_DEST)
-        m_trueCaster->GetMap()->ScriptsStart(sSpellScripts, m_spellInfo->Id, m_trueCaster, unitTarget);
+        m_trueCaster->GetMap()->ScriptsStart(SCRIPT_TYPE_SPELL, m_spellInfo->Id, m_trueCaster, unitTarget);
     else if (effectTargetType == TARGET_TYPE_GAMEOBJECT || (effectTargetType == TARGET_TYPE_LOCK && gameObjTarget))
-        m_trueCaster->GetMap()->ScriptsStart(sSpellScripts, m_spellInfo->Id, m_trueCaster, gameObjTarget);
+        m_trueCaster->GetMap()->ScriptsStart(SCRIPT_TYPE_SPELL, m_spellInfo->Id, m_trueCaster, gameObjTarget);
 }
 
 void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
@@ -1766,7 +1766,7 @@ void Spell::EffectTriggerMissileSpell(SpellEffectIndex effect_idx)
         if (unitTarget)
         {
             DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell ScriptStart spellid %u in EffectTriggerMissileSpell", m_spellInfo->Id);
-            m_caster->GetMap()->ScriptsStart(sSpellScripts, m_spellInfo->Id, m_caster, unitTarget);
+            m_caster->GetMap()->ScriptsStart(SCRIPT_TYPE_SPELL, m_spellInfo->Id, m_caster, unitTarget);
         }
         else
             sLog.outError("EffectTriggerMissileSpell of spell %u (eff: %u): triggering unknown spell id %u",
@@ -2382,9 +2382,11 @@ void Spell::EffectOpenLock(SpellEffectIndex eff_idx)
             if (gameObjTarget && !gameObjTarget->m_loot)
             {
                 // Allow one skill-up until respawned
-                if (!gameObjTarget->IsInSkillupList(player) &&
-                        player->UpdateGatherSkill(m_effectSkillInfo[eff_idx].skillId, pureSkillValue, m_effectSkillInfo[eff_idx].reqSkillValue))
+                if (!gameObjTarget->IsInSkillupList(player))
+                {
+                    player->UpdateGatherSkill(m_effectSkillInfo[eff_idx].skillId, pureSkillValue, m_effectSkillInfo[eff_idx].reqSkillValue);
                     gameObjTarget->AddToSkillupList(player);
+                }
             }
             else if (itemTarget && !itemTarget->m_loot)
             {
@@ -3802,7 +3804,7 @@ void Spell::EffectInterruptCast(SpellEffectIndex /*eff_idx*/)
         {
             SpellEntry const* curSpellInfo = spell->m_spellInfo;
             // check if we can interrupt spell
-            if ((curSpellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_COMBAT) && curSpellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE && spell->CanBeInterrupted())
+            if (spell->IsInterruptible())
             {
                 unitTarget->LockOutSpells(GetSpellSchoolMask(curSpellInfo), GetSpellDuration(m_spellInfo));
                 unitTarget->InterruptSpell(CurrentSpellTypes(i), false);
@@ -4438,9 +4440,9 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell ScriptStart spellid %u in EffectScriptEffect", m_spellInfo->Id);
     if (effectTargetType == TARGET_TYPE_UNIT || effectTargetType == TARGET_TYPE_UNIT_DEST)
-        m_trueCaster->GetMap()->ScriptsStart(sSpellScripts, m_spellInfo->Id, m_trueCaster, unitTarget);
+        m_trueCaster->GetMap()->ScriptsStart(SCRIPT_TYPE_SPELL, m_spellInfo->Id, m_trueCaster, unitTarget);
     else if (effectTargetType == TARGET_TYPE_GAMEOBJECT || (effectTargetType == TARGET_TYPE_LOCK && gameObjTarget))
-        m_trueCaster->GetMap()->ScriptsStart(sSpellScripts, m_spellInfo->Id, m_trueCaster, gameObjTarget);
+        m_trueCaster->GetMap()->ScriptsStart(SCRIPT_TYPE_SPELL, m_spellInfo->Id, m_trueCaster, gameObjTarget);
 }
 
 void Spell::EffectSanctuary(SpellEffectIndex /*eff_idx*/)

@@ -17,7 +17,7 @@
 #ifndef TIMER_AI_H
 #define TIMER_AI_H
 
-#include "Util.h"
+#include "Util/Util.h"
 #include "Platform/Define.h"
 
 #include <chrono>
@@ -29,12 +29,19 @@ using namespace std::chrono_literals;
 
 class ChatHandler;
 
+enum TimerCombat
+{
+    TIMER_COMBAT_OOC    = 0,
+    TIMER_COMBAT_COMBAT = 1,
+    TIMER_ALWAYS        = 2
+};
+
 /*
 Timer data class used for execution of TimerAI events
 */
 struct Timer
 {
-    Timer(uint32 id, std::function<void()> functor, uint32 timerMin, uint32 timerMax, bool disabled = false);
+    Timer(uint32 id, std::function<void()> functor, uint32 timerMin, uint32 timerMax, TimerCombat combatSetting, bool disabled = false);
     uint32 id;
     uint32 timer;
     bool disabled;
@@ -43,18 +50,10 @@ struct Timer
     // initial settings
     uint32 initialMin, initialMax;
     bool initialDisabled;
+    TimerCombat combatSetting;
 
-    virtual bool UpdateTimer(const uint32 diff);
+    bool UpdateTimer(const uint32 diff, bool combat);
     void ResetTimer();
-};
-
-struct CombatTimer : public Timer
-{
-    CombatTimer(uint32 id, std::function<void()> functor, bool combat, uint32 timerMin, uint32 timerMax, bool disabled = false) : Timer(id, functor, timerMin, timerMax, disabled), combat(combat) {}
-
-    bool combat;
-
-    virtual bool UpdateTimer(const uint32 diff, bool combat);
 };
 
 /*
@@ -67,16 +66,16 @@ class TimerManager
         TimerManager() {}
 
         // TODO: remove first function
-        void AddCustomAction(uint32 id, bool disabled, std::function<void()> functor);
-        void AddCustomAction(uint32 id, uint32 timer, std::function<void()> functor);
-        void AddCustomAction(uint32 id, std::chrono::milliseconds timer, std::function<void()> functor)
+        void AddCustomAction(uint32 id, bool disabled, std::function<void()> functor, TimerCombat timerCombat = TIMER_ALWAYS);
+        void AddCustomAction(uint32 id, uint32 timer, std::function<void()> functor, TimerCombat timerCombat = TIMER_ALWAYS);
+        void AddCustomAction(uint32 id, std::chrono::milliseconds timer, std::function<void()> functor, TimerCombat timerCombat = TIMER_ALWAYS)
         {
-            AddCustomAction(id, uint32(timer.count()), functor);
+            AddCustomAction(id, uint32(timer.count()), functor, timerCombat);
         }
-        void AddCustomAction(uint32 id, uint32 timerMin, uint32 timerMax, std::function<void()> functor);
-        void AddCustomAction(uint32 id, std::chrono::milliseconds timerMin, std::chrono::milliseconds timerMax, std::function<void()> functor)
+        void AddCustomAction(uint32 id, uint32 timerMin, uint32 timerMax, std::function<void()> functor, TimerCombat timerCombat = TIMER_ALWAYS);
+        void AddCustomAction(uint32 id, std::chrono::milliseconds timerMin, std::chrono::milliseconds timerMax, std::function<void()> functor, TimerCombat timerCombat = TIMER_ALWAYS)
         {
-            AddCustomAction(id, timerMin.count(), timerMax.count(), functor);
+            AddCustomAction(id, timerMin.count(), timerMax.count(), functor, timerCombat);
         }
 
         virtual void ResetTimer(uint32 index, uint32 timer);
@@ -101,7 +100,9 @@ class TimerManager
             ResetIfNotStarted(index, timer.count());
         }
 
+
         virtual void UpdateTimers(const uint32 diff);
+        virtual void UpdateTimers(const uint32 diff, bool combat);
         virtual void ResetAllTimers();
 
         virtual void GetAIInformation(ChatHandler& reader);
@@ -109,7 +110,7 @@ class TimerManager
     protected:
         void AddTimer(uint32 id, Timer&& timer);
     private:
-        std::map<uint32, Timer> m_timers;
+        std::map<uint32, Timer> m_timers; // yes, we are slicing here
 };
 
 class CombatActions : public TimerManager
@@ -187,7 +188,7 @@ class CombatActions : public TimerManager
         inline void SetActionReadyStatus(uint32 index, bool state) { m_actionReadyStatus[index] = state; }
         inline bool GetActionReadyStatus(uint32 index) { return m_actionReadyStatus[index]; }
 
-        virtual void UpdateTimers(const uint32 diff, bool combat);
+        virtual void UpdateTimers(const uint32 diff, bool combat) override;
         virtual void ExecuteActions() = 0;
         virtual void ResetAllTimers() override;
 
@@ -196,7 +197,7 @@ class CombatActions : public TimerManager
         size_t GetCombatActionCount() { return m_actionReadyStatus.size(); }
 
     private:
-        std::map<uint32, CombatTimer> m_CombatActions;
+        std::map<uint32, Timer> m_combatActions;
         std::vector<bool> m_actionReadyStatus;
         std::map<uint32, bool> m_timerlessActionSettings;
         std::map<uint32, uint32> m_spellAction;

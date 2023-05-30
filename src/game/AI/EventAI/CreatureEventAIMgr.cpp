@@ -22,7 +22,7 @@
 #include "CreatureEventAI.h"
 #include "CreatureEventAIMgr.h"
 #include "Globals/ObjectMgr.h"
-#include "ProgressBar.h"
+#include "Util/ProgressBar.h"
 #include "Policies/Singleton.h"
 #include "Maps/GridDefines.h"
 #include "Spells/SpellMgr.h"
@@ -662,8 +662,8 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                         break;
                     case ACTION_T_CAST:
                     {
-                        const SpellEntry* spell = sSpellTemplate.LookupEntry<SpellEntry>(action.cast.spellId);
-                        if (!spell)
+                        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(action.cast.spellId);
+                        if (!spellInfo)
                             sLog.outErrorEventAI("Event %u Action %u uses nonexistent SpellID %u.", eventId, j + 1, action.cast.spellId);
                         /* FIXME: temp.raw.param3 not have event tipes with recovery time in it....
                         else
@@ -681,37 +681,45 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                         if (action.cast.castFlags & CAST_FORCE_TARGET_SELF)
                             action.cast.castFlags |= CAST_TRIGGERED;
 
-                        if (spell && spell->Targets) // causes crash if not handled
+                        if (spellInfo) // causes crash if not handled
                         {
-                            if (action.cast.target == TARGET_T_NONE || action.cast.target == TARGET_T_NEAREST_AOE_TARGET)
+                            if (spellInfo->Targets)
                             {
-                                sLog.outErrorEventAI("Event %u Action %u uses SpellID %u that must have a target supplied (target is %u). Resetting to TARGET_T_HOSTILE.", eventId, j + 1, action.cast.spellId, action.cast.target);
-                                action.cast.target = TARGET_T_HOSTILE;
+                                if (action.cast.target == TARGET_T_NONE || action.cast.target == TARGET_T_NEAREST_AOE_TARGET)
+                                {
+                                    sLog.outErrorEventAI("Event %u Action %u uses SpellID %u that must have a target supplied (target is %u). Resetting to TARGET_T_HOSTILE.", eventId, j + 1, action.cast.spellId, action.cast.target);
+                                    action.cast.target = TARGET_T_HOSTILE;
+                                }
+                            }
+                            if (spellInfo->HasAttribute(SPELL_ATTR_EX_EXCLUDE_CASTER) && action.cast.target == TARGET_T_SELF)
+                            {
+                                sLog.outErrorEventAI("Event %u Action %u uses SpellID %u that must not target caster (target is %u). Resetting to TARGET_T_NONE.", eventId, j + 1, action.cast.spellId, action.cast.target);
+                                action.cast.target = TARGET_T_NONE;
                             }
                         }
 
                         IsValidTargetType(temp.event_type, action.type, action.cast.target, eventId, j + 1);
 
                         // Some Advanced target type checks - Can have false positives
-                        if (!sLog.HasLogFilter(LOG_FILTER_EVENT_AI_DEV) && spell)
+                        if (!sLog.HasLogFilter(LOG_FILTER_EVENT_AI_DEV) && spellInfo)
                         {
                             // spell must be cast on self, but is not
-                            if ((IsOnlySelfTargeting(spell) || spell->rangeIndex == SPELL_RANGE_IDX_SELF_ONLY) && action.cast.target != TARGET_T_SELF && !(action.cast.castFlags & CAST_FORCE_TARGET_SELF))
+                            if ((IsOnlySelfTargeting(spellInfo) || spellInfo->rangeIndex == SPELL_RANGE_IDX_SELF_ONLY) && action.cast.target != TARGET_T_SELF && !(action.cast.castFlags & CAST_FORCE_TARGET_SELF))
                                 sLog.outErrorEventAI("Event %u Action %u uses SpellID %u that must be self cast (target is %u)", eventId, j + 1, action.cast.spellId, action.cast.target);
 
                             // TODO: spell must be cast on enemy, but is not
 
                             // used TARGET_T_ACTION_INVOKER, but likely should be _INVOKER_OWNER instead
                             if (action.cast.target == TARGET_T_ACTION_INVOKER &&
-                                    (IsSpellHaveEffect(spell, SPELL_EFFECT_QUEST_COMPLETE) || IsSpellHaveEffect(spell, SPELL_EFFECT_DUMMY)))
+                                    (IsSpellHaveEffect(spellInfo, SPELL_EFFECT_QUEST_COMPLETE) || IsSpellHaveEffect(spellInfo, SPELL_EFFECT_DUMMY)))
                                 sLog.outErrorEventAI("Event %u Action %u has TARGET_T_ACTION_INVOKER(%u) target type, but should have TARGET_T_ACTION_INVOKER_OWNER(%u).", eventId, j + 1, TARGET_T_ACTION_INVOKER, TARGET_T_ACTION_INVOKER_OWNER);
 
                             // Spell that should only target players, but could get any
-                            if (spell->HasAttribute(SPELL_ATTR_EX3_ONLY_ON_PLAYER) &&
+                            if (spellInfo->HasAttribute(SPELL_ATTR_EX3_ONLY_ON_PLAYER) &&
                                     (action.cast.target == TARGET_T_ACTION_INVOKER || action.cast.target == TARGET_T_HOSTILE_RANDOM || action.cast.target == TARGET_T_HOSTILE_RANDOM_NOT_TOP))
                                 sLog.outErrorEventAI("Event %u Action %u uses Target type %u for a spell (%u) that should only target players. This could be wrong.", eventId, j + 1, action.cast.target, action.cast.spellId);
 
-                            if (spell->Targets != 0 && (action.cast.target == TARGET_T_NONE || action.cast.target == TARGET_T_NEAREST_AOE_TARGET))
+                            if (spellInfo->Targets != 0 && (action.cast.target == TARGET_T_NONE || action.cast.target == TARGET_T_NEAREST_AOE_TARGET))
                             {
                                 sLog.outErrorEventAI("Event %u Action %u uses Target type %u for a spell (%u) that needs target for casting. Resetting it to TARGET_T_HOSTILE.", eventId, j + 1, action.cast.target, action.cast.spellId);
                                 action.cast.target = TARGET_T_HOSTILE;
@@ -945,7 +953,8 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     case ACTION_T_START_RELAY_SCRIPT:
                         if (action.relayScript.relayId > 0)
                         {
-                            if (sRelayScripts.second.find(action.relayScript.relayId) == sRelayScripts.second.end())
+                            auto relayScripts = sScriptMgr.GetScriptMap(SCRIPT_TYPE_RELAY);
+                            if (relayScripts->second.find(action.relayScript.relayId) == relayScripts->second.end())
                             {
                                 sLog.outErrorEventAI("Event %u Action %u references invalid dbscript_on_relay id %u", eventId, j + 1, action.relayScript.relayId);
                             }

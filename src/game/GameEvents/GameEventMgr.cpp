@@ -21,7 +21,7 @@
 #include "Globals/ObjectMgr.h"
 #include "Entities/ObjectGuid.h"
 #include "Pools/PoolManager.h"
-#include "ProgressBar.h"
+#include "Util/ProgressBar.h"
 #include "Tools/Language.h"
 #include "Log.h"
 #include "Maps/MapManager.h"
@@ -903,11 +903,11 @@ void GameEventMgr::GameEventUnspawn(int16 event_id)
     }
 }
 
-GameEventCreatureData const* GameEventMgr::GetCreatureUpdateDataForActiveEvent(uint32 lowguid) const
+GameEventCreatureData const* GameEventMgr::GetCreatureUpdateDataForActiveEvent(uint32 dbGuid) const
 {
     // only for active event, creature can be listed for many so search all
     uint32 event_id = 0;
-    GameEventCreatureDataPerGuidBounds bounds = m_gameEventCreatureDataPerGuid.equal_range(lowguid);
+    GameEventCreatureDataPerGuidBounds bounds = m_gameEventCreatureDataPerGuid.equal_range(dbGuid);
     for (GameEventCreatureDataPerGuidMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
     {
         if (IsActiveEvent(itr->second))
@@ -921,7 +921,7 @@ GameEventCreatureData const* GameEventMgr::GetCreatureUpdateDataForActiveEvent(u
         return nullptr;
 
     for (const auto& itr : m_gameEventCreatureData[event_id])
-        if (itr.first == lowguid)
+        if (itr.first == dbGuid)
             return &itr.second;
 
     return nullptr;

@@ -197,6 +197,9 @@ class SpellAuraHolder
 
         void SetCreationDelayFlag();
 
+        bool IsProcReady(TimePoint const& now) const;
+        void SetProcCooldown(std::chrono::milliseconds cooldown, TimePoint const& now);
+
         // Scripting system
         AuraScript* GetAuraScript() const { return m_auraScript; }
         // hooks
@@ -240,6 +243,8 @@ class SpellAuraHolder
         bool m_isRemovedOnShapeLost: 1;
         bool m_deleted: 1;
         bool m_skipUpdate: 1;
+
+        TimePoint m_procCooldown;
 
         // Scripting System
         AuraScript* m_auraScript;
@@ -494,7 +499,7 @@ class Aura
         void OnAfterApply(bool apply);
         bool OnCheckProc(ProcExecutionData& data);
         SpellAuraProcResult OnProc(ProcExecutionData& data);
-        void OnAbsorb(int32& currentAbsorb, int32& remainingDamage, uint32& reflectedSpellId, int32& reflectDamage, bool& preventedDeath);
+        void OnAbsorb(int32& currentAbsorb, int32& remainingDamage, uint32& reflectedSpellId, int32& reflectDamage, bool& preventedDeath, bool& dropCharge);
         void OnManaAbsorb(int32& currentAbsorb);
         void OnAuraDeathPrevention(int32& remainingDamage);
         void OnPeriodicTrigger(PeriodicTriggerData& data);

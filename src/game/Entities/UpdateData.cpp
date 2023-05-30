@@ -20,17 +20,16 @@
 
 #include "Common.h"
 #include "Entities/UpdateData.h"
-#include "ByteBuffer.h"
-#include "WorldPacket.h"
+#include "Util/ByteBuffer.h"
+#include "Server/WorldPacket.h"
 #include "Log.h"
 #include "Server/Opcodes.h"
 #include "World/World.h"
 #include "Entities/ObjectGuid.h"
 #include "Server/WorldSession.h"
 
-UpdateData::UpdateData() : m_data(1), m_currentIndex(0)
+UpdateData::UpdateData() : m_data(1, {ByteBuffer(0), 0}), m_currentIndex(0)
 {
-    m_data[0].m_buffer = 0;
 }
 
 void UpdateData::AddOutOfRangeGUID(GuidSet& guids)

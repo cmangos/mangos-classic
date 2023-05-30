@@ -22,8 +22,8 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <chrono>
-#include "Errors.h"
-#include "Threading.h"
+#include "Util/Errors.h"
+#include "Multithreading/Threading.h"
 #include <thread>
 #include <boost/asio.hpp>
 #include "Common.h"
@@ -33,7 +33,7 @@
 #include "Server/DBCStores.h"
 #include "Globals/ObjectAccessor.h"
 #include "Server/Opcodes.h"
-#include "ByteBuffer.h"
+#include "Util/ByteBuffer.h"
 #include "Entities/UpdateFields.h"
 #include "Entities/UpdateData.h"
 #include "Globals/SharedDefines.h"

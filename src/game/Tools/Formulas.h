@@ -142,7 +142,7 @@ namespace MaNGOS
 
             // the X values for each breakpoint are found from the CP scores
             // of the players around that point in the WS scores
-            HonorStanding* tempSt;
+            HonorStanding tempSt;
             float honor;
 
             // initialize CP array
@@ -151,7 +151,7 @@ namespace MaNGOS
             for (uint8 i = 1; i <= 13; i++)
             {
                 honor = 0.0f;
-                tempSt = sObjectMgr.GetHonorStandingByPosition(sc.BRK[i], team);
+                std::optional<HonorStanding> tempSt = sObjectMgr.GetHonorStandingByPosition(sc.BRK[i], team);
                 if (tempSt)
                 {
                     honor += tempSt->honorPoints;

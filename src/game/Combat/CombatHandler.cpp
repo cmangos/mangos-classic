@@ -18,7 +18,7 @@
 
 #include "Common.h"
 #include "Log.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "Entities/ObjectGuid.h"
 #include "Entities/Player.h"
@@ -49,7 +49,7 @@ void WorldSession::HandleAttackSwingOpcode(WorldPacket& recv_data)
     if (!mover->CanAttackNow(enemy))
     {
         // stop attack state at client
-        mover->SendMeleeAttackStop(nullptr);
+        mover->SendMeleeAttackStop(*enemy);
         return;
     }
 

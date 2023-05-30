@@ -137,7 +137,7 @@ UPDATE creature_template SET ScriptName='spell_dummy_npc' WHERE entry IN (
 -- eastern kingdoms
 8888,13016,
 -- kalimdor
-9299,12296,12298);
+9299);
 
 /* WORLD MAP SCRIPTS */
 DELETE FROM world_template WHERE map IN (0, 1, 530);
@@ -363,12 +363,8 @@ UPDATE creature_template SET ScriptName='npc_eris_havenfire' WHERE entry=14494;
 /* ELWYNN FOREST */
 
 /* FELWOOD */
-INSERT INTO scripted_event_id VALUES
-(8328,'npc_kroshius');
 UPDATE creature_template SET ScriptName='npc_kitten' WHERE entry=9937;
 UPDATE creature_template SET ScriptName='npc_corrupt_saber' WHERE entry=10042;
-UPDATE creature_template SET ScriptName='npc_niby_the_almighty' WHERE entry=14469;
-UPDATE creature_template SET ScriptName='npc_kroshius' WHERE entry=14467;
 UPDATE creature_template SET ScriptName='npc_captured_arkonarin' WHERE entry=11016;
 UPDATE creature_template SET ScriptName='npc_arei' WHERE entry=9598;
 

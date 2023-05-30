@@ -18,7 +18,7 @@
 
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Globals/SharedDefines.h"
 #include "Server/WorldSession.h"
 #include "Server/Opcodes.h"
@@ -35,7 +35,7 @@
 #include "Tools/PlayerDump.h"
 #include "Social/SocialMgr.h"
 #include "GMTickets/GMTicketMgr.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Tools/Language.h"
 #include "Chat/Chat.h"
 #include "Spells/SpellMgr.h"
@@ -798,6 +798,10 @@ void WorldSession::HandlePlayerReconnect()
 {
     // stop logout timer if need
     LogoutRequest(0);
+
+    // if DC during cinematic - just stop it
+    if (_player->getCinematic() != 0)
+        _player->StopCinematic();
 
     // silently kick from chat channels player lists to allow reconnect correctly
     _player->CleanupChannels();

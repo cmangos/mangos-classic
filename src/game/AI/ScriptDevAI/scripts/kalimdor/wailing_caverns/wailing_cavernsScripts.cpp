@@ -243,7 +243,7 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
         }
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* /*pSummoned*/) override
     {
         ++m_uiSummonedAlive;
     }

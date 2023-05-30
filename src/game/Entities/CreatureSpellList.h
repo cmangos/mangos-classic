@@ -51,6 +51,7 @@ struct CreatureSpellListTargeting
     uint32 Param1;
     uint32 Param2;
     uint32 Param3;
+    int32  UnitCondition;
     std::string Comment;
 };
 
@@ -58,6 +59,7 @@ enum SpellListFlags
 {
     SPELL_LIST_FLAG_SUPPORT_ACTION  = 1,
     SPELL_LIST_FLAG_RANGED_ACTION   = 2, // previously known as main ranged spell in EAI
+    SPELL_LIST_FLAG_CATEGORY_COOLDOWN = 4, // imposes category cooldown instead of normal cooldown
 };
 
 struct CreatureSpellListSpell
@@ -66,6 +68,7 @@ struct CreatureSpellListSpell
     uint32 Position;
     uint32 SpellId;
     uint32 Flags;
+    int32 CombatCondition;
     CreatureSpellListTargeting* Target;
     uint32 ScriptId;
     uint32 Availability;

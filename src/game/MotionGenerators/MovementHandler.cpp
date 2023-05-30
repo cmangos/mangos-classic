@@ -17,7 +17,7 @@
  */
 
 #include "Common.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "Server/Opcodes.h"
 #include "Log.h"
@@ -328,6 +328,12 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recv_data)
     /*----------------*/
 
     if (!ProcessMovementInfo(movementInfo, mover, plMover, recv_data))
+        return;
+
+    // CMSG opcode has no handler in client, should not be sent to others.
+    // It is sent by client when you jump and hit something on the way up,
+    // thus stopping upward movement and causing you to descend sooner.
+    if (opcode == CMSG_MOVE_FALL_RESET)
         return;
 
     WorldPacket data(opcode, recv_data.size());

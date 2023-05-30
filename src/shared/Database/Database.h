@@ -20,7 +20,7 @@
 #define DATABASE_H
 
 #include "Common.h"
-#include "Threading.h"
+#include "Multithreading/Threading.h"
 #include "Database/SqlDelayThread.h"
 #include "Policies/ThreadingModel.h"
 #include "SqlPreparedStatement.h"

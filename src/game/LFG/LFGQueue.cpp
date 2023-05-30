@@ -19,7 +19,7 @@
 #include "LFG/LFGQueue.h"
 #include "World/World.h"
 #include "LFG/LFGMgr.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Entities/Player.h"
 #include "Globals/ObjectMgr.h"
 #include "Groups/Group.h"
@@ -72,7 +72,10 @@ void LFGQueue::Update()
         previously = now;
 
         if (m_queuedGroups.empty() && m_queuedPlayers.empty())
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
             continue;
+        }
 
         // Iterate over QueuedPlayersMap to update players timers and remove offline/disconnected players.
         for (auto itr = m_queuedPlayers.begin(); itr != m_queuedPlayers.end();)
@@ -397,14 +400,16 @@ void LFGQueue::RemovePlayerFromQueue(ObjectGuid playerGuid, PlayerLeaveMethod le
             {
                 Player* player = sObjectMgr.GetPlayer(playerGuid);
 
-                if (player && player->GetSession())
+                if (player)
                 {
-                    WorldPacket data;
-                    LFGMgr::BuildSetQueuePacket(data, 0, MEETINGSTONE_STATUS_LEAVE_QUEUE);
-                    player->GetSession()->SendPacket(data);
+                    if (player->GetSession())
+                    {
+                        WorldPacket data;
+                        LFGMgr::BuildSetQueuePacket(data, 0, MEETINGSTONE_STATUS_LEAVE_QUEUE);
+                        player->GetSession()->SendPacket(data);
+                    }
+                    player->SetLFGAreaId(0);
                 }
-
-                player->SetLFGAreaId(0);
             });
         }
 

@@ -30,7 +30,7 @@
 #include "Globals/ObjectMgr.h"
 #include "Globals/ObjectAccessor.h"
 #include "Mails/Mail.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Tools/Formulas.h"
 #include "Grids/GridNotifiersImpl.h"
 #include "Chat/Chat.h"
@@ -857,7 +857,7 @@ void BattleGround::EndBattleGround(Team winner)
     }
 
     // AV message is different - TODO: check if others are also wrong
-    if (winmsg_id && GetTypeId() != BATTLEGROUND_QUEUE_AV)
+    if (winmsg_id && GetTypeId() != BATTLEGROUND_AV)
         SendMessageToAll(winmsg_id, CHAT_MSG_BG_SYSTEM_NEUTRAL);
 }
 

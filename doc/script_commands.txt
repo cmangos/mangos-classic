@@ -244,8 +244,10 @@ Defining a buddy could be done in several way:
 
 16 SCRIPT_COMMAND_PLAY_SOUND                source = any object, target=any/player
                                             * datalong = sound_id
-                                            * datalong2 (bitmask: 0/1=target-player, 0/2=with distance dependent, 0/4=map wide, 0/8=zone wide;
-                                                                  so 1|2 = 3 is target with distance dependent)
+                                            * datalong2 (bitmask: 0/1=target-player, 0/2=with distance dependent, 0/4=map wide, 0/8=zone wide, 0/16=area wide;
+                                                                  so 1|2 = 3 is target with distance dependent), 8+16 does not work together
+                                            * datalong3 if datalong2 &8 or &16 zoneId or areaId respectively, defaults to source zone/area if not set
+                                            * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: play music instead of sound
 
 17 SCRIPT_COMMAND_CREATE_ITEM               source or target must be player
                                             * datalong = item entry
@@ -260,7 +262,7 @@ Defining a buddy could be done in several way:
 
 20 SCRIPT_COMMAND_MOVEMENT                  resultingSource = Creature
                                             * datalong = MovementType (0:idle, 1:random, 2:waypoint, 3:path, 4:linear, 18:fall)
-                                            * datalong2 = wanderDistance (for random movement), pathId (for waypoint movement), relayId (for jump movement)
+                                            * datalong2 = wanderDistance (for random movement), pathId (for waypoint movement), relayId (for fall movement)
                                             * datalong3 = 0x1 - timer for timed random movement or pass target to waypoint and path movegen (by default, source targets self)
                                             *             0x2 - for waypoint, path and linear path - uses pathId from waypoint_path table
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: RandomMovement around current position
@@ -428,4 +430,8 @@ Defining a buddy could be done in several way:
 
 54 SCRIPT_COMMAND_SET_SHEATHE               Sets source unit sheathe state to new value (UNIT_FIELD_BYTES_2, offset 1)
                                             * datalong = new sheathe state - enum SheathState, SHEATH_STATE_UNARMED(0), SHEATH_STATE_MELEE(1), SHEATH_STATE_RANGED(2)
+
+55 SCRIPT_COMMAND_SET_STRING_ID             Sets or removes a string_id from a WorldObject
+                                            * datalong = string_id id
+                                            * apply = 0 remove, 1 add
 

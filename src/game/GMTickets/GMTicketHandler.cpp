@@ -18,7 +18,7 @@
 
 #include "Common.h"
 #include "Tools/Language.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Log.h"
 #include "GMTickets/GMTicketMgr.h"
 #include "Globals/ObjectAccessor.h"

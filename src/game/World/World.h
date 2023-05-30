@@ -24,7 +24,7 @@
 #define __WORLD_H
 
 #include "Common.h"
-#include "Timer.h"
+#include "Util/Timer.h"
 #include "Globals/Locales.h"
 #include "Globals/SharedDefines.h"
 #include "Entities/Object.h"

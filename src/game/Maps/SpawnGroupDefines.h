@@ -93,6 +93,7 @@ struct SpawnGroupEntry
     uint32 MaxCount; // Maximum active alive entities spawned in world
     int32 WorldStateCondition; // Worldstate value when set to 1 enables spawning of given group and 0 disables spawning
     uint32 Flags;
+    uint32 StringId;
     bool Active;
     bool EnabledByDefault;
     bool HasChancedSpawns;

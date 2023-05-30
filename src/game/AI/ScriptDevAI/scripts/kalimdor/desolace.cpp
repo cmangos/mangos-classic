@@ -419,245 +419,139 @@ bool QuestAccept_npc_melizza_brimbuzzle(Player* pPlayer, Creature* pCreature, co
 
 enum
 {
-    SAY_CORK_AMBUSH1        = -1001191,
-    SAY_CORK_AMBUSH2        = -1001192,
-    SAY_CORK_AMBUSH3        = -1001193,
-    SAY_CORK_END            = -1001194,
-    SAY_RIGGER_AMBUSH1      = -1001195,
-    SAY_RIGGER_AMBUSH2      = -1001196,
-    SAY_RIGGER_END          = -1001197,
-
-    NPC_CORK_GIZELTON       = 11625,
-    NPC_RIGGER_GIZELTON     = 11626,
-    NPC_VENDOR_TRON         = 12245,
-    NPC_SUPER_SELLER        = 12246,
-
-    NPC_KOLKAR_WAYLAYER     = 12976,
-    NPC_KOLKAR_AMBUSHER     = 12977,
-
-    NPC_DOOMWARDER          = 4677,
-    NPC_LESSER_INFERNAL     = 4676,
-    NPC_NETHER_SORCERESS    = 4684,
+    NPC_CORK_GIZELTON = 11625,
+    NPC_RIGGER_GIZELTON = 11626,
+    NPC_VENDOR_TRON = 12245,
+    NPC_SUPER_SELLER = 12246,
 
     QUEST_BODYGUARD_TO_HIRE = 5821,
-    QUEST_GIZELTON_CARAVAN  = 5943,
+    QUEST_GIZELTON_CARAVAN = 5943,
+
+    WAYPOINT_PATH_ID = 19019,
+    PATH_ID_CORK_GIZELTON = 11625,
+    PATH_ID_RIGGER_GIZELTON = 11626,
+    WAYPOINT_PATH_POINT_AFTER_ESCORT_1 = 33,
+    WAYPOINT_PATH_POINT_AFTER_ESCORT_2 = 100,
+
+    GIZELTON_TIMER_AFTER_FAIL = 60 * IN_MILLISECONDS, // forced despawn when one of the member die even if still in combat
 };
 
-static const SummonLocation aAmbushLocsBodyGuard[12] =
+struct npc_cork_gizeltonAI : public npc_escortAI
 {
-    // Quest QUEST_BODYGUARD_TO_HIRE
-    {-969.05f, 1174.91f, 90.39f},       // First ambush
-    {-985.71f, 1173.95f, 91.02f},
-    {-983.01f, 1192.88f, 90.01f},
-    {-965.51f, 1193.58f, 92.15f},
-    {-1147.83f, 1180.87f, 91.38f},      // Second ambush
-    {-1163.96f, 1183.72f, 93.79f},
-    {-1160.97f, 1201.36f, 93.15f},
-    {-1146.20f, 1199.75f, 91.37f},
-    {-1277.78f, 1218.56f, 109.30f},     // Third ambush
-    {-1292.65f, 1221.28f, 109.99f},
-    {-1289.25f, 1239.20f, 108.79f},
-    {-1272.91f, 1234.39f, 108.14f},
-};
+    npc_cork_gizeltonAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
-static const SummonLocation aAmbushLocsGizelton[9] =
-{
-    // Quest QUEST_GIZELTON_CARAVAN
-    {-1823.7f, 2060.88f, 62.0925f},     // First ambush
-    {-1814.46f, 2060.13f, 62.4916f},
-    {-1814.87f, 2080.6f, 63.6323f},
-    {-1782.92f, 1942.55f, 60.2205f},    // Second ambush
-    {-1786.5f, 1926.05f, 59.7502f},
-    {-1805.74f, 1942.77f, 60.791f},
-    {-1677.56f, 1835.67f, 58.9269f},    // Third ambush
-    {-1675.66f, 1863.0f, 59.0008f},
-    {-1692.31f, 1862.69f, 58.9553f},
-};
+    int32 FailTimer = int32(GIZELTON_TIMER_AFTER_FAIL);
+    bool StatusFailed = false;
+    bool ScriptDone = false;
 
-static const uint32 AmbushersBodyguard[4] = { NPC_KOLKAR_WAYLAYER, NPC_KOLKAR_AMBUSHER, NPC_KOLKAR_WAYLAYER, NPC_KOLKAR_AMBUSHER };
-static const uint32 AmbushersGizleton[3] = { NPC_NETHER_SORCERESS, NPC_LESSER_INFERNAL, NPC_DOOMWARDER };
+    void Reset() override {   }
 
-struct npc_cork_gizeltonAI : public ScriptedAI
-{
-    npc_cork_gizeltonAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
-
-    ObjectGuid m_playerGuid;
-    uint8 uiQuestStatus;
-
-    void Reset() override
+    void MakeQuestFailAndClean()
     {
-        uiQuestStatus = 0;
-    }
-
-    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
-    {
-        if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
-            m_playerGuid = pInvoker->GetObjectGuid();
-    }
-
-    // Custom function to handle event ambushes
-    void DoAmbush(uint32 uiQuestId, uint8 uiAmbushPoint)
-    {
-        uiAmbushPoint--;
-        switch (uiQuestId)
-        {
-            case QUEST_BODYGUARD_TO_HIRE:
-                // Summon 2 NPC_KOLKAR_WAYLAYER and 2 NPC_KOLKAR_AMBUSHER
-                for (uint8 i = 0; i < 4; ++i)
-                {
-                    float fX, fY, fZ;
-                    m_creature->GetRandomPoint(aAmbushLocsBodyGuard[i + 4 * uiAmbushPoint].m_fX, aAmbushLocsBodyGuard[i + 4 * uiAmbushPoint].m_fY, aAmbushLocsBodyGuard[i + 4 * uiAmbushPoint].m_fZ, 7.0f, fX, fY, fZ);
-                    m_creature->SummonCreature(AmbushersBodyguard[i], fX, fY, fZ, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 0);
-                }
-                break;
-            case QUEST_GIZELTON_CARAVAN:
-                // Summon 1 NPC_NETHER_SORCERESS, 1 NPC_LESSER_INFERNAL and 1 NPC_DOOMWARDER
-                for (uint8 i = 0; i < 3; ++i)
-                {
-                    float fX, fY, fZ;
-                    m_creature->GetRandomPoint(aAmbushLocsGizelton[i + 3 * uiAmbushPoint].m_fX, aAmbushLocsGizelton[i + 3 * uiAmbushPoint].m_fY, aAmbushLocsGizelton[i + 3 * uiAmbushPoint].m_fZ, 7.0f, fX, fY, fZ);
-                    m_creature->SummonCreature(AmbushersGizleton[i], fX, fY, fZ, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 0);
-                }
-                break;
-        }
-    }
-
-    void MovementInform(uint32 uiType, uint32 uiPointId) override
-    {
-        if (m_playerGuid.IsEmpty() || uiType != WAYPOINT_MOTION_TYPE)
-            return;
-
-        // No player assigned as quest taker: abort to avoid summoning adds
-        Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
-        if (!pPlayer)
-            return;
-
-        if (pPlayer->GetQuestStatus(QUEST_BODYGUARD_TO_HIRE) == QUEST_STATUS_INCOMPLETE)
-        {
-            switch (uiPointId)
-            {
-                case 77:
-                    uiQuestStatus = 1;
-                // First Ambush
-                case 96:
-                    DoScriptText(SAY_CORK_AMBUSH1, m_creature);
-                    DoAmbush(QUEST_BODYGUARD_TO_HIRE, 1);
-                    break;
-                // Second Ambush
-                case 103:
-                    DoScriptText(SAY_CORK_AMBUSH2, m_creature);
-                    DoAmbush(QUEST_BODYGUARD_TO_HIRE, 2);
-                    break;
-                // Third Ambush
-                case 111:
-                    DoScriptText(SAY_CORK_AMBUSH3, m_creature);
-                    DoAmbush(QUEST_BODYGUARD_TO_HIRE, 3);
-                    break;
-                case 116:
-                    DoScriptText(SAY_CORK_END, m_creature);
-                    // Award quest credit
-                    if (pPlayer)
-                        pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_BODYGUARD_TO_HIRE, m_creature);
-                    // Remove player to avoid adds being spawned again next turn
-                    m_playerGuid.Clear();
-                    uiQuestStatus = 0;
-                    break;
-            }
-        }
-        // The second escort quest is also handled by NPC Cork though it is given by NPC Rigger
-        else if (pPlayer->GetQuestStatus(QUEST_GIZELTON_CARAVAN) == QUEST_STATUS_INCOMPLETE)
-        {
-            switch (uiPointId)
-            {
-                case 209:
-                    uiQuestStatus = 2;
-                // First Ambush
-                case 218:
-                    if (Creature* pRigger = GetClosestCreatureWithEntry(m_creature, NPC_RIGGER_GIZELTON, 100.0f))
-                        DoScriptText(SAY_RIGGER_AMBUSH1, pRigger);
-                    DoAmbush(QUEST_GIZELTON_CARAVAN, 1);
-                    break;
-                // Second Ambush
-                case 225:
-                    if (Creature* pRigger = GetClosestCreatureWithEntry(m_creature, NPC_RIGGER_GIZELTON, 100.0f))
-                        DoScriptText(SAY_RIGGER_AMBUSH2, pRigger);
-                    DoAmbush(QUEST_GIZELTON_CARAVAN, 2);
-                    break;
-                // Third Ambush
-                case 235:
-                    if (Creature* pRigger = GetClosestCreatureWithEntry(m_creature, NPC_RIGGER_GIZELTON, 100.0f))
-                        DoScriptText(SAY_RIGGER_AMBUSH1, pRigger);
-                    DoAmbush(QUEST_GIZELTON_CARAVAN, 3);
-                    break;
-                case 241:
-                    if (Creature* pRigger = GetClosestCreatureWithEntry(m_creature, NPC_RIGGER_GIZELTON, 100.0f))
-                        DoScriptText(SAY_RIGGER_END, pRigger);
-                    // Award quest credit
-                    if (pPlayer)
-                        pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_GIZELTON_CARAVAN, m_creature);
-                    // Remove player to avoid adds being spawned again next turn
-                    m_playerGuid.Clear();
-                    uiQuestStatus = 0;
-                    break;
-            }
-        }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        // By default: summoned for the two escort quests will attack
-        // So we want to add a special case to avoid the two summoned NPC vendors to also attack
-        if (pSummoned->GetEntry() != NPC_VENDOR_TRON && pSummoned->GetEntry() != NPC_SUPER_SELLER)
-            pSummoned->AI()->AttackStart(m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
-        if (!pPlayer)
+        Player* player = GetPlayerForEscort();
+        if (!player)
             return;
 
         // Handle all players in group (if they took quest)
-        if (Group* pGroup = pPlayer->GetGroup())
+        if (Group* pGroup = player->GetGroup())
         {
             for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != nullptr; pRef = pRef->next())
             {
-                if (Player* pMember = pRef->getSource())
+                if (Player* member = pRef->getSource())
                 {
-                    if (pMember->GetQuestStatus(QUEST_BODYGUARD_TO_HIRE) == QUEST_STATUS_INCOMPLETE)
-                        pMember->FailQuest(QUEST_BODYGUARD_TO_HIRE);
-                    if (pMember->GetQuestStatus(QUEST_GIZELTON_CARAVAN) == QUEST_STATUS_INCOMPLETE)
-                        pMember->FailQuest(QUEST_GIZELTON_CARAVAN);
+                    if (member->GetQuestStatus(QUEST_BODYGUARD_TO_HIRE) == QUEST_STATUS_INCOMPLETE)
+                        member->FailQuest(QUEST_BODYGUARD_TO_HIRE);
+                    if (member->GetQuestStatus(QUEST_GIZELTON_CARAVAN) == QUEST_STATUS_INCOMPLETE)
+                        member->FailQuest(QUEST_GIZELTON_CARAVAN);
                 }
             }
         }
         else
         {
-            if (pPlayer->GetQuestStatus(QUEST_BODYGUARD_TO_HIRE) == QUEST_STATUS_INCOMPLETE)
-                pPlayer->FailQuest(QUEST_BODYGUARD_TO_HIRE);
-            if (pPlayer->GetQuestStatus(QUEST_GIZELTON_CARAVAN) == QUEST_STATUS_INCOMPLETE)
-                pPlayer->FailQuest(QUEST_GIZELTON_CARAVAN);
+            if (player->GetQuestStatus(QUEST_BODYGUARD_TO_HIRE) == QUEST_STATUS_INCOMPLETE)
+                player->FailQuest(QUEST_BODYGUARD_TO_HIRE);
+            if (player->GetQuestStatus(QUEST_GIZELTON_CARAVAN) == QUEST_STATUS_INCOMPLETE)
+                player->FailQuest(QUEST_GIZELTON_CARAVAN);
         }
+
+        m_creature->GetCreatureGroup()->Despawn();
+    }
+
+    void UpdateEscortAI(const uint32 diff) override
+    {
+        npc_escortAI::UpdateEscortAI(diff);
+
+        if (ScriptDone)
+            return;
+
+        if (!StatusFailed)
+            return;
+
+        FailTimer -= diff;
+        if (FailTimer > 0 && !m_creature->GetCreatureGroup()->IsOutOfCombat())
+            return;
+
+        MakeQuestFailAndClean();
+        ScriptDone = true;
+    }
+
+    void WaypointReached(uint32 pointId) override
+    {
+        if (!HasEscortState(STATE_ESCORT_ESCORTING))
+            return;
+
+        Player* player = GetPlayerForEscort();
+
+        switch (pointId)
+        {
+            case 19:
+                if (player->GetQuestStatus(QUEST_BODYGUARD_TO_HIRE) == QUEST_STATUS_INCOMPLETE)
+                {
+                    // Award quest credit
+                    if (player)
+                        player->RewardPlayerAndGroupAtEventExplored(QUEST_BODYGUARD_TO_HIRE, m_creature);
+                }
+                m_creature->GetMotionMaster()->Clear(false, true);
+                m_creature->GetMotionMaster()->MoveWaypoint(WAYPOINT_PATH_ID, PATH_FROM_WAYPOINT_PATH);
+                m_creature->GetMotionMaster()->SetNextWaypoint(WAYPOINT_PATH_POINT_AFTER_ESCORT_1);
+                m_creature->SetWalk(false);
+                End(); // normal movement resumes - caravan doesnt despawn - it loops through zone
+                break;
+                // The second escort quest is also handled by NPC Cork though it is given by NPC Rigger
+            case 21:
+                if (player->GetQuestStatus(QUEST_GIZELTON_CARAVAN) == QUEST_STATUS_INCOMPLETE)
+                {
+                    // Award quest credit
+                    if (player)
+                        player->RewardPlayerAndGroupAtEventExplored(QUEST_GIZELTON_CARAVAN, m_creature);
+                }
+                m_creature->GetMotionMaster()->Clear(false, true);
+                m_creature->GetMotionMaster()->MoveWaypoint(WAYPOINT_PATH_ID, PATH_FROM_WAYPOINT_PATH);
+                m_creature->GetMotionMaster()->SetNextWaypoint(WAYPOINT_PATH_POINT_AFTER_ESCORT_2);
+                m_creature->SetWalk(false);
+                End(); // normal movement resumes - caravan doesnt despawn - it loops through zone
+                break;
+        }
+    }
+
+    void StartRiggerEscort(Player* player)
+    {
+        Start(false, player, m_questForEscort, false, false, PATH_ID_RIGGER_GIZELTON);
+    }
+
+
+    void CreatureGroupMemberDied(Unit* /*killed*/)
+    {
+        StatusFailed = true;
     }
 };
 
-UnitAI* GetAI_npc_cork_gizelton(Creature* pCreature)
+bool QuestAccept_npc_cork_gizelton(Player* player, Creature* creature, const Quest* quest)
 {
-    return new npc_cork_gizeltonAI(pCreature);
-}
-
-bool QuestAccept_npc_cork_gizelton(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_BODYGUARD_TO_HIRE)
+    if (quest->GetQuestId() == QUEST_BODYGUARD_TO_HIRE)
     {
-        // Faction for the other NPCs is set in dbscripts_on_quest_start
-        if (pPlayer->GetTeam() == ALLIANCE)
-            pCreature->SetFactionTemporary(FACTION_ESCORT_A_PASSIVE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
-
-        if (pPlayer->GetTeam() == HORDE)
-            pCreature->SetFactionTemporary(FACTION_ESCORT_H_PASSIVE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
-
-        pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
+        if (npc_cork_gizeltonAI* escortAI = dynamic_cast<npc_cork_gizeltonAI*>(creature->AI()))
+            escortAI->Start(false, player, quest, false, false, PATH_ID_CORK_GIZELTON); // Note: Escort path use other coords then normal path
     }
     return true;
 }
@@ -673,28 +567,16 @@ struct npc_rigger_gizeltonAI : public ScriptedAI
     void Reset() override {}
 };
 
-UnitAI* GetAI_npc_rigger_gizelton(Creature* pCreature)
+bool QuestAccept_npc_rigger_gizelton(Player* player, Creature* creature, const Quest* quest)
 {
-    return new npc_rigger_gizeltonAI(pCreature);
-}
-
-bool QuestAccept_npc_rigger_gizelton(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_GIZELTON_CARAVAN)
+    if (quest->GetQuestId() == QUEST_GIZELTON_CARAVAN)
     {
-        // Faction for the other NPCs is set in dbscripts_on_quest_start
-        if (pPlayer->GetTeam() == ALLIANCE)
-            pCreature->SetFactionTemporary(FACTION_ESCORT_A_PASSIVE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
-
-        if (pPlayer->GetTeam() == HORDE)
-            pCreature->SetFactionTemporary(FACTION_ESCORT_H_PASSIVE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
-
         // Now the quest is accepted, tell NPC Cork what player took it so it can handle quest credit/failure
         // because NPC Cork will handle both escort quests
-        if (Creature* pCork = GetClosestCreatureWithEntry(pCreature, NPC_CORK_GIZELTON, 100.0f))
-            pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCork, pQuest->GetQuestId());
+        if (Creature* cork = GetClosestCreatureWithEntry(creature, NPC_CORK_GIZELTON, 100.0f))
+            if (npc_cork_gizeltonAI* corkAI = dynamic_cast<npc_cork_gizeltonAI*>(cork->AI()))
+                corkAI->StartRiggerEscort(player);               // Note: Escort path use other coords then normal path
     }
-
     return true;
 }
 
@@ -804,13 +686,13 @@ void AddSC_desolace()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_cork_gizelton";
-    pNewScript->GetAI = &GetAI_npc_cork_gizelton;
+    pNewScript->GetAI = &GetNewAIInstance<npc_cork_gizeltonAI>;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_cork_gizelton;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_rigger_gizelton";
-    pNewScript->GetAI = &GetAI_npc_rigger_gizelton;
+    pNewScript->GetAI = &GetNewAIInstance<npc_rigger_gizeltonAI>;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_rigger_gizelton;
     pNewScript->RegisterSelf();
 

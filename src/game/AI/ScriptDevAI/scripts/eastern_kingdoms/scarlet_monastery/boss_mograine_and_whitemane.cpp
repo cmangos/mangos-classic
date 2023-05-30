@@ -208,7 +208,7 @@ struct boss_scarlet_commander_mograineAI : public CombatAI
         {
             if (m_instance->GetData(TYPE_ASHBRINGER_EVENT) == IN_PROGRESS)
             {
-                pWho->GetMap()->ScriptsStart(sRelayScripts, ASHBRINGER_RELAY_SCRIPT_ID, m_creature, pWho);
+                pWho->GetMap()->ScriptsStart(SCRIPT_TYPE_RELAY, ASHBRINGER_RELAY_SCRIPT_ID, m_creature, pWho);
                 m_instance->SetData(TYPE_ASHBRINGER_EVENT, DONE);
             }
         }

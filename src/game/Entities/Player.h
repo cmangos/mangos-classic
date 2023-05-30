@@ -32,7 +32,7 @@
 #include "Server/WorldSession.h"
 #include "Entities/Pet.h"
 #include "Maps/MapReference.h"
-#include "Util.h"                                           // for Tokens typedef
+#include "Util/Util.h"                                           // for Tokens typedef
 #include "Reputation/ReputationMgr.h"
 #include "BattleGround/BattleGround.h"
 #include "Server/DBCStores.h"
@@ -1679,8 +1679,8 @@ class Player : public Unit
 
         // LFG
         void SetLFGAreaId(uint32 areaId) { m_LFGAreaId = areaId; }
-        uint32 GetLFGAreaId() { return m_LFGAreaId; }
-        bool IsInLFG() { return m_LFGAreaId > 0; }
+        uint32 GetLFGAreaId() const { return m_LFGAreaId; }
+        bool IsInLFG() const { return m_LFGAreaId > 0; }
 
         void UpdateDefense();
         void UpdateWeaponSkill(WeaponAttackType attType);
@@ -2162,6 +2162,7 @@ class Player : public Unit
 
         virtual UnitAI* AI() override { if (m_charmInfo) return m_charmInfo->GetAI(); return nullptr; }
         virtual CombatData* GetCombatData() override { if (m_charmInfo && m_charmInfo->GetCombatData()) return m_charmInfo->GetCombatData(); return m_combatData; }
+        virtual CombatData const* GetCombatData() const override { if (m_charmInfo && m_charmInfo->GetCombatData()) return m_charmInfo->GetCombatData(); return m_combatData; }
         void ForceHealAndPowerUpdateInZone();
 
         void SendMessageToPlayer(std::string const& message) const; // debugging purposes

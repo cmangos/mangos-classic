@@ -21,7 +21,7 @@
 
 #include "Common.h"
 #include "Entities/ObjectGuid.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Entities/Player.h"
 
 #include <map>

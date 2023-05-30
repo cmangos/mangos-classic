@@ -19,7 +19,7 @@
 #ifndef MANGOS_LOOTMGR_H
 #define MANGOS_LOOTMGR_H
 
-#include "ByteBuffer.h"
+#include "Util/ByteBuffer.h"
 #include "Entities/ObjectGuid.h"
 #include "Globals/SharedDefines.h"
 
@@ -229,6 +229,7 @@ class LootStore
         void Verify() const;
 
         void LoadAndCollectLootIds(LootIdSet& ids_set);
+        void LoadAndCheckReferenceNames();
         void CheckLootRefs(LootIdSet* ref_set = nullptr) const; // check existence reference and remove it from ref_set
         void ReportUnusedIds(LootIdSet const& ids_set) const;
         void ReportNotExistedId(uint32 id) const;

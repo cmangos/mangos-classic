@@ -22,9 +22,9 @@
 #include "Entities/ObjectGuid.h"
 #include "Entities/Player.h"
 #include "Policies/Singleton.h"
-#include "Util.h"
-#include "Auth/Sha1.h"
-#include "SRP6/SRP6.h"
+#include "Util/Util.h"
+#include "Auth/CryptoHash.h"
+#include "Auth/SRP6.h"
 
 extern DatabaseType LoginDatabase;
 
