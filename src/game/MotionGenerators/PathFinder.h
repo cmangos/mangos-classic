@@ -134,7 +134,7 @@ class PathFinder
         float dist3DSqr(const Vector3& p1, const Vector3& p2) const;
         bool inRangeYZX(const float* v1, const float* v2, float r, float h) const;
 
-        dtPolyRef getPathPolyByPosition(const dtPolyRef* polyPath, uint32 polyPathSize, const float* point, float* distance = nullptr) const;
+        dtPolyRef getPathPolyByPosition(const dtPolyRef* polyPath, uint32 polyPathSize, const float* point, float* distance = nullptr, const float maxDist = 3.0f) const;
         dtPolyRef getPolyByLocation(const float* point, float* distance);
         bool HaveTile(const Vector3& p) const;
 
