@@ -313,7 +313,16 @@ void SpawnGroup::Spawn(bool force)
 
 bool SpawnGroup::IsWorldstateConditionSatisfied() const
 {
-    return !m_entry.WorldStateCondition || IsConditionSatisfied(m_entry.WorldStateCondition, nullptr, &m_map, nullptr, CONDITION_FROM_WORLDSTATE);
+    if (m_entry.WorldStateCondition)
+    {
+        return IsConditionSatisfied(m_entry.WorldStateCondition, nullptr, &m_map, nullptr, CONDITION_FROM_WORLDSTATE);
+    }
+    else if (m_entry.WorldStateExpression)
+    {
+        return sObjectMgr.IsWorldStateExpressionSatisfied(m_entry.WorldStateExpression, &m_map);
+    }
+
+    return true;
 }
 
 void SpawnGroup::RespawnIfInVicinity(Position pos, float range)

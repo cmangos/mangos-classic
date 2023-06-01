@@ -136,7 +136,7 @@ bool CombatConditionMgr::Meets(Unit const* self, int32 Id, float range)
     CombatConditionEntry& entry = itr->second;
     if (entry.WorldStateConditionId)
     {
-        if (!m_worldStateExpressionMgr.Meets(self, entry.WorldStateConditionId))
+        if (!m_worldStateExpressionMgr.Meets(self->GetMap(), entry.WorldStateConditionId))
             return false;
     }
 

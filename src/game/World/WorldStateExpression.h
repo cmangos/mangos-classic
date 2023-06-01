@@ -24,7 +24,7 @@
 #include <string>
 #include <memory>
 
-class Unit;
+class Map;
 
 enum class WorldStateExpressionValueType : uint8
 {
@@ -99,7 +99,7 @@ class WorldStateExpressionMgr
     public:
         std::shared_ptr<std::map<int32, WorldStateExpressionEntry>> Load();
 
-        bool Meets(Unit const* self, int32 Id);
+        bool Meets(Map const* map, int32 Id);
 
         bool Exists(int32 Id);
 

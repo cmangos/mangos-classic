@@ -1025,8 +1025,7 @@ class ObjectMgr
 
         // Check if a player meets condition conditionId
         bool IsConditionSatisfied(uint32 conditionId, WorldObject const* target, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const;
-
-        bool IsWorldStateExpressionSatisfied(int32 expressionId, Unit const* source);
+        bool IsWorldStateExpressionSatisfied(int32 expressionId, Map const* map);
         bool IsUnitConditionSatisfied(int32 conditionId, Unit const* source, Unit const* target);
         bool IsCombatConditionSatisfied(int32 expressionId, Unit const* source, float range);
 

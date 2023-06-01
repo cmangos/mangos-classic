@@ -970,7 +970,7 @@ void ObjectMgr::LoadSpawnGroups()
     std::shared_ptr<SpawnGroupEntryContainer> newContainer = std::make_shared<SpawnGroupEntryContainer>();
     uint32 count = 0;
 
-    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Id, Name, Type, MaxCount, WorldState, Flags, StringId FROM spawn_group"));
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Id, Name, Type, MaxCount, WorldState, WorldStateExpression, Flags, StringId FROM spawn_group"));
     if (result)
     {
         do
@@ -1006,8 +1006,18 @@ void ObjectMgr::LoadSpawnGroups()
                 }
             }
 
-            entry.Flags = fields[5].GetUInt32();
-            entry.StringId = fields[6].GetUInt32();
+            entry.WorldStateExpression = fields[5].GetInt32();
+            if (entry.WorldStateExpression)
+            {
+                if (!m_worldStateExpressionMgr->Exists(entry.WorldStateExpression)) // invalid id
+                {
+                    sLog.outErrorDb("LoadSpawnGroups: Invalid spawn_group (%u) worldstate expression id %u. Skipping.", entry.Id, entry.WorldStateExpression);
+                    continue;
+                }
+            }
+
+            entry.Flags = fields[6].GetUInt32();
+            entry.StringId = fields[7].GetUInt32();
 
             if (entry.StringId && !sScriptMgr.ExistsStringId(entry.StringId))
             {
@@ -8351,9 +8361,9 @@ bool ObjectMgr::IsConditionSatisfied(uint32 conditionId, WorldObject const* targ
     return false;
 }
 
-bool ObjectMgr::IsWorldStateExpressionSatisfied(int32 expressionId, Unit const* source)
+bool ObjectMgr::IsWorldStateExpressionSatisfied(int32 expressionId, Map const* map)
 {
-    return m_worldStateExpressionMgr->Meets(source, expressionId);
+    return m_worldStateExpressionMgr->Meets(map, expressionId);
 }
 
 bool ObjectMgr::IsUnitConditionSatisfied(int32 conditionId, Unit const* source, Unit const* target)

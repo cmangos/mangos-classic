@@ -54,55 +54,55 @@ ByteBuffer HexToBytes(const std::string& hex)
     return buffer;
 }
 
-static int32(* const WorldStateExpressionFunctions[WSE_FUNCTION_MAX])(Unit const*, uint32, uint32) =
+static int32(* const WorldStateExpressionFunctions[WSE_FUNCTION_MAX])(Map const*, uint32, uint32) =
 {
     // WSE_FUNCTION_NONE
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_RANDOM
-    [](Unit const* /*unit*/, uint32 arg1, uint32 arg2) -> int32
+    [](Map const* /*map*/, uint32 arg1, uint32 arg2) -> int32
     {
         return irand(std::min(arg1, arg2), std::max(arg1, arg2));
     },
 
     // WSE_FUNCTION_MONTH
-    [](Unit const* unit, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* map, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
-        return unit->GetMap()->GetCurrentTime_tm().tm_mon + 1;
+        return map->GetCurrentTime_tm().tm_mon + 1;
     },
 
     // WSE_FUNCTION_DAY
-    [](Unit const* unit, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* map, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
-        return unit->GetMap()->GetCurrentTime_tm().tm_mday + 1;
+        return map->GetCurrentTime_tm().tm_mday + 1;
     },
 
     // WSE_FUNCTION_TIME_OF_DAY
-    [](Unit const* unit, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* map, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
-        tm const& localTime = unit->GetMap()->GetCurrentTime_tm();
+        tm const& localTime = map->GetCurrentTime_tm();
     return localTime.tm_hour* MINUTE + localTime.tm_min;
     },
 
     // WSE_FUNCTION_REGION
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0x1;
         // return realm.Id.Region;
     },
 
     // WSE_FUNCTION_CLOCK_HOUR
-    [](Unit const* unit, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* map, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
-        uint32 currentHour = unit->GetMap()->GetCurrentTime_tm().tm_hour + 1;
+        uint32 currentHour = map->GetCurrentTime_tm().tm_hour + 1;
         return currentHour <= 12 ? (currentHour ? currentHour : 12) : currentHour - 12;
     },
 
     // WSE_FUNCTION_OLD_DIFFICULTY_ID
-    [](Unit const* unit, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         //if (DifficultyEntry const* difficulty = sDifficultyStore.LookupEntry(unit->GetMap()->GetDifficultyID()))
         //    return difficulty->OldEnumValue;
@@ -111,33 +111,33 @@ static int32(* const WorldStateExpressionFunctions[WSE_FUNCTION_MAX])(Unit const
     },
 
     // WSE_FUNCTION_HOLIDAY_START
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_HOLIDAY_LEFT
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_HOLIDAY_ACTIVE
-    [](Unit const* /*unit*/, uint32 arg1, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 arg1, uint32 /*arg2*/) -> int32
     {
         return int32(sGameEventMgr.IsActiveHoliday(HolidayIds(arg1)));
     },
 
     // WSE_FUNCTION_TIMER_CURRENT_TIME
-    [](Unit const* unit, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* map, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
-        return unit->GetMap()->GetCurrentClockTime().time_since_epoch().count();
+        return map->GetCurrentClockTime().time_since_epoch().count();
     },
 
     // WSE_FUNCTION_WEEK_NUMBER
-    [](Unit const* unit, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* map, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
-        auto now = unit->GetMap()->GetCurrentClockTime().time_since_epoch().count();
+        auto now = map->GetCurrentClockTime().time_since_epoch().count();
         uint32 raidOrigin = 1135695600;
         //if (Cfg_RegionsEntry const* region = sCfgRegionsStore.LookupEntry(realm.Id.Region))
         //    raidOrigin = region->Raidorigin;
@@ -146,128 +146,128 @@ static int32(* const WorldStateExpressionFunctions[WSE_FUNCTION_MAX])(Unit const
     },
 
     // WSE_FUNCTION_UNK13
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_UNK14
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_DIFFICULTY_ID
-    [](Unit const* unit, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* map, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_WAR_MODE_ACTIVE
-    [](Unit const* unit, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* map, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
         // return unit->HasPlayerFlag(PLAYER_FLAGS_WAR_MODE_ACTIVE);
     },
 
     // WSE_FUNCTION_UNK17
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_UNK18
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_UNK19
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_UNK20
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_UNK21
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_WORLD_STATE_EXPRESSION
-    [](Unit const* unit, uint32 arg1, uint32 /*arg2*/) -> int32
+    [](Map const* map, uint32 arg1, uint32 /*arg2*/) -> int32
     {
-        return sObjectMgr.IsWorldStateExpressionSatisfied(arg1, unit);
+        return sObjectMgr.IsWorldStateExpressionSatisfied(arg1, map);
     },
 
     // WSE_FUNCTION_KEYSTONE_AFFIX
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_UNK24
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_UNK25
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_UNK26
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_UNK27
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_KEYSTONE_LEVEL
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_UNK29
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_UNK30
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_UNK31
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_UNK32
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_MERSENNE_RANDOM
-    [](Unit const* /*unit*/, uint32 arg1, uint32 arg2) -> int32
+    [](Map const* /*map*/, uint32 arg1, uint32 arg2) -> int32
     {
         if (arg1 == 1)
             return 1;
@@ -278,37 +278,37 @@ static int32(* const WorldStateExpressionFunctions[WSE_FUNCTION_MAX])(Unit const
     },
 
     // WSE_FUNCTION_UNK34
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_UNK35
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_UNK36
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_UI_WIDGET_DATA
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_TIME_EVENT_PASSED
-    [](Unit const* /*unit*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 };
 
-int32 EvalSingleValue(ByteBuffer& buffer, Unit const* unit)
+int32 EvalSingleValue(ByteBuffer& buffer, Map const* map)
 {
     WorldStateExpressionValueType valueType = buffer.read<WorldStateExpressionValueType>();
     int32 value = 0;
@@ -323,19 +323,19 @@ int32 EvalSingleValue(ByteBuffer& buffer, Unit const* unit)
         case WorldStateExpressionValueType::WORLDSTATE:
         {
             uint32 worldStateId = buffer.read<uint32>();
-            value = unit->GetMap()->GetVariableManager().GetVariable(worldStateId);
+            value = map->GetVariableManager().GetVariable(worldStateId);
             break;
         }
         case WorldStateExpressionValueType::FUNCTION:
         {
             uint32 functionType = buffer.read<uint32>();
-            int32 arg1 = EvalSingleValue(buffer, unit);
-            int32 arg2 = EvalSingleValue(buffer, unit);
+            int32 arg1 = EvalSingleValue(buffer, map);
+            int32 arg2 = EvalSingleValue(buffer, map);
 
             if (functionType >= WSE_FUNCTION_MAX)
                 return 0;
 
-            value = WorldStateExpressionFunctions[functionType](unit, arg1, arg2);
+            value = WorldStateExpressionFunctions[functionType](map, arg1, arg2);
             break;
         }
         default:
@@ -345,15 +345,15 @@ int32 EvalSingleValue(ByteBuffer& buffer, Unit const* unit)
     return value;
 }
 
-int32 EvalValue(ByteBuffer& buffer, Unit const* unit)
+int32 EvalValue(ByteBuffer& buffer, Map const* map)
 {
-    int32 leftValue = EvalSingleValue(buffer, unit);
+    int32 leftValue = EvalSingleValue(buffer, map);
 
     WorldStateExpressionOperatorType operatorType = buffer.read<WorldStateExpressionOperatorType>();
     if (operatorType == WorldStateExpressionOperatorType::NONE)
         return leftValue;
 
-    int32 rightValue = EvalSingleValue(buffer, unit);
+    int32 rightValue = EvalSingleValue(buffer, map);
 
     switch (operatorType)
     {
@@ -369,15 +369,15 @@ int32 EvalValue(ByteBuffer& buffer, Unit const* unit)
     return leftValue;
 }
 
-bool EvalRelOp(ByteBuffer& buffer, Unit const* player)
+bool EvalRelOp(ByteBuffer& buffer, Map const* map)
 {
-    int32 leftValue = EvalValue(buffer, player);
+    int32 leftValue = EvalValue(buffer, map);
 
     ConditionOperation compareLogic = buffer.read<ConditionOperation>();
     if (compareLogic == ConditionOperation::NONE)
         return leftValue != 0;
 
-    int32 rightValue = EvalValue(buffer, player);
+    int32 rightValue = EvalValue(buffer, map);
 
     return ConditionEntry::CheckOp(compareLogic, leftValue, rightValue);
 }
@@ -419,9 +419,9 @@ std::shared_ptr<std::map<int32, WorldStateExpressionEntry>> WorldStateExpression
     return expressions;
 }
 
-bool WorldStateExpressionMgr::Meets(Unit const* self, int32 Id)
+bool WorldStateExpressionMgr::Meets(Map const* map, int32 Id)
 {
-    auto expressions = self->GetMap()->GetMapDataContainer().GetWorldStateExpressions();
+    auto expressions = map->GetMapDataContainer().GetWorldStateExpressions();
     auto itr = expressions->find(Id);
     if (expressions->end() == itr)
         return false;
@@ -436,12 +436,12 @@ bool WorldStateExpressionMgr::Meets(Unit const* self, int32 Id)
     if (!enabled)
         return false;
 
-    bool finalResult = EvalRelOp(buffer, self);
+    bool finalResult = EvalRelOp(buffer, map);
     ConditionLogic resultLogic = buffer.read<ConditionLogic>();
 
     while (resultLogic != ConditionLogic::NONE)
     {
-        bool secondResult = EvalRelOp(buffer, self);
+        bool secondResult = EvalRelOp(buffer, map);
 
         switch (resultLogic)
         {
