@@ -109,7 +109,7 @@ bool UnitConditionMgr::Exists(int32 Id)
 bool UnitConditionMgr::meets(Unit const* source, Unit const* target, UnitCondition conditionType, uint32 operation, int32 value)
 {
     int32 condValue = getConditionValue(source, target, conditionType, value);
-    return !ConditionEntry::CheckOp(ConditionOperation(operation), value, operation);
+    return !ConditionEntry::CheckOp(ConditionOperation(operation), value, condValue);
 }
 
 int32 UnitConditionMgr::getConditionValue(Unit const* source, Unit const* target, UnitCondition conditionType, int32 value)
