@@ -102,6 +102,7 @@ Some events such as EVENT_T_AGGRO, EVENT_T_DEATH, EVENT_T_SPAWNED, and EVENT_T_E
 34  EVENT_T_SPELLHIT_TARGET             SpellID, Schoolmask, RepeatMin, RepeatMax                               Expires upon Spell Hit of the NPC. When (param1) is set, it is the specific Spell ID used as the trigger. With (param2) specified, the expiration is limited to specific spell schools (-1 for all) and Spell ID value is ignored. Will repeat Event Conditions Check between every (Param3) and (Param4). Only A Spell ID or Spell School may be Specified but NOT both.
 35  EVENT_T_DEATH_PREVENTED             NONE                                                                    Expires when Death prevention kicks in
 36  EVENT_T_TARGET_NOT_REACHABLE        NONE                                                                    Expires when target is not reachable
+37  EVENT_T_SPELL_CAST                  SpellID                                                                 Expires when spell list casts spell Id successfully
 
 =========================================
 Action Types
@@ -550,6 +551,12 @@ Expires when death prevention kicks in. It expires once, and then death preventi
 36 = EVENT_T_TARGET_NOT_REACHABLE
 ---------------------------------
 Expires when main aggro target is not reachable by ChaseMovementGenerator - example of usage is teleporting player to creature
+
+-----------------------
+37 = EVENT_T_SPELL_CAST
+-----------------------
+Parameter 1: SpellID
+Expires when spellId is successfully cast by spell lists
 
 (Name ==> School ==> School Bitmask Values)
 -------------------------------------------

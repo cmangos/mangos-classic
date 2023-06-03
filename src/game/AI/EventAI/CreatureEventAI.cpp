@@ -343,6 +343,7 @@ bool CreatureEventAI::CheckEvent(CreatureEventAIHolder& holder, Unit* actionInvo
             break;
         case EVENT_T_SPELLHIT:
         case EVENT_T_SPELLHIT_TARGET:
+        case EVENT_T_SPELL_CAST:
             break;
         case EVENT_T_RANGE:
             if (!m_creature->IsInCombat() || !m_creature->GetVictim() || !m_creature->IsInMap(m_creature->GetVictim()))
@@ -1575,6 +1576,18 @@ void CreatureEventAI::CorpseRemoved(uint32& respawnDelay)
     // can happen due to forced despawn of allies
     if ((m_despawnAggregationMask & AGGREGATION_EVADE) != 0)
         DespawnGuids(m_despawnGuids);
+}
+
+void CreatureEventAI::OnSpellCast(SpellEntry const* spellInfo, Unit* target)
+{
+    IncreaseDepthIfNecessary();
+    for (auto& i : m_CreatureEventAIList)
+        if (i.event.event_type == EVENT_T_SPELL_CAST)
+            // If spell id matches (or no spell id) & if spell school matches (or no spell school)
+            if (spellInfo->Id == i.event.spellCast.spellId)
+                CheckAndReadyEventForExecution(i, target);
+
+    ProcessEvents(target);
 }
 
 void CreatureEventAI::EnterCombat(Unit* enemy)

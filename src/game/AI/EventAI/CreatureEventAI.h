@@ -76,6 +76,7 @@ enum EventAI_Type
     EVENT_T_SPELLHIT_TARGET         = 34,                   // SpellID, School, RepeatMin, RepeatMax
     EVENT_T_DEATH_PREVENTED         = 35,                   //
     EVENT_T_TARGET_NOT_REACHABLE    = 36,                   //
+    EVENT_T_SPELL_CAST              = 37,                   // SpellId
 
     EVENT_T_END,
 };
@@ -785,9 +786,13 @@ struct CreatureEventAI_Event
         // EVENT_T_TARGET_NOT_REACHABLE                     = 36
         struct
         {
-            uint32 eventId;
-            uint32 data;
-        } map_event;
+            uint32 unused;
+        } unreachable;
+        // EVENT_T_SPELL_CAST                               = 37
+        struct
+        {
+            uint32 spellId;
+        } spellCast;
         // RAW
         struct
         {
@@ -878,6 +883,7 @@ class CreatureEventAI : public CreatureAI
         void SummonedCreatureDespawn(Creature* summoned) override;
         void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* invoker, uint32 miscValue) override;
         void CorpseRemoved(uint32& respawnDelay) override;
+        void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override;
         // bool IsControllable() const override { return true; }
 
         static int Permissible(const Creature* creature);
