@@ -257,7 +257,7 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
                 uint32 stringId = tmp.buddyEntry;
                 if (stringId && !sScriptMgr.ExistsStringId(stringId))
                 {
-                    sLog.outErrorDb("Table `%s` has buddy defined by stringId (SCRIPT_FLAG_BUDDY_BY_STRING_ID) but stringId does not exist, skipping.", tablename, tmp.id, stringId);
+                    sLog.outErrorDb("Table `%s` for script id %u has buddy defined by stringId (SCRIPT_FLAG_BUDDY_BY_STRING_ID) but stringId %u does not exist, skipping.", tablename, tmp.id, stringId);
                     continue;
                 }
             }
