@@ -2112,7 +2112,7 @@ enum SpellTargetType
     SPELL_TARGET_TYPE_STRING_ID     = 5,
 };
 
-#define MAX_SPELL_TARGET_TYPE 5
+#define MAX_SPELL_TARGET_TYPE 6
 
 // pre-defined targeting for spells
 struct SpellTargetEntry
