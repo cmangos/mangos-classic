@@ -2965,10 +2965,10 @@ void Creature::Heartbeat()
         ScheduleAINotify(0);
 }
 
-void Creature::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* /*itemProto*/, bool permanent, uint32 forcedDuration)
+void Creature::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* /*itemProto*/, bool permanent, uint32 forcedDuration, bool ignoreCat /*= false*/)
 {
     uint32 recTime = forcedDuration ? forcedDuration : spellEntry.RecoveryTime;
-    uint32 categoryRecTime = spellEntry.CategoryRecoveryTime;
+    uint32 categoryRecTime = ignoreCat ? 0 : spellEntry.CategoryRecoveryTime;
     if (!forcedDuration)
     {
         uint32 cooldown = 0;

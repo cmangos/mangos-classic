@@ -1348,7 +1348,7 @@ void UnitAI::AddInitialCooldowns()
         if (cooldown)
         {
             SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(data.second.SpellId);
-            m_unit->AddCooldown(*spellInfo, nullptr, false, cooldown);
+            m_unit->AddCooldown(*spellInfo, nullptr, false, cooldown, true);
         }
     }
 }

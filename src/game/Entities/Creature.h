@@ -835,7 +835,7 @@ class Creature : public Unit
 
         bool IsPreventingDeath() const override;
 
-        virtual void AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto = nullptr, bool permanent = false, uint32 forcedDuration = 0) override;
+        virtual void AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto = nullptr, bool permanent = false, uint32 forcedDuration = 0, bool ignoreCat = false) override;
 
         // spell scripting persistency
         bool HasBeenHitBySpell(uint32 spellId);
