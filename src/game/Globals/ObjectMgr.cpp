@@ -56,6 +56,7 @@
 
 #include <limits>
 #include <cstdarg>
+#include <cstring>
 
 INSTANTIATE_SINGLETON_1(ObjectMgr);
 
@@ -1716,6 +1717,12 @@ void ObjectMgr::LoadCreatures()
             if (!cInfo)
             {
                 sLog.outErrorDb("Table `creature` has creature (GUID: %u) with non existing creature entry %u, skipped.", guid, entry);
+                continue;
+            }
+
+            if (!strcmp(cInfo->AIName, "TotemAI"))
+            {
+                sLog.outErrorDb("Table `creature` has a creature (GUID: %u, entry: %u) using TotemAI via AIName, skipped.", guid, entry);
                 continue;
             }
         }
