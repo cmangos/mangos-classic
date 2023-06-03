@@ -1161,9 +1161,17 @@ bool UnitAI::IsEligibleForDistancing() const
 
 void UnitAI::SpellListChanged()
 {
+    m_mainSpellId = 0;
+    m_mainSpellCost = 0;
+    m_mainSpellMinRange = 0;
+    m_mainAttackMask = SPELL_SCHOOL_MASK_NONE;
+    m_mainSpellInfo = nullptr;
+    m_mainSpells.clear();
+
     CreatureSpellList const& spells = GetSpellList();
     if (spells.Disabled)
         return;
+
     for (auto& data : spells.Spells)
     {
         if (data.second.Flags & SPELL_LIST_FLAG_RANGED_ACTION)
