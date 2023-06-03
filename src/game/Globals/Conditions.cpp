@@ -140,7 +140,7 @@ bool ConditionEntry::CheckOp(ConditionOperation op, int32 value, int32 operand)
         case ConditionOperation::GREATER_THAN_OR_EQUAL_TO: return value >= operand;
         default: break;
     }
-    return false;
+    return true;
 }
 
 // Actual evaluation of the condition done here.
