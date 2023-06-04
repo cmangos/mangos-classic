@@ -103,7 +103,7 @@ void UnitAI::MoveInLineOfSight(Unit* who)
 
 void UnitAI::EnterCombat(Unit*)
 {
-    if (!GetSpellList().Spells.empty())
+    if (!GetSpellList().Disabled && !GetSpellList().Spells.empty())
     {
         m_spellListCooldown = false;
         AddInitialCooldowns();

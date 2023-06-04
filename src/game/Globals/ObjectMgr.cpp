@@ -9498,7 +9498,8 @@ void ObjectMgr::LoadCreatureTemplateSpells()
                 if (!spellId)
                     continue;
 
-                if (!sSpellTemplate.LookupEntry<SpellEntry>(spellId) && spellId != 2) // 2 is attack which is hardcoded in client
+                SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
+                if (!spellInfo && spellId != 2) // 2 is attack which is hardcoded in client
                 {
                     sLog.outErrorDb("LoadCreatureTemplateSpells: Spells found for creature entry %u, assigned spell %u does not exist, set to 0", entry, spellId);
                     continue;
@@ -9521,6 +9522,7 @@ void ObjectMgr::LoadCreatureTemplateSpells()
                 spell.Availability = 100;
                 spell.Probability = 0;
                 spell.ScriptId = 0;
+                spell.DisabledForAI = !spellInfo || spellInfo->HasAttribute(SPELL_ATTR_EX_NO_AUTOCAST_AI);
                 spells.emplace(i, spell);
             }            
         } while (result->NextRow());
