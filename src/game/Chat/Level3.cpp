@@ -1014,6 +1014,7 @@ bool ChatHandler::HandleReloadCreatureSpellLists(char* /*args*/)
     sLog.outString("Reloading creature spell lists...");
     auto conditionsAndExpressions = sObjectMgr.LoadConditionsAndExpressions();
     auto result = sObjectMgr.LoadCreatureSpellLists();
+    sObjectMgr.LoadCreatureTemplateSpells(result);
     auto [unitConditions, worldstateExpressions, combatConditions] = conditionsAndExpressions;
     SendGlobalSysMessage("Reloaded creature spell lists.");
     if (result)

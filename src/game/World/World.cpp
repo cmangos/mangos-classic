@@ -986,13 +986,13 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadConditionsAndExpressions();
 
     sLog.outString("Loading Creature spell lists...");
-    sObjectMgr.LoadCreatureSpellLists();
+    auto spellLists = sObjectMgr.LoadCreatureSpellLists();
 
     sLog.outString("Loading Creature cooldowns...");
     sObjectMgr.LoadCreatureCooldowns();
 
     sLog.outString("Loading Creature template spells...");
-    sObjectMgr.LoadCreatureTemplateSpells();
+    sObjectMgr.LoadCreatureTemplateSpells(spellLists);
 
     sLog.outString("Loading ItemRequiredTarget...");
     sObjectMgr.LoadItemRequiredTarget();

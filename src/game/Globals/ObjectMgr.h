@@ -726,7 +726,7 @@ class ObjectMgr
         void LoadSpellTemplate();
         void CheckSpellCones();
 
-        void LoadCreatureTemplateSpells();
+        void LoadCreatureTemplateSpells(std::shared_ptr<CreatureSpellListContainer> container);
         void LoadCreatureCooldowns();
         void LoadCreatureImmunities();
         std::shared_ptr<CreatureSpellListContainer> LoadCreatureSpellLists();

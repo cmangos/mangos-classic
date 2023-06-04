@@ -9468,7 +9468,7 @@ bool LoadMangosStrings(DatabaseType& db, char const* table, int32 start_value, i
     return sObjectMgr.LoadMangosStrings(db, table, start_value, end_value, extra_content);
 }
 
-void ObjectMgr::LoadCreatureTemplateSpells()
+void ObjectMgr::LoadCreatureTemplateSpells(std::shared_ptr<CreatureSpellListContainer> container)
 {
     uint32 count = 0;
     std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT entry, setId, spell1, spell2, spell3, spell4, spell5, spell6, spell7, spell8, spell9, spell10 FROM creature_template_spells"));
@@ -9488,7 +9488,7 @@ void ObjectMgr::LoadCreatureTemplateSpells()
                 continue;
             }
 
-            auto& spellList = m_spellListContainer->spellLists[entry * 100 + setId];
+            auto& spellList = container->spellLists[entry * 100 + setId];
             spellList.Disabled = true;
             auto& spells = spellList.Spells;
 
@@ -9510,7 +9510,7 @@ void ObjectMgr::LoadCreatureTemplateSpells()
                 spell.Position = i;
                 spell.SpellId = spellId;
                 spell.Flags = 0;
-                spell.Target = &m_spellListContainer->targeting[1];
+                spell.Target = &container->targeting[1];
                 spell.InitialMin = 0;
                 spell.InitialMax = 0;
 
