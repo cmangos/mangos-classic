@@ -4819,6 +4819,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_NOT_BEHIND;
             }
 
+            // duplicate block to avoid previous block complex logic
+            if (m_spellInfo->HasAttribute(SPELL_ATTR_SS_FACING_BACK) && !m_trueCaster->IsFacingTargetsBack(target))
+                return SPELL_FAILED_NOT_BEHIND;
+
             // Caster must be facing the targets front
             if (((m_spellInfo->Attributes == (SPELL_ATTR_IS_ABILITY | SPELL_ATTR_NOT_SHAPESHIFT | SPELL_ATTR_DO_NOT_SHEATH | SPELL_ATTR_CANCELS_AUTO_ATTACK_COMBAT)) && !m_trueCaster->IsFacingTargetsFront(target)))
                 return SPELL_FAILED_NOT_INFRONT;

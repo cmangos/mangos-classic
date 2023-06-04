@@ -190,6 +190,7 @@ enum SpellAttributesServerside
     SPELL_ATTR_SS_PREVENT_INVIS                = 0x00000001,
     SPELL_ATTR_SS_AOE_CAP                      = 0x00000002,
     SPELL_ATTR_SS_IGNORE_EVADE                 = 0x00000004,
+    SPELL_ATTR_SS_FACING_BACK                  = 0x00000008,
 };
 
 enum SpellCastResult : uint32

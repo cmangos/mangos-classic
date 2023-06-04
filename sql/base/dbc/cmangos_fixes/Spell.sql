@@ -299,4 +299,7 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 -- Stop interrupt on damage taken for these 2 spells
 UPDATE `spell_template` SET `InterruptFlags` = 15 WHERE `Id` in (8016,7901);
 
+-- require backstab to face back
+UPDATE spell_template SET AttributesServerside=AttributesServerside|0x00000008 WHERE Id IN(15582);
+
 
