@@ -29,6 +29,24 @@ EndContentData */
 
 
 
+bool TrapTargetSearchRuneOfTheDefiler(Unit* unit)
+{
+    if (unit->GetTypeId() == TYPEID_PLAYER)
+    {
+        Player* player = static_cast<Player*>(unit);
+        if (player->HasItemCount(10757, 1)) // Ward of the Defiler
+            return true;
+    }
+
+    return false;
+}
+
+std::function<bool(Unit*)> functionRuneOfTheDefiler = &TrapTargetSearchRuneOfTheDefiler;
+
 void AddSC_blasted_lands()
 {
+    Script* pNewScript = new Script;
+    pNewScript->Name = "go_rune_of_the_defiler";
+    pNewScript->pTrapSearching = &functionRuneOfTheDefiler;
+    pNewScript->RegisterSelf();
 }
