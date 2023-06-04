@@ -301,5 +301,6 @@ UPDATE `spell_template` SET `InterruptFlags` = 15 WHERE `Id` in (8016,7901);
 
 -- require backstab to face back
 UPDATE spell_template SET AttributesServerside=AttributesServerside|0x00000008 WHERE Id IN(15582);
+UPDATE `spell_template` SET AttributesServerside=AttributesServerside|0x00000008 WHERE `Id` IN (7159,15582,15657,22416);
 
 
