@@ -189,7 +189,7 @@ void CombatManager::TriggerCombatTimer(Unit* target)
 
 void CombatManager::TriggerCombatTimer(bool pvp)
 {
-    m_combatTimer = pvp ? 5000 : 15000;
+    m_combatTimer = pvp ? 5000 : m_owner->GetPursuit();
     m_lastRefreshPos = m_owner->GetPosition();
 }
 

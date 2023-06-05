@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2814_01_mangos_worldstate_expression_spawn_group` bit(1) DEFAULT NULL
+  `required_z2815_01_mangos_pursuit` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1277,7 +1277,7 @@ CREATE TABLE `creature_template` (
   `SpeedRun` float NOT NULL DEFAULT '0',
   `Detection` INT(10) UNSIGNED NOT NULL DEFAULT '18' COMMENT 'Detection range for proximity',
   `CallForHelp` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Range in which creature calls for help?',
-  `Pursuit` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'When exceeded during pursuit creature evades?',
+  `Pursuit` INT(10) UNSIGNED NOT NULL DEFAULT '15000' COMMENT 'Hit refresh time after which creature evades',
   `Leash` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Leash range from combat start position',
   `Timeout` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Time for refreshing leashing before evade?',
   `UnitClass` tinyint(3) unsigned NOT NULL DEFAULT '0',

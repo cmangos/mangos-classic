@@ -770,6 +770,7 @@ class Creature : public Unit
         void SetCombatStartPosition(Position const& pos) { m_combatStartPos = pos; }
         void GetCombatStartPosition(Position& pos) const { pos = m_combatStartPos; }
         Position const& GetCombatStartPosition() const { return m_combatStartPos; }
+        uint32 GetPursuit() const override { return GetCreatureInfo()->Pursuit; }
 
         void SetRespawnCoord(CreatureCreatePos const& pos) { m_respawnPos = pos.m_pos; }
         void SetRespawnCoord(float x, float y, float z, float ori) { m_respawnPos.x = x; m_respawnPos.y = y; m_respawnPos.z = z; m_respawnPos.o = ori; }
