@@ -104,7 +104,10 @@ void CombatManager::Update(const uint32 diff)
                             // if timer ran out and we are far away from last refresh pos, evade
                             else if (m_owner->GetVictim() && m_owner->GetVictim()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
                             {
-                                if (m_owner->GetVictim()->GetDistance2d(m_lastRefreshPos.GetPositionX(), m_lastRefreshPos.GetPositionY()) > sWorld.getConfig(CONFIG_FLOAT_LEASH_RADIUS))
+                                // immobilized passive mobs ignore last refresh pos
+                                if (m_owner->IsImmobilizedState() && m_owner->AI()->GetReactState() == REACT_PASSIVE)
+                                    m_owner->HandleExitCombat(false);
+                                else if (m_owner->GetVictim()->GetDistance2d(m_lastRefreshPos.GetPositionX(), m_lastRefreshPos.GetPositionY()) > sWorld.getConfig(CONFIG_FLOAT_LEASH_RADIUS))
                                     m_owner->HandleExitCombat(false);
                             }
                         }
