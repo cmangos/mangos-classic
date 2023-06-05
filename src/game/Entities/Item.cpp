@@ -444,16 +444,6 @@ bool Item::LoadFromDB(uint32 guidLow, Field* fields, ObjectGuid ownerGuid)
 
     SetUInt32Value(ITEM_FIELD_FLAGS, fields[6].GetUInt32());
 
-    // update max durability (and durability) if need
-    if (proto->MaxDurability != GetUInt32Value(ITEM_FIELD_MAXDURABILITY))
-    {
-        SetUInt32Value(ITEM_FIELD_MAXDURABILITY, proto->MaxDurability);
-        if (GetUInt32Value(ITEM_FIELD_DURABILITY) > proto->MaxDurability)
-            SetUInt32Value(ITEM_FIELD_DURABILITY, proto->MaxDurability);
-
-        need_save = true;
-    }
-
     // Remove bind flag for items vs NO_BIND set
     if (IsSoulBound() && proto->Bonding == NO_BIND)
     {
