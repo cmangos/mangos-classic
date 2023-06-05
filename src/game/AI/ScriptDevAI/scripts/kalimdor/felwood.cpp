@@ -262,7 +262,7 @@ struct npc_captured_arkonarinAI : public npc_escortAI
                 }
                 
                 m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-                End();
+                QuestEnd();
                 break;
         }
     }

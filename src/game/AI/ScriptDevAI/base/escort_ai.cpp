@@ -303,6 +303,11 @@ void npc_escortAI::End()
     m_questForEscort = nullptr;
 }
 
+void npc_escortAI::QuestEnd()
+{
+    m_questForEscort = nullptr;
+}
+
 void npc_escortAI::SetEscortPaused(bool paused)
 {
     if (!HasEscortState(STATE_ESCORT_ESCORTING))
