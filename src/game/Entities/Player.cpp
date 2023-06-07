@@ -13924,6 +13924,8 @@ void Player::_LoadForgottenSkills(QueryResult* result)
 
             m_forgottenSkills.insert(std::make_pair(skill, value));
         } while (result->NextRow());
+	    
+        delete result;
     }
 }
 
