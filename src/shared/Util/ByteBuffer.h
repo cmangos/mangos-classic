@@ -49,22 +49,52 @@ struct Unused
 class ByteBuffer
 {
     public:
-        const static size_t DEFAULT_SIZE = 0x1000;
 
-        // constructor
-        ByteBuffer(): _rpos(0), _wpos(0)
+        explicit ByteBuffer(size_t reservedSize = s_defaultSize): _rpos(0), _wpos(0)
         {
-            _storage.reserve(DEFAULT_SIZE);
+            _storage.reserve(reservedSize);
         }
 
-        // constructor
-        ByteBuffer(size_t res): _rpos(0), _wpos(0)
+        virtual ~ByteBuffer() = default;
+
+        ByteBuffer(const ByteBuffer&) = default;
+
+        ByteBuffer(ByteBuffer&& byteBuffer) noexcept
+        : _rpos(byteBuffer._rpos), _wpos(byteBuffer._wpos), _storage(std::move(byteBuffer._storage))
         {
-            _storage.reserve(res);
+            // Make sure the moved-from byteBuffer is in a valid state!
+            byteBuffer.clear();
         }
 
-        // copy constructor
-        ByteBuffer(const ByteBuffer& buf): _rpos(buf._rpos), _wpos(buf._wpos), _storage(buf._storage) { }
+        // reserve/resize tag
+        struct Reserve { };
+        struct Resize { };
+
+        ByteBuffer(size_t size, Reserve) : _rpos(0), _wpos(0)
+        {
+            _storage.reserve(size);
+        }
+
+        ByteBuffer(size_t size, Resize) : _rpos(0), _wpos(size)
+        {
+            _storage.resize(size);
+        }
+
+        ByteBuffer& operator=(const ByteBuffer&) = default;
+
+        ByteBuffer& operator=(ByteBuffer&& byteBuffer) noexcept
+        {
+            if (&byteBuffer != this)
+            {
+                _rpos = byteBuffer._rpos;
+                _wpos = byteBuffer._wpos;
+                _storage = std::move(byteBuffer._storage);
+
+                // Make sure the moved-from byteBuffer is in a valid state!
+                byteBuffer.clear();
+            }
+            return *this;
+        }
 
         void clear()
         {
@@ -436,9 +466,10 @@ class ByteBuffer
             append((uint8*)&value, sizeof(value));
         }
 
-    protected:
         size_t _rpos, _wpos;
         std::vector<uint8> _storage;
+
+        static constexpr size_t s_defaultSize = 0x1000;
 };
 
 template <typename T>

@@ -227,6 +227,7 @@ target_include_directories(${LIBRARY_NAME}
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
   PUBLIC ${Boost_INCLUDE_DIRS}
   PUBLIC ${OPENSSL_INCLUDE_DIR}
+  PUBLIC ${CMAKE_BINARY_DIR}/src/shared # For the generated revision.h.
   PUBLIC "${CMAKE_SOURCE_DIR}/src/game"
 )
 
@@ -272,7 +273,7 @@ if(PCH)
 endif()
 
 # Mark the revision header as being generated.
-set_source_files_properties(${CMAKE_SOURCE_DIR}/src/shared/revision.h
+set_source_files_properties(${CMAKE_BINARY_DIR}/src/shared/revision.h
   PROPERTIES GENERATED TRUE
              HEADER_FILE_ONLY TRUE)
 if(MSVC)

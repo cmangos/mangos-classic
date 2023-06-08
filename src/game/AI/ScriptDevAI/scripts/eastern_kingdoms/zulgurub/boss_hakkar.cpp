@@ -40,11 +40,11 @@ enum
     SPELL_DOUBLE_ATTACK         = 19818,
 
     // The Aspects of all High Priests
-    SPELL_ASPECT_OF_JEKLIK      = 24687, // assumed spell list index 5
-    SPELL_ASPECT_OF_VENOXIS     = 24688, // assumed spell list index 6
-    SPELL_ASPECT_OF_MARLI       = 24686, // assumed spell list index 7
-    SPELL_ASPECT_OF_THEKAL      = 24689, // assumed spell list index 8
-    SPELL_ASPECT_OF_ARLOKK      = 24690  // assumed spell list index 9
+    SPELL_ASPECT_OF_JEKLIK      = 24687,
+    SPELL_ASPECT_OF_VENOXIS     = 24688,
+    SPELL_ASPECT_OF_MARLI       = 24686,
+    SPELL_ASPECT_OF_THEKAL      = 24689,
+    SPELL_ASPECT_OF_ARLOKK      = 24690
 };
 
 enum HakkarActions
@@ -74,21 +74,6 @@ struct boss_hakkarAI : public CombatAI
     void Aggro(Unit* /*who*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
-
-        // check if the priest encounters are done
-        if (m_instance)
-        {
-            if (m_instance->GetData(TYPE_JEKLIK) == DONE)
-                m_creature->UpdateSpell(5, 0);
-            if (m_instance->GetData(TYPE_VENOXIS) == DONE)
-                m_creature->UpdateSpell(6, 0);
-            if (m_instance->GetData(TYPE_MARLI) == DONE)
-                m_creature->UpdateSpell(7, 0);
-            if (m_instance->GetData(TYPE_THEKAL) == DONE)
-                m_creature->UpdateSpell(8, 0);
-            if (m_instance->GetData(TYPE_ARLOKK) == DONE)
-                m_creature->UpdateSpell(9, 0);
-        }
     }
 
     // For each of the High Priests that is alive, update Hakkar's Power Stacks (updating Hakkar's HP)
@@ -98,16 +83,20 @@ struct boss_hakkarAI : public CombatAI
         for (uint8 i = 0; i < MAX_PRIESTS; i++)
         {
             if (m_instance->GetData(i) != DONE)
-                m_creature->CastSpell(m_creature, SPELL_HAKKAR_POWER, TRIGGERED_NONE);
+                m_creature->CastSpell(nullptr, SPELL_HAKKAR_POWER, TRIGGERED_NONE);
         }
     }
 
     void ExecuteAction(uint32 action) override
     {
         if (action == HAKKAR_ENRAGE_LOW)
+        {
             if (m_creature->GetHealthPercent() < 5.f)
-                if (DoCastSpellIfCan(nullptr, SPELL_ENRAGE) == CAST_OK)
-                    DisableCombatAction(action);
+            {
+                m_creature->RemoveSpellCooldown(SPELL_ENRAGE);
+                DisableCombatAction(action);
+            }
+        }
     }
 };
 

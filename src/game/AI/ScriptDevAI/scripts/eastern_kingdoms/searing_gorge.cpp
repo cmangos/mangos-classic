@@ -36,67 +36,82 @@ EndContentData */
 
 enum
 {
-    SAY_DORIUS_AGGRO_1              = -1000993,
-    SAY_DORIUS_AGGRO_2              = -1000994,
+    SAY_DORIUS_AGGRO_1              = 4351,
+    SAY_DORIUS_AGGRO_2              = 4353,
+
+    SAY_DORIUS_TO_PLAYER            = 4354,
+    SAY_DORIUS_FINISH               = 4359,
 
     NPC_DARK_IRON_STEELSHIFTER      = 8337,
-    MAX_STEELSHIFTERS               = 4,
 
+    SPELL_MARKSMAN_HIT              = 12198,
+    
+    RELAY_SCRIPT_FINISHED           = 8284,
+
+    PATH_ID                         = 8284,        // Sniffed Waypoints for Escort Event
     QUEST_ID_SUNTARA_STONES         = 3367,
 };
 
 struct npc_dorius_stonetenderAI : public npc_escortAI
 {
-    npc_dorius_stonetenderAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
-
-    void Reset() override
-    {
-        if (!HasEscortState(STATE_ESCORT_ESCORTING))
-            m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+    npc_dorius_stonetenderAI(Creature* pCreature) : npc_escortAI(pCreature) 
+    { 
+        m_creature->SetStandState(UNIT_STAND_STATE_DEAD, true);
+        Reset(); 
     }
+
+    void Reset() override {}
 
     void Aggro(Unit* pWho) override
     {
-        DoScriptText(urand(0, 1) ? SAY_DORIUS_AGGRO_1 : SAY_DORIUS_AGGRO_2, m_creature, pWho);
+        DoBroadcastText(urand(0, 1) ? SAY_DORIUS_AGGRO_1 : SAY_DORIUS_AGGRO_2, m_creature, pWho);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
-            // ToDo: research if there is any text here
             m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-            m_creature->SetFactionTemporary(FACTION_ESCORT_A_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
-            Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue), true);
+            m_creature->SetFactionTemporary(FACTION_ESCORT_A_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
+            Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue), true, false, PATH_ID);
         }
+    }
+
+    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
+    {        
+        if (pSpell->Id == SPELL_MARKSMAN_HIT)
+        { 
+            if (Player* pPlayer = GetPlayerForEscort())
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_SUNTARA_STONES, m_creature);
+            // all rp things handled via relayscript
+            m_creature->GetMap()->ScriptsStart(SCRIPT_TYPE_RELAY, RELAY_SCRIPT_FINISHED, m_creature, pCaster);
+            End();
+        }            
+    }
+
+    void SummonedMovementInform(Creature* pSummoned, uint32 /*moveType*/, uint32 uiPointId) override
+    {
+        if (pSummoned->GetEntry() == NPC_DARK_IRON_STEELSHIFTER && uiPointId == 2)
+            pSummoned->AI()->AttackStart(m_creature);
     }
 
     void WaypointReached(uint32 uiPointId) override
     {
         switch (uiPointId)
-        {
-            case 21:
-                // ToDo: research if there is any text here!
-                float fX, fY, fZ;
-                for (uint8 i = 0; i < MAX_STEELSHIFTERS; ++i)
+        {         
+            case 37:
+                // Have to do it via core because we need Player as target
+                if (Player* pPlayer = GetPlayerForEscort())
                 {
-                    m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, 15.0f, i * M_PI_F / 2);
-                    m_creature->SummonCreature(NPC_DARK_IRON_STEELSHIFTER, fX, fY, fZ, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                    DoBroadcastText(SAY_DORIUS_TO_PLAYER, m_creature, pPlayer);
+                    m_creature->HandleEmote(EMOTE_ONESHOT_POINT);
                 }
                 break;
-            case 34:
-                // ToDo: research if there is any event and text here!
-                if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_SUNTARA_STONES, m_creature);
-                m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+            case 53:
+                if (Player* pPlayer = GetPlayerForEscort())                
+                    m_creature->SetFacingToObject(pPlayer);
                 break;
         }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_DARK_IRON_STEELSHIFTER)
-            pSummoned->AI()->AttackStart(m_creature);
     }
 
     void UpdateEscortAI(const uint32 /*uiDiff*/) override

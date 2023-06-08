@@ -1140,7 +1140,7 @@ void FollowMovementGenerator::HandleFinalizedMovement(Unit& owner)
 
 FormationMovementGenerator::FormationMovementGenerator(FormationSlotDataSPtr& sData, bool main) :
     FollowMovementGenerator(*sData->GetMaster(), sData->GetDistance(), sData->GetDistance(), main, false, false),
-    m_slot(sData), m_headingToMaster(false), m_lastAngle(0)
+    m_slot(sData), m_lastAngle(0), m_headingToMaster(false)
 {
     if (!this->i_path)
         this->i_path = new PathFinder(sData->GetOwner());

@@ -46,7 +46,7 @@ class WorldPacket : public ByteBuffer
         void Initialize(Opcodes opcode, size_t newres = 200)
         {
             clear();
-            _storage.reserve(newres);
+            reserve(newres);
             m_opcode = opcode;
         }
 

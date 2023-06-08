@@ -80,7 +80,7 @@ void instance_uldaman::OnCreatureCreate(Creature* pCreature)
 }
 
 // Prototype, hardcoded
-void instance_uldaman::OnCreatureGroupDespawn(CreatureGroup* pGroup, Creature* pCreature)
+void instance_uldaman::OnCreatureGroupDespawn(CreatureGroup* pGroup, Creature* /*pCreature*/)
 {
     if (pGroup->GetGroupId() == 7000000)    
         instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_SPAWN_ANNORA, 1);

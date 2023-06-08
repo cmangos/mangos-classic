@@ -238,6 +238,9 @@ void LootStore::LoadAndCheckReferenceNames()
             uint32 entry = fields[0].GetUInt32();
             std::string name = fields[1].GetCppString();
 
+            if (name.empty())
+                sLog.outErrorDb("Table reference_loot_template_names for entry %u has empty name", entry);
+
             if (foundIds.find(entry) != foundIds.end())
                 foundIds.erase(entry);
             else

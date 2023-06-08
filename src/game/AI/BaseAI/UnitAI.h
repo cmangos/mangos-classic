@@ -437,6 +437,7 @@ class UnitAI : public CombatActions
 
         // Returns friendly unit with the most amount of hp missing from max hp - ignoreSelf - some spells cant target self
         Unit* DoSelectLowestHpFriendly(float range, float minMissing = 1.f, bool percent = false, bool targetSelf = true) const;
+        Unit* DoSelectConditionalFriendly(float range, int32 unitConditionId) const;
         float CalculateSpellRange(SpellEntry const* spellInfo) const;
         CreatureList DoFindFriendlyEligibleDispel(uint32 spellId, bool self = true) const;
         CreatureList DoFindFriendlyEligibleDispel(SpellEntry const* spellInfo, bool self = true) const;
@@ -485,8 +486,8 @@ class UnitAI : public CombatActions
         void AttackSpecificEnemy(std::function<void(Unit*,Unit*&)> check);
         virtual void AttackClosestEnemy();
 
-        void SetRootSelf(bool apply, bool combatOnly = false); // must call parent JustDied if this is used
-        void ClearSelfRoot();
+        void SetAIImmobilizedState(bool apply, bool combatOnly = false); // must call parent JustDied if this is used
+        void ClearCombatOnlyRoot();
 
         virtual void HandleDelayedInstantAnimation(SpellEntry const* spellInfo);
         virtual bool IsTargetingRestricted() { return GetCombatScriptStatus(); }
@@ -563,8 +564,8 @@ class UnitAI : public CombatActions
         // member of the group got killed
         virtual void CreatureGroupMemberDied(Unit* /*killed*/) {}
 
-        virtual void RequestFollow(Unit* followee) {}
-        virtual void RelinquishFollow(ObjectGuid follower) {}
+        virtual void RequestFollow(Unit* /*followee*/) {}
+        virtual void RelinquishFollow(ObjectGuid /*follower*/) {}
 
     protected:
         virtual std::string GetAIName() { return "UnitAI"; }
@@ -589,7 +590,7 @@ class UnitAI : public CombatActions
         bool m_dismountOnAggro;
 
         bool m_meleeEnabled;                              // If we allow melee auto attack
-        bool m_selfRooted;
+        bool m_combatOnlyRoot;
 
         ReactStates m_reactState;
 

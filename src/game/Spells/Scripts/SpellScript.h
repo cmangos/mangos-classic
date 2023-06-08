@@ -21,6 +21,7 @@
 
 #include "Spells/Spell.h"
 #include <map>
+#include <memory>
 #include <functional>
 
 class DynamicObject;
@@ -36,6 +37,8 @@ struct PeriodicTriggerData
 
 struct SpellScript
 {
+    virtual ~SpellScript() = default;
+
     // called on spell init
     virtual void OnInit(Spell* /*spell*/) const {}
     // called on success during Spell::Prepare
@@ -45,7 +48,7 @@ struct SpellScript
     // called at end of Spell::CheckCast - strict is true in Spell::Prepare
     virtual SpellCastResult OnCheckCast(Spell* /*spell*/, bool /*strict*/) const { return SPELL_CAST_OK; }
     // called on Spell::SendCastResult - for overriding generic errors
-    virtual void OnSpellCastResultOverride(SpellCastResult& result, uint32& param1, uint32& param2) const {}
+    virtual void OnSpellCastResultOverride(SpellCastResult& /*result*/, uint32& /*param1*/, uint32& /*param2*/) const {}
     // called before effect execution
     virtual void OnEffectExecute(Spell* /*spell*/, SpellEffectIndex /*effIdx*/) const {}
     // called in targeting to determine radius for spell
@@ -72,11 +75,13 @@ struct AuraCalcData
 {
     Unit* caster; Unit* target; SpellEntry const* spellProto; SpellEffectIndex effIdx;
     Aura* aura; // cannot be used in auras that utilize stacking in checkcast - can be nullptr
-    AuraCalcData(Aura* aura, Unit* caster, Unit* target, SpellEntry const* spellProto, SpellEffectIndex effIdx) : aura(aura), caster(caster), target(target), spellProto(spellProto), effIdx(effIdx) {}
+    AuraCalcData(Aura* aura, Unit* caster, Unit* target, SpellEntry const* spellProto, SpellEffectIndex effIdx) : caster(caster), target(target), spellProto(spellProto), effIdx(effIdx), aura(aura) {}
 };
 
 struct AuraScript
 {
+    virtual ~AuraScript() = default;
+
     // called on SpellAuraHolder creation - caster can be nullptr
     virtual void OnHolderInit(SpellAuraHolder* /*holder*/, WorldObject* /*caster*/) const {}
     // called after end of aura object constructor
@@ -119,7 +124,7 @@ struct AuraScript
     virtual void OnPersistentAreaAuraEnd(DynamicObject* /*dynGo*/) const {}
     // called on unit heartbeat
     virtual void OnHeartbeat(Aura* /*aura*/) const {}
-    // used to override SPELL_AURA_TRANSFORM display id - more uses in future
+    // used to override SPELL_AURA_TRANSFORM or SPELL_AURA_MOD_SHAPESHIFT display id - more uses in future
     virtual uint32 GetAuraScriptCustomizationValue(Aura* /*aura*/) const { return 0; }
 };
 
@@ -148,8 +153,8 @@ class SpellScriptMgr
 
         static std::map<uint32, SpellScript*> m_spellScriptMap;
         static std::map<uint32, AuraScript*> m_auraScriptMap;
-        static std::map<std::string, SpellScript*> m_spellScriptStringMap;
-        static std::map<std::string, AuraScript*> m_auraScriptStringMap;
+        static std::map<std::string, std::unique_ptr<SpellScript>> m_spellScriptStringMap;
+        static std::map<std::string, std::unique_ptr<AuraScript>> m_auraScriptStringMap;
 };
 
 // note - linux name mangling bugs out if two script templates have same class name - avoid it

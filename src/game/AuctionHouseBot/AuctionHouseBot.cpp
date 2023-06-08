@@ -80,7 +80,7 @@ void AuctionHouseBot::Initialize()
 
         // gameobject loot
         ParseLootConfig("AuctionHouseBot.Loot.Gameobject", m_gameobjectLootConfig);
-        FillUintVectorFromQuery("SELECT DISTINCT entry FROM gameobject_loot_template WHERE entry IN (SELECT data1 FROM gameobject_template WHERE entry IN (SELECT id FROM gameobject WHERE state = 1 AND spawntimesecsmax > 0))", m_gameobjectLootTemplates);
+        FillUintVectorFromQuery("SELECT DISTINCT entry FROM gameobject_loot_template WHERE entry IN (SELECT data1 FROM gameobject_template WHERE entry IN (SELECT id FROM gameobject WHERE spawntimesecsmax > 0))", m_gameobjectLootTemplates);
 
         // skinning loot
         ParseLootConfig("AuctionHouseBot.Loot.Skinning", m_skinningLootConfig);

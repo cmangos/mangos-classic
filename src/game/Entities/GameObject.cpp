@@ -241,7 +241,7 @@ bool GameObject::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map,
             // safe to use door cos both have startOpen on same spot
             SetGoState(goinfo->door.startOpen ? GO_STATE_ACTIVE : GO_STATE_READY);
             if (goinfo->door.startOpen)
-                m_lootState = GO_NOT_READY;
+                m_lootState = GO_ACTIVATED;
             break;
         case GAMEOBJECT_TYPE_TRAP:
             // values from rogue detect traps aura
@@ -280,6 +280,9 @@ bool GameObject::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map,
             break;
     }
 
+    if (goinfo->StringId)
+        SetStringId(goinfo->StringId, true);
+
     // Notify the battleground or outdoor pvp script
     if (map->IsBattleGround())
         ((BattleGroundMap*)map)->GetBG()->HandleGameObjectCreate(this);
@@ -292,8 +295,8 @@ bool GameObject::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map,
     if (InstanceData* iData = map->GetInstanceData())
         iData->OnObjectCreate(this);
 
-    // Check if GameObject is Large
-    if (GetGOInfo()->IsLargeGameObject())
+    // Check if GameObject is Large, skip if map has same or better visibility (e.g. Battleground)
+    if (GetGOInfo()->IsLargeGameObject() && GetVisibilityData().GetVisibilityDistance() < VISIBILITY_DISTANCE_LARGE)
         GetVisibilityData().SetVisibilityDistanceOverride(VisibilityDistanceType::Large);
 
     return true;
@@ -474,8 +477,8 @@ void GameObject::Update(const uint32 diff)
                                 {
                                     case 1: // friendly
                                     {
-                                        MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(this, nullptr, radius);
-                                        MaNGOS::UnitSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> checker(target, u_check);
+                                        MaNGOS::AnySpellAssistableUnitInObjectRangeCheck u_check(this, nullptr, radius);
+                                        MaNGOS::UnitSearcher<MaNGOS::AnySpellAssistableUnitInObjectRangeCheck> checker(target, u_check);
                                         Cell::VisitAllObjects(this, checker, radius);
                                         break;
                                     }
@@ -850,6 +853,10 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forc
         return false;
     }
 
+    // Gameobject can be loaded already in map if grid has been unloaded while gameobject moves to another grid
+    if (map->GetGameObject(dbGuid))
+        return false;
+
     uint32 entry = forcedEntry ? forcedEntry : data->id;
     // uint32 map_id = data->mapid;                         // already used before call
     float x = data->posX;
@@ -883,7 +890,7 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forc
             dynguid = true;
     }
 
-    if (dynguid)
+    if (dynguid || newGuid == 0)
         newGuid = map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT);
 
     if (uint32 randomEntry = sObjectMgr.GetRandomGameObjectEntry(dbGuid))
@@ -897,6 +904,9 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forc
 
     if (group)
         SetGameObjectGroup(group);
+
+    if (groupEntry && groupEntry->StringId)
+        SetStringId(groupEntry->StringId, true);
 
     if (!GetGOInfo()->GetDespawnPossibility() && !GetGOInfo()->IsDespawnAtAction() && data->spawntimesecsmin >= 0)
     {
@@ -1828,8 +1838,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
                 if (info->spellcaster.charges > 0 && !GetUseCount())
                     SetUInt32Value(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
             };
-
-            return;
+            break;
         }
         case GAMEOBJECT_TYPE_MEETINGSTONE:                  // 23
         {

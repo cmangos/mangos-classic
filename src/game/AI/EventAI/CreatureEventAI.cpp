@@ -102,8 +102,6 @@ CreatureEventAI::CreatureEventAI(Creature* creature) : CreatureAI(creature),
 void CreatureEventAI::InitAI()
 {
     m_CreatureEventAIList.clear();
-    m_distanceSpells.clear();
-    m_mainSpells.clear();
 
     auto processMap = [&](const CreatureEventAI_Event_Vec& creatureEvent)
     {
@@ -913,9 +911,9 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             SetCombatMovement(action.combat_movement.state != 0, true);
 
             if (hasCombatMovement && action.combat_movement.melee && m_creature->IsInCombat() && m_creature->GetVictim())
-                m_creature->SendMeleeAttackStart(m_creature->GetVictim());
+                m_creature->SendMeleeAttackStart(*m_creature->GetVictim());
             else if (action.combat_movement.melee && m_creature->IsInCombat() && m_creature->GetVictim())
-                m_creature->SendMeleeAttackStop(m_creature->GetVictim());
+                m_creature->SendMeleeAttackStop(*m_creature->GetVictim());
             break;
         }
         case ACTION_T_SET_PHASE:
@@ -1350,7 +1348,7 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
         }
         case ACTION_T_SET_IMMOBILIZED_STATE:
         {
-            SetRootSelf(action.immobilizedState.apply, action.immobilizedState.combatOnly);
+            SetAIImmobilizedState(action.immobilizedState.apply, action.immobilizedState.combatOnly);
             break;
         }
         case ACTION_T_SET_DESPAWN_AGGREGATION:
@@ -1431,7 +1429,7 @@ void CreatureEventAI::Reset()
     // reset AI state
     SetAIOrder(ORDER_NONE);
     SetCombatScriptStatus(false);
-    ClearSelfRoot();
+    ClearCombatOnlyRoot();
 
     // Reset all events to enabled
     for (auto& i : m_CreatureEventAIList)

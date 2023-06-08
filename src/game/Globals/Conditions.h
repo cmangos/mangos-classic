@@ -128,14 +128,26 @@ enum ConditionRequirement
     CONDITION_REQ_BOTH_PLAYERS,
 };
 
-enum WorldStateConditionSign
+// DO NOT ALTER - db2 op struct
+enum class ConditionOperation : uint8
 {
-    WORLDSTATE_EQUALS           = 0,
-    WORLDSTATE_GREATER          = 1,
-    WORLDSTATE_GREATER_EQUAL    = 2,
-    WORLDSTATE_LESS             = 3,
-    WORLDSTATE_LESS_EQUAL       = 4,
-    WORLDSTATE_SIGN_MAX         = 5,
+    NONE                        = 0,
+    EQUAL_TO                    = 1,
+    NOT_EQUAL_TO                = 2,
+    LESS_THAN                   = 3,
+    LESS_THAN_OR_EQUAL_TO       = 4,
+    GREATER_THAN                = 5,
+    GREATER_THAN_OR_EQUAL_TO    = 6,
+    MAX
+};
+
+// DO NOT ALTER - db2 logic struct
+enum class ConditionLogic : uint8
+{
+    NONE = 0, // only execute cond 0
+    AND  = 1, // both conditions must be true
+    OR   = 2, // one condition must be true
+    XOR  = 3, // condition results must not be equal
 };
 
 class ConditionEntry
@@ -153,6 +165,8 @@ class ConditionEntry
 
         // Checks if the condition is met
         bool Meets(WorldObject const* target, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const;
+
+        static bool CheckOp(ConditionOperation op, int32 value, int32 operand);
     private:
         void DisableCondition() { m_condition = CONDITION_NONE; m_flags ^= CONDITION_FLAG_REVERSE_RESULT; }
         bool CheckParamRequirements(WorldObject const* target, Map const* map, WorldObject const* source) const;

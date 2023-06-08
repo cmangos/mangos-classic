@@ -81,6 +81,19 @@ BanWave.Minute = 0
 #       permanently silences the offending account
 #       CHEAT_ACTION_SILENCE        = 0x20,
 #
+#    Movement.BadFallReset.Enable
+#        Description: Check for wrong data in fall reset opcode.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+#
+#    Movement.BadFallReset.Threshold
+#        Description: Detections needed to trigger a penalty.
+#        Default:     1
+#
+#    Movement.BadFallReset.Penalty
+#        Description: Action to take upon failing this check.
+#        Default:     11 - Log, Report to GM, Kick
+#
 #   Examples:
 #       * To ban the account and IP, the mask is 0x08 | 0x10, or 0x18, or 24.
 #       * To send out a notification, prompting for an action of an account ban
@@ -196,6 +209,10 @@ Movement.ClockDesync.TickCount = 1
 Movement.ClockDesync.TickAction = 1
 Movement.ClockDesync.TotalCount = 0
 Movement.ClockDesync.TotalAction = 0
+
+Movement.BadFallReset.Enable = 1
+Movement.BadFallReset.Threshold = 1
+Movement.BadFallReset.Penalty = 11
 
 # Watches for a player claiming to be aboard a transport which
 # either doesn't exist, or from which they are too far away

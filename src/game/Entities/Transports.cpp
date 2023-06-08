@@ -118,7 +118,7 @@ void MapManager::LoadTransports()
     sLog.outString();
 }
 
-Transport::Transport(TransportTemplate const& transportTemplate) : GenericTransport(), m_transportTemplate(transportTemplate), m_isMoving(true), m_pendingStop(false)
+Transport::Transport(TransportTemplate const& transportTemplate) : GenericTransport(), m_isMoving(true), m_pendingStop(false), m_transportTemplate(transportTemplate)
 {
     m_updateFlag = (UPDATEFLAG_TRANSPORT | UPDATEFLAG_ALL | UPDATEFLAG_HAS_POSITION);
 }

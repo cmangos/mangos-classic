@@ -3963,6 +3963,11 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
         if (trainer_spell->reqSkill && GetSkillValueBase(trainer_spell->reqSkill) < trainer_spell->reqSkillValue)
             return TRAINER_SPELL_RED;
 
+    for (uint32 i = 0; i < 3; ++i)
+        if (trainer_spell->reqAbility[i])
+            if (!HasSpell(*trainer_spell->reqAbility[i]))
+                return TRAINER_SPELL_RED;
+
     // exist, already checked at loading
     SpellEntry const* spell = sSpellTemplate.LookupEntry<SpellEntry>(trainer_spell->learnedSpell);
 
@@ -6448,7 +6453,7 @@ void Player::UpdateHonor()
     SetHonorLastWeekStandingPos(sObjectMgr.GetHonorStandingPositionByGUID(GetGUIDLow(), GetTeam()));
 
     // RANK POINTS
-    HonorStanding* standing = sObjectMgr.GetHonorStandingByGUID(GetGUIDLow(), GetTeam());
+    std::optional<HonorStanding> standing = sObjectMgr.GetHonorStandingByGUID(GetGUIDLow(), GetTeam());
     float rankP = GetStoredHonor();
     if (standing)
         rankP += standing->rpEarning;
@@ -13786,11 +13791,6 @@ void Player::SendQuestUpdateAddItem(Quest const* pQuest, uint32 item_idx, uint32
     data << pQuest->ReqItemId[item_idx];
     data << count;
     GetSession()->SendPacket(data);
-
-    // Update player field and fire UNIT_QUEST_LOG_CHANGED for self
-    uint16 slot = FindQuestSlot(pQuest->GetQuestId());
-    if (slot < MAX_QUEST_LOG_SIZE)
-        SetQuestSlotCounter(slot, uint8(item_idx), uint8(current + count));
 }
 
 void Player::SendQuestUpdateAddCreatureOrGo(Quest const* pQuest, ObjectGuid guid, uint32 creatureOrGO_idx, uint32 count)
@@ -18740,7 +18740,7 @@ bool Player::isHonorOrXPTarget(Unit* pVictim) const
     {
         Creature* npc = static_cast<Creature*>(pVictim);
 
-        if (npc->IsTotem() || npc->IsPet() || npc->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_XP_AT_KILL)
+        if (npc->IsTotem() || npc->IsPet() || npc->IsNoXp())
             return false;
     }
     return true;

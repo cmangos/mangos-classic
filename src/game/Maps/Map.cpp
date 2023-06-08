@@ -44,6 +44,8 @@
  #include "Metric/Metric.h"
 #endif
 
+#include <time.h>
+
 Map::~Map()
 {
     UnloadAll(true);
@@ -81,6 +83,16 @@ TimePoint Map::GetCurrentClockTime() const
 uint32 Map::GetCurrentDiff() const
 {
     return World::GetCurrentDiff();
+}
+
+time_t Map::GetCurrentTime_t() const
+{
+    return m_curTime;
+}
+
+tm Map::GetCurrentTime_tm() const
+{
+    return m_curTimeTm;
 }
 
 GenericTransport* Map::GetTransport(ObjectGuid guid)
@@ -657,6 +669,13 @@ void Map::Update(const uint32& t_diff)
 });
 #endif
 
+    m_curTime = time(nullptr);
+
+#ifdef _MSC_VER
+    localtime_s(&m_curTimeTm, &m_curTime);
+#else
+    localtime_r(&m_curTime, &m_curTimeTm);
+#endif
 
     uint64 count = 0;
 
@@ -1053,6 +1072,10 @@ bool Map::UnloadGrid(const uint32& x, const uint32& y, bool pForce)
             return false;
 
         DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Unloading grid[%u,%u] for map %u", x, y, i_id);
+
+        ObjectGridStoper stoper(*grid);
+        stoper.StopN();
+
         ObjectGridUnloader unloader(*grid);
 
         // Finish remove and delete all creatures with delayed remove before moving to respawn grids
@@ -2169,7 +2192,7 @@ void Map::SendObjectUpdates()
     }
 }
 
-Creature* Map::GetCreature(uint32 dbguid)
+Creature* Map::GetCreature(uint32 dbguid) const
 {
     auto itr = m_dbGuidObjects.find(std::make_pair(HIGHGUID_UNIT, dbguid));
     if (itr == m_dbGuidObjects.end())
@@ -2186,7 +2209,7 @@ Creature* Map::GetCreature(uint32 dbguid)
     return static_cast<Creature*>((*itr).second.front());
 }
 
-GameObject* Map::GetGameObject(uint32 dbguid)
+GameObject* Map::GetGameObject(uint32 dbguid) const
 {
     auto itr = m_dbGuidObjects.find(std::make_pair(HIGHGUID_GAMEOBJECT, dbguid));
     if (itr == m_dbGuidObjects.end())
@@ -2198,6 +2221,48 @@ GameObject* Map::GetGameObject(uint32 dbguid)
     return static_cast<GameObject*>((*itr).second.front());
 }
 
+std::vector<WorldObject*> const* Map::GetWorldObjects(std::string stringId) const
+{
+    return GetWorldObjects(GetMapDataContainer().GetStringId(stringId));
+}
+
+std::vector<Creature*> const* Map::GetCreatures(std::string stringId) const
+{
+    return GetCreatures(GetMapDataContainer().GetStringId(stringId));
+}
+
+std::vector<GameObject*> const* Map::GetGameObjects(std::string stringId) const
+{
+    return GetGameObjects(GetMapDataContainer().GetStringId(stringId));
+}
+
+std::vector<WorldObject*> const* Map::GetWorldObjects(uint32 stringId) const
+{
+    auto itr = m_objectsPerStringId.find(stringId);
+    if (itr == m_objectsPerStringId.end())
+        return nullptr;
+
+    return &(itr->second.worldObjects);
+}
+
+std::vector<Creature*> const* Map::GetCreatures(uint32 stringId) const
+{
+    auto itr = m_objectsPerStringId.find(stringId);
+    if (itr == m_objectsPerStringId.end())
+        return nullptr;
+
+    return &(itr->second.creatures);
+}
+
+std::vector<GameObject*> const* Map::GetGameObjects(uint32 stringId) const
+{
+    auto itr = m_objectsPerStringId.find(stringId);
+    if (itr == m_objectsPerStringId.end())
+        return nullptr;
+
+    return &(itr->second.gameobjects);
+}
+
 void Map::AddDbGuidObject(WorldObject* obj)
 {
     m_dbGuidObjects[std::make_pair(HighGuid(obj->GetParentHigh()), obj->GetDbGuid())].push_back(obj);
@@ -2207,6 +2272,26 @@ void Map::RemoveDbGuidObject(WorldObject* obj)
 {
     auto& vec = m_dbGuidObjects[std::make_pair(HighGuid(obj->GetParentHigh()), obj->GetDbGuid())];
     vec.erase(std::remove(vec.begin(), vec.end(), obj), vec.end());
+}
+
+void Map::AddStringIdObject(uint32 stringId, WorldObject* obj)
+{
+    auto& data = m_objectsPerStringId[stringId];
+    data.worldObjects.push_back(obj);
+    if (obj->IsCreature())
+        data.creatures.push_back(static_cast<Creature*>(obj));
+    else if (obj->IsGameObject())
+        data.gameobjects.push_back(static_cast<GameObject*>(obj));
+}
+
+void Map::RemoveStringIdObject(uint32 stringId, WorldObject* obj)
+{
+    auto& data = m_objectsPerStringId[stringId];
+    data.worldObjects.erase(std::remove(data.worldObjects.begin(), data.worldObjects.end(), obj), data.worldObjects.end());
+    if (obj->IsCreature())
+        data.creatures.erase(std::remove(data.creatures.begin(), data.creatures.end(), static_cast<Creature*>(obj)), data.creatures.end());
+    else if (obj->IsGameObject())
+        data.gameobjects.erase(std::remove(data.gameobjects.begin(), data.gameobjects.end(), static_cast<GameObject*>(obj)), data.gameobjects.end());
 }
 
 uint32 Map::GenerateLocalLowGuid(HighGuid guidhigh)

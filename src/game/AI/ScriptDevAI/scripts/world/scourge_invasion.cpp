@@ -354,7 +354,7 @@ struct NecropolisAI : public ScriptedAI
 
     void Reset() override {}
 
-    void SpellHit(Unit* caster, SpellEntry const* spell) override
+    void SpellHit(Unit* /*caster*/, SpellEntry const* spell) override
     {
         if (m_creature->HasAura(SPELL_COMMUNIQUE_TIMER_NECROPOLIS))
             return;
@@ -363,7 +363,7 @@ struct NecropolisAI : public ScriptedAI
             m_creature->CastSpell(m_creature, SPELL_COMMUNIQUE_TIMER_NECROPOLIS, TRIGGERED_OLD_TRIGGERED); // m_creature->AddAura(SPELL_COMMUNIQUE_TIMER_NECROPOLIS);
     }
 
-    void UpdateAI(uint32 const diff) override
+    void UpdateAI(uint32 const /*diff*/) override
     {
         if (m_creature && m_creature->IsAlive() && m_creature->GetPositionZ() < (m_creature->GetRespawnPosition().GetPositionZ() - 10))
         {
@@ -467,7 +467,7 @@ struct NecropolisHealthAI : public ScriptedAI
 
     void Reset() override {}
 
-    void SpellHit(Unit* caster, SpellEntry const* spell) override
+    void SpellHit(Unit* /*caster*/, SpellEntry const* spell) override
     {
         if (spell->Id == SPELL_COMMUNIQUE_CAMP_TO_RELAY_DEATH)
             m_creature->CastSpell(m_creature, SPELL_ZAP_NECROPOLIS, TRIGGERED_OLD_TRIGGERED);
@@ -480,7 +480,7 @@ struct NecropolisHealthAI : public ScriptedAI
         }
     }
 
-    void JustDied(Unit* killer) override
+    void JustDied(Unit* /*killer*/) override
     {
         if (Creature* necropolis = GetClosestCreatureWithEntry(m_creature, NPC_NECROPOLIS, ATTACK_DISTANCE))
             m_creature->CastSpell(necropolis, SPELL_DESPAWNER_OTHER, TRIGGERED_OLD_TRIGGERED);
@@ -550,7 +550,7 @@ struct NecropolisProxyAI : public ScriptedAI
 
     void Reset() override {}
 
-    void SpellHit(Unit* caster, SpellEntry const* spellInfo) override
+    void SpellHit(Unit* /*caster*/, SpellEntry const* spellInfo) override
     {
         switch (spellInfo->Id)
         {
@@ -567,14 +567,14 @@ struct NecropolisProxyAI : public ScriptedAI
         }
     }
 
-    void SpellHitTarget(Unit* target, SpellEntry const* spellInfo) override
+    void SpellHitTarget(Unit* /*target*/, SpellEntry const* spellInfo) override
     {
         // Make sure m_creature despawn after SPELL_COMMUNIQUE_CAMP_TO_RELAY_DEATH hits the target to avoid getting hit by Purple bolt again.
         if (spellInfo->Id == SPELL_COMMUNIQUE_CAMP_TO_RELAY_DEATH)
             m_creature->ForcedDespawn();
     }
 
-    void UpdateAI(uint32 const diff) override
+    void UpdateAI(uint32 const /*diff*/) override
     {
         if (m_creature && m_creature->IsAlive() && m_creature->GetPositionZ() < (m_creature->GetRespawnPosition().GetPositionZ() - 10))
         {
@@ -598,7 +598,7 @@ struct NecropolisRelayAI : public ScriptedAI
 
     void Reset() override {}
 
-    void SpellHit(Unit* caster, SpellEntry const* spell) override
+    void SpellHit(Unit* /*caster*/, SpellEntry const* spell) override
     {
         switch (spell->Id)
         {
@@ -615,14 +615,14 @@ struct NecropolisRelayAI : public ScriptedAI
         }
     }
 
-    void SpellHitTarget(Unit* target, SpellEntry const* spell) override
+    void SpellHitTarget(Unit* /*target*/, SpellEntry const* spell) override
     {
         // Make sure m_creature despawn after SPELL_COMMUNIQUE_CAMP_TO_RELAY_DEATH hits the target to avoid getting hit by Purple bolt again.
         if (spell->Id == SPELL_COMMUNIQUE_CAMP_TO_RELAY_DEATH)
             m_creature->ForcedDespawn();
     }
 
-    void UpdateAI(uint32 const diff) override
+    void UpdateAI(uint32 const /*diff*/) override
     {
         if (m_creature && m_creature->IsAlive() && m_creature->GetPositionZ() < (m_creature->GetRespawnPosition().GetPositionZ() - 5))
         {
@@ -790,7 +790,7 @@ struct NecroticShard : public ScriptedAI
         }
     }
 
-    void SpellHitTarget(Unit* target, SpellEntry const* spellInfo) override
+    void SpellHitTarget(Unit* /*target*/, SpellEntry const* spellInfo) override
     {
         if (m_creature->GetEntry() != NPC_DAMAGED_NECROTIC_SHARD)
             return;
@@ -807,12 +807,12 @@ struct NecroticShard : public ScriptedAI
     }
 
     // No healing possible.
-    void HealedBy(Unit* healer, uint32& uiHealedAmount) override
+    void HealedBy(Unit* /*healer*/, uint32& uiHealedAmount) override
     {
         uiHealedAmount = 0;
     }
 
-    void JustDied(Unit* killer) override
+    void JustDied(Unit* /*killer*/) override
     {
         switch (m_creature->GetEntry())
         {
@@ -1053,7 +1053,7 @@ struct ScourgeMinion : public CombatAI
         }
     }
 
-    void JustDied(Unit* pKiller) override
+    void JustDied(Unit* /*pKiller*/) override
     {
         switch (m_creature->GetEntry())
         {
@@ -1066,7 +1066,7 @@ struct ScourgeMinion : public CombatAI
         }
     }
 
-    void SpellHit(Unit* unit, SpellEntry const* spell) override
+    void SpellHit(Unit* /*unit*/, SpellEntry const* spell) override
     {
         switch (spell->Id)
         {
@@ -1195,7 +1195,7 @@ struct PallidHorrorAI : public CombatAI
         ScriptedAI::MoveInLineOfSight(pWho);
     }
 
-    void JustDied(Unit* unit) override
+    void JustDied(Unit* /*unit*/) override
     {
         if (Creature* creature = GetClosestCreatureWithEntry(m_creature, NPC_HIGHLORD_BOLVAR_FORDRAGON, VISIBILITY_DISTANCE_NORMAL))
             DoBroadcastText(BCT_STORMWIND_BOLVAR_2, creature, m_creature, CHAT_TYPE_ZONE_YELL);

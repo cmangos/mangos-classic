@@ -443,6 +443,7 @@ struct npc_cork_gizeltonAI : public npc_escortAI
     int32 FailTimer = int32(GIZELTON_TIMER_AFTER_FAIL);
     bool StatusFailed = false;
     bool ScriptDone = false;
+    bool SouthQuest = false;
 
     void Reset() override {   }
 
@@ -505,42 +506,51 @@ struct npc_cork_gizeltonAI : public npc_escortAI
         switch (pointId)
         {
             case 19:
-                if (player->GetQuestStatus(QUEST_BODYGUARD_TO_HIRE) == QUEST_STATUS_INCOMPLETE)
+                if (!SouthQuest)
                 {
-                    // Award quest credit
-                    if (player)
-                        player->RewardPlayerAndGroupAtEventExplored(QUEST_BODYGUARD_TO_HIRE, m_creature);
+                    if (player->GetQuestStatus(QUEST_BODYGUARD_TO_HIRE) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        // Award quest credit
+                        if (player)
+                            player->RewardPlayerAndGroupAtEventExplored(QUEST_BODYGUARD_TO_HIRE, m_creature);
+                    }
+                    m_creature->GetMotionMaster()->Clear(false, true);
+                    m_creature->GetMotionMaster()->MoveWaypoint(WAYPOINT_PATH_ID, PATH_FROM_WAYPOINT_PATH);
+                    m_creature->GetMotionMaster()->SetNextWaypoint(WAYPOINT_PATH_POINT_AFTER_ESCORT_1);
+                    m_creature->SetWalk(false);
+                    End(); // normal movement resumes - caravan doesnt despawn - it loops through zone                    
+                   
                 }
-                m_creature->GetMotionMaster()->Clear(false, true);
-                m_creature->GetMotionMaster()->MoveWaypoint(WAYPOINT_PATH_ID, PATH_FROM_WAYPOINT_PATH);
-                m_creature->GetMotionMaster()->SetNextWaypoint(WAYPOINT_PATH_POINT_AFTER_ESCORT_1);
-                m_creature->SetWalk(false);
-                End(); // normal movement resumes - caravan doesnt despawn - it loops through zone
                 break;
                 // The second escort quest is also handled by NPC Cork though it is given by NPC Rigger
             case 21:
-                if (player->GetQuestStatus(QUEST_GIZELTON_CARAVAN) == QUEST_STATUS_INCOMPLETE)
+                if (SouthQuest)
                 {
-                    // Award quest credit
-                    if (player)
-                        player->RewardPlayerAndGroupAtEventExplored(QUEST_GIZELTON_CARAVAN, m_creature);
+                    if (player->GetQuestStatus(QUEST_GIZELTON_CARAVAN) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        // Award quest credit
+                        if (player)
+                            player->RewardPlayerAndGroupAtEventExplored(QUEST_GIZELTON_CARAVAN, m_creature);
+                    }
+                    m_creature->GetMotionMaster()->Clear(false, true);
+                    m_creature->GetMotionMaster()->MoveWaypoint(WAYPOINT_PATH_ID, PATH_FROM_WAYPOINT_PATH);
+                    m_creature->GetMotionMaster()->SetNextWaypoint(WAYPOINT_PATH_POINT_AFTER_ESCORT_2);
+                    m_creature->SetWalk(false);
+                    End(); // normal movement resumes - caravan doesnt despawn - it loops through zone
+                    SouthQuest = false;                                    
                 }
-                m_creature->GetMotionMaster()->Clear(false, true);
-                m_creature->GetMotionMaster()->MoveWaypoint(WAYPOINT_PATH_ID, PATH_FROM_WAYPOINT_PATH);
-                m_creature->GetMotionMaster()->SetNextWaypoint(WAYPOINT_PATH_POINT_AFTER_ESCORT_2);
-                m_creature->SetWalk(false);
-                End(); // normal movement resumes - caravan doesnt despawn - it loops through zone
                 break;
         }
     }
 
     void StartRiggerEscort(Player* player)
     {
+        SouthQuest = true;
         Start(false, player, m_questForEscort, false, false, PATH_ID_RIGGER_GIZELTON);
     }
 
 
-    void CreatureGroupMemberDied(Unit* killed)
+    void CreatureGroupMemberDied(Unit* /*killed*/)
     {
         StatusFailed = true;
     }

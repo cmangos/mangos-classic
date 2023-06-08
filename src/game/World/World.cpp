@@ -973,11 +973,17 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Creature Stats...");
     sObjectMgr.LoadCreatureClassLvlStats();
 
+    sLog.outString("Loading String Ids...");
+    sScriptMgr.LoadStringIds(); // must be before LoadCreatureSpawnDataTemplates
+
     sLog.outString("Loading Creature templates...");
     sObjectMgr.LoadCreatureTemplates();
 
     sLog.outString("Loading Creature immunities...");
     sObjectMgr.LoadCreatureImmunities();
+
+    sLog.outString("Loading Combat Conditions, Unit Conditions and Worldstate Expressions...");
+    sObjectMgr.LoadConditionsAndExpressions();
 
     sLog.outString("Loading Creature spell lists...");
     sObjectMgr.LoadCreatureSpellLists();

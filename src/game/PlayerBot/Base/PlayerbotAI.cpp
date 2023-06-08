@@ -1366,8 +1366,6 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             WorldPacket p(packet); // (8+1+4+1+1+4+4+4+4+4+1)
             ObjectGuid guid;
             uint8 loot_type;
-            uint32 gold;
-            uint8 items;
 
             p >> guid;      // 8 corpse guid
             p >> loot_type; // 1 loot type
@@ -1380,59 +1378,68 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             p >> gold;      // 4 gold
             p >> items;     // 1 items count
 
-            if (gold > 0)
+            if (loot_type != 0)
             {
-                WorldPacket* const packet = new WorldPacket(CMSG_LOOT_MONEY, 0);
-                m_bot->GetSession()->QueuePacket(std::unique_ptr<WorldPacket>(packet));
-            }
+                uint32 gold;
+                uint8 items;
 
-            for (uint8 i = 0; i < items; ++i)
-            {
-                uint32 itemid;
-                uint32 itemcount;
-                uint8 lootslot_type;
-                uint8 itemindex;
+                p >> gold;      // 4 gold
+                p >> items;     // 1 items count
 
-                p >> itemindex;         // 1 counter
-                p >> itemid;            // 4 itemid
-                p >> itemcount;         // 4 item stack count
-                p.read_skip<uint32>();  // 4 item model
-                p.read_skip<uint32>();  // 4 randomSuffix
-                p.read_skip<uint32>();  // 4 randomPropertyId
-                p >> lootslot_type;     // 1 LootSlotType
-
-                ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(itemid);
-                if (!pProto)
-                    continue;
-
-                if (lootslot_type != LOOT_SLOT_NORMAL)
-                    continue;
-
-                // skinning or collect loot flag = just auto loot everything for getting object
-                // corpse = run checks
-                if (loot_type == LOOT_SKINNING || HasCollectFlag(COLLECT_FLAG_LOOT) ||
-                        (loot_type == LOOT_CORPSE && (IsInQuestItemList(itemid) || IsItemUseful(itemid))))
+                if (gold > 0)
                 {
-                    ItemPosCountVec dest;
-                    if (m_bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemid, itemcount) == EQUIP_ERR_INVENTORY_FULL)
-                    {
-                        if (m_debugWhisper)
-                            TellMaster("I can't take %; my inventory is full.", pProto->Name1);
-                        m_inventory_full = true;
-                        continue;
-                    }
-
-                    if (m_debugWhisper)
-                        TellMaster("Store loot item %s", pProto->Name1);
-
-                    WorldPacket* const packet = new WorldPacket(CMSG_AUTOSTORE_LOOT_ITEM, 1);
-                    *packet << itemindex;
+                    WorldPacket* const packet = new WorldPacket(CMSG_LOOT_MONEY, 0);
                     m_bot->GetSession()->QueuePacket(std::unique_ptr<WorldPacket>(packet));
                 }
-                else
+
+                for (uint8 i = 0; i < items; ++i)
                 {
-                    if (m_debugWhisper)
-                        TellMaster("Skipping loot item %s", pProto->Name1);
+                    uint32 itemid;
+                    uint32 itemcount;
+                    uint8 lootslot_type;
+                    uint8 itemindex;
+
+                    p >> itemindex;         // 1 counter
+                    p >> itemid;            // 4 itemid
+                    p >> itemcount;         // 4 item stack count
+                    p.read_skip<uint32>();  // 4 item model
+                    p.read_skip<uint32>();  // 4 randomSuffix
+                    p.read_skip<uint32>();  // 4 randomPropertyId
+                    p >> lootslot_type;     // 1 LootSlotType
+
+                    ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(itemid);
+                    if (!pProto)
+                        continue;
+
+                    if (lootslot_type != LOOT_SLOT_NORMAL)
+                        continue;
+
+                    // skinning or collect loot flag = just auto loot everything for getting object
+                    // corpse = run checks
+                    if (loot_type == LOOT_SKINNING || HasCollectFlag(COLLECT_FLAG_LOOT) ||
+                            (loot_type == LOOT_CORPSE && (IsInQuestItemList(itemid) || IsItemUseful(itemid))))
+                    {
+                        ItemPosCountVec dest;
+                        if (m_bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemid, itemcount) == EQUIP_ERR_INVENTORY_FULL)
+                        {
+                            if (m_debugWhisper)
+                                TellMaster("I can't take %; my inventory is full.", pProto->Name1);
+                            m_inventory_full = true;
+                            continue;
+                        }
+
+                        if (m_debugWhisper)
+                            TellMaster("Store loot item %s", pProto->Name1);
+
+                        WorldPacket* const packet = new WorldPacket(CMSG_AUTOSTORE_LOOT_ITEM, 1);
+                        *packet << itemindex;
+                        m_bot->GetSession()->QueuePacket(std::unique_ptr<WorldPacket>(packet));
+                    }
+                    else
+                    {
+                        if (m_debugWhisper)
+                            TellMaster("Skipping loot item %s", pProto->Name1);
+                    }
                 }
             }
 
@@ -1786,8 +1793,7 @@ Item* PlayerbotAI::FindMount(uint32 matchingRidingSkill) const
             const SpellEntry* const spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
             if (spellInfo)
             {
-                Spell* spell = new Spell(m_bot, spellInfo, false);
-                if (spell && spell->CheckCast(false) != SPELL_CAST_OK)
+                if (Spell(m_bot, spellInfo, false).CheckCast(false) != SPELL_CAST_OK)
                     continue;
             }
 
@@ -1826,8 +1832,7 @@ Item* PlayerbotAI::FindMount(uint32 matchingRidingSkill) const
                     const SpellEntry* const spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
                     if (spellInfo)
                     {
-                        Spell* spell = new Spell(m_bot, spellInfo, false);
-                        if (spell && spell->CheckCast(false) != SPELL_CAST_OK)
+                        if (Spell(m_bot, spellInfo, false).CheckCast(false) != SPELL_CAST_OK)
                             continue;
                     }
 
@@ -4197,24 +4202,20 @@ SpellCastResult PlayerbotAI::CheckBotCast(const SpellEntry* sInfo)
         return SPELL_FAILED_ERROR;
 
     // check DoLoot() spells before casting
-    Spell* tmp_spell = new Spell(m_bot, sInfo, false);
-    if (tmp_spell)
-    {
-        if (m_lootCurrent.IsCreature())
-        {
-            if (Creature* obj = m_bot->GetMap()->GetCreature(m_lootCurrent))
-                tmp_spell->m_targets.setUnitTarget(obj);
-        }
-        else if (m_lootCurrent.IsGameObject())
-        {
-            if (GameObject* obj = m_bot->GetMap()->GetGameObject(m_lootCurrent))
-                tmp_spell->m_targets.setGOTarget(obj);
-        }
+    Spell tmp_spell(m_bot, sInfo, false);
 
-        // DEBUG_LOG("CheckBotCast SpellCastResult(%u)",res);
-        return tmp_spell->CheckCast(false);
+    if (m_lootCurrent.IsCreature())
+    {
+        if (Creature* obj = m_bot->GetMap()->GetCreature(m_lootCurrent))
+            tmp_spell.m_targets.setUnitTarget(obj);
     }
-    return SPELL_FAILED_ERROR;
+    else if (m_lootCurrent.IsGameObject())
+    {
+        if (GameObject* obj = m_bot->GetMap()->GetGameObject(m_lootCurrent))
+           tmp_spell.m_targets.setGOTarget(obj);
+    }
+
+    return tmp_spell.CheckCast(false);
 }
 
 SpellCastResult PlayerbotAI::CastSpell(const char* args)
@@ -4257,8 +4258,7 @@ SpellCastResult PlayerbotAI::CastSpell(uint32 spellId)
 
     // Power check
     // We use Spell::CheckPower() instead of UnitAI::CanCastSpell() because bots are players and have more requirements than mere units
-    Spell* tmp_spell = new Spell(m_bot, pSpellInfo, false);
-    SpellCastResult res = tmp_spell->CheckPower(true);
+    SpellCastResult res = Spell(m_bot, pSpellInfo, false).CheckPower(true); //Find out if it really should be strict
     if (res != SPELL_CAST_OK)
         return res;
 
@@ -6663,15 +6663,24 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         else
         {
             // TODO: make this only in response to direct whispers (chatting in party chat can in fact be between humans)
-            std::string msg = "What is [";
-            std::string textsub;
-            if (text.length() > 10)
-                textsub = text.substr(0, 10) + "...";
-            else
-                textsub = text;
-            msg += textsub.c_str();
-            msg += "]? For a list of commands, ask for 'help'.";
-            SendWhisper(msg, fromPlayer);
+            const std::string msg = "What is '%s'? For a list of commands, ask for 'help'.";
+            const size_t msglength = (msg.length() - 2);
+            const size_t limit = (255 - msglength);
+
+            std::string echo = text;
+            if (echo.length() > limit)
+            {
+                utf8limit(echo, (limit - 3));
+                echo += "...";
+            }
+
+            const size_t length = (msglength + echo.length());
+
+            std::string reply;
+            reply.reserve(length);
+            std::snprintf(reply.data(), reply.capacity(), msg.c_str(), echo.c_str());
+
+            SendWhisper(reply, fromPlayer);
             m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
         }
     }

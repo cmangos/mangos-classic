@@ -833,6 +833,11 @@ struct SpellEntry
             return mask;
         }
 
+        uint32 GetSchoolMask() const
+        {
+            return 1 << School;
+        }
+
     private:
         // prevent creating custom entries (copy data from original in fact)
         SpellEntry(SpellEntry const&);                      // DON'T must have implementation

@@ -951,7 +951,7 @@ class WorldObject : public Object
         bool IsPositionValid() const;
         void UpdateGroundPositionZ(float x, float y, float& z) const;
         virtual void UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap = nullptr) const;
-        virtual void AdjustZForCollision(float x, float y, float& z, float halfHeight) const {}
+        virtual void AdjustZForCollision(float /*x*/, float /*y*/, float& /*z*/, float /*halfHeight*/) const {}
 
         void MovePositionToFirstCollision(Position &pos, float dist, float angle);
         void GetFirstCollisionPosition(Position&pos, float dist, float angle)
@@ -1175,6 +1175,13 @@ class WorldObject : public Object
         // Spell mod owner: static player whose spell mods apply to this unit (server-side)
         virtual Player* GetSpellModOwner() const { return nullptr; }
 
+        void AddStringId(std::string& stringId);
+        void RemoveStringId(std::string& stringId);
+        bool HasStringId(std::string& stringId) const;
+
+        bool HasStringId(uint32 stringId) const; // not to be used in sd2
+        void SetStringId(uint32 stringId, bool apply); // not to be used outside of scriptmgr
+
     protected:
         explicit WorldObject();
 
@@ -1217,6 +1224,8 @@ class WorldObject : public Object
 
         // Spell System compliance
         uint32 m_castCounter;                               // count casts chain of triggered spells for prevent infinity cast crashes
+
+        std::set<uint32> m_stringIds;
 };
 
 #endif

@@ -181,9 +181,9 @@ class TypeUnorderedMapContainer
 };
 
 /*
- * @class ContainerMapList is a mulit-type container for map elements
- * By itself its meaningless but collaborate along with TypeContainers,
- * it become the most powerfully container in the whole system.
+ * @class ContainerMapList is a multi-type container for map elements
+ * By itself it's meaningless but collaborating with TypeContainers,
+ * it becomes the most powerful container in the whole system.
  */
 template<class OBJECT>
 struct ContainerMapList

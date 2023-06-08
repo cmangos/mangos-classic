@@ -2122,6 +2122,15 @@ void SpellMgr::LoadSpellScriptTarget()
                 }
                 break;
             }
+            case SPELL_TARGET_TYPE_STRING_ID:
+            {
+                if (!sScriptMgr.ExistsStringId(itr->targetEntry))
+                {
+                    sLog.outErrorDb("Table `spell_script_target`: stringId %u does not exist.", itr->targetEntry);
+                    sSpellScriptTargetStorage.EraseEntry(itr->spellId);
+                }
+                break;
+            }
             default:
                 if (!itr->targetEntry)
                 {

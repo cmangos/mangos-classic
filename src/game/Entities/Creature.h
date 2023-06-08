@@ -25,9 +25,11 @@
 #include "Server/DBCEnums.h"
 #include "Util/Util.h"
 #include "Entities/CreatureSpellList.h"
+#include "Entities/CreatureSettings.h"
 
 #include <list>
 #include <memory>
+#include <optional>
 
 struct SpellEntry;
 
@@ -48,10 +50,10 @@ enum CreatureFlagsExtra
     CREATURE_EXTRA_FLAG_NO_PARRY               = 0x00000004,       // 4 creature can't parry
     CREATURE_EXTRA_FLAG_NO_PARRY_HASTEN        = 0x00000008,       // 8 creature can't counter-attack at parry
     CREATURE_EXTRA_FLAG_NO_BLOCK               = 0x00000010,       // 16 creature can't block
-    CREATURE_EXTRA_FLAG_NO_CRUSH               = 0x00000020,       // 32 creature can't do crush attacks
-    CREATURE_EXTRA_FLAG_NO_XP_AT_KILL          = 0x00000040,       // 64 creature kill not provide XP
+    CREATURE_EXTRA_FLAG_UNUSED                 = 0x00000020,       // 32
+    CREATURE_EXTRA_FLAG_UNUSED2                = 0x00000040,       // 64
     CREATURE_EXTRA_FLAG_INVISIBLE              = 0x00000080,       // 128 creature is always invisible for player (mostly trigger creatures)
-    CREATURE_EXTRA_FLAG_NO_WOUNDED_SLOWDOWN    = 0x00000100,       // 256 creature does not slow down on low hp in combat
+    CREATURE_EXTRA_FLAG_UNUSED3                = 0x00000100,       // 256
     CREATURE_EXTRA_FLAG_AGGRO_ZONE             = 0x00000200,       // 512 creature sets itself in combat with zone on aggro
     CREATURE_EXTRA_FLAG_GUARD                  = 0x00000400,       // 1024 creature is a guard
     CREATURE_EXTRA_FLAG_NO_CALL_ASSIST         = 0x00000800,       // 2048 creature shouldn't call for assistance on aggro
@@ -64,9 +66,9 @@ enum CreatureFlagsExtra
     CREATURE_EXTRA_FLAG_FORCE_ATTACKING_CAPABILITY = 0x00080000,   // 524288 SetForceAttackingCapability(true); for nonattackable, nontargetable creatures that should be able to attack nontheless
     CREATURE_EXTRA_FLAG_DYNGUID                = 0x00100000,       // 1048576 Temporary transition flag - spawns of this entry use dynguid system
     CREATURE_EXTRA_FLAG_COUNT_SPAWNS           = 0x00200000,       // 2097152 count creature spawns in Map*
-    CREATURE_EXTRA_FLAG_IGNORE_FEIGN_DEATH     = 0x00400000,       // 4194304 Ignores Feign Death
+    CREATURE_EXTRA_FLAG_UNUSED4                = 0x00400000,       // 4194304
     CREATURE_EXTRA_FLAG_DUAL_WIELD_FORCED      = 0x00800000,       // 8388606 creature is alwyas dual wielding (even if unarmed)
-    CREATURE_EXTRA_FLAG_NO_SKILL_GAINS         = 0x01000000,       // 16777216 Does not give weapon skill gains to attacker
+    CREATURE_EXTRA_FLAG_UNUSED5                = 0x01000000,       // 16777216
 };
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
@@ -102,6 +104,10 @@ struct CreatureInfo
     uint32  DynamicFlags;
     uint32  ExtraFlags;
     uint32  CreatureTypeFlags;                              // enum CreatureTypeFlags mask values
+    uint32  StaticFlags;
+    uint32  StaticFlags2;
+    uint32  StaticFlags3;
+    uint32  StaticFlags4;
     float   SpeedWalk;
     float   SpeedRun;
     uint32  Detection;                                      // Detection Range for Line of Sight aggro
@@ -155,9 +161,10 @@ struct CreatureInfo
     uint32  VendorTemplateId;
     uint32  GossipMenuId;
     uint32  InteractionPauseTimer;
-    VisibilityDistanceType visibilityDistanceType;
     uint32  CorpseDelay;
     uint32  SpellList;
+    uint32  StringID1;
+    uint32  StringID2;
     uint32  EquipmentTemplateId;
     uint32  Civilian;
     char const* AIName;
@@ -228,6 +235,7 @@ struct CreatureSpawnTemplate
     uint32 curMana;
     uint32 spawnFlags;
     uint32 relayId;
+    uint32 stringId;
 
     bool IsRunning() const { return (spawnFlags & SPAWN_FLAG_RUN_ON_SPAWN) != 0; }
     bool IsHovering() const { return (spawnFlags & SPAWN_FLAG_HOVER) != 0; }
@@ -238,7 +246,6 @@ struct CreatureData
 {
     uint32 id;                                              // entry in creature_template
     uint16 mapid;
-    int32 equipmentId;
     float posX;
     float posY;
     float posZ;
@@ -425,24 +432,6 @@ typedef std::list<VendorItemCount> VendorItemCounts;
 
 struct TrainerSpell
 {
-#ifdef BUILD_PLAYERBOT
-    TrainerSpell() : spell(0), spellCost(0), reqSkill(0), reqSkillValue(0), reqLevel(0), learnedSpell(0), isProvidedReqLevel(false), conditionId(0) {}
-
-    TrainerSpell(uint32 _spell, uint32 _spellCost, uint32 _reqSkill, uint32 _reqSkillValue, uint32 _reqLevel, uint32 _learnedspell, bool _isProvidedReqLevel, uint32 _conditionId)
-        : spell(_spell), spellCost(_spellCost), reqSkill(_reqSkill), reqSkillValue(_reqSkillValue), reqLevel(_reqLevel), learnedSpell(_learnedspell), isProvidedReqLevel(_isProvidedReqLevel), conditionId(_conditionId) {}
-
-    uint32 spell;
-    uint32 spellCost;
-    uint32 reqSkill;
-    uint32 reqSkillValue;
-    uint32 reqLevel;
-    uint32 learnedSpell;
-    uint32 conditionId;
-    bool isProvidedReqLevel;
-
-    // helpers
-    bool IsCastable() const { return learnedSpell != spell; }
-#else
     TrainerSpell() : spell(0), spellCost(0), reqSkill(0), reqSkillValue(0), reqLevel(0), learnedSpell(0), conditionId(0), isProvidedReqLevel(false) {}
 
     TrainerSpell(uint32 _spell, uint32 _spellCost, uint32 _reqSkill, uint32 _reqSkillValue, uint32 _reqLevel, uint32 _learnedspell, bool _isProvidedReqLevel, uint32 _conditionId)
@@ -454,12 +443,12 @@ struct TrainerSpell
     uint32 reqSkillValue;
     uint32 reqLevel;
     uint32 learnedSpell;
+    std::array<std::optional<uint32>, 3> reqAbility;
     uint32 conditionId;
     bool isProvidedReqLevel;
 
     // helpers
     bool IsCastable() const { return learnedSpell != spell; }
-#endif
 };
 
 typedef std::unordered_map < uint32 /*spellid*/, TrainerSpell > TrainerSpellMap;
@@ -827,19 +816,24 @@ class Creature : public Unit
         bool CanCheckForHelp() const override { return m_checkForHelp; }
         void SetCanCheckForHelp(bool state) { m_checkForHelp = state; }
 
-        void SetNoRewards() { m_noXP = true; m_noLoot = true; m_noReputation = true; }
-        bool IsNoXp() { return m_noXP; }
-        void SetNoXP(bool state) { m_noXP = state; }
-        bool IsNoLoot() { return m_noLoot; }
-        void SetNoLoot(bool state) { m_noLoot = state; }
+        void SetNoRewards();
+        bool IsNoXp();
+        void SetNoXP(bool state);
+        bool IsNoLoot();
+        void SetNoLoot(bool state);
         bool IsNoReputation() { return m_noReputation; }
         void SetNoReputation(bool state) { m_noReputation = state; }
-        bool IsIgnoringFeignDeath() const { return m_ignoringFeignDeath; }
-        void SetIgnoreFeignDeath(bool state) { m_ignoringFeignDeath = state; }
+        bool IsIgnoringFeignDeath() const;
+        void SetIgnoreFeignDeath(bool state);
 
-        void SetNoWoundedSlowdown(bool state) { m_noWoundedSlowdown = state; }
-        bool IsNoWoundedSlowdown() const { return m_noWoundedSlowdown; }
+        void SetNoWoundedSlowdown(bool state);
+        bool IsNoWoundedSlowdown() const;
         bool IsSlowedInCombat() const override;
+
+        void SetNoWeaponSkillGain(bool state);
+        bool IsNoWeaponSkillGain() const override;
+
+        bool IsPreventingDeath() const override;
 
         virtual void AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto = nullptr, bool permanent = false, uint32 forcedDuration = 0) override;
 
@@ -867,13 +861,13 @@ class Creature : public Unit
         void ClearCreatureGroup();
         CreatureGroup* GetCreatureGroup() const { return m_creatureGroup; }
 
+        CreatureSettings const& GetSettings() const { return m_settings; }
+        CreatureSettings& GetSettings() { return m_settings; }
+
         void StartCooldown(Unit* owner);
 
         ObjectGuid GetKillerGuid() const { return m_killer; }
         void SetKillerGuid(ObjectGuid guid) { m_killer = guid; }
-
-        void SetNoWeaponSkillGain(bool state) { m_noWeaponSkillGain = state; }
-        bool IsNoWeaponSkillGain() const override { return m_noWeaponSkillGain; }
 
     protected:
         bool CreateFromProto(uint32 dbGuid, uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
@@ -933,12 +927,9 @@ class Creature : public Unit
         bool m_isInvisible;
         bool m_ignoreMMAP;
         bool m_forceAttackingCapability;                    // can attack even if not selectable/not attackable
-        bool m_noXP;
-        bool m_noLoot;
         bool m_noReputation;
-        bool m_noWoundedSlowdown;
-        bool m_ignoringFeignDeath;
-        bool m_noWeaponSkillGain;
+
+        CreatureSettings m_settings;
 
         // Script logic
         bool m_countSpawns;

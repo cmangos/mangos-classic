@@ -67,14 +67,14 @@ jobs:
 
       - name: Archive files
         run: |
-          cd bin
+          cd ${{env.BUILD_DIR}}/bin
           7z a -tzip ${{env.ARCHIVE_FILENAME}} x64_Release
 
       - name: Archive this artefact
         uses: actions/upload-artifact@v2
         with:
           name: snapshot
-          path: "bin/${{env.ARCHIVE_FILENAME}}"
+          path: "${{env.BUILD_DIR}}/bin/${{env.ARCHIVE_FILENAME}}"
 
   notify:
     name: Discord Notification

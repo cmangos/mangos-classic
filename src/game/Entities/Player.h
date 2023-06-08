@@ -2162,6 +2162,7 @@ class Player : public Unit
 
         virtual UnitAI* AI() override { if (m_charmInfo) return m_charmInfo->GetAI(); return nullptr; }
         virtual CombatData* GetCombatData() override { if (m_charmInfo && m_charmInfo->GetCombatData()) return m_charmInfo->GetCombatData(); return m_combatData; }
+        virtual CombatData const* GetCombatData() const override { if (m_charmInfo && m_charmInfo->GetCombatData()) return m_charmInfo->GetCombatData(); return m_combatData; }
         void ForceHealAndPowerUpdateInZone();
 
         void SendMessageToPlayer(std::string const& message) const; // debugging purposes

@@ -33,6 +33,9 @@ struct SpawnGroupEntryContainer;
 struct CreatureEventAI_Event;
 struct CreatureEventAI_EventComputedData;
 struct ScriptInfo;
+struct UnitConditionEntry;
+struct WorldStateExpressionEntry;
+struct CombatConditionEntry;
 
 // Event_Map
 typedef std::vector<CreatureEventAI_Event> CreatureEventAI_Event_Vec;
@@ -61,6 +64,16 @@ class MapDataContainer
 
         void SetScriptMap(ScriptMapType scriptMapType, std::shared_ptr<ScriptMapMapName> scriptMap);
         std::shared_ptr<ScriptMapMapName> GetScriptMap(ScriptMapType scriptMapType);
+
+        void SetStringIdMaps(std::shared_ptr<StringIdMap> stringIds, std::shared_ptr<StringIdMapByString> stringIdsByString);
+        uint32 GetStringId(std::string& stringId) const;
+
+        void SetUnitConditions(std::shared_ptr<std::map<int32, UnitConditionEntry>> unitConditions);
+        void SetCombatConditions(std::shared_ptr<std::map<int32, WorldStateExpressionEntry>> worldStateExpressions);
+        void SetWorldStateExpressions(std::shared_ptr<std::map<int32, CombatConditionEntry>> combatConditions);
+        std::shared_ptr<std::map<int32, UnitConditionEntry>> GetUnitConditions() const;
+        std::shared_ptr<std::map<int32, WorldStateExpressionEntry>> GetWorldStateExpressions() const;
+        std::shared_ptr<std::map<int32, CombatConditionEntry>> GetCombatConditions() const;
     private:
         std::shared_ptr<CreatureSpellListContainer> m_spellListContainer;
         std::shared_ptr<SpawnGroupEntryContainer> m_spawnGroupContainer;
@@ -70,6 +83,14 @@ class MapDataContainer
         std::shared_ptr<CreatureEventAI_EventComputedData_Map>  m_creatureEventAIComputedDataMap;
 
         std::shared_ptr<ScriptMapMapName> m_scriptMaps[SCRIPT_TYPE_MAX];
+
+        // SCRIPT_ID
+        std::shared_ptr<StringIdMap> m_stringIds;
+        std::shared_ptr<StringIdMapByString> m_stringIdsByString;
+
+        std::shared_ptr<std::map<int32, UnitConditionEntry>> m_unitConditions;
+        std::shared_ptr<std::map<int32, WorldStateExpressionEntry>> m_worldStateExpressions;
+        std::shared_ptr<std::map<int32, CombatConditionEntry>> m_combatConditions;
 };
 
 #endif

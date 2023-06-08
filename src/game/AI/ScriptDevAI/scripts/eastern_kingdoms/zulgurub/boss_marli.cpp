@@ -98,7 +98,7 @@ struct boss_marliAI : public CombatAI
             m_instance->SetData(TYPE_MARLI, DONE);
     }
 
-    void SpellHitTarget(Unit* target, const SpellEntry* spellInfo) override
+    void SpellHitTarget(Unit* /*target*/, const SpellEntry* spellInfo) override
     {
         if (spellInfo->Id == SPELL_ENVELOPING_WEBS)
             ResetCombatAction(MARLI_CHARGE, 1000);

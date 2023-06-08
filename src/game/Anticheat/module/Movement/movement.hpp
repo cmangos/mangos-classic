@@ -100,6 +100,8 @@ class Movement
 
         bool IsTeleportAllowed(MovementInfo const& movementInfo, float& distance);
 
+        bool CheckFallReset(MovementInfo const& movementInfo) const;
+
     public:
         float clientSpeeds[MAX_MOVE_TYPE];
 

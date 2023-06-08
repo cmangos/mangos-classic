@@ -753,7 +753,12 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
 
     if (at->conditionId && !sObjectMgr.IsConditionSatisfied(at->conditionId, player, player->GetMap(), nullptr, CONDITION_FROM_AREATRIGGER_TELEPORT))
     {
-        /*TODO player->GetSession()->SendAreaTriggerMessage("%s", "YOU SHALL NOT PASS!");*/
+        if (!at->status_failed_text.empty())
+        {
+            std::string message = at->status_failed_text;
+            sObjectMgr.GetAreaTriggerLocales(at->entry, GetSessionDbLocaleIndex(), &message);
+            SendAreaTriggerMessage(message.data());
+        }
         return;
     }
 

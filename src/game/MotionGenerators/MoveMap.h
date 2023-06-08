@@ -23,6 +23,8 @@
 #include <Detour/Include/DetourAlloc.h>
 #include <Detour/Include/DetourNavMesh.h>
 #include <Detour/Include/DetourNavMeshQuery.h>
+
+#include <memory>
 #include <mutex>
 
 class Unit;
@@ -84,10 +86,8 @@ namespace MMAP
     };
 
 
-    typedef std::unordered_map<uint32, MMapData*> MMapDataSet;
-
-    // singelton class
-    // holds all all access to mmap loading unloading and meshes
+    // singleton class
+    // holds all access to mmap loading unloading and meshes
     class MMapManager
     {
         public:
@@ -114,16 +114,16 @@ namespace MMAP
             bool loadMapData(uint32 mapId);
             uint32 packTileID(int32 x, int32 y) const;
 
-            MMapDataSet loadedMMaps;
+            std::unordered_map<uint32, std::unique_ptr<MMapData>> loadedMMaps;
             uint32 loadedTiles;
 
-            std::unordered_map<uint32, MMapGOData*> m_loadedModels;
+            std::unordered_map<uint32, std::unique_ptr<MMapGOData>> m_loadedModels;
             std::mutex m_modelsMutex;
     };
 
     // static class
     // holds all mmap global data
-    // access point to MMapManager singelton
+    // access point to MMapManager singleton
     class MMapFactory
     {
         public:

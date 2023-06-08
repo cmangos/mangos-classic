@@ -64,7 +64,6 @@ class instance_deadmines : public ScriptedInstance
         void SpawnFirstDeadminesPatrol();
         void SpawnSecondDeadminesPatrol();
         void SpawnThirdDeadminesPatrol();
-        bool m_firstEnter;
 
     private:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
@@ -72,6 +71,7 @@ class instance_deadmines : public ScriptedInstance
 
         uint32 m_uiIronDoorTimer;
         uint32 m_uiDoorStep;
+        bool m_firstEnter;
 };
 
 #endif

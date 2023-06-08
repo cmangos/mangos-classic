@@ -137,7 +137,8 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_SPAWN_GROUP              = 51,           // dalalong = command
     SCRIPT_COMMAND_SET_GOSSIP_MENU          = 52,           // datalong = gossip_menu_id
     SCRIPT_COMMAND_SET_WORLDSTATE           = 53,           // dataint = worldstate id, dataint2 = new value, 
-    SCRIPT_COMMAND_SET_SHEATHE              = 54,           // dataint = worldstate id, dataint2 = new value, 
+    SCRIPT_COMMAND_SET_SHEATHE              = 54,           // dataint = worldstate id, dataint2 = new value,
+    SCRIPT_COMMAND_SET_STRING_ID            = 55,           // datalong = string_id id, datalong2 = 0 unapply, 1 apply
     SCRIPT_COMMAND_MEETINGSTONE             = 200,          // datalong = area id - vanilla only
 };
 
@@ -157,8 +158,9 @@ enum ScriptInfoDataFlags
     SCRIPT_FLAG_BUDDY_BY_SPAWN_GROUP        = 0x100,        // buddy is from spawn group
     SCRIPT_FLAG_ALL_ELIGIBLE_BUDDIES        = 0x200,        // multisource/multitarget - will execute for each eligible
     SCRIPT_FLAG_BUDDY_BY_GO                 = 0x400,        // take the buddy by GO (for commands which can target both creature and GO)
+    SCRIPT_FLAG_BUDDY_BY_STRING_ID          = 0x800,        // takes buddy from string id - creature or go
 };
-#define MAX_SCRIPT_FLAG_VALID               (2 * SCRIPT_FLAG_BUDDY_BY_GO - 1)
+#define MAX_SCRIPT_FLAG_VALID               (2 * SCRIPT_FLAG_BUDDY_BY_STRING_ID - 1)
 
 struct ScriptInfo
 {
@@ -470,6 +472,12 @@ struct ScriptInfo
             uint32 sheatheState;                            // datalong
         } setSheathe;
 
+        struct                                              // SCRIPT_COMMAND_SET_STRING_ID (55)
+        {
+            uint32 stringId;                                // datalong
+            uint32 apply;                                   // datalong2
+        } stringId;
+
         struct
         {
             uint32 data[3];
@@ -651,6 +659,8 @@ class ScriptMgr
 
         void LoadScriptMap(ScriptMapType scriptType, bool reload = false);
 
+        void LoadStringIds(bool reload = false);
+
         void LoadDbScriptStrings();
         void LoadDbScriptRandomTemplates();
         void CheckRandomStringTemplates(std::set<int32>& ids);
@@ -671,6 +681,10 @@ class ScriptMgr
         static void CollectPossibleEventIds(std::set<uint32>& eventIds);
 
         std::shared_ptr<ScriptMapMapName> GetScriptMap(ScriptMapType scriptMapType);
+
+        bool ExistsStringId(uint32 stringId);
+        std::shared_ptr<StringIdMap> GetStringIdMap() { return m_stringIds; }
+        std::shared_ptr<StringIdMapByString> GetStringIdByStringMap() { return m_stringIdsByString; }
     private:
         void LoadScripts(ScriptMapType scriptType);
         void CheckScriptTexts(ScriptMapType scriptType);
@@ -689,6 +703,10 @@ class ScriptMgr
         ScriptNameMap           m_scriptNames;
 
         std::shared_ptr<ScriptMapMapName> m_scriptMaps[SCRIPT_TYPE_MAX];
+
+        // SCRIPT_ID
+        std::shared_ptr<StringIdMap> m_stringIds;
+        std::shared_ptr<StringIdMapByString> m_stringIdsByString;
 };
 
 // Starters for events

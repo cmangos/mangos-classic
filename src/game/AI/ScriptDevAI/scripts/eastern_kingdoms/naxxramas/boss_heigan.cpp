@@ -125,7 +125,7 @@ struct boss_heiganAI : public CombatAI
         }
     }
 
-    void Aggro(Unit* unit) override
+    void Aggro(Unit* /*unit*/) override
     {
         switch (urand(0, 2))
         {

@@ -19,6 +19,9 @@
 #ifndef _SCRIPTMGRDEF_H
 #define _SCRIPTMGRDEF_H
 
+#include <string>
+#include <map>
+
 enum ScriptMapType
 {
     SCRIPT_TYPE_QUEST_END           = 0,
@@ -34,5 +37,14 @@ enum ScriptMapType
     SCRIPT_TYPE_INTERNAL            = 10, // must be last
     SCRIPT_TYPE_MAX
 };
+
+struct StringId
+{
+    int32 Id;
+    std::string Name;
+};
+
+typedef std::map<int32, StringId> StringIdMap;
+typedef std::map<std::string, StringId> StringIdMapByString;
 
 #endif
