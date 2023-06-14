@@ -1375,8 +1375,6 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 				sLog.outError("Loot error, wont release");
 				return;
 			}
-            p >> gold;      // 4 gold
-            p >> items;     // 1 items count
 
             if (loot_type != 0)
             {
@@ -2236,6 +2234,15 @@ void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
     // we already have a target and we are not forced to change it
     if (m_targetCombat)
     {
+        // This is a hack. For some reason the playerbots target is dereferenced between fetching it and trying to attack it.
+        // The real solution would be to see if that could be avoided in a better way
+        if (m_targetCombat->GetDbGuid() > 1000000)
+        {
+            sLog.outString("Weird value combat target dbGuid: %i", m_targetCombat->GetDbGuid());
+            sLog.outString("setting combat target to nullptr");
+            m_targetCombat = nullptr;
+            return;
+        }
         // We have a target but it is neutralised and we are not forced to attack it: clear it for now
         if ((IsNeutralized(m_targetCombat) && !m_ignoreNeutralizeEffect))
         {
