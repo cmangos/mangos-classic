@@ -581,8 +581,16 @@ void GameObject::Update(const uint32 diff)
                 linkedTrap->Delete();
             }
 
+            bool preventDespawn = false;
             switch (GetGoType())
             {
+                case GAMEOBJECT_TYPE_TRAP:
+                    if (m_events.GetEvents().size() > 0)
+                    {
+                        preventDespawn = true;
+                        break;
+                    }
+                    break;
                 case GAMEOBJECT_TYPE_GOOBER:
                     // if gameobject should cast spell, then this, but some GOs (type = 10) should be destroyed
                     if (uint32 spellId = GetGOInfo()->goober.spellId)
@@ -630,6 +638,9 @@ void GameObject::Update(const uint32 diff)
                 default:
                     break;
             }
+
+            if (preventDespawn) // mainly serves to prevent casting traps from despawning
+                break;
 
             // Remove wild summoned after use
             if (!HasStaticDBSpawnData() && (!GetSpellId() || GetGOInfo()->GetDespawnPossibility() || GetGOInfo()->IsDespawnAtAction() || m_forcedDespawn))
