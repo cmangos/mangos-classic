@@ -124,6 +124,8 @@ struct AuraScript
     virtual void OnPeriodicTickEnd(Aura* /*aura*/) const {}
     // called on persistent area aura dyngo lifetime end
     virtual void OnPersistentAreaAuraEnd(DynamicObject* /*dynGo*/) const {}
+    // called on AreaAura target selection
+    virtual bool OnPersistentAreaAuraCheckTarget(DynamicObject* /*dynGo*/, Unit* /*target*/) const { return true; }
     // called on unit heartbeat
     virtual void OnHeartbeat(Aura* /*aura*/) const {}
     // called on affect check of aura - spellInfo can be nullptr in case of melee
