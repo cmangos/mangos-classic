@@ -293,6 +293,7 @@ INSERT INTO scripted_event_id VALUES
 
 /* BLASTED LANDS */
 UPDATE creature_template SET ScriptName='boss_kazzak' WHERE entry=12397;
+UPDATE gameobject_template SET ScriptName='go_rune_of_the_defiler' WHERE entry IN(153204);
 
 /* BURNING STEPPES */
 UPDATE creature_template SET ScriptName='npc_grark_lorkrub' WHERE entry=9520;
