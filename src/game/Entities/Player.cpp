@@ -16601,7 +16601,7 @@ void Player::PetSpellInitialize() const
 
     data.put<uint8>(spellsCountPos, addlist);
 
-    CharmCooldownInitialize(data);
+    pet->CharmCooldownInitialize(data);
 
     GetSession()->SendPacket(data);
 }
