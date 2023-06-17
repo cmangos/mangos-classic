@@ -4761,6 +4761,11 @@ bool ChatHandler::HandleQuestAddCommand(char* args)
             player->CompleteQuest(entry);
     }
 
+    if (!player->SatisfyQuestClass(pQuest, false))
+        SendSysMessage("Warning: Added quest to player who does not fulfill class requirement. Might not work correctly.");
+    if (!player->SatisfyQuestRace(pQuest, false))
+        SendSysMessage("Warning: Added quest to player who does not fulfill race requirement. Might not work correctly.");
+
     return true;
 }
 
