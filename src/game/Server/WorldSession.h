@@ -32,6 +32,8 @@
 #include "Server/WorldSocket.h"
 #include "Multithreading/Messager.h"
 
+#include <atomic>
+#include <map>
 #include <deque>
 #include <mutex>
 #include <memory>
@@ -846,7 +848,7 @@ class WorldSession
         bool m_playerRecentlyLogout;
         LocaleConstant m_sessionDbcLocale;
         int m_sessionDbLocaleIndex;
-        uint32 m_latency;
+        std::atomic<uint32> m_latency;
         AccountData m_accountData[NUM_ACCOUNT_DATA_TYPES];
         uint32 m_clientTimeDelay;
         uint32 m_Tutorials[8];
