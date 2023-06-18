@@ -147,8 +147,6 @@ class SqlStmtParameters
         // reserve memory to contain all input parameters of stmt
         explicit SqlStmtParameters(uint32 nParams);
 
-        ~SqlStmtParameters() {}
-
         // get amount of bound parameters
         uint32 boundParams() const { return m_params.size(); }
         // add parameter
@@ -162,8 +160,6 @@ class SqlStmtParameters
         const ParameterContainer& params() const { return m_params; }
 
     private:
-        SqlStmtParameters& operator=(const SqlStmtParameters& obj);
-
         // statement parameter holder
         ParameterContainer m_params;
 };
