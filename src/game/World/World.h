@@ -610,7 +610,7 @@ class World
         static uint32 GetCurrentDiff() { return m_currentDiff; }
 
         template<typename T>
-        void ExecuteForAllSessions(T executor)
+        void ExecuteForAllSessions(T executor) const
         {
             for (auto& data : m_sessions)
                 executor(*data.second);
