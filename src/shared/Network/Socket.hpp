@@ -77,8 +77,8 @@ namespace MaNGOS
             void OnError(const boost::system::error_code &error);
 
         protected:
-            const std::string m_address;
-            const std::string m_remoteEndpoint;
+            std::string m_address;
+            std::string m_remoteEndpoint;
             boost::asio::ip::address m_remoteAddress;
             uint16 m_remotePort;
 
