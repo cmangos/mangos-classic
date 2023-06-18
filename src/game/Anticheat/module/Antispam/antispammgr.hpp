@@ -10,6 +10,7 @@
 
 #include "Policies/Singleton.h"
 
+#include <atomic>
 #include <string>
 #include <vector>
 #include <mutex>
@@ -32,7 +33,7 @@ class AntispamMgr
         // here as the guarded values are seldom changed but frequently read
         mutable std::mutex _mutex;
 
-        bool _shutdownRequested;
+        std::atomic<bool> _shutdownRequested;
 
         // this collection contains a pair of strings, the original entry and the normalized version based on current settings
         std::vector<std::pair<std::string, std::string> > _blacklist;
