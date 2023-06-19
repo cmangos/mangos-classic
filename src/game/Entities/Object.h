@@ -317,6 +317,8 @@ struct Position
     bool IsEmpty() const { return x == 0.f && y == 0.f && z == 0.f; }
     float GetAngle(const float x, const float y) const;
     float GetDistance(Position const& other) const; // WARNING: Returns squared distance for performance reasons
+    float GetDistance2d(Position const& other) const; // WARNING: Returns squared distance for performance reasons
+    void RelocateOffset(Position const& offset);
     std::string to_string() const;
 };
 

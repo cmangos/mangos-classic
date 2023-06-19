@@ -135,6 +135,7 @@ class SpellCastTargets
         Position getDestination() const { return m_destPos; }
         void getDestination(WorldLocation& loc) { loc.coord_x = m_destPos.x; loc.coord_y = m_destPos.y; loc.coord_z = m_destPos.z; }
         void getSource(float& x, float& y, float& z) const { x = m_srcPos.x; y = m_srcPos.y; z = m_srcPos.z; }
+        Position getSource() const { return m_srcPos; }
 
         void setGOTarget(GameObject* target);
         ObjectGuid getGOTargetGuid() const { return m_GOTargetGUID; }
