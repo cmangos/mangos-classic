@@ -128,6 +128,8 @@ struct AuraScript
     virtual bool OnPersistentAreaAuraCheckTarget(DynamicObject* /*dynGo*/, Unit* /*target*/) const { return true; }
     // called on unit heartbeat
     virtual void OnHeartbeat(Aura* /*aura*/) const {}
+    // called on AreaAura target checking
+    virtual bool OnAreaAuraCheckTarget(Aura const* aura, Unit* target) const { return true; }
     // called on affect check of aura - spellInfo can be nullptr in case of melee
     virtual bool OnAffectCheck(Aura const* /*aura*/, SpellEntry const* /*spellInfo*/) const { return true; }
     // used to override SPELL_AURA_TRANSFORM or SPELL_AURA_MOD_SHAPESHIFT display id - more uses in future

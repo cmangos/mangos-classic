@@ -563,6 +563,8 @@ class AreaAura : public Aura
     public:
         AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = nullptr, Item* castItem = nullptr, uint32 originalRankSpellId = 0);
         virtual ~AreaAura();
+
+        bool OnAreaAuraCheckTarget(Unit* target) const;
     protected:
         void Update(uint32 diff) override;
     private:

@@ -330,6 +330,13 @@ AreaAura::~AreaAura()
 {
 }
 
+bool AreaAura::OnAreaAuraCheckTarget(Unit* target) const
+{
+    if (AuraScript* script = GetAuraScript())
+        return script->OnAreaAuraCheckTarget(this, target);
+    return true;
+}
+
 PersistentAreaAura::PersistentAreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target,
                                        Unit* caster, Item* castItem) : Aura(spellproto, eff, currentDamage, currentBasePoints, holder, target, caster, castItem)
 {
@@ -478,6 +485,9 @@ void AreaAura::Update(uint32 diff)
 
             for (auto& target : targets)
             {
+                if (!OnAreaAuraCheckTarget(target))
+                    continue;
+
                 // flag for selection is need apply aura to current iteration target
                 bool apply = true;
 
