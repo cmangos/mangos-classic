@@ -48,7 +48,7 @@ enum
     
     RELAY_SCRIPT_FINISHED           = 8284,
 
-    PATH_ID                         = 8284,        // Sniffed Waypoints for Escort Event
+    PATH_ID                         = 0,        // Sniffed Waypoints for Escort Event
     QUEST_ID_SUNTARA_STONES         = 3367,
 };
 
