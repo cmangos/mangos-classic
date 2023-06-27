@@ -2072,8 +2072,8 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map)
                 creature->SetPower(POWER_MANA, templateData->curMana);
             if (templateData->modelId > 0)
                 creature->SetDisplayId(templateData->modelId);
-            if (templateData->equipmentId)
-                creature->LoadEquipment(templateData->equipmentId == -1 ? 0 : templateData->equipmentId, true);
+            if (templateData->equipmentId != -1)
+                creature->LoadEquipment(templateData->equipmentId, true);
             if (templateData->curHealth > 1)
                 creature->SetHealth(templateData->curHealth);
             if (templateData->curMana > 0)
