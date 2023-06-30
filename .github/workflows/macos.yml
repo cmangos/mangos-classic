@@ -76,7 +76,7 @@ jobs:
     if: failure()
 
     steps:
-      - name: Setup Environment Variables
+      - name: Setup Environmental Variables
         run: |
           echo "GIT_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
           echo "GIT_SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
