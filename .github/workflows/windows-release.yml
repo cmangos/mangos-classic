@@ -1,4 +1,4 @@
-name: Windows release build
+name: Windows Release Build
 
 #
 on:
@@ -52,7 +52,7 @@ jobs:
           cmake -E make_directory ${{ env.BUILD_DIR }}
 
       # install dependencies
-      - name: Install boost
+      - name: Install Boost
         uses: MarkusJx/install-boost@v2.4.1
         id: install-boost
         with:
@@ -81,7 +81,8 @@ jobs:
         run: |
           cd ${{env.BUILD_DIR}}/bin
           7z a -tzip ${{env.ARCHIVE_FILENAME}} "x64_${{env.BUILD_TYPE}}"
-      - name: Archive this artefact
+
+      - name: Archive The Artefact
         uses: actions/upload-artifact@v3
         with:
           name: snapshot-${{matrix.TYPE}}
@@ -94,37 +95,37 @@ jobs:
     needs: build
 
     steps:
-      - name: Download artifact snapshot-default
+      - name: Download Artifact snapshot-default
         uses: actions/download-artifact@v3
         with:
           name: snapshot-default
           path: all_snapshots
-      - name: Download artifact snapshot-with-all
+      - name: Download Artifact snapshot-with-all
         uses: actions/download-artifact@v3
         with:
           name: snapshot-with-all
           path: all_snapshots
-      - name: Download artifact snapshot-with-playerbot-ahbot
+      - name: Download Artifact snapshot-with-playerbot-ahbot
         uses: actions/download-artifact@v3
         with:
           name: snapshot-with-playerbot-ahbot
           path: all_snapshots
-      - name: Download artifact snapshot-with-playerbot
+      - name: Download Artifact snapshot-with-playerbot
         uses: actions/download-artifact@v3
         with:
           name: snapshot-with-playerbot
           path: all_snapshots
-      - name: Download artifact snapshot-with-ahbot
+      - name: Download Artifact snapshot-with-ahbot
         uses: actions/download-artifact@v3
         with:
           name: snapshot-with-ahbot
           path: all_snapshots
 
-      - name: Get current date
+      - name: Get Current Date
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
 
-      - name: Upload snapshot
+      - name: Upload Snapshot
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
@@ -134,7 +135,7 @@ jobs:
           files: all_snapshots
 
   notify-success:
-    name: Discord release successfully notification
+    name: Send Notification to Discord on Success
     runs-on: ubuntu-20.04
     permissions:
       contents: none
@@ -142,14 +143,14 @@ jobs:
       - upload
 
     steps:
-      - name: Set environmental variables
+      - name: Set Environmental Variables
         run: |
           echo "GIT_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
           shortSHA=`echo ${GITHUB_SHA} | cut -c1-8`
           echo "GIT_SHORT_SHA=${shortSHA}" >> $GITHUB_ENV
           projectNames="${GITHUB_REPOSITORY#*/}"
-          expension="${projectNames#*-}"
-          echo "EXPENSION_NAME=${expension}" >> $GITHUB_ENV
+          expansion="${projectNames#*-}"
+          echo "EXPANSION_NAME=${expansion}" >> $GITHUB_ENV
           echo "DEFAULT_ARCH_NAME=${projectNames}-default-${shortSHA}.zip" >> $GITHUB_ENV
           echo "ALL_ARCH_NAME=${projectNames}-with-all-${shortSHA}.zip" >> $GITHUB_ENV
           echo "AB_ARCH_NAME=${projectNames}-with-ahbot-${shortSHA}.zip" >> $GITHUB_ENV
@@ -160,23 +161,24 @@ jobs:
         uses: rjstone/discord-webhook-notify@v1.0.4
         with:
           severity: info
-          username: ${{env.EXPENSION_NAME}}-core
           description: |
-            **${{env.EXPENSION_NAME}} prebuilt have just been released**
+            **New ${{env.EXPANSION_NAME}} Prebuild Released!**
           details: |
             **Branch:** ${{env.GIT_BRANCH}}
-            __**Winodws prebuild Binaries**__
-            - [Default download](${{github.server_url}}/${{ github.repository }}/releases/download/latest/${{env.DEFAULT_ARCH_NAME}})
-            - [All options on](${{github.server_url}}/${{ github.repository }}/releases/download/latest/${{env.ALL_ARCH_NAME}})
-            - [AhBot enabled](${{github.server_url}}/${{ github.repository }}/releases/download/latest/${{env.AB_ARCH_NAME}})
-            - [PlayerBot enabled](${{github.server_url}}/${{ github.repository }}/releases/download/latest/${{env.PB_ARCH_NAME}})
-            - [AhBot and PlayerBot enabled](${{github.server_url}}/${{ github.repository }}/releases/download/latest/${{env.PB_AB_ARCH_NAME}})
-          footer: By CMaNGOS team!
+            __**Windows Prebuilt Binaries**__
+            
+            - [Default Download](${{github.server_url}}/${{ github.repository }}/releases/download/latest/${{env.DEFAULT_ARCH_NAME}})
+            - [All Options Enabled](${{github.server_url}}/${{ github.repository }}/releases/download/latest/${{env.ALL_ARCH_NAME}})
+            - [AHBot Enabled](${{github.server_url}}/${{ github.repository }}/releases/download/latest/${{env.AB_ARCH_NAME}})
+            - [PlayerBot Enabled](${{github.server_url}}/${{ github.repository }}/releases/download/latest/${{env.PB_ARCH_NAME}})
+            - [AHBot & PlayerBot Enabled](${{github.server_url}}/${{ github.repository }}/releases/download/latest/${{env.PB_AB_ARCH_NAME}})
+            
+            If you find any bugs or issues please report them [here](https://github.com/cmangos/issues/issues/new/choose).
+          footer: Created by the CMaNGOS Team!
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK_RELEASE }}
-          avatarUrl: https://github.githubassets.com/images/modules/logos_page/Octocat.png
 
   notify:
-    name: Discord Notification
+    name: Send Notification to Discord on Failure
     runs-on: ubuntu-20.04
     permissions:
       contents: none
@@ -194,15 +196,13 @@ jobs:
         uses: rjstone/discord-webhook-notify@v1.0.4
         with:
           severity: error
-          username: ${{env.EXPENSION_NAME}}-core
           description: |
-            **Windows buid failed**
+            **Windows Build Failed**
           details: |
             - **Branch:** ${{env.GIT_BRANCH}}
             - **Pusher:** ${{github.event.pusher.name}}
             - **Author:** ${{github.event.head_commit.author.name}}
             - **Commit:** [${{github.repository}}/${{env.GIT_SHORT_SHA}}](${{github.server_url}}/${{ github.repository }}/commit/${{github.sha}})
-            - **Build log:** [actions/runs/${{github.run_id}}](${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}})
-          footer: CMaNGOS police called!
+            - **Build Log:** [actions/runs/${{github.run_id}}](${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}})
+          footer: CMaNGOS Developers Notified!
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
-          avatarUrl: https://github.githubassets.com/images/modules/logos_page/Octocat.png

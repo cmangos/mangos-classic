@@ -1,4 +1,4 @@
-name: MacOs build
+name: macOS Build
 
 on: [push]
 
@@ -25,13 +25,13 @@ jobs:
         with:
           path: ${{env.REPO_DIR}}
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
           brew install mysql-client
           brew install openssl
           echo "OPENSSL_ROOT_DIR=$(brew --prefix --installed openssl)" >> $GITHUB_ENV
 
-      - name: Install boost
+      - name: Install Boost
         uses: MarkusJx/install-boost@v2.4.1
         id: install-boost
         with:
@@ -59,14 +59,14 @@ jobs:
   notify:
     permissions:
       contents: none
-    name: Discord Notification
+    name: Send Notification to Discord on Failure
     runs-on: ubuntu-20.04
     needs: # make sure the notification is sent AFTER the jobs you want included have completed
       - build
     if: failure()
 
     steps:
-      - name: Env
+      - name: Setup Environmental Variables
         run: |
           echo "GIT_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
           echo "GIT_SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
@@ -75,15 +75,13 @@ jobs:
         uses: rjstone/discord-webhook-notify@v1.0.4
         with:
           severity: error
-          username: ${{env.EXPENSION_NAME}}-core
           description: |
-            **MacOS buid failed**
+            **macOS Build Failed**
           details: |
             - **Branch:** ${{env.GIT_BRANCH}}
             - **Pusher:** ${{github.event.pusher.name}}
             - **Author:** ${{github.event.head_commit.author.name}}
             - **Commit:** [${{github.repository}}/${{env.GIT_SHORT_SHA}}](${{github.server_url}}/${{ github.repository }}/commit/${{github.sha}})
-            - **Build log:** [actions/runs/${{github.run_id}}](${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}})
-          footer: Next time ${{github.event.pusher.name}}!
+            - **Build Log:** [actions/runs/${{github.run_id}}](${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}})
+          footer: CMaNGOS Developers Notified!
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
-          avatarUrl: https://github.githubassets.com/images/modules/logos_page/Octocat.png
