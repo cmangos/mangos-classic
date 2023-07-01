@@ -9532,9 +9532,9 @@ void CharmInfo::ProcessUnattackableTargets(CombatData* combatData)
     else // hostile refs case
     {
         Unit::AttackerSet friendlyTargets;
-        for (auto itr = combatData->hostileRefManager.begin(); itr != combatData->hostileRefManager.end(); ++itr)
+        for (auto& ref : combatData->hostileRefManager)
         {
-            Unit* attacker = (*itr).getSource()->getOwner();
+            Unit* attacker = ref.getSource()->getOwner();
             if (attacker->GetTypeId() != TYPEID_UNIT)
                 continue;
 
