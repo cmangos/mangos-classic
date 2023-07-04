@@ -551,7 +551,7 @@ bool AuthSocket::_HandleLogonProof()
     ///- Check if SRP6 results match (password is correct), else send an error
     if (!srp.Proof(lp.M1, 20))
     {
-        if (lp.securityFlags & SECURITY_FLAG_AUTHENTICATOR || !_token.empty())
+        if (_build > 6141 && (lp.securityFlags & SECURITY_FLAG_AUTHENTICATOR || !_token.empty()))
         {
             uint8 pinCount;
             if (!Read((char*)&pinCount, sizeof(uint8)))
