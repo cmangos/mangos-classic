@@ -31,6 +31,7 @@
 #include "AuthCodes.h"
 #include "Auth/SRP6.h"
 #include "Util/CommonDefines.h"
+#include "Util/Util.h"
 
 #include <openssl/md5.h>
 #include <ctime>
@@ -473,13 +474,20 @@ bool AuthSocket::_HandleLogonChallenge()
                     if (!_token.empty() && _build >= 8606) // authenticator was added in 2.4.3
                         securityFlags = SECURITY_FLAG_AUTHENTICATOR;
 
+                    if (!_token.empty() && _build <= 6141)
+                        securityFlags = SECURITY_FLAG_PIN;
+
                     pkt << uint8(securityFlags);                    // security flags (0x0...0x04)
 
                     if (securityFlags & SECURITY_FLAG_PIN)          // PIN input
                     {
-                        pkt << uint32(0);
-                        pkt << uint64(0);
-                        pkt << uint64(0);
+                        uint32 gridSeedPkt = m_gridSeed = static_cast<uint32>(0/*urand()*/);
+                        EndianConvert(gridSeedPkt);
+                        m_serverSecuritySalt.SetRand(16 * 8); // 16 bytes random
+                        m_promptPin = true;
+
+                        pkt << gridSeedPkt;
+                        pkt.append(m_serverSecuritySalt.AsByteArray(16).data(), 16);
                     }
 
                     if (securityFlags & SECURITY_FLAG_UNK)          // Matrix input
@@ -520,6 +528,14 @@ bool AuthSocket::_HandleLogonProof()
     if (!Read((char*)&lp, sizeof(sAuthLogonProof_C)))
         return false;
 
+
+    PINData pinData;
+
+    if (lp.securityFlags == SECURITY_FLAG_PIN)
+    {
+        if (!Read((char*)&pinData, sizeof(pinData)))
+            return false;
+    }
     ///- Session is closed unless overriden
     _status = STATUS_CLOSED;
 
@@ -548,8 +564,21 @@ bool AuthSocket::_HandleLogonProof()
     srp.HashSessionKey();
     srp.CalculateProof(_login);
 
+    bool pinResult = true;
+
+    if (m_promptPin && lp.securityFlags == SECURITY_FLAG_PIN)
+        pinResult = false;
+
+    if (m_promptPin && lp.securityFlags == SECURITY_FLAG_PIN)
+    {
+        auto pin = generateToken(_token.c_str());
+
+        if (pin != uint32(-1))
+            pinResult = VerifyPinData(pin, pinData);
+    }
+
     ///- Check if SRP6 results match (password is correct), else send an error
-    if (!srp.Proof(lp.M1, 20))
+    if (!srp.Proof(lp.M1, 20) && pinResult)
     {
         if (_build > 6141 && (lp.securityFlags & SECURITY_FLAG_AUTHENTICATOR || !_token.empty()))
         {
@@ -1010,6 +1039,78 @@ bool AuthSocket::_HandleXferAccept()
     ReadSkip(1);
 
     return true;
+}
+
+// Verify PIN entry data
+bool AuthSocket::VerifyPinData(uint32 pin, const PINData& clientData)
+{
+    // remap the grid to match the client's layout
+    std::vector<uint8> grid { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    std::vector<uint8> remappedGrid(grid.size());
+
+    uint8* remappedIndex = remappedGrid.data();
+    uint32 seed = m_gridSeed;
+
+    for (size_t i = grid.size(); i > 0; --i)
+    {
+        auto remainder = seed % i;
+        seed /= i;
+        *remappedIndex = grid[remainder];
+
+        size_t copySize = i;
+        copySize -= remainder;
+        --copySize;
+
+        uint8* srcPtr = grid.data() + remainder + 1;
+        uint8* dstPtr = grid.data() + remainder;
+
+        std::copy(srcPtr, srcPtr + copySize, dstPtr);
+        ++remappedIndex;
+    }
+
+    // convert the PIN to bytes (for ex. '1234' to {1, 2, 3, 4})
+    std::vector<uint8> pinBytes;
+
+    while (pin != 0)
+    {
+        pinBytes.push_back(pin % 10);
+        pin /= 10;
+    }
+
+    std::reverse(pinBytes.begin(), pinBytes.end());
+
+    // validate PIN length
+    if (pinBytes.size() < 4 || pinBytes.size() > 10)
+        return false; // PIN outside of expected range
+
+    // remap the PIN to calculate the expected client input sequence
+    for (size_t i = 0; i < pinBytes.size(); ++i)
+    {
+        auto index = std::find(remappedGrid.begin(), remappedGrid.end(), pinBytes[i]);
+        pinBytes[i] = std::distance(remappedGrid.begin(), index);
+    }
+
+    // convert PIN bytes to their ASCII values
+    for (size_t i = 0; i < pinBytes.size(); ++i)
+        pinBytes[i] += 0x30;
+
+    // validate the PIN, x = H(client_salt | H(server_salt | ascii(pin_bytes)))
+    Sha1Hash sha;
+    sha.UpdateData(m_serverSecuritySalt.AsByteArray());
+    sha.UpdateData(pinBytes.data(), pinBytes.size());
+    sha.Finalize();
+
+    BigNumber hash, clientHash;
+    hash.SetBinary(sha.GetDigest(), sha.GetLength());
+    clientHash.SetBinary(clientData.hash, 20);
+
+    sha.Initialize();
+    sha.UpdateData(clientData.salt, sizeof(clientData.salt));
+    sha.UpdateData(hash.AsByteArray());
+    sha.Finalize();
+    hash.SetBinary(sha.GetDigest(), sha.GetLength());
+
+    return !memcmp(hash.AsDecStr(), clientHash.AsDecStr(), 20);
 }
 
 int32 AuthSocket::generateToken(char const* b32key)
