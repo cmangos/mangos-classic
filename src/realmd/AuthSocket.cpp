@@ -566,10 +566,10 @@ bool AuthSocket::_HandleLogonProof()
 
     bool pinResult = true;
 
-    if (m_promptPin && lp.securityFlags & SECURITY_FLAG_PIN)
+    if (m_promptPin && (lp.securityFlags & SECURITY_FLAG_PIN))
         pinResult = false;
 
-    if (m_promptPin && lp.securityFlags & SECURITY_FLAG_PIN)
+    if (m_promptPin && (lp.securityFlags & SECURITY_FLAG_PIN))
     {
         auto pin = generateToken(_token.c_str());
 
