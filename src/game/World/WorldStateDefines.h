@@ -158,7 +158,12 @@ enum WorldStateID : int32
     WORLD_STATE_SI_SILITHYST_MAX = 2317,
 
     // Custom Worldstates
-    WORLD_STATE_CUSTOM_SPAWN_ANNORA    = 20000,
+    // Vanilla
+    WORLD_STATE_CUSTOM_SPAWN_ANNORA    = 700001,
+
+    // Tbc
+
+    // Wotlk
 };
 
 #endif
