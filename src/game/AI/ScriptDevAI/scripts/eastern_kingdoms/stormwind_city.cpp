@@ -602,14 +602,12 @@ static const DialogueEntry aMasqueradeDialogue[] =
 
 struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
 {
-    npc_reginald_windsorAI(Creature* m_creature) : npc_escortAI(m_creature),
-        DialogueHelper(aMasqueradeDialogue)
+    npc_reginald_windsorAI(Creature* creature) : npc_escortAI(creature),
+        DialogueHelper(aMasqueradeDialogue), m_scriptedMap(static_cast<ScriptedMap*>(creature->GetInstanceData())), m_guardCheckTimer(0), m_isKeepReady(false)
     {
-        m_scriptedMap = (ScriptedMap*)m_creature->GetInstanceData();
         // Npc flag is controlled by script
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
         InitializeDialogueHelper(m_scriptedMap);
-        Reset();
     }
 
     ScriptedMap* m_scriptedMap;
@@ -628,8 +626,7 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
 
     void Reset() override
     {
-        m_guardCheckTimer  = 0;
-        m_isKeepReady       = false;
+    	npc_escortAI::Reset();
 
         m_hammerTimer      = urand(0, 1000);
         m_cleaveTimer      = urand(1000, 3000);
@@ -1012,11 +1009,6 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
     }
 };
 
-UnitAI* GetAI_npc_reginald_windsor(Creature* creature)
-{
-    return new npc_reginald_windsorAI(creature);
-}
-
 bool QuestAccept_npc_reginald_windsor(Player* player, Creature* creature, const Quest* quest)
 {
     if (quest->GetQuestId() == QUEST_THE_GREAT_MASQUERADE)
@@ -1127,7 +1119,7 @@ void AddSC_stormwind_city()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_reginald_windsor";
-    pNewScript->GetAI = &GetAI_npc_reginald_windsor;
+    pNewScript->GetAI = &GetNewAIInstance<npc_reginald_windsorAI>;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_reginald_windsor;
     pNewScript->pGossipHello = &GossipHello_npc_reginald_windsor;
     pNewScript->pGossipSelect = &GossipSelect_npc_reginald_windsor;
