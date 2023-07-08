@@ -607,21 +607,17 @@ static const DialogueEntry aMasqueradeDialogue[] =
 struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
 {
     npc_reginald_windsorAI(Creature* m_creature) : npc_escortAI(m_creature),
-        DialogueHelper(aMasqueradeDialogue)
+        DialogueHelper(aMasqueradeDialogue), m_guardCheckTimer(0), m_isKeepReady(false)
     {
         m_scriptedMap = (ScriptedMap*)m_creature->GetInstanceData();
         // Npc flag is controlled by script
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
         InitializeDialogueHelper(m_scriptedMap);
-        Reset();
     }
 
     ScriptedMap* m_scriptedMap;
 
     uint32 m_guardCheckTimer;
-
-    uint32 m_hammerTimer;
-    uint32 m_cleaveTimer;
 
     bool m_isKeepReady;
 
@@ -629,20 +625,6 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
     ObjectGuid m_guardsGuid[MAX_ROYAL_GUARDS];
 
     GuidList m_lRoyalGuardsGuidList;
-
-    void Reset() override
-    {
-        m_guardCheckTimer  = 0;
-        m_isKeepReady       = false;
-
-        m_hammerTimer      = urand(0, 1000);
-        m_cleaveTimer      = urand(1000, 3000);
-    }
-
-    void Aggro(Unit* /*who*/) override
-    {
-        DoCastSpellIfCan(m_creature, SPELL_SHIELD_WALL);
-    }
 
     void WaypointReached(uint32 pointId) override
     {
@@ -992,27 +974,6 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
             else
                 m_guardCheckTimer -= diff;
         }
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_hammerTimer < diff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HAMMER_OF_JUSTICE) == CAST_OK)
-                m_hammerTimer = 60000;
-        }
-        else
-            m_hammerTimer -= diff;
-
-        if (m_cleaveTimer < diff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_STRONG_CLEAVE) == CAST_OK)
-                m_cleaveTimer = urand(1000, 5000);
-        }
-        else
-            m_cleaveTimer -= diff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
