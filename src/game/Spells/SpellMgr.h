@@ -555,6 +555,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 9205:          // Hate to Zero (Hate to Zero)
         case 9460:          // Corrosive Ooze
         case 9464:          // Barbs
+        case 9617:          // Ghost Visual
         case 9769:          // Radiation
         case 9941:          // Spell Reflection
         case 10022:         // Deadly Poison
@@ -619,6 +620,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 21862:         // Radiation
         case 22128:         // Thorns
         case 22578:         // Glowy (Black)
+        case 22650:         // Ghost Visual
         case 22735:         // Spirit of Runn Tum
         case 22781:         // Thornling
         case 22788:         // Grow
@@ -631,6 +633,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 27578:         // Battle Shout
         case 27793:         // Disease Cloud
         case 27987:         // Unholy Aura
+        case 28002:         // Ghost Visual
         case 28126:         // Spirit Particles (purple)
         case 28156:         // Disease Cloud
         case 28362:         // Disease Cloud
