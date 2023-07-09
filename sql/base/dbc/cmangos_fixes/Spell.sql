@@ -273,12 +273,29 @@ UPDATE spell_template SET EffectRadiusIndex1=0 WHERE Id IN(10909);
 -- Curse of Tongues - 1.12.0 - unexported to client but present in tbc - "This spell will no longer debuff the target if they are immune to the spellcast slowing effect."
 UPDATE spell_template SET AttributesEx4=AttributesEx4|0x00000800 WHERE Id IN(1714,11719);
 
+UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|4 WHERE `Id` IN (
+3418, -- Improved Blocking
+5667, -- Bogling Passive
+5888, -- Darkshore Frenzy
+7131, -- Illusion Passive
+8203, -- Elemental Spirit Invisibility
+10092, -- Sand Storm
+10868, -- Frost Vulnerable
+11011, -- Stone Watcher of Norgannon Passive
+11048, -- Perm. Illusion Bishop Tyriona
+15978, -- Puncture
+21911, -- Puncture
+24692, -- Hakkar Power
+28330 -- Flameshocker - Immolate Visual
+);
+
 -- ============================================================
 -- SPELL_ATTR_SS_IGNORE_EVADE - IsSpellRemovedOnEvade()
 -- ============================================================
 UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00000004 WHERE `Id` IN (
 4044,  -- Target Dummy Passive
 4133,  -- Bruise
+5301,  -- Defensive State (DND)
 6742,  -- Bloodlust
 8852,  -- Moss Hide
 11816, -- Land Mine Arming
@@ -290,6 +307,7 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 18115, -- Viewing Room Student Transform
 18163, -- Strength of Arko'narin
 18167, -- Holy Fire
+21080, -- Putrid Breath
 23378, -- Magma Splash
 27791, -- Suicide (Suicide)
 21789, -- Hate to Half (Hate to Half)
@@ -301,5 +319,8 @@ UPDATE `spell_template` SET `InterruptFlags` = 15 WHERE `Id` in (8016,7901);
 
 -- require backstab to face back
 UPDATE spell_template SET AttributesServerside=AttributesServerside|0x00000008 WHERE Id IN(15582);
-UPDATE `spell_template` SET AttributesServerside=AttributesServerside|0x00000008 WHERE `Id` IN (7159,15582,15657,22416);
+UPDATE `spell_template` SET AttributesServerside=AttributesServerside|0x00000008 WHERE `Id` IN (53,2589,2590,2591,6595,7159,8355,8721,11279,11280,11281,15582,15657,22416,24016,25300,26863); -- SPELL_ATTR_SS_FACING_BACK
+
+-- Infront only Spells - SPELL_FACING_FLAG_INFRONT "Must be in front of the caster."
+UPDATE `spell_template` SET `FacingCasterFlags` = 1 WHERE `Id` IN (12540,13579);
 
