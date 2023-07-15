@@ -1256,7 +1256,7 @@ void UnitAI::UpdateSpellLists()
         {
             uint32 spellId; uint32 probability; uint32 scriptId; Unit* target;
             std::tie(spellId, probability, scriptId, target) = *itr;
-            if (probability < spellRoll)
+            if (spellRoll < probability)
             {
                 CanCastResult castResult = DoCastSpellIfCan(target, spellId);
                 if (castResult == CAST_OK)
