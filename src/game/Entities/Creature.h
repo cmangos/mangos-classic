@@ -629,9 +629,17 @@ class Creature : public Unit
             return m_ai.get();
         }
 
-        virtual CombatData* GetCombatData() override
+        CombatData* GetCombatData() override
         {
-            if (m_charmInfo && m_charmInfo->GetCombatData()) return m_charmInfo->GetCombatData();
+            if (m_charmInfo && m_charmInfo->GetCombatData())
+                return m_charmInfo->GetCombatData();
+            return m_combatData;
+        }
+
+        CombatData const* GetCombatData() const override
+        {
+            if (m_charmInfo && m_charmInfo->GetCombatData())
+                return m_charmInfo->GetCombatData();
             return m_combatData;
         }
 
