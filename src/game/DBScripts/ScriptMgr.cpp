@@ -2120,10 +2120,9 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 if (uint32 randomField = urand(0, filledCount))               // Random selection resulted in one of the dataint fields
                     spellId = m_script->textId[randomField - 1];
 
-            Unit* castTarget = static_cast<Unit*>(pTarget);
             SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
-            if (spellInfo->HasAttribute(SPELL_ATTR_EX_EXCLUDE_CASTER) && castTarget == pSource)
-                castTarget = nullptr; // TODO: Add mechanism to opt not sending target
+            if (spellInfo->HasAttribute(SPELL_ATTR_EX_EXCLUDE_CASTER) && pTarget == pSource)
+                pTarget = nullptr; // TODO: Add mechanism to opt not sending target
 
             // TODO: when GO cast implemented, code below must be updated accordingly to also allow GO spell cast
             if (pSource && pSource->IsGameObject())
@@ -2131,13 +2130,27 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 if (LogIfNotUnit(pTarget))
                     break;
 
-                static_cast<Unit*>(pTarget)->CastSpell(castTarget, spellId, TRIGGERED_OLD_TRIGGERED | TRIGGERED_DO_NOT_PROC, nullptr, nullptr, pSource->GetObjectGuid());
+                static_cast<Unit*>(pTarget)->CastSpell(static_cast<Unit*>(pTarget), spellId, TRIGGERED_OLD_TRIGGERED | TRIGGERED_DO_NOT_PROC, nullptr, nullptr, pSource->GetObjectGuid());
                 break;
             }
 
             if (LogIfNotUnit(pSource))
                 break;
-            static_cast<Unit*>(pSource)->CastSpell(castTarget, spellId, m_script->castSpell.castFlags | TRIGGERED_DO_NOT_PROC);
+
+            if (pTarget && pTarget->IsGameObject())
+            {
+                SpellCastTargets spellCastTargets;
+                spellCastTargets.setGOTarget(static_cast<GameObject*>(pTarget));
+
+                if (spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
+                    spellCastTargets.setDestination(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ());
+                if (spellInfo->Targets & TARGET_FLAG_SOURCE_LOCATION)
+                    spellCastTargets.setSource(pSource->GetPositionX(), pSource->GetPositionY(), pSource->GetPositionZ());
+
+                static_cast<Unit*>(pSource)->CastSpell(spellCastTargets, spellInfo, m_script->castSpell.castFlags | TRIGGERED_DO_NOT_PROC);
+            }
+            else
+                static_cast<Unit*>(pSource)->CastSpell(static_cast<Unit*>(pTarget), spellId, m_script->castSpell.castFlags | TRIGGERED_DO_NOT_PROC);
             break;
         }
         case SCRIPT_COMMAND_PLAY_SOUND:                     // 16
