@@ -1243,11 +1243,11 @@ void UnitAI::UpdateSpellLists()
         sum += spell.Probability;
     }
 
-    if (eligibleSpells.size() > 1)
+    if (eligibleSpells.size() > 1 && sum != 0) // sum == 0 is meant to be priority based (lower position, higher priority)
         std::shuffle(eligibleSpells.begin(), eligibleSpells.end(), *GetRandomGenerator());
 
-    // will hit first eligible spell when sum is 0 because probability 0 < roll 1
-    uint32 spellRoll = sum == 0 ? 1 : urand(0, sum - 1);
+    // will hit first eligible spell when sum is 0 because roll -1 < probability 0
+    int32 spellRoll = sum == 0 ? -1 : irand(0, sum - 1);
     bool success = false;
     // loop until either one spell was cast successfully or ran out of eligible spells
     do
@@ -1256,7 +1256,7 @@ void UnitAI::UpdateSpellLists()
         {
             uint32 spellId; uint32 probability; uint32 scriptId; Unit* target;
             std::tie(spellId, probability, scriptId, target) = *itr;
-            if (spellRoll < probability)
+            if (spellRoll < int32(probability))
             {
                 CanCastResult castResult = DoCastSpellIfCan(target, spellId);
                 if (castResult == CAST_OK)
@@ -1273,9 +1273,8 @@ void UnitAI::UpdateSpellLists()
                 ++itr;
             spellRoll -= probability;
         }
-    } while (!success && !eligibleSpells.empty());
-
-
+    }
+    while (!success && !eligibleSpells.empty());
 }
 
 std::pair<bool, Unit*> UnitAI::ChooseTarget(CreatureSpellListTargeting* targetData, uint32 spellId) const
