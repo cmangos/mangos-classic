@@ -925,6 +925,13 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
             spell.Flags = fields[3].GetUInt32();
             spell.CombatCondition = fields[4].GetUInt32();
 
+            auto listItr = newContainer->spellLists.find(spell.Id);
+            if (listItr == newContainer->spellLists.end())
+            {
+                sLog.outErrorDb("LoadCreatureSpellLists: Invalid creature_spell_list %u list does not exist. Skipping.", spell.Id, spell.SpellId);
+                continue;
+            }
+
             SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spell.SpellId);
             if (!spellInfo && spell.SpellId != 2) // 2 is attack which is hardcoded in client
             {
@@ -945,6 +952,14 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
                 sLog.outErrorDb("LoadCreatureSpellLists: Invalid creature_spell_list %u target %u. Skipping.", spell.Id, targetId);
                 continue;
             }
+
+            if (spell.Flags & SPELL_LIST_FLAG_RANGED_ACTION && listItr->second.ChanceRangedAttack == 0)
+            {
+                sLog.outErrorDb("LoadCreatureSpellLists: Invalid creature_spell_list %u list does not exist. Skipping.", spell.Id, spell.SpellId);
+                continue;
+            }
+
+
             spell.Target = &(*itr).second;
 
             spell.ScriptId = fields[6].GetUInt32();
