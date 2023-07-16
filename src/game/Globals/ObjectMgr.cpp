@@ -955,10 +955,15 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
 
             if (spell.Flags & SPELL_LIST_FLAG_RANGED_ACTION && listItr->second.ChanceRangedAttack == 0)
             {
-                sLog.outErrorDb("LoadCreatureSpellLists: Invalid creature_spell_list %u list does not exist. Skipping.", spell.Id, spell.SpellId);
+                sLog.outErrorDb("LoadCreatureSpellLists: Invalid creature_spell_list %u list, spell %u has ranged spell flag but ChanceRangedAttack is 0. Skipping.", spell.Id, spell.SpellId);
                 continue;
             }
 
+            if (spell.Flags & SPELL_LIST_FLAG_SUPPORT_ACTION && listItr->second.ChanceSupportAction == 0)
+            {
+                sLog.outErrorDb("LoadCreatureSpellLists: Invalid creature_spell_list %u list, spell %u has support spell flag but ChanceSupportAction is 0. Skipping.", spell.Id, spell.SpellId);
+                continue;
+            }
 
             spell.Target = &(*itr).second;
 
