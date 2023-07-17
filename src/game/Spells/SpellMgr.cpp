@@ -2108,7 +2108,7 @@ void SpellMgr::LoadSpellScriptTarget()
 
                 if (!sObjectMgr.GetGOData(itr->targetEntry))
                 {
-                    sLog.outErrorDb("Table `spell_script_target`: gameobject entry %u does not exist.", itr->targetEntry);
+                    sLog.outErrorDb("Table `spell_script_target`: gameobject guid %u does not exist.", itr->targetEntry);
                     sSpellScriptTargetStorage.EraseEntry(itr->spellId);
                 }
                 break;
@@ -2117,7 +2117,7 @@ void SpellMgr::LoadSpellScriptTarget()
             {
                 if (!sObjectMgr.GetCreatureData(itr->targetEntry))
                 {
-                    sLog.outErrorDb("Table `spell_script_target`: creature entry %u does not exist.", itr->targetEntry);
+                    sLog.outErrorDb("Table `spell_script_target`: creature guid %u does not exist.", itr->targetEntry);
                     sSpellScriptTargetStorage.EraseEntry(itr->spellId);
                 }
                 break;
