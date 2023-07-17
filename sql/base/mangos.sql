@@ -1618,26 +1618,6 @@ CREATE TABLE `dbscript_random_templates` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='DBScript system';
 
 --
--- Table structure for table `dbscript_string_template`
---
-
-DROP TABLE IF EXISTS `dbscript_string_template`;
-CREATE TABLE `dbscript_string_template` (
-  `id` int(11) unsigned NOT NULL COMMENT 'Id of template' AUTO_INCREMENT,
-  `string_id` int(11) NOT NULL DEFAULT '0' COMMENT 'dbscript_string id',
-  PRIMARY KEY (`id`,`string_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='DBScript system';
-
---
--- Dumping data for table `dbscript_string_template`
---
-
-LOCK TABLES `dbscript_string_template` WRITE;
-/*!40000 ALTER TABLE `dbscript_string_template` DISABLE KEYS */;
-/*!40000 ALTER TABLE `dbscript_string_template` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `disenchant_loot_template`
 --
 
