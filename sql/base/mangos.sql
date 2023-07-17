@@ -836,40 +836,6 @@ LOCK TABLES `creature_ai_summons` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `creature_ai_texts`
---
-
-DROP TABLE IF EXISTS `creature_ai_texts`;
-CREATE TABLE `creature_ai_texts` (
-  `entry` mediumint(8) NOT NULL,
-  `content_default` text NOT NULL,
-  `content_loc1` text,
-  `content_loc2` text,
-  `content_loc3` text,
-  `content_loc4` text,
-  `content_loc5` text,
-  `content_loc6` text,
-  `content_loc7` text,
-  `content_loc8` text,
-  `sound` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `type` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `language` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `emote` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `broadcast_text_id` INT(11) NOT NULL DEFAULT '0',
-  `comment` text,
-  PRIMARY KEY (`entry`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Script Texts';
-
---
--- Dumping data for table `creature_ai_texts`
---
-
-LOCK TABLES `creature_ai_texts` WRITE;
-/*!40000 ALTER TABLE `creature_ai_texts` DISABLE KEYS */;
-/*!40000 ALTER TABLE `creature_ai_texts` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `creature_battleground`
 --
 
@@ -1507,40 +1473,6 @@ CREATE TABLE `custom_texts` (
 LOCK TABLES `custom_texts` WRITE;
 /*!40000 ALTER TABLE `custom_texts` DISABLE KEYS */;
 /*!40000 ALTER TABLE `custom_texts` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `dbscript_string`
---
-
-DROP TABLE IF EXISTS `dbscript_string`;
-CREATE TABLE `dbscript_string` (
-  `entry` int(11) unsigned NOT NULL DEFAULT '0',
-  `content_default` text NOT NULL,
-  `content_loc1` text,
-  `content_loc2` text,
-  `content_loc3` text,
-  `content_loc4` text,
-  `content_loc5` text,
-  `content_loc6` text,
-  `content_loc7` text,
-  `content_loc8` text,
-  `sound` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `type` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `language` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `emote` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `broadcast_text_id` INT(11) NOT NULL DEFAULT '0',
-  `comment` text,
-  PRIMARY KEY (`entry`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `dbscript_string`
---
-
-LOCK TABLES `dbscript_string` WRITE;
-/*!40000 ALTER TABLE `dbscript_string` DISABLE KEYS */;
-/*!40000 ALTER TABLE `dbscript_string` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
