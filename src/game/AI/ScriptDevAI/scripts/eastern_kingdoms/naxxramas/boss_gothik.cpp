@@ -500,9 +500,10 @@ struct GothikSideAssault : public SpellScript
                 // If for some reason one ore more creatures are not in combat when the central gates open
                 // Set them in combat with zone
                 if (!unitTarget->IsInCombat())
+                {
                     ((Creature*)unitTarget)->SetInCombatWithZone();
-
-                unitTarget->AI()->AttackClosestEnemy();
+                    unitTarget->AI()->AttackClosestEnemy();
+                }
             }
         }
     }
