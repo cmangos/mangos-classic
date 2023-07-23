@@ -2263,6 +2263,24 @@ std::vector<GameObject*> const* Map::GetGameObjects(uint32 stringId) const
     return &(itr->second.gameobjects);
 }
 
+WorldObject* Map::GetWorldObject(std::string stringId) const
+{
+    auto objects = GetWorldObjects(stringId);
+    return objects && !objects->empty() ? objects->front() : nullptr;
+}
+
+Creature* Map::GetCreature(std::string stringId) const
+{
+    auto objects = GetCreatures(stringId);
+    return objects && !objects->empty() ? objects->front() : nullptr;
+}
+
+GameObject* Map::GetGameObject(std::string stringId) const
+{
+    auto objects = GetGameObjects(stringId);
+    return objects && !objects->empty() ? objects->front() : nullptr;
+}
+
 void Map::AddDbGuidObject(WorldObject* obj)
 {
     m_dbGuidObjects[std::make_pair(HighGuid(obj->GetParentHigh()), obj->GetDbGuid())].push_back(obj);

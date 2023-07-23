@@ -264,6 +264,9 @@ class Map : public GridRefManager<NGridType>
         std::vector<WorldObject*> const* GetWorldObjects(uint32 stringId) const;
         std::vector<Creature*> const* GetCreatures(uint32 stringId) const;
         std::vector<GameObject*> const* GetGameObjects(uint32 stringId) const;
+        WorldObject* GetWorldObject(std::string stringId) const;
+        Creature* GetCreature(std::string stringId) const;
+        GameObject* GetGameObject(std::string stringId) const;
 
         void AddDbGuidObject(WorldObject* obj);
         void RemoveDbGuidObject(WorldObject* obj);
