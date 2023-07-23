@@ -501,7 +501,8 @@ struct GothikSideAssault : public SpellScript
                 // Set them in combat with zone
                 if (!unitTarget->IsInCombat())
                     ((Creature*)unitTarget)->SetInCombatWithZone();
-                    unitTarget->AI()->AttackClosestEnemy();
+
+                unitTarget->AI()->AttackClosestEnemy();
             }
         }
     }
