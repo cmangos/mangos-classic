@@ -75,7 +75,7 @@ namespace MaNGOS
     {
         m_workerThreads.reserve(workerThreads);
         for (auto i = 0; i < workerThreads; ++i)
-            m_workerThreads.push_back(std::unique_ptr<NetworkThread<SocketType>>(new NetworkThread<SocketType>));
+            m_workerThreads.push_back(std::make_unique<NetworkThread<SocketType>>());
 
         BeginAccept();
 

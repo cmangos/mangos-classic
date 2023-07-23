@@ -163,7 +163,7 @@ void metric::metric::report(std::string measurement, std::map<std::string, boost
     m_queueService.post([&, measurement, fields, tags]
     {
         std::lock_guard<std::mutex> guard(m_queueWriteLock);
-        m_measurementQueue.push_back(std::unique_ptr<Measurement>(new Measurement(measurement, tags, fields)));
+        m_measurementQueue.push_back(std::make_unique<Measurement>(measurement, tags, fields));
     });
 }
 

@@ -2988,7 +2988,7 @@ void LootMgr::CheckDropStats(ChatHandler& chat, uint32 amountOfCheck, uint32 loo
     if (amountOfCheck < 1)
         amountOfCheck = 1;
 
-    std::unique_ptr<Loot> loot = std::unique_ptr<Loot>(new Loot(LOOT_DEBUG));
+    std::unique_ptr<Loot> loot = std::make_unique<Loot>(LOOT_DEBUG);
 
     // get loot table for provided loot id
     LootTemplate const* lootTable = store->GetLootFor(lootId);

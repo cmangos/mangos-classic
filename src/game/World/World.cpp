@@ -1651,7 +1651,7 @@ namespace MaNGOS
 
                 while (char* line = lineFromMessage(pos))
                 {
-                    auto data = std::unique_ptr<WorldPacket>(new WorldPacket());
+                    auto data = std::make_unique<WorldPacket>();
                     ChatHandler::BuildChatPacket(*data, CHAT_MSG_SYSTEM, line);
                     data_list.push_back(std::move(data));
                 }
