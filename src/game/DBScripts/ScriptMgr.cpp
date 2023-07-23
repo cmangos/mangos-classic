@@ -2137,20 +2137,22 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
             if (LogIfNotUnit(pSource))
                 break;
 
-            if (pTarget && pTarget->IsGameObject())
+            SpellCastTargets spellCastTargets;
+            if (pTarget)
             {
-                SpellCastTargets spellCastTargets;
-                spellCastTargets.setGOTarget(static_cast<GameObject*>(pTarget));
+                if (pTarget->IsUnit())
+                  spellCastTargets.setUnitTarget(static_cast<Unit*>(pTarget));
+                else if (pTarget->IsGameObject())
+                    spellCastTargets.setGOTarget(static_cast<GameObject*>(pTarget));
 
                 if (spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
                     spellCastTargets.setDestination(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ());
-                if (spellInfo->Targets & TARGET_FLAG_SOURCE_LOCATION)
-                    spellCastTargets.setSource(pSource->GetPositionX(), pSource->GetPositionY(), pSource->GetPositionZ());
-
-                static_cast<Unit*>(pSource)->CastSpell(spellCastTargets, spellInfo, m_script->castSpell.castFlags | TRIGGERED_DO_NOT_PROC);
             }
-            else
-                static_cast<Unit*>(pSource)->CastSpell(static_cast<Unit*>(pTarget), spellId, m_script->castSpell.castFlags | TRIGGERED_DO_NOT_PROC);
+
+            if (spellInfo->Targets & TARGET_FLAG_SOURCE_LOCATION)
+                spellCastTargets.setSource(pSource->GetPositionX(), pSource->GetPositionY(), pSource->GetPositionZ());
+
+            static_cast<Unit*>(pSource)->CastSpell(spellCastTargets, spellInfo, m_script->castSpell.castFlags | TRIGGERED_DO_NOT_PROC);
             break;
         }
         case SCRIPT_COMMAND_PLAY_SOUND:                     // 16
