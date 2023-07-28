@@ -85,11 +85,13 @@ else()
   message(STATUS "Build git_id          : No  (default)")
 endif()
 
-if(BUILD_DOCS)
-  message(STATUS "Build documentation   : Yes")
+if(CMAKE_INTERPROCEDURAL_OPTIMIZATION)
+  message(STATUS "Link-time optimizations : Yes")
 else()
-  message(STATUS "Build documentation   : No  (default)")
+  message(STATUS "Link-time optimizations : No  (default)")
 endif()
+
+message(STATUS "Target directory for dev binaries(DEV_BINARY_DIR) = ${DEV_BINARY_DIR}")
 
 # if(SQL)
 #   message(STATUS "Install SQL-files     : Yes")

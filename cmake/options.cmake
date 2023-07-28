@@ -13,6 +13,7 @@ option(BUILD_RECASTDEMOMOD  "Build map/vmap/mmap viewer"            OFF)
 option(BUILD_GIT_ID         "Build git_id"                          OFF)
 option(BUILD_DOCS           "Build documentation with doxygen"      OFF)
 option(CMAKE_INTERPROCEDURAL_OPTIMIZATION "Enable link-time optimizations" OFF)
+set(DEV_BINARY_DIR ${CMAKE_BINARY_DIR} CACHE STRING "Executable directory on Windows")
 
 # TODO: options that should be checked/created:
 #option(CLI                  "With CLI"                              ON)
@@ -39,6 +40,10 @@ message(STATUS
     BUILD_RECASTDEMOMOD     Build map/vmap/mmap viewer
     BUILD_GIT_ID            Build git_id
     BUILD_DOCS              Build documentation with doxygen
+    CMAKE_INTERPROCEDURAL_OPTIMIZATION Enable link-time optimizations
+
+    DEV_BINARY_DIR          Target directory for executables on Windows only
+
 
   To set an option simply type -D<OPTION>=<VALUE> after 'cmake <srcs>'.
   Also, you can specify the generator with -G. see 'cmake --help' for more details
