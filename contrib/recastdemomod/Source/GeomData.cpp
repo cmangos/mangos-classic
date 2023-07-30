@@ -615,7 +615,10 @@ bool GeomData::RaycastMesh(float* src, float* dst, float& tmin) const
     if (m_MeshObjectsMap.empty())
         return false;
 
-    bool hit = false;
+    bool mapHit = false;
+    bool vmapHit = false;
+    float mapDist = FLT_MAX;
+    float vmapDist = FLT_MAX;
     MeshObjectsMap::const_iterator itr = m_MeshObjectsMap.begin();
     while (itr != m_MeshObjectsMap.end())
     {
@@ -624,16 +627,32 @@ bool GeomData::RaycastMesh(float* src, float* dst, float& tmin) const
         MeshInfos const* vmmi = mo->GetVMap();
 
         if (mmi && mmi->GetSolidMesh())
-            hit = RaycastMesh(mmi->GetSolidMesh(), src, dst, tmin);
+            vmapHit = RaycastMesh(mmi->GetSolidMesh(), src, dst, vmapDist);
 
-        if (!hit && vmmi && vmmi->GetSolidMesh())
-                    hit = RaycastMesh(vmmi->GetSolidMesh(), src, dst, tmin);
+        if (vmmi && vmmi->GetSolidMesh())
+                    mapHit = RaycastMesh(vmmi->GetSolidMesh(), src, dst, mapDist);
 
-        if (hit)
-                break;
+        if (mapHit || vmapHit)
+        {
+            if (mapHit && vmapHit)
+            {
+                if (mapDist < vmapDist)
+                    tmin = mapDist;
+                else
+                    tmin = vmapDist;
+            }
+            else if (mapHit)
+            {
+                tmin = mapDist;
+            }
+            else
+                tmin = vmapDist;
+
+            break;
+        }
 
         ++itr;
     }
 
-    return hit;
+    return mapHit || vmapHit;
 }
