@@ -16,7 +16,6 @@
 // 3. This notice may not be removed or altered from any source distribution.
 //
 
-#define _USE_MATH_DEFINES
 #include <math.h>
 #include <stdio.h>
 #include "Sample.h"
@@ -34,6 +33,16 @@
 #ifdef WIN32
 #	define snprintf _snprintf
 #endif
+
+SampleTool::~SampleTool()
+{
+	// Defined out of line to fix the weak v-tables warning
+}
+
+SampleToolState::~SampleToolState()
+{
+	// Defined out of line to fix the weak v-tables warning
+}
 
 unsigned int SampleDebugDraw::areaToCol(unsigned int area)
 {

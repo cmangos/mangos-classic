@@ -6,7 +6,7 @@
 local action = _ACTION or ""
 local todir = "Build/" .. action
 
-solution "recastnavigation"
+workspace "recastnavigation"
 	configurations { 
 		"Debug",
 		"Release"
@@ -15,27 +15,28 @@ solution "recastnavigation"
 	location (todir)
 
 	floatingpoint "Fast"
-	symbols "On"
 	exceptionhandling "Off"
 	rtti "Off"
+	symbols "On"
 	flags { "FatalCompileWarnings" }
+	cppdialect "C++98"
 
 	-- debug configs
-	configuration "Debug*"
+	filter "configurations:Debug"
 		defines { "DEBUG" }
 		targetdir ( todir .. "/lib/Debug" )
  
  	-- release configs
-	configuration "Release*"
+	filter "configurations:Release"
 		defines { "NDEBUG" }
 		optimize "On"
 		targetdir ( todir .. "/lib/Release" )
 
-	configuration "not windows"
+	filter "system:not windows"
 		warnings "Extra"
 
 	-- windows specific
-	configuration "windows"
+	filter "system:windows"
 		platforms { "Win32", "Win64" }
 		defines { "WIN32", "_WINDOWS", "_CRT_SECURE_NO_WARNINGS", "_HAS_EXCEPTIONS=0" }
 		-- warnings "Extra" uses /W4 which is too aggressive for us, so use W3 instead.
@@ -58,7 +59,7 @@ project "DebugUtils"
 		"../DetourTileCache/Include",
 		"../Recast/Include"
 	}
-	files { 
+	files {
 		"../DebugUtils/Include/*.h",
 		"../DebugUtils/Source/*.cpp"
 	}
@@ -73,6 +74,12 @@ project "Detour"
 		"../Detour/Include/*.h", 
 		"../Detour/Source/*.cpp" 
 	}
+	-- linux library cflags and libs
+	filter {"system:linux", "toolset:gcc"}
+		buildoptions {
+			"-Wno-error=class-memaccess",
+			"-Wno-error=maybe-uninitialized"
+		}
 
 project "DetourCrowd"
 	language "C++"
@@ -124,7 +131,7 @@ project "RecastDemo"
 		"../DetourTileCache/Include",
 		"../Recast/Include"
 	}
-	files	{ 
+	files {
 		"../RecastDemo/Include/*.h",
 		"../RecastDemo/Source/*.cpp",
 		"../RecastDemo/Contrib/fastlz/*.h",
@@ -132,7 +139,7 @@ project "RecastDemo"
 	}
 
 	-- project dependencies
-	links { 
+	links {
 		"DebugUtils",
 		"Detour",
 		"DetourCrowd",
@@ -144,11 +151,12 @@ project "RecastDemo"
 	targetdir "Bin"
 
 	-- linux library cflags and libs
-	configuration { "linux", "gmake" }
+	filter "system:linux"
 		buildoptions { 
 			"`pkg-config --cflags sdl2`",
 			"`pkg-config --cflags gl`",
-			"`pkg-config --cflags glu`" 
+			"`pkg-config --cflags glu`",
+			"-Wno-ignored-qualifiers",
 		}
 		linkoptions { 
 			"`pkg-config --libs sdl2`",
@@ -156,8 +164,13 @@ project "RecastDemo"
 			"`pkg-config --libs glu`" 
 		}
 
+	filter { "system:linux", "toolset:gcc", "files:*.c" }
+		buildoptions {
+			"-Wno-class-memaccess"
+		}
+
 	-- windows library cflags and libs
-	configuration { "windows" }
+	filter "system:windows"
 		includedirs { "../RecastDemo/Contrib/SDL/include" }
 		libdirs { "../RecastDemo/Contrib/SDL/lib/%{cfg.architecture:gsub('x86_64', 'x64')}" }
 		debugdir "../RecastDemo/Bin/"
@@ -173,9 +186,9 @@ project "RecastDemo"
 		}
 
 	-- mac includes and libs
-	configuration { "macosx" }
+	filter "system:macosx"
 		kind "ConsoleApp" -- xcode4 failes to run the project if using WindowedApp
-		includedirs { "/Library/Frameworks/SDL2.framework/Headers" }
+		includedirs { "Bin/SDL2.framework/Headers" }
 		links { 
 			"OpenGL.framework", 
 			"SDL2.framework",
@@ -185,6 +198,7 @@ project "RecastDemo"
 project "Tests"
 	language "C++"
 	kind "ConsoleApp"
+	cppdialect "C++14" -- Catch requires newer C++ features
 
 	-- Catch requires RTTI and exceptions
 	exceptionhandling "On"
@@ -199,8 +213,9 @@ project "Tests"
 		"../Recast/Source",
 		"../Tests/Recast",
 		"../Tests",
+		"../Tests/Contrib"
 	}
-	files	{ 
+	files { 
 		"../Tests/*.h",
 		"../Tests/*.hpp",
 		"../Tests/*.cpp",
@@ -208,6 +223,7 @@ project "Tests"
 		"../Tests/Recast/*.cpp",
 		"../Tests/Detour/*.h",
 		"../Tests/Detour/*.cpp",
+		"../Tests/Contrib/catch2/*.cpp"
 	}
 
 	-- project dependencies
@@ -222,9 +238,14 @@ project "Tests"
 	-- distribute executable in RecastDemo/Bin directory
 	targetdir "Bin"
 
+	-- enable ubsan and asan when compiling with clang
+	filter "toolset:clang"
+			buildoptions { "-fsanitize=undefined", "-fsanitize=address" } -- , "-fsanitize=memory" }
+			linkoptions { "-fsanitize=undefined", "-fsanitize=address" } --, "-fsanitize=memory" }
+
 	-- linux library cflags and libs
-	configuration { "linux", "gmake" }
-		buildoptions { 
+	filter "system:linux"
+		buildoptions {
 			"`pkg-config --cflags sdl2`",
 			"`pkg-config --cflags gl`",
 			"`pkg-config --cflags glu`",
@@ -233,11 +254,12 @@ project "Tests"
 		linkoptions { 
 			"`pkg-config --libs sdl2`",
 			"`pkg-config --libs gl`",
-			"`pkg-config --libs glu`" 
+			"`pkg-config --libs glu`",
+			"-lpthread"
 		}
 
 	-- windows library cflags and libs
-	configuration { "windows" }
+	filter "system:windows"
 		includedirs { "../RecastDemo/Contrib/SDL/include" }
 		libdirs { "../RecastDemo/Contrib/SDL/lib/%{cfg.architecture:gsub('x86_64', 'x64')}" }
 		debugdir "../RecastDemo/Bin/"
@@ -249,11 +271,8 @@ project "Tests"
 		}
 
 	-- mac includes and libs
-	configuration { "macosx" }
+	filter "system:macosx"
 		kind "ConsoleApp"
-		includedirs { "/Library/Frameworks/SDL2.framework/Headers" }
-		links { 
-			"OpenGL.framework", 
-			"SDL2.framework",
+		links {
 			"Cocoa.framework",
 		}

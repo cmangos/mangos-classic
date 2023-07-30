@@ -1,43 +1,37 @@
-#
-# This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-#
+file(GLOB SOURCES Source/*.cpp)
+add_library(DetourCrowd ${SOURCES})
 
-# enumerate all library files
-FILE(GLOB_RECURSE SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "Source/*.cpp")
-FILE(GLOB_RECURSE HEADERS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "Include/*.h")
+add_library(RecastNavigation::DetourCrowd ALIAS DetourCrowd)
+set_target_properties(DetourCrowd PROPERTIES DEBUG_POSTFIX -d)
 
-# create the lib
-add_library(detourcrowd STATIC
-  ${SRCS}
-  ${HEADERS}
+set(DetourCrowd_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Include")
+
+target_include_directories(DetourCrowd PUBLIC
+    "$<BUILD_INTERFACE:${DetourCrowd_INCLUDE_DIR}>"
 )
 
-# add dependencies libs
-target_link_libraries(detourcrowd
-    PUBLIC detour
-    PUBLIC recast
+target_link_libraries(DetourCrowd
+    Detour
 )
 
-# add header include folder
-target_include_directories(detourcrowd
-    PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/Include"
-)
+set_target_properties(DetourCrowd PROPERTIES
+        SOVERSION ${SOVERSION}
+        VERSION ${LIB_VERSION}
+        COMPILE_PDB_OUTPUT_DIRECTORY .
+        COMPILE_PDB_NAME "DetourCrowd-d"
+        )
 
+install(TARGETS DetourCrowd
+        EXPORT recastnavigation-targets
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT library
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} ${CMAKE_INSTALL_INCLUDEDIR}/recastnavigation
+        )
+
+file(GLOB INCLUDES Include/*.h)
+install(FILES ${INCLUDES} DESTINATION
+    ${CMAKE_INSTALL_INCLUDEDIR}/recastnavigation)
 if(MSVC)
-  # Put this lib in dependencies category
-  set_target_properties(detourcrowd PROPERTIES FOLDER "Dependencies")
+    install(FILES "$<TARGET_FILE_DIR:DetourCrowd>/DetourCrowd-d.pdb" CONFIGURATIONS "Debug" DESTINATION "lib" OPTIONAL)
 endif()
