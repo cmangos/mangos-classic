@@ -48,8 +48,8 @@ add_library(vmaplib STATIC
 target_link_libraries(vmaplib
   PUBLIC shared
   PUBLIC g3dlite
-  PUBLIC detour
-  PUBLIC recast
+  PUBLIC Detour
+  PUBLIC Recast
   PUBLIC ${EXTRA_LIBS}
 )
 
@@ -83,8 +83,8 @@ if (BUILD_EXTRACTORS)
 
   target_link_libraries(${EXECUTABLE_NAME}
     vmaplib
-    detour
-    recast
+    Detour
+    Recast
     mmaplib
   )
 
