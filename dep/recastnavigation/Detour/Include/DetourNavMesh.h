@@ -40,9 +40,9 @@
 /// A handle to a polygon within a navigation mesh tile.
 /// @ingroup detour
 #ifdef DT_POLYREF64
-static const unsigned int DT_SALT_BITS = 16;
-static const unsigned int DT_TILE_BITS = 28;
-static const unsigned int DT_POLY_BITS = 20;
+static const unsigned int DT_SALT_BITS = 12;
+static const unsigned int DT_TILE_BITS = 21;
+static const unsigned int DT_POLY_BITS = 31;
 typedef uint64_t dtPolyRef;
 #else
 typedef unsigned int dtPolyRef;
