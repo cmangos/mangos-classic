@@ -19,13 +19,15 @@
 if (BUILD_GAME_SERVER OR BUILD_EXTRACTORS OR BUILD_RECASTDEMOMOD)
   add_definitions(-DDT_POLYREF64)
   add_subdirectory(Detour)
-  target_include_directories(detour
+  target_include_directories(Detour
     INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
+  set_target_properties(Detour PROPERTIES DEBUG_POSTFIX "")
   )
 endif()
 
 if (BUILD_EXTRACTORS OR BUILD_RECASTDEMOMOD)
   add_subdirectory(Recast)
+  set_target_properties(Recast PROPERTIES DEBUG_POSTFIX "")
 endif()
 
 if (BUILD_RECASTDEMOMOD)
