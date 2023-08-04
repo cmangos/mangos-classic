@@ -130,6 +130,7 @@ public:
 
 private:
     void           ComputeBounds();
+    bool           MeshHitTest(MeshInfos const* mesh, float* src, float* dst, float& dist) const;
     MeshObjectsMap m_MeshObjectsMap;
     BuildContext*  m_Ctx;
     unsigned int   m_MapId;

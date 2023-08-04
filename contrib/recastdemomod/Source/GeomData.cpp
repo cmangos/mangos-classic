@@ -610,6 +610,52 @@ bool GeomData::RaycastMesh(MeshDetails const* mesh, float* src, float* dst, floa
     return hit;
 }
 
+// check hit on either map mesh and liquid mesh
+bool GeomData::MeshHitTest(MeshInfos const* mesh, float* src, float* dst, float& dist) const
+{
+    bool result = false;
+    if (mesh)
+    {
+        bool mHit = false;
+        bool lHit = false;
+        float mDist = FLT_MAX;
+        float lDist = FLT_MAX;
+        if (mesh->GetSolidMesh())
+        {
+            mHit = RaycastMesh(mesh->GetSolidMesh(), src, dst, mDist);
+        }
+
+        if (mesh->GetLiquidMesh())
+        {
+            lHit = RaycastMesh(mesh->GetLiquidMesh(), src, dst, lDist);
+        }
+
+        if (mHit || lHit)
+        {
+            if (mHit && lHit)
+            {
+                if (mDist > lDist)
+                {
+                    dist = lDist;
+                }
+                else
+                {
+                    dist = mDist;
+                }
+            }
+            else if (mHit)
+                dist = mDist;
+            else
+                dist = lDist;
+
+            result = true;
+        }
+
+    }
+
+    return result;
+}
+
 bool GeomData::RaycastMesh(float* src, float* dst, float& tmin) const
 {
     if (m_MeshObjectsMap.empty())
@@ -626,12 +672,15 @@ bool GeomData::RaycastMesh(float* src, float* dst, float& tmin) const
         MeshInfos const* mmi = mo->GetMap();
         MeshInfos const* vmmi = mo->GetVMap();
 
-        if (mmi && mmi->GetSolidMesh())
-            vmapHit = RaycastMesh(mmi->GetSolidMesh(), src, dst, vmapDist);
+        // test hit on map data if any
+        if (mmi)
+            mapHit = MeshHitTest(mmi, src, dst, mapDist);
 
-        if (vmmi && vmmi->GetSolidMesh())
-                    mapHit = RaycastMesh(vmmi->GetSolidMesh(), src, dst, mapDist);
+        // test hit on vmap data if any
+        if (vmmi)
+            vmapHit = MeshHitTest(vmmi, src, dst, vmapDist);
 
+        // take the most near hit we have
         if (mapHit || vmapHit)
         {
             if (mapHit && vmapHit)
@@ -648,6 +697,7 @@ bool GeomData::RaycastMesh(float* src, float* dst, float& tmin) const
             else
                 tmin = vmapDist;
 
+            // break out of the while loop
             break;
         }
 
