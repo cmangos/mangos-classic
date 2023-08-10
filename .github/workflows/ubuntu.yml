@@ -82,12 +82,14 @@ jobs:
           USE_PCH: ${{ matrix.USE_PCH }}
           EXTRA_BUILD: ${{ matrix.EXTRA_BUILD }}
           BOOST_ROOT: "${{env.BOOST_INSTALL_DIR}}/boost/boost"
-        run: cmake -DBoost_ARCHITECTURE=-x64 -DPCH=${{env.USE_PCH}} ${{env.EXTRA_BUILD}}-B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
+        run: cmake -DBoost_ARCHITECTURE=-x64 -DPCH=${{env.USE_PCH}} -DCMAKE_INSTALL_PREFIX=/home/runner/work ${{env.EXTRA_BUILD}}-B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
 
       - name: Build
         env:
           MAKEFLAGS: "-j8"
-        run: cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}}
+        run: |
+            cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}}
+            cmake --install ${{env.BUILD_DIR}}
 
   notify:
     name: Discord Notification
