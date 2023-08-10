@@ -16,9 +16,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
+# EXCLUDE_FROM_ALL important to bypass install target witch we dont need as we link statically
 if (BUILD_GAME_SERVER OR BUILD_EXTRACTORS OR BUILD_RECASTDEMOMOD)
   add_definitions(-DDT_POLYREF64)
-  add_subdirectory(Detour)
+  add_subdirectory(Detour EXCLUDE_FROM_ALL)
   target_include_directories(Detour
     INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
   set_target_properties(Detour PROPERTIES DEBUG_POSTFIX "")
@@ -26,12 +27,12 @@ if (BUILD_GAME_SERVER OR BUILD_EXTRACTORS OR BUILD_RECASTDEMOMOD)
 endif()
 
 if (BUILD_EXTRACTORS OR BUILD_RECASTDEMOMOD)
-  add_subdirectory(Recast)
+  add_subdirectory(Recast EXCLUDE_FROM_ALL)
   set_target_properties(Recast PROPERTIES DEBUG_POSTFIX "")
 endif()
 
 if (BUILD_RECASTDEMOMOD)
-  add_subdirectory(DetourCrowd)
-  add_subdirectory(DetourTileCache)
-  add_subdirectory(DebugUtils)
+  add_subdirectory(DetourCrowd EXCLUDE_FROM_ALL)
+  add_subdirectory(DetourTileCache EXCLUDE_FROM_ALL)
+  add_subdirectory(DebugUtils EXCLUDE_FROM_ALL)
 endif()
