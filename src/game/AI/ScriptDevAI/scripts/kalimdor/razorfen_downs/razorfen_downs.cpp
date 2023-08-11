@@ -186,11 +186,11 @@ struct npc_belnistraszAI : public npc_escortAI
                         m_uiRitualTimer = 1000;
                         break;
                     case 1:
-                        DoSummonSpawner(irand(1, 3));
+                        DoSummonSpawner(irand(0, 2));
                         m_uiRitualTimer = 39000;
                         break;
                     case 2:
-                        DoSummonSpawner(irand(1, 3));
+                        DoSummonSpawner(irand(0, 2));
                         m_uiRitualTimer = 20000;
                         break;
                     case 3:
@@ -198,16 +198,16 @@ struct npc_belnistraszAI : public npc_escortAI
                         m_uiRitualTimer = 20000;
                         break;
                     case 4:
-                        DoSummonSpawner(irand(1, 3));
+                        DoSummonSpawner(irand(0, 2));
                         m_uiRitualTimer = 40000;
                         break;
                     case 5:
-                        DoSummonSpawner(irand(1, 3));
+                        DoSummonSpawner(irand(0, 2));
                         DoScriptText(SAY_BELNISTRASZ_2_MIN, m_creature, m_creature);
                         m_uiRitualTimer = 40000;
                         break;
                     case 6:
-                        DoSummonSpawner(irand(1, 3));
+                        DoSummonSpawner(irand(0, 2));
                         m_uiRitualTimer = 20000;
                         break;
                     case 7:
@@ -215,7 +215,7 @@ struct npc_belnistraszAI : public npc_escortAI
                         m_uiRitualTimer = 40000;
                         break;
                     case 8:
-                        DoSummonSpawner(irand(1, 3));
+                        DoSummonSpawner(irand(0, 2));
                         m_uiRitualTimer = 20000;
                         break;
                     case 9:
