@@ -647,6 +647,12 @@ void MotionMaster::PauseWaypoints(uint32 time)
         gen->AddToPathPauseTime(time, true);
         return;
     }
+    else if (GetCurrentMovementGeneratorType() == RANDOM_MOTION_TYPE)
+    {
+        auto gen = (WanderMovementGenerator*)top();
+        gen->AddToRandomPauseTime(time, true);
+        return;
+    }
 }
 
 void MotionMaster::UnpauseWaypoints()

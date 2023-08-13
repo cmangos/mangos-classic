@@ -75,6 +75,8 @@ class WanderMovementGenerator : public AbstractRandomMovementGenerator
         void Finalize(Unit& owner) override;
         void Interrupt(Unit& owner) override;
 
+        void AddToRandomPauseTime(int32 waitTimeDiff, bool force);
+
         MovementGeneratorType GetMovementGeneratorType() const override { return RANDOM_MOTION_TYPE; }
 };
 
