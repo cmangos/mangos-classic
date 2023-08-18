@@ -506,7 +506,7 @@ class WorldMap : public Map
     private:
         using Map::GetPersistentState;                      // hide in subclass for overwrite
     public:
-        WorldMap(uint32 id, time_t expiry) : Map(id, expiry, 0) {}
+        WorldMap(uint32 id, time_t expiry, uint32 InstanceId) : Map(id, expiry, InstanceId) {}
         ~WorldMap() {}
 
         // can't be nullptr for loaded map
