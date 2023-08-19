@@ -33,6 +33,7 @@ struct guardAI : public CombatAI
         void Aggro(Unit* who) override;
 
         void JustDied(Unit* /*killer*/) override;
+        void JustRespawned() override;
 
         // Commonly used for guards in main cities
         void DoReplyToTextEmote(uint32 textEmote);

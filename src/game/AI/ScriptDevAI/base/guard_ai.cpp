@@ -57,6 +57,26 @@ void guardAI::JustDied(Unit* killer)
         m_creature->SendZoneUnderAttackMessage(pPlayer);
 }
 
+void guardAI::JustRespawned()
+{
+    CombatAI::JustRespawned();
+    const auto& spellList = GetSpellList();
+    if (spellList.ChanceRangedAttack)
+    {
+        for (auto& spell : spellList.Spells)
+        {
+            if (spell.second.Flags & SPELL_LIST_FLAG_RANGED_ACTION)
+            {
+                SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spell.second.SpellId);
+                if (!spellInfo)
+                    continue;
+                SetRangedMode(true, CalculateSpellRange(spellInfo) * 0.8f, TYPE_PROXIMITY);
+                break;
+            }
+        }
+    }
+}
+
 void guardAI::DoReplyToTextEmote(uint32 textEmote)
 {
     switch (textEmote)

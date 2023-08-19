@@ -90,12 +90,3 @@ void GuardAI::MoveInLineOfSight(Unit* who)
         }
     }
 }
-
-void GuardAI::UpdateAI(const uint32 /*diff*/)
-{
-    // update i_victimGuid if i_creature.GetVictim() !=0 and changed
-    if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-        return;
-
-    DoMeleeAttackIfReady();
-}
