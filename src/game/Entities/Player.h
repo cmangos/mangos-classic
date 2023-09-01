@@ -2176,6 +2176,7 @@ class Player : public Unit
         PlayerbotMgr* GetPlayerbotMgr() { return m_playerbotMgr; }
         void SetBotDeathTimer() { m_deathTimer = 0; }
         bool IsInDuel() const { return duel && duel->startTime != 0; }
+        bool IsBot() const { return m_playerbotAI != nullptr; }
 #endif
 
         void SendLootError(ObjectGuid guid, LootError error) const;
