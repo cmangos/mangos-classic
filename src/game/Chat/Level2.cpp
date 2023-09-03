@@ -1862,15 +1862,15 @@ bool ChatHandler::HandleNpcDeleteCommand(char* args)
     if (*args)
     {
         // number or [name] Shift-click form |color|Hcreature:creature_guid|h[name]|h|r
-        uint32 lowguid;
-        if (!ExtractUint32KeyFromLink(&args, "Hcreature", lowguid))
+        uint32 dbGuid;
+        if (!ExtractUint32KeyFromLink(&args, "Hcreature", dbGuid))
             return false;
 
-        if (!lowguid)
+        if (!dbGuid)
             return false;
 
-        if (CreatureData const* data = sObjectMgr.GetCreatureData(lowguid))
-            unit = m_session->GetPlayer()->GetMap()->GetCreature(data->GetObjectGuid(lowguid));
+        if (CreatureData const* data = sObjectMgr.GetCreatureData(dbGuid))
+            unit = m_session->GetPlayer()->GetMap()->GetCreature(data->GetObjectGuid(dbGuid));
     }
     else
         unit = getSelectedCreature();
@@ -1882,15 +1882,21 @@ bool ChatHandler::HandleNpcDeleteCommand(char* args)
         return false;
     }
 
+    if (unit->GetCreatureGroup())
+    {
+        SendSysMessage("Removing spawn group creatures is not supported at this time.");
+        return false;
+    }
+
     switch (unit->GetSubtype())
     {
         case CREATURE_SUBTYPE_GENERIC:
         {
             unit->CombatStop();
-            if (CreatureData const* data = sObjectMgr.GetCreatureData(unit->GetGUIDLow()))
+            if (CreatureData const* data = sObjectMgr.GetCreatureData(unit->GetDbGuid()))
             {
-                Creature::AddToRemoveListInMaps(unit->GetGUIDLow(), data);
-                Creature::DeleteFromDB(unit->GetGUIDLow(), data);
+                Creature::AddToRemoveListInMaps(unit->GetDbGuid(), data);
+                Creature::DeleteFromDB(unit->GetDbGuid(), data);
             }
             else
                 unit->AddObjectToRemoveList();
