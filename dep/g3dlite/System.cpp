@@ -987,13 +987,6 @@ private:
 
     std::mutex            m_lock;
 
-    void lock() {
-        m_lock.lock();
-    }
-
-    void unlock() {
-        m_lock.unlock();
-    }
 
 #if 0 //-----------------------------------------------old mutex
 #   ifdef G3D_WIN32
@@ -1222,50 +1215,49 @@ public:
 
 
     UserPtr malloc(size_t bytes) {
-        lock();
-        ++totalMallocs;
+        {
+            std::lock_guard lock(m_lock);
+            ++totalMallocs;
 
-        if (bytes <= tinyBufferSize) {
+            if (bytes <= tinyBufferSize) {
 
-            UserPtr ptr = tinyMalloc(bytes);
+                UserPtr ptr = tinyMalloc(bytes);
 
-            if (ptr) {
-                ++mallocsFromTinyPool;
-                unlock();
-                return ptr;
+                if (ptr) {
+                    ++mallocsFromTinyPool;
+                    return ptr;
+                }
+
             }
 
+            // Failure to allocate a tiny buffer is allowed to flow
+            // through to a small buffer
+            if (bytes <= smallBufferSize) {
+
+                UserPtr ptr = malloc(smallPool, smallPoolSize, bytes);
+
+                if (ptr) {
+                    ++mallocsFromSmallPool;
+                    return ptr;
+                }
+
+            }
+            else if (bytes <= medBufferSize) {
+                // Note that a small allocation failure does *not* fall
+                // through into a medium allocation because that would
+                // waste the medium buffer's resources.
+
+                UserPtr ptr = malloc(medPool, medPoolSize, bytes);
+
+                if (ptr) {
+                    ++mallocsFromMedPool;
+                    debugAssertM(ptr != NULL, "BufferPool::malloc returned NULL");
+                    return ptr;
+                }
+            }
+
+            bytesAllocated += USERSIZE_TO_REALSIZE(bytes);
         }
-
-        // Failure to allocate a tiny buffer is allowed to flow
-        // through to a small buffer
-        if (bytes <= smallBufferSize) {
-
-            UserPtr ptr = malloc(smallPool, smallPoolSize, bytes);
-
-            if (ptr) {
-                ++mallocsFromSmallPool;
-                unlock();
-                return ptr;
-            }
-
-        } else if (bytes <= medBufferSize) {
-            // Note that a small allocation failure does *not* fall
-            // through into a medium allocation because that would
-            // waste the medium buffer's resources.
-
-            UserPtr ptr = malloc(medPool, medPoolSize, bytes);
-
-            if (ptr) {
-                ++mallocsFromMedPool;
-                unlock();
-                debugAssertM(ptr != NULL, "BufferPool::malloc returned NULL");
-                return ptr;
-            }
-        }
-
-        bytesAllocated += USERSIZE_TO_REALSIZE(bytes);
-        unlock();
 
         // Heap allocate
 
@@ -1318,35 +1310,36 @@ public:
         assert(isValidPointer(ptr));
 
         if (inTinyHeap(ptr)) {
-            lock();
-            tinyFree(ptr);
-            unlock();
+            {
+                std::lock_guard lock(m_lock);
+                tinyFree(ptr);
+            }
             return;
         }
 
         uint32 bytes = USERSIZE_FROM_USERPTR(ptr);
 
-        lock();
-        if (bytes <= smallBufferSize) {
-            if (smallPoolSize < maxSmallBuffers) {
-                smallPool[smallPoolSize] = MemBlock(ptr, bytes);
-                ++smallPoolSize;
-                unlock();
-                return;
+        {
+            std::lock_guard lock(m_lock);
+            if (bytes <= smallBufferSize) {
+                if (smallPoolSize < maxSmallBuffers) {
+                    smallPool[smallPoolSize] = MemBlock(ptr, bytes);
+                    ++smallPoolSize;
+                    return;
+                }
             }
-        } else if (bytes <= medBufferSize) {
-            if (medPoolSize < maxMedBuffers) {
-                medPool[medPoolSize] = MemBlock(ptr, bytes);
-                ++medPoolSize;
-                unlock();
-                return;
+            else if (bytes <= medBufferSize) {
+                if (medPoolSize < maxMedBuffers) {
+                    medPool[medPoolSize] = MemBlock(ptr, bytes);
+                    ++medPoolSize;
+                    return;
+                }
+                bytesAllocated -= USERSIZE_TO_REALSIZE(bytes);
+
+                // Free; the buffer pools are full or this is too big to store.
+                ::free(USERPTR_TO_REALPTR(ptr));
             }
         }
-        bytesAllocated -= USERSIZE_TO_REALSIZE(bytes);
-        unlock();
-
-        // Free; the buffer pools are full or this is too big to store.
-        ::free(USERPTR_TO_REALPTR(ptr));
     }
 
     std::string performance() const {
