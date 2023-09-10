@@ -12090,6 +12090,9 @@ bool Unit::MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spell
         if (spellInfo->HasAttribute(SPELL_ATTR_EX3_ONLY_ON_PLAYER) && target->GetTypeId() != TYPEID_PLAYER)
             return false;
 
+        if (!IsIgnoreLosSpellCast(spellInfo) && !IsWithinLOSInMap(target, true))
+            return false;
+
         switch (spellInfo->rangeIndex)
         {
             case SPELL_RANGE_IDX_ANYWHERE:  return true;

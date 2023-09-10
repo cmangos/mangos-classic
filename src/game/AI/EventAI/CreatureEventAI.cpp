@@ -789,8 +789,6 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
                 if (!spellInfo)
                     return false;
-                if (!IsIgnoreLosSpellCast(spellInfo))
-                    selectFlags = SELECT_FLAG_IN_LOS;
                 if (action.cast.castFlags & CAST_PLAYER_ONLY)
                     selectFlags |= SELECT_FLAG_PLAYER;
                 if (action.cast.castFlags & CAST_AURA_NOT_PRESENT)
