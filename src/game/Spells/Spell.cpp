@@ -1270,14 +1270,13 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
                 spellDamageInfo.HitInfo |= SPELL_HIT_TYPE_CRIT;
                 spellDamageInfo.damage = affectiveCaster->CalculateCritAmount(unitTarget, spellDamageInfo.damage, m_spellInfo);
             }
-
-            // damage mitigation
-            if (spellDamageInfo.damage > 0)
-            {
-                // physical damage => armor
-                if (m_spellSchoolMask & SPELL_SCHOOL_MASK_NORMAL)
-                    spellDamageInfo.damage = Unit::CalcArmorReducedDamage(affectiveCaster ? affectiveCaster : m_trueCaster, unitTarget, spellDamageInfo.damage);
-            }
+        }
+        // damage mitigation
+        if (spellDamageInfo.damage > 0)
+        {
+            // physical damage => armor
+            if (m_spellSchoolMask & SPELL_SCHOOL_MASK_NORMAL)
+                spellDamageInfo.damage = Unit::CalcArmorReducedDamage(affectiveCaster ? affectiveCaster : m_trueCaster, unitTarget, spellDamageInfo.damage);
         }
 
         unitTarget->CalculateAbsorbResistBlock(affectiveCaster, &spellDamageInfo, m_spellInfo);
