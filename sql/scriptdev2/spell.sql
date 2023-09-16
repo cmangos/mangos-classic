@@ -301,6 +301,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Shaman
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(29203,'spell_healing_way'),
 (6495,'spell_sentry_totem');
 
 -- Hunter

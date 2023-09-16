@@ -7242,18 +7242,6 @@ uint32 Unit::SpellHealingBonusTaken(Unit* pCaster, SpellEntry const* spellInfo, 
     // apply benefit affected by spell power implicit coeffs and spell level penalties
     TakenTotal = pCaster->SpellBonusWithCoeffs(spellInfo, TakenTotal, TakenAdvertisedBenefit, 0, damagetype, false);
 
-    // Taken mods
-    // Healing Wave cast
-    if (spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN && (spellInfo->SpellFamilyFlags & uint64(0x0000000000000040)))
-    {
-        // Search for Healing Way on Victim
-        AuraList const& auraDummy = GetAurasByType(SPELL_AURA_DUMMY);
-        for (auto itr : auraDummy)
-            if (itr->GetId() == 29203)
-                TakenTotalMod *= (itr->GetModifier()->m_amount + 100.0f) / 100.0f;
-    }
-
-
     // use float as more appropriate for negative values and percent applying
     float heal = (healamount + TakenTotal * int32(stack)) * TakenTotalMod;
 
