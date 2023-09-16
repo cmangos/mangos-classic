@@ -495,6 +495,7 @@ class Aura
         void OnAuraInit();
         int32 OnAuraValueCalculate(Unit* caster, int32 currentValue);
         void OnDamageCalculate(Unit* victim, int32& advertisedBenefit, float& totalMod);
+        void OnCritChanceCalculate(Unit const* victim, float& chance);
         void OnApply(bool apply);
         void OnAfterApply(bool apply);
         bool OnCheckProc(ProcExecutionData& data);

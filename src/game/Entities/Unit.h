@@ -261,6 +261,7 @@ enum AuraScriptLocation : uint32
     SCRIPT_LOCATION_SPELL_DAMAGE_TAKEN,
     SCRIPT_LOCATION_SPELL_HEALING_DONE,
     SCRIPT_LOCATION_SPELL_HEALING_TAKEN,
+    SCRIPT_LOCATION_CRIT_CHANCE,
     SCRIPT_LOCATION_MAX,
 };
 
@@ -2379,7 +2380,7 @@ class Unit : public WorldObject
         Aura* GetOverrideScript(uint32 id) const;
         void RegisterOverrideScriptAura(Aura* aura, uint32 id, bool apply);
         void RegisterScriptedLocationAura(Aura* aura, AuraScriptLocation location, bool apply); // Spell scripting - requires correctly set spell_affect
-        std::vector<Aura*>& GetScriptedLocationAuras(AuraScriptLocation location) { return m_scriptedLocations[location]; }
+        std::vector<Aura*> const& GetScriptedLocationAuras(AuraScriptLocation location) const;
 
         uint8 GetComboPoints() const { return m_comboPoints; }
         ObjectGuid const& GetComboTargetGuid() const { return m_comboTargetGuid; }

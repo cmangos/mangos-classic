@@ -92,6 +92,7 @@ struct AuraScript
     virtual void OnDamageCalculate(Aura* /*aura*/, Unit* /*victim*/, int32& /*advertisedBenefit*/, float& /*totalMod*/) const {}
     // called during duration calculation - target can be nullptr for channel duration calculation
     virtual int32 OnDurationCalculate(WorldObject const* /*caster*/, Unit const* /*target*/, int32 duration) const { return duration; }
+    virtual void OnCritChanceCalculate(Aura* /*aura*/, Unit const* /*target*/, float& /*chance*/) const {}
     // the following two hooks are done in an alternative fashion due to how they are usually used
     // if an aura is applied before, its removed after, and if some aura needs to do something after aura effect is applied, need to revert that change before its removed
     // called before aura apply and after aura unapply

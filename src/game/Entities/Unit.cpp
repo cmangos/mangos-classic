@@ -3735,43 +3735,31 @@ float Unit::CalculateEffectiveMissChance(const Unit *victim, WeaponAttackType at
     return std::max(minimum, std::min(chance, 100.0f));
 }
 
-float Unit::CalculateSpellCritChance(const Unit* victim, SpellSchoolMask schoolMask, const SpellEntry* spell) const
+float Unit::CalculateSpellCritChance(const Unit* victim, SpellSchoolMask schoolMask, const SpellEntry* spellInfo) const
 {
-    if (!spell || spell->HasAttribute(SPELL_ATTR_EX2_CANT_CRIT))
+    if (!spellInfo || spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_CRIT))
         return 0.0f;
 
     float chance = 0.0f;
 
-    switch (spell->DmgClass)
+    switch (spellInfo->DmgClass)
     {
         case SPELL_DAMAGE_CLASS_MELEE:
         case SPELL_DAMAGE_CLASS_RANGED:
-            return CalculateEffectiveCritChance(victim, GetWeaponAttackType(spell), spell);
+            return CalculateEffectiveCritChance(victim, GetWeaponAttackType(spellInfo), spellInfo);
     }
-    chance += GetCritChance(spell, schoolMask);
+    chance += GetCritChance(spellInfo, schoolMask);
     // Own chance appears to be zero / below zero / unmeaningful for some reason (debuffs?): skip calculation, unit is incapable
     if (chance < 0.005f)
         return 0.0f;
     // Modify by victim in case of hostile hit
-    if (!IsPositiveSpell(spell, this, victim))
-        chance += victim->GetCritTakenChance(schoolMask, SpellDmgClass(spell->DmgClass));
-    // TODO: Scripted crit chance auras: class script auras need to be orgnaized and re-implemented in the future as a part of scripting system
-    const AuraList& scripts = GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-    for (auto script : scripts)
+    if (!IsPositiveSpell(spellInfo, this, victim))
+        chance += victim->GetCritTakenChance(schoolMask, SpellDmgClass(spellInfo->DmgClass));
+    for (auto i : GetScriptedLocationAuras(SCRIPT_LOCATION_CRIT_CHANCE))
     {
-        if (!(script->isAffectedOnSpell(spell)))
+        if (!i->isAffectedOnSpell(spellInfo))
             continue;
-        switch (script->GetModifier()->m_miscvalue)
-        {
-            // Shatter
-            case 849: if (victim->isFrozen()) chance += 10.0f; break;
-            case 910: if (victim->isFrozen()) chance += 20.0f; break;
-            case 911: if (victim->isFrozen()) chance += 30.0f; break;
-            case 912: if (victim->isFrozen()) chance += 40.0f; break;
-            case 913: if (victim->isFrozen()) chance += 50.0f; break;
-            default:
-                break;
-        }
+        i->OnCritChanceCalculate(victim, chance);
     }
     return std::max(0.0f, std::min(chance, 100.0f));
 }
@@ -11942,6 +11930,11 @@ void Unit::RegisterScriptedLocationAura(Aura* aura, AuraScriptLocation location,
         m_scriptedLocations[location].push_back(aura);
     else
         m_scriptedLocations[location].erase(std::remove(m_scriptedLocations[location].begin(), m_scriptedLocations[location].end(), aura), m_scriptedLocations[location].end());
+}
+
+std::vector<Aura*> const& Unit::GetScriptedLocationAuras(AuraScriptLocation location) const
+{
+    return m_scriptedLocations[location];
 }
 
 void Unit::AddComboPoints(Unit* target, int8 count)
