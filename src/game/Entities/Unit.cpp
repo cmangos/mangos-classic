@@ -7517,39 +7517,13 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                 }
             }
         }
+    }
 
-        // .. done (class scripts)
-        AuraList const& mOverrideClassScript = GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-        for (auto i : mOverrideClassScript)
-        {
-            if (!(i->isAffectedOnSpell(spellInfo)))
-                continue;
-            switch (i->GetMiscValue())
-            {
-                // Dirty Deeds
-                case 6427:
-                case 6428:
-                    if (victim->GetHealthPercent() < 35.f)
-                    {
-                        Aura* eff0 = i->GetHolder()->m_auras[EFFECT_INDEX_0];
-                        if (!eff0)
-                        {
-                            sLog.outError("Spell structure of DD (%u) changed.", i->GetId());
-                            continue;
-                        }
-
-                        // effect 0 have expected value but in negative state
-                        DoneTotalMod *= (-eff0->GetModifier()->m_amount + 100.0f) / 100.0f;
-                    }
-                    break;
-            }
-        }
-        for (auto i : GetScriptedLocationAuras(SCRIPT_LOCATION_MELEE_DAMAGE_DONE))
-        {
-            if (!i->isAffectedOnSpell(spellInfo))
-                continue;
-            i->OnDamageCalculate(victim, DoneFlat, DoneTotalMod);
-        }
+    for (auto i : GetScriptedLocationAuras(SCRIPT_LOCATION_MELEE_DAMAGE_DONE))
+    {
+        if (!i->isAffectedOnSpell(spellInfo))
+            continue;
+        i->OnDamageCalculate(victim, DoneFlat, DoneTotalMod);
     }
 
     // final calculation
@@ -7617,6 +7591,7 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* caster, uint32 pdamage, WeaponAttackTyp
     // differentiate for weapon damage based spells
     bool isWeaponDamageBasedSpell = !(spellInfo && (damagetype == DOT || IsSpellHaveEffect(spellInfo, SPELL_EFFECT_SCHOOL_DAMAGE)));
     schoolMask              = ((spellInfo && schoolMask != GetSpellSchoolMask(spellInfo)) ? GetSpellSchoolMask(spellInfo) : schoolMask);
+    uint32 mechanicMask     = spellInfo ? GetAllSpellMechanicMask(spellInfo) : 0;
 
     // FLAT damage bonus auras
     // =======================
@@ -7647,14 +7622,11 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* caster, uint32 pdamage, WeaponAttackTyp
     // special dummys/class scripts and other effects
     // =============================================
 
-    if (spellInfo)
+    for (auto i : GetScriptedLocationAuras(SCRIPT_LOCATION_MELEE_DAMAGE_TAKEN))
     {
-        for (auto i : GetScriptedLocationAuras(SCRIPT_LOCATION_MELEE_DAMAGE_TAKEN))
-        {
-            if (!i->isAffectedOnSpell(spellInfo))
-                continue;
-            i->OnDamageCalculate(this, TakenAdvertisedBenefit, TakenTotalMod);
-        }
+        if (!i->isAffectedOnSpell(spellInfo))
+            continue;
+        i->OnDamageCalculate(this, TakenAdvertisedBenefit, TakenTotalMod);
     }
 
     // final calculation

@@ -257,7 +257,7 @@ Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* curr
     m_spellmod(nullptr), m_periodicTimer(0), m_periodicTick(0), m_removeMode(AURA_REMOVE_BY_DEFAULT),
     m_effIndex(eff), m_positive(false), m_isPeriodic(false), m_isAreaAura(false),
     m_isPersistent(false), m_magnetUsed(false), m_spellAuraHolder(holder),
-    m_scriptValue(0), m_storage(nullptr)
+    m_scriptValue(0), m_storage(nullptr), m_affectOverriden(false)
 {
     MANGOS_ASSERT(target);
     MANGOS_ASSERT(spellproto && spellproto == sSpellTemplate.LookupEntry<SpellEntry>(spellproto->Id) && "`info` must be pointer to sSpellTemplate element");
@@ -711,17 +711,20 @@ ClassFamilyMask Aura::GetAuraSpellClassMask() const
     return sSpellMgr.GetSpellAffectMask(GetId(), GetEffIndex());
 }
 
-bool Aura::isAffectedOnSpell(SpellEntry const* spell) const
+bool Aura::isAffectedOnSpell(SpellEntry const* spellProto) const
 {
+    if (m_affectOverriden)
+        return OnAffectCheck(spellProto);
+
     if (m_spellmod)
-        return m_spellmod->isAffectedOnSpell(spell);
+        return m_spellmod->isAffectedOnSpell(spellProto);
 
     // Check family name
-    if (spell->SpellFamilyName != GetSpellProto()->SpellFamilyName)
+    if (spellProto->SpellFamilyName != GetSpellProto()->SpellFamilyName)
         return false;
 
     ClassFamilyMask mask = sSpellMgr.GetSpellAffectMask(GetId(), GetEffIndex());
-    return spell->IsFitToFamilyMask(mask);
+    return spellProto->IsFitToFamilyMask(mask);
 }
 
 bool Aura::CanProcFrom(SpellEntry const* spell, uint32 EventProcEx, uint32 procEx, bool active, bool useClassMask) const
@@ -6218,6 +6221,13 @@ void Aura::OnHeartbeat()
     // TODO: move HB resist here
     if (AuraScript* script = GetAuraScript())
         script->OnHeartbeat(this);
+}
+
+bool Aura::OnAffectCheck(SpellEntry const* spellInfo) const
+{
+    if (AuraScript* script = GetAuraScript())
+        return script->OnAffectCheck(this, spellInfo);
+    return false;
 }
 
 uint32 Aura::GetAuraScriptCustomizationValue()

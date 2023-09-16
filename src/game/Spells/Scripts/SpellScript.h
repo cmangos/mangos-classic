@@ -125,6 +125,8 @@ struct AuraScript
     virtual void OnPersistentAreaAuraEnd(DynamicObject* /*dynGo*/) const {}
     // called on unit heartbeat
     virtual void OnHeartbeat(Aura* /*aura*/) const {}
+    // called on affect check of aura - spellInfo can be nullptr in case of melee
+    virtual bool OnAffectCheck(Aura const* /*aura*/, SpellEntry const* /*spellInfo*/) const { return true; }
     // used to override SPELL_AURA_TRANSFORM or SPELL_AURA_MOD_SHAPESHIFT display id - more uses in future
     virtual uint32 GetAuraScriptCustomizationValue(Aura* /*aura*/) const { return 0; }
 };
