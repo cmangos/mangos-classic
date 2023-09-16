@@ -716,6 +716,9 @@ bool Aura::isAffectedOnSpell(SpellEntry const* spellProto) const
     if (m_affectOverriden)
         return OnAffectCheck(spellProto);
 
+    if (!spellProto)
+        return false;
+
     if (m_spellmod)
         return m_spellmod->isAffectedOnSpell(spellProto);
 
