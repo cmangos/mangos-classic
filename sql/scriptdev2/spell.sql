@@ -210,6 +210,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (20306,'spell_seal_of_the_crusader'),
 (20307,'spell_seal_of_the_crusader'),
 (20308,'spell_seal_of_the_crusader'),
+(19977,'spell_blessing_of_light'),
+(19978,'spell_blessing_of_light'),
+(19979,'spell_blessing_of_light'),
 (20271,'spell_judgement');
 
 -- Warlock

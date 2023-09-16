@@ -75,8 +75,31 @@ struct spell_judgement : public SpellScript
     }
 };
 
+// 19977 - Blessing of Light
+struct BlessingOfLight : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_HEALING_TAKEN, apply);
+    }
+
+    void OnDamageCalculate(Aura* aura, Unit* attacker, Unit* /*victim*/, int32& advertisedBenefit, float& totalMod) const override
+    {
+        advertisedBenefit += (aura->GetModifier()->m_amount);  // BoL is penalized since 2.3.0
+        // Note: This forces the caster to keep libram equipped, but works regardless if the BOL is his or not
+        if (Aura* improved = attacker->GetAura(38320, EFFECT_INDEX_0)) // improved Blessing of light
+        {
+            if (aura->GetEffIndex() == EFFECT_INDEX_0)
+                advertisedBenefit += improved->GetModifier()->m_amount; // holy light gets full amount
+            else
+                advertisedBenefit += (improved->GetModifier()->m_amount / 2); // flash of light gets half
+        }
+    }
+};
+
 void LoadPaladinScripts()
 {
     RegisterSpellScript<spell_judgement>("spell_judgement");
     RegisterSpellScript<SealOfTheCrusader>("spell_seal_of_the_crusader");
+    RegisterSpellScript<BlessingOfLight>("spell_blessing_of_light");
 }
