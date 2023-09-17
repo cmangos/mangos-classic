@@ -6993,11 +6993,6 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellSchoolMask schoolMask, Spel
                 DoneAdvertisedBenefit += i->GetModifier()->m_amount;
                 break;
             }
-            case 4555: // Improved Moonfire
-            {
-                DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
-                break;
-            }
         }
     }
 

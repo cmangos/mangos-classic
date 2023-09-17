@@ -389,6 +389,8 @@ Spell::Spell(WorldObject* caster, SpellEntry const* info, uint32 triggeredFlags,
     m_delayAtDamageCount = 0;
 
     m_applyMultiplierMask = 0;
+    for (float& value : m_damageDoneMultiplier)
+        value = 1.f;
 
     // Get data for type of attack
     m_attackType = GetWeaponAttackType(m_spellInfo);
@@ -6255,7 +6257,7 @@ SpellCastResult Spell::CheckRange(bool strict)
     return SPELL_CAST_OK;
 }
 
-int32 Spell::CalculateSpellEffectDamage(Unit* unitTarget, int32 damage)
+int32 Spell::CalculateSpellEffectDamage(Unit* unitTarget, int32 damage, float damageDoneMod)
 {
     // damage bonus (per damage class)
     switch (m_spellInfo->DmgClass)
@@ -6267,6 +6269,7 @@ int32 Spell::CalculateSpellEffectDamage(Unit* unitTarget, int32 damage)
             // Calculate damage bonus
             if (!m_trueCaster->IsGameObject())
                 damage = m_caster->MeleeDamageBonusDone(unitTarget, damage, m_attackType, m_spellSchoolMask, m_spellInfo, SPELL_DIRECT_DAMAGE);
+            damage *= damageDoneMod;
             damage = unitTarget->MeleeDamageBonusTaken(m_trueCaster->IsGameObject() ? nullptr : m_caster, damage, m_attackType, m_spellSchoolMask, m_spellInfo, SPELL_DIRECT_DAMAGE);
         }
         break;
@@ -6277,6 +6280,7 @@ int32 Spell::CalculateSpellEffectDamage(Unit* unitTarget, int32 damage)
             // Calculate damage bonus
             if (!m_trueCaster->IsGameObject())
                 damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellSchoolMask, m_spellInfo, damage, SPELL_DIRECT_DAMAGE);
+            damage *= damageDoneMod;
             damage = unitTarget->SpellDamageBonusTaken(m_trueCaster->IsGameObject() ? nullptr : m_caster, m_spellSchoolMask, m_spellInfo, damage, SPELL_DIRECT_DAMAGE);
         }
         break;
@@ -7841,6 +7845,11 @@ void Spell::SetOverridenSpeed(float newSpeed)
 {
     m_overrideSpeed = true;
     m_overridenSpeed = newSpeed;
+}
+
+void Spell::SetDamageDoneModifier(float mod, SpellEffectIndex effIdx)
+{
+    m_damageDoneMultiplier[effIdx] = mod;
 }
 
 void Spell::OnInit()
