@@ -154,6 +154,10 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28091,'spell_despawner_self'),
 (28345,'spell_communique_trigger'),
 (31315,'spell_summon_boss'),
+(27855,'spell_increased_healing_done_dummy'),
+(28856,'spell_increased_healing_done_dummy'),
+(28851,'spell_increased_healing_done_dummy'),
+(28853,'spell_increased_healing_done_dummy'),
 (491,'spell_gameobject_call_for_help_on_usage'), -- Khadgar's Unlocking
 (857,'spell_gameobject_call_for_help_on_usage'), -- Khadgar's Unlocking
 (1804,'spell_gameobject_call_for_help_on_usage'), -- Pick Lock
