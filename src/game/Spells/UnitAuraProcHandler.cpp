@@ -1386,29 +1386,8 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
             break;
         case SPELLFAMILY_PALADIN:
         {
-            // Judgement of Light and Judgement of Wisdom
-            if (auraSpellInfo->SpellFamilyFlags & uint64(0x0000000000080000))
-            {
-                switch (auraSpellInfo->Id)
-                {
-                    // Judgement of Light
-                    case 20185: trigger_spell_id = 20267; break; // Rank 1
-                    case 20344: trigger_spell_id = 20341; break; // Rank 2
-                    case 20345: trigger_spell_id = 20342; break; // Rank 3
-                    case 20346: trigger_spell_id = 20343; break; // Rank 4
-                    // Judgement of Wisdom
-                    case 20186: trigger_spell_id = 20268; break; // Rank 1
-                    case 20354: trigger_spell_id = 20352; break; // Rank 2
-                    case 20355: trigger_spell_id = 20353; break; // Rank 3
-                    default:
-                        sLog.outError("Unit::HandleProcTriggerSpellAuraProc: Spell %u miss posibly Judgement of Light/Wisdom", auraSpellInfo->Id);
-                        return SPELL_AURA_PROC_FAILED;
-                }
-                pVictim->CastSpell(nullptr, trigger_spell_id, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
-                return SPELL_AURA_PROC_OK;                  // no hidden cooldown
-            }
             // Illumination
-            else if (auraSpellInfo->SpellIconID == 241)
+            if (auraSpellInfo->SpellIconID == 241)
             {
                 if (!spellInfo)
                     return SPELL_AURA_PROC_FAILED;
