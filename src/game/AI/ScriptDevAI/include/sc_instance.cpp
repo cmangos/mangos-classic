@@ -3,6 +3,7 @@
  * Please see the included DOCS/LICENSE.TXT for more information */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "Maps/MapPersistentStateMgr.h"
 
 /**
    Function that uses a door or a button
