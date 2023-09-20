@@ -144,8 +144,10 @@ then
   echo "How many CPU threads should be used for extracting mmaps? (leave empty to use all available threads)"
   read line
   echo
-  if [[ ! -z $line ]]; then
-    if [[ $line =~ ^[1-9+]$ ]]; then
+  # check string is there
+  if [ ! -z $line ]; then
+    # and a number greater 0
+    if [ "$(expr "$line" : "^[1-9][0-9]*$")" -gt 0 ]; then
       NUM_THREAD=$line
     else
       echo "Only numbers are allowed!"
@@ -252,8 +254,9 @@ if [ "$USE_VMAPS" = "1" ]
 then
   echo "$(date): Start extraction of vmaps..." | tee -a $LOG_FILE
   $PREFIX/vmap_extractor $VMAP_RES $VMAP_OPT_RES | tee -a $DETAIL_LOG_FILE
-  exit_code="${PIPESTATUS[0]}"
-  if [[ "$exit_code" -ne "0" ]]; then
+  # $? has the exit code of the last closed pipeline, vmap_extractor in this case
+  exit_code="$?"
+  if [ "$exit_code" -ne "0" ]; then
     echo "$(date): Extraction of vmaps failed with errors. Aborting extraction. See the log file for more details."
     exit "$exit_code"
   fi
@@ -264,8 +267,9 @@ then
   fi
   echo "$(date): Start assembling of vmaps..." | tee -a $LOG_FILE
   $PREFIX/vmap_assembler ${OUTPUT_PATH:-.}/Buildings ${OUTPUT_PATH:-.}/vmaps | tee -a $DETAIL_LOG_FILE
-  exit_code="${PIPESTATUS[0]}"
-  if [[ "$exit_code" -ne "0" ]]; then
+  # $? has the exit code of the last closed pipeline, vmap_assembler in this case
+  exit_code="$?"
+  if [ "$exit_code" -ne "0" ]; then
     echo "$(date): Assembling of vmaps failed with errors. Aborting extraction. See the log file for more details."
     exit "$exit_code"
   fi

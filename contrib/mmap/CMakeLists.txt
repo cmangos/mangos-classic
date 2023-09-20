@@ -119,6 +119,6 @@ if (BUILD_EXTRACTORS)
   endif()
 
   install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR}/tools)
-  install(FILES "${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/MoveMapGen.sh" DESTINATION ${BIN_DIR}/tools)
+  install(PROGRAMS "${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/MoveMapGen.sh" DESTINATION ${BIN_DIR}/tools)
   install(FILES "${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/offmesh.txt" DESTINATION ${BIN_DIR}/tools)
 endif()
