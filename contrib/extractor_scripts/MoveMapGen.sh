@@ -16,7 +16,7 @@
 ## 3rd param may be an addition filename for storing detailed log
 ## 4th param may be a number of threads to use for maps processing
 
-PREFIX="$(dirname $0)"
+PREFIX="$(dirname "$0")"
 
 ## Additional Parameters to be forwarded to MoveMapGen, see mmaps/readme for instructions
 PARAMS="--silent --configInputPath config.json"
@@ -43,8 +43,8 @@ badParam()
 if [ "$#" = "5" ]
 then
   OUTPUT_PATH="$2"
-  LOG_FILE=$3
-  DETAIL_LOG_FILE=$4
+  LOG_FILE="$3"
+  DETAIL_LOG_FILE="$4"
   if [ "$5" != "all" ]
   then
     PARAMS="${PARAMS} --threads $5"
@@ -52,12 +52,12 @@ then
 elif [ "$#" = "4" ]
 then
   OUTPUT_PATH="$2"
-  LOG_FILE=$3
-  DETAIL_LOG_FILE=$4
+  LOG_FILE="$3"
+  DETAIL_LOG_FILE="$4"
 elif [ "$#" = "3" ]
 then
   OUTPUT_PATH="$2"
-  LOG_FILE=$3
+  LOG_FILE="$3"
 fi
 
 # Offmesh file provided?
@@ -77,10 +77,10 @@ fi
 
 createHeader()
 {
- echo "`date`: Start creating MoveMaps" | tee -a $LOG_FILE
- echo "Used params: $PARAMS $OFFMESH" | tee -a $LOG_FILE
- echo "Detailed log can be found in $DETAIL_LOG_FILE" | tee -a $LOG_FILE
- echo "Start creating MoveMaps" | tee -a $DETAIL_LOG_FILE
+ echo "$(date): Start creating MoveMaps" | tee -a "$LOG_FILE"
+ echo "Used params: $PARAMS $OFFMESH" | tee -a "$LOG_FILE"
+ echo "Detailed log can be found in $DETAIL_LOG_FILE" | tee -a "$LOG_FILE"
+ echo "Start creating MoveMaps" | tee -a "$DETAIL_LOG_FILE"
  echo
  echo "Be PATIENT - This may take a long time with small number of threads and might also have gaps between visible changes on the console."
  echo "WAIT until you are informed that 'creating MoveMaps' is 'finished'!"
@@ -89,7 +89,7 @@ createHeader()
 # Create mmaps directory if not exist
 if [ ! -d mmaps ]
 then
- mkdir ${OUTPUT_PATH:-.}/mmaps
+ mkdir "${OUTPUT_PATH:-.}/mmaps"
 fi
 
 # Param control
@@ -97,15 +97,15 @@ case "$1" in
 
  "maps" )
     createHeader
-    $PREFIX/MoveMapGen $PARAMS $OFFMESH $MMG_RES --buildGameObjects | tee -a $DETAIL_LOG_FILE
+    "$PREFIX"/MoveMapGen "$PARAMS" "$OFFMESH" "$MMG_RES" --buildGameObjects | tee -a "$DETAIL_LOG_FILE"
    ;;
  "offmesh" )
-   echo "`date`: Recreate offmeshes from file $OFFMESH_FILE" | tee -a $LOG_FILE
-   echo "Recreate offmeshes from file $OFFMESH_FILE" | tee -a $DETAIL_LOG_FILE
+   echo "$(date): Recreate offmeshes from file $OFFMESH_FILE" | tee -a "$LOG_FILE"
+   echo "Recreate offmeshes from file $OFFMESH_FILE" | tee -a "$DETAIL_LOG_FILE"
    while read map tile line
    do
-     $PREFIX/MoveMapGen $PARAMS $OFFMESH $MMG_RES $map --tile $tile | tee -a $DETAIL_LOG_FILE
-     echo "`date`: Recreated $map $tile from $OFFMESH_FILE" | tee -a $LOG_FILE
+     "$PREFIX"/MoveMapGen "$PARAMS" "$OFFMESH" "$MMG_RES" "$map" --tile "$tile" | tee -a "$DETAIL_LOG_FILE"
+     echo "$(date): Recreated $map $tile from $OFFMESH_FILE" | tee -a "$LOG_FILE"
    done < $OFFMESH_FILE &
    ;;
  * )
@@ -116,7 +116,7 @@ esac
 
 wait
 
-echo  | tee -a $LOG_FILE
-echo  | tee -a $DETAIL_LOG_FILE
-echo "`date`: Finished creating MoveMaps" | tee -a $LOG_FILE
-echo "`date`: Finished creating MoveMaps" >> $DETAIL_LOG_FILE
+echo  | tee -a "$LOG_FILE"
+echo  | tee -a "$DETAIL_LOG_FILE"
+echo "$(date): Finished creating MoveMaps" | tee -a "$LOG_FILE"
+echo "$(date): Finished creating MoveMaps" >> "$DETAIL_LOG_FILE"
