@@ -1,5 +1,4 @@
 #!/bin/sh
-set -e
 
 # This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
 #
@@ -252,27 +251,32 @@ fi
 ## Extract vmaps
 if [ "$USE_VMAPS" = "1" ]
 then
+  # We need to save the exit code for vmap_extractor and vmap_assembler so it doesn't get swallowed by tee. For this we create a temporary file.
+  file=$(mktemp)
   echo "$(date): Start extraction of vmaps..." | tee -a $LOG_FILE
-  $PREFIX/vmap_extractor $VMAP_RES $VMAP_OPT_RES | tee -a $DETAIL_LOG_FILE
-  # $? has the exit code of the last closed pipeline, vmap_extractor in this case
-  exit_code="$?"
+  # We group command and echo to file so we can save the exit code ($?) before execution of tee overwrites it.
+  { $PREFIX/vmap_extractor $VMAP_RES $VMAP_OPT_RES; echo $? > "$file"; } | tee -a $DETAIL_LOG_FILE
+  exit_code="$(cat $file)"
   if [ "$exit_code" -ne "0" ]; then
     echo "$(date): Extraction of vmaps failed with errors. Aborting extraction. See the log file for more details."
+    rm "$file"
     exit "$exit_code"
   fi
   echo "$(date): Extracting of vmaps finished" | tee -a $LOG_FILE
-  if [ ! -d "$(pwd)/vmaps" ]
+  if [ ! -d "${OUTPUT_PATH:-.}/vmaps" ]
   then
     mkdir ${OUTPUT_PATH:-.}/vmaps
   fi
   echo "$(date): Start assembling of vmaps..." | tee -a $LOG_FILE
-  $PREFIX/vmap_assembler ${OUTPUT_PATH:-.}/Buildings ${OUTPUT_PATH:-.}/vmaps | tee -a $DETAIL_LOG_FILE
-  # $? has the exit code of the last closed pipeline, vmap_assembler in this case
-  exit_code="$?"
+  # We group command and echo to file so we can save the exit code ($?) before execution of tee overwrites it.
+  { $PREFIX/vmap_assembler ${OUTPUT_PATH:-.}/Buildings ${OUTPUT_PATH:-.}/vmaps; echo $? > "$file"; } | tee -a $DETAIL_LOG_FILE
+  exit_code="$(cat $file)"
   if [ "$exit_code" -ne "0" ]; then
     echo "$(date): Assembling of vmaps failed with errors. Aborting extraction. See the log file for more details."
+    rm "$file"
     exit "$exit_code"
   fi
+  rm "$file"
   echo "$(date): Assembling of vmaps finished" | tee -a $LOG_FILE
 
   echo | tee -a $LOG_FILE

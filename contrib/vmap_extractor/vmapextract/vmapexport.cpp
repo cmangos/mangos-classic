@@ -477,9 +477,7 @@ int main(int argc, char** argv)
         if (!stat(sdir.c_str(), &status) || !stat(sdir_bin.c_str(), &status))
         {
             printf("Your output directory seems to be polluted, please use an empty directory!\n");
-            printf("<press return to exit>");
-            char garbage[2];
-            scanf("%c", garbage);
+            fflush(stdout);
             return 1;
         }
     }
