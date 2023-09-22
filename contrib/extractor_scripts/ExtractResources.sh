@@ -137,7 +137,11 @@ then
 fi
 
 ## MMap Extraction specific
-if [ "$USE_MMAPS" = "1" ]
+if [ "$1" = "a" ]
+then
+  NUM_THREAD="all"
+  USE_MMAPS_DELAY=""
+elif [ "$USE_MMAPS" = "1" ]
 then
   ## Obtain number of processes
   echo "How many CPU threads should be used for extracting mmaps? (leave empty to use all available threads)"
@@ -170,9 +174,12 @@ then
 fi
 
 ## Check if user want to do high resolution extraction of maps
-if [ "$USE_AD" = "1" ]; then
+if [ "$1" = "a" ]
+then
+  AD_RES=""
+elif [ "$USE_AD" = "1" ]; then
   echo
-  echo "Would you like the extraction of maps to be high-resolution? (y/n)"
+  echo "Would you like the extraction of maps to be high-resolution? [y/N]"
   read line
   if [ "$line" = "y" ]; then
     AD_RES="-f 0"
@@ -182,9 +189,12 @@ if [ "$USE_AD" = "1" ]; then
 fi
 
 ## Check if user want to do high resolution extraction of vmaps
-if [ "$USE_VMAPS" = "1" ]; then
+if [ "$1" = "a" ]
+then
+  VMAP_RES=""
+elif [ "$USE_VMAPS" = "1" ]; then
   echo
-  echo "Would you like the extraction of vmaps to be high-resolution? (y/n)"
+  echo "Would you like the extraction of vmaps to be high-resolution? [y/N]"
   read line
   if [ "$line" = "y" ]; then
     VMAP_RES="-l"
@@ -192,6 +202,7 @@ if [ "$USE_VMAPS" = "1" ]; then
     VMAP_RES=""
   fi
 fi
+
 ## Give some status
 echo
 echo "Current Settings:"
