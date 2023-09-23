@@ -253,7 +253,7 @@ echo | tee -a "$DETAIL_LOG_FILE"
 if [ "$USE_AD" = "1" ]
 then
  echo "$(date): Start extraction of DBCs and map files..." | tee -a "$LOG_FILE"
- "$PREFIX"/ad "$AD_RES" "$AD_OPT_RES" | tee -a "$DETAIL_LOG_FILE"
+ "$PREFIX"/ad $AD_RES $AD_OPT_RES | tee -a "$DETAIL_LOG_FILE"
  echo "$(date): Extracting of DBCs and map files finished" | tee -a "$LOG_FILE"
  echo | tee -a "$LOG_FILE"
  echo | tee -a "$DETAIL_LOG_FILE"
@@ -266,7 +266,7 @@ then
   file=$(mktemp)
   echo "$(date): Start extraction of vmaps..." | tee -a "$LOG_FILE"
   # We group command and echo to file so we can save the exit code ($?) before execution of tee overwrites it.
-  { "$PREFIX"/vmap_extractor "$VMAP_RES" "$VMAP_OPT_RES"; echo $? > "$file"; } | tee -a "$DETAIL_LOG_FILE"
+  { "$PREFIX"/vmap_extractor $VMAP_RES $VMAP_OPT_RES; echo $? > "$file"; } | tee -a "$DETAIL_LOG_FILE"
   exit_code=$(cat "$file")
   if [ "$exit_code" -ne "0" ]; then
     echo "$(date): Extraction of vmaps failed with errors. Aborting extraction. See the log file for more details."
