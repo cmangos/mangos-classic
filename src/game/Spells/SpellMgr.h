@@ -1515,6 +1515,12 @@ inline bool IsIgnoreRootSpell(SpellEntry const* spellInfo)
     return false;
 }
 
+inline bool IsSpellUseWeaponSkill(SpellEntry const* spellInfo)
+{
+    // note: this is not a mirror of client function - that function does not work for Bloodthirst edgecase
+    return spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON || spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE || spellInfo->DmgClass == SPELL_DAMAGE_CLASS_RANGED && spellInfo->HasAttribute(SPELL_ATTR_USES_RANGED_SLOT);
+}
+
 inline uint32 GetDispellMask(DispelType dispel)
 {
     // If dispell all
