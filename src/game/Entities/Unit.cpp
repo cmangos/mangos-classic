@@ -6979,23 +6979,6 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellSchoolMask schoolMask, Spel
         i->OnDamageCalculate(this, victim, DoneAdvertisedBenefit, DoneTotalMod);
     }
 
-    AuraList const& mOverrideClassScript = owner->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-    for (auto i : mOverrideClassScript)
-    {
-        if (!i->isAffectedOnSpell(spellInfo))
-            continue;
-
-        switch (i->GetModifier()->m_miscvalue)
-        {
-            case 4418: // Increased Shock Damage
-            case 4554: // Increased Lightning Damage
-            {
-                DoneAdvertisedBenefit += i->GetModifier()->m_amount;
-                break;
-            }
-        }
-    }
-
     // Pets just add their bonus damage to their spell damage
     // note that their spell damage is just gain of their own auras
     if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->IsPet())
