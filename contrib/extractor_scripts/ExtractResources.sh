@@ -251,7 +251,14 @@ then
  then
   set -- "$@" "-o" "$OUTPUT_PATH"
  fi
- "$PREFIX"/ad "$@" | tee -a "$DETAIL_LOG_FILE"
+ file=$(mktemp)
+ { "$PREFIX"/ad "$@"; echo $? > "$file"; } | tee -a "$DETAIL_LOG_FILE"
+ exit_code=$(cat "$file")
+ rm "$file"
+ if [ "$exit_code" -ne "0" ]; then
+  echo "$(date): Extraction of DBCs and map files failed with errors. Aborting extraction. See the log file for more details."
+  exit "$exit_code"
+ fi
  echo "$(date): Extracting of DBCs and map files finished" | tee -a "$LOG_FILE"
  echo | tee -a "$LOG_FILE"
  echo | tee -a "$DETAIL_LOG_FILE"
