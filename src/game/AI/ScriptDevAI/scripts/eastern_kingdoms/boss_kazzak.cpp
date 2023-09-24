@@ -181,15 +181,40 @@ struct boss_kazzakAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_kazzak(Creature* pCreature)
+// 21056 - Mark of Kazzak
+struct MarkOfLordKazzak : public AuraScript
 {
-    return new boss_kazzakAI(pCreature);
-}
+    void OnPeriodicTickEnd(Aura* aura) const override
+    {
+        if (aura->GetTarget()->HasMana())
+        {
+            if (aura->GetTarget()->GetPower(POWER_MANA) == 0)
+            {
+                aura->GetTarget()->CastSpell(nullptr, 21058, TRIGGERED_OLD_TRIGGERED);
+                aura->GetTarget()->RemoveAurasDueToSpell(aura->GetId());
+            }
+        }
+    }
+};
+
+// 21063 - Twisted Reflection
+struct TwistedReflection : public AuraScript
+{
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        procData.triggerTarget = procData.victim;
+        procData.triggeredSpellId = 21064;
+        return SPELL_AURA_PROC_OK;
+    }
+};
 
 void AddSC_boss_kazzakAI()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_kazzak";
-    pNewScript->GetAI = &GetAI_boss_kazzak;
+    pNewScript->GetAI = &GetNewAIInstance<boss_kazzakAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<MarkOfLordKazzak>("spell_mark_of_lord_kazzak");
+    RegisterSpellScript<TwistedReflection>("spell_twisted_reflection");
 }

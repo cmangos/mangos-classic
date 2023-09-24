@@ -160,6 +160,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28853,'spell_increased_healing_done_dummy'),
 (27859,'spell_increased_spell_damage_done_dummy'),
 (28857,'spell_increased_spell_damage_done_dummy'),
+(21056,'spell_mark_of_lord_kazzak'),
+(21063,'spell_twisted_reflection'),
 (491,'spell_gameobject_call_for_help_on_usage'), -- Khadgar's Unlocking
 (857,'spell_gameobject_call_for_help_on_usage'), -- Khadgar's Unlocking
 (1804,'spell_gameobject_call_for_help_on_usage'), -- Pick Lock

@@ -823,10 +823,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                     triggered_spell_id = 22858;
                     break;
                 }
-                // Twisted Reflection (boss spell)
-                case 21063:
-                    triggered_spell_id = 21064;
-                    break;
                 // Unstable Power
                 case 24658:
                 {
