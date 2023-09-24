@@ -4654,7 +4654,6 @@ void Spell::EffectActivateObject(SpellEffectIndex effIdx)
             switch (m_spellInfo->Id)
             {
                 case 17731:         // Onyxia - Eruption
-                case 24731:
                     gameObjTarget->SendGameObjectCustomAnim(gameObjTarget->GetObjectGuid());
                     break;
                 default:
