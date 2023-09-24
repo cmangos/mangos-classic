@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
 #
@@ -62,7 +62,6 @@ fi
 
 # Offmesh file provided?
 OFFMESH=""
-MMG_RES="--workdir ${OUTPUT_PATH:-.}/"
 if [ "$OFFMESH_FILE" != "" ]
 then
  if [ ! -f "$OFFMESH_FILE" ]
@@ -97,14 +96,14 @@ case "$1" in
 
  "maps" )
     createHeader
-    "$PREFIX"/MoveMapGen $PARAMS $OFFMESH $MMG_RES --buildGameObjects | tee -a "$DETAIL_LOG_FILE"
+    "$PREFIX"/MoveMapGen $PARAMS $OFFMESH --workdir "${OUTPUT_PATH:-.}/" --buildGameObjects | tee -a "$DETAIL_LOG_FILE"
    ;;
  "offmesh" )
    echo "$(date): Recreate offmeshes from file $OFFMESH_FILE" | tee -a "$LOG_FILE"
    echo "Recreate offmeshes from file $OFFMESH_FILE" | tee -a "$DETAIL_LOG_FILE"
    while read map tile line
    do
-     "$PREFIX"/MoveMapGen $PARAMS $OFFMESH $MMG_RES "$map" --tile "$tile" | tee -a "$DETAIL_LOG_FILE"
+     "$PREFIX"/MoveMapGen $PARAMS $OFFMESH --workdir "${OUTPUT_PATH:-.}/" "$map" --tile "$tile" | tee -a "$DETAIL_LOG_FILE"
      echo "$(date): Recreated $map $tile from $OFFMESH_FILE" | tee -a "$LOG_FILE"
    done < $OFFMESH_FILE &
    ;;

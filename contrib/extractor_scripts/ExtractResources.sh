@@ -116,18 +116,6 @@ else
   fi
 fi
 
-if [ "x$CLIENT_PATH" != "x" ]
-then
-  AD_OPT_RES="-i $CLIENT_PATH"
-  VMAP_OPT_RES="-d $CLIENT_PATH/Data"
-fi
-
-if [ "x$OUTPUT_PATH" != "x" ] && [ -d "$OUTPUT_PATH" ]
-then
-  AD_OPT_RES="$AD_OPT_RES -o $OUTPUT_PATH"
-  VMAP_OPT_RES="$VMAP_OPT_RES -o $OUTPUT_PATH"
-fi
-
 ## Special case: Only reextract offmesh tiles
 if [ "$USE_MMAPS_OFFMESH" = "1" ]
 then
@@ -253,7 +241,17 @@ echo | tee -a "$DETAIL_LOG_FILE"
 if [ "$USE_AD" = "1" ]
 then
  echo "$(date): Start extraction of DBCs and map files..." | tee -a "$LOG_FILE"
- "$PREFIX"/ad $AD_RES $AD_OPT_RES | tee -a "$DETAIL_LOG_FILE"
+ # Prepare ad arguments
+ set -- $AD_RES
+ if [ "x$CLIENT_PATH" != "x" ]
+ then
+  set -- "$@" "-i" "$CLIENT_PATH"
+ fi
+ if [ "x$OUTPUT_PATH" != "x" ] && [ -d "$OUTPUT_PATH" ]
+ then
+  set -- "$@" "-o" "$OUTPUT_PATH"
+ fi
+ "$PREFIX"/ad "$@" | tee -a "$DETAIL_LOG_FILE"
  echo "$(date): Extracting of DBCs and map files finished" | tee -a "$LOG_FILE"
  echo | tee -a "$LOG_FILE"
  echo | tee -a "$DETAIL_LOG_FILE"
@@ -265,8 +263,18 @@ then
   # We need to save the exit code for vmap_extractor and vmap_assembler so it doesn't get swallowed by tee. For this we create a temporary file.
   file=$(mktemp)
   echo "$(date): Start extraction of vmaps..." | tee -a "$LOG_FILE"
+  # Prepare vmap_extractor arguments
+  set -- $VMAP_RES
+  if [ "x$CLIENT_PATH" != "x" ]
+  then
+   set -- "$@" "-d" "$CLIENT_PATH/Data"
+  fi
+  if [ "x$OUTPUT_PATH" != "x" ] && [ -d "$OUTPUT_PATH" ]
+  then
+   set -- "$@" "-o" "$OUTPUT_PATH"
+  fi
   # We group command and echo to file so we can save the exit code ($?) before execution of tee overwrites it.
-  { "$PREFIX"/vmap_extractor $VMAP_RES $VMAP_OPT_RES; echo $? > "$file"; } | tee -a "$DETAIL_LOG_FILE"
+  { "$PREFIX"/vmap_extractor "$@"; echo $? > "$file"; } | tee -a "$DETAIL_LOG_FILE"
   exit_code=$(cat "$file")
   if [ "$exit_code" -ne "0" ]; then
     echo "$(date): Extraction of vmaps failed with errors. Aborting extraction. See the log file for more details."
