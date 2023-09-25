@@ -406,6 +406,10 @@ void CreatureGroup::TriggerLinkingEvent(uint32 event, Unit* target)
             if ((m_entry.Flags & CREATURE_GROUP_AGGRO_TOGETHER) == 0)
                 return;
 
+            // disallow aggro of a group member
+            if (m_objects.find(target->GetDbGuid()) != m_objects.end())
+                return;
+
             for (auto& data : m_objects)
             {
                 uint32 dbGuid = data.first;
