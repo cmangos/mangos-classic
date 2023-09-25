@@ -149,6 +149,13 @@ void TimerManager::ResetAllTimers()
         data.second.ResetTimer();
 }
 
+void TimerManager::ResetTimersOnEvade()
+{
+    for (auto& data : m_timers)
+        if (data.second.combatSetting != TIMER_ALWAYS)
+            data.second.ResetTimer();
+}
+
 void TimerManager::GetAIInformation(ChatHandler& reader)
 {
     reader.PSendSysMessage("TimerAI: Timers:");
@@ -185,6 +192,21 @@ void CombatActions::ResetAllTimers()
     for (auto& data : m_combatActions)
         data.second.ResetTimer();
     TimerManager::ResetAllTimers();
+}
+
+void CombatActions::ResetTimersOnEvade()
+{
+    for (uint32 i = 0; i < m_actionReadyStatus.size(); ++i)
+    {
+        auto itr = m_timerlessActionSettings.find(i);
+        if (itr == m_timerlessActionSettings.end())
+            m_actionReadyStatus[i] = false;
+        else
+            m_actionReadyStatus[i] = (*itr).second;
+    }
+    for (auto& data : m_combatActions)
+        data.second.ResetTimer();
+    TimerManager::ResetTimersOnEvade();
 }
 
 void CombatActions::AddCombatAction(uint32 id, bool disabled)
