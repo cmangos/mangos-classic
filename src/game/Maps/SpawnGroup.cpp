@@ -407,7 +407,7 @@ void CreatureGroup::TriggerLinkingEvent(uint32 event, Unit* target)
                 return;
 
             // disallow aggro of a group member
-            if (m_objects.find(target->GetDbGuid()) != m_objects.end())
+            if (!target->HasCharmer() && m_objects.find(target->GetDbGuid()) != m_objects.end())
                 return;
 
             for (auto& data : m_objects)
