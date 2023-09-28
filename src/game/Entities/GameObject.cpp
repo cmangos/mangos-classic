@@ -92,7 +92,7 @@ GameObject::GameObject() : WorldObject(),
     m_isInUse = false;
     m_reStockTimer = 0;
     m_rearmTimer = 0;
-    m_despawnTimer = 0;
+    m_despawnTimer = TimePoint::max();
 
     m_delayedActionTimer = 0;
 
@@ -526,9 +526,7 @@ void GameObject::Update(const uint32 diff)
                 case GAMEOBJECT_TYPE_CHEST:
                     if (m_loot)
                     {
-                        if (m_loot->IsChanged())
-                            m_despawnTimer = time(nullptr) + 5 * MINUTE; // TODO:: need to add a define?
-                        else if (m_despawnTimer != 0 && m_despawnTimer <= time(nullptr))
+                        if (m_despawnTimer <= GetMap()->GetCurrentClockTime())
                             m_lootState = GO_JUST_DEACTIVATED;
 
                         m_loot->Update();
@@ -625,7 +623,7 @@ void GameObject::Update(const uint32 diff)
                     SetLootState(GO_READY);
                     return; // SetLootState and return because go is treated as "burning flag" due to GetGoAnimProgress() being 100 and would be removed on the client
                 case GAMEOBJECT_TYPE_CHEST:
-                    m_despawnTimer = 0;
+                    m_despawnTimer = TimePoint::max();
                     // consumable confirmed to override chest restock
                     if (!m_goInfo->chest.consumable && m_goInfo->chest.chestRestockTime)
                     {
@@ -744,6 +742,11 @@ void GameObject::Heartbeat()
 {
     if (AI())
         AI()->OnHeartbeat();
+}
+
+void GameObject::SetChestDespawn()
+{
+    m_despawnTimer = GetMap()->GetCurrentClockTime() + std::chrono::minutes(5);
 }
 
 void GameObject::Refresh()
