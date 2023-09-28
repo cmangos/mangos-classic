@@ -55,7 +55,7 @@ struct ShatterMage : public AuraScript
         aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_CRIT_CHANCE, apply);
     }
 
-    void OnCritChanceCalculate(Aura* aura, Unit const* target, float& chance) const override
+    void OnCritChanceCalculate(Aura* aura, Unit const* target, float& chance, SpellEntry const* /*spellInfo*/) const override
     {
         switch (aura->GetModifier()->m_miscvalue)
         {

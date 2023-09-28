@@ -6156,10 +6156,10 @@ void Aura::OnDamageCalculate(Unit* victim, Unit* attacker, int32& advertisedBene
         return script->OnDamageCalculate(this, attacker, victim, advertisedBenefit, totalMod);
 }
 
-void Aura::OnCritChanceCalculate(Unit const* victim, float& chance)
+void Aura::OnCritChanceCalculate(Unit const* victim, float& chance, SpellEntry const* spellInfo)
 {
     if (AuraScript* script = GetAuraScript())
-        return script->OnCritChanceCalculate(this, victim, chance);
+        return script->OnCritChanceCalculate(this, victim, chance, spellInfo);
 }
 
 void Aura::OnApply(bool apply)
