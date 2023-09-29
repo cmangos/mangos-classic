@@ -71,14 +71,14 @@ createHeader() {
   echo "$(date): Start creating MoveMaps" | tee -a "$LOG_FILE"
   echo "Used params: $PARAMS $OFFMESH" | tee -a "$LOG_FILE"
   echo "Detailed log can be found in $DETAIL_LOG_FILE" | tee -a "$LOG_FILE"
-  echo "Start creating MoveMaps" | tee -a "$DETAIL_LOG_FILE"
+  echo "Start creating MoveMaps" >>"$DETAIL_LOG_FILE"
   echo
   echo "Be PATIENT - This may take a long time with small number of threads and might also have gaps between visible changes on the console."
   echo "WAIT until you are informed that 'creating MoveMaps' is 'finished'!"
 }
 
 # Create mmaps directory if not exist
-if [ ! -d mmaps ]; then
+if [ ! -d "${OUTPUT_PATH:-.}/mmaps" ]; then
   mkdir "${OUTPUT_PATH:-.}/mmaps"
 fi
 
@@ -87,15 +87,41 @@ case "$1" in
 
 "maps")
   createHeader
-  "$PREFIX"/MoveMapGen $PARAMS $OFFMESH --workdir "${OUTPUT_PATH:-.}/" --buildGameObjects | tee -a "$DETAIL_LOG_FILE"
+  file=$(mktemp)
+  {
+    "$PREFIX"/MoveMapGen $PARAMS $OFFMESH --workdir "${OUTPUT_PATH:-.}/" --buildGameObjects
+    echo $? >"$file"
+  } | tee -a "$DETAIL_LOG_FILE"
+  exit_code=$(cat "$file")
+  rm "$file"
+  if [ "$exit_code" -ne "0" ]; then
+    echo "$(date): Creation of MoveMaps failed. Aborting."
+    exit "$exit_code"
+  fi
   ;;
 "offmesh")
   echo "$(date): Recreate offmeshes from file $OFFMESH_FILE" | tee -a "$LOG_FILE"
-  echo "Recreate offmeshes from file $OFFMESH_FILE" | tee -a "$DETAIL_LOG_FILE"
+  echo "Recreate offmeshes from file $OFFMESH_FILE" >>"$DETAIL_LOG_FILE"
+  file=$(mktemp)
   while read map tile line; do
-    "$PREFIX"/MoveMapGen $PARAMS $OFFMESH --workdir "${OUTPUT_PATH:-.}/" "$map" --tile "$tile" | tee -a "$DETAIL_LOG_FILE"
-    echo "$(date): Recreated $map $tile from $OFFMESH_FILE" | tee -a "$LOG_FILE"
+    {
+      "$PREFIX"/MoveMapGen $PARAMS $OFFMESH --workdir "${OUTPUT_PATH:-.}/" "$map" --tile "$tile"
+      echo $? >"$file"
+    } | tee -a "$DETAIL_LOG_FILE"
+    exit_code=$(cat "$file")
+    if [ "$exit_code" -ne "0" ]; then
+      echo "$(date): Error when recreating $map $tile from $OFFMESH_FILE. Aborting."
+      exit "$exit_code"
+    else
+      echo "$(date): Recreated $map $tile from $OFFMESH_FILE" | tee -a "$LOG_FILE"
+    fi
   done <$OFFMESH_FILE &
+  wait
+  exit_code=$(cat "$file")
+  rm "$file"
+  if [ "$exit_code" -ne "0" ]; then
+    exit "$exit_code"
+  fi
   ;;
 *)
   badParam
@@ -103,9 +129,7 @@ case "$1" in
   ;;
 esac
 
-wait
-
 echo | tee -a "$LOG_FILE"
-echo | tee -a "$DETAIL_LOG_FILE"
+echo >>"$DETAIL_LOG_FILE"
 echo "$(date): Finished creating MoveMaps" | tee -a "$LOG_FILE"
 echo "$(date): Finished creating MoveMaps" >>"$DETAIL_LOG_FILE"
