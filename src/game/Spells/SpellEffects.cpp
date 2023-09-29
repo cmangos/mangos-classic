@@ -2015,6 +2015,7 @@ void Spell::EffectHeal(SpellEffectIndex eff_idx)
         }
 
         addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
+        addhealth *= m_damageDoneMultiplier[eff_idx];
         addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
 
         m_healingPerEffect[eff_idx] = addhealth;
