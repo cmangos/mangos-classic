@@ -62,6 +62,7 @@ class CreatureAI : public UnitAI
         virtual void RequestFollow(Unit* followee) override;
         virtual void RelinquishFollow(ObjectGuid follower) override;
     protected:
+        void HandleSpawnGuard();
 
         Creature* m_creature;
         bool m_deathPrevented;

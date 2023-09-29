@@ -285,24 +285,6 @@ BattleGround::~BattleGround()
 */
 void BattleGround::Update(uint32 diff)
 {
-    if (!GetPlayersSize())
-    {
-        // BG is empty
-        // if there are no players invited, delete BG
-        // this will delete arena or bg object, where any player entered
-        // [[   but if you use battleground object again (more battles possible to be played on 1 instance)
-        //      then this condition should be removed and code:
-        //      if (!GetInvitedCount(HORDE) && !GetInvitedCount(ALLIANCE))
-        //          this->AddToFreeBGObjectsQueue(); // not yet implemented
-        //      should be used instead of current
-        // ]]
-        // BattleGround Template instance cannot be updated, because it would be deleted
-        if (!GetInvitedCount(HORDE) && !GetInvitedCount(ALLIANCE))
-            delete this;
-
-        return;
-    }
-
     // remove offline players from bg after 5 minutes
     if (!m_offlineQueue.empty())
     {

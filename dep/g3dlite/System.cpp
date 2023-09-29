@@ -1334,11 +1334,12 @@ public:
                     ++medPoolSize;
                     return;
                 }
-                bytesAllocated -= USERSIZE_TO_REALSIZE(bytes);
-
-                // Free; the buffer pools are full or this is too big to store.
-                ::free(USERPTR_TO_REALPTR(ptr));
             }
+
+            bytesAllocated -= USERSIZE_TO_REALSIZE(bytes);
+
+            // Free; the buffer pools are full or this is too big to store.
+            ::free(USERPTR_TO_REALPTR(ptr));
         }
     }
 

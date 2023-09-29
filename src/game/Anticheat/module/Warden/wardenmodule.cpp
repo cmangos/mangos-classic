@@ -81,6 +81,23 @@ WardenModule::WardenModule(std::string const &bin, std::string const &kf, std::s
 
     if (Windows())
     {
+        for (uint8 i = 0; i <= UINT8_MAX; i++)
+        {
+            if (opcodes[0] != i &&
+                opcodes[1] != i &&
+                opcodes[2] != i &&
+                opcodes[3] != i &&
+                opcodes[4] != i &&
+                opcodes[5] != i &&
+                opcodes[6] != i &&
+                opcodes[7] != i &&
+                opcodes[8] != i)
+            {
+                scanTerminator = i;
+                break;
+            }
+        }
+
         if (!memoryRead)
             throw std::runtime_error("Module data does not include memory read information");
 

@@ -1867,7 +1867,23 @@ void BattleGroundMap::Update(const uint32& diff)
 {
     Map::Update(diff);
 
-    GetBG()->Update(diff);
+    if (!m_bg->GetPlayersSize())
+    {
+        // BG is empty
+        // if there are no players invited, delete BG
+        // this will delete arena or bg object, where any player entered
+        // [[   but if you use battleground object again (more battles possible to be played on 1 instance)
+        //      then this condition should be removed and code:
+        //      if (!GetInvitedCount(HORDE) && !GetInvitedCount(ALLIANCE))
+        //          this->AddToFreeBGObjectsQueue(); // not yet implemented
+        //      should be used instead of current
+        // ]]
+        // BattleGround Template instance cannot be updated, because it would be deleted
+        if (!m_bg->GetInvitedCount(HORDE) && !m_bg->GetInvitedCount(ALLIANCE))
+            delete m_bg;
+    }
+    else
+        m_bg->Update(diff);
 }
 
 BattleGroundPersistentState* BattleGroundMap::GetPersistanceState() const
@@ -2261,6 +2277,24 @@ std::vector<GameObject*> const* Map::GetGameObjects(uint32 stringId) const
         return nullptr;
 
     return &(itr->second.gameobjects);
+}
+
+WorldObject* Map::GetWorldObject(std::string stringId) const
+{
+    auto objects = GetWorldObjects(stringId);
+    return objects && !objects->empty() ? objects->front() : nullptr;
+}
+
+Creature* Map::GetCreature(std::string stringId) const
+{
+    auto objects = GetCreatures(stringId);
+    return objects && !objects->empty() ? objects->front() : nullptr;
+}
+
+GameObject* Map::GetGameObject(std::string stringId) const
+{
+    auto objects = GetGameObjects(stringId);
+    return objects && !objects->empty() ? objects->front() : nullptr;
 }
 
 void Map::AddDbGuidObject(WorldObject* obj)

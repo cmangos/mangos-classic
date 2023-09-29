@@ -89,9 +89,10 @@ struct AuraScript
     // called during any event that calculates aura modifier amount - caster can be nullptr
     virtual int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const { return value; }
     // called during done/taken damage calculation
-    virtual void OnDamageCalculate(Aura* /*aura*/, Unit* /*victim*/, int32& /*advertisedBenefit*/, float& /*totalMod*/) const {}
+    virtual void OnDamageCalculate(Aura* /*aura*/, Unit* /*attacker*/, Unit* /*victim*/, int32& /*advertisedBenefit*/, float& /*totalMod*/) const {}
     // called during duration calculation - target can be nullptr for channel duration calculation
     virtual int32 OnDurationCalculate(WorldObject const* /*caster*/, Unit const* /*target*/, int32 duration) const { return duration; }
+    virtual void OnCritChanceCalculate(Aura* /*aura*/, Unit const* /*target*/, float& /*chance*/) const {}
     // the following two hooks are done in an alternative fashion due to how they are usually used
     // if an aura is applied before, its removed after, and if some aura needs to do something after aura effect is applied, need to revert that change before its removed
     // called before aura apply and after aura unapply
@@ -124,6 +125,8 @@ struct AuraScript
     virtual void OnPersistentAreaAuraEnd(DynamicObject* /*dynGo*/) const {}
     // called on unit heartbeat
     virtual void OnHeartbeat(Aura* /*aura*/) const {}
+    // called on affect check of aura - spellInfo can be nullptr in case of melee
+    virtual bool OnAffectCheck(Aura const* /*aura*/, SpellEntry const* /*spellInfo*/) const { return true; }
     // used to override SPELL_AURA_TRANSFORM or SPELL_AURA_MOD_SHAPESHIFT display id - more uses in future
     virtual uint32 GetAuraScriptCustomizationValue(Aura* /*aura*/) const { return 0; }
 };

@@ -3,6 +3,7 @@
  * Please see the included DOCS/LICENSE.TXT for more information */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "Maps/MapPersistentStateMgr.h"
 
 /**
    Function that uses a door or a button
@@ -205,6 +206,7 @@ void ScriptedInstance::DespawnGuids(GuidVector& spawns)
 
 void ScriptedInstance::RespawnDbGuids(std::vector<uint32>& spawns, uint32 respawnDelay)
 {
+    time_t respawnTime = time(nullptr) + respawnDelay;
     for (uint32 spawn : spawns)
     {
         if (respawnDelay)
@@ -219,6 +221,7 @@ void ScriptedInstance::RespawnDbGuids(std::vector<uint32>& spawns, uint32 respaw
             }
         }
         instance->GetSpawnManager().RespawnCreature(spawn, respawnDelay);
+        instance->GetPersistentState()->SaveCreatureRespawnTime(spawn, respawnTime);
     }
 }
 

@@ -999,7 +999,7 @@ namespace MaNGOS
             WorldObject const& GetFocusObject() const { return *i_obj; }
             bool operator()(Unit* u)
             {
-                return u->IsAlive() && i_obj->IsWithinDistInMap(u, i_range, true);
+                return u->IsAlive() && i_obj->IsWithinDistInMap(u, i_range, true) && i_obj->CanAssistSpell(u);
             }
         private:
             WorldObject const* i_obj;

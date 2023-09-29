@@ -44,7 +44,7 @@ CreatureAI::CreatureAI(Creature* creature, uint32 combatActions) :
 
 void CreatureAI::Reset()
 {
-    ResetAllTimers();
+    ResetTimersOnEvade();
     m_currentRangedMode = m_rangedMode;
     m_attackDistance = m_chaseDistance;
 }
@@ -75,6 +75,9 @@ void CreatureAI::AttackStart(Unit* who)
     if (m_creature->Attack(who, m_meleeEnabled))
     {
         m_creature->EngageInCombatWith(who);
+
+        if (m_creature->GetSettings().HasFlag(CreatureStaticFlags::CALLS_GUARDS))
+            HandleSpawnGuard();
 
         HandleMovementOnAttackStart(who, targetChange);
     }
@@ -243,4 +246,105 @@ void CreatureAI::RelinquishFollow(ObjectGuid follower)
         if (Unit* owner = m_creature->GetMap()->GetUnit(m_requestedFollower))
             if (owner->IsPlayer())
                 static_cast<Player*>(owner)->RelinquishFollowData(m_creature->GetObjectGuid());
+}
+
+void CreatureAI::HandleSpawnGuard()
+{
+    Unit* caster = m_creature;
+    float pointX = 0;
+    float pointY = 0;
+    float pointZ = 0;
+
+    uint32 guardEntry = 0;
+    uint32 counter = 0;
+
+    bool foundPosition = false;
+
+    switch (caster->GetAreaId())
+    {
+        case 9:
+        case 24: guardEntry = 1642;     break;      // Northshire
+        case 42: guardEntry = 10038;    break;      // Darkshire
+        case 69: guardEntry = 10037;    break;      // Lakeshire
+        case 87: guardEntry = 1423;     break;      // Goldshire
+        case 108: guardEntry = 8096;    break;      // Sentinel Hill
+        case 131: guardEntry = 727;     break;      // Kharanos
+        case 132: guardEntry = 853;     break;      // Coldridge Valley
+        case 144: guardEntry = 8055;    break;      // Thelsamar
+        case 152:                                   // The Bulwark
+        case 154:                                   // Deathknell
+        case 159: guardEntry = 7980;    break;      // Brill
+        case 188: guardEntry = 4844;    break;      // Shadowglen
+        case 186: guardEntry = 3571;    break;      // Dolanaar
+        case 221:                                   // Camp Narache
+        case 222:                                   // Bloodhoof Village
+        {
+            switch (rand() % 4)
+            {
+                case 0: guardEntry = 3210; break;
+                case 1: guardEntry = 3211; break;
+                case 2: guardEntry = 3213; break;
+                case 3: guardEntry = 3214; break;
+            }
+            break;
+        }
+        case 228: guardEntry = 7489;    break;      // Sulpcher
+        case 271: guardEntry = 2386;    break;      // Southshore
+        case 272: guardEntry = 2405;    break;      // Tarren Mill
+        case 320: guardEntry = 10696;   break;      // Refuge Pointe
+        case 321: guardEntry = 2621;    break;      // Hammerfall
+        case 340: guardEntry = 8155;    break;      // Kargath
+        case 362: guardEntry = 5953;    break;      // Razor Hill
+        case 363: guardEntry = 5952;    break;      // Valley of Trials
+        case 367: guardEntry = 8017;    break;      // Sen'jin Village
+        case 380: guardEntry = 3501;    break;      // Crossroads
+        case 415: guardEntry = 6087;    break;      // Astranaar
+        case 431: guardEntry = 12903;   break;      // Splintertree Post
+        case 442: guardEntry = 6086;    break;      // Auberdine
+        case 460: guardEntry = 7730;    break;      // Sun Rock Retreat
+        case 484: guardEntry = 9525;    break;      // Freewind Post
+        case 513: guardEntry = 4979;    break;      // Threamore
+        case 597: guardEntry = 8154;    break;      // Ghost Walker Post
+        case 608: guardEntry = 8151;    break;      // Nijel's Point
+        case 1099: guardEntry = 8147;   break;      // Camp Mojache
+        case 1116: guardEntry = 7939;   break;      // Feathermoon Stronghold
+        case 1497: guardEntry = 5624;   break;      // Undercity
+        case 1519: guardEntry = 68;     break;      // Stormwind City
+        case 1537: guardEntry = 5595;   break;      // Ironforge
+        case 1637: guardEntry = 3296;   break;      // Orgrimmar
+        case 1638: guardEntry = 3084;   break;      // Thunder Bluff
+        case 1657: guardEntry = 4262;   break;      // Darnassus
+        case 2408: guardEntry = 12338;  break;      // Shadowprey Village
+        case 2897: guardEntry = 12903;  break;      // Zoram'gar Outpost
+        case 3462:                                  // Fairbreeze Village
+        case 3487:                                  // Silvermoon City
+        case 3488: guardEntry = 16222;  break;      // Tranquillien
+        case 3527: guardEntry = 16921;  break;      // Crash Site
+        case 3557: guardEntry = 16733;  break;      // Exodar
+        case 3576: guardEntry = 18038;  break;      // Azure Watch
+        case 3584: guardEntry = 17549;  break;      // Blood Watch
+        case 3665: guardEntry = 16222;  break;      // Falconwing Square
+    }
+
+    caster->GetRandomPoint(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ(), 30.0f, pointX, pointY, pointZ, 20.0f);
+
+
+    while (counter < 100)
+    {
+        foundPosition = caster->GetMap()->GetReachableRandomPosition(caster, pointX, pointY, pointZ, 20.0f);
+
+        if (foundPosition)
+            break;
+
+        counter++;
+    }
+
+    // Spawn Guards only if we have random position.
+    if (foundPosition && guardEntry != 0)
+    {
+        Creature* guard = caster->SummonCreature(guardEntry, pointX, pointY, pointZ, caster->GetOrientation(), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30 * IN_MILLISECONDS);
+
+        if (guard)
+            guard->AI()->AttackStart(caster->getAttackerForHelper());
+    }
 }

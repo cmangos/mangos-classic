@@ -494,7 +494,8 @@ class Aura
         // hooks
         void OnAuraInit();
         int32 OnAuraValueCalculate(Unit* caster, int32 currentValue);
-        void OnDamageCalculate(Unit* victim, int32& advertisedBenefit, float& totalMod);
+        void OnDamageCalculate(Unit* victim, Unit* attacker, int32& advertisedBenefit, float& totalMod);
+        void OnCritChanceCalculate(Unit const* victim, float& chance);
         void OnApply(bool apply);
         void OnAfterApply(bool apply);
         bool OnCheckProc(ProcExecutionData& data);
@@ -507,9 +508,11 @@ class Aura
         void OnPeriodicTickEnd();
         void OnPeriodicCalculateAmount(uint32& amount);
         void OnHeartbeat();
+        bool OnAffectCheck(SpellEntry const* spellInfo) const;
         uint32 GetAuraScriptCustomizationValue();
         // Hook Requirements
         void ForcePeriodicity(uint32 periodicTime);
+        void SetAffectOverriden() { m_affectOverriden = true; } // spell script must implement condition
 
     protected:
         Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = nullptr, Item* castItem = nullptr);
@@ -550,6 +553,7 @@ class Aura
         // Scripting system
         uint64 m_scriptValue; // persistent value for spell script state
         ScriptStorage* m_storage;
+        bool m_affectOverriden;
     private:
         void ReapplyAffectedPassiveAuras(Unit* target);
 };

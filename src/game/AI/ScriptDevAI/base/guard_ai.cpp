@@ -26,7 +26,7 @@ EndScriptData */
 
 // This script is for use within every single guard to save coding time
 
-guardAI::guardAI(Creature* creature) : ScriptedAI(creature),
+guardAI::guardAI(Creature* creature) : CombatAI(creature, 0),
     m_globalCooldown(0),
     m_buffTimer(0)
 {}
@@ -48,9 +48,6 @@ void guardAI::Aggro(Unit* who)
             case 2: DoScriptText(SAY_GUARD_SIL_AGGRO3, m_creature, who); break;
         }
     }
-
-    if (const SpellEntry* spellInfo = m_creature->ReachWithSpellAttack(who))
-        m_creature->CastSpell(who, spellInfo, TRIGGERED_NONE);
 }
 
 void guardAI::JustDied(Unit* killer)
@@ -60,76 +57,24 @@ void guardAI::JustDied(Unit* killer)
         m_creature->SendZoneUnderAttackMessage(pPlayer);
 }
 
-void guardAI::UpdateAI(const uint32 diff)
+void guardAI::JustRespawned()
 {
-    // Always decrease our global cooldown first
-    if (m_globalCooldown > diff)
-        m_globalCooldown -= diff;
-    else
-        m_globalCooldown = 0;
-
-    // Buff timer (only buff when we are alive and not in combat
-    if (m_creature->IsAlive() && !m_creature->IsInCombat())
+    CombatAI::JustRespawned();
+    const auto& spellList = GetSpellList();
+    if (spellList.ChanceRangedAttack)
     {
-        if (m_buffTimer < diff)
+        for (auto& spell : spellList.Spells)
         {
-            // Find a spell that targets friendly and applies an aura (these are generally buffs)
-            const SpellEntry* spellInfo = SelectSpell(m_creature, -1, -1, SELECT_TARGET_ANY_FRIEND, 0, 0, 0, 0, SELECT_EFFECT_AURA);
-
-            if (spellInfo && !m_globalCooldown)
+            if (spell.second.Flags & SPELL_LIST_FLAG_RANGED_ACTION)
             {
-                // Cast the buff spell
-                m_creature->CastSpell(m_creature, spellInfo, TRIGGERED_NONE);
-
-                // Set our global cooldown
-                m_globalCooldown = GENERIC_CREATURE_COOLDOWN;
-
-                // Set our timer to 10 minutes before rebuff
-                m_buffTimer = 600000;
-            }                                               // Try again in 30 seconds
-            else
-                m_buffTimer = 30000;
-        }
-        else
-            m_buffTimer -= diff;
-    }
-
-    // Return since we have no target
-    if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-        return;
-
-    // Make sure our attack is ready and we arn't currently casting
-    if (!m_creature->IsNonMeleeSpellCasted(false))
-    {
-        // If we are within range melee the target
-        if (m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
-        {
-            bool bHealing = false;
-            const SpellEntry* spellInfo = nullptr;
-
-            // Select a healing spell if less than 30% hp
-            if (m_creature->GetHealthPercent() < 30.0f && !urand(0, 2))
-                spellInfo = SelectSpell(m_creature, -1, -1, SELECT_TARGET_ANY_FRIEND, 0, 0, 0, 0, SELECT_EFFECT_HEALING);
-
-            // No healing spell available, select a hostile spell
-            if (spellInfo)
-                bHealing = true;
-            else
-                spellInfo = SelectSpell(m_creature->GetVictim(), -1, -1, SELECT_TARGET_ANY_ENEMY, 0, 0, 0, 0, SELECT_EFFECT_DONTCARE);
-
-            // 20% chance to replace our white hit with a spell
-            if (spellInfo && !urand(0, 4) && !m_globalCooldown)
-            {
-                // Cast spell
-                DoCastSpellIfCan(bHealing ? m_creature : m_creature->GetVictim(), spellInfo->Id);
-
-                // Set our global cooldown
-                m_globalCooldown = GENERIC_CREATURE_COOLDOWN;
+                SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spell.second.SpellId);
+                if (!spellInfo)
+                    continue;
+                SetRangedMode(true, CalculateSpellRange(spellInfo) * 0.8f, TYPE_PROXIMITY);
+                break;
             }
         }
     }
-
-    DoMeleeAttackIfReady();
 }
 
 void guardAI::DoReplyToTextEmote(uint32 textEmote)

@@ -145,7 +145,7 @@ bool CombatConditionMgr::Meets(Unit const* self, int32 Id, float range)
             return false;
 
     if (entry.TargetConditionId)
-        if (!self->GetTarget() || !m_unitConditionMgr.Meets(self->GetTarget(), self, entry.SelfConditionId))
+        if (!self->GetTarget() || !m_unitConditionMgr.Meets(self->GetTarget(), self, entry.TargetConditionId))
             return false;
 
     if (entry.FriendConditionId[0])

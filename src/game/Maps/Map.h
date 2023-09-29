@@ -264,6 +264,9 @@ class Map : public GridRefManager<NGridType>
         std::vector<WorldObject*> const* GetWorldObjects(uint32 stringId) const;
         std::vector<Creature*> const* GetCreatures(uint32 stringId) const;
         std::vector<GameObject*> const* GetGameObjects(uint32 stringId) const;
+        WorldObject* GetWorldObject(std::string stringId) const;
+        Creature* GetCreature(std::string stringId) const;
+        GameObject* GetGameObject(std::string stringId) const;
 
         void AddDbGuidObject(WorldObject* obj);
         void RemoveDbGuidObject(WorldObject* obj);
@@ -503,7 +506,7 @@ class WorldMap : public Map
     private:
         using Map::GetPersistentState;                      // hide in subclass for overwrite
     public:
-        WorldMap(uint32 id, time_t expiry) : Map(id, expiry, 0) {}
+        WorldMap(uint32 id, time_t expiry, uint32 InstanceId) : Map(id, expiry, InstanceId) {}
         ~WorldMap() {}
 
         // can't be nullptr for loaded map

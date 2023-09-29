@@ -70,9 +70,9 @@ void TotemAI::UpdateAI(const uint32 diff)
     if (!spellInfo)
         return;
 
-	// shorthand CD check
-	if (!m_creature->IsSpellReady(*spellInfo))
-		return;
+    // shorthand CD check
+    if (!m_creature->IsSpellReady(*spellInfo))
+        return;
 
     // Get spell rangy
     SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);

@@ -95,7 +95,7 @@ void MapManager::CreateContinents()
     uint32 continents[] = { 0, 1 };
     for (auto id : continents)
     {
-        Map* m = new WorldMap(id, i_gridCleanUpDelay);
+        Map* m = new WorldMap(id, i_gridCleanUpDelay, 0);
         // add map into container
         i_maps[MapID(id)] = m;
 
@@ -126,14 +126,15 @@ Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
     }
     else
     {
+        uint32 instanceId = 0;
         // create regular non-instanceable map
         m = FindMap(id);
         if (m == nullptr)
         {
             std::lock_guard<std::mutex> lock(m_lock);
-            m = new WorldMap(id, i_gridCleanUpDelay);
+            m = new WorldMap(id, i_gridCleanUpDelay, instanceId);
             // add map into container
-            i_maps[MapID(id)] = m;
+            i_maps[MapID(id, instanceId)] = m;
 
             // non-instanceable maps always expected have saved state
             m->Initialize();

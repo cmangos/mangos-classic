@@ -233,9 +233,9 @@ void GameEventMgr::LoadFromDB()
     m_gameEventSpawnPoolIds.resize(m_gameEvents.size());
 
     m_gameEventCreatureGuids.resize(m_gameEvents.size() * 2 - 1);
-    //                                   1              2
-    result.reset(WorldDatabase.Query("SELECT creature.guid, game_event_creature.event "
-                                 "FROM creature JOIN game_event_creature ON creature.guid = game_event_creature.guid"));
+    //                                       0              1                         2
+    result.reset(WorldDatabase.Query("SELECT creature.guid, game_event_creature.guid, game_event_creature.event "
+                                 "FROM game_event_creature LEFT OUTER JOIN creature ON creature.guid = game_event_creature.guid"));
 
     count = 0;
     if (!result)
@@ -255,8 +255,14 @@ void GameEventMgr::LoadFromDB()
 
             bar.step();
 
-            uint32 guid    = fields[0].GetUInt32();
-            int16 event_id = fields[1].GetInt16();
+            uint32 guid = fields[1].GetUInt32();
+            if (fields[0].IsNULL())
+            {
+                sLog.outErrorDb("`game_event_creature` guid (%u) does not exist in `creature`", guid);
+                continue;
+            }
+
+            int16 event_id = fields[2].GetInt16();
 
             if (event_id == 0)
             {
@@ -309,9 +315,9 @@ void GameEventMgr::LoadFromDB()
     }
 
     m_gameEventGameobjectGuids.resize(m_gameEvents.size() * 2 - 1);
-    //                                   1                2
-    result.reset(WorldDatabase.Query("SELECT gameobject.guid, game_event_gameobject.event "
-                                 "FROM gameobject JOIN game_event_gameobject ON gameobject.guid=game_event_gameobject.guid"));
+    //                                   0                    1                           2
+    result.reset(WorldDatabase.Query("SELECT gameobject.guid, game_event_gameobject.guid, game_event_gameobject.event "
+                                 "FROM game_event_gameobject LEFT OUTER JOIN gameobject ON gameobject.guid=game_event_gameobject.guid"));
 
     count = 0;
     if (!result)
@@ -330,9 +336,15 @@ void GameEventMgr::LoadFromDB()
             Field* fields = result->Fetch();
 
             bar.step();
+            
+            uint32 guid = fields[1].GetUInt32();
+            if (fields[0].IsNULL())
+            {
+                sLog.outErrorDb("`game_event_gameobject` guid (%u) does not exist in `gameobject`", guid);
+                continue;
+            }
 
-            uint32 guid    = fields[0].GetUInt32();
-            int16 event_id = fields[1].GetInt16();
+            int16 event_id = fields[2].GetInt16();
 
             if (event_id == 0)
             {
@@ -394,13 +406,13 @@ void GameEventMgr::LoadFromDB()
     }
 
     m_gameEventCreatureData.resize(m_gameEvents.size());
-    //                                   0              1                             2
+    //                                       0              1                               2
     result.reset(WorldDatabase.Query("SELECT creature.guid, game_event_creature_data.event, game_event_creature_data.modelid,"
                                  //   3                                      4
                                  "game_event_creature_data.equipment_id, game_event_creature_data.entry_id, "
-                                 //   5                                     6
-                                 "game_event_creature_data.spell_start, game_event_creature_data.spell_end "
-                                 "FROM creature JOIN game_event_creature_data ON creature.guid=game_event_creature_data.guid"));
+                                 //   5                                     6                               7
+                                 "game_event_creature_data.spell_start, game_event_creature_data.spell_end, game_event_creature_data.guid "
+                                 "FROM game_event_creature_data LEFT OUTER JOIN creature ON creature.guid=game_event_creature_data.guid"));
 
     count = 0;
     if (!result)
@@ -419,7 +431,13 @@ void GameEventMgr::LoadFromDB()
             Field* fields = result->Fetch();
 
             bar.step();
-            uint32 guid     = fields[0].GetUInt32();
+            uint32 guid = fields[7].GetUInt32();
+            if (fields[0].IsNULL())
+            {
+                sLog.outErrorDb("`game_event_creature_data` guid (%u) does not exist in `creature`", guid);
+                continue;
+            }
+
             uint16 event_id = fields[1].GetUInt16();
 
             if (event_id == 0)

@@ -31,9 +31,9 @@ class ChatHandler;
 
 enum TimerCombat
 {
-    TIMER_COMBAT_OOC    = 0,
-    TIMER_COMBAT_COMBAT = 1,
-    TIMER_ALWAYS        = 2
+    TIMER_COMBAT_OOC    = 0, // reset on evade
+    TIMER_COMBAT_COMBAT = 1, // reset on evade
+    TIMER_ALWAYS        = 2, // reset on spawn
 };
 
 /*
@@ -104,6 +104,7 @@ class TimerManager
         virtual void UpdateTimers(const uint32 diff);
         virtual void UpdateTimers(const uint32 diff, bool combat);
         virtual void ResetAllTimers();
+        virtual void ResetTimersOnEvade();
 
         virtual void GetAIInformation(ChatHandler& reader);
 
@@ -191,6 +192,7 @@ class CombatActions : public TimerManager
         virtual void UpdateTimers(const uint32 diff, bool combat) override;
         virtual void ExecuteActions() = 0;
         virtual void ResetAllTimers() override;
+        virtual void ResetTimersOnEvade() override;
 
         virtual void GetAIInformation(ChatHandler& reader) override;
 

@@ -57,6 +57,9 @@ public:
     // mapping of scan function to the numerical value of the opcode
     uint8_t opcodes[ScanTypeCount];
 
+    // invalid opcode value that signifies scans are over
+    uint8 scanTerminator;
+
     // pregenerated challenge, responses, and encryption keys for this module
     std::vector<ChallengeResponseEntry> crk;
 };

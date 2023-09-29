@@ -334,9 +334,12 @@ bool CreatureEventAI::CheckEvent(CreatureEventAIHolder& holder, Unit* actionInvo
                 if (!actionInvoker)
                     return false;
 
-                if (Player* player = actionInvoker->GetBeneficiaryPlayer())
-                    if (!sObjectMgr.IsConditionSatisfied(event.death.conditionId, player, player->GetMap(), m_creature, CONDITION_FROM_EVENTAI))
-                        return false;
+                Unit const* controller = actionInvoker->GetControllingPlayer();
+                if (!controller) // only allow going forward if we can evaluate condition
+                    controller = actionInvoker;
+
+                if (!sObjectMgr.IsConditionSatisfied(event.death.conditionId, controller, controller->GetMap(), m_creature, CONDITION_FROM_EVENTAI))
+                    return false;
             }
             break;
         case EVENT_T_EVADE:
@@ -786,8 +789,6 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
                 if (!spellInfo)
                     return false;
-                if (!IsIgnoreLosSpellCast(spellInfo))
-                    selectFlags = SELECT_FLAG_IN_LOS;
                 if (action.cast.castFlags & CAST_PLAYER_ONLY)
                     selectFlags |= SELECT_FLAG_PLAYER;
                 if (action.cast.castFlags & CAST_AURA_NOT_PRESENT)

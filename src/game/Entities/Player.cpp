@@ -13204,15 +13204,21 @@ void Player::SetQuestStatus(uint32 quest_id, QuestStatus status)
 }
 
 // not used in MaNGOS, but used in scripting code
-uint32 Player::GetReqKillOrCastCurrentCount(uint32 quest_id, int32 entry)
+uint32 Player::GetReqKillOrCastCurrentCount(uint32 quest_id, int32 entry) const
 {
     Quest const* qInfo = sObjectMgr.GetQuestTemplate(quest_id);
     if (!qInfo)
         return 0;
 
     for (int j = 0; j < QUEST_OBJECTIVES_COUNT; ++j)
+    {
         if (qInfo->ReqCreatureOrGOId[j] == entry)
-            return mQuestStatus[quest_id].m_creatureOrGOcount[j];
+        {
+            auto itr = mQuestStatus.find(quest_id);
+            if (itr != mQuestStatus.end())
+                return itr->second.m_creatureOrGOcount[j];
+        }
+    }
 
     return 0;
 }
