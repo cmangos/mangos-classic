@@ -306,6 +306,7 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 13879, -- Magma Splash
 16577, -- Disease Cloud
 17205, -- Winterfall Firewater
+17327, -- Spirit Particles
 18115, -- Viewing Room Student Transform
 18163, -- Strength of Arko'narin
 18167, -- Holy Fire
