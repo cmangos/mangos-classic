@@ -31,6 +31,7 @@ enum
     EMOTE_GENERIC_ENRAGED       = -1000003,
 
     // All phases spells
+    SPELL_DOUBLE_ATTACK         = 19818,
     SPELL_FROST_AURA            = 28529,            // Periodically triggers 28531
     SPELL_BESERK                = 26662,
 
@@ -114,6 +115,8 @@ struct boss_sapphironAI : public CombatAI
         SetDeathPrevention(false);
         SetMeleeEnabled(true);
         m_creature->SetHover(false);
+
+        DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     uint32 GetSubsequentActionTimer(uint32 action)
