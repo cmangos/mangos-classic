@@ -313,6 +313,7 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 18163, -- Strength of Arko'narin
 18167, -- Holy Fire
 19817, -- Double Attack
+18951, -- Spirit Particles (green)
 21080, -- Putrid Breath
 23378, -- Magma Splash
 27791, -- Suicide (Suicide)
