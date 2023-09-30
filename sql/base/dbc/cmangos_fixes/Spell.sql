@@ -308,6 +308,7 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 12898, -- Smoke Aura Visual
 13483, -- Wither Touch
 13879, -- Magma Splash
+16331, -- Incorporeal Defense
 16577, -- Disease Cloud
 17205, -- Winterfall Firewater
 17327, -- Spirit Particles
