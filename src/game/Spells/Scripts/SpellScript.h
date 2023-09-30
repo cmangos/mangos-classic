@@ -73,9 +73,9 @@ struct SpellScript
 
 struct AuraCalcData
 {
-    Unit* caster; Unit* target; SpellEntry const* spellProto; SpellEffectIndex effIdx;
+    Unit* caster; Unit* target; SpellEntry const* spellProto; SpellEffectIndex effIdx; Item* castItem;
     Aura* aura; // cannot be used in auras that utilize stacking in checkcast - can be nullptr
-    AuraCalcData(Aura* aura, Unit* caster, Unit* target, SpellEntry const* spellProto, SpellEffectIndex effIdx) : caster(caster), target(target), spellProto(spellProto), effIdx(effIdx), aura(aura) {}
+    AuraCalcData(Aura* aura, Unit* caster, Unit* target, SpellEntry const* spellProto, SpellEffectIndex effIdx, Item* castItem) : caster(caster), target(target), spellProto(spellProto), effIdx(effIdx), aura(aura), castItem(castItem) {}
 };
 
 struct AuraScript
