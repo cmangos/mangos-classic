@@ -301,8 +301,10 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 8852,  -- Moss Hide
 11816, -- Land Mine Arming
 11966, -- Fire Shield
+12782, -- Shield Spike
 12896, -- Helboar
 12898, -- Smoke Aura Visual
+13483, -- Wither Touch
 13879, -- Magma Splash
 16577, -- Disease Cloud
 17205, -- Winterfall Firewater
