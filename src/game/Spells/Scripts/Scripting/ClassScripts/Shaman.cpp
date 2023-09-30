@@ -102,6 +102,17 @@ struct HealingWay : public AuraScript
     }
 };
 
+// 8516 - Windfury Totem
+struct WindfuryTotemAura : public AuraScript
+{
+    int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const override
+    {
+        if (data.castItem)
+            value += (value * data.castItem->GetEnchantmentModifier() / 100);
+        return value;
+    }
+};
+
 void LoadShamanScripts()
 {
     Script* pNewScript = new Script;
@@ -111,4 +122,5 @@ void LoadShamanScripts()
 
     RegisterSpellScript<SentryTotem>("spell_sentry_totem");
     RegisterSpellScript<HealingWay>("spell_healing_way");
+    RegisterSpellScript<WindfuryTotemAura>("spell_windfury_totem_aura");
 }

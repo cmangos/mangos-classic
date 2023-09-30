@@ -275,6 +275,15 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (10185,'spell_blizzard'),
 (10186,'spell_blizzard'),
 (10187,'spell_blizzard');
+(543,'spell_fire_ward_mage'),
+(8457,'spell_fire_ward_mage'),
+(8458,'spell_fire_ward_mage'),
+(10223,'spell_fire_ward_mage'),
+(10225,'spell_fire_ward_mage')
+(6143,'spell_frost_ward_mage'),
+(8461,'spell_frost_ward_mage'),
+(8462,'spell_frost_ward_mage'),
+(10177,'spell_frost_ward_mage');
 
 -- Druid
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
@@ -315,6 +324,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 -- Shaman
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (29203,'spell_healing_way'),
+(8516,'spell_windfury_totem_aura'),
+(10608,'spell_windfury_totem_aura'),
+(10610,'spell_windfury_totem_aura'),
 (6495,'spell_sentry_totem');
 
 -- Hunter
