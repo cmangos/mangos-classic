@@ -94,6 +94,78 @@ struct LifeTap : public SpellScript
     }
 };
 
+// 5699 - Create Healthstone
+struct CreateHealthStoneWarlock : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        // check if we already have a healthstone
+        uint32 itemType = GetUsableHealthStoneItemType(caster, spell->m_spellInfo);
+        if (itemType && caster->IsPlayer() && static_cast<Player*>(caster)->GetItemCount(itemType) > 0)
+            return SPELL_FAILED_TOO_MANY_OF_ITEM;
+        return SPELL_CAST_OK;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        uint32 itemType = GetUsableHealthStoneItemType(target, spell->m_spellInfo);
+        if (itemType)
+            spell->DoCreateItem(effIdx, itemType);
+    }
+
+    uint32 GetUsableHealthStoneItemType(Unit* target, SpellEntry const* spellInfo) const
+    {
+        if (!target || target->IsPlayer())
+            return 0;
+
+        uint32 itemtype = 0;
+        uint32 rank = 0;
+        Unit::AuraList const& mDummyAuras = target->GetAurasByType(SPELL_AURA_DUMMY);
+        for (auto mDummyAura : mDummyAuras)
+        {
+            if (mDummyAura->GetId() == 18692)
+            {
+                rank = 1;
+                break;
+            }
+            if (mDummyAura->GetId() == 18693)
+            {
+                rank = 2;
+                break;
+            }
+        }
+
+        static uint32 const itypes[6][3] =
+        {
+            { 5512, 19004, 19005},              // Minor Healthstone
+            { 5511, 19006, 19007},              // Lesser Healthstone
+            { 5509, 19008, 19009},              // Healthstone
+            { 5510, 19010, 19011},              // Greater Healthstone
+            { 9421, 19012, 19013}               // Major Healthstone
+        };
+
+        switch (spellInfo->Id)
+        {
+            case  6201:
+                itemtype = itypes[0][rank]; break; // Minor Healthstone
+            case  6202:
+                itemtype = itypes[1][rank]; break; // Lesser Healthstone
+            case  5699:
+                itemtype = itypes[2][rank]; break; // Healthstone
+            case 11729:
+                itemtype = itypes[3][rank]; break; // Greater Healthstone
+            case 11730:
+                itemtype = itypes[4][rank]; break; // Major Healthstone
+        }
+        return itemtype;
+    }
+};
+
 struct SoulLink : public AuraScript
 {
     void OnAuraInit(Aura* aura) const override
@@ -154,6 +226,7 @@ void LoadWarlockScripts()
 {
     RegisterSpellScript<CurseOfAgony>("spell_curse_of_agony");
     RegisterSpellScript<LifeTap>("spell_life_tap");
+    RegisterSpellScript<CreateHealthStoneWarlock>("spell_create_health_stone_warlock");
     RegisterSpellScript<SoulLink>("spell_soul_link");
     RegisterSpellScript<DevourMagic>("spell_devour_magic");
     RegisterSpellScript<CurseOfDoom>("spell_curse_of_doom");
