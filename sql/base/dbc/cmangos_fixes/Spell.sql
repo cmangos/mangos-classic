@@ -321,6 +321,3 @@ UPDATE `spell_template` SET `InterruptFlags` = 15 WHERE `Id` in (8016,7901);
 UPDATE spell_template SET AttributesServerside=AttributesServerside|0x00000008 WHERE Id IN(15582);
 UPDATE `spell_template` SET AttributesServerside=AttributesServerside|0x00000008 WHERE `Id` IN (53,2589,2590,2591,6595,7159,8355,8721,11279,11280,11281,15582,15657,22416,24016,25300,26863); -- SPELL_ATTR_SS_FACING_BACK
 
--- Infront only Spells - SPELL_FACING_FLAG_INFRONT "Must be in front of the caster."
-UPDATE `spell_template` SET `FacingCasterFlags` = 1 WHERE `Id` IN (12540,13579);
-
