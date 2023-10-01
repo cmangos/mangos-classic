@@ -316,9 +316,10 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 18951, -- Spirit Particles (green)
 21080, -- Putrid Breath
 23378, -- Magma Splash
-27791, -- Suicide (Suicide)
+21130, -- Grip of Command
 21788, -- Deadly Poison
 21789, -- Hate to Half (Hate to Half)
+27791, -- Suicide (Suicide)
 28330  -- Flameshocker - Immolate Visual
 );
 
