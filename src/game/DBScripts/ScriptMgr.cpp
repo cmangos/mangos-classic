@@ -2536,12 +2536,12 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 {
                     if (m_script->IsCreatureBuddy())
                     {
-                        if (pTarget && pTarget->IsUnit() && pTarget->GetGUIDLow() == m_script->searchRadiusOrGuid)
+                        if (pTarget && pTarget->IsUnit() && pTarget->GetDbGuid() == m_script->searchRadiusOrGuid)
                             terminationBuddy = pTarget;
                     }
                     else
                     {
-                        if (pTarget && pTarget->IsGameObject() && pTarget->GetGUIDLow() == m_script->searchRadiusOrGuid)
+                        if (pTarget && pTarget->IsGameObject() && pTarget->GetDbGuid() == m_script->searchRadiusOrGuid)
                             terminationBuddy = pTarget;
                     }
                 }
