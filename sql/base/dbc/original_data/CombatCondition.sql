@@ -1,5 +1,4 @@
-DROP TABLE IF EXISTS combat_condition;
-CREATE TABLE combat_condition (
+CREATE TABLE IF NOT EXISTS combat_condition (
 `Id` INT(11) NOT NULL,
 `WorldStateExpressionID` INT(11) NOT NULL DEFAULT '0',
 `SelfConditionID` INT(11) NOT NULL DEFAULT '0',
@@ -21,6 +20,7 @@ CREATE TABLE combat_condition (
 PRIMARY KEY(`Id`)
 );
 
+DELETE FROM combat_condition WHERE Id > 0; -- so that DB can add negative on their own
 INSERT INTO combat_condition(Id,WorldStateExpressionID,SelfConditionID,TargetConditionID,FriendConditionLogic,EnemyConditionLogic,FriendConditionID_0,FriendConditionID_1,FriendConditionOp_0,FriendConditionOp_1,FriendConditionCount_0,FriendConditionCount_1,EnemyConditionID_0,EnemyConditionID_1,EnemyConditionOp_0,EnemyConditionOp_1,EnemyConditionCount_0,EnemyConditionCount_1) VALUES
 (21,0,21,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),
 (22,0,2,0,0,0,0,0,0,0,0,0,22,0,1,0,0,0),
