@@ -1,5 +1,4 @@
-DROP TABLE IF EXISTS unit_condition;
-CREATE TABLE unit_condition (
+CREATE TABLE IF NOT EXISTS unit_condition (
 `Id` INT(11) NOT NULL,
 `Flags` INT(11) UNSIGNED NOT NULL DEFAULT '0',
 `Variable_0` INT(11) UNSIGNED NOT NULL DEFAULT '0',
@@ -29,6 +28,7 @@ CREATE TABLE unit_condition (
 PRIMARY KEY(`Id`)
 );
 
+DELETE FROM unit_condition WHERE Id > 0; -- so that DB can add negative on their own
 INSERT INTO `unit_condition`(Id,Flags,Variable_0,Variable_1,Variable_2,Variable_3,Variable_4,Variable_5,Variable_6,Variable_7,Op_0,Op_1,Op_2,Op_3,Op_4,Op_5,Op_6,Op_7,Value_0,Value_1,Value_2,Value_3,Value_4,Value_5,Value_6,Value_7) VALUES
 (1,0,13,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),
 (2,0,53,44,0,0,0,0,0,0,1,5,0,0,0,0,0,0,0,1,0,0,0,0,0,0),
