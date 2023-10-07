@@ -1900,6 +1900,31 @@ UnitAI* GetAI_npc_ironhand_guardian(Creature* creature)
     return new npc_ironhand_guardianAI(creature);
 }
 
+// 27673 - Five Fat Finger Exploding Heart Technique
+struct FiveFatFingerExplodingHeartTechnique : public AuraScript
+{
+    struct FatFingerStorage : public ScriptStorage
+    {
+        Position pos;
+    };
+
+    void OnAuraInit(Aura* aura) const override
+    {
+        FatFingerStorage* storage = new FatFingerStorage();
+        storage->pos = aura->GetTarget()->GetPosition();
+        aura->SetScriptStorage(storage);
+    }
+
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        if (aura->GetStackAmount() < 5)
+            return;
+        // 5 steps 5 yards?
+        if (static_cast<FatFingerStorage*>(aura->GetScriptStorage())->pos.GetDistance(aura->GetTarget()->GetPosition()) >= 5.f)
+            data.spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(27676); // Exploding Heart
+    }
+};
+
 void AddSC_blackrock_depths()
 {
     Script* pNewScript = new Script;
@@ -1999,4 +2024,6 @@ void AddSC_blackrock_depths()
     pNewScript->Name = "npc_ironhand_guardian";
     pNewScript->GetAI = &GetAI_npc_ironhand_guardian;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<FiveFatFingerExplodingHeartTechnique>("spell_five_fat_finger_exploding_heart_technique");
 }
