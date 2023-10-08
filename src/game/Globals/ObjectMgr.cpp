@@ -9375,6 +9375,12 @@ void ObjectMgr::LoadCreatureTemplateSpells(std::shared_ptr<CreatureSpellListCont
                 continue;
             }
 
+            if (container->spellLists.find(entry * 100 + setId) != container->spellLists.end())
+            {
+                sLog.outErrorDb("LoadCreatureTemplateSpells: Spells found for creature entry %u, but is already occupied by spell list of same id, skipping", entry);
+                continue;
+            }
+
             auto& spellList = container->spellLists[entry * 100 + setId];
             spellList.Disabled = true;
             auto& spells = spellList.Spells;
