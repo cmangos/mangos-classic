@@ -518,7 +518,9 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
     uint32 faction = GetCreatureInfo()->Faction;
     if (data && data->spawnTemplate->faction)
         faction = data->spawnTemplate->faction;
-    setFaction(faction);
+    // update entry can occur during player vehicle ride - ignore faction change then
+    if (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && !hasUnitState(UNIT_STAT_POSSESSED))
+        setFaction(faction);
 
     SetDefaultGossipMenuId(GetCreatureInfo()->GossipMenuId);
 
@@ -540,6 +542,12 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
     // we may need to append or remove additional flags
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT))
         unitFlags |= UNIT_FLAG_IN_COMBAT;
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT))
+        unitFlags |= UNIT_FLAG_PET_IN_COMBAT;
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        unitFlags |= UNIT_FLAG_PLAYER_CONTROLLED;
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED))
+        unitFlags |= UNIT_FLAG_POSSESSED;
 
     // TODO: Get rid of this by fixing DB data, seems to be static
     if (m_movementInfo.HasMovementFlag(MOVEFLAG_SWIMMING))
