@@ -919,7 +919,7 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
             auto listItr = newContainer->spellLists.find(spell.Id);
             if (listItr == newContainer->spellLists.end())
             {
-                sLog.outErrorDb("LoadCreatureSpellLists: Invalid creature_spell_list %u list does not exist. Skipping.", spell.Id, spell.SpellId);
+                sLog.outErrorDb("LoadCreatureSpellLists: Invalid creature_spell_list %u list does not exist. Skipping.", spell.Id);
                 continue;
             }
 
