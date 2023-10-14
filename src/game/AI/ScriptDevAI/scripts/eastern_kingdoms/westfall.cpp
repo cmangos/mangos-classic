@@ -180,7 +180,7 @@ struct npc_daphne_stilwellAI : public npc_escortAI
 
     void DoSendWave()
     {
-        if (m_wave < 0 || m_wave > 2)
+        if (m_wave > 2)
             return;
 
         ++m_wave;
@@ -216,7 +216,7 @@ struct npc_daphne_stilwellAI : public npc_escortAI
         if (summoned->GetEntry() != NPC_DEFIAS_RAIDER || motionType != POINT_MOTION_TYPE) // sanity check
             return;
 
-        if (data >= 0 && data <= 4)
+        if (data <= 4)
         {
             uint8 secondWpOffset = 10;
             summoned->GetMotionMaster()->MovePoint(5, RaiderCoords[secondWpOffset + data][0], RaiderCoords[secondWpOffset + data][1], RaiderCoords[secondWpOffset + data][2]);
