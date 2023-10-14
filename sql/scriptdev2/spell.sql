@@ -28,6 +28,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (5166,'spell_harvest_silithid_egg'),
 (6467,'spell_unarmed_woodcutter'),
 (7054,'spell_forsaken_skill'),
+(7131,'spell_illusion_passive'),
 (8555,'spell_left_for_dead'),
 (8603,'spell_tribal_death'),
 (8655,'spell_tribal_death'),
