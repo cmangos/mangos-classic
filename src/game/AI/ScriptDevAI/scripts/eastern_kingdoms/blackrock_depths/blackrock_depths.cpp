@@ -1923,6 +1923,15 @@ struct FiveFatFingerExplodingHeartTechnique : public AuraScript
         if (static_cast<FatFingerStorage*>(aura->GetScriptStorage())->pos.GetDistance(aura->GetTarget()->GetPosition()) >= 5.f)
             data.spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(27676); // Exploding Heart
     }
+
+    void OnPeriodicTickEnd(Aura* aura) const override
+    {
+        if (aura->GetStackAmount() < 5)
+            return;
+        // 5 steps 5 yards?
+        if (static_cast<FatFingerStorage*>(aura->GetScriptStorage())->pos.GetDistance(aura->GetTarget()->GetPosition()) >= 5.f)
+            aura->GetTarget()->RemoveAurasDueToSpell(aura->GetId());
+    }
 };
 
 void AddSC_blackrock_depths()
