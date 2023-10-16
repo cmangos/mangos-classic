@@ -57,9 +57,10 @@ struct CreatureSpellListTargeting
 
 enum SpellListFlags
 {
-    SPELL_LIST_FLAG_SUPPORT_ACTION  = 1,
-    SPELL_LIST_FLAG_RANGED_ACTION   = 2, // previously known as main ranged spell in EAI
-    SPELL_LIST_FLAG_CATEGORY_COOLDOWN = 4, // imposes category cooldown instead of normal cooldown
+    SPELL_LIST_FLAG_SUPPORT_ACTION      = 1,
+    SPELL_LIST_FLAG_RANGED_ACTION       = 2, // previously known as main ranged spell in EAI
+    SPELL_LIST_FLAG_CATEGORY_COOLDOWN   = 4, // imposes category cooldown instead of normal cooldown
+    SPELL_LIST_FLAG_NON_BLOCKING        = 8, // executes spell outside of rolling for one action, should be instant TODO: check if its not identical to SPELL_ATTR_EX4_ALLOW_CAST_WHILE_CASTING
 };
 
 struct CreatureSpellListSpell
