@@ -531,8 +531,6 @@ UPDATE creature_template SET ScriptName='mob_arugal_voidwalker' WHERE entry=4627
 UPDATE creature_template SET ScriptName='boss_arugal' WHERE entry=4275;
 
 /* SILITHUS */
-UPDATE creature_template SET ScriptName='npc_anachronos_the_ancient' WHERE entry=15381;
-UPDATE gameobject_template SET ScriptName='go_crystalline_tear' WHERE entry=180633;
 UPDATE creature_template SET ScriptName='npc_solenor' WHERE entry IN (14530,14536);
 
 /* SILVERPINE FOREST */
@@ -1435,39 +1433,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1000738','%s begins chanting a strange spell...','0','2','0','0','7467','Ranshalla EMOTE_CHANT_SPELL'),
 ('-1000739','Remember, I need your help to properly channel. I will ask you to aid me several times in our path, so please be ready.','0','0','0','0','0','Ranshalla SAY_QUEST_START'),
 
-('-1000740','We must act quickly or all shall be lost!','0','0','0','1','10909','SAY_ANACHRONOS_INTRO_1'),
-('-1000741','My forces cannot overcome the Qiraji defenses. We will not be able to get close enough to place your precious barrier, dragon.','0','0','0','0','10910','SAY_FANDRAL_INTRO_2'),
-('-1000742','There is a way...','0','0','0','22','10911','SAY_MERITHRA_INTRO_3'),
-('-1000743','%s nods knowingly.','0','2','0','0','10913','EMOTE_ARYGOS_NOD'),
-('-1000744','Aye, Fandral, remember these words: Let not your grief guide your faith. These thoughts you hold... dark places you go, night elf. Absolution cannot be had through misguided vengeance.','0','0','0','1','10914','SAY_CAELESTRASZ_INTRO_4'),
-('-1000745','%s glances at her compatriots.','0','2','0','0','10912','EMOTE_MERITHRA_GLANCE'),
-('-1000746','We will push him back, Anachronos. This I vow. Uphold your end of this task. Let not your hands falter as you seal our fates behind the barrier.','0','0','0','1','0','SAY_MERITHRA_INTRO_5'),
-('-1000747','Succumb to the endless dream, little ones. Let it consume you!','0','1','0','22','10903','SAY_MERITHRA_ATTACK_1'),
-('-1000748','Anachronos, this diversion will give you and the young druid time enough to seal the gate. Do not falter. Now, let us see how they deal with chaotic magic.','0','0','0','1','10904','SAY_ARYGOS_ATTACK_2'),
-('-1000749','Let them feel the wrath of the Blue Flight! May Malygos protect me!','0','1','0','22','10901','SAY_ARYGOS_ATTACK_3'),
-('-1000750','Do not forget the sacrifices made on this day, night elf. We have all suffered immensely at the hands of these beasts.','0','0','0','1','10907','SAY_CAELESTRASZ_ATTACK_4'),
-('-1000751','Alexstrasza grant me the resolve to drive our enemies back!','0','1','0','22','10902','SAY_CAELESTRASZ_ATTACK_5'),
-('-1000752','NOW, STAGHELM! WE GO NOW! Prepare your magic!','0','0','0','22','10915','SAY_ANACHRONOS_SEAL_1'),
-('-1000753','It is done, dragon. Lead the way.','0','0','0','25','10916','SAY_FANDRAL_SEAL_2'),
-('-1000754','Stay close...','0','0','0','0','10917','SAY_ANACHRONOS_SEAL_3'),
-('-1000755','The sands of time will halt, but only for a moment! I will now conjure the barrier.','0','0','0','0','10930','SAY_ANACHRONOS_SEAL_4'),
-('-1000756','FINISH THE SPELL, STAGHELM! I CANNOT HOLD THE GLYPHS OF WARDING IN PLACE MUCH LONGER! CALL FORTH THE ROOTS!','0','0','0','0','10920','SAY_ANACHRONOS_SEAL_5'),
-('-1000757','Ancient ones guide my hand... Wake from your slumber! WAKE AND SEAL THIS CURSED PLACE!','0','0','0','0','10921','SAY_FANDRAL_SEAL_6'),
-('-1000758','%s falls to one knee - exhausted.','0','2','0','0','10922','EMOTE_FANDRAL_EXHAUSTED'),
-('-1000759','It... It is over, Lord Staghelm. We are victorious. Albeit the cost for this victory was great.','0','0','0','1','10923','SAY_ANACHRONOS_EPILOGUE_1'),
-('-1000760','There is but one duty that remains...','0','0','0','1','10924','SAY_ANACHRONOS_EPILOGUE_2'),
-('-1000761','Before I leave this place, I make one final offering for you, Lord Staghelm. Should a time arise in which you must gain entry to this accursed fortress, use the Scepter of the Shifting Sands on the sacred gong. The magic holding the barrier together will dissipate and the horrors of Ahn''Qiraj will be unleashed upon the world once more.','0','0','0','1','0','SAY_ANACHRONOS_EPILOGUE_3'),
-('-1000762','%s hands the Scepter of the Shifting Sands to $N.','0','2','0','0','0','EMOTE_ANACHRONOS_SCEPTER'),
-('-1000763','After the savagery that my people have witnessed and felt, you expect me to accept another burden, dragon? Surely you are mad.','0','0','0','1','10927','SAY_FANDRAL_EPILOGUE_4'),
-('-1000764','I want nothing to do with Silithus, the Qiraji and least of all, any damned dragons!','0','0','0','1','10928','SAY_FANDRAL_EPILOGUE_5'),
-('-1000765','%s hurls the Scepter of the Shifting Sands into the barrier, shattering it.','0','2','0','0','10929','EMOTE_FANDRAL_SHATTER'),
-('-1000766','Lord Staghelm, where are you going? You would shatter our bond for the sake of pride?','0','0','0','1','10931','SAY_ANACHRONOS_EPILOGUE_6'),
-('-1000767','My son''s soul will find no comfort in this hollow victory, dragon. I will have him back. Though it takes a millennia, I WILL have my son back!  ','0','0','0','1','10932','SAY_FANDRAL_EPILOGUE_7'),
-('-1000768','%s shakes his head in disappointment.','0','2','0','25','10933','EMOTE_ANACHRONOS_DISPPOINTED'),
-('-1000769','%s kneels down to pickup the fragments of the shattered scepter.','0','2','0','0','0','EMOTE_ANACHRONOS_PICKUP'),
-('-1000770','And now you know all that there is to know, mortal... ','0','0','0','0','10935','SAY_ANACHRONOS_EPILOGUE_8'),
-
-('-1000771','Let''s go $N!','0','0','0','0','0','Feero Ironhand SAY_QUEST_START'),
+('-1000771','Let''s go $N!','0','0','0','0','21649','Feero Ironhand SAY_QUEST_START'),
 ('-1000772','It looks like we''re in trouble. Look lively, here they come!','0','0','0','0','1372','Feero Ironhand SAY_FIRST_AMBUSH_START'),
 ('-1000773','Assassins from that cult you found... Let''s get moving before someone else finds us out here.','0','0','0','0','1294','Feero Ironhand SAY_FIRST_AMBUSH_END'),
 ('-1000774','Hold! I sense an evil presence... Undead!','0','0','0','0','1373','Feero Ironhand SAY_SECOND_AMBUSH_START'),
