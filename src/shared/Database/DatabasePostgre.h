@@ -40,7 +40,7 @@ class PostgreSQLConnection : public SqlConnection
 
         bool Initialize(const char* infoString) override;
 
-        QueryResult* Query(const char* sql) override;
+        std::unique_ptr<QueryResult> Query(const char* sql) override;
         QueryNamedResult* QueryNamed(const char* sql) override;
         bool Execute(const char* sql) override;
 

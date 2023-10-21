@@ -88,12 +88,12 @@ void GuildMgr::LoadGuilds()
     Guild* newGuild;
     uint32 count = 0;
 
-    //                                                    0             1          2          3           4           5           6
-    QueryResult* result = CharacterDatabase.Query("SELECT guild.guildid,guild.name,leaderguid,EmblemStyle,EmblemColor,BorderStyle,BorderColor,"
+    //                                                 0             1          2          3           4           5           6
+    auto queryResult = CharacterDatabase.Query("SELECT guild.guildid,guild.name,leaderguid,EmblemStyle,EmblemColor,BorderStyle,BorderColor,"
                           //   7               8    9    10
                           "BackgroundColor,info,motd,createdate FROM guild ORDER BY guildid ASC");
 
-    if (!result)
+    if (!queryResult)
     {
         BarGoLink bar(1);
         bar.step();
@@ -103,30 +103,30 @@ void GuildMgr::LoadGuilds()
     }
 
     // load guild ranks
-    //                                                                0       1   2     3
-    QueryResult* guildRanksResult   = CharacterDatabase.Query("SELECT guildid,rid,rname,rights FROM guild_rank ORDER BY guildid ASC, rid ASC");
+    //                                                      0       1   2     3
+    auto guildRanksResult = CharacterDatabase.Query("SELECT guildid,rid,rname,rights FROM guild_rank ORDER BY guildid ASC, rid ASC");
 
     // load guild members
-    //                                                                0       1                  2     3     4
-    QueryResult* guildMembersResult = CharacterDatabase.Query("SELECT guildid,guild_member.guid,`rank`,pnote,offnote,"
+    //                                                        0       1                  2     3     4
+    auto guildMembersResult = CharacterDatabase.Query("SELECT guildid,guild_member.guid,`rank`,pnote,offnote,"
                                       //   5                6                 7                 8                9                       10
                                       "characters.name, characters.level, characters.class, characters.zone, characters.logout_time, characters.account "
                                       "FROM guild_member LEFT JOIN characters ON characters.guid = guild_member.guid ORDER BY guildid ASC");
 
-    BarGoLink bar(result->GetRowCount());
+    BarGoLink bar(queryResult->GetRowCount());
 
     do
     {
-        // Field *fields = result->Fetch();
+        // Field *fields = queryResult->Fetch();
 
         bar.step();
         ++count;
 
         newGuild = new Guild;
-        if (!newGuild->LoadGuildFromDB(result) ||
-                !newGuild->LoadRanksFromDB(guildRanksResult) ||
-                !newGuild->LoadMembersFromDB(guildMembersResult) ||
-                !newGuild->CheckGuildStructure()
+        if (!newGuild->LoadGuildFromDB(queryResult.get()) ||
+            !newGuild->LoadRanksFromDB(guildRanksResult.get()) ||
+            !newGuild->LoadMembersFromDB(guildMembersResult.get()) ||
+            !newGuild->CheckGuildStructure()
            )
         {
             newGuild->Disband();
@@ -136,11 +136,7 @@ void GuildMgr::LoadGuilds()
         newGuild->LoadGuildEventLogFromDB();
         AddGuild(newGuild);
     }
-    while (result->NextRow());
-
-    delete result;
-    delete guildRanksResult;
-    delete guildMembersResult;
+    while (queryResult->NextRow());
 
     // delete unused LogGuid records in guild_eventlog table
     // you can comment these lines if you don't plan to change CONFIG_UINT32_GUILD_EVENT_LOG_COUNT

@@ -113,19 +113,19 @@ bool ChatHandler::HandleAccountDeleteCommand(char* args)
  */
 bool ChatHandler::GetDeletedCharacterInfoList(DeletedInfoList& foundList, std::string searchString)
 {
-    QueryResult* resultChar;
+    std::unique_ptr<QueryResult> resultChar;
     if (!searchString.empty())
     {
         // search by GUID
         if (isNumeric(searchString))
-            resultChar = CharacterDatabase.PQuery("SELECT guid, deleteInfos_Name, deleteInfos_Account, deleteDate FROM characters WHERE deleteDate IS NOT NULL AND guid = %u", uint32(atoi(searchString.c_str())));
+            resultChar.reset(CharacterDatabase.PQuery("SELECT guid, deleteInfos_Name, deleteInfos_Account, deleteDate FROM characters WHERE deleteDate IS NOT NULL AND guid = %u", uint32(atoi(searchString.c_str()))));
         // search by name
         else
         {
             if (!normalizePlayerName(searchString))
                 return false;
 
-            resultChar = CharacterDatabase.PQuery("SELECT guid, deleteInfos_Name, deleteInfos_Account, deleteDate FROM characters WHERE deleteDate IS NOT NULL AND deleteInfos_Name " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), searchString.c_str());
+            resultChar.reset(CharacterDatabase.PQuery("SELECT guid, deleteInfos_Name, deleteInfos_Account, deleteDate FROM characters WHERE deleteDate IS NOT NULL AND deleteInfos_Name " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), searchString.c_str()));
         }
     }
     else
@@ -137,7 +137,6 @@ bool ChatHandler::GetDeletedCharacterInfoList(DeletedInfoList& foundList, std::s
         {
             PSendSysMessage("Too many results %u. Narrow it down.", (uint32)resultChar->GetRowCount());
             SetSentErrorMessage(true);
-            delete resultChar;
             return false;
         }
 
@@ -159,8 +158,6 @@ bool ChatHandler::GetDeletedCharacterInfoList(DeletedInfoList& foundList, std::s
             foundList.push_back(info);
         }
         while (resultChar->NextRow());
-
-        delete resultChar;
     }
 
     return true;

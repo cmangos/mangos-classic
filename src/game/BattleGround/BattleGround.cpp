@@ -736,12 +736,11 @@ void BattleGround::EndBattleGround(Team winner)
         uint8 battleground_type = (uint8)GetTypeId();
 
         // query next id
-        QueryResult* result = CharacterDatabase.Query("SELECT MAX(id) FROM pvpstats_battlegrounds");
-        if (result)
+        auto queryResult = CharacterDatabase.Query("SELECT MAX(id) FROM pvpstats_battlegrounds");
+        if (queryResult)
         {
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
             battleground_id = fields[0].GetUInt64() + 1;
-            delete result;
         }
 
         stmt.PExecute(battleground_id, bgScoresWinner, battleground_bracket, battleground_type);

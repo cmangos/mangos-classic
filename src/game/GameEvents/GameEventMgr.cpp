@@ -193,7 +193,7 @@ void GameEventMgr::LoadFromDB()
         sLog.outString(">> Loaded %u game events", count);
     }
 
-    result.reset(WorldDatabase.Query("SELECT entry, start_time, end_time FROM game_event_time"));
+    result = WorldDatabase.Query("SELECT entry, start_time, end_time FROM game_event_time");
     if (!result)
     {
         sLog.outString(">> Table game_event_time is empty!");
@@ -233,9 +233,9 @@ void GameEventMgr::LoadFromDB()
     m_gameEventSpawnPoolIds.resize(m_gameEvents.size());
 
     m_gameEventCreatureGuids.resize(m_gameEvents.size() * 2 - 1);
-    //                                       0              1                         2
-    result.reset(WorldDatabase.Query("SELECT creature.guid, game_event_creature.guid, game_event_creature.event "
-                                 "FROM game_event_creature LEFT OUTER JOIN creature ON creature.guid = game_event_creature.guid"));
+    //                                   0              1                         2
+    result = WorldDatabase.Query("SELECT creature.guid, game_event_creature.guid, game_event_creature.event "
+                                 "FROM game_event_creature LEFT OUTER JOIN creature ON creature.guid = game_event_creature.guid");
 
     count = 0;
     if (!result)
@@ -315,9 +315,9 @@ void GameEventMgr::LoadFromDB()
     }
 
     m_gameEventGameobjectGuids.resize(m_gameEvents.size() * 2 - 1);
-    //                                   0                    1                           2
-    result.reset(WorldDatabase.Query("SELECT gameobject.guid, game_event_gameobject.guid, game_event_gameobject.event "
-                                 "FROM game_event_gameobject LEFT OUTER JOIN gameobject ON gameobject.guid=game_event_gameobject.guid"));
+    //                                   0                1                           2
+    result = WorldDatabase.Query("SELECT gameobject.guid, game_event_gameobject.guid, game_event_gameobject.event "
+                                 "FROM game_event_gameobject LEFT OUTER JOIN gameobject ON gameobject.guid=game_event_gameobject.guid");
 
     count = 0;
     if (!result)
@@ -406,13 +406,13 @@ void GameEventMgr::LoadFromDB()
     }
 
     m_gameEventCreatureData.resize(m_gameEvents.size());
-    //                                       0              1                               2
-    result.reset(WorldDatabase.Query("SELECT creature.guid, game_event_creature_data.event, game_event_creature_data.modelid,"
+    //                                   0              1                             2
+    result = WorldDatabase.Query("SELECT creature.guid, game_event_creature_data.event, game_event_creature_data.modelid,"
                                  //   3                                      4
                                  "game_event_creature_data.equipment_id, game_event_creature_data.entry_id, "
                                  //   5                                     6                               7
                                  "game_event_creature_data.spell_start, game_event_creature_data.spell_end, game_event_creature_data.guid "
-                                 "FROM game_event_creature_data LEFT OUTER JOIN creature ON creature.guid=game_event_creature_data.guid"));
+                                 "FROM game_event_creature_data LEFT OUTER JOIN creature ON creature.guid=game_event_creature_data.guid");
 
     count = 0;
     if (!result)
@@ -496,7 +496,7 @@ void GameEventMgr::LoadFromDB()
 
     m_gameEventQuests.resize(m_gameEvents.size());
 
-    result.reset(WorldDatabase.Query("SELECT quest, event FROM game_event_quest"));
+    result = WorldDatabase.Query("SELECT quest, event FROM game_event_quest");
 
     count = 0;
     if (!result)
@@ -554,7 +554,7 @@ void GameEventMgr::LoadFromDB()
 
     m_gameEventMails.resize(m_gameEvents.size() * 2 - 1);
 
-    result.reset(WorldDatabase.Query("SELECT event, raceMask, quest, mailTemplateId, senderEntry FROM game_event_mail"));
+    result = WorldDatabase.Query("SELECT event, raceMask, quest, mailTemplateId, senderEntry FROM game_event_mail");
 
     count = 0;
     if (!result)
@@ -637,16 +637,15 @@ uint32 GameEventMgr::Initialize()                           // return the next e
 
     ActiveEvents activeAtShutdown;
 
-    if (QueryResult* result = CharacterDatabase.Query("SELECT event FROM game_event_status"))
+    if (auto queryResult = CharacterDatabase.Query("SELECT event FROM game_event_status"))
     {
         do
         {
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
             uint16 event_id = fields[0].GetUInt16();
             activeAtShutdown.insert(event_id);
         }
-        while (result->NextRow());
-        delete result;
+        while (queryResult->NextRow());
 
         CharacterDatabase.Execute("TRUNCATE game_event_status");
     }

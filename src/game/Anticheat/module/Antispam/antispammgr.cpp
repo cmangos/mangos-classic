@@ -204,12 +204,12 @@ void AntispamMgr::LoadFromDB()
 
     _blacklist.clear();
 
-    std::unique_ptr<QueryResult> result(LoginDatabase.Query("SELECT `string` FROM antispam_blacklist"));
+    auto queryResult = LoginDatabase.Query("SELECT `string` FROM antispam_blacklist");
 
-    if (result)
+    if (queryResult)
         do
         {
-            auto fields = result->Fetch();
+            auto fields = queryResult->Fetch();
             auto entry = fields[0].GetCppString();
 
             if (entry.empty())
@@ -230,33 +230,33 @@ void AntispamMgr::LoadFromDB()
             auto const normEntry = NormalizeStringInternal(entry, normMask);
 
             _blacklist.emplace_back(entry, normEntry);
-        } while (result->NextRow());
+        } while (queryResult->NextRow());
 
     sLog.outString(">> %lu blacklist entries loaded and normalized", uint64(_blacklist.size()));
 
-    result.reset(LoginDatabase.Query("SELECT `from`, `to` FROM antispam_replacement"));
+    queryResult = LoginDatabase.Query("SELECT `from`, `to` FROM antispam_replacement");
 
     _asciiReplace.clear();
 
-    if (result)
+    if (queryResult)
         do
         {
-            auto fields = result->Fetch();
+            auto fields = queryResult->Fetch();
             _asciiReplace.emplace_back(fields[0].GetCppString(), fields[1].GetCppString());
-        } while (result->NextRow());
+        } while (queryResult->NextRow());
 
     sLog.outString(">> %lu ASCII string replacements loaded", uint64(_asciiReplace.size()));
 
-    result.reset(LoginDatabase.Query("SELECT `from`, `to` FROM antispam_unicode_replacement"));
+    queryResult = LoginDatabase.Query("SELECT `from`, `to` FROM antispam_unicode_replacement");
 
     _unicodeReplace.clear();
 
-    if (result)
+    if (queryResult)
         do
         {
             std::wostringstream wss;
 
-            auto fields = result->Fetch();
+            auto fields = queryResult->Fetch();
             
             wss.str(std::wstring());
             wss << wchar_t(fields[0].GetUInt32());
@@ -267,7 +267,7 @@ void AntispamMgr::LoadFromDB()
             std::wstring value = wss.str();
 
             _unicodeReplace.emplace_back(key, value);
-        } while (result->NextRow());
+        } while (queryResult->NextRow());
 
     sLog.outString(">> %lu unicode character replacements loaded", uint64(_unicodeReplace.size()));
 }

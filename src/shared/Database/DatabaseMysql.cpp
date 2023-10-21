@@ -204,7 +204,7 @@ bool MySQLConnection::_Query(const char* sql, MYSQL_RES** pResult, MYSQL_FIELD**
     return true;
 }
 
-QueryResult* MySQLConnection::Query(const char* sql)
+std::unique_ptr<QueryResult> MySQLConnection::Query(const char* sql)
 {
     MYSQL_RES* result = nullptr;
     MYSQL_FIELD* fields = nullptr;
@@ -214,7 +214,7 @@ QueryResult* MySQLConnection::Query(const char* sql)
     if (!_Query(sql, &result, &fields, &rowCount, &fieldCount))
         return nullptr;
 
-    QueryResultMysql* queryResult = new QueryResultMysql(result, fields, rowCount, fieldCount);
+    auto queryResult = std::make_unique<QueryResultMysql>(result, fields, rowCount, fieldCount);
 
     queryResult->NextRow();
     return queryResult;

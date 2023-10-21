@@ -36,11 +36,11 @@ void MapManager::LoadTransports()
 {
     sTransportMgr.LoadTransportTemplates();
 
-    QueryResult* result = WorldDatabase.Query("SELECT entry, name, period FROM transports");
+    auto queryResult = WorldDatabase.Query("SELECT entry, name, period FROM transports");
 
     uint32 count = 0;
 
-    if (!result)
+    if (!queryResult)
     {
         BarGoLink bar(1);
         bar.step();
@@ -49,13 +49,13 @@ void MapManager::LoadTransports()
         return;
     }
 
-    BarGoLink bar(result->GetRowCount());
+    BarGoLink bar(queryResult->GetRowCount());
 
     do
     {
         bar.step();
 
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
 
         uint32 entry = fields[0].GetUInt32();
         std::string name = fields[1].GetCppString();
@@ -93,25 +93,22 @@ void MapManager::LoadTransports()
 
         ++count;
     }
-    while (result->NextRow());
-    delete result;
+    while (queryResult->NextRow());
 
     // check transport data DB integrity
-    result = WorldDatabase.Query("SELECT gameobject.guid,gameobject.id,transports.name FROM gameobject,transports WHERE gameobject.id = transports.entry");
-    if (result)                                             // wrong data found
+    queryResult = WorldDatabase.Query("SELECT gameobject.guid,gameobject.id,transports.name FROM gameobject,transports WHERE gameobject.id = transports.entry");
+    if (queryResult)                                             // wrong data found
     {
         do
         {
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
 
             uint32 guid  = fields[0].GetUInt32();
             uint32 entry = fields[1].GetUInt32();
             std::string name = fields[2].GetCppString();
             sLog.outErrorDb("Transport %u '%s' have record (GUID: %u) in `gameobject`. Transports MUST NOT have any records in `gameobject` or its behavior will be unpredictable/bugged.", entry, name.c_str(), guid);
         }
-        while (result->NextRow());
-
-        delete result;
+        while (queryResult->NextRow());
     }
 
     sLog.outString(">> Loaded %u transports", count);

@@ -38,16 +38,16 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Summons(bool check_entry_use)
     m_CreatureEventAI_Summon_Map.clear();
 
     // Gather additional data for EventAI
-    QueryResult* result = WorldDatabase.Query("SELECT id, position_x, position_y, position_z, orientation, spawntimesecs FROM creature_ai_summons");
-    if (result)
+    auto queryResult = WorldDatabase.Query("SELECT id, position_x, position_y, position_z, orientation, spawntimesecs FROM creature_ai_summons");
+    if (queryResult)
     {
-        BarGoLink bar(result->GetRowCount());
+        BarGoLink bar(queryResult->GetRowCount());
         uint32 Count = 0;
 
         do
         {
             bar.step();
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
 
             CreatureEventAI_Summon temp;
 
@@ -68,9 +68,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Summons(bool check_entry_use)
             m_CreatureEventAI_Summon_Map[temp.id] = temp;
             ++Count;
         }
-        while (result->NextRow());
-
-        delete result;
+        while (queryResult->NextRow());
 
         if (check_entry_use)
             CheckUnusedAISummons();

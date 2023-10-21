@@ -252,9 +252,9 @@ void AuctionHouseMgr::SendAuctionExpiredMail(AuctionEntry* auction)
 void AuctionHouseMgr::LoadAuctionItems()
 {
     // data needs to be at first place for Item::LoadFromDB 0        1            2                3      4         5        6      7             8                 9           10          11        12
-    QueryResult* result = CharacterDatabase.Query("SELECT itemEntry, creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, durability, itemTextId, itemguid, item_template FROM auction JOIN item_instance ON itemguid = guid");
+    auto queryResult = CharacterDatabase.Query("SELECT itemEntry, creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, durability, itemTextId, itemguid, item_template FROM auction JOIN item_instance ON itemguid = guid");
 
-    if (!result)
+    if (!queryResult)
     {
         BarGoLink bar(1);
         bar.step();
@@ -262,7 +262,7 @@ void AuctionHouseMgr::LoadAuctionItems()
         return;
     }
 
-    BarGoLink bar(result->GetRowCount());
+    BarGoLink bar(queryResult->GetRowCount());
 
     uint32 count = 0;
 
@@ -270,7 +270,7 @@ void AuctionHouseMgr::LoadAuctionItems()
     {
         bar.step();
 
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
         uint32 item_guid        = fields[11].GetUInt32();
         uint32 item_template    = fields[12].GetUInt32();
 
@@ -293,8 +293,7 @@ void AuctionHouseMgr::LoadAuctionItems()
 
         ++count;
     }
-    while (result->NextRow());
-    delete result;
+    while (queryResult->NextRow());
 
     sLog.outString(">> Loaded %u auction items", count);
     sLog.outString();
@@ -302,8 +301,8 @@ void AuctionHouseMgr::LoadAuctionItems()
 
 void AuctionHouseMgr::LoadAuctions()
 {
-    QueryResult* result = CharacterDatabase.Query("SELECT COUNT(*) FROM auction");
-    if (!result)
+    auto queryResult = CharacterDatabase.Query("SELECT COUNT(*) FROM auction");
+    if (!queryResult)
     {
         BarGoLink bar(1);
         bar.step();
@@ -311,9 +310,8 @@ void AuctionHouseMgr::LoadAuctions()
         return;
     }
 
-    Field* fields = result->Fetch();
+    Field* fields = queryResult->Fetch();
     uint32 AuctionCount = fields[0].GetUInt32();
-    delete result;
 
     if (!AuctionCount)
     {
@@ -323,9 +321,9 @@ void AuctionHouseMgr::LoadAuctions()
         return;
     }
 
-    //                                       0  1       2        3             4          5                     6         7           8    9       10      11       12
-    result = CharacterDatabase.Query("SELECT id,houseid,itemguid,item_template,item_count,item_randompropertyid,itemowner,buyoutprice,time,buyguid,lastbid,startbid,deposit FROM auction");
-    if (!result)
+    //                                            0  1       2        3             4          5                     6         7           8    9       10      11       12
+    queryResult = CharacterDatabase.Query("SELECT id,houseid,itemguid,item_template,item_count,item_randompropertyid,itemowner,buyoutprice,time,buyguid,lastbid,startbid,deposit FROM auction");
+    if (!queryResult)
     {
         BarGoLink bar(1);
         bar.step();
@@ -337,7 +335,7 @@ void AuctionHouseMgr::LoadAuctions()
 
     do
     {
-        fields = result->Fetch();
+        fields = queryResult->Fetch();
 
         bar.step();
 
@@ -413,8 +411,7 @@ void AuctionHouseMgr::LoadAuctions()
 
         GetAuctionsMap(auction->auctionHouseEntry)->AddAuction(auction);
     }
-    while (result->NextRow());
-    delete result;
+    while (queryResult->NextRow());
 
     sLog.outString(">> Loaded %u auctions", AuctionCount);
     sLog.outString();

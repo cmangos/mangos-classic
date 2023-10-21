@@ -1207,13 +1207,13 @@ void ScriptMgr::LoadDbScriptStrings()
 
 void ScriptMgr::LoadDbScriptRandomTemplates()
 {
-    QueryResult* result = WorldDatabase.Query("SELECT id, type, target_id, chance FROM dbscript_random_templates");
+    auto queryResult = WorldDatabase.Query("SELECT id, type, target_id, chance FROM dbscript_random_templates");
 
-    if (result)
+    if (queryResult)
     {
         do
         {
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
 
             uint32 id = fields[0].GetUInt32();
             int32 type = fields[1].GetUInt32();
@@ -1230,9 +1230,7 @@ void ScriptMgr::LoadDbScriptRandomTemplates()
             else
                 sLog.outErrorDb("Table `dbscript_random_templates` entry (%u) uses invalid type (%u). Won't be used.", id, type);
         }
-        while (result->NextRow());
-
-        delete result;
+        while (queryResult->NextRow());
     }
 }
 

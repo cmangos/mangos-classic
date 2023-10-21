@@ -72,8 +72,8 @@ void CreatureLinkingMgr::LoadFromDB()
     // Load `creature_linking_template`
     sLog.outString("> Loading table `creature_linking_template`");
     uint32 count = 0;
-    QueryResult* result = WorldDatabase.Query("SELECT entry, map, master_entry, flag, search_range FROM creature_linking_template");
-    if (!result)
+    auto queryResult = WorldDatabase.Query("SELECT entry, map, master_entry, flag, search_range FROM creature_linking_template");
+    if (!queryResult)
     {
         BarGoLink bar(1);
         bar.step();
@@ -82,12 +82,12 @@ void CreatureLinkingMgr::LoadFromDB()
     }
     else
     {
-        BarGoLink bar((int)result->GetRowCount());
+        BarGoLink bar((int)queryResult->GetRowCount());
         do
         {
             bar.step();
 
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
             CreatureLinkingInfo tmp;
 
             uint32 entry            = fields[0].GetUInt32();
@@ -108,19 +108,17 @@ void CreatureLinkingMgr::LoadFromDB()
             // Store master_entry
             m_eventTriggers.insert(tmp.masterId);
         }
-        while (result->NextRow());
+        while (queryResult->NextRow());
 
         sLog.outString(">> Loaded creature linking for %u creature-entries", count);
         sLog.outString();
-
-        delete result;
     }
 
     // Load `creature_linking`
     sLog.outString("> Loading table `creature_linking`");
     count = 0;
-    result = WorldDatabase.Query("SELECT guid, master_guid, flag FROM creature_linking");
-    if (!result)
+    queryResult = WorldDatabase.Query("SELECT guid, master_guid, flag FROM creature_linking");
+    if (!queryResult)
     {
         BarGoLink bar(1);
         bar.step();
@@ -131,12 +129,12 @@ void CreatureLinkingMgr::LoadFromDB()
         return;
     }
 
-    BarGoLink guidBar((int)result->GetRowCount());
+    BarGoLink guidBar((int)queryResult->GetRowCount());
     do
     {
         guidBar.step();
 
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
         CreatureLinkingInfo tmp;
 
         uint32 guid             = fields[0].GetUInt32();
@@ -157,12 +155,10 @@ void CreatureLinkingMgr::LoadFromDB()
         // Store master_guid
         m_eventGuidTriggers.insert(tmp.masterId);
     }
-    while (result->NextRow());
+    while (queryResult->NextRow());
 
     sLog.outString(">> Loaded creature linking for %u creature-Guids", count);
     sLog.outString();
-
-    delete result;
 }
 
 /** This function is used to check if a DB-Entry is valid

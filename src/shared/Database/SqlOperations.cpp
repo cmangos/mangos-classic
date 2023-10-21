@@ -91,7 +91,7 @@ bool SqlQuery::Execute(SqlConnection* conn)
 
     LOCK_DB_CONN(conn);
     /// execute the query and store the result in the callback
-    m_callback->SetResult(conn->Query(&m_sql[0]));
+    m_callback->SetResult(conn->Query(&m_sql[0]).release());
     /// add the callback to the sql result queue of the thread it originated from
     m_queue->Add(m_callback);
 
@@ -227,7 +227,7 @@ bool SqlQueryHolderEx::Execute(SqlConnection* conn)
     {
         /// execute all queries in the holder and pass the results
         char const* sql = queries[i].first;
-        if (sql) m_holder->SetResult(i, conn->Query(sql));
+        if (sql) m_holder->SetResult(i, conn->Query(sql).release());
     }
 
     /// sync with the caller thread

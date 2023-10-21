@@ -231,13 +231,13 @@ void Database::Ping()
 
     {
         SqlConnection::Lock guard(m_pAsyncConn);
-        delete guard->Query(sql);
+        guard->Query(sql);
     }
 
     for (int i = 0; i < m_nQueryConnPoolSize; ++i)
     {
         SqlConnection::Lock guard(m_pQueryConnections[i]);
-        delete guard->Query(sql);
+        guard->Query(sql);
     }
 }
 
@@ -299,7 +299,7 @@ QueryResult* Database::PQuery(const char* format, ...)
         return nullptr;
     }
 
-    return Query(szQuery);
+    return Query(szQuery).release();
 }
 
 QueryNamedResult* Database::PQueryNamed(const char* format, ...)

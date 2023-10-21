@@ -802,7 +802,7 @@ class ChatHandler
         void ShowTriggerListHelper(AreaTriggerEntry const* atEntry);
         void ShowTriggerTargetListHelper(uint32 id, AreaTrigger const* at, bool subpart = false);
         bool LookupPlayerSearchCommand(QueryResult* result, uint32* limit = nullptr);
-        bool HandleBanListHelper(QueryResult* result);
+        bool HandleBanListHelper(std::unique_ptr<QueryResult> queryResult);
         bool HandleBanHelper(BanMode mode, char* args);
         bool HandleBanInfoHelper(uint32 accountid, char const* accountname);
         bool HandleUnBanHelper(BanMode mode, char* args);
