@@ -450,18 +450,18 @@ void ReputationMgr::SetInactive(FactionState* faction, bool inactive)
     faction->needSave = true;
 }
 
-void ReputationMgr::LoadFromDB(QueryResult* result)
+void ReputationMgr::LoadFromDB(std::unique_ptr<QueryResult> queryResult)
 {
     // Set initial reputations (so everything is nifty before DB data load)
     Initialize();
 
     // QueryResult *result = CharacterDatabase.PQuery("SELECT faction,standing,flags FROM character_reputation WHERE guid = '%u'",GetGUIDLow());
 
-    if (result)
+    if (queryResult)
     {
         do
         {
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
 
             FactionEntry const* factionEntry = sFactionStore.LookupEntry(fields[0].GetUInt32());
             if (factionEntry && factionEntry->HasReputation())
@@ -506,9 +506,7 @@ void ReputationMgr::LoadFromDB(QueryResult* result)
                 }
             }
         }
-        while (result->NextRow());
-
-        delete result;
+        while (queryResult->NextRow());
     }
 }
 

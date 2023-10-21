@@ -330,7 +330,7 @@ class WorldSession
         void SetAccountData(AccountDataType type, time_t time_, const std::string& data);
         void SendAccountDataTimes();
         void LoadGlobalAccountData();
-        void LoadAccountData(QueryResult* result, uint32 mask);
+        void LoadAccountData(std::unique_ptr<QueryResult> queryResult, uint32 mask);
         void LoadTutorialsData();
         void SendTutorialsData();
         void SaveTutorialsData();

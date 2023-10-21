@@ -957,23 +957,23 @@ void WorldSession::SendAuthWaitQue(uint32 position) const
 void WorldSession::LoadGlobalAccountData()
 {
     LoadAccountData(
-        CharacterDatabase.PQuery("SELECT type, time, data FROM account_data WHERE account='%u'", GetAccountId()).release(),
+        CharacterDatabase.PQuery("SELECT type, time, data FROM account_data WHERE account='%u'", GetAccountId()),
         GLOBAL_CACHE_MASK
     );
 }
 
-void WorldSession::LoadAccountData(QueryResult* result, uint32 mask)
+void WorldSession::LoadAccountData(std::unique_ptr<QueryResult> queryResult, uint32 mask)
 {
     for (uint32 i = 0; i < NUM_ACCOUNT_DATA_TYPES; ++i)
         if (mask & (1 << i))
             m_accountData[i] = AccountData();
 
-    if (!result)
+    if (!queryResult)
         return;
 
     do
     {
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
 
         uint32 type = fields[0].GetUInt32();
         if (type >= NUM_ACCOUNT_DATA_TYPES)
@@ -992,9 +992,7 @@ void WorldSession::LoadAccountData(QueryResult* result, uint32 mask)
 
         m_accountData[type].Time = time_t(fields[1].GetUInt64());
         m_accountData[type].Data = fields[2].GetCppString();
-    } while (result->NextRow());
-
-    delete result;
+    } while (queryResult->NextRow());
 }
 
 void WorldSession::SetAccountData(AccountDataType type, time_t time_, const std::string& data)

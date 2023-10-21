@@ -20,6 +20,7 @@
 #define MANGOS_CALLBACK_H
 
 #include <functional>
+#include <memory>
 
 /// ---------- QUERY CALLBACKS -----------
 
@@ -33,7 +34,7 @@ namespace MaNGOS
 
             virtual ~IQueryCallback() = default;
             virtual void Execute() = 0;
-            virtual void SetResult(QueryResult* queryResult) = 0;
+            virtual void SetResult(std::unique_ptr<QueryResult> queryResult) = 0;
     };
 
     class QueryCallback : public IQueryCallback
@@ -54,18 +55,18 @@ namespace MaNGOS
 
             void Execute() override
             {
-                m_Callback(m_QueryResult);
+                m_Callback(m_QueryResult.release());
             }
 
-            void SetResult(QueryResult* queryResult) override
+            void SetResult(std::unique_ptr<QueryResult> queryResult) override
             {
-                m_QueryResult = queryResult;
+                m_QueryResult = std::move(queryResult);
             }
 
         private:
 
             std::function<void(QueryResult*)> m_Callback;
-            QueryResult* m_QueryResult;
+            std::unique_ptr<QueryResult> m_QueryResult;
     };
 }
 
