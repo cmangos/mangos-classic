@@ -20,6 +20,7 @@
 #include "Database/SqlOperations.h"
 
 #include <cstdarg>
+#include <functional>
 
 /// Function body definitions for the template function members of the Database class
 
@@ -52,7 +53,8 @@ bool
 Database::AsyncQuery(Class* object, void (Class::*method)(QueryResult*), const char* sql)
 {
     ASYNC_QUERY_BODY(sql)
-    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::QueryCallback<Class>(object, method), m_pResultQueue));
+    auto callback = std::bind(method, object);
+    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::QueryCallback(std::move(callback)), m_pResultQueue));
 }
 
 template<class Class, typename ParamType1>
@@ -60,7 +62,8 @@ bool
 Database::AsyncQuery(Class* object, void (Class::*method)(QueryResult*, ParamType1), ParamType1 param1, const char* sql)
 {
     ASYNC_QUERY_BODY(sql)
-    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::QueryCallback<Class, ParamType1>(object, method, (QueryResult*)nullptr, param1), m_pResultQueue));
+    auto callback = std::bind(method, object, std::placeholders::_1, param1);
+    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::QueryCallback(std::move(callback)), m_pResultQueue));
 }
 
 template<class Class, typename ParamType1, typename ParamType2>
@@ -68,7 +71,8 @@ bool
 Database::AsyncQuery(Class* object, void (Class::*method)(QueryResult*, ParamType1, ParamType2), ParamType1 param1, ParamType2 param2, const char* sql)
 {
     ASYNC_QUERY_BODY(sql)
-    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::QueryCallback<Class, ParamType1, ParamType2>(object, method, (QueryResult*)nullptr, param1, param2), m_pResultQueue));
+    auto callback = std::bind(method, object, std::placeholders::_1, param1, param2);
+    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::QueryCallback(std::move(callback)), m_pResultQueue));
 }
 
 template<class Class, typename ParamType1, typename ParamType2, typename ParamType3>
@@ -76,7 +80,8 @@ bool
 Database::AsyncQuery(Class* object, void (Class::*method)(QueryResult*, ParamType1, ParamType2, ParamType3), ParamType1 param1, ParamType2 param2, ParamType3 param3, const char* sql)
 {
     ASYNC_QUERY_BODY(sql)
-    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::QueryCallback<Class, ParamType1, ParamType2, ParamType3>(object, method, (QueryResult*)nullptr, param1, param2, param3), m_pResultQueue));
+    auto callback = std::bind(method, object, std::placeholders::_1, param1, param2, param3);
+    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::QueryCallback(std::move(callback)), m_pResultQueue));
 }
 
 // -- Query / static --
@@ -86,7 +91,8 @@ bool
 Database::AsyncQuery(void (*method)(QueryResult*, ParamType1), ParamType1 param1, const char* sql)
 {
     ASYNC_QUERY_BODY(sql)
-    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::SQueryCallback<ParamType1>(method, (QueryResult*)nullptr, param1), m_pResultQueue));
+    auto callback = std::bind(method, std::placeholders::_1, param1);
+    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::QueryCallback(std::move(callback)), m_pResultQueue));
 }
 
 template<typename ParamType1, typename ParamType2>
@@ -94,7 +100,8 @@ bool
 Database::AsyncQuery(void (*method)(QueryResult*, ParamType1, ParamType2), ParamType1 param1, ParamType2 param2, const char* sql)
 {
     ASYNC_QUERY_BODY(sql)
-    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::SQueryCallback<ParamType1, ParamType2>(method, (QueryResult*)nullptr, param1, param2), m_pResultQueue));
+    auto callback = std::bind(method, std::placeholders::_1, param1, param2);
+    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::QueryCallback(std::move(callback)), m_pResultQueue));
 }
 
 template<typename ParamType1, typename ParamType2, typename ParamType3>
@@ -102,7 +109,8 @@ bool
 Database::AsyncQuery(void (*method)(QueryResult*, ParamType1, ParamType2, ParamType3), ParamType1 param1, ParamType2 param2, ParamType3 param3, const char* sql)
 {
     ASYNC_QUERY_BODY(sql)
-    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::SQueryCallback<ParamType1, ParamType2, ParamType3>(method, (QueryResult*)nullptr, param1, param2, param3), m_pResultQueue));
+    auto callback = std::bind(method, std::placeholders::_1, param1, param2, param3);
+    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::QueryCallback(std::move(callback)), m_pResultQueue));
 }
 
 // -- PQuery / member --
@@ -172,7 +180,8 @@ bool
 Database::DelayQueryHolder(Class* object, void (Class::*method)(QueryResult*, SqlQueryHolder*), SqlQueryHolder* holder)
 {
     ASYNC_DELAYHOLDER_BODY(holder)
-    return holder->Execute(new MaNGOS::QueryCallback<Class, SqlQueryHolder*>(object, method, (QueryResult*)nullptr, holder), m_threadBody, m_pResultQueue);
+    auto callback = std::bind(method, object, std::placeholders::_1, holder);
+    return holder->Execute(new MaNGOS::QueryCallback(std::move(callback)), m_threadBody, m_pResultQueue);
 }
 
 template<class Class, typename ParamType1>
@@ -180,7 +189,8 @@ bool
 Database::DelayQueryHolder(Class* object, void (Class::*method)(QueryResult*, SqlQueryHolder*, ParamType1), SqlQueryHolder* holder, ParamType1 param1)
 {
     ASYNC_DELAYHOLDER_BODY(holder)
-    return holder->Execute(new MaNGOS::QueryCallback<Class, SqlQueryHolder*, ParamType1>(object, method, (QueryResult*)nullptr, holder, param1), m_threadBody, m_pResultQueue);
+    auto callback = std::bind(method, object, std::placeholders::_1, holder, param1);
+    return holder->Execute(new MaNGOS::QueryCallback(std::move(callback)), m_threadBody, m_pResultQueue);
 }
 
 #undef ASYNC_QUERY_BODY
