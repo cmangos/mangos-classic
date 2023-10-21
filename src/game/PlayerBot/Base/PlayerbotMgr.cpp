@@ -894,10 +894,10 @@ void Creature::LoadBotMenu(Player* pPlayer)
     if (pPlayer->GetPlayerbotAI()) return;
     ObjectGuid guid = pPlayer->GetObjectGuid();
     uint32 accountId = sObjectMgr.GetPlayerAccountIdByGUID(guid);
-    QueryResult* result = CharacterDatabase.PQuery("SELECT guid, name FROM characters WHERE account='%d'", accountId);
+    auto queryResult = CharacterDatabase.PQuery("SELECT guid, name FROM characters WHERE account='%d'", accountId);
     do
     {
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
         ObjectGuid guidlo = ObjectGuid(fields[0].GetUInt64());
         std::string name = fields[1].GetString();
         std::string word = "";
@@ -928,8 +928,7 @@ void Creature::LoadBotMenu(Player* pPlayer)
             }
         }
     }
-    while (result->NextRow());
-    delete result;
+    while (queryResult->NextRow());
 }
 
 void Player::skill(std::list<uint32>& m_spellsToLearn)
@@ -1126,7 +1125,7 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
         return false;
     }
 
-    QueryResult* resultchar = CharacterDatabase.PQuery("SELECT COUNT(*) FROM characters WHERE online = '1' AND account = '%u'", m_session->GetAccountId());
+    auto resultchar = CharacterDatabase.PQuery("SELECT COUNT(*) FROM characters WHERE online = '1' AND account = '%u'", m_session->GetAccountId());
     if (resultchar)
     {
         Field* fields = resultchar->Fetch();
@@ -1137,13 +1136,11 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
             {
                 PSendSysMessage("|cffff0000You cannot summon anymore bots.(Current Max: |cffffffff%u)", maxnum);
                 SetSentErrorMessage(true);
-                delete resultchar;
                 return false;
             }
-        delete resultchar;
     }
 
-    QueryResult* resultlvl = CharacterDatabase.PQuery("SELECT level, name, race FROM characters WHERE guid = '%u'", guid.GetCounter());
+    auto resultlvl = CharacterDatabase.PQuery("SELECT level, name, race FROM characters WHERE guid = '%u'", guid.GetCounter());
     if (resultlvl)
     {
         Field* fields = resultlvl->Fetch();
@@ -1160,7 +1157,6 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
             {
                 PSendSysMessage("|cffff0000You cannot summon |cffffffff[%s]|cffff0000, it's level is too high.(Current Max:lvl |cffffffff%u)", fields[1].GetString(), maxlvl);
                 SetSentErrorMessage(true);
-                delete resultlvl;
                 return false;
             }
 
@@ -1169,11 +1165,9 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
             {
                 PSendSysMessage("|cffff0000You cannot summon |cffffffff[%s]|cffff0000, a member of the enemy side", fields[1].GetString());
                 SetSentErrorMessage(true);
-                delete resultlvl;
                 return false;
             }
         }
-        delete resultlvl;
     }
 
     // end of gmconfig patch

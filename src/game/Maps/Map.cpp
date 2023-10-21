@@ -1472,24 +1472,22 @@ void Map::CreateInstanceData(bool load)
 
     if (load)
     {
-        // TODO: make a global storage for this
-        QueryResult* result;
+        std::unique_ptr<QueryResult> queryResult;
 
         if (Instanceable())
-            result = CharacterDatabase.PQuery("SELECT data FROM instance WHERE id = '%u'", i_InstanceId);
+            queryResult = CharacterDatabase.PQuery("SELECT data FROM instance WHERE id = '%u'", i_InstanceId);
         else
-            result = CharacterDatabase.PQuery("SELECT data FROM world WHERE map = '%u'", GetId());
+            queryResult = CharacterDatabase.PQuery("SELECT data FROM world WHERE map = '%u'", GetId());
 
-        if (result)
+        if (queryResult)
         {
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
             const char* data = fields[0].GetString();
             if (data)
             {
                 DEBUG_LOG("Loading instance data for `%s` (Map: %u Instance: %u)", sScriptDevAIMgr.GetScriptName(i_script_id), GetId(), i_InstanceId);
                 i_data->Load(data);
             }
-            delete result;
         }
         else
         {

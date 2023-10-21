@@ -2636,10 +2636,10 @@ void SpellMgr::CheckUsedSpells(char const* table) const
     uint32 countSpells = 0;
     uint32 countMasks = 0;
 
-    //                                                 0       1               2               3         4           5             6          7          8         9    10
-    QueryResult* result = WorldDatabase.PQuery("SELECT spellid,SpellFamilyName,SpellFamilyMask,SpellIcon,SpellVisual,SpellCategory,EffectType,EffectAura,EffectIdx,Name,Code FROM %s", table);
+    //                                              0       1               2               3         4           5             6          7          8         9    10
+    auto queryResult = WorldDatabase.PQuery("SELECT spellid,SpellFamilyName,SpellFamilyMask,SpellIcon,SpellVisual,SpellCategory,EffectType,EffectAura,EffectIdx,Name,Code FROM %s", table);
 
-    if (!result)
+    if (!queryResult)
     {
         BarGoLink bar(1);
 
@@ -2650,11 +2650,11 @@ void SpellMgr::CheckUsedSpells(char const* table) const
         return;
     }
 
-    BarGoLink bar(result->GetRowCount());
+    BarGoLink bar(queryResult->GetRowCount());
 
     do
     {
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
 
         bar.step();
 
@@ -2871,9 +2871,7 @@ void SpellMgr::CheckUsedSpells(char const* table) const
             }
         }
     }
-    while (result->NextRow());
-
-    delete result;
+    while (queryResult->NextRow());
 
     sLog.outString();
     sLog.outString(">> Checked %u spells and %u spell masks", countSpells, countMasks);

@@ -957,7 +957,7 @@ void WorldSession::SendAuthWaitQue(uint32 position) const
 void WorldSession::LoadGlobalAccountData()
 {
     LoadAccountData(
-        CharacterDatabase.PQuery("SELECT type, time, data FROM account_data WHERE account='%u'", GetAccountId()),
+        CharacterDatabase.PQuery("SELECT type, time, data FROM account_data WHERE account='%u'", GetAccountId()).release(),
         GLOBAL_CACHE_MASK
     );
 }
@@ -1068,9 +1068,9 @@ void WorldSession::LoadTutorialsData()
     for (unsigned int& m_Tutorial : m_Tutorials)
         m_Tutorial = 0;
 
-    QueryResult* result = CharacterDatabase.PQuery("SELECT tut0,tut1,tut2,tut3,tut4,tut5,tut6,tut7 FROM character_tutorial WHERE account = '%u'", GetAccountId());
+    auto queryResult = CharacterDatabase.PQuery("SELECT tut0,tut1,tut2,tut3,tut4,tut5,tut6,tut7 FROM character_tutorial WHERE account = '%u'", GetAccountId());
 
-    if (!result)
+    if (!queryResult)
     {
         m_tutorialState = TUTORIALDATA_NEW;
         return;
@@ -1078,14 +1078,12 @@ void WorldSession::LoadTutorialsData()
 
     do
     {
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
 
         for (int iI = 0; iI < 8; ++iI)
             m_Tutorials[iI] = fields[iI].GetUInt32();
     }
-    while (result->NextRow());
-
-    delete result;
+    while (queryResult->NextRow());
 
     m_tutorialState = TUTORIALDATA_UNCHANGED;
 }

@@ -114,12 +114,12 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
     scripts.first = tablename;
     scripts.second.clear();                                 // need for reload support
 
-    //                                                                0   1      2        3         4          5          6            7              8           9        10        11        12               13 14 15 16 17     18            19
-    std::unique_ptr<QueryResult> result(WorldDatabase.PQuery("SELECT id, delay, command, datalong, datalong2, datalong3, buddy_entry, search_radius, data_flags, dataint, dataint2, dataint3, dataint4, datafloat, x, y, z, o, speed, condition_id FROM %s ORDER BY priority", tablename));
+    //                                              0   1      2        3         4          5          6            7              8           9        10        11        12               13 14 15 16 17     18            19
+    auto queryResult = WorldDatabase.PQuery("SELECT id, delay, command, datalong, datalong2, datalong3, buddy_entry, search_radius, data_flags, dataint, dataint2, dataint3, dataint4, datafloat, x, y, z, o, speed, condition_id FROM %s ORDER BY priority", tablename);
 
     uint32 count = 0;
 
-    if (!result)
+    if (!queryResult)
     {
         BarGoLink bar(1);
         bar.step();
@@ -128,13 +128,13 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
         return;
     }
 
-    BarGoLink bar(result->GetRowCount());
+    BarGoLink bar(queryResult->GetRowCount());
 
     do
     {
         bar.step();
 
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
 
         ScriptInfo tmp;
         tmp.id                 = fields[0].GetUInt32();
@@ -971,7 +971,7 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
 
         ++count;
     }
-    while (result->NextRow());
+    while (queryResult->NextRow());
 
     m_scriptMaps[scriptType] = std::make_shared<ScriptMapMapName>(scripts);
 

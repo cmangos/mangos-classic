@@ -233,22 +233,20 @@ bool CreatureLinkingMgr::IsLinkingEntryValid(uint32 slaveEntry, CreatureLinkingI
         // Check for uniqueness of mob whom is followed, on whom spawning is dependend
         if (pTmp->searchRange == 0 && pTmp->linkingFlag & (FLAG_FOLLOW | FLAG_CANT_SPAWN_IF_BOSS_DEAD | FLAG_CANT_SPAWN_IF_BOSS_ALIVE))
         {
-            QueryResult* result = WorldDatabase.PQuery("SELECT guid FROM creature WHERE id=%u AND map=%u LIMIT 2", pTmp->masterId, pTmp->mapId);
-            if (!result)
+            auto queryResult = WorldDatabase.PQuery("SELECT guid FROM creature WHERE id=%u AND map=%u LIMIT 2", pTmp->masterId, pTmp->mapId);
+            if (!queryResult)
             {
                 sLog.outErrorDb("`creature_linking_template` has FLAG_FOLLOW, but no master, (entry: %u, map: %u, master: %u)", slaveEntry, pTmp->mapId, pTmp->masterId);
                 return false;
             }
 
-            if (result->GetRowCount() > 1)
+            if (queryResult->GetRowCount() > 1)
             {
                 sLog.outErrorDb("`creature_linking_template` has FLAG_FOLLOW, but non unique master, (entry: %u, map: %u, master: %u)", slaveEntry, pTmp->mapId, pTmp->masterId);
-                delete result;
                 return false;
             }
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
             pTmp->masterDBGuid = fields[0].GetUInt32();
-            delete result;
         }
     }
 

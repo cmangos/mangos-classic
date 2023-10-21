@@ -393,10 +393,10 @@ bool AuthSocket::_HandleLogonChallenge()
     {
         ///- Get the account details from the account table
         // No SQL injection (escaped user name)
-        QueryResult* result = LoginDatabase.PQuery("SELECT id,locked,lockedIp,gmlevel,v,s,token FROM account WHERE username = '%s'", _safelogin.c_str());
-        if (result)
+        auto queryResult = LoginDatabase.PQuery("SELECT id,locked,lockedIp,gmlevel,v,s,token FROM account WHERE username = '%s'", _safelogin.c_str());
+        if (queryResult)
         {
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
 
             ///- If the IP is 'locked', check that the player comes indeed from the correct IP address
             bool locked = false;
@@ -430,7 +430,7 @@ bool AuthSocket::_HandleLogonChallenge()
             if (!locked && !broken)
             {
                 ///- If the account is banned, reject the logon attempt
-                QueryResult* banresult = LoginDatabase.PQuery("SELECT banned_at,expires_at FROM account_banned WHERE "
+                auto banresult = LoginDatabase.PQuery("SELECT banned_at,expires_at FROM account_banned WHERE "
                                          "account_id = %u AND active = 1 AND (expires_at > UNIX_TIMESTAMP() OR expires_at = banned_at)", fields[0].GetUInt32());
                 if (banresult)
                 {
@@ -444,8 +444,6 @@ bool AuthSocket::_HandleLogonChallenge()
                         pkt << uint8(AUTH_LOGON_FAILED_SUSPENDED);
                         BASIC_LOG("[AuthChallenge] Temporarily banned account %s tries to login!", _login.c_str());
                     }
-
-                    delete banresult;
                 }
                 else
                 {
@@ -501,7 +499,6 @@ bool AuthSocket::_HandleLogonChallenge()
                     _status = STATUS_LOGON_PROOF;
                 }
             }
-            delete result;
         }
         else                                                // no account
             pkt << uint8(AUTH_LOGON_FAILED_UNKNOWN_ACCOUNT);
@@ -632,7 +629,7 @@ bool AuthSocket::_HandleLogonProof()
             // Increment number of failed logins by one and if it reaches the limit temporarily ban that account or IP
             LoginDatabase.PExecute("UPDATE account SET failed_logins = failed_logins + 1 WHERE username = '%s'", _safelogin.c_str());
 
-            if (QueryResult* loginfail = LoginDatabase.PQuery("SELECT id, failed_logins FROM account WHERE username = '%s'", _safelogin.c_str()))
+            if (auto loginfail = LoginDatabase.PQuery("SELECT id, failed_logins FROM account WHERE username = '%s'", _safelogin.c_str()))
             {
                 Field* fields = loginfail->Fetch();
                 uint32 failed_logins = fields[1].GetUInt32();
@@ -661,7 +658,6 @@ bool AuthSocket::_HandleLogonProof()
                                   current_ip.c_str(), WrongPassBanTime, _login.c_str(), failed_logins);
                     }
                 }
-                delete loginfail;
             }
         }
     }
@@ -711,19 +707,18 @@ bool AuthSocket::_HandleReconnectChallenge()
     EndianConvert(ch->build);
     _build = ch->build;
 
-    QueryResult* result = LoginDatabase.PQuery("SELECT sessionkey FROM account WHERE username = '%s'", _safelogin.c_str());
+    auto queryResult = LoginDatabase.PQuery("SELECT sessionkey FROM account WHERE username = '%s'", _safelogin.c_str());
 
     // Stop if the account is not found
-    if (!result)
+    if (!queryResult)
     {
         sLog.outError("[ERROR] user %s tried to login and we cannot find his session key in the database.", _login.c_str());
         Close();
         return false;
     }
 
-    Field* fields = result->Fetch();
+    Field* fields = queryResult->Fetch();
     srp.SetStrongSessionKey(fields[0].GetString());
-    delete result;
 
     ///- All good, await client's proof
     _status = STATUS_RECON_PROOF;
@@ -803,17 +798,16 @@ bool AuthSocket::_HandleRealmList()
     ///- Get the user id (else close the connection)
     // No SQL injection (escaped user name)
 
-    QueryResult* result = LoginDatabase.PQuery("SELECT id, gmlevel FROM account WHERE username = '%s'", _safelogin.c_str());
-    if (!result)
+    auto queryResult = LoginDatabase.PQuery("SELECT id, gmlevel FROM account WHERE username = '%s'", _safelogin.c_str());
+    if (!queryResult)
     {
         sLog.outError("[ERROR] user %s tried to login and we cannot find him in the database.", _login.c_str());
         Close();
         return false;
     }
 
-    uint32 id = (*result)[0].GetUInt32();
-    uint8 accountSecurityLevel = (*result)[1].GetUInt8();
-    delete result;
+    uint32 id = (*queryResult)[0].GetUInt32();
+    uint8 accountSecurityLevel = (*queryResult)[1].GetUInt8();
 
     ///- Update realm list if need
     sRealmList.UpdateIfNeed();
@@ -847,12 +841,11 @@ void AuthSocket::LoadRealmlist(ByteBuffer& pkt, uint32 acctid, uint8 securityLev
                 uint8 AmountOfCharacters;
 
                 // No SQL injection. id of realm is controlled by the database.
-                QueryResult* result = LoginDatabase.PQuery("SELECT numchars FROM realmcharacters WHERE realmid = '%d' AND acctid='%u'", i.second.m_ID, acctid);
-                if (result)
+                auto queryResult = LoginDatabase.PQuery("SELECT numchars FROM realmcharacters WHERE realmid = '%d' AND acctid='%u'", i.second.m_ID, acctid);
+                if (queryResult)
                 {
-                    Field* fields = result->Fetch();
+                    Field* fields = queryResult->Fetch();
                     AmountOfCharacters = fields[0].GetUInt8();
-                    delete result;
                 }
                 else
                     AmountOfCharacters = 0;
@@ -912,12 +905,11 @@ void AuthSocket::LoadRealmlist(ByteBuffer& pkt, uint32 acctid, uint8 securityLev
                 uint8 AmountOfCharacters;
 
                 // No SQL injection. id of realm is controlled by the database.
-                QueryResult* result = LoginDatabase.PQuery("SELECT numchars FROM realmcharacters WHERE realmid = '%d' AND acctid='%u'", i.second.m_ID, acctid);
-                if (result)
+                auto queryResult = LoginDatabase.PQuery("SELECT numchars FROM realmcharacters WHERE realmid = '%d' AND acctid='%u'", i.second.m_ID, acctid);
+                if (queryResult)
                 {
-                    Field* fields = result->Fetch();
+                    Field* fields = queryResult->Fetch();
                     AmountOfCharacters = fields[0].GetUInt8();
-                    delete result;
                 }
                 else
                     AmountOfCharacters = 0;

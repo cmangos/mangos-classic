@@ -306,8 +306,8 @@ void PlayerDumpWriter::DumpTableContent(std::string& dump, uint32 guid, char con
         else                                                // not set case, get single guid string
             wherestr = GenerateWhereStr(fieldname, guid);
 
-        QueryResult* result = CharacterDatabase.PQuery("SELECT * FROM %s WHERE %s", tableFrom, wherestr.c_str());
-        if (!result)
+        auto queryResult = CharacterDatabase.PQuery("SELECT * FROM %s WHERE %s", tableFrom, wherestr.c_str());
+        if (!queryResult)
             return;
 
         do
@@ -316,26 +316,24 @@ void PlayerDumpWriter::DumpTableContent(std::string& dump, uint32 guid, char con
             switch (type)
             {
                 case DTT_INVENTORY:
-                    StoreGUID(result, 3, items); break;     // item guid collection
+                    StoreGUID(queryResult.get(), 3, items); break;     // item guid collection
                 case DTT_ITEM:
-                    StoreGUID(result, 0, ITEM_FIELD_ITEM_TEXT_ID, texts); break;
+                    StoreGUID(queryResult.get(), 0, ITEM_FIELD_ITEM_TEXT_ID, texts); break;
                 // item text id collection
                 case DTT_PET:
-                    StoreGUID(result, 0, pets);  break;     // pet petnumber collection (character_pet.id)
+                    StoreGUID(queryResult.get(), 0, pets);  break;     // pet petnumber collection (character_pet.id)
                 case DTT_MAIL:
-                    StoreGUID(result, 0, mails);            // mail id collection (mail.id)
-                    StoreGUID(result, 7, texts); break;     // item text id collection
+                    StoreGUID(queryResult.get(), 0, mails);            // mail id collection (mail.id)
+                    StoreGUID(queryResult.get(), 7, texts); break;     // item text id collection
                 case DTT_MAIL_ITEM:
-                    StoreGUID(result, 1, items); break;     // item guid collection (mail_items.item_guid)
+                    StoreGUID(queryResult.get(), 1, items); break;     // item guid collection (mail_items.item_guid)
                 default:                       break;
             }
 
-            dump += CreateDumpString(tableTo, result);
+            dump += CreateDumpString(tableTo, queryResult.get());
             dump += "\n";
         }
-        while (result->NextRow());
-
-        delete result;
+        while (queryResult->NextRow());
     }
     while (guids && guids_itr != guids->end());             // not set case iterate single time, set case iterate for all guids
 }
@@ -411,18 +409,16 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
     if (!fin)
         return DUMP_FILE_OPEN_ERROR;
 
-    QueryResult* result;
     char newguid[20], chraccount[20], newpetid[20], currpetid[20], lastpetid[20];
 
     // make sure the same guid doesn't already exist and is safe to use
     bool incHighest = true;
     if (guid != 0 && guid < sObjectMgr.m_CharGuids.GetNextAfterMaxUsed())
     {
-        result = CharacterDatabase.PQuery("SELECT * FROM characters WHERE guid = '%u'", guid);
-        if (result)
+        auto queryResult = CharacterDatabase.PQuery("SELECT * FROM characters WHERE guid = '%u'", guid);
+        if (queryResult)
         {
             guid = sObjectMgr.m_CharGuids.GetNextAfterMaxUsed();
-            delete result;
         }
         else incHighest = false;
     }
@@ -436,11 +432,10 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
     if (ObjectMgr::CheckPlayerName(name, true) == CHAR_NAME_SUCCESS)
     {
         CharacterDatabase.escape_string(name);              // for safe, we use name only for sql quearies anyway
-        result = CharacterDatabase.PQuery("SELECT * FROM characters WHERE name = '%s'", name.c_str());
-        if (result)
+        auto queryResult = CharacterDatabase.PQuery("SELECT * FROM characters WHERE name = '%s'", name.c_str());
+        if (queryResult)
         {
             name.clear();                                   // use the one from the dump
-            delete result;
         }
     }
     else
@@ -538,11 +533,9 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
                     name = getnth(line, 3);                 // characters.name
                     CharacterDatabase.escape_string(name);
 
-                    result = CharacterDatabase.PQuery("SELECT * FROM characters WHERE name = '%s'", name.c_str());
-                    if (result)
+                    auto queryResult = CharacterDatabase.PQuery("SELECT * FROM characters WHERE name = '%s'", name.c_str());
+                    if (queryResult)
                     {
-                        delete result;
-
                         if (!changenth(line, 35, "1"))      // characters.at_login set to "rename on login"
                             ROLLBACK(DUMP_FILE_BROKEN);
                     }

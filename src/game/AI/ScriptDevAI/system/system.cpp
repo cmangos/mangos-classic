@@ -24,14 +24,13 @@ SystemMgr& SystemMgr::Instance()
 void SystemMgr::LoadVersion()
 {
     // Get Version information
-    QueryResult* result = WorldDatabase.PQuery("SELECT version FROM sd2_db_version LIMIT 1");
+    auto queryResult = WorldDatabase.PQuery("SELECT version FROM sd2_db_version LIMIT 1");
 
-    if (result)
+    if (queryResult)
     {
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
 
         strSD2Version = fields[0].GetCppString();
-        delete result;
     }
     else
         script_error_log("Missing `sd2_db_version` information.");
@@ -73,7 +72,7 @@ void SystemMgr::LoadScriptWaypoints()
     outstring_log("SD2: Loading Script Waypoints for " UI64FMTD " creature(s)...", creatureCount);
 
     //                                    0      1       2      3          4          5          6            7         8
-    result.reset(WorldDatabase.PQuery("SELECT Entry, PathId, Point, PositionX, PositionY, PositionZ, Orientation, WaitTime, ScriptId FROM script_waypoint ORDER BY Entry, PathId, Point"));
+    result = WorldDatabase.PQuery("SELECT Entry, PathId, Point, PositionX, PositionY, PositionZ, Orientation, WaitTime, ScriptId FROM script_waypoint ORDER BY Entry, PathId, Point");
 
     if (result)
     {

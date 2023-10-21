@@ -306,30 +306,28 @@ template<class DerivedLoader, class StorageClass>
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::Load(StorageClass& store, bool error_at_empty /*= true*/)
 {
     Field* fields = nullptr;
-    QueryResult* result  = WorldDatabase.PQuery("SELECT MAX(%s) FROM %s", store.EntryFieldName(), store.GetTableName());
-    if (!result)
+    auto queryResult = WorldDatabase.PQuery("SELECT MAX(%s) FROM %s", store.EntryFieldName(), store.GetTableName());
+    if (!queryResult)
     {
         sLog.outError("Error loading %s table (not exist?)\n", store.GetTableName());
         Log::WaitBeforeContinueIfNeed();
         exit(1);                                            // Stop server at loading non exited table or not accessable table
     }
 
-    uint32 maxRecordId = (*result)[0].GetUInt32() + 1;
+    uint32 maxRecordId = (*queryResult)[0].GetUInt32() + 1;
     uint32 recordCount = 0;
     uint32 recordsize = 0;
-    delete result;
 
-    result = WorldDatabase.PQuery("SELECT COUNT(*) FROM %s", store.GetTableName());
-    if (result)
+    queryResult = WorldDatabase.PQuery("SELECT COUNT(*) FROM %s", store.GetTableName());
+    if (queryResult)
     {
-        fields = result->Fetch();
+        fields = queryResult->Fetch();
         recordCount = fields[0].GetUInt32();
-        delete result;
     }
 
-    result = WorldDatabase.PQuery("SELECT * FROM %s", store.GetTableName());
+    queryResult = WorldDatabase.PQuery("SELECT * FROM %s", store.GetTableName());
 
-    if (!result)
+    if (!queryResult)
     {
         if (error_at_empty)
             sLog.outError("%s table is empty!\n", store.GetTableName());
@@ -340,11 +338,10 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::Load(StorageClass& store
         return;
     }
 
-    if (store.GetSrcFieldCount() != result->GetFieldCount())
+    if (store.GetSrcFieldCount() != queryResult->GetFieldCount())
     {
         recordCount = 0;
         sLog.outError("Error in %s table, probably sql file format was updated (there should be %d fields in sql).\n", store.GetTableName(), store.GetSrcFieldCount());
-        delete result;
         Log::WaitBeforeContinueIfNeed();
         exit(1);                                            // Stop server at loading broken or non-compatible table.
     }
@@ -391,7 +388,7 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::Load(StorageClass& store
     BarGoLink bar(recordCount);
     do
     {
-        fields = result->Fetch();
+        fields = queryResult->Fetch();
         bar.step();
 
         char* record = store.createRecord(fields[0].GetUInt32());
@@ -442,9 +439,7 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::Load(StorageClass& store
             ++y;
         }
     }
-    while (result->NextRow());
-
-    delete result;
+    while (queryResult->NextRow());
 }
 
 #endif

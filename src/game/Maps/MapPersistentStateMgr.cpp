@@ -742,12 +742,12 @@ void MapPersistentStateManager::_DelHelper(DatabaseType& db, const char* fields,
     vsnprintf(szQueryTail, MAX_QUERY_LEN, queryTail, ap);
     va_end(ap);
 
-    QueryResult* result = db.PQuery("SELECT %s FROM %s %s", fields, table, szQueryTail);
-    if (result)
+    auto queryResult = db.PQuery("SELECT %s FROM %s %s", fields, table, szQueryTail);
+    if (queryResult)
     {
         do
         {
-            Field* resultFields = result->Fetch();
+            Field* resultFields = queryResult->Fetch();
             std::ostringstream ss;
             for (size_t i = 0; i < fieldTokens.size(); ++i)
             {
@@ -757,8 +757,7 @@ void MapPersistentStateManager::_DelHelper(DatabaseType& db, const char* fields,
             }
             db.PExecute("DELETE FROM %s WHERE %s", table, ss.str().c_str());
         }
-        while (result->NextRow());
-        delete result;
+        while (queryResult->NextRow());
     }
 }
 

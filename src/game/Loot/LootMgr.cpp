@@ -103,15 +103,15 @@ void LootStore::LoadLootTable()
     Clear();
 
     //                                                 0      1     2                    3        4              5         6
-    QueryResult* result = WorldDatabase.PQuery("SELECT entry, item, ChanceOrQuestChance, groupid, mincountOrRef, maxcount, condition_id FROM %s", GetName());
+    auto queryResult = WorldDatabase.PQuery("SELECT entry, item, ChanceOrQuestChance, groupid, mincountOrRef, maxcount, condition_id FROM %s", GetName());
 
-    if (result)
+    if (queryResult)
     {
-        BarGoLink bar(result->GetRowCount());
+        BarGoLink bar(queryResult->GetRowCount());
 
         do
         {
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
             bar.step();
 
             uint32 entry               = fields[0].GetUInt32();
@@ -168,9 +168,7 @@ void LootStore::LoadLootTable()
             tab->second->AddEntry(storeitem);
             ++count;
         }
-        while (result->NextRow());
-
-        delete result;
+        while (queryResult->NextRow());
 
         Verify();                                           // Checks validity of the loot store
 

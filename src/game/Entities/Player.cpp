@@ -4029,11 +4029,10 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
     }
 
     // the player was uninvited already on logout so just remove from group
-    QueryResult* resultGroup = CharacterDatabase.PQuery("SELECT groupId FROM group_member WHERE memberGuid='%u'", lowguid);
+    auto resultGroup = CharacterDatabase.PQuery("SELECT groupId FROM group_member WHERE memberGuid='%u'", lowguid);
     if (resultGroup)
     {
         uint32 groupId = (*resultGroup)[0].GetUInt32();
-        delete resultGroup;
         if (Group* group = sObjectMgr.GetGroupById(groupId))
             RemoveFromGroup(group, playerguid);
     }
@@ -4046,8 +4045,8 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
         // completely remove from the database
         case 0:
         {
-            // return back all mails with COD and Item                 0  1           2              3      4       5          6     7
-            QueryResult* resultMail = CharacterDatabase.PQuery("SELECT id,messageType,mailTemplateId,sender,subject,itemTextId,money,has_items FROM mail WHERE receiver='%u' AND has_items<>0 AND cod<>0", lowguid);
+            // return back all mails with COD and Item         0  1           2              3      4       5          6     7
+            auto resultMail = CharacterDatabase.PQuery("SELECT id,messageType,mailTemplateId,sender,subject,itemTextId,money,has_items FROM mail WHERE receiver='%u' AND has_items<>0 AND cod<>0", lowguid);
             if (resultMail)
             {
                 do
@@ -4084,8 +4083,8 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
                     if (has_items)
                     {
                         // data needs to be at first place for Item::LoadFromDB
-                        //                                                          0          1            2                3      4         5        6      7             8                 9           10          11         12
-                        QueryResult* resultItems = CharacterDatabase.PQuery("SELECT itemEntry, creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, durability, itemTextId, item_guid, item_template FROM mail_items JOIN item_instance ON item_guid = guid WHERE mail_id='%u'", mail_id);
+                        //                                                  0          1            2                3      4         5        6      7             8                 9           10          11         12
+                        auto resultItems = CharacterDatabase.PQuery("SELECT itemEntry, creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, durability, itemTextId, item_guid, item_template FROM mail_items JOIN item_instance ON item_guid = guid WHERE mail_id='%u'", mail_id);
                         if (resultItems)
                         {
                             do
@@ -4113,8 +4112,6 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
                                 draft.AddItem(pItem);
                             }
                             while (resultItems->NextRow());
-
-                            delete resultItems;
                         }
                     }
 
@@ -4125,16 +4122,14 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
                     draft.SetMoney(money).SendReturnToSender(pl_account, playerguid, ObjectGuid(HIGHGUID_PLAYER, sender));
                 }
                 while (resultMail->NextRow());
-
-                delete resultMail;
             }
 
             // unsummon and delete for pets in world is not required: player deleted from CLI or character list with not loaded pet.
             // Get guids of character's pets, will deleted in transaction
-            QueryResult* resultPets = CharacterDatabase.PQuery("SELECT id FROM character_pet WHERE owner = '%u'", lowguid);
+            auto resultPets = CharacterDatabase.PQuery("SELECT id FROM character_pet WHERE owner = '%u'", lowguid);
 
             // delete char from friends list when selected chars is online (non existing - error)
-            QueryResult* resultFriend = CharacterDatabase.PQuery("SELECT DISTINCT guid FROM character_social WHERE friend = '%u'", lowguid);
+            auto  resultFriend = CharacterDatabase.PQuery("SELECT DISTINCT guid FROM character_social WHERE friend = '%u'", lowguid);
 
             // NOW we can finally clear other DB data related to character
             CharacterDatabase.BeginTransaction();
@@ -4148,7 +4143,6 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
                     Pet::DeleteFromDB(petguidlow, false);
                 }
                 while (resultPets->NextRow());
-                delete resultPets;
             }
 
             // cleanup friends for online players, offline case will cleanup later in code
@@ -4167,7 +4161,6 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
                     }
                 }
                 while (resultFriend->NextRow());
-                delete resultFriend;
             }
 
             CharacterDatabase.PExecute("DELETE FROM characters WHERE guid = '%u'", lowguid);
@@ -4230,7 +4223,7 @@ void Player::DeleteOldCharacters(uint32 keepDays)
 {
     sLog.outString("Player::DeleteOldChars: Deleting all characters which have been deleted %u days before...", keepDays);
 
-    QueryResult* resultChars = CharacterDatabase.PQuery("SELECT guid, deleteInfos_Account FROM characters WHERE deleteDate IS NOT NULL AND deleteDate < '" UI64FMTD "'", uint64(time(nullptr) - time_t(keepDays * DAY)));
+    auto resultChars = CharacterDatabase.PQuery("SELECT guid, deleteInfos_Account FROM characters WHERE deleteDate IS NOT NULL AND deleteDate < '" UI64FMTD "'", uint64(time(nullptr) - time_t(keepDays * DAY)));
     if (resultChars)
     {
         sLog.outString("Player::DeleteOldChars: Found %u character(s) to delete", uint32(resultChars->GetRowCount()));
@@ -4241,7 +4234,6 @@ void Player::DeleteOldCharacters(uint32 keepDays)
             Player::DeleteFromDB(guid, charFields[1].GetUInt32(), true, true);
         }
         while (resultChars->NextRow());
-        delete resultChars;
     }
     sLog.outString();
 }
@@ -6658,22 +6650,20 @@ uint32 Player::GetGuildIdFromDB(ObjectGuid guid)
 {
     uint32 lowguid = guid.GetCounter();
 
-    QueryResult* result = CharacterDatabase.PQuery("SELECT guildid FROM guild_member WHERE guid='%u'", lowguid);
-    if (!result)
+    auto queryResult = CharacterDatabase.PQuery("SELECT guildid FROM guild_member WHERE guid='%u'", lowguid);
+    if (!queryResult)
         return 0;
 
-    uint32 id = result->Fetch()[0].GetUInt32();
-    delete result;
+    uint32 id = queryResult->Fetch()[0].GetUInt32();
     return id;
 }
 
 uint32 Player::GetRankFromDB(ObjectGuid guid)
 {
-    QueryResult* result = CharacterDatabase.PQuery("SELECT `rank` FROM guild_member WHERE guid='%u'", guid.GetCounter());
-    if (result)
+    auto queryResult = CharacterDatabase.PQuery("SELECT `rank` FROM guild_member WHERE guid='%u'", guid.GetCounter());
+    if (queryResult)
     {
-        uint32 v = result->Fetch()[0].GetUInt32();
-        delete result;
+        uint32 v = queryResult->Fetch()[0].GetUInt32();
         return v;
     }
     return 0;
@@ -6682,25 +6672,23 @@ uint32 Player::GetRankFromDB(ObjectGuid guid)
 uint32 Player::GetZoneIdFromDB(ObjectGuid guid)
 {
     uint32 lowguid = guid.GetCounter();
-    QueryResult* result = CharacterDatabase.PQuery("SELECT zone FROM characters WHERE guid='%u'", lowguid);
-    if (!result)
+    auto queryResult = CharacterDatabase.PQuery("SELECT zone FROM characters WHERE guid='%u'", lowguid);
+    if (!queryResult)
         return 0;
-    Field* fields = result->Fetch();
+    Field* fields = queryResult->Fetch();
     uint32 zone = fields[0].GetUInt32();
-    delete result;
 
     if (!zone)
     {
         // stored zone is zero, use generic and slow zone detection
-        result = CharacterDatabase.PQuery("SELECT map,position_x,position_y,position_z FROM characters WHERE guid='%u'", lowguid);
-        if (!result)
+        queryResult = CharacterDatabase.PQuery("SELECT map,position_x,position_y,position_z FROM characters WHERE guid='%u'", lowguid);
+        if (!queryResult)
             return 0;
-        fields = result->Fetch();
+        fields = queryResult->Fetch();
         uint32 map = fields[0].GetUInt32();
         float posx = fields[1].GetFloat();
         float posy = fields[2].GetFloat();
         float posz = fields[3].GetFloat();
-        delete result;
 
         zone = sTerrainMgr.GetZoneId(map, posx, posy, posz);
 
@@ -6715,13 +6703,12 @@ uint32 Player::GetLevelFromDB(ObjectGuid guid)
 {
     uint32 lowguid = guid.GetCounter();
 
-    QueryResult* result = CharacterDatabase.PQuery("SELECT level FROM characters WHERE guid='%u'", lowguid);
-    if (!result)
+    auto queryResult = CharacterDatabase.PQuery("SELECT level FROM characters WHERE guid='%u'", lowguid);
+    if (!queryResult)
         return 0;
 
-    Field* fields = result->Fetch();
+    Field* fields = queryResult->Fetch();
     uint32 level = fields[0].GetUInt32();
-    delete result;
 
     return level;
 }
@@ -11780,7 +11767,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId)
             }
             else if (GetPlayerbotMgr()->GetPlayerBot(ObjectGuid(HIGHGUID_PLAYER, guidlo)) == nullptr)
             {
-                QueryResult* resultchar = CharacterDatabase.PQuery("SELECT COUNT(*) FROM characters WHERE online = '1' AND account = '%u'", m_session->GetAccountId());
+                auto resultchar = CharacterDatabase.PQuery("SELECT COUNT(*) FROM characters WHERE online = '1' AND account = '%u'", m_session->GetAccountId());
                 if (resultchar)
                 {
                     Field* fields = resultchar->Fetch();
@@ -11790,13 +11777,11 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId)
                         if (acctcharcount > maxnum)
                         {
                             ChatHandler(this).PSendSysMessage("|cffff0000You cannot summon anymore bots.(Current Max: |cffffffff%u)", maxnum);
-                            delete resultchar;
                             break;
                         }
                 }
-                delete resultchar;
 
-                QueryResult* resultlvl = CharacterDatabase.PQuery("SELECT level,name FROM characters WHERE guid = '%u'", guidlo);
+                auto resultlvl = CharacterDatabase.PQuery("SELECT level,name FROM characters WHERE guid = '%u'", guidlo);
                 if (resultlvl)
                 {
                     Field* fields = resultlvl->Fetch();
@@ -11806,11 +11791,9 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId)
                         if (charlvl > maxlvl)
                         {
                             ChatHandler(this).PSendSysMessage("|cffff0000You cannot summon |cffffffff[%s]|cffff0000, it's level is too high.(Current Max:lvl |cffffffff%u)", fields[1].GetString(), maxlvl);
-                            delete resultlvl;
                             break;
                         }
                 }
-                delete resultlvl;
 
                 GetPlayerbotMgr()->LoginPlayerBot(ObjectGuid(HIGHGUID_PLAYER, guidlo));
                 this->ModifyMoney(-(int32)cost);
@@ -13935,11 +13918,11 @@ void Player::_LoadForgottenSkills(QueryResult* result)
 
 bool Player::LoadPositionFromDB(ObjectGuid guid, uint32& mapid, float& x, float& y, float& z, float& o, bool& in_flight)
 {
-    QueryResult* result = CharacterDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map,taxi_path FROM characters WHERE guid = '%u'", guid.GetCounter());
-    if (!result)
+    auto queryResult = CharacterDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map,taxi_path FROM characters WHERE guid = '%u'", guid.GetCounter());
+    if (!queryResult)
         return false;
 
-    Field* fields = result->Fetch();
+    Field* fields = queryResult->Fetch();
 
     x = fields[0].GetFloat();
     y = fields[1].GetFloat();
@@ -13948,7 +13931,6 @@ bool Player::LoadPositionFromDB(ObjectGuid guid, uint32& mapid, float& x, float&
     mapid = fields[4].GetUInt32();
     in_flight = !fields[5].GetCppString().empty();
 
-    delete result;
     return true;
 }
 
@@ -16904,13 +16886,13 @@ void Player::RemovePetitionsAndSigns(ObjectGuid guid)
 {
     uint32 lowguid = guid.GetCounter();
 
-    QueryResult* result = CharacterDatabase.PQuery("SELECT ownerguid,petitionguid FROM petition_sign WHERE playerguid = '%u'", lowguid);
-    if (result)
+    auto queryResult = CharacterDatabase.PQuery("SELECT ownerguid,petitionguid FROM petition_sign WHERE playerguid = '%u'", lowguid);
+    if (queryResult)
     {
         do                                                  // this part effectively does nothing, since the deletion / modification only takes place _after_ the PetitionQuery. Though I don't know if the result remains intact if I execute the delete query beforehand.
         {
             // and SendPetitionQueryOpcode reads data from the DB
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
             ObjectGuid ownerguid   = ObjectGuid(HIGHGUID_PLAYER, fields[0].GetUInt32());
             ObjectGuid petitionguid = ObjectGuid(HIGHGUID_ITEM, fields[1].GetUInt32());
 
@@ -16919,9 +16901,7 @@ void Player::RemovePetitionsAndSigns(ObjectGuid guid)
             if (owner)
                 owner->GetSession()->SendPetitionQueryOpcode(petitionguid);
         }
-        while (result->NextRow());
-
-        delete result;
+        while (queryResult->NextRow());
 
         CharacterDatabase.PExecute("DELETE FROM petition_sign WHERE playerguid = '%u'", lowguid);
     }
@@ -20228,12 +20208,12 @@ void Player::AddNewInstanceId(uint32 instanceId)
 void Player::_LoadCreatedInstanceTimers()
 {
     //                                                     0          1
-    QueryResult* result = CharacterDatabase.PQuery("SELECT ExpireTime, InstanceId FROM account_instances_entered WHERE AccountId = '%u'", m_session->GetAccountId());
-    if (result)
+    auto queryResult = CharacterDatabase.PQuery("SELECT ExpireTime, InstanceId FROM account_instances_entered WHERE AccountId = '%u'", m_session->GetAccountId());
+    if (queryResult)
     {
         do
         {
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
             TimePoint expireTime = std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::from_time_t(fields[0].GetUInt64()));
             uint32 instanceId = fields[1].GetUInt32();
 
@@ -20241,9 +20221,7 @@ void Player::_LoadCreatedInstanceTimers()
                 m_enteredInstances.emplace(instanceId, expireTime);
 
         }
-        while (result->NextRow());
-
-        delete result;
+        while (queryResult->NextRow());
     }
 }
 

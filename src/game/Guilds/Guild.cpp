@@ -199,18 +199,17 @@ bool Guild::AddMember(ObjectGuid plGuid, uint32 plRank)
     }
     else
     {
-        //                                                     0    1     2     3    4
-        QueryResult* result = CharacterDatabase.PQuery("SELECT name,level,class,zone,account FROM characters WHERE guid = '%u'", lowguid);
-        if (!result)
+        //                                                  0    1     2     3    4
+        auto queryResult = CharacterDatabase.PQuery("SELECT name,level,class,zone,account FROM characters WHERE guid = '%u'", lowguid);
+        if (!queryResult)
             return false;                                   // player doesn't exist
 
-        Field* fields    = result->Fetch();
+        Field* fields    = queryResult->Fetch();
         newmember.Name   = fields[0].GetCppString();
         newmember.Level  = fields[1].GetUInt8();
         newmember.Class  = fields[2].GetUInt8();
         newmember.ZoneId = fields[3].GetUInt32();
         newmember.accountId = fields[4].GetInt32();
-        delete result;
 
         if (newmember.Level < 1 || newmember.Class < 1 ||
                 !((1 << (newmember.Class - 1)) & CLASSMASK_ALL_PLAYABLE))
@@ -847,15 +846,15 @@ void Guild::DisplayGuildEventLog(WorldSession* session)
 void Guild::LoadGuildEventLogFromDB()
 {
     //                                                     0        1          2            3            4        5
-    QueryResult* result = CharacterDatabase.PQuery("SELECT LogGuid, EventType, PlayerGuid1, PlayerGuid2, NewRank, TimeStamp FROM guild_eventlog WHERE guildid=%u ORDER BY TimeStamp DESC,LogGuid DESC LIMIT %u", m_Id, GUILD_EVENTLOG_MAX_RECORDS);
-    if (!result)
+    auto queryResult = CharacterDatabase.PQuery("SELECT LogGuid, EventType, PlayerGuid1, PlayerGuid2, NewRank, TimeStamp FROM guild_eventlog WHERE guildid=%u ORDER BY TimeStamp DESC,LogGuid DESC LIMIT %u", m_Id, GUILD_EVENTLOG_MAX_RECORDS);
+    if (!queryResult)
         return;
     bool isNextLogGuidSet = false;
     // uint32 configCount = sWorld.getConfig(CONFIG_UINT32_GUILD_EVENT_LOG_COUNT);
     // First event in list will be the oldest and the latest event is last event in list
     do
     {
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
         if (!isNextLogGuidSet)
         {
             m_GuildEventLogNextGuid = fields[0].GetUInt32();
@@ -876,8 +875,7 @@ void Guild::LoadGuildEventLogFromDB()
         // Add entry to list
         m_GuildEventLog.push_front(NewEvent);
     }
-    while (result->NextRow());
-    delete result;
+    while (queryResult->NextRow());
 }
 
 // Add entry to guild eventlog

@@ -283,9 +283,10 @@ bool Database::PExecuteLog(const char* format, ...)
     return Execute(szQuery);
 }
 
-QueryResult* Database::PQuery(const char* format, ...)
+std::unique_ptr<QueryResult> Database::PQuery(const char* format, ...)
 {
-    if (!format) return nullptr;
+    if (!format)
+        return {};
 
     va_list ap;
     char szQuery [MAX_QUERY_LEN];
@@ -296,10 +297,10 @@ QueryResult* Database::PQuery(const char* format, ...)
     if (res == -1)
     {
         sLog.outError("SQL Query truncated (and not execute) for format: %s", format);
-        return nullptr;
+        return {};
     }
 
-    return Query(szQuery).release();
+    return Query(szQuery);
 }
 
 QueryNamedResult* Database::PQueryNamed(const char* format, ...)
@@ -446,10 +447,9 @@ bool Database::RollbackTransaction()
 bool Database::CheckRequiredField(char const* table_name, char const* required_name)
 {
     // check required field
-    QueryResult* result = PQuery("SELECT %s FROM %s LIMIT 1", required_name, table_name);
-    if (result)
+    auto queryResult = PQuery("SELECT %s FROM %s LIMIT 1", required_name, table_name);
+    if (queryResult)
     {
-        delete result;
         return true;
     }
 

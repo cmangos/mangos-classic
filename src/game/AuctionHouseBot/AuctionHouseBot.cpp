@@ -132,12 +132,12 @@ void AuctionHouseBot::Initialize()
         m_buyValue = GetMinMaxConfig("AuctionHouseBot.Buy.Value", 0, 200, 90);
 
         // overridden items
-        QueryResult* result = CharacterDatabase.PQuery("SELECT item, value, add_chance, min_amount, max_amount FROM ahbot_items");
-        if (result)
+        auto queryResult = CharacterDatabase.PQuery("SELECT item, value, add_chance, min_amount, max_amount FROM ahbot_items");
+        if (queryResult)
         {
             do
             {
-                Field* fields = result->Fetch();
+                Field* fields = queryResult->Fetch();
                 uint32 itemId = fields[0].GetUInt32();
                 AuctionHouseBotItemData itemData;
                 itemData.Value = fields[1].GetUInt32();
@@ -146,8 +146,7 @@ void AuctionHouseBot::Initialize()
                 itemData.MaxAmount = fields[4].GetUInt32();
                 m_itemData[itemId] = itemData;
             }
-            while (result->NextRow());
-            delete result;
+            while (queryResult->NextRow());
         }
     }
 }
@@ -433,19 +432,18 @@ void AuctionHouseBot::ParseLootConfig(char const* fieldname, std::vector<int32>&
 void AuctionHouseBot::FillUintVectorFromQuery(char const* query, std::vector<uint32>& lootTemplates)
 {
     lootTemplates.clear();
-    if (QueryResult* result = WorldDatabase.PQuery("%s", query))
+    if (auto queryResult = WorldDatabase.PQuery("%s", query))
     {
-        BarGoLink bar(result->GetRowCount());
+        BarGoLink bar(queryResult->GetRowCount());
         do
         {
             bar.step();
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
             uint32 entry = fields[0].GetUInt32();
             if (!entry)
                 continue;
             lootTemplates.push_back(fields[0].GetUInt32());
-        } while (result->NextRow());
-        delete result;
+        } while (queryResult->NextRow());
     }
 }
 

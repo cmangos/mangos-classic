@@ -124,7 +124,7 @@ class Database
             return guard->QueryNamed(sql);
         }
 
-        QueryResult* PQuery(const char* format, ...) ATTR_PRINTF(2, 3);
+        std::unique_ptr<QueryResult> PQuery(const char* format, ...) ATTR_PRINTF(2, 3);
         QueryNamedResult* PQueryNamed(const char* format, ...) ATTR_PRINTF(2, 3);
 
         bool DirectExecute(const char* sql) const
