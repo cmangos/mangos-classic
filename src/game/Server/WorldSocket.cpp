@@ -300,7 +300,6 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     std::string account, os;
     Sha1Hash sha1;
     BigNumber v, s, g, N, K;
-    WorldPacket packet, SendAddonPacked;
 
     // Read the content of the packet
     recvPacket >> ClientBuild;
@@ -317,7 +316,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     // Check the version of client trying to connect
     if (!IsAcceptableClientBuild(ClientBuild))
     {
-        packet.Initialize(SMSG_AUTH_RESPONSE, 1);
+        WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
         packet << uint8(AUTH_VERSION_MISMATCH);
 
         SendPacket(packet);
@@ -352,7 +351,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     // Stop if the account is not found
     if (!queryResult)
     {
-        packet.Initialize(SMSG_AUTH_RESPONSE, 1);
+        WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
         packet << uint8(AUTH_UNKNOWN_ACCOUNT);
 
         SendPacket(packet);
@@ -385,7 +384,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     {
         if (strcmp(fields[3].GetString(), GetRemoteAddress().c_str()))
         {
-            packet.Initialize(SMSG_AUTH_RESPONSE, 1);
+            WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
             packet << uint8(AUTH_FAILED);
             SendPacket(packet);
 
@@ -419,7 +418,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     if (banresult) // if account banned
     {
-        packet.Initialize(SMSG_AUTH_RESPONSE, 1);
+        WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
         packet << uint8(AUTH_BANNED);
         SendPacket(packet);
 
@@ -456,7 +455,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     if (memcmp(sha.GetDigest(), digest, 20))
     {
-        packet.Initialize(SMSG_AUTH_RESPONSE, 1);
+        WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
         packet << uint8(AUTH_FAILED);
 
         SendPacket(packet);
