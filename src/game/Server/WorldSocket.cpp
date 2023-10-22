@@ -432,8 +432,8 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     if (allowedAccountType > SEC_PLAYER && AccountTypes(security) < allowedAccountType)
     {
-        WorldPacket Packet(SMSG_AUTH_RESPONSE, 1);
-        Packet << uint8(AUTH_UNAVAILABLE);
+        WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
+        packet << uint8(AUTH_UNAVAILABLE);
 
         SendPacket(packet);
 
