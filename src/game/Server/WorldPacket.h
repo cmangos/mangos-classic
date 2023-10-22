@@ -30,23 +30,15 @@ class WorldPacket : public ByteBuffer
 {
     public:
         // just container for later use
-        WorldPacket()                                       : ByteBuffer(0), m_opcode(MSG_NULL_ACTION)
+        WorldPacket() : ByteBuffer(0), m_opcode(MSG_NULL_ACTION)
         {
         }
-        explicit WorldPacket(Opcodes opcode, size_t res = 200) : ByteBuffer(res), m_opcode(opcode) { }
-        // copy constructor
-        WorldPacket(const WorldPacket& packet)              : ByteBuffer(packet), m_opcode(packet.m_opcode)
-        {
-        }
-        WorldPacket(const WorldPacket& packet, std::chrono::steady_clock::time_point receivedTime) : ByteBuffer(packet),
-            m_opcode(packet.m_opcode), m_receivedTime(receivedTime)
-        {
-        }
+        explicit WorldPacket(Opcodes opcode, size_t reservedSize = 200) : ByteBuffer(reservedSize), m_opcode(opcode) {}
 
-        void Initialize(Opcodes opcode, size_t newres = 200)
+        void Initialize(Opcodes opcode, size_t reservedSize = 200)
         {
             clear();
-            reserve(newres);
+            reserve(reservedSize);
             m_opcode = opcode;
         }
 
@@ -57,7 +49,7 @@ class WorldPacket : public ByteBuffer
         std::chrono::steady_clock::time_point GetReceivedTime() const { return m_receivedTime; }
         void SetReceivedTime(std::chrono::steady_clock::time_point receivedTime) { m_receivedTime = receivedTime; }
 
-    protected:
+    private:
         Opcodes m_opcode;
         std::chrono::steady_clock::time_point m_receivedTime; // only set for a specific set of opcodes, for performance reasons.
 };
