@@ -1163,7 +1163,7 @@ class ObjectMgr
             return { itrSpell->second.first, itrSpell->second.second };
         }
 
-        bool GetCreatureCooldown(uint32 entry, uint32 spellId, uint32 cooldown) const
+        bool GetCreatureCooldown(uint32 entry, uint32 spellId, uint32& cooldown) const
         {
             auto itrEntry = m_creatureCooldownMap.find(entry);
             if (itrEntry == m_creatureCooldownMap.end())
