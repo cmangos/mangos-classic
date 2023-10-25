@@ -4164,6 +4164,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, spells[urand(0, 1)], TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 26264:                                 // Despawn
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+                    Creature* creatureTarget = (Creature*)unitTarget;
+                    creatureTarget->ForcedDespawn();
+                    return;
+                }
                 case 26465:                                 // Mercurial Shield - need remove one 26464 Mercurial Shield aura
                     unitTarget->RemoveAuraHolderFromStack(26464);
                     return;
