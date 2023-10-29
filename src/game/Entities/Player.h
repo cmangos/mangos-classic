@@ -2313,6 +2313,8 @@ class Player : public Unit
         inline uint32 GetMirrorTimerMaxDuration(MirrorTimer::Type timer) const;
         inline SpellAuraHolder const* GetMirrorTimerBuff(MirrorTimer::Type timer) const;
 
+        uint32 getCorpseReclaimDelayHelper(time_t deathExpirationTime, time_t time, bool pvp) const;
+
         /*********************************************************/
         /***                  HONOR SYSTEM                     ***/
         /*********************************************************/

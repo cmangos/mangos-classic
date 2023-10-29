@@ -1341,6 +1341,22 @@ SpellAuraHolder const* Player::GetMirrorTimerBuff(MirrorTimer::Type timer) const
     }
 }
 
+uint32 Player::getCorpseReclaimDelayHelper(time_t deathExpirationTime, time_t time, bool pvp) const
+{
+    uint32 count;
+    if ((pvp && sWorld.getConfig(CONFIG_BOOL_DEATH_CORPSE_RECLAIM_DELAY_PVP)) ||
+        (!pvp && sWorld.getConfig(CONFIG_BOOL_DEATH_CORPSE_RECLAIM_DELAY_PVE)))
+    {
+        count = uint32(deathExpirationTime - time) / DEATH_EXPIRE_STEP;
+        if (count >= MAX_DEATH_COUNT)
+            count = MAX_DEATH_COUNT - 1;
+    }
+    else
+        count = 0;
+
+    return corpseReclaimDelay[count];
+}
+
 void Player::Update(const uint32 diff)
 {
     if (!IsInWorld())
@@ -18896,16 +18912,11 @@ void Player::UpdateAreaDependentAuras()
 
 uint32 Player::GetCorpseReclaimDelay(bool pvp) const
 {
-    if ((pvp && !sWorld.getConfig(CONFIG_BOOL_DEATH_CORPSE_RECLAIM_DELAY_PVP)) ||
-            (!pvp && !sWorld.getConfig(CONFIG_BOOL_DEATH_CORPSE_RECLAIM_DELAY_PVE)))
-    {
-        return corpseReclaimDelay[0];
-    }
-
     time_t now = time(nullptr);
+    if (now > m_deathExpireTime)
+        now = m_deathExpireTime;
     // 0..2 full period
-    uint32 count = (now < m_deathExpireTime) ? uint32((m_deathExpireTime - now) / DEATH_EXPIRE_STEP) : 0;
-    return corpseReclaimDelay[count];
+    return getCorpseReclaimDelayHelper(m_deathExpireTime, now, pvp);
 }
 
 void Player::UpdateCorpseReclaimDelay()
@@ -18943,19 +18954,7 @@ void Player::SendCorpseReclaimDelay(bool load) const
             return;
 
         bool pvp = corpse->GetType() == CORPSE_RESURRECTABLE_PVP;
-
-        uint32 count;
-        if ((pvp && sWorld.getConfig(CONFIG_BOOL_DEATH_CORPSE_RECLAIM_DELAY_PVP)) ||
-                (!pvp && sWorld.getConfig(CONFIG_BOOL_DEATH_CORPSE_RECLAIM_DELAY_PVE)))
-        {
-            count = uint32(m_deathExpireTime - corpse->GetGhostTime()) / DEATH_EXPIRE_STEP;
-            if (count >= MAX_DEATH_COUNT)
-                count = MAX_DEATH_COUNT - 1;
-        }
-        else
-            count = 0;
-
-        time_t expected_time = corpse->GetGhostTime() + corpseReclaimDelay[count];
+        time_t expected_time = corpse->GetGhostTime() + getCorpseReclaimDelayHelper(m_deathExpireTime, corpse->GetGhostTime(), pvp);
 
         time_t now = time(nullptr);
         if (now >= expected_time)
