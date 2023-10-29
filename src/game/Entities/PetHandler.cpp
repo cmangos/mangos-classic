@@ -111,7 +111,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
         {
             pet = static_cast<Pet*>(petUnit);
 
-            if (pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
+            if (pet->HasActionsDisabled())
                 return;
         }
     }
@@ -480,7 +480,7 @@ void WorldSession::HandlePetSetAction(WorldPacket& recv_data)
     Pet* pet = (petCreature && petCreature->IsPet()) ? static_cast<Pet*>(petUnit) : nullptr;
 
     // pet can have action bar disabled
-    if (pet && (pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS))
+    if (pet && pet->HasActionsDisabled())
         return;
 
     CharmInfo* charmInfo = petUnit->GetCharmInfo();

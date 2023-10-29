@@ -1150,7 +1150,7 @@ bool Unit::CanAttackOnSight(Unit const* target) const
 
     // Pets in disabled state (e.g. when player is mounted) do not draw aggro on sight
     // TODO: Fix for temporary pets and charms
-    if (target->GetTypeId() == TYPEID_UNIT && static_cast<Creature const*>(target)->IsPet() && static_cast<Pet const*>(target)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
+    if (target->GetTypeId() == TYPEID_UNIT && static_cast<Creature const*>(target)->IsPet() && static_cast<Pet const*>(target)->HasActionsDisabled())
         return false;
 
     return (CanAttack(target) && IsEnemy(target));
