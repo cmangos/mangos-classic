@@ -131,15 +131,18 @@ void PetAI::UpdateAI(const uint32 diff)
 
     Unit* victim = m_pet && m_pet->HasActionsDisabled() ? nullptr : m_unit->GetVictim();
 
-    // Do not continue attacking if victim is moving home
-    if (victim && victim->GetCombatManager().IsEvadingHome())
-        victim = nullptr;
-
     CharmInfo* charmInfo = m_unit->GetCharmInfo();
     MANGOS_ASSERT(charmInfo);
 
+    // Do not continue attacking if victim is moving home
+    if (victim && victim->GetCombatManager().IsEvadingHome())
+        victim = nullptr;
+    // Do not continue attacking when victim is CCed
+    if (victim && victim->IsCrowdControlled() && victim->HasAuraPetShouldAvoidBreaking(m_pet, charmInfo->GetPetLastAttackCommandTime()))
+        victim = nullptr;
+
     // Stop auto attack and chase if victim was dropped
-    if (m_inCombat && (!victim || (victim->IsCrowdControlled() && victim->HasAuraPetShouldAvoidBreaking(m_pet, charmInfo->GetPetLastAttackCommandTime()))))
+    if (m_inCombat && !victim)
     {
         m_unit->AttackStop(true, true);
         m_inCombat = false;
