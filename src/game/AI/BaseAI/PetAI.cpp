@@ -64,8 +64,12 @@ PetAI::PetAI(Creature* creature) : CreatureAI(creature), m_inCombat(false)
 
 void PetAI::MoveInLineOfSight(Unit* who)
 {
+    CharmInfo* charmInfo = m_unit->GetCharmInfo();
+    MANGOS_ASSERT(charmInfo);
+
     Unit* victim = m_unit->GetVictim();
-    if (victim && victim->IsAlive())
+    // Don't search for victim when the current victim is alive or retreating
+    if (victim && victim->IsAlive() || charmInfo->GetIsRetreating())
         return;
 
     if (HasReactState(REACT_AGGRESSIVE)
