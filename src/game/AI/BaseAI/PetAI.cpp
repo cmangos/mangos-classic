@@ -303,8 +303,7 @@ std::pair<Unit*, Spell*> PetAI::PickSpellWithTarget(Unit* owner, Unit* victim, C
             // If pet owner is a player, get the group and cast the spell on anyone in the group
             else if (owner->GetTypeId() == TYPEID_PLAYER)
             {
-                Player* target = PickGroupMemberForSpell(static_cast<Player*>(owner), spell);
-                if (target)
+                if (Player* target = PickGroupMemberForSpell(static_cast<Player*>(owner), spell))
                     return { target, spell };
             }
         }
