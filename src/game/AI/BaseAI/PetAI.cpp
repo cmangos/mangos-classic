@@ -94,10 +94,6 @@ void PetAI::AttackStart(Unit* who)
     if (!who || m_pet && m_pet->HasActionsDisabled())
         return;
 
-    // Do not start attack if target is moving home
-    if (who->GetCombatManager().IsEvadingHome())
-        return;
-
     if (m_unit->Attack(who, m_meleeEnabled))
     {
         // TMGs call CreatureRelocation which via MoveInLineOfSight can call this function
