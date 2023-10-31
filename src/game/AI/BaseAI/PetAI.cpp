@@ -78,7 +78,9 @@ void PetAI::MoveInLineOfSight(Unit* who)
             && m_creature->CanAttackOnSight(who) && who->isInAccessablePlaceFor(m_unit)
             && m_unit->IsWithinDistInMap(who, m_unit->GetAttackDistance(who))
             && m_unit->GetDistanceZ(who) <= CREATURE_Z_ATTACK_RANGE_MELEE
-            && m_unit->IsWithinLOSInMap(who, true))
+            && m_unit->IsWithinLOSInMap(who, true)
+            && !who->IsCrowdControlled()
+            && !who->HasAuraPetShouldAvoidBreaking(m_pet, charmInfo->GetPetLastAttackCommandTime()))
     {
         AttackStart(who);
 
