@@ -27,6 +27,7 @@ EndScriptData
 
 enum
 {
+    SPELL_FROST_ARMOR   = 12556,
     SPELL_FROSTBOLT     = 17503,
     SPELL_DRAIN_LIFE    = 17238,
     SPELL_DRAIN_MANA    = 17243,
@@ -48,6 +49,8 @@ struct boss_maleki_the_pallidAI : public ScriptedAI
         m_uiFrostboltTimer  = 0;
         m_uiIceTombTimer    = 15000;
         m_uiDrainLifeTimer  = 20000;
+
+        DoCastSpellIfCan(nullptr, SPELL_FROST_ARMOR, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void UpdateAI(const uint32 uiDiff) override

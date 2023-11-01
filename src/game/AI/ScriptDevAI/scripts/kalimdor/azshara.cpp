@@ -460,6 +460,7 @@ GameObjectAI* GetAI_go_lightning(GameObject* go)
 
 enum
 {
+    SPELL_THRASH                = 8876,
     SPELL_FRENZY                = 19812,
     SPELL_DARK_WATER            = 25743,
     SPELL_RAMPAGE               = 25744,
@@ -486,6 +487,8 @@ struct boss_mawsAI : public ScriptedAI
         uiDarkWaterTimer        = 15 * IN_MILLISECONDS;
         uiRampageTimer          = urand(20, 120) * IN_MILLISECONDS;
         uiDespawnTimer          = 2.5 * HOUR * IN_MILLISECONDS;
+
+        DoCastSpellIfCan(nullptr, SPELL_THRASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void JustDied(Unit* /*pKiller*/)

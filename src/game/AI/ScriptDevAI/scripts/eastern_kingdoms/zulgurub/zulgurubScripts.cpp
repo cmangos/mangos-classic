@@ -31,7 +31,7 @@ enum
     // npc_soulflayer
     SPELL_SOUL_TAP               = 24619,
     SPELL_LIGHTNING_BREATH       = 20543,
-    SPELL_THRASH                 = 12787,
+    SPELL_THRASH                 = 8876,
     SPELL_KNOCKDOWN              = 20276,
     SPELL_FEAR                   = 22678,
     SPELL_FRENZY                 = 28371,
