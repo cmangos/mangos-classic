@@ -91,7 +91,7 @@ void PetAI::MoveInLineOfSight(Unit* who)
 
 void PetAI::AttackStart(Unit* who)
 {
-    if (!who || m_pet && m_pet->HasActionsDisabled())
+    if (m_pet && m_pet->HasActionsDisabled())
         return;
 
     if (m_unit->Attack(who, m_meleeEnabled))
