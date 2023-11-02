@@ -11300,6 +11300,10 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
         charmed->ClearInCombat();
     }
 
+    MotionMaster* mm = charmed->GetMotionMaster();
+    if (mm->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
+        mm->MovementExpired();
+
     if (UnitAI* ai = charmed->AI())
         ai->JustGotCharmed(this);
 
