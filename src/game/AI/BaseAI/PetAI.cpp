@@ -79,6 +79,7 @@ void PetAI::MoveInLineOfSight(Unit* who)
             && m_unit->IsWithinDistInMap(who, m_unit->GetAttackDistance(who))
             && m_unit->GetDistanceZ(who) <= CREATURE_Z_ATTACK_RANGE_MELEE
             && m_unit->IsWithinLOSInMap(who, true)
+            && !GetCombatScriptStatus()
             && !who->IsCrowdControlled()
             && !who->HasAuraPetShouldAvoidBreaking(m_pet, charmInfo->GetPetLastAttackCommandTime()))
     {
@@ -92,6 +93,9 @@ void PetAI::MoveInLineOfSight(Unit* who)
 void PetAI::AttackStart(Unit* who)
 {
     if (m_pet && m_pet->HasActionsDisabled())
+        return;
+
+    if (GetCombatScriptStatus())
         return;
 
     if (m_unit->Attack(who, m_meleeEnabled))
@@ -128,6 +132,12 @@ void PetAI::UpdateAI(const uint32 diff)
     Unit* owner = m_unit->GetMaster();
     if (!owner)
         return;
+
+    if (GetCombatScriptStatus())
+    {
+        m_inCombat = false;
+        return;
+    }
 
     Unit* victim = m_pet && m_pet->HasActionsDisabled() ? nullptr : m_unit->GetVictim();
 
@@ -186,7 +196,7 @@ void PetAI::UpdateAI(const uint32 diff)
         }
 
         // if pet misses its target, it will also be the first in threat list
-        if (m_meleeEnabled && m_unit->CanReachWithMeleeAttack(victim))
+        if (m_inCombat && m_meleeEnabled && m_unit->CanReachWithMeleeAttack(victim))
         {
             if (!m_unit->HasInArc(victim, 2 * M_PI_F / 3))
                 m_unit->SetFacingToObject(victim);
@@ -374,6 +384,6 @@ void PetAI::AttackedBy(Unit* attacker)
     MANGOS_ASSERT(charmInfo);
 
     // when attacked, fight back if no victim unless we have a charm state set to passive
-    if (!(m_unit->GetVictim() || charmInfo->GetIsRetreating() || HasReactState(REACT_PASSIVE)))
+    if (!(m_unit->GetVictim() || GetCombatScriptStatus() || charmInfo->GetIsRetreating() || HasReactState(REACT_PASSIVE)))
         AttackStart(attacker);
 }
