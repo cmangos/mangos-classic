@@ -283,7 +283,7 @@ std::pair<Unit*, Spell*> PetAI::PickSpellWithTarget(Unit* owner, Unit* victim, C
         // 1. Not ready.
         // 2. Non-combat spells while in combat (f.e., Succubus's Lesser Invisibility).
         // 3. Combat spells while not in combat.
-        if (!spellInfo || !m_unit->IsSpellReady(*spellInfo) || (m_inCombat && IsNonCombatSpell(spellInfo)) || (!m_inCombat && !IsPositiveSpell(spellInfo->Id)))
+        if (!spellInfo || !m_unit->IsSpellReady(*spellInfo) || (m_inCombat && IsNonCombatSpell(spellInfo)) || (!m_inCombat && !IsPositiveSpell(spellInfo)))
             continue;
 
         Spell* spell = new Spell(m_unit, spellInfo, flags);
@@ -303,7 +303,7 @@ std::pair<Unit*, Spell*> PetAI::PickSpellWithTarget(Unit* owner, Unit* victim, C
         else if (IsAreaOfEffectSpell(spellInfo))
         {
             // If it's a harmful spell (Thunderstomp, Suffering)
-            if (!IsPositiveSpell(spellInfo->Id))
+            if (!IsPositiveSpell(spellInfo))
             {
                 // Keep spell until the victim is in melee range
                 if (!victim || !m_unit->CanReachWithMeleeAttack(victim))
