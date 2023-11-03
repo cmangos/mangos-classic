@@ -299,11 +299,6 @@ std::pair<Unit*, Spell*> PetAI::PickSpellWithTarget(Unit* owner, Unit* victim, C
 
             return { m_unit, spell };
         }
-        // Cast a spell on the victim in case the spell can be targeted at anyone
-        // IsSpellRequireTarget() check is not really required since AoE spells (like Thunderstomp)
-        // don't require target but need to be targeted at specific victim for distance check.
-        else if (victim && spell->CanAutoCast(victim))
-            return { victim, spell };
         // Try to cast a spell if the spell is AoE
         else if (IsAreaOfEffectSpell(spellInfo))
         {
@@ -334,6 +329,9 @@ std::pair<Unit*, Spell*> PetAI::PickSpellWithTarget(Unit* owner, Unit* victim, C
         // In all other cases, try to find a good use for the spell
         else
         {
+            // Cast a spell on the victim, if present
+            if (victim && spell->CanAutoCast(victim))
+                return { victim, spell };
             // Cast the spell on self, if applicable
             if (spell->CanAutoCast(m_unit))
                 return { m_unit, spell };
