@@ -291,7 +291,7 @@ std::pair<Unit*, Spell*> PetAI::PickSpellWithTarget(Unit* owner, Unit* victim, C
         // Try to cast a spell on self if the spell allows only targeting self (Lesser Invisibility, Blood Pact, Dash)
         if (IsOnlySelfTargeting(spellInfo)) {
             // Skip the spell in case it's already applied to self or doesn't meet specific conditions
-            if (!ShouldSelfCast(spellInfo, victim) || !spell->CanAutoCast(m_unit))
+            if (!ShouldCast(spellInfo, victim) || !spell->CanAutoCast(m_unit))
             {
                 delete spell;
                 continue;
@@ -330,7 +330,7 @@ std::pair<Unit*, Spell*> PetAI::PickSpellWithTarget(Unit* owner, Unit* victim, C
         else
         {
             // Cast a spell on the victim, if present
-            if (victim && spell->CanAutoCast(victim))
+            if (victim && ShouldCast(spellInfo, victim) && spell->CanAutoCast(victim))
                 return { victim, spell };
             // Cast the spell on self, if applicable
             if (spell->CanAutoCast(m_unit))
@@ -352,9 +352,12 @@ std::pair<Unit*, Spell*> PetAI::PickSpellWithTarget(Unit* owner, Unit* victim, C
     return { nullptr, nullptr };
 }
 
-bool PetAI::ShouldSelfCast(SpellEntry const* spellInfo, Unit* victim)
+bool PetAI::ShouldCast(SpellEntry const* spellInfo, Unit* victim)
 {
     switch (spellInfo->Id) {
+        case 19244: // Spell lock Rank 1-2
+        case 19647:
+            return victim->IsNonMeleeSpellCasted(false);
         case 23145: // Dive Rank 1-3
         case 23147:
         case 23148:
