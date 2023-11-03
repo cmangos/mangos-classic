@@ -288,10 +288,10 @@ std::pair<Unit*, Spell*> PetAI::PickSpellWithTarget(Unit* owner, Unit* victim, C
 
         Spell* spell = new Spell(m_unit, spellInfo, flags);
 
-        // Try to cast a spell on self if the spell allows only targeting self (like Lesser Invisibility and Blood Pact)
+        // Try to cast a spell on self if the spell allows only targeting self (Lesser Invisibility, Blood Pact, Dash)
         if (IsOnlySelfTargeting(spellInfo)) {
-            // Skip the spell in case it's already applied to self
-            if (!spell->CanAutoCast(m_unit))
+            // Skip the spell in case it's already applied to self or doesn't meet specific conditions
+            if (!ShouldSelfCast(spellInfo, victim) || !spell->CanAutoCast(m_unit))
             {
                 delete spell;
                 continue;
@@ -304,6 +304,33 @@ std::pair<Unit*, Spell*> PetAI::PickSpellWithTarget(Unit* owner, Unit* victim, C
         // don't require target but need to be targeted at specific victim for distance check.
         else if (victim && spell->CanAutoCast(victim))
             return { victim, spell };
+        // Try to cast a spell if the spell is AoE
+        else if (IsAreaOfEffectSpell(spellInfo))
+        {
+            // If it's a harmful spell (Thunderstomp, Suffering)
+            if (!IsPositiveSpell(spellInfo->Id))
+            {
+                // Keep spell until the victim is in melee range
+                if (!victim || !m_unit->CanReachWithMeleeAttack(victim))
+                {
+                    delete spell;
+                    continue;
+                }
+            }
+            else
+            // If it's a positive spell (Furious Howl)
+            {
+                // Use it only in combat
+                if (!m_inCombat)
+                {
+                    delete spell;
+                    continue;
+                }
+            }
+
+            // Target is not required for pet AoE spells
+            return { nullptr, spell };
+        }
         // In all other cases, try to find a good use for the spell
         else
         {
@@ -325,6 +352,24 @@ std::pair<Unit*, Spell*> PetAI::PickSpellWithTarget(Unit* owner, Unit* victim, C
     }
 
     return { nullptr, nullptr };
+}
+
+bool PetAI::ShouldSelfCast(SpellEntry const* spellInfo, Unit* victim)
+{
+    switch (spellInfo->Id) {
+        case 23145: // Dive Rank 1-3
+        case 23147:
+        case 23148:
+        case 23099: // Dash Rank 1-3
+        case 23109:
+        case 23110:
+            // Cast only when there is a victim and it is not within melee range
+            return victim && !m_unit->CanReachWithMeleeAttack(victim);
+        case 26064: // Shell Shield Rank 1
+            // Cast only in combat and when HP is lower than 50%
+            return m_inCombat && m_unit->GetHealthPercent() < 50;
+    }
+    return true;
 }
 
 Player* PetAI::PickGroupMemberForSpell(Player* player, Spell* spell)

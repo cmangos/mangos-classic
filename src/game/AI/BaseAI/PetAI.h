@@ -50,6 +50,7 @@ class PetAI : public CreatureAI
         Player* PickGroupMemberForSpell(Player* player, Spell* spell);
         std::pair<Unit*, Spell*> PickSpellWithTarget(Unit* owner, Unit* victim, CharmInfo* charminfo);
         void Cast(std::pair<Unit*, Spell*> spellWithTarget);
+        bool ShouldSelfCast(SpellEntry const* spellInfo, Unit* victim);
 
         bool m_inCombat;
 
