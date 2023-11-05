@@ -34,6 +34,7 @@ EndContentData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "world_eastern_kingdoms.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 /*######
 ## npc_bartleby
@@ -98,104 +99,87 @@ enum
     SAY_STONEFIST_3             = -1001276,
 };
 
-struct npc_dashel_stonefistAI : public ScriptedAI
+enum DashelStonefistActions
 {
-    npc_dashel_stonefistAI(Creature* pCreature) : ScriptedAI(pCreature)
+    DASHEL_LOW_HP,
+    DASHEL_ACTION_MAX,
+    DASHEL_START_EVENT,
+    DASHEL_END_EVENT,
+};
+
+struct npc_dashel_stonefistAI : public CombatAI
+{
+    npc_dashel_stonefistAI(Creature* creature) : CombatAI(creature, DASHEL_ACTION_MAX)
     {
-        m_uiStartEventTimer = 0;
-        m_uiEndEventTimer = 0;
-        Reset();
+        AddTimerlessCombatAction(DASHEL_LOW_HP, true);
+        AddCustomAction(DASHEL_START_EVENT, true, [&]() { HandleStartEvent(); });
+        AddCustomAction(DASHEL_END_EVENT, true, [&]() { HandleEndEvent(); });
+        SetDeathPrevention(true);
     }
 
-    uint32 m_uiStartEventTimer;
-    uint32 m_uiEndEventTimer;
     ObjectGuid m_playerGuid;
 
     void Reset() override
    {
+        CombatAI::Reset();
         SetReactState(REACT_PASSIVE);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
     }
 
-    void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void StartEvent(ObjectGuid guid)
     {
-        if (damage > m_creature->GetHealth() || ((m_creature->GetHealth() - damage) * 100 / m_creature->GetMaxHealth() < 15))
+        m_playerGuid = guid;
+        ResetTimer(DASHEL_START_EVENT, 3000);
+    }
+
+    void HandleStartEvent()
+    {
+        if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
         {
-            damage = std::min(damage, m_creature->GetHealth() - 1);
+            AttackStart(player);
+
+            if (Creature* thug = m_creature->SummonCreature(NPC_OLD_TOWN_THUG, -8672.33f, 442.88f, 99.98f, 3.5f, TEMPSPAWN_DEAD_DESPAWN, 300000))
+                thug->AI()->AttackStart(player);
+
+            if (Creature* thug = m_creature->SummonCreature(NPC_OLD_TOWN_THUG, -8691.59f, 441.66f, 99.41f, 6.1f, TEMPSPAWN_DEAD_DESPAWN, 300000))
+                thug->AI()->AttackStart(player);
+        }
+    }
+
+    void HandleEndEvent()
+    {
+        DoScriptText(SAY_STONEFIST_3, m_creature);
+
+        if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
+            player->AreaExploredOrEventHappens(QUEST_MISSING_DIPLO_PT8);
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        if (action == DASHEL_LOW_HP && m_creature->GetHealthPercent() <= 15.f)
+        {
             DoScriptText(SAY_STONEFIST_2, m_creature);
-            m_uiEndEventTimer = 5000;
+            ResetTimer(DASHEL_END_EVENT, 5000);
             EnterEvadeMode();
         }
     }
-
-    void StartEvent(ObjectGuid pGuid)
-    {
-        m_playerGuid = pGuid;
-        m_uiStartEventTimer = 3000;
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiStartEventTimer)
-        {
-            if (m_uiStartEventTimer <= uiDiff)
-            {
-                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
-                {
-                    AttackStart(pPlayer);
-
-                    if (Creature* pThug = m_creature->SummonCreature(NPC_OLD_TOWN_THUG, -8672.33f, 442.88f, 99.98f, 3.5f, TEMPSPAWN_DEAD_DESPAWN, 300000))
-                        pThug->AI()->AttackStart(pPlayer);
-
-                    if (Creature* pThug = m_creature->SummonCreature(NPC_OLD_TOWN_THUG, -8691.59f, 441.66f, 99.41f, 6.1f, TEMPSPAWN_DEAD_DESPAWN, 300000))
-                        pThug->AI()->AttackStart(pPlayer);
-                }
-
-                m_uiStartEventTimer = 0;
-            }
-            else
-                m_uiStartEventTimer -= uiDiff;
-        }
-
-        if (m_uiEndEventTimer)
-        {
-            if (m_uiEndEventTimer <= uiDiff)
-            {
-                DoScriptText(SAY_STONEFIST_3, m_creature);
-
-                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
-                    pPlayer->AreaExploredOrEventHappens(QUEST_MISSING_DIPLO_PT8);
-
-                m_uiEndEventTimer = 0;
-            }
-            else
-                m_uiEndEventTimer -= uiDiff;
-        }
-
-        DoMeleeAttackIfReady();
-    }
 };
 
-bool QuestAccept_npc_dashel_stonefist(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+bool QuestAccept_npc_dashel_stonefist(Player* player, Creature* creature, const Quest* quest)
 {
-    if (pQuest->GetQuestId() == QUEST_MISSING_DIPLO_PT8)
+    if (quest->GetQuestId() == QUEST_MISSING_DIPLO_PT8)
     {
-        pCreature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_RESPAWN);
-        pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-        pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-        pCreature->AI()->SetReactState(REACT_AGGRESSIVE);
-        DoScriptText(SAY_STONEFIST_1, pCreature, pPlayer);
+        creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_RESPAWN);
+        creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+        creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+        creature->AI()->SetReactState(REACT_AGGRESSIVE);
+        DoScriptText(SAY_STONEFIST_1, creature, player);
 
-        if (npc_dashel_stonefistAI* pStonefistAI = dynamic_cast<npc_dashel_stonefistAI*>(pCreature->AI()))
-           pStonefistAI->StartEvent(pPlayer->GetObjectGuid());
+        if (npc_dashel_stonefistAI* stonefistAI = dynamic_cast<npc_dashel_stonefistAI*>(creature->AI()))
+           stonefistAI->StartEvent(player->GetObjectGuid());
     }
     return true;
-}
-
-UnitAI* GetAI_npc_dashel_stonefist(Creature* pCreature)
-{
-    return new npc_dashel_stonefistAI(pCreature);
 }
 
 /*######
@@ -1112,7 +1096,7 @@ void AddSC_stormwind_city()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_dashel_stonefist";
-    pNewScript->GetAI = &GetAI_npc_dashel_stonefist;
+    pNewScript->GetAI = &GetNewAIInstance<npc_dashel_stonefistAI>;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_dashel_stonefist;
     pNewScript->RegisterSelf();
 
