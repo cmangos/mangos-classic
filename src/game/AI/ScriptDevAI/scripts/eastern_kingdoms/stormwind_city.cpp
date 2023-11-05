@@ -91,8 +91,10 @@ UnitAI* GetAI_npc_bartleby(Creature* pCreature)
 enum
 {
     QUEST_MISSING_DIPLO_PT8     = 1447,
-    FACTION_HOSTILE             = 168,
+    FACTION_HOSTILE             = 7,
     NPC_OLD_TOWN_THUG           = 4969,
+
+    SPELL_UNKILLABLE_OFF        = 13835,
 
     SAY_STONEFIST_1             = -1001274,
     SAY_STONEFIST_2             = -1001275,
@@ -114,7 +116,6 @@ struct npc_dashel_stonefistAI : public CombatAI
         AddTimerlessCombatAction(DASHEL_LOW_HP, true);
         AddCustomAction(DASHEL_START_EVENT, true, [&]() { HandleStartEvent(); });
         AddCustomAction(DASHEL_END_EVENT, true, [&]() { HandleEndEvent(); });
-        SetDeathPrevention(true);
     }
 
     ObjectGuid m_playerGuid;
@@ -123,6 +124,11 @@ struct npc_dashel_stonefistAI : public CombatAI
    {
         CombatAI::Reset();
         SetReactState(REACT_PASSIVE);
+    }
+
+    void JustRespawned() override
+    {
+        CombatAI::Reset();
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
     }
@@ -137,6 +143,7 @@ struct npc_dashel_stonefistAI : public CombatAI
     {
         if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
         {
+            SetDeathPrevention(true);
             AttackStart(player);
 
             if (Creature* thug = m_creature->SummonCreature(NPC_OLD_TOWN_THUG, -8672.33f, 442.88f, 99.98f, 3.5f, TEMPSPAWN_DEAD_DESPAWN, 300000))
@@ -149,7 +156,12 @@ struct npc_dashel_stonefistAI : public CombatAI
 
     void HandleEndEvent()
     {
+        SetDeathPrevention(false);
         DoScriptText(SAY_STONEFIST_3, m_creature);
+        m_creature->CastSpell(nullptr, SPELL_UNKILLABLE_OFF, TRIGGERED_OLD_TRIGGERED);
+
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
 
         if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
             player->AreaExploredOrEventHappens(QUEST_MISSING_DIPLO_PT8);

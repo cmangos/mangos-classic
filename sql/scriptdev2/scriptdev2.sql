@@ -1734,8 +1734,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1001253','You dare interfere with this being''s testing? The battle must be fought alone! You shall all pay for this interference!','0','0','0','0','0','the_cleaner SAY_CLEANER_AGGRO'),
 -- used in TBC core
 ('-1001274','Now you''re gonna get it good, $N!','0','0','0','0','1961','dashel stonefist SAY_STONEFIST_1'),
-('-1001275','Okay, okay! Enough fighting. No one else needs to get hurt.','0','0','0','0','1712','dashel stonefist SAY_STONEFIST_2'),
-('-1001276','It''s okay, boys. Back off. You''ve done enough. I''ll meet up with you later.','0','0','0','0','1713','dashel stonefist SAY_STONEFIST_3');
+('-1001275','Okay, okay! Enough fighting. No one else needs to get hurt.','0','0','0','20','1712','dashel stonefist SAY_STONEFIST_2'),
+('-1001276','It''s okay, boys. Back off. You''ve done enough. I''ll meet up with you later.','0','0','0','1','1713','dashel stonefist SAY_STONEFIST_3');
 
 -- -1 010 000 Classic texts
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
