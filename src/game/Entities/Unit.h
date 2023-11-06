@@ -1190,7 +1190,7 @@ class Unit : public WorldObject
          */
         bool CanUseEquippedWeapon(WeaponAttackType attackType) const
         {
-            if (IsNoWeaponShapeShift())
+            if (IsAttackSpeedOverridenShapeShift())
                 return false;
 
             switch (attackType)
@@ -1955,6 +1955,7 @@ class Unit : public WorldObject
 
         bool IsShapeShifted() const;
         bool IsNoWeaponShapeShift() const;
+        bool IsAttackSpeedOverridenShapeShift() const;
 
         bool IsInDisallowedMountForm() const
         {
