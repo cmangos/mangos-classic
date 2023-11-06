@@ -427,6 +427,10 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
     if (!holder)
         return;
 
+    // cant remove any auras while possessed
+    if (_player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED) || _player->HasCharmer())
+        return;
+
     if (!holder->IsPositive())
     {
         // ignore for remote control state
