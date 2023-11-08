@@ -9,7 +9,7 @@ env:
   REPO_DIR : ${{github.workspace}}
   BUILD_DIR: ${{github.workspace}}/bin/builddir
   BOOST_TOOLSET: "msvc"
-  BOOST_VERSION: "1.79.0"
+  BOOST_VERSION: "1.83.0"
   BOOST_PLATFORM_VERSION: "2022"
 
 jobs:
@@ -32,7 +32,7 @@ jobs:
 
       # install dependencies
       - name: Install Boost
-        uses: MarkusJx/install-boost@v2.4.1
+        uses: MarkusJx/install-boost@v2.4.4
         id: install-boost
         with:
           # REQUIRED: Specify the required boost version

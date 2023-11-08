@@ -7,7 +7,7 @@ env:
   BUILD_TYPE: Release
   REPO_DIR : ${{github.workspace}}
   BUILD_DIR: ${{github.workspace}}/bin/builddir
-  BOOST_VERSION: "1.79.0"
+  BOOST_VERSION: "1.83.0"
   BOOST_PLATFORM_VERSION: "22.04"
 
 jobs:
@@ -52,7 +52,7 @@ jobs:
           cmake -E make_directory ${{ env.BUILD_DIR }}
 
       - name: Install Boost
-        uses: MarkusJx/install-boost@v2.4.1
+        uses: MarkusJx/install-boost@v2.4.4
         id: install-boost
         with:
           # REQUIRED: Specify the required boost version
