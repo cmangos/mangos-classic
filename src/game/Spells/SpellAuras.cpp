@@ -755,11 +755,13 @@ bool Aura::CanProcFrom(SpellEntry const* spell, uint32 EventProcEx, uint32 procE
             // Check for extra req (if none) and hit/crit
             if (EventProcEx == PROC_EX_NONE)
             {
+                if ((procEx & PROC_EX_CAST_END) != 0) // cast end does not care about damage/healing
+                    return true;
                 if ((procEx & PROC_EX_ABSORB) && absorbing) // trigger ex absorb procs even if no damage is dealt
                     return true;
 
                 // No extra req, so can trigger only for active (damage/healing present) and hit/crit
-                return ((procEx & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT)) && damaging) || (procEx & PROC_EX_CAST_END) != 0;
+                return ((procEx & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT)) && damaging);
             }
             // Passive spells hits here only if resist/reflect/immune/evade
             // Passive spells can`t trigger if need hit (exclude cases when procExtra include non-active flags)
