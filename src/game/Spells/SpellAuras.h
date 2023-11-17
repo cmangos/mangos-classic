@@ -468,7 +468,7 @@ class Aura
         // more limited that used in future versions (spell_affect table based only), so need be careful with backporting uses
         ClassFamilyMask GetAuraSpellClassMask() const;
         bool isAffectedOnSpell(SpellEntry const* spell) const;
-        bool CanProcFrom(SpellEntry const* spell, uint32 EventProcEx, uint32 procEx, bool active, bool useClassMask) const;
+        bool CanProcFrom(SpellEntry const* spell, uint32 EventProcEx, uint32 procEx, bool damaging, bool absorbing, bool useClassMask) const;
 
         SpellAuraHolder* GetHolder() { return m_spellAuraHolder; }
         SpellAuraHolder const* GetHolder() const { return m_spellAuraHolder; }

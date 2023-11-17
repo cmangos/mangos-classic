@@ -1172,8 +1172,8 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellPr
     }
     else // all spells hits here only if resist/reflect/immune/evade
     {
-        // Exist req for PROC_EX_EX_TRIGGER_ALWAYS
-        if (procEvent_procEx & PROC_EX_EX_TRIGGER_ALWAYS)
+        // Exist req for PROC_EX_EX_TRIGGER_ON_NO_DAMAGE
+        if (procEvent_procEx & PROC_EX_EX_TRIGGER_ON_NO_DAMAGE)
             return true;
         // Check Extra Requirement like (hit/crit/miss/resist/parry/dodge/block/immune/reflect/absorb and other)
         if (procEvent_procEx & procExtra)

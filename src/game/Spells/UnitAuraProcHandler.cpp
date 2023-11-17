@@ -495,10 +495,10 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
                             continue;
                     }
                     // don't check dbc FamilyFlags if schoolMask exists
-                    else if (!execData.triggeredByAura->CanProcFrom(execData.spellInfo, spellProcEvent->procEx, execData.procExtra, execData.damage != 0, !spellProcEvent->schoolMask))
+                    else if (!execData.triggeredByAura->CanProcFrom(execData.spellInfo, spellProcEvent->procEx, execData.procExtra, execData.damage != 0, execData.absorb != 0, !spellProcEvent->schoolMask))
                         continue;
                 }
-                else if (!execData.triggeredByAura->CanProcFrom(execData.spellInfo, PROC_EX_NONE, execData.procExtra, execData.damage != 0, true))
+                else if (!execData.triggeredByAura->CanProcFrom(execData.spellInfo, PROC_EX_NONE, execData.procExtra, execData.damage != 0, execData.absorb != 0, true))
                     continue;
             }
 

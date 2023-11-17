@@ -730,7 +730,7 @@ bool Aura::isAffectedOnSpell(SpellEntry const* spellProto) const
     return spellProto->IsFitToFamilyMask(mask);
 }
 
-bool Aura::CanProcFrom(SpellEntry const* spell, uint32 EventProcEx, uint32 procEx, bool active, bool useClassMask) const
+bool Aura::CanProcFrom(SpellEntry const* spell, uint32 EventProcEx, uint32 procEx, bool damaging, bool absorbing, bool useClassMask) const
 {
     // Check EffectClassMask
     ClassFamilyMask mask = GetAuraSpellClassMask();
@@ -750,18 +750,21 @@ bool Aura::CanProcFrom(SpellEntry const* spell, uint32 EventProcEx, uint32 procE
     // if no class mask defined, or spell_proc_event has SpellFamilyName=0 - allow proc
     if (!useClassMask || !mask)
     {
-        if (!(EventProcEx & PROC_EX_EX_TRIGGER_ALWAYS))
+        if (!(EventProcEx & PROC_EX_EX_TRIGGER_ON_NO_DAMAGE))
         {
             // Check for extra req (if none) and hit/crit
             if (EventProcEx == PROC_EX_NONE)
             {
+                if ((procEx & PROC_EX_ABSORB) && absorbing) // trigger ex absorb procs even if no damage is dealt
+                    return true;
+
                 // No extra req, so can trigger only for active (damage/healing present) and hit/crit
-                return ((procEx & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT)) && active) || procEx == PROC_EX_CAST_END;
+                return ((procEx & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT)) && damaging) || (procEx & PROC_EX_CAST_END) != 0;
             }
             // Passive spells hits here only if resist/reflect/immune/evade
             // Passive spells can`t trigger if need hit (exclude cases when procExtra include non-active flags)
-            if ((EventProcEx & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT) & procEx) && !active)
-                return false;
+            if ((EventProcEx & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT) & procEx) && !damaging)
+                return (EventProcEx & (PROC_EX_ABSORB) & procEx) && !absorbing; // but allow full absorb case when specified
         }
         return true;
     }
