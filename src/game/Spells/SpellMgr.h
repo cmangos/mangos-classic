@@ -1437,7 +1437,12 @@ inline bool IsIgnoreLosSpell(SpellEntry const* spellInfo)
     return spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LINE_OF_SIGHT);
 }
 
-inline bool IsIgnoreLosSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex effIdx)
+inline bool IsIgnoreLosSpellCast(SpellEntry const* spellInfo)
+{
+    return spellInfo->rangeIndex == 13 || IsIgnoreLosSpell(spellInfo);
+}
+
+inline bool IsIgnoreLosSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex effIdx, bool targetB)
 {
     // TODO: Move this to target logic
     switch (spellInfo->EffectImplicitTargetA[effIdx])
@@ -1446,15 +1451,13 @@ inline bool IsIgnoreLosSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex
         case TARGET_UNIT_FRIEND_AND_PARTY:
         case TARGET_UNIT_RAID_AND_CLASS:
         case TARGET_ENUM_UNITS_PARTY_WITHIN_CASTER_RANGE: return true;
-        default: break;
+        default:
+            if (IsCheckCastTarget(targetB ? spellInfo->EffectImplicitTargetB[effIdx] : spellInfo->EffectImplicitTargetA[effIdx]))
+                return IsIgnoreLosSpellCast(spellInfo);
+            break;
     }
 
     return spellInfo->EffectRadiusIndex[effIdx] == 28 || IsIgnoreLosSpell(spellInfo);
-}
-
-inline bool IsIgnoreLosSpellCast(SpellEntry const* spellInfo)
-{
-    return spellInfo->rangeIndex == 13 || IsIgnoreLosSpell(spellInfo);
 }
 
 inline bool NeedsComboPoints(SpellEntry const* spellInfo)
