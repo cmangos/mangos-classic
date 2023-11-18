@@ -45,25 +45,8 @@ float ThreatCalcHelper::CalcThreat(Unit* hatedUnit, Unit* hatingUnit, float thre
 
     if (threatSpell)
     {
-        // Keep exception to calculate the real threat for SPELL_AURA_MOD_TOTAL_THREAT
-        bool HasExceptionForNoThreat = false;
-        for (int i = 0; i < MAX_EFFECT_INDEX; i++)
-        {
-            if (threatSpell->EffectApplyAuraName[i] == SPELL_AURA_MOD_TOTAL_THREAT && threatSpell->EffectBasePoints[i] < 0)
-            {
-                HasExceptionForNoThreat = true;
-                break;
-            }
-        }
-
-        if (!HasExceptionForNoThreat)
-        {
-            if (threatSpell->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
-                return 0.0f;
-
-            if (Player* modOwner = hatedUnit->GetSpellModOwner())
-                modOwner->ApplySpellMod(threatSpell->Id, SPELLMOD_THREAT, threat);
-        }
+        if (Player* modOwner = hatedUnit->GetSpellModOwner())
+            modOwner->ApplySpellMod(threatSpell->Id, SPELLMOD_THREAT, threat);
 
         if (crit)
             threat *= hatedUnit->GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_CRITICAL_THREAT, schoolMask);
@@ -483,17 +466,17 @@ void ThreatManager::addThreat(Unit* victim, float threat, bool crit, SpellSchool
 
     float calculatedThreat = ThreatCalcHelper::CalcThreat(victim, iOwner, threat, crit, schoolMask, threatSpell);
 
-    addThreatDirectly(victim, calculatedThreat);
+    addThreatDirectly(victim, calculatedThreat, threatSpell && threatSpell->HasAttribute(SPELL_ATTR_EX_NO_THREAT));
 }
 
-void ThreatManager::addThreatDirectly(Unit* victim, float threat)
+void ThreatManager::addThreatDirectly(Unit* victim, float threat, bool noNew)
 {
     HostileReference* ref = iThreatContainer.addThreat(victim, threat);
     // Ref is not in the online refs, search the offline refs next
     if (!ref)
         ref = iThreatOfflineContainer.addThreat(victim, threat);
 
-    if (!ref)                                               // there was no ref => create a new one
+    if (!ref && !noNew) // there was no ref => create a new one
     {
         HostileReference* hostileReference = new HostileReference(victim, this, 0); // threat has to be 0 here
         iThreatContainer.addReference(hostileReference);

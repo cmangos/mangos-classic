@@ -3619,7 +3619,7 @@ void Spell::EffectTaunt(SpellEffectIndex eff_idx)
     if (unitTarget->CanHaveThreatList())
     {
         float addedThreat = unitTarget->getThreatManager().GetHighestThreat() - unitTarget->getThreatManager().getThreat(m_caster);
-        unitTarget->getThreatManager().addThreatDirectly(m_caster, addedThreat);
+        unitTarget->getThreatManager().addThreatDirectly(m_caster, addedThreat, false);
         unitTarget->getThreatManager().setCurrentVictimByTarget(m_caster); // force changes the target to caster of taunt
     }
     // Units without threat lists but with AI are susceptible to attack target interference by taunt effect:
@@ -3767,14 +3767,6 @@ void Spell::EffectThreat(SpellEffectIndex /*eff_idx*/)
 
     if (!unitTarget->CanHaveThreatList())
         return;
-
-    if (!m_caster->IsInCombat() || !unitTarget->IsInCombat())
-    {
-        if (unitTarget->AI())
-            unitTarget->AI()->AttackStart(m_caster);
-        else
-            unitTarget->EngageInCombatWith(m_caster);
-    }
 
     unitTarget->AddThreat(m_caster, float(damage), false, GetSpellSchoolMask(m_spellInfo), m_spellInfo);
     m_spellLog.AddLog(uint32(SPELL_EFFECT_THREAT), unitTarget->GetObjectGuid());
