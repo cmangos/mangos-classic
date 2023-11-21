@@ -158,13 +158,13 @@ static int32(* const WorldStateExpressionFunctions[WSE_FUNCTION_MAX])(Map const*
     },
 
     // WSE_FUNCTION_DIFFICULTY_ID
-    [](Map const* map, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
     },
 
     // WSE_FUNCTION_WAR_MODE_ACTIVE
-    [](Map const* map, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
+    [](Map const* /*map*/, uint32 /*arg1*/, uint32 /*arg2*/) -> int32
     {
         return 0;
         // return unit->HasPlayerFlag(PLAYER_FLAGS_WAR_MODE_ACTIVE);

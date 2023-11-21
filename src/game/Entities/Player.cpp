@@ -13768,7 +13768,7 @@ void Player::SendPushToPartyResponse(Player* pPlayer, uint32 msg) const
     }
 }
 
-void Player::SendQuestUpdateAddItem(Quest const* pQuest, uint32 item_idx, uint32 current, uint32 count)
+void Player::SendQuestUpdateAddItem(Quest const* pQuest, uint32 item_idx, uint32 /*current*/, uint32 count)
 {
     MANGOS_ASSERT(count < 64 && "Quest slot count store is limited to 6 bits 2^6 = 64 (0..63)");
 
