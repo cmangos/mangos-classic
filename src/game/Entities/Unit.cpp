@@ -10748,8 +10748,16 @@ bool Unit::IsAttackSpeedOverridenShapeShift() const
 {
     // Mirroring clientside gameplay logic
     if (ShapeshiftForm form = GetShapeshiftForm())
-        if (SpellShapeshiftFormEntry const* entry = sSpellShapeshiftFormStore.LookupEntry(form))
-            return entry->attackSpeed > 0;
+    {
+        switch (form)
+        {
+            case FORM_CAT:
+            case FORM_BEAR:
+            case FORM_DIREBEAR:
+                return true;
+            default: return false;
+        }
+    }
 
     return false;
 }
