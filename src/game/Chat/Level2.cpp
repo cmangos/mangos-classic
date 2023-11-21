@@ -1688,6 +1688,21 @@ bool ChatHandler::HandleNpcEvade(char* args)
     return true;
 }
 
+bool ChatHandler::HandleNpcDespawn(char* /*args*/)
+{
+    Creature* target = getSelectedCreature();
+
+    if (!target)
+    {
+        SendSysMessage(LANG_SELECT_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    target->ForcedDespawn();
+    return true;
+}
+
 // add item in vendorlist
 bool ChatHandler::HandleNpcAddVendorItemCommand(char* args)
 {

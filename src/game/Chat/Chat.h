@@ -484,6 +484,7 @@ class ChatHandler
         bool HandleNpcYellCommand(char* args);
         bool HandleNpcTempSpawn(char* args);
         bool HandleNpcEvade(char* args);
+        bool HandleNpcDespawn(char* args);
         bool HandleNpcGroupInfoCommand(char* args);
         //bool HandleNpcGroupBehaviorShowCommand(char* args);
         //bool HandleNpcGroupBehaviorSetCommand(char* args);

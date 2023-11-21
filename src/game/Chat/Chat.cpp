@@ -540,6 +540,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "showloot",       SEC_GAMEMASTER,     false, &ChatHandler::HandleNpcShowLootCommand,         "", nullptr },
         { "tempspawn",      SEC_GAMEMASTER,     false, &ChatHandler::HandleNpcTempSpawn,               "", nullptr },
         { "evade",          SEC_GAMEMASTER,     false, &ChatHandler::HandleNpcEvade,                   "", nullptr },
+        { "despawn",        SEC_GAMEMASTER,     false, &ChatHandler::HandleNpcDespawn,                 "", nullptr },
         { "formation",      SEC_GAMEMASTER,     false, nullptr,                                        "", npcFormationCommandTable },
         { "group",          SEC_GAMEMASTER,     false, nullptr,                                        "", npcGroupCommandTable },
 
