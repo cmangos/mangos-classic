@@ -699,7 +699,7 @@ void GameObject::Update(const uint32 diff)
             {
                 m_respawnTime = std::numeric_limits<time_t>::max();
                 if (m_respawnDelay && !GetGameObjectGroup())
-                    GetMap()->GetSpawnManager().AddGameObject(m_respawnDelay, GetDbGuid());
+                    GetMap()->GetSpawnManager().AddGameObject(GetDbGuid());
 
                 if (m_respawnDelay || !m_spawnedByDefault || m_forcedDespawn)
                     AddObjectToRemoveList();

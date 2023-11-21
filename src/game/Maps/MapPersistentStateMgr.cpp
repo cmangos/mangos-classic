@@ -1011,14 +1011,14 @@ void MapPersistentStateManager::LoadCreatureRespawnTimes()
         Field* fields = queryResult->Fetch();
         bar.step();
 
-        uint32 loguid               = fields[0].GetUInt32();
+        uint32 dbGuid               = fields[0].GetUInt32();
         uint64 respawn_time         = fields[1].GetUInt64();
         uint32 mapId                = fields[2].GetUInt32();
         uint32 instanceId           = fields[3].GetUInt32();
         time_t resetTime            = (time_t)fields[4].GetUInt64();
         uint32 completedEncounters  = fields[5].GetUInt32();
 
-        CreatureData const* data = sObjectMgr.GetCreatureData(loguid);
+        CreatureData const* data = sObjectMgr.GetCreatureData(dbGuid);
         if (!data)
             continue;
 
@@ -1041,7 +1041,7 @@ void MapPersistentStateManager::LoadCreatureRespawnTimes()
         if (!state)
             continue;
 
-        state->SetCreatureRespawnTime(loguid, time_t(respawn_time));
+        state->SetCreatureRespawnTime(dbGuid, time_t(respawn_time));
 
         ++count;
     }
@@ -1077,14 +1077,14 @@ void MapPersistentStateManager::LoadGameobjectRespawnTimes()
         Field* fields = queryResult->Fetch();
         bar.step();
 
-        uint32 loguid               = fields[0].GetUInt32();
+        uint32 dbGuid               = fields[0].GetUInt32();
         uint64 respawn_time         = fields[1].GetUInt64();
         uint32 mapId                = fields[2].GetUInt32();
         uint32 instanceId           = fields[3].GetUInt32();
         time_t resetTime            = (time_t)fields[4].GetUInt64();
         uint32 completedEncounters  = fields[5].GetUInt32();
 
-        GameObjectData const* data = sObjectMgr.GetGOData(loguid);
+        GameObjectData const* data = sObjectMgr.GetGOData(dbGuid);
         if (!data)
             continue;
 
@@ -1107,7 +1107,7 @@ void MapPersistentStateManager::LoadGameobjectRespawnTimes()
         if (!state)
             continue;
 
-        state->SetGORespawnTime(loguid, time_t(respawn_time));
+        state->SetGORespawnTime(dbGuid, time_t(respawn_time));
 
         ++count;
     }

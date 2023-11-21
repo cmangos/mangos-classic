@@ -55,8 +55,8 @@ class SpawnManager
         ~SpawnManager();
         void Initialize();
 
-        void AddCreature(uint32 respawnDelay, uint32 dbguid);
-        void AddGameObject(uint32 respawnDelay, uint32 dbguid);
+        void AddCreature(uint32 dbguid);
+        void AddGameObject(uint32 dbguid);
 
         void RespawnCreature(uint32 dbguid, uint32 respawnDelay = 0); // seconds
         void RespawnGameObject(uint32 dbguid, uint32 respawnDelay = 0); // seconds
