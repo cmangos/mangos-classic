@@ -1949,12 +1949,15 @@ void WorldObject::AddToWorld()
 
 void WorldObject::RemoveFromWorld()
 {
-    if (m_isOnEventNotified)
-        m_currMap->RemoveFromOnEventNotified(this);
+    if (IsInWorld())
+    {
+        if (m_isOnEventNotified)
+            m_currMap->RemoveFromOnEventNotified(this);
 
-    if (!m_stringIds.empty())
-        for (uint32 stringId : m_stringIds)
-            m_currMap->RemoveStringIdObject(stringId, this);
+        if (!m_stringIds.empty())
+            for (uint32 stringId : m_stringIds)
+                m_currMap->RemoveStringIdObject(stringId, this);
+    }
 
     Object::RemoveFromWorld();
 }
