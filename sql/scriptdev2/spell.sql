@@ -280,12 +280,12 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (8427,'spell_blizzard'),
 (10185,'spell_blizzard'),
 (10186,'spell_blizzard'),
-(10187,'spell_blizzard');
+(10187,'spell_blizzard'),
 (543,'spell_fire_ward_mage'),
 (8457,'spell_fire_ward_mage'),
 (8458,'spell_fire_ward_mage'),
 (10223,'spell_fire_ward_mage'),
-(10225,'spell_fire_ward_mage')
+(10225,'spell_fire_ward_mage'),
 (6143,'spell_frost_ward_mage'),
 (8461,'spell_frost_ward_mage'),
 (8462,'spell_frost_ward_mage'),
