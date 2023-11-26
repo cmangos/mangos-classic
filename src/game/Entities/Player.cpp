@@ -7684,20 +7684,10 @@ void Player::SendInitWorldStates(uint32 zoneid) const
     switch (zoneid)
     {
     case 139:                                       // Eastern Plaguelands
-        if (sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_EP_ENABLED))
-        {
-            if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zoneid))
-                outdoorPvP->FillInitialWorldStates(data, count);
-            break;
-        }
-            
     case 1377:                                      // Silithus
-        if (sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_SI_ENABLED))
-        {
-            if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zoneid))
-                outdoorPvP->FillInitialWorldStates(data, count);
-            break;
-        }
+	if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zoneid))
+		outdoorPvP->FillInitialWorldStates(data, count);
+	break;
     }	
 
     if (InstanceData* instanceData = GetMap()->GetInstanceData())
