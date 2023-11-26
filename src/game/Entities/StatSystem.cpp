@@ -498,6 +498,50 @@ void Player::UpdateSpellCritChance(uint32 school)
     m_modSpellCritChance[school] = crit;
 }
 
+void Player::UpdateMeleeHitChances()
+{
+    int32 meleeHitChance = 0;
+    Item* weapon = GetWeaponForAttack(BASE_ATTACK);
+
+    AuraList const& hitAura = GetAurasByType(SPELL_AURA_MOD_HIT_CHANCE);
+    for (auto hitAura : hitAura)
+    {
+        // item neutral spell
+        if (hitAura->GetSpellProto()->EquippedItemClass == -1)
+            meleeHitChance += hitAura->GetModifier()->m_amount;
+        // item dependent spell
+        else if (weapon && weapon->IsFitToSpellRequirements(hitAura->GetSpellProto()))
+            meleeHitChance += hitAura->GetModifier()->m_amount;
+    }
+    m_modMeleeHitChance = meleeHitChance;
+    m_modMeleeHitChance +=  GetRatingBonusValue(CR_HIT_MELEE);
+}
+
+void Player::UpdateRangedHitChances()
+{
+    int32 rangedHitChance = 0;
+    Item* weapon = GetWeaponForAttack(RANGED_ATTACK);
+
+    AuraList const& hitAura = GetAurasByType(SPELL_AURA_MOD_HIT_CHANCE);
+    for (auto hitAura : hitAura)
+    {
+        // item neutral spell
+        if (hitAura->GetSpellProto()->EquippedItemClass == -1)
+            rangedHitChance += hitAura->GetModifier()->m_amount;
+        // item dependent spell
+        else if (weapon && weapon->IsFitToSpellRequirements(hitAura->GetSpellProto()))
+            rangedHitChance += hitAura->GetModifier()->m_amount;
+    }
+    m_modMeleeHitChance = rangedHitChance;
+    m_modRangedHitChance += GetRatingBonusValue(CR_HIT_RANGED);
+}
+
+void Player::UpdateSpellHitChances()
+{
+    m_modSpellHitChance = GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
+    m_modSpellHitChance += GetRatingBonusValue(CR_HIT_SPELL);
+}
+
 void Player::UpdateAllSpellCritChances()
 {
     for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)

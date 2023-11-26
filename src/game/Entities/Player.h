@@ -1608,6 +1608,8 @@ class Player : public Unit
         void UpdateAllCritPercentages();
         void UpdateParryPercentage();
         void UpdateDodgePercentage();
+        void UpdateWeaponHitChances(WeaponAttackType attType);
+        void UpdateSpellHitChances();
 
         void UpdateAllSpellCritChances();
         void UpdateSpellCritChance(uint32 school);

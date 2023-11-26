@@ -3898,8 +3898,16 @@ void Aura::HandleModHitChance(bool apply, bool /*Real*/)
 {
     Unit* target = GetTarget();
 
-    target->m_modMeleeHitChance += (apply ? m_modifier.m_amount : -m_modifier.m_amount);
-    target->m_modRangedHitChance += (apply ? m_modifier.m_amount : -m_modifier.m_amount);
+    if (target->IsPlayer())
+    {
+        static_cast<Player*>(target)->UpdateMeleeHitChances();
+        static_cast<Player*>(target)->UpdateRangedHitChances();
+    }
+    else
+    {
+        target->m_modMeleeHitChance += (apply ? m_modifier.m_amount : -m_modifier.m_amount);
+        target->m_modRangedHitChance += (apply ? m_modifier.m_amount : -m_modifier.m_amount);
+    }
 }
 
 void Aura::HandleModSpellHitChance(bool apply, bool /*Real*/)
