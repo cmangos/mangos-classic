@@ -6776,7 +6776,13 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea, bool force)
         sOutdoorPvPMgr.HandlePlayerEnterZone(this, newZone);
         sWorldState.HandlePlayerEnterZone(this, newZone);
 
-        SendInitWorldStates(newZone);                       // only if really enters to new zone, not just area change, works strange...
+        if (newZone == 139 && sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_EP_ENABLED))
+            SendInitWorldStates(newZone);                       // only if really enters to new zone, not just area change, works strange...
+        else if (newZone == 1377 && sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_SI_ENABLED))
+            SendInitWorldStates(newZone);                       // only if really enters to new zone, not just area change, works strange...
+        else if (newZone != 139 && newZone != 1377)
+            SendInitWorldStates(newZone);                       // only if really enters to new zone, not just area change, works strange...
+	    
 
         if (sWorld.getConfig(CONFIG_BOOL_WEATHER))
         {
@@ -7677,12 +7683,22 @@ void Player::SendInitWorldStates(uint32 zoneid) const
 
     switch (zoneid)
     {
-        case 139:                                       // Eastern Plaguelands
-        case 1377:                                      // Silithus
+    case 139:                                       // Eastern Plaguelands
+        if (sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_EP_ENABLED))
+        {
             if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zoneid))
                 outdoorPvP->FillInitialWorldStates(data, count);
             break;
-    }
+        }
+            
+    case 1377:                                      // Silithus
+        if (sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_SI_ENABLED))
+        {
+            if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zoneid))
+                outdoorPvP->FillInitialWorldStates(data, count);
+            break;
+        }
+    }	
 
     if (InstanceData* instanceData = GetMap()->GetInstanceData())
         instanceData->FillInitialWorldStates(data, count, zoneid, 0); // Vanilla does not support areaid transition
