@@ -43,14 +43,12 @@ OutdoorPvPEP::OutdoorPvPEP() : OutdoorPvP(),
 
 void OutdoorPvPEP::FillInitialWorldStates(WorldPacket& data, uint32& count)
 {
-    if (sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_EP_ENABLED))
-    {
-        FillInitialWorldState(data, count, WORLD_STATE_EP_TOWER_COUNT_ALLIANCE, m_towersAlliance);
-        FillInitialWorldState(data, count, WORLD_STATE_EP_TOWER_COUNT_HORDE, m_towersHorde);
 
-        for (unsigned int i : m_towerWorldState)
-            FillInitialWorldState(data, count, i, WORLD_STATE_ADD);
-    }
+    FillInitialWorldState(data, count, WORLD_STATE_EP_TOWER_COUNT_ALLIANCE, m_towersAlliance);
+    FillInitialWorldState(data, count, WORLD_STATE_EP_TOWER_COUNT_HORDE, m_towersHorde);
+
+    for (unsigned int i : m_towerWorldState)
+        FillInitialWorldState(data, count, i, WORLD_STATE_ADD);
 }
 
 void OutdoorPvPEP::SendRemoveWorldStates(Player* player)
