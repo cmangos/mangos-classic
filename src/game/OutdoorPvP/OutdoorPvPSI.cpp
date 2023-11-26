@@ -36,9 +36,12 @@ OutdoorPvPSI::OutdoorPvPSI() : OutdoorPvP(),
 // Send initial world states
 void OutdoorPvPSI::FillInitialWorldStates(WorldPacket& data, uint32& count)
 {
-    FillInitialWorldState(data, count, WORLD_STATE_SI_GATHERED_A, m_resourcesAlliance);
-    FillInitialWorldState(data, count, WORLD_STATE_SI_GATHERED_H, m_resourcesHorde);
-    FillInitialWorldState(data, count, WORLD_STATE_SI_SILITHYST_MAX, MAX_SILITHYST);
+    if (sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_SI_ENABLED))
+    {
+        FillInitialWorldState(data, count, WORLD_STATE_SI_GATHERED_A, m_resourcesAlliance);
+        FillInitialWorldState(data, count, WORLD_STATE_SI_GATHERED_H, m_resourcesHorde);
+        FillInitialWorldState(data, count, WORLD_STATE_SI_SILITHYST_MAX, MAX_SILITHYST);
+    }
 }
 
 // Handle buffs when player enters the zone
@@ -66,84 +69,89 @@ void OutdoorPvPSI::HandlePlayerLeaveZone(Player* player, bool isMainZone)
 // Handle case when player returns a silithyst
 bool OutdoorPvPSI::HandleAreaTrigger(Player* player, uint32 triggerId)
 {
-    if (player->IsGameMaster() || player->IsDead())
-        return false;
-
-    switch (triggerId)
+    if (sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_SI_ENABLED))
     {
-        case AREATRIGGER_SILITHUS_ALLIANCE:
-            if (player->GetTeam() != ALLIANCE || !player->HasAura(SPELL_SILITHYST))
-                return false;
+        if (player->IsGameMaster() || player->IsDead())
+            return false;
 
-            // update counter
-            ++ m_resourcesAlliance;
-            SendUpdateWorldState(WORLD_STATE_SI_GATHERED_A, m_resourcesAlliance);
+        switch (triggerId)
+        {
+            case AREATRIGGER_SILITHUS_ALLIANCE:
+                if (player->GetTeam() != ALLIANCE || !player->HasAura(SPELL_SILITHYST))
+                    return false;
 
-            // handle the case when the faction has reached maximum resources allowed
-            if (m_resourcesAlliance == MAX_SILITHYST)
-            {
-                // NOTE: On retail it would not reset until server restart but we do not support weekly restart :)
-                m_zoneOwner = ALLIANCE;
-                m_resourcesAlliance = 0;
-                m_resourcesHorde = 0;
-
-                // also update the horde counter if resources were reset
-                SendUpdateWorldState(WORLD_STATE_SI_GATHERED_H, m_resourcesHorde);
-
-                // apply buff to owner team
-                BuffTeam(ALLIANCE, SPELL_CENARION_FAVOR);
-
-                // Send defense message
-                sWorld.SendDefenseMessage(ZONE_ID_SILITHUS, LANG_OPVP_SI_CAPTURE_A);
-            }
-
-            // give quest credit if necessary
-            if (player->GetQuestStatus(QUEST_SCOURING_DESERT_ALLIANCE) == QUEST_STATUS_INCOMPLETE)
-                player->KilledMonsterCredit(NPC_SILITHUS_DUST_QUEST_ALLIANCE);
-            break;
-        case AREATRIGGER_SILITHUS_HORDE:
-            if (player->GetTeam() != HORDE || !player->HasAura(SPELL_SILITHYST))
-                return false;
-
-            // update counter
-            ++ m_resourcesHorde;
-            SendUpdateWorldState(WORLD_STATE_SI_GATHERED_H, m_resourcesHorde);
-
-            // handle the case when the faction has reached maximum resources allowed
-            if (m_resourcesHorde == MAX_SILITHYST)
-            {
-                // NOTE: On retail it would not reset until server restart but we do not support weekly restart :)
-                m_zoneOwner = HORDE;
-                m_resourcesAlliance = 0;
-                m_resourcesHorde = 0;
-
-                // also update the alliance counter if resources were reset
+                // update counter
+                ++ m_resourcesAlliance;
                 SendUpdateWorldState(WORLD_STATE_SI_GATHERED_A, m_resourcesAlliance);
 
-                // apply buff to owner team
-                BuffTeam(HORDE, SPELL_CENARION_FAVOR);
+                // handle the case when the faction has reached maximum resources allowed
+                if (m_resourcesAlliance == MAX_SILITHYST)
+                {
+                    // NOTE: On retail it would not reset until server restart but we do not support weekly restart :)
+                    m_zoneOwner = ALLIANCE;
+                    m_resourcesAlliance = 0;
+                    m_resourcesHorde = 0;
 
-                // Send defense message
-                sWorld.SendDefenseMessage(ZONE_ID_SILITHUS, LANG_OPVP_SI_CAPTURE_H);
-            }
+                    // also update the horde counter if resources were reset
+                    SendUpdateWorldState(WORLD_STATE_SI_GATHERED_H, m_resourcesHorde);
 
-            // give quest credit if necessary
-            if (player->GetQuestStatus(QUEST_SCOURING_DESERT_HORDE) == QUEST_STATUS_INCOMPLETE)
-                player->KilledMonsterCredit(NPC_SILITHUS_DUST_QUEST_HORDE);
-            break;
-        default:
-            return false;
+                    // apply buff to owner team
+                    BuffTeam(ALLIANCE, SPELL_CENARION_FAVOR);
+
+                    // Send defense message
+                    sWorld.SendDefenseMessage(ZONE_ID_SILITHUS, LANG_OPVP_SI_CAPTURE_A);
+                }
+
+                // give quest credit if necessary
+                if (player->GetQuestStatus(QUEST_SCOURING_DESERT_ALLIANCE) == QUEST_STATUS_INCOMPLETE)
+                    player->KilledMonsterCredit(NPC_SILITHUS_DUST_QUEST_ALLIANCE);
+                break;
+            case AREATRIGGER_SILITHUS_HORDE:
+                if (player->GetTeam() != HORDE || !player->HasAura(SPELL_SILITHYST))
+                    return false;
+
+                // update counter
+                ++ m_resourcesHorde;
+                SendUpdateWorldState(WORLD_STATE_SI_GATHERED_H, m_resourcesHorde);
+
+                // handle the case when the faction has reached maximum resources allowed
+                if (m_resourcesHorde == MAX_SILITHYST)
+                {
+                    // NOTE: On retail it would not reset until server restart but we do not support weekly restart :)
+                    m_zoneOwner = HORDE;
+                    m_resourcesAlliance = 0;
+                    m_resourcesHorde = 0;
+
+                    // also update the alliance counter if resources were reset
+                    SendUpdateWorldState(WORLD_STATE_SI_GATHERED_A, m_resourcesAlliance);
+
+                    // apply buff to owner team
+                    BuffTeam(HORDE, SPELL_CENARION_FAVOR);
+
+                    // Send defense message
+                    sWorld.SendDefenseMessage(ZONE_ID_SILITHUS, LANG_OPVP_SI_CAPTURE_H);
+                }
+
+                // give quest credit if necessary
+                if (player->GetQuestStatus(QUEST_SCOURING_DESERT_HORDE) == QUEST_STATUS_INCOMPLETE)
+                    player->KilledMonsterCredit(NPC_SILITHUS_DUST_QUEST_HORDE);
+                break;
+            default:
+                return false;
+        }
+
+        // remove silithyst aura
+        player->RemoveAurasDueToSpell(SPELL_SILITHYST);
+
+        // reward the player
+        player->CastSpell(player, SPELL_TRACES_OF_SILITHYST, TRIGGERED_OLD_TRIGGERED);
+        player->AddHonorCP(HONOR_REWARD_SILITHYST, HONORABLE);
+        player->GetReputationMgr().ModifyReputation(sFactionStore.LookupEntry(FACTION_CENARION_CIRCLE), REPUTATION_REWARD_SILITHYST);
+
+        return true;
     }
-
-    // remove silithyst aura
-    player->RemoveAurasDueToSpell(SPELL_SILITHYST);
-
-    // reward the player
-    player->CastSpell(player, SPELL_TRACES_OF_SILITHYST, TRIGGERED_OLD_TRIGGERED);
-    player->AddHonorCP(HONOR_REWARD_SILITHYST, HONORABLE);
-    player->GetReputationMgr().ModifyReputation(sFactionStore.LookupEntry(FACTION_CENARION_CIRCLE), REPUTATION_REWARD_SILITHYST);
-
-    return true;
+    else
+        return false;
 }
 
 // Handle case when player drops flag
