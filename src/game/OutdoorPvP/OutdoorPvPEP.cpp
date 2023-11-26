@@ -43,11 +43,14 @@ OutdoorPvPEP::OutdoorPvPEP() : OutdoorPvP(),
 
 void OutdoorPvPEP::FillInitialWorldStates(WorldPacket& data, uint32& count)
 {
-    FillInitialWorldState(data, count, WORLD_STATE_EP_TOWER_COUNT_ALLIANCE, m_towersAlliance);
-    FillInitialWorldState(data, count, WORLD_STATE_EP_TOWER_COUNT_HORDE, m_towersHorde);
+    if (sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_EP_ENABLED))
+    {
+        FillInitialWorldState(data, count, WORLD_STATE_EP_TOWER_COUNT_ALLIANCE, m_towersAlliance);
+        FillInitialWorldState(data, count, WORLD_STATE_EP_TOWER_COUNT_HORDE, m_towersHorde);
 
-    for (unsigned int i : m_towerWorldState)
-        FillInitialWorldState(data, count, i, WORLD_STATE_ADD);
+        for (unsigned int i : m_towerWorldState)
+            FillInitialWorldState(data, count, i, WORLD_STATE_ADD);
+    }
 }
 
 void OutdoorPvPEP::SendRemoveWorldStates(Player* player)
@@ -217,118 +220,123 @@ bool OutdoorPvPEP::HandleEvent(uint32 eventId, Object* source, Object* /*target*
 
 bool OutdoorPvPEP::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team, uint32 newWorldState)
 {
-    // Remove existing buff for both teams before applying new one: this prevent auras stacking
-    if (m_towersAlliance != 0)
-        BuffTeam(ALLIANCE, plaguelandsTowerBuffs[m_towersAlliance - 1].spellIdAlliance, true);
-    if (m_towersHorde != 0)
-        BuffTeam(HORDE, plaguelandsTowerBuffs[m_towersHorde - 1].spellIdHorde, true);
-
-    // Update world state and banners for captured tower
-    if (team == ALLIANCE)
+    if (sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_EP_ENABLED))
     {
-        // update banner
-        for (GuidList::const_iterator itr = m_towerBanners[towerId].begin(); itr != m_towerBanners[towerId].end(); ++itr)
-            SetBannerVisual(go, (*itr), CAPTURE_ARTKIT_ALLIANCE, CAPTURE_ANIM_ALLIANCE);
+        // Remove existing buff for both teams before applying new one: this prevent auras stacking
+        if (m_towersAlliance != 0)
+            BuffTeam(ALLIANCE, plaguelandsTowerBuffs[m_towersAlliance - 1].spellIdAlliance, true);
+        if (m_towersHorde != 0)
+            BuffTeam(HORDE, plaguelandsTowerBuffs[m_towersHorde - 1].spellIdHorde, true);
 
-        // update counter
-        ++m_towersAlliance;
-        SendUpdateWorldState(WORLD_STATE_EP_TOWER_COUNT_ALLIANCE, m_towersAlliance);
-    }
-    else if (team == HORDE)
-    {
-        // update banner
-        for (GuidList::const_iterator itr = m_towerBanners[towerId].begin(); itr != m_towerBanners[towerId].end(); ++itr)
-            SetBannerVisual(go, (*itr), CAPTURE_ARTKIT_HORDE, CAPTURE_ANIM_HORDE);
-
-        // update counter
-        ++m_towersHorde;
-        SendUpdateWorldState(WORLD_STATE_EP_TOWER_COUNT_HORDE, m_towersHorde);
-    }
-    else
-    {
-        // update banner
-        for (GuidList::const_iterator itr = m_towerBanners[towerId].begin(); itr != m_towerBanners[towerId].end(); ++itr)
-            SetBannerVisual(go, (*itr), CAPTURE_ARTKIT_NEUTRAL, CAPTURE_ANIM_NEUTRAL);
-
-        if (m_towerOwner[towerId] == ALLIANCE)
+        // Update world state and banners for captured tower
+        if (team == ALLIANCE)
         {
+            // update banner
+            for (GuidList::const_iterator itr = m_towerBanners[towerId].begin(); itr != m_towerBanners[towerId].end(); ++itr)
+                SetBannerVisual(go, (*itr), CAPTURE_ARTKIT_ALLIANCE, CAPTURE_ANIM_ALLIANCE);
+
             // update counter
-            --m_towersAlliance;
+            ++m_towersAlliance;
             SendUpdateWorldState(WORLD_STATE_EP_TOWER_COUNT_ALLIANCE, m_towersAlliance);
+        }
+        else if (team == HORDE)
+        {
+            // update banner
+            for (GuidList::const_iterator itr = m_towerBanners[towerId].begin(); itr != m_towerBanners[towerId].end(); ++itr)
+                SetBannerVisual(go, (*itr), CAPTURE_ARTKIT_HORDE, CAPTURE_ANIM_HORDE);
+
+            // update counter
+            ++m_towersHorde;
+            SendUpdateWorldState(WORLD_STATE_EP_TOWER_COUNT_HORDE, m_towersHorde);
         }
         else
         {
-            // update counter
-            --m_towersHorde;
-            SendUpdateWorldState(WORLD_STATE_EP_TOWER_COUNT_HORDE, m_towersHorde);
+            // update banner
+            for (GuidList::const_iterator itr = m_towerBanners[towerId].begin(); itr != m_towerBanners[towerId].end(); ++itr)
+                SetBannerVisual(go, (*itr), CAPTURE_ARTKIT_NEUTRAL, CAPTURE_ANIM_NEUTRAL);
+
+            if (m_towerOwner[towerId] == ALLIANCE)
+            {
+                // update counter
+                --m_towersAlliance;
+                SendUpdateWorldState(WORLD_STATE_EP_TOWER_COUNT_ALLIANCE, m_towersAlliance);
+            }
+            else
+            {
+                // update counter
+                --m_towersHorde;
+                SendUpdateWorldState(WORLD_STATE_EP_TOWER_COUNT_HORDE, m_towersHorde);
+            }
         }
-    }
 
-    // Update Echoes of Lordaeron aura for capturing team and opposite team (if needed)
-    // Apply auras with updated capture towers values
-    if (m_towersAlliance != 0)
-        BuffTeam(ALLIANCE, plaguelandsTowerBuffs[m_towersAlliance - 1].spellIdAlliance);
-    if (m_towersHorde != 0)
-        BuffTeam(HORDE, plaguelandsTowerBuffs[m_towersHorde - 1].spellIdHorde);
+        // Update Echoes of Lordaeron aura for capturing team and opposite team (if needed)
+        // Apply auras with updated capture towers values
+        if (m_towersAlliance != 0)
+            BuffTeam(ALLIANCE, plaguelandsTowerBuffs[m_towersAlliance - 1].spellIdAlliance);
+        if (m_towersHorde != 0)
+            BuffTeam(HORDE, plaguelandsTowerBuffs[m_towersHorde - 1].spellIdHorde);
 
-    // Update reward for captured tower
-    bool eventHandled = true;
+        // Update reward for captured tower
+        bool eventHandled = true;
 
-    if (team != TEAM_NONE)
-    {
-        // update capture point owner before rewards are applied
-        m_towerOwner[towerId] = team;
-
-        // apply rewards of changed tower
-        switch (towerId)
+        if (team != TEAM_NONE)
         {
-            case TOWER_ID_NORTHPASS:
-                RespawnGO(go, team == ALLIANCE ? m_lordaeronShrineAlliance : m_lordaeronShrineHorde, true);
-                break;
-            case TOWER_ID_CROWNGUARD:
-                SetGraveYardLinkTeam(GRAVEYARD_ID_EASTERN_PLAGUE, GRAVEYARD_ZONE_EASTERN_PLAGUE, team, { 0 });
-                break;
-            case TOWER_ID_EASTWALL:
-                // Return false - allow the DB to handle summons
-                if (m_towerOwner[TOWER_ID_NORTHPASS] != team)
+            // update capture point owner before rewards are applied
+            m_towerOwner[towerId] = team;
+
+            // apply rewards of changed tower
+            switch (towerId)
+            {
+                case TOWER_ID_NORTHPASS:
+                    RespawnGO(go, team == ALLIANCE ? m_lordaeronShrineAlliance : m_lordaeronShrineHorde, true);
+                    break;
+                case TOWER_ID_CROWNGUARD:
+                    SetGraveYardLinkTeam(GRAVEYARD_ID_EASTERN_PLAGUE, GRAVEYARD_ZONE_EASTERN_PLAGUE, team, { 0 });
+                    break;
+                case TOWER_ID_EASTWALL:
+                    // Return false - allow the DB to handle summons
+                    if (m_towerOwner[TOWER_ID_NORTHPASS] != team)
+                        eventHandled = false;
+                    break;
+                case TOWER_ID_PLAGUEWOOD:
+                    // Return false - allow the DB to handle summons
                     eventHandled = false;
-                break;
-            case TOWER_ID_PLAGUEWOOD:
-                // Return false - allow the DB to handle summons
-                eventHandled = false;
-                break;
+                    break;
+            }
         }
+        else
+        {
+            // remove rewards of changed tower
+            switch (towerId)
+            {
+                case TOWER_ID_NORTHPASS:
+                    RespawnGO(go, m_towerOwner[TOWER_ID_NORTHPASS] == ALLIANCE ? m_lordaeronShrineAlliance : m_lordaeronShrineHorde, false);
+                    break;
+                case TOWER_ID_CROWNGUARD:
+                    SetGraveYardLinkTeam(GRAVEYARD_ID_EASTERN_PLAGUE, GRAVEYARD_ZONE_EASTERN_PLAGUE, TEAM_INVALID, { 0 });
+                    break;
+                case TOWER_ID_EASTWALL:
+                    UnsummonSoldiers(go);
+                    break;
+                case TOWER_ID_PLAGUEWOOD:
+                    UnsummonFlightMaster(go);
+                    break;
+            }
+
+            // update capture point owner after rewards have been removed
+            m_towerOwner[towerId] = team;
+        }
+
+        // update tower state
+        SendUpdateWorldState(m_towerWorldState[towerId], WORLD_STATE_REMOVE);
+        m_towerWorldState[towerId] = newWorldState;
+        SendUpdateWorldState(m_towerWorldState[towerId], WORLD_STATE_ADD);
+
+        // there are some events which required further DB script
+        return eventHandled;
     }
     else
-    {
-        // remove rewards of changed tower
-        switch (towerId)
-        {
-            case TOWER_ID_NORTHPASS:
-                RespawnGO(go, m_towerOwner[TOWER_ID_NORTHPASS] == ALLIANCE ? m_lordaeronShrineAlliance : m_lordaeronShrineHorde, false);
-                break;
-            case TOWER_ID_CROWNGUARD:
-                SetGraveYardLinkTeam(GRAVEYARD_ID_EASTERN_PLAGUE, GRAVEYARD_ZONE_EASTERN_PLAGUE, TEAM_INVALID, { 0 });
-                break;
-            case TOWER_ID_EASTWALL:
-                UnsummonSoldiers(go);
-                break;
-            case TOWER_ID_PLAGUEWOOD:
-                UnsummonFlightMaster(go);
-                break;
-        }
-
-        // update capture point owner after rewards have been removed
-        m_towerOwner[towerId] = team;
-    }
-
-    // update tower state
-    SendUpdateWorldState(m_towerWorldState[towerId], WORLD_STATE_REMOVE);
-    m_towerWorldState[towerId] = newWorldState;
-    SendUpdateWorldState(m_towerWorldState[towerId], WORLD_STATE_ADD);
-
-    // there are some events which required further DB script
-    return eventHandled;
+        return false;
 }
 
 bool OutdoorPvPEP::HandleGameObjectUse(Player* /*player*/, GameObject* go)
