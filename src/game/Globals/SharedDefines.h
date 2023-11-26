@@ -2047,7 +2047,7 @@ enum TrackedAuraType
 #define EXPECTED_MANGOSD_CLIENT_BUILD        {5875, 6005, 6141, 0}
 
 // Max creature level (included some bosses and elite)
-#define DEFAULT_MAX_CREATURE_LEVEL 65
+#define DEFAULT_MAX_CREATURE_LEVEL 70
 
 enum TeleportLocation
 {
