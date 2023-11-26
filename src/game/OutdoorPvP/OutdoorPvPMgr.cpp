@@ -60,31 +60,41 @@ void OutdoorPvPMgr::InitOutdoorPvP()
 
 OutdoorPvP* OutdoorPvPMgr::GetScript(uint32 zoneId)
 {
-    switch (zoneId)
+    if (sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_SI_ENABLED) || sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_EP_ENABLED))
     {
-        case ZONE_ID_SILITHUS:
-            return m_scripts[OPVP_ID_SI];
-        case ZONE_ID_EASTERN_PLAGUELANDS:
-            return m_scripts[OPVP_ID_EP];
-        default:
-            return nullptr;
+        switch (zoneId)
+        {
+            case ZONE_ID_SILITHUS:
+                return m_scripts[OPVP_ID_SI];
+            case ZONE_ID_EASTERN_PLAGUELANDS:
+                return m_scripts[OPVP_ID_EP];
+            default:
+                return nullptr;
+        }
     }
+    else
+        return nullptr;
 }
 
 OutdoorPvP* OutdoorPvPMgr::GetScriptOfAffectedZone(uint32 zoneId)
 {
-    switch (zoneId)
+    if (sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_SI_ENABLED) || sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_EP_ENABLED))
     {
-        case ZONE_ID_TEMPLE_OF_AQ:
-        case ZONE_ID_RUINS_OF_AQ:
-        case ZONE_ID_GATES_OF_AQ:
-            return m_scripts[OPVP_ID_SI];
-        case ZONE_ID_STRATHOLME:
-        case ZONE_ID_SCHOLOMANCE:
-            return m_scripts[OPVP_ID_EP];
-        default:
-            return nullptr;
+        switch (zoneId)
+        {
+            case ZONE_ID_TEMPLE_OF_AQ:
+            case ZONE_ID_RUINS_OF_AQ:
+            case ZONE_ID_GATES_OF_AQ:
+                return m_scripts[OPVP_ID_SI];
+            case ZONE_ID_STRATHOLME:
+            case ZONE_ID_SCHOLOMANCE:
+                return m_scripts[OPVP_ID_EP];
+            default:
+                return nullptr;
+        }
     }
+    else
+        return nullptr;
 }
 
 /**
