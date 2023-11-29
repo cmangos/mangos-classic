@@ -78,15 +78,19 @@ void SpawnManager::Initialize()
 void SpawnManager::AddCreature(uint32 dbguid)
 {
     time_t respawnTime = m_map.GetPersistentState()->GetCreatureRespawnTime(dbguid);
-    m_spawns.emplace_back(TimePoint(std::chrono::seconds(respawnTime)), dbguid, HIGHGUID_UNIT);
-    std::sort(m_spawns.begin(), m_spawns.end());
+    if (m_updated)
+        m_deferredSpawns.emplace_back(TimePoint(std::chrono::seconds(respawnTime)), dbguid, HIGHGUID_UNIT);
+    else
+        m_spawns.emplace_back(TimePoint(std::chrono::seconds(respawnTime)), dbguid, HIGHGUID_UNIT);
 }
 
 void SpawnManager::AddGameObject(uint32 dbguid)
 {
     time_t respawnTime = m_map.GetPersistentState()->GetGORespawnTime(dbguid);
-    m_spawns.emplace_back(TimePoint(std::chrono::seconds(respawnTime)), dbguid, HIGHGUID_GAMEOBJECT);
-    std::sort(m_spawns.begin(), m_spawns.end());
+    if (m_updated)
+        m_deferredSpawns.emplace_back(TimePoint(std::chrono::seconds(respawnTime)), dbguid, HIGHGUID_GAMEOBJECT);
+    else
+        m_spawns.emplace_back(TimePoint(std::chrono::seconds(respawnTime)), dbguid, HIGHGUID_GAMEOBJECT);
 }
 
 void SpawnManager::RespawnCreature(uint32 dbguid, uint32 respawnDelay)
@@ -113,8 +117,6 @@ void SpawnManager::RespawnCreature(uint32 dbguid, uint32 respawnDelay)
     }
     else if (respawnDelay == 0)
         (*itr).ConstructForMap(m_map);
-    if (respawnDelay > 0)
-        std::sort(m_spawns.begin(), m_spawns.end());
 }
 
 void SpawnManager::RespawnGameObject(uint32 dbguid, uint32 respawnDelay)
@@ -141,8 +143,6 @@ void SpawnManager::RespawnGameObject(uint32 dbguid, uint32 respawnDelay)
     }
     else if (respawnDelay == 0)
         (*itr).ConstructForMap(m_map);
-    if (respawnDelay > 0)
-        std::sort(m_spawns.begin(), m_spawns.end());
 }
 
 void SpawnManager::RespawnAll()
@@ -160,6 +160,12 @@ void SpawnManager::RespawnAll()
 
 void SpawnManager::Update()
 {
+    m_updated = true;
+    if (!m_deferredSpawns.empty()) // cannot insert during update
+    {
+        m_spawns.emplace_back(m_deferredSpawns);
+        m_deferredSpawns.clear();
+    }
     auto now = m_map.GetCurrentClockTime();
     for (auto itr = m_spawns.begin(); itr != m_spawns.end();)
     {
@@ -170,7 +176,9 @@ void SpawnManager::Update()
         else
             ++itr;
     }
+    m_updated = false;
 
+    // spawn groups are safe from this
     for (auto& group : m_spawnGroups)
         group.second->Update();
 }

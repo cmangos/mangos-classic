@@ -73,8 +73,10 @@ class SpawnManager
     private:
         Map& m_map;
 
+        std::vector<SpawnInfo> m_deferredSpawns;
         std::vector<SpawnInfo> m_spawns; // must only be erased from in Update
         std::map<uint32, SpawnGroup*> m_spawnGroups;
+        bool m_updated;
 };
 
 #endif
