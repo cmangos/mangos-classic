@@ -49,6 +49,36 @@ SpawnManager::~SpawnManager()
 
 void SpawnManager::Initialize()
 {
+    time_t now = time(nullptr);
+    std::vector<uint32>* dynGuidCreatures = sObjectMgr.GetCreatureDynGuidForMap(m_map.GetId());
+    if (dynGuidCreatures)
+    {
+        for (uint32 dbGuid : *dynGuidCreatures)
+        {
+            if (m_map.GetPersistentState()->GetCreatureRespawnTime(dbGuid) < now)
+            {
+                auto data = sObjectMgr.GetCreatureData(dbGuid);
+                m_map.GetPersistentState()->AddCreatureToGrid(dbGuid, data);
+            }
+            else
+                AddCreature(dbGuid);
+        }
+    }
+    std::vector<uint32>* dynGuidGameObjects = sObjectMgr.GetGameObjectDynGuidForMap(m_map.GetId());
+    if (dynGuidGameObjects)
+    {
+        for (uint32 dbGuid : *dynGuidGameObjects)
+        {
+            if (m_map.GetPersistentState()->GetGORespawnTime(dbGuid) < now)
+            {
+                auto data = sObjectMgr.GetGOData(dbGuid);
+                m_map.GetPersistentState()->AddGameobjectToGrid(dbGuid, data);
+            }
+            else
+                AddGameObject(dbGuid);
+        }
+    }
+
     auto spawnGroupData = m_map.GetMapDataContainer().GetSpawnGroups();
     for (auto& groupData : spawnGroupData->spawnGroupMap)
     {

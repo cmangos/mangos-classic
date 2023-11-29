@@ -1605,8 +1605,6 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
     {
         if (isUsingNewSpawningSystem && !group) // only at this point we know if marked as dynguid per entry
         {
-            GetMap()->GetPersistentState()->RemoveCreatureFromGrid(GetDbGuid(), data);
-            GetMap()->GetSpawnManager().AddCreature(GetDbGuid());
             return false;
         }
         m_deathState = DEAD;
