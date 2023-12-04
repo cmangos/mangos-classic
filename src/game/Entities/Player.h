@@ -1721,6 +1721,7 @@ class Player : public Unit
         bool IsBeingTeleported() const { return m_semaphoreTeleport_Near || m_semaphoreTeleport_Far; }
         bool IsBeingTeleportedNear() const { return m_semaphoreTeleport_Near; }
         bool IsBeingTeleportedFar() const { return m_semaphoreTeleport_Far; }
+        bool IsDelayedResurrect() const { return m_DelayedOperations & DELAYED_RESURRECT_PLAYER; }
         void SetSemaphoreTeleportNear(bool semphsetting);
         void SetSemaphoreTeleportFar(bool semphsetting);
         void ProcessDelayedOperations();
