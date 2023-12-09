@@ -582,7 +582,7 @@ class ObjectMgr
         {
             auto itr = map.find(dbguid);
             if (itr != map.end())
-                return &((*itr).second).first;
+                return (*itr).second.first;
             return false;
         }
 
