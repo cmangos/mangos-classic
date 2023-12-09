@@ -748,7 +748,7 @@ struct ProcSystemArguments
 
     explicit ProcSystemArguments(Unit* attacker, Unit* victim, uint32 procFlagsAttacker, uint32 procFlagsVictim, uint32 procExtra, uint32 amount, uint32 absorb, WeaponAttackType attType = BASE_ATTACK,
         SpellEntry const* spellInfo = nullptr, Spell* spell = nullptr, uint32 healthGain = 0, bool isHeal = false) : attacker(attacker), victim(victim), procFlagsAttacker(procFlagsAttacker), procFlagsVictim(procFlagsVictim), procExtra(procExtra), damage(amount),
-        spellInfo(spellInfo), attType(attType), spell(spell), healthGain(healthGain), isHeal(isHeal)
+        absorb(absorb), spellInfo(spellInfo), attType(attType), spell(spell), healthGain(healthGain), isHeal(isHeal)
     {
     }
 };
