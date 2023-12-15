@@ -1481,13 +1481,17 @@ std::pair<bool, bool> ScriptAction::GetScriptProcessTargets(WorldObject* origina
             if ((m_script->data_flags & SCRIPT_FLAG_ALL_ELIGIBLE_BUDDIES) != 0)
             {
                 for (WorldObject* wo : *worldObjects)
-                    buddies.push_back(wo);
+                    if (!wo->IsCreature() || static_cast<Creature*>(wo)->IsAlive() != m_script->IsDeadOrDespawnedBuddy())
+                        buddies.push_back(wo);
             }
             else
             {
                 WorldObject* closest = nullptr;
                 for (WorldObject* wo : *worldObjects)
                 {
+                    if (wo->IsCreature() && static_cast<Creature*>(wo)->IsAlive() == m_script->IsDeadOrDespawnedBuddy())
+                        continue;
+
                     if (!closest)
                         closest = wo;
                     else if (origin->GetDistance(wo, true, DIST_CALC_NONE) < origin->GetDistance(closest, true, DIST_CALC_NONE))
