@@ -28,11 +28,12 @@ class DynamicObject;
 
 struct PeriodicTriggerData
 {
+    WorldObject* trueCaster;
     Unit* caster; Unit* target; WorldObject* targetObject;
     SpellEntry const* spellInfo;
     int32* basePoints;
-    PeriodicTriggerData(Unit* caster, Unit* target, WorldObject* targetObject, SpellEntry const* spellInfo, int32* basePoints) :
-        caster(caster), target(target), targetObject(targetObject), spellInfo(spellInfo), basePoints(basePoints) {}
+    PeriodicTriggerData(WorldObject* trueCaster, Unit* caster, Unit* target, WorldObject* targetObject, SpellEntry const* spellInfo, int32* basePoints) :
+        trueCaster(nullptr), caster(caster), target(target), targetObject(targetObject), spellInfo(spellInfo), basePoints(basePoints) {}
 };
 
 struct SpellScript

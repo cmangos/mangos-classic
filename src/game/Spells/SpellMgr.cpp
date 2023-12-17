@@ -140,7 +140,7 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, WorldObject* caster, Spell*
     if (!spellCastTimeEntry)
         return 0;
 
-    int32 spellRank = caster && caster->GetTypeId() != TYPEID_GAMEOBJECT ? static_cast<Unit*>(caster)->GetSpellRank(spellInfo) : 0;
+    int32 spellRank = caster && caster->IsUnit() ? static_cast<Unit*>(caster)->GetSpellRank(spellInfo) : 0;
     int32 castTime = spellCastTimeEntry->CastTime + spellCastTimeEntry->CastTimePerLevel * (spellRank / 5 - spellInfo->baseLevel);
     castTime = std::max(castTime, spellCastTimeEntry->MinCastTime);
 
