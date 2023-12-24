@@ -686,6 +686,7 @@ void Group::SendUpdateTo(Player* player)
             data << uint8(m_lootMethod);                    // loot method
             data << masterLootGuid;                         // master loot guid
             data << uint8(m_lootThreshold);                 // loot threshold
+            data << uint8(0);                               // Heroic Mod Group - unused in vanilla
         }
 
         session->SendPacket(data);
