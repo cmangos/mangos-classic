@@ -3368,7 +3368,7 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     if (plr->IsPvP())
         pet->SetPvP(true);
 
-    pet->GetCharmInfo()->SetPetNumber(sObjectMgr.GeneratePetNumber(), (m_caster->GetTypeId() == TYPEID_PLAYER));
+    pet->GetCharmInfo()->SetPetNumber(pet->GetObjectGuid().GetEntry(), (m_caster->GetTypeId() == TYPEID_PLAYER));
 
     uint32 level = creatureTarget->GetLevel();
     pet->SetCanModifyStats(true);
