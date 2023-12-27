@@ -4412,6 +4412,9 @@ SpellCastResult PlayerbotAI::Buff(uint32 spellId, Unit* target, void (*beforeCas
     if (spellId == 0)
         return SPELL_FAILED_NOT_KNOWN;
 
+    if (!target)
+        return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
+
     // Target already has aura from spellId, skip for speed. May need to add exceptions
     if (target->HasAura(spellId))
         return SPELL_FAILED_AURA_BOUNCED;
@@ -4420,9 +4423,6 @@ SpellCastResult PlayerbotAI::Buff(uint32 spellId, Unit* target, void (*beforeCas
 
     if (!spellProto)
         return SPELL_NOT_FOUND;
-
-    if (!target)
-        return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
 
     // Select appropriate spell rank for target's level
     spellProto = sSpellMgr.SelectAuraRankForLevel(spellProto, target->GetLevel());
