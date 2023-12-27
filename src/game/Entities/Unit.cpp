@@ -381,8 +381,9 @@ Unit::Unit() :
         m_createResistance = 0;
 
     m_attacking = nullptr;
-    m_modMeleeHitChance = 0.0f;
-    m_modRangedHitChance = 0.0f;
+    m_modWeaponHitChance[BASE_ATTACK] = 0.0f;
+    m_modWeaponHitChance[OFF_ATTACK] = 0.0f;
+    m_modWeaponHitChance[RANGED_ATTACK] = 0.0f;
     m_modSpellHitChance = 0.0f;
     for (float& i : m_modSpellCritChance)
         i = 0.0f;
@@ -3568,9 +3569,7 @@ uint32 Unit::CalculateCritAmount(CalcDamageInfo* meleeInfo) const
 
 float Unit::GetHitChance(WeaponAttackType attackType) const
 {
-    if (attackType == RANGED_ATTACK)
-        return m_modRangedHitChance;
-    return m_modMeleeHitChance;
+    return m_modWeaponHitChance[attackType];
 }
 
 float Unit::GetHitChance(SpellSchoolMask schoolMask) const

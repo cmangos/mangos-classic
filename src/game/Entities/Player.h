@@ -1615,6 +1615,8 @@ class Player : public Unit
         void UpdateSpellCritChance(uint32 school);
         void UpdateManaRegen();
 
+        void UpdateWeaponDependantStats(WeaponAttackType attType);
+
         ObjectGuid const& GetLootGuid() const { return m_lootGuid; }
         void SetLootGuid(ObjectGuid const& guid) { m_lootGuid = guid; }
 

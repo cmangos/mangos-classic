@@ -1964,8 +1964,7 @@ class Unit : public WorldObject
                    form != FORM_SHADOW && form != FORM_STEALTH;
         }
 
-        float m_modMeleeHitChance;
-        float m_modRangedHitChance;
+        float m_modWeaponHitChance[MAX_ATTACK];
         float m_modSpellHitChance;
         float m_modSpellCritChance[MAX_SPELL_SCHOOL];
 
