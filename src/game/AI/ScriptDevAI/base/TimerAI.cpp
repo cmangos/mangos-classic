@@ -163,7 +163,7 @@ void TimerManager::GetAIInformation(ChatHandler& reader)
     for (auto itr = m_timers.begin(); itr != m_timers.end(); ++itr)
     {
         Timer& timer = (*itr).second;
-        output += "Timer ID: " + std::to_string(timer.id) + " Timer: " + std::to_string(timer.timer), +" Disabled: " + std::to_string(timer.disabled) + "\n";
+        output += "Timer ID: " + std::to_string(timer.id) + " Timer: " + std::to_string(timer.timer) +" Disabled: " + std::to_string(timer.disabled) + "\n";
     }
     reader.PSendSysMessage("%s", output.data());
 }
@@ -301,7 +301,7 @@ void CombatActions::GetAIInformation(ChatHandler& reader)
     for (auto itr = m_combatActions.begin(); itr != m_combatActions.end(); ++itr)
     {
         Timer& timer = (*itr).second;
-        output += "Timer ID: " + std::to_string(timer.id) + " Timer: " + std::to_string(timer.timer), +" Disabled: " + std::to_string(timer.disabled) + "\n";
+        output += "Timer ID: " + std::to_string(timer.id) + " Timer: " + std::to_string(timer.timer) +" Disabled: " + std::to_string(timer.disabled) + "\n";
     }
     reader.PSendSysMessage("%s", output.data());
 }
