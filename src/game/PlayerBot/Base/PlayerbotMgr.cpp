@@ -1047,7 +1047,7 @@ uint32 Player::GetSpec()
 
 bool ChatHandler::HandlePlayerbotCommand(char* args)
 {
-    if (!(m_session->GetSecurity() > SEC_PLAYER))
+    if (m_session && !(m_session->GetSecurity() > SEC_PLAYER))
     {
         if (botConfig.GetBoolDefault("PlayerbotAI.DisableBots", false))
         {
