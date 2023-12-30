@@ -154,6 +154,12 @@ struct boss_mandokirAI : public CombatAI
         m_creature->CastSpell(nullptr, SPELL_DESPAWN_CHAINED_SPIRITS, TRIGGERED_OLD_TRIGGERED);
     }
 
+    void SpellHitTarget(Unit* /*target*/, const SpellEntry* spellInfo) override
+    {
+        if (spellInfo->Id == SPELL_CHARGE)
+            DoResetThreat();
+    }
+
     void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* invoker, uint32 /*miscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
