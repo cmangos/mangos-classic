@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2815_01_mangos_pursuit` bit(1) DEFAULT NULL
+  `required_z2816_01_mangos_precision_decimal` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -720,10 +720,10 @@ CREATE TABLE `creature` (
   `id` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Creature Identifier',
   `map` smallint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'Map Identifier',
   `spawnMask` tinyint(3) unsigned NOT NULL DEFAULT '1',
-  `position_x` float NOT NULL DEFAULT '0',
-  `position_y` float NOT NULL DEFAULT '0',
-  `position_z` float NOT NULL DEFAULT '0',
-  `orientation` float NOT NULL DEFAULT '0',
+  `position_x` DECIMAL(40,20) NOT NULL DEFAULT '0',
+  `position_y` DECIMAL(40,20) NOT NULL DEFAULT '0',
+  `position_z` DECIMAL(40,20) NOT NULL DEFAULT '0',
+  `orientation` DECIMAL(40,20) NOT NULL DEFAULT '0',
   `spawntimesecsmin` int(10) unsigned NOT NULL DEFAULT '120' COMMENT 'Creature respawn time minimum',
   `spawntimesecsmax` int(10) unsigned NOT NULL DEFAULT '120' COMMENT 'Creature respawn time maximum',
   `spawndist` float NOT NULL DEFAULT '5',
@@ -1912,14 +1912,14 @@ CREATE TABLE `gameobject` (
   `id` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Gameobject Identifier',
   `map` smallint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'Map Identifier',
   `spawnMask` tinyint(3) unsigned NOT NULL DEFAULT '1',
-  `position_x` float NOT NULL DEFAULT '0',
-  `position_y` float NOT NULL DEFAULT '0',
-  `position_z` float NOT NULL DEFAULT '0',
-  `orientation` float NOT NULL DEFAULT '0',
-  `rotation0` float NOT NULL DEFAULT '0',
-  `rotation1` float NOT NULL DEFAULT '0',
-  `rotation2` float NOT NULL DEFAULT '0',
-  `rotation3` float NOT NULL DEFAULT '0',
+  `position_x` DECIMAL(40,20) NOT NULL DEFAULT '0',
+  `position_y` DECIMAL(40,20) NOT NULL DEFAULT '0',
+  `position_z` DECIMAL(40,20) NOT NULL DEFAULT '0',
+  `orientation` DECIMAL(40,20) NOT NULL DEFAULT '0',
+  `rotation0` DECIMAL(40,20) NOT NULL DEFAULT '0',
+  `rotation1` DECIMAL(40,20) NOT NULL DEFAULT '0',
+  `rotation2` DECIMAL(40,20) NOT NULL DEFAULT '0',
+  `rotation3` DECIMAL(40,20) NOT NULL DEFAULT '0',
   `spawntimesecsmin` int(11) NOT NULL DEFAULT '0' COMMENT 'GameObject respawn time minimum',
   `spawntimesecsmax` int(11) NOT NULL DEFAULT '0' COMMENT 'Gameobject respawn time maximum',
   PRIMARY KEY (`guid`),
