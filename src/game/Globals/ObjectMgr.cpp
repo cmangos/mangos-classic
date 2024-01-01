@@ -1840,7 +1840,7 @@ void ObjectMgr::LoadCreatures()
         else
             data.OriginalZoneId = 0;
 
-        if (dynGuid)
+        if (dynGuid && !data.gameEvent)
         {
             m_dynguidCreatureDbGuids[data.mapid].push_back(guid);
         }
@@ -2034,7 +2034,7 @@ void ObjectMgr::LoadGameObjects()
         else
             data.OriginalZoneId = 0;
 
-        if (dynGuid)
+        if (dynGuid && !data.gameEvent)
         {
             m_dynguidGameobjectDbGuids[data.mapid].push_back(guid);
         }
