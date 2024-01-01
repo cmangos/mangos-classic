@@ -138,10 +138,25 @@ struct BlessingOfLight : public AuraScript
     }
 };
 
+// 19752 - Divine Intervention
+struct DivineIntervention : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target)
+            return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
+        if (target->HasAura(23333) || target->HasAura(23335) || target->HasAura(34976)) // possibly SPELL_ATTR_EX_IMMUNITY_TO_HOSTILE_AND_FRIENDLY_EFFECTS
+            return SPELL_FAILED_TARGET_AURASTATE;
+        return SPELL_CAST_OK;
+    }
+};
+
 void LoadPaladinScripts()
 {
     RegisterSpellScript<JudgementOfLightIntermediate>("spell_judgement_of_light_intermediate");
     RegisterSpellScript<JudgementOfWisdomIntermediate>("spell_judgement_of_wisdom_intermediate");
+    RegisterSpellScript<DivineIntervention>("spell_divine_intervention");
     RegisterSpellScript<spell_judgement>("spell_judgement");
     RegisterSpellScript<SealOfTheCrusader>("spell_seal_of_the_crusader");
     RegisterSpellScript<BlessingOfLight>("spell_blessing_of_light");
