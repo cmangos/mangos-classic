@@ -635,6 +635,9 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
     m_isDebuggingAreaTriggers = false;
 
     m_fishingSteps = 0;
+
+    m_lastDbGuid = 0;
+    m_lastGameObject = false;
 }
 
 Player::~Player()

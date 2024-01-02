@@ -309,6 +309,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "zonexy",         SEC_MODERATOR,      false, &ChatHandler::HandleGoZoneXYCommand,            "", nullptr },
         { "xy",             SEC_MODERATOR,      false, &ChatHandler::HandleGoXYCommand,                "", nullptr },
         { "xyz",            SEC_MODERATOR,      false, &ChatHandler::HandleGoXYZCommand,               "", nullptr },
+        { "next",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleGoNextCommand,              "", nullptr },
         { "",               SEC_MODERATOR,      false, &ChatHandler::HandleGoCommand,                  "", nullptr },
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };

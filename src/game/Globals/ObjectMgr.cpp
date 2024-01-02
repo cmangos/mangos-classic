@@ -136,7 +136,9 @@ ObjectMgr::ObjectMgr() :
     m_Dbc2StorageLocaleIndex(DEFAULT_LOCALE),
     m_unitConditionMgr(std::make_unique<UnitConditionMgr>()),
     m_worldStateExpressionMgr(std::make_unique<WorldStateExpressionMgr>()),
-    m_combatConditionMgr(std::make_unique<CombatConditionMgr>(*m_unitConditionMgr, *m_worldStateExpressionMgr))
+    m_combatConditionMgr(std::make_unique<CombatConditionMgr>(*m_unitConditionMgr, *m_worldStateExpressionMgr)),
+    m_maxGoDbGuid(0),
+    m_maxCreatureDbGuid(0)
 {
 }
 
@@ -1786,6 +1788,10 @@ void ObjectMgr::LoadCreatures()
         data.spawnTemplate      = GetCreatureSpawnTemplate(0);
         uint32 spawnDataEntry   = fields[15].GetUInt32();
 
+
+        if (m_maxCreatureDbGuid < guid)
+            m_maxCreatureDbGuid = guid;
+
         MapEntry const* mapEntry = sMapStore.LookupEntry(data.mapid);
         if (!mapEntry)
         {
@@ -1974,6 +1980,9 @@ void ObjectMgr::LoadGameObjects()
 
         data.animprogress     = GO_ANIMPROGRESS_DEFAULT;
         data.goState          = -1;
+
+        if (m_maxGoDbGuid < guid)
+            m_maxGoDbGuid = guid;
 
         MapEntry const* mapEntry = sMapStore.LookupEntry(data.mapid);
         if (!mapEntry)

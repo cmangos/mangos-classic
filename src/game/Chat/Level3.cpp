@@ -7269,3 +7269,74 @@ bool ChatHandler::HandleModifyParryCommand(char *args)
 {
     return ModifyStatCommandHelper(args, "Parry Chance", SPELL_MOD_PARRY_CHANCE);
 }
+
+bool ChatHandler::HandleGoNextCommand(char* args)
+{
+    Player* player = m_session->GetPlayer();
+
+    uint32 lastDbguid; uint32 gameobjectUint;
+    bool gameobject;
+    if (!ExtractUInt32(&args, lastDbguid) || !ExtractUInt32(&args, gameobjectUint))
+    {
+        std::tie(lastDbguid, gameobject) = player->GetLastData();
+        ++lastDbguid;
+    }
+    else
+    {
+        gameobject = gameobjectUint;
+        player->SetLastData(lastDbguid, gameobject);
+    }
+
+    uint32 mapId;
+    float x, y, z;
+    if (gameobject)
+    {
+        uint32 maxDbGuid = sObjectMgr.GetMaxGoDbGuid();
+        GameObjectData const* goData = nullptr;
+        uint32 i;
+        for (i = lastDbguid; i < maxDbGuid; ++i)
+        {
+            goData = sObjectMgr.GetGOData(i);
+            if (goData)
+                break;
+        }
+
+        if (goData)
+        {
+            player->SetLastData(i, true);
+            mapId = goData->mapid;
+            x = goData->posX;
+            y = goData->posY;
+            z = goData->posZ;
+            PSendSysMessage("Teleporting to gameobject dbGuid %u", i);
+        }
+        else
+            return false;
+    }
+    else
+    {
+        uint32 maxDbGuid = sObjectMgr.GetMaxCreatureDbGuid();
+        CreatureData const* creatureData = nullptr;
+        uint32 i;
+        for (i = lastDbguid; i < maxDbGuid; ++i)
+        {
+            creatureData = sObjectMgr.GetCreatureData(i);
+            if (creatureData)
+                break;
+        }
+
+        if (creatureData)
+        {
+            player->SetLastData(i, false);
+            mapId = creatureData->mapid;
+            x = creatureData->posX;
+            y = creatureData->posY;
+            z = creatureData->posZ;
+            PSendSysMessage("Teleporting to creature dbGuid %u", i);
+        }
+        else
+            return false;
+    }
+
+    return HandleGoHelper(player, mapId, x, y, &z);
+}
