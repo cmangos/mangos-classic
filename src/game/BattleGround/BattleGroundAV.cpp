@@ -273,7 +273,7 @@ void BattleGroundAV::UpdateScore(PvpTeamIndex teamIdx, int32 points)
 
     // note: to remove reinforcements points must be negative, for adding reinforcements points must be positive
     int32 newVal = std::max(GetBgMap()->GetVariableManager().GetVariable(worldStateId) + points, 0);
-    GetBgMap()->GetVariableManager().SetVariable(BG_AV_STATE_SCORE_A, newVal);
+    GetBgMap()->GetVariableManager().SetVariable(worldStateId, newVal);
 
     if (points < 0)
     {
