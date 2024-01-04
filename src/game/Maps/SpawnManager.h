@@ -51,7 +51,7 @@ bool operator<(SpawnInfo const& lhs, SpawnInfo const& rhs);
 class SpawnManager
 {
     public:
-        SpawnManager(Map& map) : m_map(map) {}
+        SpawnManager(Map& map) : m_map(map), m_updated(false) {}
         ~SpawnManager();
         void Initialize();
 
