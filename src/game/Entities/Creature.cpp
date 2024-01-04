@@ -2584,54 +2584,6 @@ void Creature::FillGuidsListFromThreatList(GuidVector& guids, uint32 maxamount /
         guids.push_back((*itr)->getUnitGuid());
 }
 
-struct AddCreatureToRemoveListInMapsWorker
-{
-    AddCreatureToRemoveListInMapsWorker(uint32 dbGuid) : i_guid(dbGuid) {}
-
-    void operator()(Map* map)
-    {
-        if (Creature* pCreature = map->GetCreature(i_guid))
-            pCreature->AddObjectToRemoveList();
-    }
-
-    uint32 i_guid;
-};
-
-void Creature::AddToRemoveListInMaps(uint32 db_guid, CreatureData const* data)
-{
-    AddCreatureToRemoveListInMapsWorker worker(db_guid);
-    sMapMgr.DoForAllMapsWithMapId(data->mapid, worker);
-}
-
-struct SpawnCreatureInMapsWorker
-{
-    SpawnCreatureInMapsWorker(uint32 guid, CreatureData const* data)
-        : i_guid(guid), i_data(data) {}
-
-    void operator()(Map* map)
-    {
-        // We use spawn coords to spawn
-        if (map->IsLoaded(i_data->posX, i_data->posY))
-        {
-            Creature* pCreature = new Creature;
-            // DEBUG_LOG("Spawning creature %u",*itr);
-            if (!pCreature->LoadFromDB(i_guid, map, i_guid, 0))
-            {
-                delete pCreature;
-            }
-        }
-    }
-
-    uint32 i_guid;
-    CreatureData const* i_data;
-};
-
-void Creature::SpawnInMaps(uint32 db_guid, CreatureData const* data)
-{
-    SpawnCreatureInMapsWorker worker(db_guid, data);
-    sMapMgr.DoForAllMapsWithMapId(data->mapid, worker);
-}
-
 bool Creature::HasStaticDBSpawnData() const
 {
     if (GetObjectGuid().GetHigh() == HIGHGUID_PET)

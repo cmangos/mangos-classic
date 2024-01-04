@@ -61,6 +61,14 @@ class SpawnManager
         void RespawnCreature(uint32 dbguid, uint32 respawnDelay = 0); // seconds
         void RespawnGameObject(uint32 dbguid, uint32 respawnDelay = 0); // seconds
 
+        void RemoveSpawns(std::vector<uint32> const& creatureDbGuids, std::vector<uint32> const& goDbGuids);
+        void RemoveSpawn(uint32 dbguid, HighGuid high);
+
+        // boilerplate methods for dynguid transition period
+        void AddEventGuid(uint32 dbguid, HighGuid high);
+        void RemoveEventGuid(uint32 dbguid, HighGuid high);
+        bool IsEventGuid(uint32 dbguid, HighGuid high) const;
+
         void RespawnAll();
 
         void Update();
@@ -77,6 +85,9 @@ class SpawnManager
         std::vector<SpawnInfo> m_spawns; // must only be erased from in Update
         std::map<uint32, SpawnGroup*> m_spawnGroups;
         bool m_updated;
+
+        std::set<uint32> m_eventCreatureDbGuids;
+        std::set<uint32> m_eventGoDbGuids;
 };
 
 #endif

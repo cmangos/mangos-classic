@@ -175,6 +175,63 @@ void SpawnManager::RespawnGameObject(uint32 dbguid, uint32 respawnDelay)
         (*itr).ConstructForMap(m_map);
 }
 
+void SpawnManager::RemoveSpawns(std::vector<uint32> const& creatureDbGuids, std::vector<uint32> const& goDbGuids)
+{
+    for (auto& spawnInfo : m_spawns)
+    {
+        switch (spawnInfo.GetHighGuid())
+        {
+            case HIGHGUID_GAMEOBJECT:
+                if (std::find(goDbGuids.begin(), goDbGuids.end(), spawnInfo.GetDbGuid()) != goDbGuids.end())
+                    spawnInfo.SetUsed(); // will be erased on next manager update
+                break;
+            case HIGHGUID_UNIT:
+                if (std::find(creatureDbGuids.begin(), creatureDbGuids.end(), spawnInfo.GetDbGuid()) != creatureDbGuids.end())
+                    spawnInfo.SetUsed(); // will be erased on next manager update
+                break;
+        }
+    }
+}
+
+void SpawnManager::RemoveSpawn(uint32 dbguid, HighGuid high)
+{
+    for (auto& spawnInfo : m_spawns)
+    {
+        if (spawnInfo.GetHighGuid() == high && spawnInfo.GetDbGuid() == dbguid)
+        {
+            spawnInfo.SetUsed(); // will be erased on next manager update
+            break;
+        }
+    }
+}
+
+void SpawnManager::AddEventGuid(uint32 dbguid, HighGuid high)
+{
+    switch (high)
+    {
+        case HIGHGUID_GAMEOBJECT: m_eventGoDbGuids.insert(dbguid); break;
+        case HIGHGUID_UNIT: m_eventCreatureDbGuids.insert(dbguid); break;
+    }
+}
+
+void SpawnManager::RemoveEventGuid(uint32 dbguid, HighGuid high)
+{
+    switch (high)
+    {
+        case HIGHGUID_GAMEOBJECT: m_eventGoDbGuids.erase(dbguid); break;
+        case HIGHGUID_UNIT: m_eventCreatureDbGuids.erase(dbguid); break;
+    }
+}
+
+bool SpawnManager::IsEventGuid(uint32 dbguid, HighGuid high) const
+{
+    switch (high)
+    {
+        case HIGHGUID_GAMEOBJECT: return m_eventGoDbGuids.find(dbguid) != m_eventGoDbGuids.end();
+        case HIGHGUID_UNIT: return m_eventCreatureDbGuids.find(dbguid) != m_eventCreatureDbGuids.end();
+    }
+}
+
 void SpawnManager::RespawnAll()
 {
     for (auto itr = m_spawns.begin(); itr != m_spawns.end();)

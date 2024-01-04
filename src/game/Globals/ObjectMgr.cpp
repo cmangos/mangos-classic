@@ -836,6 +836,26 @@ std::vector<uint32>* ObjectMgr::GetGameObjectDynGuidForMap(uint32 mapId)
     return &(*itr).second;
 }
 
+void ObjectMgr::AddDynGuidForMap(uint32 mapId, std::pair<std::vector<uint32>, std::vector<uint32>> const& dbGuids)
+{
+    auto& data = m_dynguidCreatureDbGuids[mapId];
+    for (uint32 creature : dbGuids.first)
+        data.push_back(creature);
+    auto& goData = m_dynguidGameobjectDbGuids[mapId];
+    for (uint32 go : dbGuids.second)
+        goData.push_back(go);
+}
+
+void ObjectMgr::RemoveDynGuidForMap(uint32 mapId, std::pair<std::vector<uint32>, std::vector<uint32>> const& dbGuids)
+{
+    auto& data = m_dynguidCreatureDbGuids[mapId];
+    for (uint32 creature : dbGuids.first)
+        data.erase(std::remove(data.begin(), data.end(), creature), data.end());
+    auto& goData = m_dynguidGameobjectDbGuids[mapId];
+    for (uint32 go : dbGuids.second)
+        goData.erase(std::remove(goData.begin(), goData.end(), go), goData.end());
+}
+
 void ObjectMgr::LoadCreatureImmunities()
 {
     uint32 count = 0;
