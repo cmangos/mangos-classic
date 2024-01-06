@@ -56,7 +56,7 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
     const char* v_hex = srp.GetVerifier().AsHexStr();
 
     bool update_sv = LoginDatabase.PExecute(
-        "INSERT INTO account(username,v,s,joindate) VALUES('%s','%s','%s',NOW())",
+        "INSERT INTO account(username,v,s,joindate) VALUES('%s','%s','%s'," _NOW_ ")",
             username.c_str(), v_hex, s_hex);
 
     OPENSSL_free((void*)s_hex);

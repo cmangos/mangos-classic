@@ -647,7 +647,7 @@ uint32 GameEventMgr::Initialize()                           // return the next e
         }
         while (queryResult->NextRow());
 
-        CharacterDatabase.Execute("TRUNCATE game_event_status");
+        CharacterDatabase.Execute(_TRUNCATE_ " game_event_status");
     }
 
     uint32 delay = Update(&activeAtShutdown);

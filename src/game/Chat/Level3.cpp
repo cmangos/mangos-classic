@@ -5130,7 +5130,7 @@ bool ChatHandler::HandleBanInfoCharacterCommand(char* args)
 
 bool ChatHandler::HandleBanInfoHelper(uint32 accountid, char const* accountname)
 {
-    auto queryResult = LoginDatabase.PQuery("SELECT FROM_UNIXTIME(banned_at),expires_at-banned_at,active,expires_at,reason,banned_by,unbanned_at,unbanned_by "
+    auto queryResult = LoginDatabase.PQuery("SELECT " _FROM_UNIXTIME_("banned_at") ",expires_at-banned_at,active,expires_at,reason,banned_by,unbanned_at,unbanned_by "
                                             "FROM account_banned WHERE account_id = '%u' ORDER BY banned_at ASC", accountid);
     if (!queryResult)
     {
@@ -5181,7 +5181,7 @@ bool ChatHandler::HandleBanInfoIPCommand(char* args)
     std::string IP = cIP;
 
     LoginDatabase.escape_string(IP);
-    auto queryResult = LoginDatabase.PQuery("SELECT ip, FROM_UNIXTIME(banned_at), FROM_UNIXTIME(expires_at), expires_at-UNIX_TIMESTAMP(), reason,banned_by,expires_at-banned_at"
+    auto queryResult = LoginDatabase.PQuery("SELECT ip, " _FROM_UNIXTIME_("banned_at") ", " _FROM_UNIXTIME_("expires_at") ", expires_at-" _UNIXTIME_ ", reason,banned_by,expires_at-banned_at"
                                             "FROM ip_banned WHERE ip = '%s'", IP.c_str());
     if (!queryResult)
     {
@@ -5199,7 +5199,7 @@ bool ChatHandler::HandleBanInfoIPCommand(char* args)
 
 bool ChatHandler::HandleBanListCharacterCommand(char* args)
 {
-    LoginDatabase.Execute("DELETE FROM ip_banned WHERE expires_at<=UNIX_TIMESTAMP() AND expires_at<>banned_at");
+    LoginDatabase.Execute("DELETE FROM ip_banned WHERE expires_at<=" _UNIXTIME_ " AND expires_at<>banned_at");
 
     char* cFilter = ExtractLiteralArg(&args);
     if (!cFilter)
@@ -5219,7 +5219,7 @@ bool ChatHandler::HandleBanListCharacterCommand(char* args)
 
 bool ChatHandler::HandleBanListAccountCommand(char* args)
 {
-    LoginDatabase.Execute("DELETE FROM ip_banned WHERE expires_at<=UNIX_TIMESTAMP() AND expires_at<>banned_at");
+    LoginDatabase.Execute("DELETE FROM ip_banned WHERE expires_at<=" _UNIXTIME_ " AND expires_at<>banned_at");
 
     char* cFilter = ExtractLiteralArg(&args);
     std::string filter = cFilter ? cFilter : "";
@@ -5328,7 +5328,7 @@ bool ChatHandler::HandleBanListHelper(std::unique_ptr<QueryResult> queryResult)
 
 bool ChatHandler::HandleBanListIPCommand(char* args)
 {
-    LoginDatabase.Execute("DELETE FROM ip_banned WHERE expires_at<=UNIX_TIMESTAMP() AND expires_at<>banned_at");
+    LoginDatabase.Execute("DELETE FROM ip_banned WHERE expires_at<=" _UNIXTIME_ " AND expires_at<>banned_at");
 
     char* cFilter = ExtractLiteralArg(&args);
     std::string filter = cFilter ? cFilter : "";
@@ -5339,13 +5339,13 @@ bool ChatHandler::HandleBanListIPCommand(char* args)
     if (filter.empty())
     {
         queryResult = LoginDatabase.Query("SELECT ip,banned_at,expires_at,banned_by,reason FROM ip_banned"
-                                          " WHERE (banned_at=expires_at OR expires_at>UNIX_TIMESTAMP())"
+                                          " WHERE (banned_at=expires_at OR expires_at>" _UNIXTIME_ ")"
                                           " ORDER BY expires_at");
     }
     else
     {
         queryResult = LoginDatabase.PQuery("SELECT ip,banned_at,expires_at,banned_by,reason FROM ip_banned"
-                                           " WHERE (banned_at=expires_at OR expires_at>UNIX_TIMESTAMP()) AND ip " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'")
+                                           " WHERE (banned_at=expires_at OR expires_at>" _UNIXTIME_ ") AND ip " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'")
                                            " ORDER BY expires_at", filter.c_str());
     }
 

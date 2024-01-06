@@ -46,6 +46,8 @@ set(SRC_GRP_DATABASE
     Database/DatabaseMysql.h
     Database/DatabasePostgre.cpp
     Database/DatabasePostgre.h
+    Database/DatabaseSqlite.cpp
+    Database/DatabaseSqlite.h
     Database/Field.cpp
     Database/Field.h
     Database/PGSQLDelayThread.h
@@ -54,6 +56,8 @@ set(SRC_GRP_DATABASE
     Database/QueryResultMysql.h
     Database/QueryResultPostgre.cpp
     Database/QueryResultPostgre.h
+    Database/QueryResultSqlite.cpp
+    Database/QueryResultSqlite.h
     Database/SqlDelayThread.cpp
     Database/SqlDelayThread.h
     Database/SqlOperations.cpp
@@ -244,6 +248,9 @@ endif()
 if(POSTGRESQL AND POSTGRESQL_FOUND)
   target_include_directories(${LIBRARY_NAME} PUBLIC ${PostgreSQL_INCLUDE_DIRS})
   target_link_libraries(${LIBRARY_NAME} PUBLIC ${PostgreSQL_LIBRARIES})
+elseif(SQLITE AND SQLite3_FOUND)
+  target_include_directories(${LIBRARY_NAME} PUBLIC ${SQLite3_INCLUDE_DIRS})
+  target_link_libraries(${LIBRARY_NAME} PUBLIC ${SQLite3_LIBRARIES})
 else()
   target_include_directories(${LIBRARY_NAME} PUBLIC ${MYSQL_INCLUDE_DIR})
   target_link_libraries(${LIBRARY_NAME} PUBLIC ${MYSQL_LIBRARY})

@@ -16,35 +16,40 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef DO_POSTGRESQL
-#ifndef DO_SQLITE
+#ifdef DO_SQLITE
 
-#if !defined(QUERYRESULTMYSQL_H)
-#define QUERYRESULTMYSQL_H
+#if !defined(QUERYRESULTSQLITE_H)
+#define QUERYRESULTSQLITE_H
 
 #include "Common.h"
+#include "QueryResult.h"
 
 #ifdef _WIN32
   #include <WinSock2.h>
 #endif
 
-#include <mysql.h>
+#include <sqlite3.h>
 
-class QueryResultMysql : public QueryResult
+class QueryResultSqlite : public QueryResult
 {
     public:
-        QueryResultMysql(MYSQL_RES* result, MYSQL_FIELD* fields, uint64 rowCount, uint32 fieldCount);
+        QueryResultSqlite(sqlite3_stmt** stmt);
 
-        ~QueryResultMysql();
+        ~QueryResultSqlite();
 
         bool NextRow() override;
 
+        operator bool() const
+        {
+          return (mRowCount * mFieldCount) > 0;
+        }
+
     private:
-        enum Field::DataTypes ConvertNativeType(enum_field_types mysqlType) const;
+        enum Field::DataTypes ConvertNativeType(int sqliteType) const;
+        //enum Field::DataTypes ConvertNativeType(enum_field_types mysqlType) const;
         void EndQuery();
 
-        MYSQL_RES* mResult;
+        sqlite3_stmt** mStmt;
 };
-#endif
 #endif
 #endif

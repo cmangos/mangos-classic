@@ -411,9 +411,9 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     // Re-check account ban (same check as in realmd)
     auto banresult =
-        LoginDatabase.PQuery("SELECT 1 FROM account_banned WHERE account_id = %u AND active = 1 AND (expires_at > UNIX_TIMESTAMP() OR expires_at = banned_at)"
+        LoginDatabase.PQuery("SELECT 1 FROM account_banned WHERE account_id = %u AND active = 1 AND (expires_at > " _UNIXTIME_ " OR expires_at = banned_at)"
                              "UNION "
-                             "SELECT 1 FROM ip_banned WHERE (expires_at = banned_at OR expires_at > UNIX_TIMESTAMP()) AND ip = '%s'",
+                             "SELECT 1 FROM ip_banned WHERE (expires_at = banned_at OR expires_at > " _UNIXTIME_ ") AND ip = '%s'",
                              id, GetRemoteAddress().c_str());
 
     if (banresult) // if account banned
@@ -485,7 +485,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     // No SQL injection, username escaped.
     static SqlStatementID updAccount;
 
-    SqlStatement stmt = LoginDatabase.CreateStatement(updAccount, "INSERT INTO account_logons(accountId,ip,loginTime,loginSource) VALUES(?,?,NOW(),?)");
+    SqlStatement stmt = LoginDatabase.CreateStatement(updAccount, "INSERT INTO account_logons(accountId,ip,loginTime,loginSource) VALUES(?,?," _NOW_ ",?)");
     stmt.PExecute(id, address.c_str(), std::to_string(LOGIN_TYPE_MANGOSD).c_str());
 
     m_crypt.Init(&K);

@@ -228,8 +228,8 @@ int main(int argc, char* argv[])
     // cleanup query
     // set expired bans to inactive
     LoginDatabase.BeginTransaction();
-    LoginDatabase.Execute("UPDATE account_banned SET active = 0 WHERE expires_at<=UNIX_TIMESTAMP() AND expires_at<>banned_at");
-    LoginDatabase.Execute("DELETE FROM ip_banned WHERE expires_at<=UNIX_TIMESTAMP() AND expires_at<>banned_at");
+    LoginDatabase.Execute("UPDATE account_banned SET active = 0 WHERE expires_at<=" _UNIXTIME_ " AND expires_at<>banned_at");
+    LoginDatabase.Execute("DELETE FROM ip_banned WHERE expires_at<=" _UNIXTIME_ " AND expires_at<>banned_at");
     LoginDatabase.CommitTransaction();
 
     // FIXME - more intelligent selection of thread count is needed here.  config option?

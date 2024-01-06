@@ -35,6 +35,25 @@ typedef DatabasePostgre DatabaseType;
 #define _TABLE_SIM_      "\""
 #define _CONCAT3_(A,B,C) "( " A " || " B " || " C " )"
 #define _OFFSET_         "LIMIT 1 OFFSET %d"
+#define _TRUNCATE_       "TRUNCATE TABLE"
+#define _NOW_            "NOW()"
+#define _UNIXTIME_       "UNIX_TIMESTAMP()"
+#define _UNIXNOW_        "UNIX_TIMESTAMP(NOW())"
+#define _FROM_UNIXTIME_(X) "TO_TIMESTAMP(" X ")"
+#elif DO_SQLITE
+#include "Database/QueryResultSqlite.h"
+#include "Database/Database.h"
+#include "Database/DatabaseSqlite.h"
+typedef DatabaseSqlite DatabaseType;
+#define _LIKE_           "LIKE"
+#define _TABLE_SIM_      '`'
+#define _CONCAT3_(A,B,C) "( " A " || " B " || " C " )"
+#define _OFFSET_         "LIMIT %d,1"
+#define _TRUNCATE_       "DELETE FROM"
+#define _NOW_            "datetime()"
+#define _UNIXTIME_       "unixepoch()"
+#define _UNIXNOW_        "unixepoch('now')"
+#define _FROM_UNIXTIME_(X) "datetime(" X ",'unixepoch')"
 #else
 #include "Database/QueryResultMysql.h"
 #include "Database/Database.h"
@@ -44,6 +63,11 @@ typedef DatabaseMysql DatabaseType;
 #define _TABLE_SIM_      '`'
 #define _CONCAT3_(A,B,C) "CONCAT( " A " , " B " , " C " )"
 #define _OFFSET_         "LIMIT %d,1"
+#define _TRUNCATE_       "TRUNCATE TABLE"
+#define _NOW_            "NOW()"
+#define _UNIXTIME_       "UNIX_TIMESTAMP()"
+#define _UNIXNOW_        "UNIX_TIMESTAMP(NOW())"
+#define _FROM_UNIXTIME_(X) "FROM_UNIXTIME(" X ")"
 #endif
 
 extern DatabaseType WorldDatabase;
