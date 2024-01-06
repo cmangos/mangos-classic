@@ -24,6 +24,7 @@
 #include "Database/SqlDelayThread.h"
 #include "Policies/ThreadingModel.h"
 #include "SqlPreparedStatement.h"
+#include "QueryResult.h"
 
 #include <boost/thread/tss.hpp>
 #include <atomic>

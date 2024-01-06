@@ -17,6 +17,7 @@
  */
 
 #ifndef DO_POSTGRESQL
+#ifndef DO_SQLITE
 
 #include "Util/Util.h"
 #include "Policies/Singleton.h"
@@ -486,4 +487,5 @@ enum_field_types MySqlPreparedStatement::ToMySQLType(const SqlStmtFieldData& dat
 
     return dataType;
 }
+#endif
 #endif

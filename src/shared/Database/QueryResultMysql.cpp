@@ -17,6 +17,7 @@
  */
 
 #ifndef DO_POSTGRESQL
+#ifndef DO_SQLITE
 
 #include "DatabaseEnv.h"
 #include "Util/Errors.h"
@@ -96,4 +97,5 @@ enum Field::DataTypes QueryResultMysql::ConvertNativeType(enum_field_types mysql
             return Field::DB_TYPE_UNKNOWN;
     }
 }
+#endif
 #endif

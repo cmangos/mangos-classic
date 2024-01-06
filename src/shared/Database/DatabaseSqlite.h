@@ -17,23 +17,23 @@
  */
 
 #ifndef DO_POSTGRESQL
-#ifndef DO_SQLITE
 
-#ifndef _DATABASEMYSQL_H
-#define _DATABASEMYSQL_H
+#ifndef _DatabaseSqlite_H
+#define _DatabaseSqlite_H
 
 //#include "Common.h"
 #include "Database.h"
 #include "Policies/Singleton.h"
+#include "QueryResultSqlite.h"
 
-#include <mysql.h>
+#include <sqlite3.h>
 
 // MySQL prepared statement class
-class MySqlPreparedStatement : public SqlPreparedStatement
+class SqlitePreparedStatement : public SqlPreparedStatement
 {
     public:
-        MySqlPreparedStatement(const std::string& fmt, SqlConnection& conn, MYSQL* mysql);
-        ~MySqlPreparedStatement();
+        SqlitePreparedStatement(const std::string& fmt, SqlConnection& conn, sqlite3* mysql);
+        ~SqlitePreparedStatement();
 
         // prepare statement
         virtual bool prepare() override;
@@ -48,23 +48,19 @@ class MySqlPreparedStatement : public SqlPreparedStatement
         // bind parameters
         void addParam(unsigned int nIndex, const SqlStmtFieldData& data);
 
-        static enum_field_types ToMySQLType(const SqlStmtFieldData& data, bool& bUnsigned);
-
     private:
         void RemoveBinds();
 
-        MYSQL* m_pMySQLConn;
-        MYSQL_STMT* m_stmt;
-        MYSQL_BIND* m_pInputArgs;
-        MYSQL_BIND* m_pResult;
-        MYSQL_RES* m_pResultMetadata;
+        sqlite3* m_pSqliteConn;
+        sqlite3_stmt** m_stmt;
+        sqlite3_value* m_pResult;
 };
 
-class MySQLConnection : public SqlConnection
+class SQLiteConnection : public SqlConnection
 {
     public:
-        MySQLConnection(Database& db) : SqlConnection(db), mMysql(nullptr) {}
-        ~MySQLConnection();
+        SQLiteConnection(Database& db) : SqlConnection(db), mSqlite(nullptr) {}
+        ~SQLiteConnection();
 
         //! Initializes Mysql and connects to a server.
         /*! infoString should be formated like hostname;username;password;database. */
@@ -85,23 +81,18 @@ class MySQLConnection : public SqlConnection
 
     private:
         bool _TransactionCmd(const char* sql);
-        bool _Query(const char* sql, MYSQL_RES** pResult, MYSQL_FIELD** pFields, uint64* pRowCount, uint32* pFieldCount);
+        bool _Query(const char* sql, sqlite3_stmt** pStmt);
 
-        MYSQL* mMysql;
+        sqlite3* mSqlite;
 };
 
-class DatabaseMysql : public Database
+class DatabaseSqlite : public Database
 {
-        friend class MaNGOS::OperatorNew<DatabaseMysql>;
+        friend class MaNGOS::OperatorNew<DatabaseSqlite>;
 
     public:
-        DatabaseMysql();
-        ~DatabaseMysql();
-
-        // must be call before first query in thread
-        void ThreadStart() override;
-        // must be call before finish thread run
-        void ThreadEnd() override;
+        DatabaseSqlite();
+        ~DatabaseSqlite();
 
     protected:
         virtual SqlConnection* CreateConnection() override;
@@ -110,6 +101,5 @@ class DatabaseMysql : public Database
         static size_t db_count;
 };
 
-#endif
 #endif
 #endif
