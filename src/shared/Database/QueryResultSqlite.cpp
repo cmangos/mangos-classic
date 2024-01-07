@@ -67,7 +67,8 @@ bool QueryResultSqlite::NextRow()
     for (int i = 0; i < mFieldCount; ++i)
     {
         const unsigned char* value = sqlite3_column_text(*mStmt, i);
-        mCurrentRow[i].SetValue(value ? reinterpret_cast<const char*>(value) : "");
+
+        mCurrentRow[i].SetValue(value ? reinterpret_cast<const char*>(value) : nullptr);
         mCurrentRow[i].SetType(ConvertNativeType(sqlite3_column_type(*mStmt, i)));
     }
 
