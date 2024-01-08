@@ -315,7 +315,7 @@ class WorldSession
 
         void SendTradeStatus(const TradeStatusInfo& status) const;
         void SendUpdateTrade(bool trader_state = true) const;
-        void SendCancelTrade() const;
+        void SendCancelTrade(TradeStatus status) const;
 
         void SendPetitionQueryOpcode(ObjectGuid petitionguid) const;
 

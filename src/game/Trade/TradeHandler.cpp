@@ -58,13 +58,13 @@ void WorldSession::SendTradeStatus(TradeStatusInfo const& info) const
 void WorldSession::HandleIgnoreTradeOpcode(WorldPacket& /*recvPacket*/)
 {
     DEBUG_LOG("WORLD: Ignore Trade %u", _player->GetGUIDLow());
-    // recvPacket.print_storage();
+    _player->TradeCancel(true, TRADE_STATUS_IGNORE_YOU);
 }
 
 void WorldSession::HandleBusyTradeOpcode(WorldPacket& /*recvPacket*/)
 {
     DEBUG_LOG("WORLD: Busy Trade %u", _player->GetGUIDLow());
-    // recvPacket.print_storage();
+    _player->TradeCancel(true, TRADE_STATUS_BUSY);
 }
 
 void WorldSession::SendUpdateTrade(bool trader_state /*= true*/) const
@@ -523,13 +523,13 @@ void WorldSession::HandleBeginTradeOpcode(WorldPacket& /*recvPacket*/)
     SendTradeStatus(info);
 }
 
-void WorldSession::SendCancelTrade() const
+void WorldSession::SendCancelTrade(TradeStatus status) const
 {
     if (m_playerRecentlyLogout)
         return;
 
     TradeStatusInfo info;
-    info.Status = TRADE_STATUS_TRADE_CANCELED;
+    info.Status = status;
     SendTradeStatus(info);
 }
 
@@ -621,16 +621,8 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (pOther->GetSocial()->HasIgnore(GetPlayer()->GetObjectGuid()))
-    {
-        info.Status = TRADE_STATUS_IGNORE_YOU;
-        SendTradeStatus(info);
-        return;
-    }
-
     // [XFACTION]: Vanilla-specific - possibility to trade with opposing team when not in the same group
     const bool xfaction = (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_TRADE) && pOther->GetTeam() != _player->GetTeam());
-
     // [XFACTION]: Reserve possibility to trade with each other for crossfaction group members (when no charms involved)
     if (!_player->CanCooperate(pOther) && (pOther->HasCharmer() || _player->HasCharmer() || (!pOther->IsInGroup(_player) && !xfaction)))
     {
