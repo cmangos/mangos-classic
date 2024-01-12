@@ -1,3 +1,0 @@
-[submodule "src/modules/Bots"]
-	path = src/modules/Bots
-	url = https://github.com/celguar/mangosbot-bots.git
