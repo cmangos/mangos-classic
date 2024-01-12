@@ -29,3 +29,26 @@ endif()
 if(BUILD_LOGIN_SERVER)
   add_subdirectory(realmd)
 endif()
+
+if(BUILD_IKE3_BOTS)
+  include(FetchContent)
+
+  FetchContent_Declare(
+    ike3_bots
+    GIT_REPOSITORY "https://github.com/celguar/mangosbot-bots.git"
+	GIT_TAG "master"
+  )
+  
+  message(STATUS "Fetching Ike3 Playerbots ...")
+  
+  FetchContent_Populate(ike3_bots)
+  
+  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
+    file(REMOVE_RECURSE ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
+  endif()
+  
+  file(COPY ${ike3_bots_SOURCE_DIR}/. DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
+  
+  message(STATUS "Ike3 Playerbots fetched and populated in ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots")
+  add_subdirectory(modules/Bots)
+endif()
