@@ -19,7 +19,7 @@
 if(BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER OR BUILD_EXTRACTORS)
   add_subdirectory(framework)
   add_subdirectory(shared)
-endif()
+endif() 
 
 if(BUILD_GAME_SERVER)
   add_subdirectory(game)
