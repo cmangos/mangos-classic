@@ -2067,6 +2067,7 @@ class Unit : public WorldObject
         void EvadeTimerExpired();
 
         Aura* GetAura(uint32 spellId, SpellEffectIndex effindex);
+        Aura const* GetAura(uint32 spellId, SpellEffectIndex effindex) const;
         Aura* GetAura(AuraType type, SpellFamily family, uint64 familyFlag, ObjectGuid casterGuid = ObjectGuid());
         SpellAuraHolder* GetSpellAuraHolder(uint32 spellid) const;
         SpellAuraHolder* GetSpellAuraHolder(uint32 spellid, ObjectGuid casterGuid) const;

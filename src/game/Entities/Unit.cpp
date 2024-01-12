@@ -5455,6 +5455,14 @@ Aura* Unit::GetAura(uint32 spellId, SpellEffectIndex effindex)
     return nullptr;
 }
 
+Aura const* Unit::GetAura(uint32 spellId, SpellEffectIndex effindex) const
+{
+    SpellAuraHolderConstBounds bounds = GetSpellAuraHolderBounds(spellId);
+    if (bounds.first != bounds.second)
+        return bounds.first->second->GetAuraByEffectIndex(effindex);
+    return nullptr;
+}
+
 Aura* Unit::GetAura(AuraType type, SpellFamily family, uint64 familyFlag, ObjectGuid casterGuid)
 {
     AuraList const& auras = GetAurasByType(type);
