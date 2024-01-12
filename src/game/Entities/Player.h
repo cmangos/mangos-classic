@@ -63,6 +63,11 @@ struct FactionTemplateEntry;
 #include "PlayerBot/Base/PlayerbotAI.h"
 #endif
 
+#ifdef ENABLE_PLAYERBOTS
+class PlayerbotAI;
+class PlayerbotMgr;
+#endif
+
 struct AreaTrigger;
 
 typedef std::deque<Mail*> PlayerMails;
@@ -868,7 +873,7 @@ class TradeData
         uint32     m_spell;                                 // m_player apply spell to non-traded slot item
         ObjectGuid m_spellCastItem;                         // applied spell casted by item use
 
-        ObjectGuid m_items[TRADE_SLOT_COUNT];               // traded itmes from m_player side including non-traded slot
+        ObjectGuid m_items[TRADE_SLOT_COUNT];               // traded items from m_player side including non-traded slot
 };
 
 class Player : public Unit
@@ -912,6 +917,11 @@ class Player : public Unit
         bool Create(uint32 guidlow, const std::string& name, uint8 race, uint8 class_, uint8 gender, uint8 skin, uint8 face, uint8 hairStyle, uint8 hairColor, uint8 facialHair, uint8 outfitId);
 
         void Update(const uint32 diff) override;
+
+#ifdef ENABLE_PLAYERBOTS
+        void UpdateAI(const uint32 diff, bool minimal = false);
+#endif
+
         void Heartbeat() override;
 
         static bool BuildEnumData(QueryResult* result,  WorldPacket& p_data);
@@ -1354,6 +1364,10 @@ class Player : public Unit
         /*********************************************************/
 
         bool LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder);
+
+#ifdef ENABLE_PLAYERBOTS
+        bool MinimalLoadFromDB(QueryResult* result, uint32 guid);
+#endif
 
         static uint32 GetZoneIdFromDB(ObjectGuid guid);
         static uint32 GetLevelFromDB(ObjectGuid guid);
@@ -2178,6 +2192,14 @@ class Player : public Unit
         bool IsInDuel() const { return duel && duel->startTime != 0; }
 #endif
 
+#ifdef ENABLE_PLAYERBOTS
+        void SetPlayerbotAI(PlayerbotAI* ai) { assert(!m_playerbotAI && !m_playerbotMgr); m_playerbotAI = ai; }
+        PlayerbotAI* GetPlayerbotAI() { return m_playerbotAI; }
+        void SetPlayerbotMgr(PlayerbotMgr* mgr) { assert(!m_playerbotAI && !m_playerbotMgr); m_playerbotMgr = mgr; }
+        PlayerbotMgr* GetPlayerbotMgr() { return m_playerbotMgr; }
+        void SetBotDeathTimer() { m_deathTimer = 0; }
+#endif
+
         void SendLootError(ObjectGuid guid, LootError error) const;
 
         // cooldown system
@@ -2475,6 +2497,11 @@ class Player : public Unit
         std::unique_ptr<PlayerMenu> m_playerMenu;
 
 #ifdef BUILD_PLAYERBOT
+        PlayerbotAI* m_playerbotAI;
+        PlayerbotMgr* m_playerbotMgr;
+#endif
+
+#ifdef ENABLE_PLAYERBOTS
         PlayerbotAI* m_playerbotAI;
         PlayerbotMgr* m_playerbotMgr;
 #endif
