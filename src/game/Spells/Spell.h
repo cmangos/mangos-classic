@@ -729,8 +729,9 @@ class Spell
         // OnInit use only
         void SetEffectSkipMask(uint32 mask) { m_effectSkipMask = mask; }
         // OnHit use only
-        uint32 GetTotalTargetDamage() { return m_damage; }
+        uint32 GetTotalTargetDamage() const { return m_damage; }
         void SetTotalTargetValueModifier(float modifier);
+        int32 GetDamageForEffect(SpellEffectIndex effIdx) const { return m_damagePerEffect[effIdx]; }
         // script initialization hook only setters - use only if dynamic - else use appropriate helper
         void SetMaxAffectedTargets(uint32 newValue) { m_affectedTargetCount = newValue; }
         void SetJumpRadius(float newValue) { m_jumpRadius = newValue; }
