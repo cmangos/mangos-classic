@@ -2599,7 +2599,7 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3000120,'Pardon the intrusion, Lady Prestor, but Highlord Bolvar suggested that I seek your advice.','npc_lady_katrana_prestor GOSSIP_ITEM_KAT_1'),
 (-3000121,'My apologies, Lady Prestor.','npc_lady_katrana_prestor GOSSIP_ITEM_KAT_2'),
 (-3000122,'Begging your pardon','npc_lady_katrana_prestor GOSSIP_ITEM_KAT_3'),
-(-3000122,'Thank you for your time','npc_lady_katrana_prestor GOSSIP_ITEM_KAT_4');
+(-3000123,'Thank you for your time','npc_lady_katrana_prestor GOSSIP_ITEM_KAT_4');
 
 -- -3 033 000 SHADOWFANG KEEP
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
