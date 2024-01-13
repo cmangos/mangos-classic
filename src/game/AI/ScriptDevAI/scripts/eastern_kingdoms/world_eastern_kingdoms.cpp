@@ -27,7 +27,29 @@
  */
 struct world_map_eastern_kingdoms : public ScriptedMap
 {
-    world_map_eastern_kingdoms(Map* pMap) : ScriptedMap(pMap) {}
+    world_map_eastern_kingdoms(Map* pMap) : ScriptedMap(pMap)
+    {
+        Initialize();
+    }
+
+    void Initialize() override
+    {
+        instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_STV_GRP_01, urand(0, 1));
+        instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_STV_GRP_02, urand(0, 1));
+    }
+
+    void OnCreatureGroupDespawn(CreatureGroup* creatureGroup, Creature* /*creature*/) override
+    {
+        switch (creatureGroup->GetGroupEntry().WorldStateCondition)
+        {
+            case 9900: case 9901: // TODO: Propagate respawn info so they do not instant respawn
+                instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_STV_GRP_01, urand(0, 1));
+                break;
+            case 9902: case 9903:
+                instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_STV_GRP_02, urand(0, 1));
+                break;
+        }
+    }
 
     void OnCreatureCreate(Creature* pCreature) override
     {
