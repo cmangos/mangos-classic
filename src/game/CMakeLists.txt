@@ -214,7 +214,7 @@ endif()
 
 # Define Ike3 Bots ENABLE_PLAYERBOTS if need
 if (BUILD_IKE3_BOTS)
-  add_definitions(-DENABLE_PLAYERBOTS)
+  add_definitions(-DENABLE_IKE3_BOTS)
 endif()
 
 if (MSVC)
