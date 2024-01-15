@@ -67,6 +67,10 @@ namespace Movement
     };
 
     typedef counter<uint32, 0xFFFFFFFF> UInt32Counter;
+
+#ifdef ENABLE_MANGOSBOTS
+    extern float computeFallElevation(float t_passed, bool isSafeFall, float start_velocity);
+#endif
 }
 
 #endif // MANGOSSERVER_TYPEDEFS_H

@@ -319,6 +319,21 @@ namespace MaNGOS
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
     };
 
+#ifdef ENABLE_MANGOSBOTS
+    template<class Check>
+    struct DynamicObjectListSearcher
+    {
+        DynamicObjectList& i_objects;
+        Check& i_check;
+
+        DynamicObjectListSearcher(DynamicObjectList& objects, Check& check) : i_objects(objects), i_check(check) {}
+
+        void Visit(DynamicObjectMapType& m);
+
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
+    };
+#endif
+
     // Unit searchers
 
     // First accepted by Check Unit if any

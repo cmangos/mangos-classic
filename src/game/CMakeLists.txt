@@ -51,8 +51,8 @@ if(NOT BUILD_PLAYERBOT)
   endforeach()
 endif()
 
-if(NOT BUILD_IKE3_BOTS)
-  # exclude Ike3 Playerbots folder
+if(NOT BUILD_MANGOSBOTS)
+  # exclude Mangosbots folder
   set (EXCLUDE_DIR "Bots/")
   foreach (TMP_PATH ${LIBRARY_SRCS})
       string (FIND ${TMP_PATH} ${EXCLUDE_DIR} EXCLUDE_DIR_FOUND)
@@ -96,7 +96,7 @@ target_link_libraries(${LIBRARY_NAME}
 
 # include additionals headers
 # TO DO: Remove this if when old playerbots get removed
-if(NOT BUILD_IKE3_BOTS)
+if(NOT BUILD_MANGOSBOTS)
   set(ADDITIONAL_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/vmap
@@ -123,7 +123,7 @@ target_include_directories(${LIBRARY_NAME}
   PRIVATE ${Boost_INCLUDE_DIRS}
 )
 
-if(BUILD_IKE3_BOTS)
+if(BUILD_MANGOSBOTS)
     include_directories(
         ${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot
         ${CMAKE_SOURCE_DIR}/src/modules/Bots/ahbot
@@ -212,9 +212,9 @@ if (BUILD_PLAYERBOT)
   add_definitions(-DBUILD_PLAYERBOT)
 endif()
 
-# Define Ike3 Bots ENABLE_PLAYERBOTS if need
-if (BUILD_IKE3_BOTS)
-  add_definitions(-DENABLE_IKE3_BOTS)
+# Define ENABLE_MANGOSBOTS if need
+if (BUILD_MANGOSBOTS)
+  add_definitions(-DENABLE_MANGOSBOTS)
 endif()
 
 if (MSVC)

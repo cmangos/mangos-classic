@@ -117,6 +117,11 @@ if (BUILD_EXTRACTORS)
     add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FILES_LIST_TO_COPY} \"$<TARGET_FILE_DIR:${EXECUTABLE_NAME}>\")
   endif()
+  
+  # Define ENABLE_MANGOSBOTS if need
+  if (BUILD_MANGOSBOTS)
+    add_definitions(-DENABLE_MANGOSBOTS)
+  endif()
 
   install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR}/tools)
   install(PROGRAMS "${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/MoveMapGen.sh" DESTINATION ${BIN_DIR}/tools)

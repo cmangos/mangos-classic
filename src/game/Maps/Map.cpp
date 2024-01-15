@@ -46,6 +46,10 @@
 
 #include <time.h>
 
+#ifdef ENABLE_MANGOSBOTS
+#include "playerbot.h"
+#endif
+
 Map::~Map()
 {
     UnloadAll(true);
@@ -155,6 +159,9 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId)
       m_activeNonPlayersIter(m_activeNonPlayers.end()), m_onEventNotifiedIter(m_onEventNotifiedObjects.end()),
       i_gridExpiry(expiry), m_TerrainData(sTerrainMgr.LoadTerrain(id)),
       i_data(nullptr), i_script_id(0), m_transportsIterator(m_transports.begin()), m_spawnManager(*this),
+#ifdef ENABLE_MANGOSBOTS
+      m_activeAreasTimer(0), hasRealPlayers(false),
+#endif
       m_variableManager(this)
 {
     m_weatherSystem = new WeatherSystem(this);
@@ -728,19 +735,121 @@ void Map::Update(const uint32& t_diff)
 #endif
     }
 
+#ifdef ENABLE_MANGOSBOTS
+    // active areas timer
+    m_activeAreasTimer += t_diff;
+    if (m_activeAreasTimer >= 10000)
+    {
+        m_activeAreasTimer = 0;
+        m_activeAreas.clear();
+        m_activeZones.clear();
+    }
+
+    if (!m_activeAreasTimer && IsContinent() && HasRealPlayers())
+    {
+        for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
+        {
+            Player* plr = m_mapRefIter->getSource();
+            if (plr && plr->IsInWorld())
+            {
+                if (plr->GetPlayerbotAI() && !plr->GetPlayerbotAI()->IsRealPlayer())
+                    continue;
+
+                if (plr->isAFK())
+                    continue;
+
+                if (!plr->isGMVisible())
+                    continue;
+
+                if (find(m_activeZones.begin(), m_activeZones.end(), plr->GetZoneId()) == m_activeZones.end())
+                    m_activeZones.push_back(plr->GetZoneId());
+
+                ContinentArea activeArea = sMapMgr.GetContinentInstanceId(GetId(), plr->GetPositionX(), plr->GetPositionY());
+                // check active area
+                if (activeArea != MAP_NO_AREA)
+                {
+                    if (!HasActiveAreas(activeArea))
+                        m_activeAreas.push_back(activeArea);
+                }
+            }
+        }
+    }
+
+    bool hasPlayers = false;
+    uint32 activeChars = 0;
+    uint32 maxDiff = sWorld.GetMaxDiff();
+    bool updateAI = urand(0, (HasRealPlayers() ? maxDiff : (maxDiff * 3))) < 10;
+#endif
+
     /// update players at tick
     for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
     {
         Player* plr = m_mapRefIter->getSource();
         if (plr && plr->IsInWorld())
+        {
+#ifdef ENABLE_MANGOSBOTS
+            bool isInActiveArea = false;
+            if (!plr->GetPlayerbotAI() || plr->GetPlayerbotAI()->IsRealPlayer())
+            {
+                isInActiveArea = true;
+                hasPlayers = true;
+
+            }
+            else if (HasRealPlayers())
+            {
+                ContinentArea activeArea = MAP_NO_AREA;
+                if (IsContinent())
+                    activeArea = sMapMgr.GetContinentInstanceId(GetId(), plr->GetPositionX(), plr->GetPositionY());
+
+                isInActiveArea = IsContinent() ? (activeArea == MAP_NO_AREA ? false : HasActiveAreas(activeArea)) : HasRealPlayers();
+
+                if (isInActiveArea)
+                {
+                    if (maxDiff > 200 && IsContinent())
+                    {
+                        if (find(m_activeZones.begin(), m_activeZones.end(), plr->GetZoneId()) == m_activeZones.end())
+                            isInActiveArea = false;
+                    }
+                }
+            }
+            if (plr->GetPlayerbotAI() && plr->GetPlayerbotAI()->HasRealPlayerMaster())
+                isInActiveArea = true;
+            if (plr->InBattleGroundQueue() || plr->InBattleGround())
+                isInActiveArea = true;
+
+            if (isInActiveArea)
+                activeChars++;
+#endif
+
             plr->Update(t_diff);
+
+#ifdef ENABLE_MANGOSBOTS
+            plr->UpdateAI(t_diff, !(isInActiveArea || updateAI || plr->IsInCombat()));
+#endif
+        }
     }
+
+#ifdef ENABLE_MANGOSBOTS
+    hasRealPlayers = hasPlayers;
+
+    if (IsContinent() && HasRealPlayers() && HasActiveAreas() && !m_activeAreasTimer)
+    {
+        sLog.outBasic("Map %u: Active Areas:Zones - %u:%u", GetId(), m_activeAreas.size(), m_activeZones.size());
+        sLog.outBasic("Map %u: Active Areas Chars - %u of %u", GetId(), activeChars, m_mapRefManager.getSize());
+    }
+#endif
 
     for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
     {
         Player* player = m_mapRefIter->getSource();
-        if (!player->IsInWorld() || !player->IsPositionValid())
+        if (!player || !player->IsInWorld() || !player->IsPositionValid())
             continue;
+
+#ifdef ENABLE_MANGOSBOTS
+        // update objects beyond visibility distance
+        if (!player->GetPlayerbotAI() && !player->isAFK())
+            player->GetCamera().UpdateVisibilityForOwner(false, true);
+#endif
 
         VisitNearbyCellsOf(player, grid_object_update, world_object_update);
 
@@ -748,6 +857,10 @@ void Map::Update(const uint32& t_diff)
         if (WorldObject* viewPoint = GetWorldObject(player->GetFarSightGuid()))
             VisitNearbyCellsOf(viewPoint, grid_object_update, world_object_update);
     }
+
+#ifdef ENABLE_MANGOSBOTS
+    bool updateObj = urand(0, (HasRealPlayers() ? maxDiff : (maxDiff * 3))) < 10;
+#endif
 
     // non-player active objects
     if (!m_activeNonPlayers.empty())
@@ -763,6 +876,29 @@ void Map::Update(const uint32& t_diff)
 
             if (!obj->IsInWorld() || !obj->IsPositionValid())
                 continue;
+
+#ifdef ENABLE_MANGOSBOTS
+            // skip objects if world is laggy
+            if (IsContinent() && maxDiff > 100)
+            {
+                bool isInActiveArea = false;
+
+                ContinentArea activeArea = MAP_NO_AREA;
+                if (IsContinent())
+                    activeArea = sMapMgr.GetContinentInstanceId(GetId(), obj->GetPositionX(), obj->GetPositionY());
+
+                isInActiveArea = IsContinent() ? (activeArea == MAP_NO_AREA ? false : HasActiveAreas(activeArea)) : HasRealPlayers();
+
+                if (isInActiveArea && IsContinent())
+                {
+                    if (maxDiff > 150 && find(m_activeZones.begin(), m_activeZones.end(), obj->GetZoneId()) == m_activeZones.end())
+                        isInActiveArea = false;
+                }
+
+                if (!isInActiveArea && !updateObj)
+                    continue;
+            }
+#endif
 
             objToUpdate.insert(obj);
 
@@ -875,7 +1011,15 @@ void Map::Remove(Player* player, bool remove)
     SendRemoveTransports(player);
     UpdateObjectVisibility(player, cell, p);
 
+#ifdef ENABLE_MANGOSBOTS
+    if (!player->GetPlayerbotAI())
+    {
+#endif
     player->ResetMap();
+#ifdef ENABLE_MANGOSBOTS
+    }
+#endif
+
     if (remove)
         DeleteFromWorld(player);
 }

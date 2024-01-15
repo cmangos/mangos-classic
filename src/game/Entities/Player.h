@@ -63,6 +63,11 @@ struct FactionTemplateEntry;
 #include "PlayerBot/Base/PlayerbotAI.h"
 #endif
 
+#ifdef ENABLE_MANGOSBOTS
+class PlayerbotAI;
+class PlayerbotMgr;
+#endif
+
 struct AreaTrigger;
 
 typedef std::deque<Mail*> PlayerMails;
@@ -914,6 +919,10 @@ class Player : public Unit
         void Update(const uint32 diff) override;
         void Heartbeat() override;
 
+#ifdef ENABLE_MANGOSBOTS
+        void UpdateAI(const uint32 diff, bool minimal = false);
+#endif
+
         static bool BuildEnumData(QueryResult* result,  WorldPacket& p_data);
 
         void SendInitialPacketsBeforeAddToMap();
@@ -1071,6 +1080,9 @@ class Player : public Unit
         Item* GetItemByGuid(ObjectGuid guid) const;
         Item* GetItemByPos(uint16 pos) const;
         Item* GetItemByPos(uint8 bag, uint8 slot) const;
+#ifdef ENABLE_MANGOSBOTS
+        Item* GetItemByEntry(uint32 item) const;
+#endif
         Item* GetWeaponForAttack(WeaponAttackType attackType) const { return GetWeaponForAttack(attackType, false, false); }
         Item* GetWeaponForAttack(WeaponAttackType attackType, bool nonbroken, bool useable) const;
         Item* GetShield(bool useable = false) const;
@@ -1353,6 +1365,10 @@ class Player : public Unit
         /***                   LOAD SYSTEM                     ***/
         /*********************************************************/
 
+#ifdef ENABLE_MANGOSBOTS
+        bool MinimalLoadFromDB(QueryResult* result, uint32 guid);
+#endif
+
         bool LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder);
 
         static uint32 GetZoneIdFromDB(ObjectGuid guid);
@@ -1477,6 +1493,9 @@ class Player : public Unit
         void learnQuestRewardedSpells();
         void learnQuestRewardedSpells(Quest const* quest);
         void learnSpellHighRank(uint32 spellid);
+#ifdef ENABLE_MANGOSBOTS
+        void learnClassLevelSpells(bool includeHighLevelQuestRewards = false);
+#endif
 
         uint32 GetFreeTalentPoints() const { return GetUInt32Value(PLAYER_CHARACTER_POINTS1); }
         void SetFreeTalentPoints(uint32 points) { SetUInt32Value(PLAYER_CHARACTER_POINTS1, points); }
@@ -2178,6 +2197,17 @@ class Player : public Unit
         bool IsInDuel() const { return duel && duel->startTime != 0; }
 #endif
 
+#ifdef ENABLE_MANGOSBOTS
+        // A Player can either have a playerbotMgr (to manage its bots), or have playerbotAI (if it is a bot), or
+        // neither. Code that enables bots must create the playerbotMgr and set it using SetPlayerbotMgr.
+        void SetPlayerbotAI(PlayerbotAI* ai) { assert(!m_playerbotAI && !m_playerbotMgr); m_playerbotAI = ai; }
+        PlayerbotAI* GetPlayerbotAI() { return m_playerbotAI; }
+        void SetPlayerbotMgr(PlayerbotMgr* mgr) { assert(!m_playerbotAI && !m_playerbotMgr); m_playerbotMgr = mgr; }
+        PlayerbotMgr* GetPlayerbotMgr() { return m_playerbotMgr; }
+        void SetBotDeathTimer() { m_deathTimer = 0; }
+        bool isRealPlayer() { return m_session && (m_session->GetRemoteAddress() != "disconnected/bot"); }
+#endif
+
         void SendLootError(ObjectGuid guid, LootError error) const;
 
         // cooldown system
@@ -2474,7 +2504,7 @@ class Player : public Unit
         MapReference m_mapRef;
         std::unique_ptr<PlayerMenu> m_playerMenu;
 
-#ifdef BUILD_PLAYERBOT
+#if defined(BUILD_PLAYERBOT) || defined(ENABLE_MANGOSBOTS)
         PlayerbotAI* m_playerbotAI;
         PlayerbotMgr* m_playerbotMgr;
 #endif

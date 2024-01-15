@@ -52,6 +52,10 @@
 #include "PlayerBot/Base/PlayerbotAI.h"
 #endif
 
+#ifdef ENABLE_MANGOSBOTS
+#include "playerbot.h"
+#endif
+
 // select opcodes appropriate for processing in Map::Update context for current session state
 static bool MapSessionFilterHelper(WorldSession* session, OpcodeHandler const& opHandle)
 {
@@ -193,7 +197,7 @@ void WorldSession::SetPlayer(Player* plr, uint32 playerGuid)
 /// Send a packet to the client
 void WorldSession::SendPacket(WorldPacket const& packet, bool forcedSend /*= false*/) const
 {
-#ifdef BUILD_PLAYERBOT
+#if defined(BUILD_PLAYERBOT) || defined(ENABLE_MANGOSBOTS)
     // Send packet to bot AI
     if (GetPlayer())
     {
@@ -385,7 +389,7 @@ bool WorldSession::Update(uint32 diff)
 
                 // lag can cause STATUS_LOGGEDIN opcodes to arrive after the player started a transfer
 
-#ifdef BUILD_PLAYERBOT
+#if defined(BUILD_PLAYERBOT) || defined(ENABLE_MANGOSBOTS)
                 if (_player && _player->GetPlayerbotMgr())
                     _player->GetPlayerbotMgr()->HandleMasterIncomingPacket(*packet);
 #endif
@@ -462,6 +466,11 @@ bool WorldSession::Update(uint32 diff)
         }
         GetPlayer()->GetPlayerbotMgr()->RemoveBots();
     }
+#endif
+
+#ifdef ENABLE_MANGOSBOTS
+    if (GetPlayer() && GetPlayer()->GetPlayerbotMgr())
+        GetPlayer()->GetPlayerbotMgr()->UpdateSessions(0);
 #endif
 
     // check if we are safe to proceed with logout
@@ -568,6 +577,19 @@ void WorldSession::UpdateMap(uint32 diff)
     }
 }
 
+#ifdef ENABLE_MANGOSBOTS
+void WorldSession::HandleBotPackets()
+{
+    while (!m_recvQueue.empty())
+    {
+        auto const packet = std::move(m_recvQueue.front());
+        m_recvQueue.pop_front();
+        OpcodeHandler const& opHandle = opcodeTable[packet->GetOpcode()];
+        (this->*opHandle.handler)(*packet);
+    }
+}
+#endif
+
 /// %Log the player out
 void WorldSession::LogoutPlayer()
 {
@@ -588,8 +610,16 @@ void WorldSession::LogoutPlayer()
         if (_player->GetPlayerbotMgr())
             _player->GetPlayerbotMgr()->LogoutAllBots(true);
 #endif
+#ifdef ENABLE_MANGOSBOTS
+        if (_player->GetPlayerbotMgr() && (!_player->GetPlayerbotAI() || _player->GetPlayerbotAI()->IsRealPlayer()))
+            _player->GetPlayerbotMgr()->LogoutAllBots();
 
+        sRandomPlayerbotMgr.OnPlayerLogout(_player);
+
+        sLog.outChar("Account: %d (IP: %s) Logout Character:[%s] (guid: %u)", GetAccountId(), m_Socket ? GetRemoteAddress().c_str() : "bot", _player->GetName(), _player->GetGUIDLow());
+#else
         sLog.outChar("Account: %d (IP: %s) Logout Character:[%s] (guid: %u)", GetAccountId(), GetRemoteAddress().c_str(), _player->GetName(), _player->GetGUIDLow());
+#endif
 
         if (Loot* loot = sLootMgr.GetLoot(_player))
             loot->Release(_player);
@@ -706,7 +736,7 @@ void WorldSession::LogoutPlayer()
         // GM ticket notification
         sTicketMgr.OnPlayerOnlineState(*_player, false);
 
-#ifdef BUILD_PLAYERBOT
+#if defined(BUILD_PLAYERBOT) || defined(ENABLE_MANGOSBOTS)
         // Remember player GUID for update SQL below
         uint32 guid = _player->GetGUIDLow();
 #endif
@@ -738,10 +768,10 @@ void WorldSession::LogoutPlayer()
 
         static SqlStatementID updChars;
 
-#ifdef BUILD_PLAYERBOT
+#if defined(BUILD_PLAYERBOT) || defined(ENABLE_MANGOSBOTS)
         // Set for only character instead of accountid
         // Different characters can be alive as bots
-        SqlStatement stmt = CharacterDatabase.CreateStatement(updChars, "UPDATE characters SET online = 0 WHERE guid = ?");
+        stmt = CharacterDatabase.CreateStatement(updChars, "UPDATE characters SET online = 0 WHERE guid = ?");
         stmt.PExecute(guid);
 #else
         ///- Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
@@ -1266,3 +1296,10 @@ void WorldSession::HandleWardenDataOpcode(WorldPacket& recv_data)
 {
     m_anticheat->WardenPacket(recv_data);
 }
+
+#ifdef ENABLE_MANGOSBOTS
+void WorldSession::SetNoAnticheat()
+{
+    m_anticheat.reset(new NullSessionAnticheat(this));
+}
+#endif

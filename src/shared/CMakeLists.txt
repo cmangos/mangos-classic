@@ -267,6 +267,11 @@ if(APPLE OR "${CMAKE_SYSTEM_NAME}" STREQUAL "FreeBSD")
   add_compile_definitions(_GNU_SOURCE)
 endif()
 
+# Define ENABLE_MANGOSBOTS if need
+if (BUILD_MANGOSBOTS)
+  add_definitions(-DENABLE_MANGOSBOTS)
+endif()
+
 # Generate precompiled header
 if(PCH)
   target_precompile_headers(${LIBRARY_NAME} PRIVATE "${PCH_FILE_HEADER}")

@@ -27,6 +27,7 @@ ConfVersion=2022012301
 #    WorldDatabaseInfo
 #    CharacterDatabaseInfo
 #    LogsDatabaseInfo
+#    PlayerbotDatabaseInfo
 #        Database connection settings for the world server.
 #        Default:
 #                ---MYSQL---
@@ -42,6 +43,7 @@ ConfVersion=2022012301
 #    WorldDatabaseConnections
 #    CharacterDatabaseConnections
 #    LogsDatabaseConnections
+#    PlayerbotDatabaseConnections
 #        Amount of connections to database which will be used for SELECT queries. Maximum 16 connections per database.
 #        Please, note, for data consistency only one connection for each database is used for transactions and async SELECTs.
 #        So formula to find out how many connections will be established: X = #_connections + 1
@@ -71,10 +73,12 @@ LoginDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;classicrealmd"
 WorldDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;classicmangos"
 CharacterDatabaseInfo = "127.0.0.1;3306;mangos;mangos;classiccharacters"
 LogsDatabaseInfo      = "127.0.0.1;3306;mangos;mangos;classiclogs"
+PlayerbotDatabaseInfo = "127.0.0.1;3306;mangos;mangos;classicplayerbots"
 LoginDatabaseConnections = 1
 WorldDatabaseConnections = 1
 CharacterDatabaseConnections = 1
 LogsDatabaseConnections = 1
+PlayerbotDatabaseConnections = 1
 MaxPingTime = 30
 WorldServerPort = 8085
 BindIP = "0.0.0.0"
