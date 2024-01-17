@@ -104,7 +104,7 @@ std::shared_ptr<ScriptMapMapName> MapDataContainer::GetScriptMap(ScriptMapType s
     return m_scriptMaps[scriptMapType];
 }
 
-uint32 MapDataContainer::GetStringId(std::string& stringId) const
+uint32 MapDataContainer::GetStringId(const std::string& stringId) const
 {
     auto itr = m_stringIdsByString->find(stringId);
     if (itr == m_stringIdsByString->end())

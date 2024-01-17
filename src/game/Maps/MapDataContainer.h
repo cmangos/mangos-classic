@@ -66,7 +66,7 @@ class MapDataContainer
         std::shared_ptr<ScriptMapMapName> GetScriptMap(ScriptMapType scriptMapType);
 
         void SetStringIdMaps(std::shared_ptr<StringIdMap> stringIds, std::shared_ptr<StringIdMapByString> stringIdsByString);
-        uint32 GetStringId(std::string& stringId) const;
+        uint32 GetStringId(const std::string& stringId) const;
 
         void SetUnitConditions(std::shared_ptr<std::map<int32, UnitConditionEntry>> unitConditions);
         void SetCombatConditions(std::shared_ptr<std::map<int32, WorldStateExpressionEntry>> worldStateExpressions);

@@ -1179,7 +1179,7 @@ class WorldObject : public Object
 
         void AddStringId(std::string& stringId);
         void RemoveStringId(std::string& stringId);
-        bool HasStringId(std::string& stringId) const;
+        bool HasStringId(const std::string& stringId) const;
 
         bool HasStringId(uint32 stringId) const; // not to be used in sd2
         void SetStringId(uint32 stringId, bool apply); // not to be used outside of scriptmgr
