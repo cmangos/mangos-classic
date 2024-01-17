@@ -1146,6 +1146,8 @@ void ObjectMgr::LoadSpawnGroups()
     result = WorldDatabase.Query("SELECT Id, Guid, SlotId, Chance FROM spawn_group_spawn");
     if (result)
     {
+        std::set<uint32> foundCreatureGuids;
+        std::set<uint32> foundGoGuids;
         do
         {
             Field* fields = result->Fetch();
@@ -1168,6 +1170,12 @@ void ObjectMgr::LoadSpawnGroups()
 
             if (group.Type == SPAWN_GROUP_CREATURE)
             {
+                if (foundCreatureGuids.find(guid.DbGuid) != foundCreatureGuids.end())
+                {
+                    sLog.outErrorDb("LoadSpawnGroups: spawn_group_spawn creature dbGuid %u belongs to more than one spawn_group. Skipping.", guid.DbGuid);
+                    continue;
+                }
+
                 CreatureData const* data = GetCreatureData(guid.DbGuid);
                 if (!data)
                 {
@@ -1182,6 +1190,12 @@ void ObjectMgr::LoadSpawnGroups()
             }
             else
             {
+                if (foundGoGuids.find(guid.DbGuid) != foundGoGuids.end())
+                {
+                    sLog.outErrorDb("LoadSpawnGroups: spawn_group_spawn gameobject dbGuid %u belongs to more than one spawn_group. Skipping.", guid.DbGuid);
+                    continue;
+                }
+
                 GameObjectData const* data = GetGOData(guid.DbGuid);
                 if (!data)
                 {
@@ -1198,6 +1212,11 @@ void ObjectMgr::LoadSpawnGroups()
             group.DbGuids.push_back(guid);
             if (guid.Chance)
                 group.HasChancedSpawns = true;
+
+            if (group.Type == SPAWN_GROUP_CREATURE)
+                foundCreatureGuids.insert(guid.DbGuid);
+            else
+                foundGoGuids.insert(guid.DbGuid);
         } while (result->NextRow());
 
         // check and fix correctness of slot id indexation
