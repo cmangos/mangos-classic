@@ -6,3 +6,4 @@ DROP DATABASE IF EXISTS `classicmangos`;
 DROP DATABASE IF EXISTS `classiclogs`;
 DROP DATABASE IF EXISTS `classiccharacters`;
 DROP DATABASE IF EXISTS `classicrealmd`;
+DROP DATABASE IF EXISTS `classicplayerbots`;

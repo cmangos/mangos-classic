@@ -123,7 +123,12 @@ void PlayerbotHolder::HandlePlayerBotLoginCallback(QueryResult* dummy, SqlQueryH
     WorldSession* botSession = new WorldSession(botAccountId, NULL, SEC_PLAYER, 0, LOCALE_enUS, "", 0);
     botSession->SetNoAnticheat();
 
+    // has bot already been added?
+    if (sObjectMgr.GetPlayer(lqh->GetGuid()))
+        return;
+
     uint32 guid = lqh->GetGuid().GetRawValue();
+
     botSession->HandlePlayerLogin(lqh); // will delete lqh
 
     Player* bot = botSession->GetPlayer();
@@ -241,14 +246,11 @@ class CharacterHandler
             ObjectGuid guid = ((LoginQueryHolder*)holder)->GetGuid();
             session->HandlePlayerLogin((LoginQueryHolder*)holder);
 
-            Player* player = sObjectMgr.GetPlayer(guid, true);
+            Player* player = session->GetPlayer();
             if (player)
             {
-                if (!sRandomPlayerbotMgr.IsRandomBot(player))
-                {
-                    player->SetPlayerbotMgr(new PlayerbotMgr(player));
-                    player->GetPlayerbotMgr()->OnPlayerLogin(player);
-                }
+                player->SetPlayerbotMgr(new PlayerbotMgr(player));
+                player->GetPlayerbotMgr()->OnPlayerLogin(player);
                 sRandomPlayerbotMgr.OnPlayerLogin(player);
             }
 #else
@@ -256,6 +258,7 @@ class CharacterHandler
                 session->HandlePlayerLogin((LoginQueryHolder*)holder);
 #endif
         }
+
 #ifdef BUILD_PLAYERBOT
         // This callback is different from the normal HandlePlayerLoginCallback in that it
         // sets up the bot's world session and also stores the pointer to the bot player in the master's
@@ -593,6 +596,37 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recv_data)
         SendPacket(data, true);
         return;
     }
+
+#ifdef ENABLE_MANGOSBOTS
+    if (pCurrChar && pCurrChar->GetPlayerbotAI())
+    {
+        WorldSession* botSession = pCurrChar->GetSession();
+        SetPlayer(pCurrChar, playerGuid);
+        _player->SetSession(this);
+        _logoutTime = time(0);
+
+        m_sessionDbcLocale = botSession->m_sessionDbcLocale;
+        m_sessionDbLocaleIndex = botSession->m_sessionDbLocaleIndex;
+
+        PlayerbotMgr* mgr = _player->GetPlayerbotMgr();
+        if (!mgr || mgr->GetMaster() != _player)
+        {
+            _player->SetPlayerbotMgr(NULL);
+            delete mgr;
+            _player->SetPlayerbotMgr(new PlayerbotMgr(_player));
+            _player->GetPlayerbotMgr()->OnPlayerLogin(_player);
+
+            if (sRandomPlayerbotMgr.GetPlayerBot(playerGuid))
+            {
+                sRandomPlayerbotMgr.MovePlayerBot(playerGuid, _player->GetPlayerbotMgr());
+            }
+            else
+            {
+                _player->GetPlayerbotMgr()->OnBotLogin(_player);
+            }
+        }
+    }
+#endif
 
     if (_player)
     {

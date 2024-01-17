@@ -185,6 +185,23 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             if (!CheckChatMessage(msg))
                 return;
 
+#ifdef ENABLE_MANGOSBOTS
+            if (GetSecurity() > SEC_PLAYER && GetPlayer()->IsGameMaster())
+            {
+                sRandomPlayerbotMgr.HandleCommand(type, msg, *_player, "", TEAM_BOTH_ALLOWED, lang);
+            }
+            else
+            {
+                sRandomPlayerbotMgr.HandleCommand(type, msg, *_player, "", GetPlayer()->GetTeam(), lang);
+            }
+
+            // apply to own bots
+            if (_player->GetPlayerbotMgr())
+            {
+                _player->GetPlayerbotMgr()->HandleCommand(type, msg, lang);
+            }
+#endif
+
             if (type == CHAT_MSG_SAY)
             {
                 GetPlayer()->Say(msg, lang);
@@ -269,13 +286,13 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
 #ifdef ENABLE_MANGOSBOTS
             if (player->GetPlayerbotAI())
             {
-                player->GetPlayerbotAI()->HandleCommand(type, msg, *GetPlayer());
+                player->GetPlayerbotAI()->HandleCommand(type, msg, *GetPlayer(), lang);
                 GetPlayer()->m_speakTime = 0;
                 GetPlayer()->m_speakCount = 0;
             }
-            else
-#endif
 
+            if (msg.find("BOT\t") != 0) //These are spoofed SendAddonMessage with channel "WHISPER".
+#endif
             GetPlayer()->Whisper(msg, lang, player->GetObjectGuid());
 
             if (lang != LANG_ADDON && !m_anticheat->IsSilenced())
@@ -320,7 +337,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                 Player* player = itr->getSource();
                 if (player && player->GetPlayerbotAI())
                 {
-                    player->GetPlayerbotAI()->HandleCommand(type, msg, *GetPlayer());
+                    player->GetPlayerbotAI()->HandleCommand(type, msg, *GetPlayer(), lang);
                     GetPlayer()->m_speakTime = 0;
                     GetPlayer()->m_speakCount = 0;
                 }
@@ -353,17 +370,19 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
 
 #ifdef ENABLE_MANGOSBOTS
             PlayerbotMgr* mgr = GetPlayer()->GetPlayerbotMgr();
-            if (mgr)
+            if (mgr && GetPlayer()->GetGuildId())
             {
                 for (PlayerBotMap::const_iterator it = mgr->GetPlayerBotsBegin(); it != mgr->GetPlayerBotsEnd(); ++it)
                 {
                     Player* const bot = it->second;
                     if (bot->GetGuildId() == GetPlayer()->GetGuildId())
                     {
-                        bot->GetPlayerbotAI()->HandleCommand(type, msg, *GetPlayer());
+                        bot->GetPlayerbotAI()->HandleCommand(type, msg, *GetPlayer(), lang);
                     }
                 }
             }
+
+            sRandomPlayerbotMgr.HandleCommand(type, msg, *_player, "", GetPlayer()->GetTeam(), lang);
 #endif
 
             break;
@@ -433,7 +452,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                 Player* player = itr->getSource();
                 if (player && player->GetPlayerbotAI())
                 {
-                    player->GetPlayerbotAI()->HandleCommand(type, msg, *GetPlayer());
+                    player->GetPlayerbotAI()->HandleCommand(type, msg, *GetPlayer(), lang);
                     GetPlayer()->m_speakTime = 0;
                     GetPlayer()->m_speakCount = 0;
                 }
@@ -477,7 +496,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                 Player* player = itr->getSource();
                 if (player && player->GetPlayerbotAI())
                 {
-                    player->GetPlayerbotAI()->HandleCommand(type, msg, *GetPlayer());
+                    player->GetPlayerbotAI()->HandleCommand(type, msg, *GetPlayer(), lang);
                     GetPlayer()->m_speakTime = 0;
                     GetPlayer()->m_speakCount = 0;
                 }
@@ -520,7 +539,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                 Player* player = itr->getSource();
                 if (player && player->GetPlayerbotAI())
                 {
-                    player->GetPlayerbotAI()->HandleCommand(type, msg, *GetPlayer());
+                    player->GetPlayerbotAI()->HandleCommand(type, msg, *GetPlayer(), lang);
                     GetPlayer()->m_speakTime = 0;
                     GetPlayer()->m_speakCount = 0;
                 }
@@ -603,17 +622,17 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                     // if GM apply to all random bots
                     if (GetSecurity() > SEC_PLAYER && GetPlayer()->IsGameMaster())
                     {
-                        sRandomPlayerbotMgr.HandleCommand(type, msg, *_player);
+                        sRandomPlayerbotMgr.HandleCommand(type, msg, *_player, "", TEAM_BOTH_ALLOWED, lang);
                     }
                     else
                     {
-                        sRandomPlayerbotMgr.HandleCommand(type, msg, *_player, "", GetPlayer()->GetTeam());
+                        sRandomPlayerbotMgr.HandleCommand(type, msg, *_player, "", GetPlayer()->GetTeam(), lang);
                     }
 
                     // apply to own bots
                     if (_player->GetPlayerbotMgr() && chn->GetFlags() & 0x18)
                     {
-                        _player->GetPlayerbotMgr()->HandleCommand(type, msg);
+                        _player->GetPlayerbotMgr()->HandleCommand(type, msg, lang);
                     }
 #endif
                 }

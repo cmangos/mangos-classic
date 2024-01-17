@@ -738,6 +738,7 @@ class World
         static uint32 m_currentDiffSumIndex;
         static uint32 m_averageDiff;
         static uint32 m_maxDiff;
+        static std::list<uint32> m_histDiff;
 #endif
 
         Messager<World> m_messager;

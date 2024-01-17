@@ -405,7 +405,7 @@ class Map : public GridRefManager<NGridType>
 #ifdef ENABLE_MANGOSBOTS
         bool HasRealPlayers() { return hasRealPlayers; }
         bool HasActiveAreas(ContinentArea areaId = MAP_NO_AREA) { if (areaId == MAP_NO_AREA) { return !m_activeAreas.empty(); } else { return !(find(m_activeAreas.begin(), m_activeAreas.end(), areaId) == m_activeAreas.end()); } }
-        bool HasActiveZone(uint32 zoneId) { return !(find(m_activeZones.begin(), m_activeZones.end(), zoneId) == m_activeZones.end()); }
+        bool HasActiveZone(uint32 zoneId) { return find(m_activeZones.begin(), m_activeZones.end(), zoneId) != m_activeZones.end(); }
 #endif
 
     private:

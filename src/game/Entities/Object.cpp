@@ -2466,7 +2466,12 @@ struct WorldObjectChangeAccumulator
         // send self fields changes in another way, otherwise
         // with new camera system when player's camera too far from player, camera wouldn't receive packets and changes from player
         if (i_object.isType(TYPEMASK_PLAYER))
+        {
+#ifdef ENABLE_MANGOSBOTS
+            if (((Player*)&i_object)->isRealPlayer())
+#endif
             i_object.BuildUpdateDataForPlayer((Player*)&i_object, i_updateDatas);
+        }
     }
 
     void Visit(CameraMapType& m)
@@ -2474,7 +2479,11 @@ struct WorldObjectChangeAccumulator
         for (auto& iter : m)
         {
             Player* owner = iter.getSource()->GetOwner();
+#ifdef ENABLE_MANGOSBOTS
+            if (owner != &i_object && owner->isRealPlayer() && owner->HasAtClient(&i_object))
+#else
             if (owner != &i_object && owner->HasAtClient(&i_object))
+#endif
                 i_object.BuildUpdateDataForPlayer(owner, i_updateDatas);
         }
     }

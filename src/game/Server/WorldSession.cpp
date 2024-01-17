@@ -582,10 +582,24 @@ void WorldSession::HandleBotPackets()
 {
     while (!m_recvQueue.empty())
     {
+        if (_player)
+            _player->SetCanDelayTeleport(true);
+
         auto const packet = std::move(m_recvQueue.front());
         m_recvQueue.pop_front();
         OpcodeHandler const& opHandle = opcodeTable[packet->GetOpcode()];
         (this->*opHandle.handler)(*packet);
+
+        if (_player)
+        {
+            // can be not set in fact for login opcode, but this not create problems.
+            _player->SetCanDelayTeleport(false);
+
+            // we should execute delayed teleports only for alive(!) players
+            // because we don't want player's ghost teleported from graveyard
+            if (_player->IsHasDelayedTeleport())
+                _player->TeleportTo(_player->m_teleport_dest, _player->m_teleport_options);
+        }
     }
 }
 #endif
@@ -714,6 +728,7 @@ void WorldSession::LogoutPlayer()
         ///- Leave all channels before player delete...
         _player->CleanupChannels();
 
+#ifndef ENABLE_MANGOSBOTS
         ///- If the player is in a group (or invited), remove him. If the group if then only 1 person, disband the group.
         _player->UninviteFromGroup();
 
@@ -721,6 +736,7 @@ void WorldSession::LogoutPlayer()
         // a) in group; b) not in raid group; c) logging out normally (not being kicked or disconnected)
         if (_player->GetGroup() && !_player->GetGroup()->IsRaidGroup() && m_Socket && !m_Socket->IsClosed())
             _player->RemoveFromGroup();
+#endif
 
         ///- Send update to group
         if (Group* group = _player->GetGroup())

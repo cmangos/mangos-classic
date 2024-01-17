@@ -68,9 +68,9 @@ else()
 endif()
 
 if(BUILD_IKE3_BOTS)
-  message(STATUS "Build ike3 Playerbots : Yes")
+  message(STATUS "Build Mangosbots	    : Yes")
 else()
-  message(STATUS "Build ike3 Playerbots : No  (default)")
+  message(STATUS "Build Mangosbots      : No  (default)")
 endif()
 
 if(BUILD_EXTRACTORS)

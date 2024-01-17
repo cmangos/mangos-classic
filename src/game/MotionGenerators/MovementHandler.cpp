@@ -279,6 +279,13 @@ void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)
 #ifdef ENABLE_MANGOSBOTS
     // send MSG_MOVE_TELEPORT to observers around old position
     SendTeleportToObservers(dest.coord_x, dest.coord_y, dest.coord_z, dest.orientation);
+
+    // interrupt moving for bot if any
+    if (plMover->GetPlayerbotAI() && !plMover->GetMotionMaster()->empty())
+    {
+        if (MovementGenerator* movgen = plMover->GetMotionMaster()->top())
+            movgen->Interrupt(*plMover);
+    }
 #endif
 
     plMover->SetDelayedZoneUpdate(false, 0);
@@ -287,13 +294,6 @@ void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)
 
 #ifdef ENABLE_MANGOSBOTS
     plMover->m_movementInfo.ChangePosition(dest.coord_x, dest.coord_y, dest.coord_z, dest.orientation);
-
-    // interrupt moving for bot if any
-    if (plMover->GetPlayerbotAI() && !plMover->GetMotionMaster()->empty())
-    {
-        if (MovementGenerator* movgen = plMover->GetMotionMaster()->top())
-            movgen->Interrupt(*plMover);
-    }
 #endif
 
     plMover->SetFallInformation(0, dest.coord_z);

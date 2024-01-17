@@ -441,6 +441,14 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
                 buildShotrcut = true;
         }
 
+#ifdef ENABLE_MANGOSBOTS
+        if (m_sourceUnit && m_sourceUnit->IsPlayer() && IsPointHigherThan(getActualEndPosition(), getStartPosition()))
+        {
+            sLog.outDebug("%s (%u) Path Shortcut skipped: endPoint is higher", m_sourceUnit->GetName(), m_sourceUnit->GetGUIDLow());
+            buildShotrcut = false;
+        }
+#endif
+
         if (buildShotrcut)
         {
             BuildShortcut();
@@ -711,6 +719,15 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
         {
             // only happens if we passed bad data to findPath(), or navmesh is messed up
             sLog.outError("%u's Path Build failed: 0 length path", m_sourceUnit->GetGUIDLow());
+
+#ifdef ENABLE_MANGOSBOTS
+            if (m_sourceUnit && m_sourceUnit->IsPlayer() && IsPointHigherThan(getActualEndPosition(), getStartPosition()))
+            {
+                sLog.outDebug("%s (%u) Path Shortcut skipped: endPoint is higher", m_sourceUnit->GetName(), m_sourceUnit->GetGUIDLow());
+                return;
+            }
+#endif
+
             BuildShortcut();
             m_type = PATHFIND_NOPATH;
             return;
@@ -954,6 +971,13 @@ void PathFinder::BuildShortcut()
 
     m_type = PATHFIND_SHORTCUT;
 }
+
+#ifdef ENABLE_MANGOSBOTS
+bool PathFinder::IsPointHigherThan(const Vector3& posOne, const Vector3& posTwo)
+{
+    return posOne.z > posTwo.z;
+}
+#endif
 
 void PathFinder::createFilter()
 {

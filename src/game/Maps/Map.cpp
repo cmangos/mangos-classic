@@ -777,8 +777,8 @@ void Map::Update(const uint32& t_diff)
 
     bool hasPlayers = false;
     uint32 activeChars = 0;
-    uint32 maxDiff = sWorld.GetMaxDiff();
-    bool updateAI = urand(0, (HasRealPlayers() ? maxDiff : (maxDiff * 3))) < 10;
+    uint32 avgDiff = sWorld.GetAverageDiff();
+    bool updateAI = urand(0, (HasRealPlayers() ? avgDiff : (avgDiff * 3))) < 10;
 #endif
 
     /// update players at tick
@@ -802,23 +802,22 @@ void Map::Update(const uint32& t_diff)
                     activeArea = sMapMgr.GetContinentInstanceId(GetId(), plr->GetPositionX(), plr->GetPositionY());
 
                 isInActiveArea = IsContinent() ? (activeArea == MAP_NO_AREA ? false : HasActiveAreas(activeArea)) : HasRealPlayers();
-
-                if (isInActiveArea)
-                {
-                    if (maxDiff > 200 && IsContinent())
-                    {
-                        if (find(m_activeZones.begin(), m_activeZones.end(), plr->GetZoneId()) == m_activeZones.end())
-                            isInActiveArea = false;
-                    }
-                }
             }
+
             if (plr->GetPlayerbotAI() && plr->GetPlayerbotAI()->HasRealPlayerMaster())
+            {
                 isInActiveArea = true;
+            }
+
             if (plr->InBattleGroundQueue() || plr->InBattleGround())
+            {
                 isInActiveArea = true;
+            }
 
             if (isInActiveArea)
+            {
                 activeChars++;
+            }
 #endif
 
             plr->Update(t_diff);
@@ -846,9 +845,24 @@ void Map::Update(const uint32& t_diff)
             continue;
 
 #ifdef ENABLE_MANGOSBOTS
-        // update objects beyond visibility distance
-        if (!player->GetPlayerbotAI() && !player->isAFK())
-            player->GetCamera().UpdateVisibilityForOwner(false, true);
+        if (!player->isRealPlayer()) //For non-players only load the grid.
+        {
+            CellPair center = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY()).normalize();
+            uint32 cell_id = (center.y_coord * TOTAL_NUMBER_OF_CELLS_PER_MAP) + center.x_coord;
+
+            if (!isCellMarked(cell_id))
+            {
+                Cell cell(center);
+                const uint32 x = cell.GridX();
+                const uint32 y = cell.GridY();
+                if (!cell.NoCreate() || loaded(GridPair(x, y)))
+                {
+                    EnsureGridLoaded(player->GetCurrentCell());
+                }
+            }
+
+            continue;
+        }
 #endif
 
         VisitNearbyCellsOf(player, grid_object_update, world_object_update);
@@ -859,7 +873,7 @@ void Map::Update(const uint32& t_diff)
     }
 
 #ifdef ENABLE_MANGOSBOTS
-    bool updateObj = urand(0, (HasRealPlayers() ? maxDiff : (maxDiff * 3))) < 10;
+    bool updateObj = urand(0, (HasRealPlayers() ? avgDiff : (avgDiff * 3))) < 10;
 #endif
 
     // non-player active objects
@@ -879,7 +893,7 @@ void Map::Update(const uint32& t_diff)
 
 #ifdef ENABLE_MANGOSBOTS
             // skip objects if world is laggy
-            if (IsContinent() && maxDiff > 100)
+            if (IsContinent() && avgDiff > 100)
             {
                 bool isInActiveArea = false;
 
@@ -891,7 +905,7 @@ void Map::Update(const uint32& t_diff)
 
                 if (isInActiveArea && IsContinent())
                 {
-                    if (maxDiff > 150 && find(m_activeZones.begin(), m_activeZones.end(), obj->GetZoneId()) == m_activeZones.end())
+                    if (avgDiff > 150 && find(m_activeZones.begin(), m_activeZones.end(), obj->GetZoneId()) == m_activeZones.end())
                         isInActiveArea = false;
                 }
 
@@ -1011,14 +1025,7 @@ void Map::Remove(Player* player, bool remove)
     SendRemoveTransports(player);
     UpdateObjectVisibility(player, cell, p);
 
-#ifdef ENABLE_MANGOSBOTS
-    if (!player->GetPlayerbotAI())
-    {
-#endif
     player->ResetMap();
-#ifdef ENABLE_MANGOSBOTS
-    }
-#endif
 
     if (remove)
         DeleteFromWorld(player);
@@ -1280,8 +1287,15 @@ void Map::UpdateObjectVisibility(WorldObject* obj, Cell cell, const CellPair& ce
     TypeContainerVisitor<MaNGOS::VisibleChangesNotifier, WorldTypeMapContainer > player_notifier(notifier);
     cell.Visit(cellpair, player_notifier, *this, *obj, obj->GetVisibilityData().GetVisibilityDistance());
     for (auto guid : notifier.GetUnvisitedGuids())
+    {
         if (Player* player = GetPlayer(guid))
+        {
+#ifdef ENABLE_MANGOSBOTS
+            if (player->isRealPlayer())
+#endif
             player->UpdateVisibilityOf(player->GetCamera().GetBody(), obj);
+        }
+    }
 }
 
 void Map::SendInitSelf(Player* player) const

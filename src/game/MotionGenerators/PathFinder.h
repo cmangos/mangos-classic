@@ -157,6 +157,9 @@ class PathFinder
         void BuildPolyPath(const Vector3& startPos, const Vector3& endPos);
         void BuildPointPath(const float* startPoint, const float* endPoint);
         void BuildShortcut();
+#ifdef ENABLE_MANGOSBOTS
+        bool IsPointHigherThan(const Vector3& posOne, const Vector3& posTwo);
+#endif
 
         NavTerrainFlag getNavTerrain(float x, float y, float z) const;
         void createFilter();
