@@ -749,10 +749,6 @@ class Creature : public Unit
         float GetRespawnRadius() const { return m_respawnradius; }
         void SetRespawnRadius(float dist) { m_respawnradius = dist; }
 
-        // Functions spawn/remove creature with DB guid in all loaded map copies (if point grid loaded in map)
-        static void AddToRemoveListInMaps(uint32 db_guid, CreatureData const* data);
-        static void SpawnInMaps(uint32 db_guid, CreatureData const* data);
-
         void SendZoneUnderAttackMessage(Player* attacker) const;
 
         void SetInCombatWithZone(bool checkAttackability = true);

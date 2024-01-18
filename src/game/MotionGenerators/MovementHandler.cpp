@@ -115,7 +115,8 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     }
 
     uint32 miscRequirement = 0;
-    if (AreaTrigger const* at = sObjectMgr.GetMapEntranceTrigger(loc.mapid))
+    AreaTrigger const* at = sObjectMgr.GetMapEntranceTrigger(loc.mapid);
+    if (at)
     {
         if (AREA_LOCKSTATUS_OK != GetPlayer()->GetAreaTriggerLockStatus(at, miscRequirement))
         {
@@ -135,6 +136,15 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     // relocate the player to the teleport destination
     if (!map)
         map = sMapMgr.CreateMap(loc.mapid, GetPlayer());
+
+    // if dead player is entering an instance of same id but corpse is not found, likely means entering different instance id
+    if (GetPlayer()->IsDelayedResurrect() && !map->GetCorpse(GetPlayer()->GetObjectGuid()) && at)
+    {
+        // respawn at entrance
+        loc.coord_x = at->target_X;
+        loc.coord_y = at->target_Y;
+        loc.coord_z = at->target_Z;
+    }
 
     GetPlayer()->SetMap(map);
     bool found = true;

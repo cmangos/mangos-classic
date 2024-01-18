@@ -214,8 +214,9 @@ UnitAI* GetAI_mob_restless_soul(Creature* pCreature)
 
 enum
 {
-    SPELL_HAUNTING_PHANTOM  = 16336,
-    SPELL_SLAP              = 6754
+    SPELL_INCORPOREAL_DEFENSE   = 16331,
+    SPELL_HAUNTING_PHANTOM      = 16336,
+    SPELL_SLAP                  = 6754
 };
 
 struct mobs_spectral_ghostly_citizenAI : public ScriptedAI
@@ -227,7 +228,7 @@ struct mobs_spectral_ghostly_citizenAI : public ScriptedAI
 
     void Reset() override
     {
-
+        DoCastSpellIfCan(nullptr, SPELL_INCORPOREAL_DEFENSE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void JustRespawned() override

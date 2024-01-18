@@ -38,7 +38,7 @@ enum
     // Intro spells
     SPELL_ENCAGE_EMBERSEER  = 15281,                        // cast by Blackhand Incarcerator
 
-    SPELL_FIRE_SHIELD       = 13376,                        // not sure what's the purpose of this
+    SPELL_FIRE_SHIELD       = 13377,
     SPELL_DESPAWN_EMBERSEER = 16078,                        // not sure what's the purpose of this
     SPELL_FREEZE_ANIM       = 16245,                        // not sure what's the purpose of this
     SPELL_FULL_STRENGHT     = 16047,
@@ -78,6 +78,8 @@ struct boss_pyroguard_emberseerAI : public ScriptedAI
 
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+
+        DoCastSpellIfCan(m_creature, SPELL_FIRE_SHIELD, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void JustDied(Unit* /*pKiller*/) override

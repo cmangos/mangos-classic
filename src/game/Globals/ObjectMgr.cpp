@@ -136,7 +136,9 @@ ObjectMgr::ObjectMgr() :
     m_Dbc2StorageLocaleIndex(DEFAULT_LOCALE),
     m_unitConditionMgr(std::make_unique<UnitConditionMgr>()),
     m_worldStateExpressionMgr(std::make_unique<WorldStateExpressionMgr>()),
-    m_combatConditionMgr(std::make_unique<CombatConditionMgr>(*m_unitConditionMgr, *m_worldStateExpressionMgr))
+    m_combatConditionMgr(std::make_unique<CombatConditionMgr>(*m_unitConditionMgr, *m_worldStateExpressionMgr)),
+    m_maxGoDbGuid(0),
+    m_maxCreatureDbGuid(0)
 {
 }
 
@@ -816,6 +818,44 @@ WorldStateName* ObjectMgr::GetWorldStateName(int32 Id)
     return &(itr->second);
 }
 
+std::vector<uint32>* ObjectMgr::GetCreatureDynGuidForMap(uint32 mapId)
+{
+    auto itr = m_dynguidCreatureDbGuids.find(mapId);
+    if (itr == m_dynguidCreatureDbGuids.end())
+        return nullptr;
+
+    return &(*itr).second;
+}
+
+std::vector<uint32>* ObjectMgr::GetGameObjectDynGuidForMap(uint32 mapId)
+{
+    auto itr = m_dynguidGameobjectDbGuids.find(mapId);
+    if (itr == m_dynguidGameobjectDbGuids.end())
+        return nullptr;
+
+    return &(*itr).second;
+}
+
+void ObjectMgr::AddDynGuidForMap(uint32 mapId, std::pair<std::vector<uint32>, std::vector<uint32>> const& dbGuids)
+{
+    auto& data = m_dynguidCreatureDbGuids[mapId];
+    for (uint32 creature : dbGuids.first)
+        data.push_back(creature);
+    auto& goData = m_dynguidGameobjectDbGuids[mapId];
+    for (uint32 go : dbGuids.second)
+        goData.push_back(go);
+}
+
+void ObjectMgr::RemoveDynGuidForMap(uint32 mapId, std::pair<std::vector<uint32>, std::vector<uint32>> const& dbGuids)
+{
+    auto& data = m_dynguidCreatureDbGuids[mapId];
+    for (uint32 creature : dbGuids.first)
+        data.erase(std::remove(data.begin(), data.end(), creature), data.end());
+    auto& goData = m_dynguidGameobjectDbGuids[mapId];
+    for (uint32 go : dbGuids.second)
+        goData.erase(std::remove(goData.begin(), goData.end(), go), goData.end());
+}
+
 void ObjectMgr::LoadCreatureImmunities()
 {
     uint32 count = 0;
@@ -1295,6 +1335,8 @@ void ObjectMgr::LoadSpawnGroups()
             {
                 CreatureData const* data = GetCreatureData(guidData.DbGuid);
                 RemoveCreatureFromGrid(guidData.DbGuid, data);
+                auto& creatureDynguidsForMap = m_dynguidCreatureDbGuids[data->mapid];
+                creatureDynguidsForMap.erase(std::remove(creatureDynguidsForMap.begin(), creatureDynguidsForMap.end(), guidData.DbGuid), creatureDynguidsForMap.end());
                 newContainer->spawnGroupByGuidMap.emplace(std::make_pair(guidData.DbGuid, uint32(TYPEID_UNIT)), &entry);
                 if (sWorld.getConfig(CONFIG_BOOL_AUTOLOAD_ACTIVE))
                 {
@@ -1321,6 +1363,8 @@ void ObjectMgr::LoadSpawnGroups()
             {
                 GameObjectData const* data = GetGOData(guidData.DbGuid);
                 RemoveGameobjectFromGrid(guidData.DbGuid, data);
+                auto& goDynguidsForMap = m_dynguidGameobjectDbGuids[data->mapid];
+                goDynguidsForMap.erase(std::remove(goDynguidsForMap.begin(), goDynguidsForMap.end(), guidData.DbGuid), goDynguidsForMap.end());
                 newContainer->spawnGroupByGuidMap.emplace(std::make_pair(guidData.DbGuid, uint32(TYPEID_GAMEOBJECT)), &entry);
                 if (sWorld.getConfig(CONFIG_BOOL_AUTOLOAD_ACTIVE))
                 {
@@ -1652,7 +1696,9 @@ void ObjectMgr::LoadCreatureSpawnEntry()
         }
 
         auto& entries = m_creatureSpawnEntryMap[guid];
-        entries.push_back(entry);
+        if (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_ACTIVE)
+            entries.first = true; // if at least one entry is dynguided, promote dbGuid to dynguided
+        entries.second.push_back(entry);
 
         ++count;
     } while (queryResult->NextRow());
@@ -1703,13 +1749,17 @@ void ObjectMgr::LoadCreatures()
 
         // validate creature dual spawn template
         bool isConditional  = false;
+        bool dynGuid = false;
         if (entry == 0)
         {
             CreatureConditionalSpawn const* cSpawn = GetCreatureConditionalSpawn(guid);
             if (!cSpawn)
             {
                 if (uint32 randomEntry = GetRandomCreatureEntry(guid))
+                {
                     entry = randomEntry;
+                    dynGuid = IsCreatureDbGuidDynGuided(guid);
+                }
             }
             else
             {
@@ -1734,6 +1784,9 @@ void ObjectMgr::LoadCreatures()
                 sLog.outErrorDb("Table `creature` has a creature (GUID: %u, entry: %u) using TotemAI via AIName, skipped.", guid, entry);
                 continue;
             }
+
+            if (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_DYNGUID)
+                dynGuid = true;
         }
 
         CreatureData& data = mCreatureDataMap[guid];
@@ -1754,6 +1807,10 @@ void ObjectMgr::LoadCreatures()
         data.EntryPoolId        = fields[14].GetInt16();
         data.spawnTemplate      = GetCreatureSpawnTemplate(0);
         uint32 spawnDataEntry   = fields[15].GetUInt32();
+
+
+        if (m_maxCreatureDbGuid < guid)
+            m_maxCreatureDbGuid = guid;
 
         MapEntry const* mapEntry = sMapStore.LookupEntry(data.mapid);
         if (!mapEntry)
@@ -1813,6 +1870,10 @@ void ObjectMgr::LoadCreatures()
         else
             data.OriginalZoneId = 0;
 
+        if (dynGuid && !data.gameEvent)
+        {
+            m_dynguidCreatureDbGuids[data.mapid].push_back(guid);
+        }
         if (data.IsNotPartOfPoolOrEvent()) // if not this is to be managed by GameEvent System or Pool system
         {
             AddCreatureToGrid(guid, &data);
@@ -1858,10 +1919,10 @@ void ObjectMgr::LoadGameObjects()
 {
     uint32 count = 0;
 
-    //                                                           0              1    2                 3                      4                      5                       6
-    auto queryResult = WorldDatabase.Query("SELECT gameobject.guid, gameobject.id, map, round(position_x, 20), round(position_y, 20), round(position_z, 20), round(orientation, 20),"
-                          //             7                     8                     9                    10                     11                12         13     14
-                          "round(rotation0, 20), round(rotation1, 20), round(rotation2, 20), round(rotation3, 20), spawntimesecsmin, spawntimesecsmax, spawnMask, event,"
+    //                                                           0              1    2           3            4          5            6
+    auto queryResult = WorldDatabase.Query("SELECT gameobject.guid, gameobject.id, map, position_x, position_y, position_z, orientation,"
+                          //       7          8          9          10               11                12         13     14
+                          "rotation0, rotation1, rotation2, rotation3, spawntimesecsmin, spawntimesecsmax, spawnMask, event,"
                           //                       15                                   16
                           "pool_gameobject.pool_entry, pool_gameobject_template.pool_entry "
                           "FROM gameobject "
@@ -1888,9 +1949,15 @@ void ObjectMgr::LoadGameObjects()
         uint32 guid         = fields[ 0].GetUInt32();
         uint32 entry        = fields[ 1].GetUInt32();
 
+        bool dynGuid = false;
         if (entry == 0)
+        {
             if (uint32 randomEntry = GetRandomGameObjectEntry(guid))
+            {
                 entry = randomEntry;
+                dynGuid = IsGameObjectDbGuidDynGuided(guid);
+            }
+        }
 
         GameObjectInfo const* gInfo = nullptr;
         if (entry)
@@ -1907,6 +1974,9 @@ void ObjectMgr::LoadGameObjects()
                 sLog.outErrorDb("Gameobject (GUID: %u Entry %u GoType: %u) have invalid displayId (%u), not loaded.", guid, entry, gInfo->type, gInfo->displayId);
                 continue;
             }
+
+            if (gInfo->ExtraFlags & GAMEOBJECT_EXTRA_FLAG_DYNGUID)
+                dynGuid = true;
         }
 
         GameObjectData& data = mGameObjectDataMap[guid];
@@ -1930,6 +2000,9 @@ void ObjectMgr::LoadGameObjects()
 
         data.animprogress     = GO_ANIMPROGRESS_DEFAULT;
         data.goState          = -1;
+
+        if (m_maxGoDbGuid < guid)
+            m_maxGoDbGuid = guid;
 
         MapEntry const* mapEntry = sMapStore.LookupEntry(data.mapid);
         if (!mapEntry)
@@ -1994,7 +2067,11 @@ void ObjectMgr::LoadGameObjects()
         else
             data.OriginalZoneId = 0;
 
-        if (data.IsNotPartOfPoolOrEvent()) // if not this is to be managed by GameEvent System or Pool system
+        if (dynGuid && !data.gameEvent)
+        {
+            m_dynguidGameobjectDbGuids[data.mapid].push_back(guid);
+        }
+        else if (data.IsNotPartOfPoolOrEvent()) // if not this is to be managed by GameEvent System or Pool system
         {
             AddGameobjectToGrid(guid, &data);
 
@@ -2061,6 +2138,8 @@ void ObjectMgr::LoadGameObjectSpawnEntry()
 
     uint32 count = 0;
 
+    std::set<uint32> dynGuided;
+
     do
     {
         bar.step();
@@ -2078,7 +2157,9 @@ void ObjectMgr::LoadGameObjectSpawnEntry()
         }
 
         auto& entries = m_gameobjectSpawnEntryMap[guid];
-        entries.push_back(entry);
+        if (info->ExtraFlags & GAMEOBJECT_EXTRA_FLAG_DYNGUID)
+            entries.first = true; // if at least one entry is dynguided, promote dbGuid to dynguided
+        entries.second.push_back(entry);
 
         ++count;
     } while (queryResult->NextRow());

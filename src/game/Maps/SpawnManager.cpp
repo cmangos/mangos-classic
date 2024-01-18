@@ -49,6 +49,36 @@ SpawnManager::~SpawnManager()
 
 void SpawnManager::Initialize()
 {
+    time_t now = time(nullptr);
+    std::vector<uint32>* dynGuidCreatures = sObjectMgr.GetCreatureDynGuidForMap(m_map.GetId());
+    if (dynGuidCreatures)
+    {
+        for (uint32 dbGuid : *dynGuidCreatures)
+        {
+            if (m_map.GetPersistentState()->GetCreatureRespawnTime(dbGuid) < now)
+            {
+                auto data = sObjectMgr.GetCreatureData(dbGuid);
+                m_map.GetPersistentState()->AddCreatureToGrid(dbGuid, data);
+            }
+            else
+                AddCreature(dbGuid);
+        }
+    }
+    std::vector<uint32>* dynGuidGameObjects = sObjectMgr.GetGameObjectDynGuidForMap(m_map.GetId());
+    if (dynGuidGameObjects)
+    {
+        for (uint32 dbGuid : *dynGuidGameObjects)
+        {
+            if (m_map.GetPersistentState()->GetGORespawnTime(dbGuid) < now)
+            {
+                auto data = sObjectMgr.GetGOData(dbGuid);
+                m_map.GetPersistentState()->AddGameobjectToGrid(dbGuid, data);
+            }
+            else
+                AddGameObject(dbGuid);
+        }
+    }
+
     auto spawnGroupData = m_map.GetMapDataContainer().GetSpawnGroups();
     for (auto& groupData : spawnGroupData->spawnGroupMap)
     {
@@ -78,15 +108,19 @@ void SpawnManager::Initialize()
 void SpawnManager::AddCreature(uint32 dbguid)
 {
     time_t respawnTime = m_map.GetPersistentState()->GetCreatureRespawnTime(dbguid);
-    m_spawns.emplace_back(TimePoint(std::chrono::seconds(respawnTime)), dbguid, HIGHGUID_UNIT);
-    std::sort(m_spawns.begin(), m_spawns.end());
+    if (m_updated)
+        m_deferredSpawns.emplace_back(TimePoint(std::chrono::seconds(respawnTime)), dbguid, HIGHGUID_UNIT);
+    else
+        m_spawns.emplace_back(TimePoint(std::chrono::seconds(respawnTime)), dbguid, HIGHGUID_UNIT);
 }
 
 void SpawnManager::AddGameObject(uint32 dbguid)
 {
     time_t respawnTime = m_map.GetPersistentState()->GetGORespawnTime(dbguid);
-    m_spawns.emplace_back(TimePoint(std::chrono::seconds(respawnTime)), dbguid, HIGHGUID_GAMEOBJECT);
-    std::sort(m_spawns.begin(), m_spawns.end());
+    if (m_updated)
+        m_deferredSpawns.emplace_back(TimePoint(std::chrono::seconds(respawnTime)), dbguid, HIGHGUID_GAMEOBJECT);
+    else
+        m_spawns.emplace_back(TimePoint(std::chrono::seconds(respawnTime)), dbguid, HIGHGUID_GAMEOBJECT);
 }
 
 void SpawnManager::RespawnCreature(uint32 dbguid, uint32 respawnDelay)
@@ -113,8 +147,6 @@ void SpawnManager::RespawnCreature(uint32 dbguid, uint32 respawnDelay)
     }
     else if (respawnDelay == 0)
         (*itr).ConstructForMap(m_map);
-    if (respawnDelay > 0)
-        std::sort(m_spawns.begin(), m_spawns.end());
 }
 
 void SpawnManager::RespawnGameObject(uint32 dbguid, uint32 respawnDelay)
@@ -141,8 +173,63 @@ void SpawnManager::RespawnGameObject(uint32 dbguid, uint32 respawnDelay)
     }
     else if (respawnDelay == 0)
         (*itr).ConstructForMap(m_map);
-    if (respawnDelay > 0)
-        std::sort(m_spawns.begin(), m_spawns.end());
+}
+
+void SpawnManager::RemoveSpawns(std::vector<uint32> const& creatureDbGuids, std::vector<uint32> const& goDbGuids)
+{
+    for (auto& spawnInfo : m_spawns)
+    {
+        switch (spawnInfo.GetHighGuid())
+        {
+            case HIGHGUID_GAMEOBJECT:
+                if (std::find(goDbGuids.begin(), goDbGuids.end(), spawnInfo.GetDbGuid()) != goDbGuids.end())
+                    spawnInfo.SetUsed(); // will be erased on next manager update
+                break;
+            case HIGHGUID_UNIT:
+                if (std::find(creatureDbGuids.begin(), creatureDbGuids.end(), spawnInfo.GetDbGuid()) != creatureDbGuids.end())
+                    spawnInfo.SetUsed(); // will be erased on next manager update
+                break;
+        }
+    }
+}
+
+void SpawnManager::RemoveSpawn(uint32 dbguid, HighGuid high)
+{
+    for (auto& spawnInfo : m_spawns)
+    {
+        if (spawnInfo.GetHighGuid() == high && spawnInfo.GetDbGuid() == dbguid)
+        {
+            spawnInfo.SetUsed(); // will be erased on next manager update
+            break;
+        }
+    }
+}
+
+void SpawnManager::AddEventGuid(uint32 dbguid, HighGuid high)
+{
+    switch (high)
+    {
+        case HIGHGUID_GAMEOBJECT: m_eventGoDbGuids.insert(dbguid); break;
+        case HIGHGUID_UNIT: m_eventCreatureDbGuids.insert(dbguid); break;
+    }
+}
+
+void SpawnManager::RemoveEventGuid(uint32 dbguid, HighGuid high)
+{
+    switch (high)
+    {
+        case HIGHGUID_GAMEOBJECT: m_eventGoDbGuids.erase(dbguid); break;
+        case HIGHGUID_UNIT: m_eventCreatureDbGuids.erase(dbguid); break;
+    }
+}
+
+bool SpawnManager::IsEventGuid(uint32 dbguid, HighGuid high) const
+{
+    switch (high)
+    {
+        case HIGHGUID_GAMEOBJECT: return m_eventGoDbGuids.find(dbguid) != m_eventGoDbGuids.end();
+        case HIGHGUID_UNIT: return m_eventCreatureDbGuids.find(dbguid) != m_eventCreatureDbGuids.end();
+    }
 }
 
 void SpawnManager::RespawnAll()
@@ -160,6 +247,13 @@ void SpawnManager::RespawnAll()
 
 void SpawnManager::Update()
 {
+    m_updated = true;
+    if (!m_deferredSpawns.empty()) // cannot insert during update
+    {
+        m_spawns.reserve(m_spawns.size() + m_spawns.size());
+        std::move(std::begin(m_deferredSpawns), std::end(m_deferredSpawns), std::back_inserter(m_deferredSpawns));
+        m_deferredSpawns.clear();
+    }
     auto now = m_map.GetCurrentClockTime();
     for (auto itr = m_spawns.begin(); itr != m_spawns.end();)
     {
@@ -170,7 +264,9 @@ void SpawnManager::Update()
         else
             ++itr;
     }
+    m_updated = false;
 
+    // spawn groups are safe from this
     for (auto& group : m_spawnGroups)
         group.second->Update();
 }

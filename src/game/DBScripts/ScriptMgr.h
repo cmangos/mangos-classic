@@ -605,7 +605,7 @@ class ScriptAction
         ScriptAction(ScriptMapType scriptType, Map* _map, ObjectGuid _sourceGuid, ObjectGuid _targetGuid, ObjectGuid _ownerGuid, std::shared_ptr<ScriptInfo> _script);
 
         bool HandleScriptStep();                            // return true IF AND ONLY IF the script should be terminated
-        bool ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTarget, Object* pSourceOrItem);
+        bool ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTarget, Object* pSourceOrItem, bool buddyFound);
 
         const char* GetTableName() const { return m_table; }
         uint32 GetId() const { return m_script->id; }
@@ -632,7 +632,7 @@ class ScriptAction
 
         // Helper functions
         bool GetScriptCommandObject(const ObjectGuid guid, bool includeItem, Object*& resultObject) const;
-        bool GetScriptProcessTargets(WorldObject* originalSource, WorldObject* originalTarget, std::vector<WorldObject*>& finalSources, std::vector<WorldObject*>& finalTargets) const;
+        std::pair<bool, bool> GetScriptProcessTargets(WorldObject* originalSource, WorldObject* originalTarget, std::vector<WorldObject*>& finalSources, std::vector<WorldObject*>& finalTargets) const;
         bool LogIfNotCreature(WorldObject* pWorldObject) const;
         bool LogIfNotUnit(WorldObject* pWorldObject) const;
         bool LogIfNotGameObject(WorldObject* pWorldObject) const;

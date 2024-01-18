@@ -216,10 +216,13 @@ void MaNGOS::RespawnDo::operator()(Creature* u) const
 
     if (u->IsUsingNewSpawningSystem())
     {
-        if (u->GetMap()->GetMapDataContainer().GetSpawnGroupByGuid(u->GetDbGuid(), TYPEID_UNIT))
-            u->GetMap()->GetPersistentState()->SaveCreatureRespawnTime(u->GetDbGuid(), time(nullptr));
-        else
-            u->GetMap()->GetSpawnManager().RespawnCreature(u->GetDbGuid(), 0);
+        if (u->IsDead() && !u->GetCreatureGroup())
+        {
+            if (u->GetMap()->GetMapDataContainer().GetSpawnGroupByGuid(u->GetDbGuid(), TYPEID_UNIT))
+                u->GetMap()->GetPersistentState()->SaveCreatureRespawnTime(u->GetDbGuid(), time(nullptr));
+            else
+                u->GetMap()->GetSpawnManager().RespawnCreature(u->GetDbGuid(), 0);
+        }
     }
     else
         u->Respawn();

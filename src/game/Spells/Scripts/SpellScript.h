@@ -28,11 +28,12 @@ class DynamicObject;
 
 struct PeriodicTriggerData
 {
+    WorldObject* trueCaster;
     Unit* caster; Unit* target; WorldObject* targetObject;
     SpellEntry const* spellInfo;
     int32* basePoints;
-    PeriodicTriggerData(Unit* caster, Unit* target, WorldObject* targetObject, SpellEntry const* spellInfo, int32* basePoints) :
-        caster(caster), target(target), targetObject(targetObject), spellInfo(spellInfo), basePoints(basePoints) {}
+    PeriodicTriggerData(WorldObject* trueCaster, Unit* caster, Unit* target, WorldObject* targetObject, SpellEntry const* spellInfo, int32* basePoints) :
+        trueCaster(nullptr), caster(caster), target(target), targetObject(targetObject), spellInfo(spellInfo), basePoints(basePoints) {}
 };
 
 struct SpellScript
@@ -123,8 +124,12 @@ struct AuraScript
     virtual void OnPeriodicTickEnd(Aura* /*aura*/) const {}
     // called on persistent area aura dyngo lifetime end
     virtual void OnPersistentAreaAuraEnd(DynamicObject* /*dynGo*/) const {}
+    // called on AreaAura target selection
+    virtual bool OnPersistentAreaAuraCheckTarget(DynamicObject* /*dynGo*/, Unit* /*target*/) const { return true; }
     // called on unit heartbeat
     virtual void OnHeartbeat(Aura* /*aura*/) const {}
+    // called on AreaAura target checking
+    virtual bool OnAreaAuraCheckTarget(Aura const* aura, Unit* target) const { return true; }
     // called on affect check of aura - spellInfo can be nullptr in case of melee
     virtual bool OnAffectCheck(Aura const* /*aura*/, SpellEntry const* /*spellInfo*/) const { return true; }
     // used to override SPELL_AURA_TRANSFORM or SPELL_AURA_MOD_SHAPESHIFT display id - more uses in future

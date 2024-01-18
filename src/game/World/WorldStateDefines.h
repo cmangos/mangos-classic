@@ -161,6 +161,9 @@ enum WorldStateID : int32
     // Vanilla
     WORLD_STATE_CUSTOM_SPAWN_ANNORA    = 700001,
 
+    WORLD_STATE_CUSTOM_STV_GRP_01      = 330001,
+    WORLD_STATE_CUSTOM_STV_GRP_02      = 330002,
+
     // Tbc
 
     // Wotlk

@@ -71,6 +71,7 @@ class DynamicObject : public WorldObject
         bool CanAssistSpell(Unit const* target, SpellEntry const* spellInfo = nullptr) const override;
 
         void OnPersistentAreaAuraEnd();
+        bool OnPersistentAreaAuraCheckTarget(Unit* target);
 
         float GetObjectBoundingRadius() const override { return 0.f; } // dynamic object not have real interact size
         float GetCollisionHeight() const override { return 1.f; } // to get away with ground collision

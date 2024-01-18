@@ -274,6 +274,8 @@ UPDATE spell_template SET EffectRadiusIndex1=0 WHERE Id IN(10909);
 UPDATE spell_template SET AttributesEx4=AttributesEx4|0x00000800 WHERE Id IN(1714,11719);
 
 UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|4 WHERE `Id` IN (
+3235, -- Rancid Blood
+3338, -- Rancid Ooze
 3418, -- Improved Blocking
 5667, -- Bogling Passive
 5888, -- Darkshore Frenzy
@@ -283,6 +285,7 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|4 WH
 10868, -- Frost Vulnerable
 11011, -- Stone Watcher of Norgannon Passive
 11048, -- Perm. Illusion Bishop Tyriona
+13377, -- Fire Shield
 15978, -- Puncture
 21911, -- Puncture
 24692, -- Hakkar Power
@@ -300,18 +303,28 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 8852,  -- Moss Hide
 11816, -- Land Mine Arming
 11966, -- Fire Shield
+12782, -- Shield Spike
 12896, -- Helboar
 12898, -- Smoke Aura Visual
+13483, -- Wither Touch
 13879, -- Magma Splash
+16331, -- Incorporeal Defense
+16577, -- Disease Cloud
 17205, -- Winterfall Firewater
+17327, -- Spirit Particles
 18115, -- Viewing Room Student Transform
 18163, -- Strength of Arko'narin
 18167, -- Holy Fire
+19817, -- Double Attack
+18951, -- Spirit Particles (green)
 21080, -- Putrid Breath
 23378, -- Magma Splash
-27791, -- Suicide (Suicide)
+21130, -- Grip of Command
+21788, -- Deadly Poison
 21789, -- Hate to Half (Hate to Half)
-28330  -- Flameshocker - Immolate Visual
+27791, -- Suicide (Suicide)
+28330, -- Flameshocker - Immolate Visual
+30079 -- Retching Plague
 );
 
 -- Stop interrupt on damage taken for these 2 spells

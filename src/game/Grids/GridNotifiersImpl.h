@@ -250,6 +250,9 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
         }
     }
 
+    if (!i_dynobject.OnPersistentAreaAuraCheckTarget(target))
+        return;
+
     if (spellInfo->HasAttribute(SPELL_ATTR_EX3_ONLY_ON_PLAYER) && target->GetTypeId() != TYPEID_PLAYER)
         return;
 

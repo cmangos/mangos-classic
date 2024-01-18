@@ -156,8 +156,6 @@ void CreatureEventAI::InitAI()
         processMap(creatureEvent);
     }
 
-    if (m_creature->GetDbGuid() == 5026)
-        printf("");
     auto creatureEventsGuidItr = m_creature->GetMap()->GetMapDataContainer().GetCreatureEventGuidAIMap()->find(m_creature->GetDbGuid());
     if (creatureEventsGuidItr != m_creature->GetMap()->GetMapDataContainer().GetCreatureEventGuidAIMap()->end())
     {

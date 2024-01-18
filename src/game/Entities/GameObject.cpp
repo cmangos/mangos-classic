@@ -679,6 +679,9 @@ void GameObject::Update(const uint32 diff)
             if (AI())
                 AI()->JustDespawned();
 
+            if (InstanceData* iData = GetMap()->GetInstanceData())
+                iData->OnObjectDespawn(this);
+
             if (!m_respawnOverriden)
             {
                 // since pool system can fail to roll unspawned object, this one can remain spawned, so must set respawn nevertheless
@@ -781,6 +784,9 @@ void GameObject::Delete()
 
     if (AI())
         AI()->JustDespawned();
+
+    if (InstanceData* iData = GetMap()->GetInstanceData())
+        iData->OnObjectDespawn(this);
 
     if (uint16 poolid = sPoolMgr.IsPartOfAPool<GameObject>(GetDbGuid()))
         sPoolMgr.UpdatePool<GameObject>(*GetMap()->GetPersistentState(), poolid, GetDbGuid());
@@ -2148,56 +2154,6 @@ bool GameObject::IsInSkillupList(Player* player) const
 void GameObject::AddToSkillupList(Player* player)
 {
     m_SkillupSet.insert(player->GetObjectGuid());
-}
-
-struct AddGameObjectToRemoveListInMapsWorker
-{
-    AddGameObjectToRemoveListInMapsWorker(ObjectGuid guid) : i_guid(guid) {}
-
-    void operator()(Map* map)
-    {
-        if (GameObject* pGameobject = map->GetGameObject(i_guid))
-            pGameobject->Delete();
-    }
-
-    ObjectGuid i_guid;
-};
-
-void GameObject::AddToRemoveListInMaps(uint32 db_guid, GameObjectData const* data)
-{
-    AddGameObjectToRemoveListInMapsWorker worker(ObjectGuid(HIGHGUID_GAMEOBJECT, data->id, db_guid));
-    sMapMgr.DoForAllMapsWithMapId(data->mapid, worker);
-}
-
-struct SpawnGameObjectInMapsWorker
-{
-    SpawnGameObjectInMapsWorker(uint32 guid, GameObjectData const* data)
-        : i_guid(guid), i_data(data) {}
-
-    void operator()(Map* map)
-    {
-        // Spawn if necessary (loaded grids only)
-        if (map->IsLoaded(i_data->posX, i_data->posY))
-        {
-            GameObjectData const* data = sObjectMgr.GetGOData(i_guid);
-            MANGOS_ASSERT(data);
-            GameObject* pGameobject = GameObject::CreateGameObject(data->id);
-            // DEBUG_LOG("Spawning gameobject %u", *itr);
-            if (!pGameobject->LoadFromDB(i_guid, map, i_guid, 0))
-            {
-                delete pGameobject;
-            }
-        }
-    }
-
-    uint32 i_guid;
-    GameObjectData const* i_data;
-};
-
-void GameObject::SpawnInMaps(uint32 db_guid, GameObjectData const* data)
-{
-    SpawnGameObjectInMapsWorker worker(db_guid, data);
-    sMapMgr.DoForAllMapsWithMapId(data->mapid, worker);
 }
 
 bool GameObject::HasStaticDBSpawnData() const

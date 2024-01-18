@@ -1908,7 +1908,13 @@ bool ChatHandler::HandleNpcDeleteCommand(char* args)
             unit->CombatStop();
             if (CreatureData const* data = sObjectMgr.GetCreatureData(unit->GetDbGuid()))
             {
-                Creature::AddToRemoveListInMaps(unit->GetDbGuid(), data);
+                // chat commands execute in world thread so should be thread safe for now
+                sMapMgr.DoForAllMapsWithMapId(data->mapid, [&](Map* map)
+                {
+                    map->GetSpawnManager().RemoveSpawn(unit->GetDbGuid(), HIGHGUID_UNIT);
+                    if (Creature* creature = map->GetCreature(unit->GetDbGuid()))
+                        creature->AddObjectToRemoveList();
+                });
                 Creature::DeleteFromDB(unit->GetDbGuid(), data);
             }
             else
@@ -2232,7 +2238,7 @@ bool ChatHandler::HandleNpcSpawnTimeCommand(char* args)
 
     uint32 u_guidlow = pCreature->GetGUIDLow();
 
-    WorldDatabase.PExecuteLog("UPDATE creature SET spawntimesecs=%i WHERE guid=%u", stime, u_guidlow);
+    WorldDatabase.PExecuteLog("UPDATE creature SET spawntimesecsmin=%i, spawntimesecsmax=%i WHERE guid=%u", stime, stime, u_guidlow);
     pCreature->SetRespawnDelay(stime);
     PSendSysMessage(LANG_COMMAND_SPAWNTIME, stime);
 
