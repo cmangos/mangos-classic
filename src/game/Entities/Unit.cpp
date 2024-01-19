@@ -55,11 +55,6 @@
  #include "Metric/Metric.h"
 #endif
 
-#ifdef ENABLE_MANGOSBOTS
-#include "playerbot.h"
-#include "GuildTaskMgr.h"
-#endif
-
 #include <math.h>
 #include <limits>
 #include <array>
@@ -1348,12 +1343,6 @@ void Unit::JustKilledCreature(Unit* killer, Creature* victim, Player* responsibl
     if (responsiblePlayer)                                  // killedby Player, inform BG
         if (BattleGround* bg = responsiblePlayer->GetBattleGround())
             bg->HandleKillUnit(victim, responsiblePlayer);
-
-#ifdef ENABLE_MANGOSBOTS
-    // Guild Task check
-    if (responsiblePlayer && sPlayerbotAIConfig.guildTaskEnabled)
-        sGuildTaskMgr.CheckKillTask(responsiblePlayer, victim);
-#endif
 
     // Notify the outdoor pvp script
     if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(responsiblePlayer ? responsiblePlayer->GetCachedZoneId() : victim->GetZoneId()))
