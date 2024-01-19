@@ -1252,6 +1252,11 @@ void World::SetInitialWorldSettings()
     sLog.outString(">>> Localization strings loaded");
     sLog.outString();
 
+#ifdef ENABLE_MANGOSBOTS
+    sLog.outString("Loading Meeting Stones...");            // After load all static data
+    sWorld.GetLFGQueue().LoadMeetingStones();
+#endif
+
     ///- Load dynamic data tables from the database
     sLog.outString("Loading Auctions...");
     sAuctionMgr.LoadAuctionItems();

@@ -55,7 +55,11 @@ const char GMTicketCategoryfmt[] = "nssssssssx";
 const char ItemBagFamilyfmt[] = "nxxxxxxxxx";
 const char ItemClassfmt[] = "nxxssssssssx";
 // const char ItemDisplayTemplateEntryfmt[]="nxxxxxxxxxxixxxxxxxxxxx";
+#ifdef ENABLE_MANGOSBOTS
+const char ItemRandomPropertiesfmt[] = "nxiiixxssssssssx";
+#else
 const char ItemRandomPropertiesfmt[] = "nxiiixxxxxxxxxxx";
+#endif
 const char ItemSetEntryfmt[] = "dssssssssxxxxxxxxxxxxxxxxxxiiiiiiiiiiiiiiiiii";
 const char LiquidTypefmt[] = "niii";
 const char LockEntryfmt[] = "niiiiiiiiiiiiiiiiiiiiiiiixxxxxxxx";
