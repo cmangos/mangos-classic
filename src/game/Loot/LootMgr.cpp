@@ -967,7 +967,7 @@ bool Loot::FillLoot(uint32 loot_id, LootStore const& store, Player* lootOwner, b
 
     m_lootItems.reserve(MAX_NR_LOOT_ITEMS);
 
-    tab->Process(*this, lootOwner, store, store.IsRatesAllowed()); // Processing is done there, callback via Loot::AddItem()
+    tab->Process(*this, lootOwner, store.IsRatesAllowed()); // Processing is done there, callback via Loot::AddItem()
 
     // fill the loot owners right here so its impossible from this point to change loot result
     Player* masterLooter = nullptr;
@@ -2457,7 +2457,7 @@ bool LootTemplate::LootGroup::HasQuestDropForPlayer(Player const* player) const
 }
 
 // Rolls an item from the group (if any takes its chance) and adds the item to the loot
-void LootTemplate::LootGroup::Process(Loot& loot, Player const* lootOwner, LootStore const& store, bool rate) const
+void LootTemplate::LootGroup::Process(Loot& loot, Player const* lootOwner, bool rate) const
 {
     LootStoreItem const* item = Roll(loot, lootOwner);
     if (item != nullptr)
@@ -2472,7 +2472,7 @@ void LootTemplate::LootGroup::Process(Loot& loot, Player const* lootOwner, LootS
             if (lRef)
             {
                 for (uint32 loop = 0; loop < item->maxcount; ++loop)
-                    lRef->Process(loot, lootOwner, store, rate);
+                    lRef->Process(loot, lootOwner, rate);
             }
         }
     }
@@ -2551,17 +2551,8 @@ void LootTemplate::AddEntry(LootStoreItem& item)
 }
 
 // Rolls for every item in the template and adds the rolled items the the loot
-void LootTemplate::Process(Loot& loot, Player const* lootOwner, LootStore const& store, bool rate, uint8 groupId) const
+void LootTemplate::Process(Loot& loot, Player const* lootOwner, bool rate) const
 {
-    if (groupId)                                            // Group reference uses own processing of the group
-    {
-        if (groupId > Groups.size())
-            return;                                         // Error message already printed at loading stage
-
-        Groups[groupId - 1].Process(loot, lootOwner, store, rate);
-        return;
-    }
-
     // Rolling non-grouped items
     for (auto const& Entrie : Entries)
     {
@@ -2580,7 +2571,7 @@ void LootTemplate::Process(Loot& loot, Player const* lootOwner, LootStore const&
                 continue;                                   // Error message already printed at loading stage
 
             for (uint32 loop = 0; loop < Entrie.maxcount; ++loop) // Ref multiplicator
-                Referenced->Process(loot, lootOwner, store, rate, Entrie.group);
+                Referenced->Process(loot, lootOwner, rate);
         }
         else                                                // Plain entries (not a reference, not grouped)
             loot.AddItem(Entrie);                               // Chance is already checked, just add
@@ -2588,7 +2579,7 @@ void LootTemplate::Process(Loot& loot, Player const* lootOwner, LootStore const&
 
     // Now processing groups
     for (auto const& Group : Groups)
-        Group.Process(loot, lootOwner, store, rate);
+        Group.Process(loot, lootOwner, rate);
 }
 
 // True if template includes at least 1 quest drop entry
@@ -3041,7 +3032,7 @@ void LootMgr::CheckDropStats(ChatHandler& chat, uint32 amountOfCheck, uint32 loo
     std::unordered_map<uint32, uint32> itemStatsMap;
     for (uint32 i = 1; i <= amountOfCheck; ++i)
     {
-        lootTable->Process(*loot, nullptr, *store, store->IsRatesAllowed());
+        lootTable->Process(*loot, nullptr, store->IsRatesAllowed());
         for (auto lootItem : loot->m_lootItems)
             ++itemStatsMap[lootItem->itemId];
         loot->Clear();

@@ -264,7 +264,7 @@ class LootTemplate
                 bool HasQuestDropForPlayer(Player const* player) const;
                 // The same for active quests of the player
                 // Rolls an item from the group (if any) and adds the item to the loot
-                void Process(Loot& loot, Player const* lootOwner, LootStore const& store, bool rate) const;
+                void Process(Loot& loot, Player const* lootOwner, bool rate) const;
                 float RawTotalChance() const;                       // Overall chance for the group (without equal chanced items)
                 float TotalChance() const;                          // Overall chance for the group
 
@@ -283,7 +283,7 @@ class LootTemplate
         // Adds an entry to the group (at loading stage)
         void AddEntry(LootStoreItem& item);
         // Rolls for every item in the template and adds the rolled items the the loot
-        void Process(Loot& loot, Player const* lootOwner, LootStore const& store, bool rate, uint8 groupId = 0) const;
+        void Process(Loot& loot, Player const* lootOwner, bool rate) const;
 
         // True if template includes at least 1 quest drop entry
         bool HasQuestDrop(LootTemplateMap const& store, uint8 groupId = 0) const;
