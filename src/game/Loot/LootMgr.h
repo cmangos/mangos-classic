@@ -216,7 +216,7 @@ struct LootItem
 
 typedef std::vector<LootItem*> LootItemList;
 typedef std::vector<LootStoreItem> LootStoreItemList;
-typedef std::unordered_map<uint32, LootTemplate*> LootTemplateMap;
+typedef std::unordered_map<uint32, LootTemplate> LootTemplateMap;
 typedef std::set<uint32> LootIdSet;
 
 class LootStore
@@ -234,7 +234,7 @@ class LootStore
         void ReportUnusedIds(LootIdSet const& ids_set) const;
         void ReportNotExistedId(uint32 id) const;
 
-        bool HaveLootFor(uint32 loot_id) const { return m_LootTemplates.find(loot_id) != m_LootTemplates.end(); }
+        bool HaveLootFor(uint32 loot_id) const;
         bool HaveQuestLootFor(uint32 loot_id) const;
         bool HaveQuestLootForPlayer(uint32 loot_id, Player* player) const;
 
@@ -255,8 +255,29 @@ class LootStore
 
 class LootTemplate
 {
-        class  LootGroup;                                   // A set of loot definitions for items (refs are not allowed inside)
-        typedef std::vector<LootGroup> LootGroups;
+    private:
+        class LootTemplate::LootGroup                           // A set of loot definitions for items (refs are not allowed)
+        {
+            public:
+                void AddEntry(LootStoreItem& item);                 // Adds an entry to the group (at loading stage)
+                bool HasQuestDrop() const;                          // True if group includes at least 1 quest drop entry
+                bool HasQuestDropForPlayer(Player const* player) const;
+                // The same for active quests of the player
+                // Rolls an item from the group (if any) and adds the item to the loot
+                void Process(Loot& loot, Player const* lootOwner, LootStore const& store, bool rate) const;
+                float RawTotalChance() const;                       // Overall chance for the group (without equal chanced items)
+                float TotalChance() const;                          // Overall chance for the group
+
+                void Verify(LootStore const& lootstore, uint32 id, uint32 group_id) const;
+                bool CheckLootRefs(LootIdSet* ref_set, LootIdSet& prevRefs);
+            private:
+                LootStoreItemList ExplicitlyChanced;                // Entries with chances defined in DB
+                LootStoreItemList EqualChanced;                     // Zero chances - every entry takes the same chance
+
+                // Rolls an item from the group, returns nullptr if all miss their chances
+                LootStoreItem const* Roll(Loot const& loot, Player const* lootOwner) const;
+        };
+        using LootGroups = std::vector<LootGroup>;
 
     public:
         // Adds an entry to the group (at loading stage)
