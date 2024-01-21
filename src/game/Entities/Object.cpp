@@ -2480,11 +2480,14 @@ struct WorldObjectChangeAccumulator
         {
             Player* owner = iter.getSource()->GetOwner();
 #ifdef ENABLE_MANGOSBOTS
-            if (owner != &i_object && owner->isRealPlayer() && owner->HasAtClient(&i_object))
-#else
-            if (owner != &i_object && owner->HasAtClient(&i_object))
+            if (owner->isRealPlayer())
+            {
 #endif
+            if (owner != &i_object && owner->HasAtClient(&i_object))
                 i_object.BuildUpdateDataForPlayer(owner, i_updateDatas);
+#ifdef ENABLE_MANGOSBOTS
+            }
+#endif
         }
     }
 

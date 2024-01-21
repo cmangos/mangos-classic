@@ -12645,11 +12645,14 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
 #endif
 
 #ifdef ENABLE_MANGOSBOTS
-    if (this != questGiver && !handled && pQuest->GetQuestCompleteScript() != 0)
-#else
-    if (!handled && pQuest->GetQuestCompleteScript() != 0)
+    if (this != questGiver)
+    {
 #endif
+    if (!handled && pQuest->GetQuestCompleteScript() != 0)
         GetMap()->ScriptsStart(SCRIPT_TYPE_QUEST_END, pQuest->GetQuestCompleteScript(), questGiver, this, Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE);
+#ifdef ENABLE_MANGOSBOTS
+    }
+#endif
 
     // Find spell cast on spell reward if any, then find the appropriate caster and cast it
     uint32 spellId = pQuest->GetRewSpellCast();

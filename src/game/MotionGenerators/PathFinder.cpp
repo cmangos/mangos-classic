@@ -1297,11 +1297,7 @@ dtStatus PathFinder::findSmoothPath(const float* startPos, const float* endPos,
     *smoothPathSize = nsmoothPath;
 
     // this is most likely a loop
-#ifdef ENABLE_MANGOSBOTS
-    return nsmoothPath <= m_pointPathLimit ? DT_SUCCESS : DT_FAILURE;
-#else
     return nsmoothPath < m_pointPathLimit ? DT_SUCCESS : DT_FAILURE;
-#endif
 }
 
 void PathFinder::ComputePathToRandomPoint(Vector3 const& startPoint, float maxRange)
