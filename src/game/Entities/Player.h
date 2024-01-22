@@ -919,10 +919,6 @@ class Player : public Unit
         void Update(const uint32 diff) override;
         void Heartbeat() override;
 
-#ifdef ENABLE_MANGOSBOTS
-        void UpdateAI(const uint32 diff, bool minimal = false);
-#endif
-
         static bool BuildEnumData(QueryResult* result,  WorldPacket& p_data);
 
         void SendInitialPacketsBeforeAddToMap();
@@ -2205,10 +2201,13 @@ class Player : public Unit
 #ifdef ENABLE_MANGOSBOTS
         // A Player can either have a playerbotMgr (to manage its bots), or have playerbotAI (if it is a bot), or
         // neither. Code that enables bots must create the playerbotMgr and set it using SetPlayerbotMgr.
-        void SetPlayerbotAI(PlayerbotAI* ai) { assert(!m_playerbotAI && !m_playerbotMgr); m_playerbotAI = ai; }
-        PlayerbotAI* GetPlayerbotAI() { return m_playerbotAI; }
-        void SetPlayerbotMgr(PlayerbotMgr* mgr) { assert(!m_playerbotAI && !m_playerbotMgr); m_playerbotMgr = mgr; }
-        PlayerbotMgr* GetPlayerbotMgr() { return m_playerbotMgr; }
+        void UpdateAI(const uint32 diff, bool minimal = false);
+        void CreatePlayerbotAI();
+        void RemovePlayerbotAI();
+        PlayerbotAI* GetPlayerbotAI() { return m_playerbotAI.get(); }
+        void CreatePlayerbotMgr();
+        void RemovePlayerbotMgr();
+        PlayerbotMgr* GetPlayerbotMgr() { return m_playerbotMgr.get(); }
         void SetBotDeathTimer() { m_deathTimer = 0; }
         bool isRealPlayer() { return m_session && (m_session->GetRemoteAddress() != "disconnected/bot"); }
 #endif
@@ -2512,9 +2511,14 @@ class Player : public Unit
         MapReference m_mapRef;
         std::unique_ptr<PlayerMenu> m_playerMenu;
 
-#if defined(BUILD_PLAYERBOT) || defined(ENABLE_MANGOSBOTS)
+#ifdef BUILD_PLAYERBOT
         PlayerbotAI* m_playerbotAI;
         PlayerbotMgr* m_playerbotMgr;
+#endif
+
+#ifdef ENABLE_MANGOSBOTS
+        std::unique_ptr<PlayerbotAI> m_playerbotAI;
+        std::unique_ptr<PlayerbotMgr> m_playerbotMgr;
 #endif
 
         // Homebind coordinates
