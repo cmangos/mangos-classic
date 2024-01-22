@@ -777,15 +777,17 @@ void Map::Update(const uint32& t_diff)
         }
     }
 
-    // Reset the has real players flag
+    // Reset the has real players flag and check for it again
+    const bool hadRealPlayers = hasRealPlayers;
     hasRealPlayers = false;
-    uint32 activeChars = 0;
+
+    uint32 activePlayers = 0;
     uint32 avgDiff = sWorld.GetAverageDiff();
 
     // Calculate the chance that the bots in this map should update based on server load and real players online
     // (default is a 10% on a avg diff of 100)
     float botUpdateChance = avgDiff * 0.1f;
-    if (!HasRealPlayers())
+    if (!hadRealPlayers)
     {
         // If no real players are on the map then lower the chances of updating by 300%
         botUpdateChance *= 3.0f;
@@ -813,7 +815,7 @@ void Map::Update(const uint32& t_diff)
             else
             {
                 // If there are real players in the map, check if the bot is on a zone with players
-                if (HasRealPlayers())
+                if (hadRealPlayers)
                 {
                     // Check if the bot is in an active zone (or instance)
                     shouldUpdateBot = IsContinent() ? HasActiveZone(plr->GetZoneId()) : true;
@@ -838,7 +840,7 @@ void Map::Update(const uint32& t_diff)
             // Save the active characters for later logs
             if (shouldUpdateBot)
             {
-                activeChars++;
+                activePlayers++;
             }
 #endif
 
@@ -855,7 +857,7 @@ void Map::Update(const uint32& t_diff)
     if (IsContinent() && HasRealPlayers() && HasActiveZones() && m_activeZonesTimer == 0U)
     {
         sLog.outBasic("Map %u: Active Zones - %u", GetId(), m_activeZones.size());
-        sLog.outBasic("Map %u: Active Zones Chars - %u of %u", GetId(), activeChars, m_mapRefManager.getSize());
+        sLog.outBasic("Map %u: Active Zone Players - %u of %u", GetId(), activePlayers, m_mapRefManager.getSize());
     }
 #endif
 
