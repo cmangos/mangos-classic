@@ -62,11 +62,6 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         typedef std::map<MapID, Map* > MapMapType;
 
         void CreateContinents();
-
-#ifdef ENABLE_MANGOSBOTS
-        ContinentArea GetContinentInstanceId(uint32 mapId, float x, float y, bool* transitionArea = nullptr);
-#endif
-
         Map* CreateMap(uint32, const WorldObject* obj);
         Map* CreateBgMap(uint32 mapid, BattleGround* bg);
         Map* FindMap(uint32 mapid, uint32 instanceId = 0) const;

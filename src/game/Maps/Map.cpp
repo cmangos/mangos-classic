@@ -160,7 +160,7 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId)
       i_gridExpiry(expiry), m_TerrainData(sTerrainMgr.LoadTerrain(id)),
       i_data(nullptr), i_script_id(0), m_transportsIterator(m_transports.begin()), m_spawnManager(*this),
 #ifdef ENABLE_MANGOSBOTS
-      m_activeAreasTimer(0), hasRealPlayers(false),
+      m_activeZonesTimer(0), hasRealPlayers(false),
 #endif
       m_variableManager(this)
 {
@@ -736,49 +736,62 @@ void Map::Update(const uint32& t_diff)
     }
 
 #ifdef ENABLE_MANGOSBOTS
-    // active areas timer
-    m_activeAreasTimer += t_diff;
-    if (m_activeAreasTimer >= 10000)
+    // Calculate the active zones every 10 seconds (An active zone is a zone where one or more real players are)
+    constexpr uint32 maxActiveZonesTimer = 10000U;
+    if (m_activeZonesTimer < maxActiveZonesTimer)
     {
-        m_activeAreasTimer = 0;
-        m_activeAreas.clear();
-        m_activeZones.clear();
+        m_activeZonesTimer += t_diff;
     }
-
-    if (!m_activeAreasTimer && IsContinent() && HasRealPlayers())
+    else
     {
-        for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
+        m_activeZonesTimer = 0U;
+        m_activeZones.clear();
+
+        // Recalculate active zones
+        if (IsContinent() && HasRealPlayers())
         {
-            Player* plr = m_mapRefIter->getSource();
-            if (plr && plr->IsInWorld())
+            for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
             {
-                if (plr->GetPlayerbotAI() && !plr->GetPlayerbotAI()->IsRealPlayer())
-                    continue;
-
-                if (plr->isAFK())
-                    continue;
-
-                if (!plr->isGMVisible())
-                    continue;
-
-                if (find(m_activeZones.begin(), m_activeZones.end(), plr->GetZoneId()) == m_activeZones.end())
-                    m_activeZones.push_back(plr->GetZoneId());
-
-                ContinentArea activeArea = sMapMgr.GetContinentInstanceId(GetId(), plr->GetPositionX(), plr->GetPositionY());
-                // check active area
-                if (activeArea != MAP_NO_AREA)
+                Player* plr = m_mapRefIter->getSource();
+                if (plr && plr->IsInWorld())
                 {
-                    if (!HasActiveAreas(activeArea))
-                        m_activeAreas.push_back(activeArea);
+                    // Only consider real players
+                    if (plr->GetPlayerbotAI() && !plr->GetPlayerbotAI()->IsRealPlayer())
+                        continue;
+
+                    // Ignore afk players
+                    if (plr->isAFK())
+                        continue;
+
+                    // Ignore gm players
+                    if (!plr->isGMVisible())
+                        continue;
+
+                    // Register an active zone when a real player is on the zone
+                    if (find(m_activeZones.begin(), m_activeZones.end(), plr->GetZoneId()) == m_activeZones.end())
+                    {
+                        m_activeZones.push_back(plr->GetZoneId());
+                    }
                 }
             }
         }
     }
 
-    bool hasPlayers = false;
+    // Reset the has real players flag
+    hasRealPlayers = false;
     uint32 activeChars = 0;
     uint32 avgDiff = sWorld.GetAverageDiff();
-    bool updateAI = urand(0, (HasRealPlayers() ? avgDiff : (avgDiff * 3))) < 10;
+
+    // Calculate the chance that the bots in this map should update based on server load and real players online
+    // (default is a 10% on a avg diff of 100)
+    float botUpdateChance = avgDiff * 0.1f;
+    if (!HasRealPlayers())
+    {
+        // If no real players are on the map then lower the chances of updating by 300%
+        botUpdateChance *= 3.0f;
+    }
+
+    bool shouldUpdateBots = urand(0, (uint32)(botUpdateChance * 100)) < 100;
 #endif
 
     /// update players at tick
@@ -788,33 +801,42 @@ void Map::Update(const uint32& t_diff)
         if (plr && plr->IsInWorld())
         {
 #ifdef ENABLE_MANGOSBOTS
-            bool isInActiveArea = false;
+            // Determine if the individual bot should update
+            bool shouldUpdateBot = shouldUpdateBots;
+
+            // Real players should update always (it will update alt bots)
             if (!plr->GetPlayerbotAI() || plr->GetPlayerbotAI()->IsRealPlayer())
             {
-                isInActiveArea = true;
-                hasPlayers = true;
-
+                shouldUpdateBot = true;
+                hasRealPlayers = true;
             }
-            else if (HasRealPlayers())
+            else
             {
-                ContinentArea activeArea = MAP_NO_AREA;
-                if (IsContinent())
-                    activeArea = sMapMgr.GetContinentInstanceId(GetId(), plr->GetPositionX(), plr->GetPositionY());
+                // If there are real players in the map, check if the bot is on a zone with players
+                if (HasRealPlayers())
+                {
+                    // Check if the bot is in an active zone (or instance)
+                    shouldUpdateBot = IsContinent() ? HasActiveZone(plr->GetZoneId()) : true;
+                }
 
-                isInActiveArea = IsContinent() ? (activeArea == MAP_NO_AREA ? false : HasActiveAreas(activeArea)) : HasRealPlayers();
+                // Check for edge case reasons to force update the bot
+                if (!shouldUpdateBot)
+                {
+                    // Force bots to be active if:
+                    // - The bot is playing with a real player
+                    // - The bot is in a battleground
+                    // - The bot is in combat
+                    if ((plr->GetPlayerbotAI() && plr->GetPlayerbotAI()->HasRealPlayerMaster()) ||
+                        plr->InBattleGroundQueue() || plr->InBattleGround() ||
+                        plr->IsInCombat())
+                    {
+                        shouldUpdateBot = true;
+                    }
+                }
             }
 
-            if (plr->GetPlayerbotAI() && plr->GetPlayerbotAI()->HasRealPlayerMaster())
-            {
-                isInActiveArea = true;
-            }
-
-            if (plr->InBattleGroundQueue() || plr->InBattleGround())
-            {
-                isInActiveArea = true;
-            }
-
-            if (isInActiveArea)
+            // Save the active characters for later logs
+            if (shouldUpdateBot)
             {
                 activeChars++;
             }
@@ -823,18 +845,17 @@ void Map::Update(const uint32& t_diff)
             plr->Update(t_diff);
 
 #ifdef ENABLE_MANGOSBOTS
-            plr->UpdateAI(t_diff, !(isInActiveArea || updateAI || plr->IsInCombat()));
+            plr->UpdateAI(t_diff, !shouldUpdateBot);
 #endif
         }
     }
 
 #ifdef ENABLE_MANGOSBOTS
-    hasRealPlayers = hasPlayers;
-
-    if (IsContinent() && HasRealPlayers() && HasActiveAreas() && !m_activeAreasTimer)
+    // Log the active zones and characters
+    if (IsContinent() && HasRealPlayers() && HasActiveZones() && m_activeZonesTimer == 0U)
     {
-        sLog.outBasic("Map %u: Active Areas:Zones - %u:%u", GetId(), m_activeAreas.size(), m_activeZones.size());
-        sLog.outBasic("Map %u: Active Areas Chars - %u of %u", GetId(), activeChars, m_mapRefManager.getSize());
+        sLog.outBasic("Map %u: Active Zones - %u", GetId(), m_activeZones.size());
+        sLog.outBasic("Map %u: Active Zones Chars - %u of %u", GetId(), activeChars, m_mapRefManager.getSize());
     }
 #endif
 
@@ -845,7 +866,8 @@ void Map::Update(const uint32& t_diff)
             continue;
 
 #ifdef ENABLE_MANGOSBOTS
-        if (!player->isRealPlayer()) //For non-players only load the grid.
+        // For non-players only load the grid
+        if (!player->isRealPlayer()) 
         {
             CellPair center = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY()).normalize();
             uint32 cell_id = (center.y_coord * TOTAL_NUMBER_OF_CELLS_PER_MAP) + center.x_coord;
@@ -873,7 +895,16 @@ void Map::Update(const uint32& t_diff)
     }
 
 #ifdef ENABLE_MANGOSBOTS
-    bool updateObj = urand(0, (HasRealPlayers() ? avgDiff : (avgDiff * 3))) < 10;
+    // Calculate the chance that the objects (non players) should update based on server load and real players online
+    // (default is a 10% on a avg diff of 100)
+    float objectUpdateChance = avgDiff * 0.1f;
+    if (!HasRealPlayers())
+    {
+        // If no real players are on the map then lower the chances of updating by 300%
+        objectUpdateChance *= 3.0f;
+    }
+
+    const bool shouldUpdateObjects = urand(0, (uint32)(objectUpdateChance * 100)) < 100;
 #endif
 
     // non-player active objects
@@ -892,25 +923,14 @@ void Map::Update(const uint32& t_diff)
                 continue;
 
 #ifdef ENABLE_MANGOSBOTS
-            // skip objects if world is laggy
+            // Skip objects on locations away from real players if world is laggy
             if (IsContinent() && avgDiff > 100)
             {
-                bool isInActiveArea = false;
-
-                ContinentArea activeArea = MAP_NO_AREA;
-                if (IsContinent())
-                    activeArea = sMapMgr.GetContinentInstanceId(GetId(), obj->GetPositionX(), obj->GetPositionY());
-
-                isInActiveArea = IsContinent() ? (activeArea == MAP_NO_AREA ? false : HasActiveAreas(activeArea)) : HasRealPlayers();
-
-                if (isInActiveArea && IsContinent())
+                const bool isInActiveZone = IsContinent() ? HasActiveZone(obj->GetZoneId()) : HasRealPlayers();
+                if (!isInActiveZone && !shouldUpdateObjects)
                 {
-                    if (avgDiff > 150 && find(m_activeZones.begin(), m_activeZones.end(), obj->GetZoneId()) == m_activeZones.end())
-                        isInActiveArea = false;
-                }
-
-                if (!isInActiveArea && !updateObj)
                     continue;
+                }
             }
 #endif
 
