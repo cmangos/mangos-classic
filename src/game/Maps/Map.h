@@ -92,9 +92,6 @@ struct WorldTemplate
     uint32 script_id;
 };
 
-{
-};
-
 #if defined( __GNUC__ )
 #pragma pack()
 #else
