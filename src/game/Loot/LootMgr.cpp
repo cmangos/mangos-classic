@@ -2993,7 +2993,7 @@ Loot* LootMgr::GetLoot(Player* player, ObjectGuid const& targetGuid) const
     return loot;
 }
 
-void LootMgr::CheckDropStats(ChatHandler& chat, uint32 amountOfCheck, uint32 lootId, std::string lootStore) const
+void LootMgr::CheckDropStats(ChatHandler& chat, uint32 amountOfCheck, uint32 lootId, std::string lootStore, bool full) const
 {
     // choose correct loot template
     LootStore* store = &LootTemplates_Creature;
@@ -3013,6 +3013,10 @@ void LootMgr::CheckDropStats(ChatHandler& chat, uint32 amountOfCheck, uint32 loo
             store = &LootTemplates_Disenchant;
         else if (lootStore == "mail")
             store = &LootTemplates_Mail;
+        else if (lootStore == "reference")
+            store = &LootTemplates_Reference;
+        else
+            return;
     }
 
     if (amountOfCheck < 1)

@@ -5118,3 +5118,96 @@ bool ChatHandler::HandleBattlegroundStopCommand(char* args)
 
     return true;
 }
+
+bool ChatHandler::LootStatsHelper(char* args, bool full)
+{
+    uint32 amountOfCheck = 100000;
+    uint32 lootId = 0;
+    std::string lootStore = "creature";
+    Creature* target = getSelectedCreature();
+
+    const std::string usageStr = "Usage: if you selected a creature you can do:\n"
+        " -> '.loot stats [#amountOfDropCheck]'\n"
+        " else you have to provide loot type and loot entry\n"
+        " -> '.loot stats lootType #lootEntry [#amountOfDropCheck]\n'"
+        " -> lootType can be 'creature', 'gameobject', 'fishing', 'item', 'pickpocketing', 'skinning', 'disenchanting', 'mail', 'reference'\n"
+        " -> ex: '.loot stats c 448' will show Hogger loot table";
+
+    if (target)
+    {
+        lootId = target->GetCreatureInfo()->LootId;
+    }
+    else
+    {
+        if (args != nullptr)
+        {
+            std::string lootType = ExtractLiteralArg(&args);
+
+            // check if lootType start with correct store name
+            if (lootType.rfind("c", 0) == 0)
+                lootStore = "creature";
+            else if (lootType.rfind("g", 0) == 0)
+                lootStore = "gameobject";
+            else if (lootType.rfind("f", 0) == 0)
+                lootStore = "fishing";
+            else if (lootType.rfind("i", 0) == 0)
+                lootStore = "item";
+            else if (lootType.rfind("pi", 0) == 0)
+                lootStore = "pickpocketing";
+            else if (lootType.rfind("s", 0) == 0)
+                lootStore = "skinning";
+            else if (lootType.rfind("dis", 0) == 0)
+                lootStore = "disenchanting";
+            else if (lootType.rfind("m", 0) == 0)
+                lootStore = "mail";
+            else if (lootType.rfind("r", 0) == 0)
+                lootStore = "reference";
+            else
+            {
+                if (m_session)
+                {
+                    SendSysMessage("");
+                    SendSysMessage(usageStr.c_str());
+                    SetSentErrorMessage(true);
+                }
+
+                // Output to console
+                sLog.outError(usageStr.c_str());
+
+                SetSentErrorMessage(true);
+                return true;
+            }
+        }
+
+        if (!*args || !ExtractUInt32(&args, lootId))
+        {
+            if (m_session)
+            {
+                SendSysMessage("");
+                SendSysMessage(usageStr.c_str());
+                SetSentErrorMessage(true);
+            }
+
+            // Output to console
+            sLog.outError(usageStr.c_str());
+
+            SetSentErrorMessage(true);
+            return true;
+        }
+    }
+
+    ExtractUInt32(&args, amountOfCheck);
+
+    sLootMgr.CheckDropStats(*this, amountOfCheck, lootId, lootStore, full);
+    return  true;
+}
+
+bool ChatHandler::HandleLootStatsCommand(char* args)
+{
+    return LootStatsHelper(args, false);
+}
+
+bool ChatHandler::HandleLootFullStatsCommand(char* args)
+{
+    return LootStatsHelper(args, true);
+}

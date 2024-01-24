@@ -442,7 +442,7 @@ class LootMgr
     public:
         void PlayerVote(Player* player, ObjectGuid const& lootTargetGuid, uint32 itemSlot, RollVote vote);
         Loot* GetLoot(Player* player, ObjectGuid const& targetGuid = ObjectGuid()) const;
-        void CheckDropStats(ChatHandler& chat, uint32 amountOfCheck, uint32 lootId, std::string lootStore) const;
+        void CheckDropStats(ChatHandler& chat, uint32 amountOfCheck, uint32 lootId, std::string lootStore, bool full) const;
         bool ExistsRefLootTemplate(uint32 refLootId) const;
 };
 
