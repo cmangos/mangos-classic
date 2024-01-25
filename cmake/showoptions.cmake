@@ -67,7 +67,7 @@ else()
   message(STATUS "Build Playerbot       : No  (default)")
 endif()
 
-if(BUILD_IKE3_BOTS)
+if(BUILD_MANGOSBOTS)
   message(STATUS "Build Mangosbots	    : Yes")
 else()
   message(STATUS "Build Mangosbots      : No  (default)")
