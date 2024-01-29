@@ -137,8 +137,8 @@ pAuraProcHandler AuraProcHandler[TOTAL_AURAS] =
     &Unit::HandleNULLProc,                                  // 104 SPELL_AURA_WATER_WALK
     &Unit::HandleNULLProc,                                  // 105 SPELL_AURA_FEATHER_FALL
     &Unit::HandleNULLProc,                                  // 106 SPELL_AURA_HOVER
-    &Unit::HandleNULLProc,                                  // 107 SPELL_AURA_ADD_FLAT_MODIFIER
-    &Unit::HandleNULLProc,                                  // 108 SPELL_AURA_ADD_PCT_MODIFIER
+    &Unit::HandleSpellModProc,                              // 107 SPELL_AURA_ADD_FLAT_MODIFIER
+    &Unit::HandleSpellModProc,                              // 108 SPELL_AURA_ADD_PCT_MODIFIER
     &Unit::HandleNULLProc,                                  // 109 SPELL_AURA_ADD_TARGET_TRIGGER
     &Unit::HandleNULLProc,                                  // 110 SPELL_AURA_MOD_POWER_REGEN_PERCENT
     &Unit::HandleNULLProc,                                  // 111 SPELL_AURA_ADD_CASTER_HIT_TRIGGER
@@ -1703,4 +1703,10 @@ SpellAuraProcResult Unit::HandleInvisibilityAuraProc(ProcExecutionData& data)
 
     RemoveAurasDueToSpell(triggeredByAura->GetId());
     return SPELL_AURA_PROC_OK;
+}
+
+SpellAuraProcResult Unit::HandleSpellModProc(ProcExecutionData& data)
+{
+    // one day if figured out - remove charges through proc system but currently not reliable enough for edge cases
+    return SPELL_AURA_PROC_CANT_TRIGGER;
 }

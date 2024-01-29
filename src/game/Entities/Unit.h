@@ -2167,6 +2167,7 @@ class Unit : public WorldObject
         SpellAuraProcResult HandleModResistanceAuraProc(ProcExecutionData& data);
         SpellAuraProcResult HandleRemoveByDamageChanceProc(ProcExecutionData& data);
         SpellAuraProcResult HandleInvisibilityAuraProc(ProcExecutionData& data);
+        SpellAuraProcResult HandleSpellModProc(ProcExecutionData& data);
         SpellAuraProcResult HandleNULLProc(ProcExecutionData& /*data*/)
         {
             // no proc handler for this aura type
