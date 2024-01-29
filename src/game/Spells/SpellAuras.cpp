@@ -1271,16 +1271,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         }
                         break;
                     }
-                    case 11403:                             // Dream Vision
-                    {
-                        if (target->IsPlayer())
-                        {
-                            Unit* pet = static_cast<Player*>(target)->GetCharm();
-                            if (pet && pet->GetEntry() == 7863)
-                                pet->SetVisibility(VISIBILITY_OFF);
-                        }
-                        break;
-                    }
                     case 6946:                              // Curse of the Bleakheart
                     case 41170:
                         m_isPeriodic = true;
