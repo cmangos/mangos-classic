@@ -5133,6 +5133,20 @@ bool ChatHandler::LootStatsHelper(char* args, bool full)
         " -> lootType can be 'creature', 'gameobject', 'fishing', 'item', 'pickpocketing', 'skinning', 'disenchanting', 'mail', 'reference'\n"
         " -> ex: '.loot stats c 448' will show Hogger loot table";
 
+    auto showError = [&]()
+    {
+            if (m_session)
+            {
+            SendSysMessage(usageStr.c_str());
+            SetSentErrorMessage(true);
+        }
+
+        // Output to console
+        sLog.outError(usageStr.c_str());
+
+        SetSentErrorMessage(true);
+    };
+
     if (target)
     {
         lootId = target->GetCreatureInfo()->LootId;
@@ -5141,7 +5155,13 @@ bool ChatHandler::LootStatsHelper(char* args, bool full)
     {
         if (args != nullptr)
         {
-            std::string lootType = ExtractLiteralArg(&args);
+            auto argsStr = ExtractLiteralArg(&args);
+            if (!argsStr)
+            {
+                showError();
+                return true;
+            }
+            std::string lootType(argsStr);
 
             // check if lootType start with correct store name
             if (lootType.rfind("c", 0) == 0)
@@ -5164,34 +5184,14 @@ bool ChatHandler::LootStatsHelper(char* args, bool full)
                 lootStore = "reference";
             else
             {
-                if (m_session)
-                {
-                    SendSysMessage("");
-                    SendSysMessage(usageStr.c_str());
-                    SetSentErrorMessage(true);
-                }
-
-                // Output to console
-                sLog.outError(usageStr.c_str());
-
-                SetSentErrorMessage(true);
+                showError();
                 return true;
             }
         }
 
         if (!*args || !ExtractUInt32(&args, lootId))
         {
-            if (m_session)
-            {
-                SendSysMessage("");
-                SendSysMessage(usageStr.c_str());
-                SetSentErrorMessage(true);
-            }
-
-            // Output to console
-            sLog.outError(usageStr.c_str());
-
-            SetSentErrorMessage(true);
+            showError();
             return true;
         }
     }

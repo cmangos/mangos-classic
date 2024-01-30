@@ -2457,13 +2457,24 @@ bool LootTemplate::LootGroup::HasQuestDropForPlayer(Player const* player) const
 }
 
 // Rolls an item from the group (if any takes its chance) and adds the item to the loot
-void LootTemplate::LootGroup::Process(Loot& loot, Player const* lootOwner, bool rate) const
+void LootTemplate::LootGroup::Process(Loot& loot, Player const* lootOwner, bool rate, LootStatsData* lootStatsData /*= nullptr*/) const
 {
+    LootStats::GroupStats* groupStats = nullptr;
+    if (lootStatsData)
+    {
+        groupStats = lootStatsData->stats->GetStatsForLootId(lootStatsData->groupIdOrItemId);
+    }
+
     LootStoreItem const* item = Roll(loot, lootOwner);
     if (item != nullptr)
     {
         if (item->mincountOrRef > 0)
+        {
             loot.AddItem(*item);
+            // only used if we want some stats
+            if (groupStats)
+                groupStats->IncItemCount(item->group, item->itemid);
+        }
         else
         {
             // we should continue and get next loot reference to process this loot list
@@ -2471,8 +2482,18 @@ void LootTemplate::LootGroup::Process(Loot& loot, Player const* lootOwner, bool 
 
             if (lRef)
             {
+                std::unique_ptr<LootStatsData> lsData = nullptr;
+                // only used if we want some stats
+                if (lootStatsData)
+                {
+                    lsData = std::make_unique<LootStatsData>(item->mincountOrRef, lootStatsData->stats);
+
+                    // no need to check groupStats here, if we have a lootStatsPair->first, we have a lootStatsPair->second
+                    groupStats->IncItemCount(item->group, item->mincountOrRef); // register the reference as a loot
+                }
+
                 for (uint32 loop = 0; loop < item->maxcount; ++loop)
-                    lRef->Process(loot, lootOwner, rate);
+                    lRef->Process(loot, lootOwner, rate, nullptr);
             }
         }
     }
@@ -2551,8 +2572,14 @@ void LootTemplate::AddEntry(LootStoreItem& item)
 }
 
 // Rolls for every item in the template and adds the rolled items the the loot
-void LootTemplate::Process(Loot& loot, Player const* lootOwner, bool rate) const
+void LootTemplate::Process(Loot& loot, Player const* lootOwner, bool rate, LootStatsData* lootStatsData /*= nullptr*/) const
 {
+    LootStats::GroupStats* groupStats = nullptr;
+    if (lootStatsData)
+    {
+        groupStats = lootStatsData->stats->GetStatsForLootId(lootStatsData->groupIdOrItemId);
+    }
+
     // Rolling non-grouped items
     for (auto const& Entrie : Entries)
     {
@@ -2570,16 +2597,31 @@ void LootTemplate::Process(Loot& loot, Player const* lootOwner, bool rate) const
             if (!Referenced)
                 continue;                                   // Error message already printed at loading stage
 
+            std::unique_ptr<LootStatsData> lsData = nullptr;
+            // only used if we want some stats
+            if (lootStatsData)
+            {
+                lsData = std::make_unique<LootStatsData>(Entrie.mincountOrRef, lootStatsData->stats);
+
+                // no need to check groupStats here, if we have a lootStatsPair->first, we have a lootStatsPair->second
+                groupStats->IncItemCount(0, Entrie.mincountOrRef); // register the reference as a loot
+            }
+
             for (uint32 loop = 0; loop < Entrie.maxcount; ++loop) // Ref multiplicator
-                Referenced->Process(loot, lootOwner, rate);
+                Referenced->Process(loot, lootOwner, rate, lsData.get());
         }
         else                                                // Plain entries (not a reference, not grouped)
+        {
             loot.AddItem(Entrie);                               // Chance is already checked, just add
+            // only used if we want some stats
+            if (groupStats)
+                groupStats->IncItemCount(0, Entrie.itemid);
+        }
     }
 
     // Now processing groups
     for (auto const& Group : Groups)
-        Group.Process(loot, lootOwner, rate);
+        Group.Process(loot, lootOwner, rate, lootStatsData);
 }
 
 // True if template includes at least 1 quest drop entry
@@ -3028,15 +3070,20 @@ void LootMgr::CheckDropStats(ChatHandler& chat, uint32 amountOfCheck, uint32 loo
     LootTemplate const* lootTable = store->GetLootFor(lootId);
     if (!lootTable)
     {
-        chat.PSendSysMessage("No table loot found for lootId(%u) in table loot table '%s'.", lootId, store->GetName());
+        if (chat.GetSession())
+            chat.PSendSysMessage("No table loot found for lootId(%u) in table loot table '%s'.", lootId, store->GetName());
+        sLog.outError("No table loot found for lootId(%u) in table loot table '%s'.", lootId, store->GetName());
         return;
     }
+
+    LootStats lootStats;
+    LootStatsData lootStatsData(lootId, &lootStats);
 
     // do the loot drop simulation
     std::unordered_map<uint32, uint32> itemStatsMap;
     for (uint32 i = 1; i <= amountOfCheck; ++i)
     {
-        lootTable->Process(*loot, nullptr, store->IsRatesAllowed());
+        lootTable->Process(*loot, nullptr, store->IsRatesAllowed(), &lootStatsData);
         for (auto lootItem : loot->m_lootItems)
             ++itemStatsMap[lootItem->itemId];
         loot->Clear();
@@ -3044,29 +3091,211 @@ void LootMgr::CheckDropStats(ChatHandler& chat, uint32 amountOfCheck, uint32 loo
 
     // sort the result
     auto comp = [](std::pair<uint32, uint32> const& a, std::pair<uint32, uint32> const& b) { return a.second > b.second; };
-    std::set<std::pair<uint32, uint32>, decltype(comp)> sortedResult(
-        itemStatsMap.begin(), itemStatsMap.end(), comp);
+    std::set<std::pair<uint32, uint32>, decltype(comp)> sortedResult(itemStatsMap.begin(), itemStatsMap.end(), comp);
 
-    // report the result in both chat client and console
-    chat.PSendSysMessage("Results for %u drops simulation of loot id(%u) in %s:", amountOfCheck, lootId, store->GetName());
-    sLog.outString("Results for %u drops simulation of loot id(%u) in %s:", amountOfCheck, lootId, store->GetName());
-    std::stringstream ss;
-    for (auto itemStat : sortedResult)
+    if (full)
     {
-        uint32 itemId = itemStat.first;
-        ItemPrototype const* pProto = sItemStorage.LookupEntry<ItemPrototype >(itemId);
-        if (!pProto)
-            continue;
+        struct LootStatsInfo
+        {
+            using ItemStats = std::pair<int32, uint32>;
+            using GroupStats = std::map<uint32, std::list<ItemStats>>;
 
-        std::string name = pProto->Name1;
-        sObjectMgr.GetItemLocaleStrings(itemId, -1, &name);
-        float computedStats = itemStat.second / float(amountOfCheck) * 100;
-        ss.str("");
-        ss.clear();
-        ss << std::fixed << std::setprecision(4) << computedStats;
-        ss << '%';
-        chat.PSendSysMessage(LANG_ITEM_LIST_CHAT, itemId, itemId, name.c_str(), ss.str().c_str());
-        sLog.outString("%6u - %-45s \tfound %6u/%-6u \tso %8s%% drop", itemStat.first, name.c_str(), itemStat.second, amountOfCheck, ss.str().c_str());
+            int32 lootIdOrRef = 0;
+            GroupStats groupStats;
+        };
+
+        std::list<LootStatsInfo> sortedStats;
+
+        for (auto& lootRef : lootStats.groupStatsMap)
+        {
+            int32 lootIdOrRef = lootRef.first;
+
+            LootStatsInfo* lootStatsInfo = nullptr;
+            if (lootIdOrRef < 0)
+            {
+                auto& lsi = sortedStats.emplace_back();
+                lootStatsInfo = &lsi;
+            }
+            else
+            {
+                auto& lsi = sortedStats.emplace_front();
+                lootStatsInfo = &lsi;
+            }
+
+            lootStatsInfo->lootIdOrRef = lootIdOrRef;
+
+            // for each group, set the items stats and sort them
+            for (auto& group : lootRef.second.groups)
+            {
+                uint32 groupId = group.first;
+                auto& groupStats = lootStatsInfo->groupStats[groupId];
+
+                // fill the group stats with the items stats
+                groupStats.insert(groupStats.end(), group.second.begin(), group.second.end());
+
+                // sort the items stats
+                groupStats.sort(
+                    [](LootStatsInfo::ItemStats const& a, LootStatsInfo::ItemStats const& b)
+                    { return a.second > b.second; }
+                );
+            }
+        }
+
+        // SELECT `name`, `entry` FROM reference_loot_template_names WHERE `entry` in (50502, 50600, 50601, 50650);
+        std::ostringstream stream;
+        std::string refIds;
+        for (auto const& lsi : sortedStats)
+        {
+            int32 lootIdOrRef = lsi.lootIdOrRef;
+            if (lootIdOrRef < 0)
+            {
+                if (refIds.empty())
+                    refIds += std::to_string(-lootIdOrRef);
+                else
+                    refIds += ", " + std::to_string(-lootIdOrRef);
+            }
+
+        }
+        stream << "SELECT `name`, `entry` FROM reference_loot_template_names WHERE `entry` in (" << refIds << ");";
+
+        auto queryResult = WorldDatabase.PQuery(stream.str().c_str());
+
+        std::map<int32, std::string> refNames;
+        if (queryResult)
+        {
+            do
+            {
+                Field* fields = queryResult->Fetch();
+
+                int32 entry = fields[1].GetInt32();
+                std::string name = fields[0].GetString();
+
+                refNames[entry] = name;
+            } while (queryResult->NextRow());
+        }
+
+        if (store == &LootTemplates_Reference)
+        {
+            if (chat.GetSession())
+                chat.PSendSysMessage("Results for %u drops simulation of loot reference id[%u] in %s:", amountOfCheck, lootId, LootTemplates_Reference.GetName());
+            sLog.outString("Results for %u drops simulation of loot reference id[%u] in %s:", amountOfCheck, lootId, LootTemplates_Reference.GetName());
+        }
+        else
+        {
+            if (chat.GetSession())
+                chat.PSendSysMessage("Results for %u drops simulation of loot id[%u] in %s:", amountOfCheck, lootId, store->GetName());
+            sLog.outString("Results for %u drops simulation of loot id[%u] in %s:", amountOfCheck, lootId, store->GetName());
+        }
+
+        std::string const defaultRefName = "No name assigned to this ref!";
+
+        for (auto& lInfo : sortedStats)
+        {
+            int32 lootIdOrRef = lInfo.lootIdOrRef;
+
+            if (lootIdOrRef < 0 || store == &LootTemplates_Reference)
+            {
+                std::string const* refName = &defaultRefName;
+                auto refNameItr = refNames.find(-lootIdOrRef);
+                if (refNameItr != refNames.end())
+                    refName = &refNameItr->second;
+
+                if (chat.GetSession())
+                    chat.PSendSysMessage("In %s[%d] '%s':", LootTemplates_Reference.GetName(), -lootIdOrRef, (*refName).c_str());
+                sLog.outString("In %s[%d] '%s':", LootTemplates_Reference.GetName(), -lootIdOrRef, (*refName).c_str());
+            }
+            else
+            {
+                if (chat.GetSession())
+                    chat.PSendSysMessage("In %s[%d]:", store->GetName(), lootIdOrRef);
+                sLog.outString("In %s[%d]:", store->GetName(), lootIdOrRef);
+            }
+
+            // use stringstream to format item name with color
+            for (auto& groupStats : lInfo.groupStats)
+            {
+                uint32 groupId = groupStats.first;
+                auto& itemsStats = groupStats.second;
+
+                if (chat.GetSession())
+                    chat.PSendSysMessage("Group %u:", groupId);
+                sLog.outString("Group %u:", groupId);
+
+                for (auto& stats : itemsStats)
+                {
+                    int32 itemId = stats.first;
+                    uint32 count = stats.second;
+                    float computedStats = count / float(amountOfCheck) * 100;
+                    stream.str("");
+
+                    ItemPrototype const* pProto = sItemStorage.LookupEntry<ItemPrototype>(itemId);
+                    if (pProto)
+                    {
+                        std::string name = pProto->Name1;
+                        sObjectMgr.GetItemLocaleStrings(itemId, -1, &name);
+                        uint32 color = ItemQualityColors[pProto->Quality];
+
+                        // Build the format string -> "%d - |cffffffff|Hitem:%d :0:0:0:0:0:0:0|h[%s]|h|r %s"
+                        stream << "  - |cffffffff" << std::fixed << std::setprecision(4) << std::setw(8) << std::setfill(' ') << computedStats << "%%|r";
+                        stream << " - [" << std::dec << itemId << "] - |c";
+                        stream << std::hex << std::setw(8) << std::setfill('0') << color;
+                        stream << "|Hitem:" << std::dec << itemId << ":0:0:0:0:0:0:0|h[" << name << "]|h|r ";
+
+                        if (chat.GetSession())
+                            chat.PSendSysMessage(stream.str().c_str());
+                        sLog.outString("%8d - %-45s \tfound %6u/%-6u \tso %8s%% drop", itemId, name.c_str(), count, amountOfCheck, std::to_string(computedStats).c_str());
+                    }
+                    else
+                    {
+                        std::string const* refName = &defaultRefName;
+                        auto refNameItr = refNames.find(-itemId);
+                        if (refNameItr != refNames.end())
+                            refName = &refNameItr->second;
+                        // Build the format string -> "%d - Reference [%d] %f%%"
+                        stream << "  - |cffffffff" << std::fixed << std::setprecision(4) << std::setw(8) << std::setfill(' ') << computedStats << "%%|r - [";
+                        stream << std::dec << -itemId << "] - " << *refName;
+                        if (chat.GetSession())
+                            chat.PSendSysMessage(stream.str().c_str());
+                        sLog.outString("%8d - %-45s \tfound %6u/%-6u \tso %8s%% drop", itemId, (*refName).c_str(), count, amountOfCheck, std::to_string(computedStats).c_str());
+                    }
+                }
+            }
+
+            if (chat.GetSession())
+                chat.PSendSysMessage("----------------------");
+            sLog.outString("----------------------");
+        }
+    }
+    else
+    {
+        // report the result in both chat client and console
+        if (chat.GetSession())
+            chat.PSendSysMessage("Results for %u drops simulation of loot id(%u) in %s:", amountOfCheck, lootId, store->GetName());
+        sLog.outString("Results for %u drops simulation of loot id(%u) in %s:", amountOfCheck, lootId, store->GetName());
+        std::stringstream ss;
+        for (auto itemStat : sortedResult)
+        {
+            uint32 itemId = itemStat.first;
+            ItemPrototype const* pProto = sItemStorage.LookupEntry<ItemPrototype >(itemId);
+            if (!pProto)
+                continue;
+
+            ss.str("");
+            std::string name = pProto->Name1;
+            sObjectMgr.GetItemLocaleStrings(itemId, -1, &name);
+            float computedStats = itemStat.second / float(amountOfCheck) * 100;
+            uint32 color = ItemQualityColors[pProto->Quality];
+
+            // Build the format string -> "%d - |cffffffff|Hitem:%d :0:0:0:0:0:0:0|h[%s]|h|r %s"
+            ss << "  - |cffffffff" << std::fixed << std::setprecision(4) << std::setw(8) << std::setfill(' ') << computedStats << "%%|r";
+            ss << " - [" << std::dec << itemId << "] - |c";
+            ss << std::hex << std::setw(8) << std::setfill('0') << color;
+            ss << "|Hitem:" << std::dec << itemId << ":0:0:0:0:0:0:0|h[" << name << "]|h|r ";
+
+            if (chat.GetSession())
+                chat.PSendSysMessage(ss.str().c_str());
+            sLog.outString("%6u - %-45s \tfound %6u/%-6u \tso %8s%% drop", itemStat.first, name.c_str(), itemStat.second, amountOfCheck, ss.str().c_str());
+        }
     }
 }
 

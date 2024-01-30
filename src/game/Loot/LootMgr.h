@@ -123,6 +123,44 @@ enum LootError
     LOOT_ERROR_NOT_WHILE_SHAPESHIFTED   = 16    // You can't do that while shapeshifted.
 };
 
+struct LootStats
+{
+    // itemId and count
+    struct GroupStats
+    {
+        using ItemStatsPair = std::map<int32, uint32>;
+        using GroupStatsMap = std::map<uint32, ItemStatsPair>;
+
+        GroupStatsMap groups;
+
+        void IncItemCount(uint32 group, int32 itemId)
+        {
+            ++groups[group][itemId];
+        }
+    };
+
+    // lootId and item stats
+    std::map<int32, GroupStats> groupStatsMap;
+
+    GroupStats* GetStatsForLootId(int32 lootId)
+    {
+        return &groupStatsMap[lootId];
+    }
+};
+
+struct LootStatsData
+{
+    LootStatsData() = delete;
+    LootStatsData(uint32 _groupIdOrItemId, LootStats* _stats)
+        : groupIdOrItemId(_groupIdOrItemId), stats(_stats)
+    {}
+
+    uint32 groupIdOrItemId;
+    LootStats* stats;
+};
+
+using LootStatsUPtr = std::unique_ptr<LootStats>;
+
 struct PlayerRollVote
 {
     PlayerRollVote() : vote(ROLL_NOT_VALID), number(0) {}
@@ -243,9 +281,11 @@ class LootStore
         char const* GetName() const { return m_name; }
         char const* GetEntryName() const { return m_entryName; }
         bool IsRatesAllowed() const { return m_ratesAllowed; }
+
     protected:
         void LoadLootTable();
         void Clear();
+
     private:
         LootTemplateMap m_LootTemplates;
         char const* m_name;
@@ -264,12 +304,13 @@ class LootTemplate
                 bool HasQuestDropForPlayer(Player const* player) const;
                 // The same for active quests of the player
                 // Rolls an item from the group (if any) and adds the item to the loot
-                void Process(Loot& loot, Player const* lootOwner, bool rate) const;
+                void Process(Loot& loot, Player const* lootOwner, bool rate, LootStatsData* lootStats = nullptr) const;
                 float RawTotalChance() const;                       // Overall chance for the group (without equal chanced items)
                 float TotalChance() const;                          // Overall chance for the group
 
                 void Verify(LootStore const& lootstore, uint32 id, uint32 group_id) const;
                 bool CheckLootRefs(LootIdSet* ref_set, LootIdSet& prevRefs);
+
             private:
                 LootStoreItemList ExplicitlyChanced;                // Entries with chances defined in DB
                 LootStoreItemList EqualChanced;                     // Zero chances - every entry takes the same chance
@@ -283,13 +324,13 @@ class LootTemplate
         // Adds an entry to the group (at loading stage)
         void AddEntry(LootStoreItem& item);
         // Rolls for every item in the template and adds the rolled items the the loot
-        void Process(Loot& loot, Player const* lootOwner, bool rate) const;
+        void Process(Loot& loot, Player const* lootOwner, bool rate, LootStatsData* lootStatsData = nullptr) const;
 
         // True if template includes at least 1 quest drop entry
         bool HasQuestDrop(LootTemplateMap const& store, uint8 groupId = 0) const;
         // True if template includes at least 1 quest drop for an active quest of the player
         bool HasQuestDropForPlayer(LootTemplateMap const& store, Player const* player, uint8 groupId = 0) const;
-        // True if at least one player fulfils loot condition
+        // True if at least one player fulfills loot condition
         static bool PlayerOrGroupFulfilsCondition(const Loot& loot, Player const* lootOwner, uint16 conditionId);
 
         // Checks integrity of the template
