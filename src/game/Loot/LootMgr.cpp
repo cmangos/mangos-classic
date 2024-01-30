@@ -172,15 +172,12 @@ void LootStore::LoadLootTable()
                 }
             }
 
-            LootStoreItem storeitem = LootStoreItem(item, chanceOrQuestChance, group, conditionId, mincountOrRef, maxcount);
-
-            if (!storeitem.IsValid(*this, entry))           // Validity checks
+            // Validity checks
+            if (!IsValidItemTemplate(entry, item, group, mincountOrRef, chanceOrQuestChance, maxcount))
                 continue;
 
-            LootTemplate* currenTpl = &m_LootTemplates[entry];
-
-            // Adds current row to the template
-            currenTpl->AddEntry(storeitem);
+            // Add the item to the loot store
+            m_LootTemplates[entry].AddEntry(LootStoreItem(item, chanceOrQuestChance, group, conditionId, mincountOrRef, maxcount));
             ++count;
         }
         while (queryResult->NextRow());
@@ -308,6 +305,64 @@ bool LootStore::HaveLootFor(uint32 loot_id) const
     return m_LootTemplates.find(loot_id) != m_LootTemplates.end();
 }
 
+bool LootStore::IsValidItemTemplate(uint32 entry, uint32 itemId, uint32 group, int32 mincountOrRef, float chanceOrQuestChance, uint32 maxCount) const
+{
+    float chance = fabs(chanceOrQuestChance);
+    if (group >= 1 << 7)                                    // it stored in 7 bit field
+    {
+        sLog.outErrorDb("Table '%s' entry %d item %d: group (%u) must be less %u - skipped", GetName(), entry, itemId, group, 1 << 7);
+        return false;
+    }
+
+    if (mincountOrRef == 0)
+    {
+        sLog.outErrorDb("Table '%s' entry %d item %d: wrong mincountOrRef (%d) - skipped", GetName(), entry, itemId, mincountOrRef);
+        return false;
+    }
+
+    if (mincountOrRef > 0)                                  // item (quest or non-quest) entry, maybe grouped
+    {
+        ItemPrototype const* proto = ObjectMgr::GetItemPrototype(itemId);
+        if (!proto)
+        {
+            sLog.outErrorDb("Table '%s' entry %d item %d: item entry not listed in `item_template` - skipped", GetName(), entry, itemId);
+            return false;
+        }
+
+        if (chance == 0 && group == 0)                      // Zero chance is allowed for grouped entries only
+        {
+            sLog.outErrorDb("Table '%s' entry %d item %d: equal-chanced grouped entry, but group not defined - skipped", GetName(), entry, itemId);
+            return false;
+        }
+
+        if (chance != 0 && chance < 0.000001f)              // loot with low chance
+        {
+            sLog.outErrorDb("Table '%s' entry %d item %d: low chance (%f) - skipped", GetName(), entry, itemId, chance);
+            return false;
+        }
+
+        if (maxCount < mincountOrRef)                       // wrong max count
+        {
+            sLog.outErrorDb("Table '%s' entry %d item %d: max count (%u) less that min count (%i) - skipped", GetName(), entry, itemId, uint32(maxCount), mincountOrRef);
+            return false;
+        }
+    }
+    else                                                    // mincountOrRef < 0
+    {
+        if (chanceOrQuestChance < 0)
+        {
+            sLog.outErrorDb("Table '%s' entry %d item %d: negative chance is given for a reference, skipped", GetName(), entry, itemId);
+            return false;
+        }
+        if (chance == 0 && group == 0)                      // no chance for the reference
+        {
+            sLog.outErrorDb("Table '%s' entry %d item %d: zero chance is given for a reference, reference will never be used, skipped", GetName(), entry, itemId);
+            return false;
+        }
+    }
+    return true;                                            // Referenced template existence is checked at whole store level
+}
+
 //
 // --------- LootStoreItem ---------
 //
@@ -330,64 +385,6 @@ bool LootStoreItem::Roll(bool rate) const
     float qualityModifier = pProto && rate ? sWorld.getConfig(qualityToRate[pProto->Quality]) : 1.0f;
 
     return roll_chance_f(chance * qualityModifier);
-}
-
-// Checks correctness of values
-bool LootStoreItem::IsValid(LootStore const& store, uint32 entry) const
-{
-    if (group >= 1 << 7)                                    // it stored in 7 bit field
-    {
-        sLog.outErrorDb("Table '%s' entry %d item %d: group (%u) must be less %u - skipped", store.GetName(), entry, itemid, group, 1 << 7);
-        return false;
-    }
-
-    if (mincountOrRef == 0)
-    {
-        sLog.outErrorDb("Table '%s' entry %d item %d: wrong mincountOrRef (%d) - skipped", store.GetName(), entry, itemid, mincountOrRef);
-        return false;
-    }
-
-    if (mincountOrRef > 0)                                  // item (quest or non-quest) entry, maybe grouped
-    {
-        ItemPrototype const* proto = ObjectMgr::GetItemPrototype(itemid);
-        if (!proto)
-        {
-            sLog.outErrorDb("Table '%s' entry %d item %d: item entry not listed in `item_template` - skipped", store.GetName(), entry, itemid);
-            return false;
-        }
-
-        if (chance == 0 && group == 0)                      // Zero chance is allowed for grouped entries only
-        {
-            sLog.outErrorDb("Table '%s' entry %d item %d: equal-chanced grouped entry, but group not defined - skipped", store.GetName(), entry, itemid);
-            return false;
-        }
-
-        if (chance != 0 && chance < 0.000001f)              // loot with low chance
-        {
-            sLog.outErrorDb("Table '%s' entry %d item %d: low chance (%f) - skipped", store.GetName(), entry, itemid, chance);
-            return false;
-        }
-
-        if (maxcount < mincountOrRef)                       // wrong max count
-        {
-            sLog.outErrorDb("Table '%s' entry %d item %d: max count (%u) less that min count (%i) - skipped", store.GetName(), entry, itemid, uint32(maxcount), mincountOrRef);
-            return false;
-        }
-    }
-    else                                                    // mincountOrRef < 0
-    {
-        if (needs_quest)
-        {
-            sLog.outErrorDb("Table '%s' entry %d item %d: negative chance is given for a reference, skipped", store.GetName(), entry, itemid);
-            return false;
-        }
-        if (chance == 0 && group == 0)                      // no chance for the reference
-        {
-            sLog.outErrorDb("Table '%s' entry %d item %d: zero chance is given for a reference, reference will never be used, skipped", store.GetName(), entry, itemid);
-            return false;
-        }
-    }
-    return true;                                            // Referenced template existence is checked at whole store level
 }
 
 //

@@ -216,8 +216,6 @@ struct LootStoreItem
     {}
 
     bool Roll(bool rate) const;                             // Checks if the entry takes it's chance (at loot generation)
-    bool IsValid(LootStore const& store, uint32 entry) const;
-    // Checks correctness of values
 };
 
 struct LootItem
@@ -281,6 +279,9 @@ class LootStore
         char const* GetName() const { return m_name; }
         char const* GetEntryName() const { return m_entryName; }
         bool IsRatesAllowed() const { return m_ratesAllowed; }
+
+        // Checks if drop rules are valid for the item
+        bool IsValidItemTemplate(uint32 entry, uint32 itemId, uint32 group, int32 mincountOrRef, float chance, uint32 maxCount) const;
 
     protected:
         void LoadLootTable();
