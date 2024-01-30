@@ -25,7 +25,7 @@
 
 #include "Common.h"
 
-enum eAuthCmd
+enum eAuthCmd : uint8
 {
     CMD_AUTH_LOGON_CHALLENGE        = 0x00,
     CMD_AUTH_LOGON_PROOF            = 0x01,

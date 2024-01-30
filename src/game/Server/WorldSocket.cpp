@@ -41,6 +41,7 @@
 
 #include <boost/asio.hpp>
 #include <utility>
+#include <vector>
 
 #if defined( __GNUC__ )
 #pragma pack(1)
@@ -51,6 +52,14 @@ struct ServerPktHeader
 {
     uint16 size;
     uint16 cmd;
+
+    const char* data() const {
+        return reinterpret_cast<const char*>(this);
+}
+
+    std::size_t headerSize() const {
+        return sizeof(ServerPktHeader);
+    }
 };
 #if defined( __GNUC__ )
 #pragma pack()
@@ -83,8 +92,8 @@ std::deque<uint32> WorldSocket::GetIncOpcodeHistory()
     return m_opcodeHistoryInc;
 }
 
-WorldSocket::WorldSocket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler) : Socket(service, std::move(closeHandler)), m_lastPingTime(std::chrono::system_clock::time_point::min()), m_overSpeedPings(0), m_existingHeader(),
-    m_useExistingHeader(false), m_session(nullptr), m_seed(urand()), m_loggingPackets(false)
+WorldSocket::WorldSocket(boost::asio::io_service& service) : AsyncSocket(service), m_lastPingTime(std::chrono::system_clock::time_point::min()), m_overSpeedPings(0),
+    m_session(nullptr), m_seed(urand()), m_loggingPackets(false)
 {
 }
 
@@ -112,24 +121,31 @@ void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
 
     m_crypt.EncryptSend(reinterpret_cast<uint8*>(&header), sizeof(header));
 
-    if (pct.size() > 0)
-        Write(reinterpret_cast<const char*>(&header), sizeof(header), reinterpret_cast<const char*>(pct.contents()), pct.size());
-    else
-        Write(reinterpret_cast<const char*>(&header), sizeof(header));
+    uint32 opcode = pct.GetOpcode();
 
-    if (immediate)
-        ForceFlushOut();
-
-    m_opcodeHistoryOut.push_front(uint32(pct.GetOpcode()));
+    m_opcodeHistoryOut.push_front(uint32(opcode));
     if (m_opcodeHistoryOut.size() > 50)
         m_opcodeHistoryOut.resize(30);
+
+    if (pct.size() > 0)
+    {
+        // allocate array for full message
+        std::shared_ptr<std::vector<char>> fullMessage = std::make_shared<std::vector<char>>(sizeof(header) + pct.size());
+        std::memcpy(fullMessage->data(), reinterpret_cast<const char*>(&header), sizeof(header)); // copy header
+        std::memcpy((fullMessage->data() + sizeof(header)), reinterpret_cast<const char*>(pct.contents()), pct.size()); // copy packet
+        auto self(shared_from_this());
+        Write(fullMessage->data(), fullMessage->size(), [self, fullMessage](const boost::system::error_code& error, std::size_t read) {});
+    }
+    else
+    {
+        std::shared_ptr<ServerPktHeader> sharedHeader = std::make_shared<ServerPktHeader>(header);
+        auto self(shared_from_this());
+        Write(sharedHeader->data(), sharedHeader->headerSize(), [self, sharedHeader](const boost::system::error_code& error, std::size_t read) {});
+    }
 }
 
-bool WorldSocket::Open()
+bool WorldSocket::OnOpen()
 {
-    if (!Socket::Open())
-        return false;
-
     // Send startup packet.
     WorldPacket packet(SMSG_AUTH_CHALLENGE, 40);
     packet << m_seed;
@@ -149,142 +165,100 @@ bool WorldSocket::Open()
 
 bool WorldSocket::ProcessIncomingData()
 {
-    ClientPktHeader header;
+    std::shared_ptr<ClientPktHeader> header = std::make_shared<ClientPktHeader>();
 
-    if (m_useExistingHeader)
+    auto self(shared_from_this());
+    Read((char*)header.get(), sizeof(ClientPktHeader), [self, header](const boost::system::error_code& error, std::size_t read) -> void
     {
-        m_useExistingHeader = false;
-        header = m_existingHeader;
-
-        ReadSkip(sizeof(ClientPktHeader));
-    }
-    else
-    {
-        if (!Read((char*)&header, sizeof(ClientPktHeader)))
-        {
-            errno = EBADMSG;
-            return false;
-        }
-
+        if (error) return;
         // thread safe due to always being called from service context
-        m_crypt.DecryptRecv((uint8*)&header, sizeof(ClientPktHeader));
+        self->m_crypt.DecryptRecv((uint8*)header.get(), sizeof(ClientPktHeader));
 
-        EndianConvertReverse(header.size);
-        EndianConvert(header.cmd);
-    }
+        EndianConvertReverse(header->size);
+        EndianConvert(header->cmd);
 
-    // there must always be at least four bytes for the opcode,
-    // and 0x2800 is the largest supported buffer in the client
-    if ((header.size < 4) || (header.size > 0x2800) || (header.cmd >= NUM_MSG_TYPES))
-    {
-        sLog.outError("WorldSocket::ProcessIncomingData: client sent malformed packet size = %u , cmd = %u", header.size, header.cmd);
+        const Opcodes opcode = static_cast<Opcodes>(header->cmd);
 
-        errno = EINVAL;
-        return false;
-    }
+        size_t packetSize = header->size - 4;
+        std::shared_ptr<std::vector<uint8>> packetBuffer = std::make_shared<std::vector<uint8>>(packetSize);
 
-    // the minus four is because we've already read the four byte opcode value
-    const uint16 validBytesRemaining = header.size - 4;
-
-    // check if the client has told us that there is more data than there is
-    if (validBytesRemaining > ReadLengthRemaining())
-    {
-        // we must preserve the decrypted header so as not to corrupt the crypto state, and to prevent duplicating work
-        m_useExistingHeader = true;
-        m_existingHeader = header;
-
-        // we move the read pointer backward because it will be skipped again later.  this is a slight kludge, but to solve
-        // it more elegantly would require introducing protocol awareness into the socket library, which we want to avoid
-        ReadSkip(-static_cast<int>(sizeof(ClientPktHeader)));
-
-        errno = EBADMSG;
-        return false;
-    }
-
-    const Opcodes opcode = static_cast<Opcodes>(header.cmd);
-
-    if (IsClosed())
-        return false;
-
-    std::unique_ptr<WorldPacket> pct(new WorldPacket(opcode, validBytesRemaining));
-
-    if (validBytesRemaining)
-    {
-        pct->append(InPeak(), validBytesRemaining);
-        ReadSkip(validBytesRemaining);
-    }
-
-    if (sPacketLog->CanLogPacket() && IsLoggingPackets())
-        sPacketLog->LogPacket(*pct, CLIENT_TO_SERVER, GetRemoteIpAddress(), GetRemotePort());
-
-    sLog.outWorldPacketDump(GetRemoteEndpoint().c_str(), pct->GetOpcode(), pct->GetOpcodeName(), *pct, true);
-
-    if (WorldSocket::m_packetCooldowns[opcode])
-    {
-        auto now = std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::now());
-        if (now < m_lastPacket[opcode]) // packet on cooldown
-            return true;
-        else // start cooldown and allow execution
-            m_lastPacket[opcode] = now + std::chrono::milliseconds(WorldSocket::m_packetCooldowns[opcode]);
-    }
-
-    try
-    {
-        switch (opcode)
+        self->Read(reinterpret_cast<char*>(packetBuffer->data()), packetBuffer->size(), [self, packetBuffer, opcode, packetSize](const boost::system::error_code& error, std::size_t read) -> void
         {
-            case CMSG_AUTH_SESSION:
-                if (m_session)
-                {
-                    sLog.outError("WorldSocket::ProcessIncomingData: Player send CMSG_AUTH_SESSION again");
-                    return false;
-                }
+            std::unique_ptr<WorldPacket> pct = std::make_unique<WorldPacket>(opcode, packetSize);
+            pct->append(*packetBuffer.get());
+            if (sPacketLog->CanLogPacket() && self->IsLoggingPackets())
+                sPacketLog->LogPacket(*pct, CLIENT_TO_SERVER, self->GetRemoteIpAddress(), self->GetRemotePort());
 
-                return HandleAuthSession(*pct);
+            sLog.outWorldPacketDump(self->GetRemoteEndpoint().c_str(), pct->GetOpcode(), pct->GetOpcodeName(), *pct, true);
 
-            case CMSG_PING:
-                return HandlePing(*pct);
-
-            case CMSG_KEEP_ALIVE:
-                DEBUG_LOG("CMSG_KEEP_ALIVE ,size: " SIZEFMTD " ", pct->size());
-
-                return true;
-
-            default:
+            if (WorldSocket::m_packetCooldowns[opcode])
             {
-                m_opcodeHistoryInc.push_front(uint32(pct->GetOpcode()));
-                if (m_opcodeHistoryInc.size() > 50)
-                    m_opcodeHistoryInc.resize(30);
+                auto now = std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::now());
+                if (now < self->m_lastPacket[opcode]) // packet on cooldown
+                    return;
+                else // start cooldown and allow execution
+                    self->m_lastPacket[opcode] = now + std::chrono::milliseconds(WorldSocket::m_packetCooldowns[opcode]);
+            }
 
-                if (!m_session)
+            try
+            {
+                switch (opcode)
                 {
-                    sLog.outError("WorldSocket::ProcessIncomingData: Client not authed opcode = %u", uint32(opcode));
-                    return false;
+                    case CMSG_AUTH_SESSION:
+                        if (self->m_session)
+                        {
+                            sLog.outError("WorldSocket::ProcessIncomingData: Player send CMSG_AUTH_SESSION again");
+                            return;
+                        }
+
+                        if (!self->HandleAuthSession(*pct))
+                            return;
+                        break;
+                    case CMSG_PING:
+                        if (!self->HandlePing(*pct))
+                            return;
+                        break;
+                    case CMSG_KEEP_ALIVE:
+                        DEBUG_LOG("CMSG_KEEP_ALIVE, size: " SIZEFMTD " ", pct->size());
+                        break;
+                    default:
+                    {
+                        self->m_opcodeHistoryInc.push_front(uint32(pct->GetOpcode()));
+                        if (self->m_opcodeHistoryInc.size() > 50)
+                            self->m_opcodeHistoryInc.resize(30);
+
+                        if (!self->m_session)
+                        {
+                            sLog.outError("WorldSocket::ProcessIncomingData: Client not authed opcode = %u", uint32(opcode));
+                            return;
+                        }
+
+                        self->m_session->QueuePacket(std::move(pct));
+                        break;
+                    }
+                }
+            }
+            catch (ByteBufferException&)
+            {
+                sLog.outError("WorldSocket::ProcessIncomingData ByteBufferException occured while parsing an instant handled packet (opcode: %u) from client %s, accountid=%i.",
+                    opcode, self->GetRemoteAddress().c_str(), self->m_session ? self->m_session->GetAccountId() : -1);
+
+                if (sLog.HasLogLevelOrHigher(LOG_LVL_DEBUG))
+                {
+                    DEBUG_LOG("Dumping error-causing packet:");
+                    pct->hexlike();
                 }
 
-                m_session->QueuePacket(std::move(pct));
-
-                return true;
+                if (sWorld.getConfig(CONFIG_BOOL_KICK_PLAYER_ON_BAD_PACKET))
+                {
+                    DETAIL_LOG("Disconnecting session [account id %i / address %s] for badly formatted packet.",
+                        self->m_session ? self->m_session->GetAccountId() : -1, self->GetRemoteAddress().c_str());
+                    return;
+                }
             }
-        }
-    }
-    catch (ByteBufferException&)
-    {
-        sLog.outError("WorldSocket::ProcessIncomingData ByteBufferException occured while parsing an instant handled packet (opcode: %u) from client %s, accountid=%i.",
-                      opcode, GetRemoteAddress().c_str(), m_session ? m_session->GetAccountId() : -1);
-
-        if (sLog.HasLogLevelOrHigher(LOG_LVL_DEBUG))
-        {
-            DEBUG_LOG("Dumping error-causing packet:");
-            pct->hexlike();
-        }
-
-        if (sWorld.getConfig(CONFIG_BOOL_KICK_PLAYER_ON_BAD_PACKET))
-        {
-            DETAIL_LOG("Disconnecting session [account id %i / address %s] for badly formatted packet.",
-                       m_session ? m_session->GetAccountId() : -1, GetRemoteAddress().c_str());
-            return false;
-        }
-    }
+            self->ProcessIncomingData();
+        });
+    });
 
     return true;
 }

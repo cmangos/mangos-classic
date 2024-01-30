@@ -39,8 +39,10 @@
 #include "Config/Config.h"
 #include "Database/DatabaseEnv.h"
 #include "Policies/Singleton.h"
-#include "Network/Listener.hpp"
-#include "Network/Socket.hpp"
+#include "Network/AsyncListener.hpp"
+#include "Network/AsyncSocket.hpp"
+
+#include <boost/thread.hpp>
 
 #include <memory>
 
@@ -216,17 +218,30 @@ int Master::Run()
     }
 
     {
-        int32 networkThreadWorker = sConfig.GetIntDefault("Network.Threads", 1);
-        if (networkThreadWorker <= 0)
+        int32 networkThreadCount = sConfig.GetIntDefault("Network.Threads", 1);
+        if (networkThreadCount <= 0)
         {
-            sLog.outError("Invalid network thread workers setting in mangosd.conf. (%d) should be > 0", networkThreadWorker);
-            networkThreadWorker = 1;
+            sLog.outError("Invalid network thread workers setting in mangosd.conf. (%d) should be > 0", networkThreadCount);
+            networkThreadCount = 1;
         }
-        MaNGOS::Listener<WorldSocket> listener(sConfig.GetStringDefault("BindIP", "0.0.0.0"), int32(sWorld.getConfig(CONFIG_UINT32_PORT_WORLD)), networkThreadWorker);
+        std::string bindIp = sConfig.GetStringDefault("BindIP", "0.0.0.0");
+        int32 port = int32(sWorld.getConfig(CONFIG_UINT32_PORT_WORLD));
+        MaNGOS::AsyncListener<WorldSocket> listener(m_service, bindIp, port);
 
-        std::unique_ptr<MaNGOS::Listener<RASocket>> raListener;
-        if (sConfig.GetBoolDefault("Ra.Enable", false))
-            raListener.reset(new MaNGOS::Listener<RASocket>(sConfig.GetStringDefault("Ra.IP", "0.0.0.0"), sConfig.GetIntDefault("Ra.Port", 3443), 1));
+        std::vector<std::thread> threads;
+        for (int32 i = 0; i < networkThreadCount; ++i)
+            threads.emplace_back([&]() { m_service.run(); });
+
+        std::unique_ptr<MaNGOS::AsyncListener<RASocket>> raListener;
+        std::string raBindIp = sConfig.GetStringDefault("Ra.IP", "0.0.0.0");
+        int32 raPort = sConfig.GetIntDefault("Ra.Port", 3443);
+        std::thread m_raThread;
+        bool raEnable = sConfig.GetBoolDefault("Ra.Enable", false);
+        if (raEnable)
+        {
+            raListener.reset(new MaNGOS::AsyncListener<RASocket>(m_raService, raBindIp, raPort));
+            m_raThread = std::thread([this]() { m_raService.run(); });
+        }
 
         std::unique_ptr<SOAPThread> soapThread;
         if (sConfig.GetBoolDefault("SOAP.Enabled", false))
@@ -237,6 +252,17 @@ int Master::Run()
             std::this_thread::sleep_for(std::chrono::seconds(1));
 
         world_thread.wait();
+
+        m_service.stop();
+
+        if (raEnable)
+        {
+            m_raService.stop();
+            m_raThread.join();
+        }
+
+        for (int32 i = 0; i < networkThreadCount; ++i)
+            threads[i].join();
     }
 
     ///- Stop freeze protection before shutdown tasks

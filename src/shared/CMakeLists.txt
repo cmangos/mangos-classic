@@ -97,14 +97,8 @@ if(BUILD_METRICS)
 endif()
 
 set(SRC_GRP_NETWORK
-    Network/Listener.cpp
-    Network/Listener.hpp
-    Network/NetworkThread.cpp
-    Network/NetworkThread.hpp
-    Network/PacketBuffer.cpp
-    Network/PacketBuffer.hpp
-    Network/Socket.cpp
-    Network/Socket.hpp
+    Network/AsyncSocket.hpp
+    Network/AsyncListener.hpp
 )
 
 set(SRC_GRP_PLATFORM

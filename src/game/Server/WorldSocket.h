@@ -28,7 +28,7 @@
 #include "Common.h"
 #include "AuthCrypt.h"
 #include "Auth/BigNumber.h"
-#include "Network/Socket.hpp"
+#include "Network/AsyncSocket.hpp"
 
 #include <chrono>
 #include <functional>
@@ -74,7 +74,7 @@ class WorldSession;
  *
  */
 
-class WorldSocket : public MaNGOS::Socket
+class WorldSocket : public MaNGOS::AsyncSocket<WorldSocket>
 {
     private:
 #if defined( __GNUC__ )
@@ -98,9 +98,6 @@ class WorldSocket : public MaNGOS::Socket
 
         /// Keep track of over-speed pings ,to prevent ping flood.
         uint32 m_overSpeedPings;
-
-        ClientPktHeader m_existingHeader;
-        bool m_useExistingHeader;
 
         /// Class used for managing encryption of the headers
         AuthCrypt m_crypt;
@@ -129,14 +126,14 @@ class WorldSocket : public MaNGOS::Socket
         bool m_loggingPackets;
 
     public:
-        WorldSocket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler);
+        WorldSocket(boost::asio::io_service& service);
 
         // send a packet \o/
         void SendPacket(const WorldPacket& pct, bool immediate = false);
 
         void FinalizeSession() { m_session = nullptr; }
 
-        virtual bool Open() override;
+        bool OnOpen() override;
 
         /// Return the session key
         BigNumber& GetSessionKey() { return m_s; }

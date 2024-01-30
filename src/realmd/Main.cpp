@@ -31,7 +31,7 @@
 #include "revision.h"
 #include "revision_sql.h"
 #include "Util/Util.h"
-#include "Network/Listener.hpp"
+#include "Network/AsyncListener.hpp"
 
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
@@ -41,6 +41,7 @@
 
 #include <boost/program_options.hpp>
 #include <boost/version.hpp>
+#include <boost/thread.hpp>
 
 #include <iostream>
 #include <string>
@@ -70,6 +71,8 @@ void HookSignals();
 bool stopEvent = false;                                     ///< Setting it to true stops the server
 
 DatabaseType LoginDatabase;                                 ///< Accessor to the realm server database
+
+boost::asio::io_service service;
 
 /// Launch the realm server
 int main(int argc, char* argv[])
@@ -232,12 +235,15 @@ int main(int argc, char* argv[])
     LoginDatabase.Execute("DELETE FROM ip_banned WHERE expires_at<=" _UNIXTIME_ " AND expires_at<>banned_at");
     LoginDatabase.CommitTransaction();
 
-    // FIXME - more intelligent selection of thread count is needed here.  config option?
-    MaNGOS::Listener<AuthSocket> listener(
+    uint32 networkThreadCount = sConfig.GetIntDefault("ListenerThreads", 1);
+    MaNGOS::AsyncListener<AuthSocket> listener(service,
             sConfig.GetStringDefault("BindIP", "0.0.0.0"),
-            sConfig.GetIntDefault("RealmServerPort", DEFAULT_REALMSERVER_PORT),
-            sConfig.GetIntDefault("ListenerThreads", 1)
+            sConfig.GetIntDefault("RealmServerPort", DEFAULT_REALMSERVER_PORT)
     );
+
+    std::vector<std::thread> threads;
+    for (uint32 i = 0; i < networkThreadCount; ++i)
+        threads.emplace_back([&]() { service.run(); });
 
     ///- Catch termination signals
     HookSignals();
@@ -310,6 +316,11 @@ int main(int argc, char* argv[])
         while (m_ServiceStatus == 2) Sleep(1000);
 #endif
     }
+
+    service.stop();
+
+    for (uint32 i = 0; i < networkThreadCount; ++i)
+        threads[i].join();
 
     ///- Wait for the delay thread to exit
     LoginDatabase.HaltDelayThread();

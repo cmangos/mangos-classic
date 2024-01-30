@@ -29,7 +29,7 @@
 #include "Auth/SRP6.h"
 #include "Util/ByteBuffer.h"
 
-#include "Network/Socket.hpp"
+#include "Network/AsyncSocket.hpp"
 
 #include <boost/asio.hpp>
 
@@ -37,14 +37,16 @@
 
 #define HMAC_RES_SIZE 20
 
-class AuthSocket : public MaNGOS::Socket
+struct sAuthLogonProof_C;
+
+class AuthSocket : public MaNGOS::AsyncSocket<AuthSocket>
 {
     public:
         const static int s_BYTE_SIZE = 32;
 
-        AuthSocket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler);
+        AuthSocket(boost::asio::io_service& service);
 
-        bool Open() override;
+        bool OnOpen() override;
 
         void SendProof(Sha1Hash sha);
         void LoadRealmlist(ByteBuffer& pkt, uint32 acctid, uint8 accountSecurityLevel = 0);
@@ -65,6 +67,8 @@ class AuthSocket : public MaNGOS::Socket
         bool _HandleXferAccept();
 
     private:
+        void verifyVersionAndFinalizeAuthentication(std::shared_ptr<sAuthLogonProof_C> lp);
+
         enum eStatus
         {
             STATUS_CHALLENGE,

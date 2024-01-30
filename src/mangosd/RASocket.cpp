@@ -37,8 +37,8 @@
 #include <string>
 
 /// RASocket constructor
-RASocket::RASocket(boost::asio::io_service& service, std::function<void(Socket*)> closeHandler) :
-    MaNGOS::Socket(service, std::move(closeHandler)), m_secure(sConfig.GetBoolDefault("RA.Secure", true)),
+RASocket::RASocket(boost::asio::io_service& service) :
+    MaNGOS::AsyncSocket<RASocket>(service), m_secure(sConfig.GetBoolDefault("RA.Secure", true)),
     m_authLevel(AuthLevel::None), m_accountLevel(AccountTypes::SEC_PLAYER), m_accountId(0)
 {
     if (sConfig.IsSet("RA.Stricted"))
@@ -57,12 +57,9 @@ RASocket::~RASocket()
 }
 
 /// Accept an incoming connection
-bool RASocket::Open()
+bool RASocket::OnOpen()
 {
-    if (!Socket::Open())
-        return false;
-
-    sLog.outRALog("Incoming connection from %s.", m_address.c_str());
+    sLog.outRALog("Incoming connection from %s.", GetRemoteAddress().c_str());
 
     ///- print Motd
     Send(sWorld.GetMotd());
@@ -77,29 +74,31 @@ bool RASocket::ProcessIncomingData()
 {
     DEBUG_LOG("RASocket::ProcessIncomingData");
 
-    std::string buffer;
-    buffer.resize(ReadLengthRemaining());
-    Read(&buffer[0], buffer.size());
-
-    static const std::string NEWLINE = "\n\r";
-
-    auto pos = 0;
-
-    while (pos != std::string::npos)
+    std::shared_ptr<std::string> buffer = std::make_shared<std::string>();
+    auto self = shared_from_this();
+    ReadUntil(*buffer.get(), '\n', [self, buffer](const boost::system::error_code& error, std::size_t read)
     {
-        auto newLine = buffer.find_first_of(NEWLINE, pos);
+        static const std::string NEWLINE = "\n\r";
 
-        m_input += buffer.substr(pos, newLine - pos);
+        auto pos = 0;
 
-        pos = buffer.find_first_not_of(NEWLINE, newLine);
+        while (pos != std::string::npos)
+        {
+            auto newLine = buffer->find_first_of(NEWLINE, pos);
 
-        if (newLine == std::string::npos)
-            break;
+            self->m_input += buffer->substr(pos, newLine - pos);
 
-        if (!HandleInput())
-            return false;
-    }
+            pos = buffer->find_first_not_of(NEWLINE, newLine);
 
+            if (newLine == std::string::npos)
+                break;
+
+            if (!self->HandleInput())
+                return;
+        }
+
+        self->ProcessIncomingData();
+    });
     return true;
 }
 
@@ -109,7 +108,7 @@ bool RASocket::HandleInput()
 
     switch (m_authLevel)
     {
-        /// <ul> <li> If the input is '<username>'
+        // If the input is '<username>'
         case AuthLevel::None:
         {
             m_accountId = sAccountMgr.GetId(m_input);
@@ -152,7 +151,7 @@ bool RASocket::HandleInput()
             Send(sObjectMgr.GetMangosStringForDbcLocale(LANG_RA_PASS));
             break;
         }
-        ///<li> If the input is '<password>' (and the user already gave his username)
+        // If the input is '<password>' (and the user already gave his username)
         case AuthLevel::HaveUsername:
         {
             // login+pass ok
@@ -178,7 +177,7 @@ bool RASocket::HandleInput()
             }
             break;
         }
-        ///<li> If user is logged, parse and execute the command
+        // If user is logged, parse and execute the command
         case AuthLevel::Authenticated:
         {
             if (m_input.length())
@@ -210,5 +209,7 @@ bool RASocket::HandleInput()
 
 void RASocket::Send(const std::string& message)
 {
-    Write(message.c_str(), message.length());
+    std::shared_ptr<std::string> textMessage = std::make_shared<std::string>(message);
+    auto self(shared_from_this());
+    Write(textMessage->c_str(), textMessage->length(), [self, textMessage](const boost::system::error_code& error, std::size_t read) {});
 }

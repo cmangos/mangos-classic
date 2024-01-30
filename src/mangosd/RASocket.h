@@ -25,14 +25,14 @@
 
 #include "Common.h"
 
-#include "Network/Socket.hpp"
+#include "Network/AsyncSocket.hpp"
 
 #include <functional>
 #include <vector>
 #include <string>
 
 /// Remote Administration socket
-class RASocket : public MaNGOS::Socket
+class RASocket : public MaNGOS::AsyncSocket<RASocket>
 {
     private:
         enum AuthLevel
@@ -56,10 +56,10 @@ class RASocket : public MaNGOS::Socket
         void Send(const std::string& message);
 
     public:
-        RASocket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler);
+        RASocket(boost::asio::io_service& service);
         virtual ~RASocket();
 
-        virtual bool Open() override;
+        bool OnOpen() override;
 };
 #endif
 /// @}
