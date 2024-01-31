@@ -511,10 +511,7 @@ bool AuthSocket::_HandleLogonChallenge()
                     *pkt << uint8(AUTH_LOGON_FAILED_UNKNOWN_ACCOUNT);
             }
 
-            self->Write((const char*)pkt->contents(), pkt->size(), [self, pkt](const boost::system::error_code& error, std::size_t read)
-            {
-                printf("");
-            });
+            self->Write((const char*)pkt->contents(), pkt->size(), [self, pkt](const boost::system::error_code& error, std::size_t read) {});
             self->ProcessIncomingData();
         });
     });
