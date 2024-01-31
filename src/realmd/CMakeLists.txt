@@ -87,6 +87,9 @@ set_target_properties(${EXECUTABLE_NAME} PROPERTIES LINK_FLAGS
   "${EXECUTABLE_LINK_FLAGS}"
 )
 
+if (NOT WIN32)
+  install(FILES run-realmd DESTINATION ${BIN_DIR})
+endif()
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR})
 install(FILES realmd.conf.dist.in DESTINATION ${CONF_DIR} RENAME realmd.conf.dist)
 
