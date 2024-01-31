@@ -2349,7 +2349,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li)
 //
 
 // Adds an entry to the group (at loading stage)
-void LootTemplate::LootGroup::AddEntry(LootStoreItem& item)
+void LootTemplate::LootGroup::AddEntry(LootStoreItem const& item)
 {
     if (item.chance != 0)
         ExplicitlyChanced.push_back(item);
@@ -2558,7 +2558,7 @@ bool LootTemplate::LootGroup::CheckLootRefs(LootIdSet* ref_set, LootIdSet& prevR
 //
 
 // Adds an entry to the group (at loading stage)
-void LootTemplate::AddEntry(LootStoreItem& item)
+void LootTemplate::AddEntry(LootStoreItem const& item)
 {
     if (item.group > 0)           // Group
     {
