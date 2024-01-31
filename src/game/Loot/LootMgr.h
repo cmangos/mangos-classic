@@ -128,14 +128,15 @@ struct LootStats
     // itemId and count
     struct GroupStats
     {
-        using ItemStatsPair = std::map<int32, uint32>;
-        using GroupStatsMap = std::map<uint32, ItemStatsPair>;
+        using ItemIndex = std::pair<int32, uint32>;
+        using ItemStatsMap = std::map<ItemIndex, uint32>;
+        using GroupStatsMap = std::map<uint32, ItemStatsMap>;
 
         GroupStatsMap groups;
 
-        void IncItemCount(uint32 group, int32 itemId)
+        void IncItemCount(uint32 group, ItemIndex itemIdx)
         {
-            ++groups[group][itemId];
+            ++groups[group][itemIdx];
         }
     };
 
@@ -200,6 +201,7 @@ typedef std::unordered_map<uint32, GroupLootRoll> GroupLootRollMap;
 
 struct LootStoreItem
 {
+    uint32  itemIndex;                                      // index in loot store
     uint32  itemid;                                         // id of the item
     float   chance;                                         // always positive, chance to drop for both quest and non-quest items, chance to be used for refs
     int32   mincountOrRef;                                  // mincount for drop items (positive) or minus referenced TemplateleId (negative)
@@ -210,8 +212,8 @@ struct LootStoreItem
 
     // Constructor, converting ChanceOrQuestChance -> (chance, needs_quest)
     // displayid is filled in IsValid() which must be called after
-    LootStoreItem(uint32 _itemid, float _chanceOrQuestChance, int8 _group, uint16 _conditionId, int32 _mincountOrRef, uint8 _maxcount)
-        : itemid(_itemid), chance(fabs(_chanceOrQuestChance)), mincountOrRef(_mincountOrRef),
+    LootStoreItem(uint32 _itemIndex, uint32 _itemid, float _chanceOrQuestChance, int8 _group, uint16 _conditionId, int32 _mincountOrRef, uint8 _maxcount)
+        : itemIndex(_itemIndex), itemid(_itemid), chance(fabs(_chanceOrQuestChance)), mincountOrRef(_mincountOrRef),
           group(_group), needs_quest(_chanceOrQuestChance < 0), maxcount(_maxcount), conditionId(_conditionId)
     {}
 

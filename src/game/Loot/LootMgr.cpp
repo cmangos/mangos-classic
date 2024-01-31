@@ -126,6 +126,7 @@ void LootStore::LoadLootTable()
 {
     LootTemplateMap::const_iterator tplEntriesItr;
     uint32 count = 0;
+    std::map<uint32, uint32> validItems;
 
     // Clearing store (for reloading case)
     Clear();
@@ -177,7 +178,8 @@ void LootStore::LoadLootTable()
                 continue;
 
             // Add the item to the loot store
-            m_LootTemplates[entry].AddEntry(LootStoreItem(item, chanceOrQuestChance, group, conditionId, mincountOrRef, maxcount));
+            ++validItems[entry];
+            m_LootTemplates[entry].AddEntry(LootStoreItem(validItems[entry], item, chanceOrQuestChance, group, conditionId, mincountOrRef, maxcount));
             ++count;
         }
         while (queryResult->NextRow());
@@ -341,7 +343,7 @@ bool LootStore::IsValidItemTemplate(uint32 entry, uint32 itemId, uint32 group, i
             return false;
         }
 
-        if (maxCount < mincountOrRef)                       // wrong max count
+        if (maxCount < uint32(mincountOrRef))                       // wrong max count
         {
             sLog.outErrorDb("Table '%s' entry %d item %d: max count (%u) less that min count (%i) - skipped", GetName(), entry, itemId, uint32(maxCount), mincountOrRef);
             return false;
@@ -2470,7 +2472,7 @@ void LootTemplate::LootGroup::Process(Loot& loot, Player const* lootOwner, bool 
             loot.AddItem(*item);
             // only used if we want some stats
             if (groupStats)
-                groupStats->IncItemCount(item->group, item->itemid);
+                groupStats->IncItemCount(item->group, std::make_pair(item->itemid, item->itemIndex));
         }
         else
         {
@@ -2486,7 +2488,7 @@ void LootTemplate::LootGroup::Process(Loot& loot, Player const* lootOwner, bool 
                     lsData = std::make_unique<LootStatsData>(item->mincountOrRef, lootStatsData->stats);
 
                     // no need to check groupStats here, if we have a lootStatsPair->first, we have a lootStatsPair->second
-                    groupStats->IncItemCount(item->group, item->mincountOrRef); // register the reference as a loot
+                    groupStats->IncItemCount(item->group, std::make_pair(item->mincountOrRef, item->itemIndex)); // register the reference as a loot
                 }
 
                 for (uint32 loop = 0; loop < item->maxcount; ++loop)
@@ -2601,7 +2603,7 @@ void LootTemplate::Process(Loot& loot, Player const* lootOwner, bool rate, LootS
                 lsData = std::make_unique<LootStatsData>(Entrie.mincountOrRef, lootStatsData->stats);
 
                 // no need to check groupStats here, if we have a lootStatsPair->first, we have a lootStatsPair->second
-                groupStats->IncItemCount(0, Entrie.mincountOrRef); // register the reference as a loot
+                groupStats->IncItemCount(0, std::make_pair(Entrie.mincountOrRef, Entrie.itemIndex)); // register the reference as a loot
             }
 
             for (uint32 loop = 0; loop < Entrie.maxcount; ++loop) // Ref multiplicator
@@ -2612,7 +2614,7 @@ void LootTemplate::Process(Loot& loot, Player const* lootOwner, bool rate, LootS
             loot.AddItem(Entrie);                               // Chance is already checked, just add
             // only used if we want some stats
             if (groupStats)
-                groupStats->IncItemCount(0, Entrie.itemid);
+                groupStats->IncItemCount(0, std::make_pair(Entrie.itemid, Entrie.itemIndex));
         }
     }
 
@@ -3121,17 +3123,23 @@ void LootMgr::CheckDropStats(ChatHandler& chat, uint32 amountOfCheck, uint32 loo
 
             lootStatsInfo->lootIdOrRef = lootIdOrRef;
 
-            // for each group, set the items stats and sort them
+            // set the items stats and sort them for each group
             for (auto& group : lootRef.second.groups)
             {
                 uint32 groupId = group.first;
-                auto& groupStats = lootStatsInfo->groupStats[groupId];
+                auto& groupStats = group.second;
+                auto& fullGroupStats = lootStatsInfo->groupStats[groupId];
 
                 // fill the group stats with the items stats
-                groupStats.insert(groupStats.end(), group.second.begin(), group.second.end());
+                for (const auto& kv : groupStats)
+                {
+                    const auto& itemId = kv.first;
+                    const auto& count = kv.second;
+                    fullGroupStats.emplace_back(itemId.first, count);
+                }
 
                 // sort the items stats
-                groupStats.sort(
+                fullGroupStats.sort(
                     [](LootStatsInfo::ItemStats const& a, LootStatsInfo::ItemStats const& b)
                     { return a.second > b.second; }
                 );
