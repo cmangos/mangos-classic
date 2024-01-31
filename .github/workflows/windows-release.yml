@@ -96,27 +96,27 @@ jobs:
 
     steps:
       - name: Download Artifact snapshot-default
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: snapshot-default
           path: all_snapshots
       - name: Download Artifact snapshot-with-all
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: snapshot-with-all
           path: all_snapshots
       - name: Download Artifact snapshot-with-playerbot-ahbot
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: snapshot-with-playerbot-ahbot
           path: all_snapshots
       - name: Download Artifact snapshot-with-playerbot
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: snapshot-with-playerbot
           path: all_snapshots
       - name: Download Artifact snapshot-with-ahbot
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: snapshot-with-ahbot
           path: all_snapshots
