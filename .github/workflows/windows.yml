@@ -62,7 +62,7 @@ jobs:
           7z a -tzip ${{env.ARCHIVE_FILENAME}} x64_Release
 
       - name: Archive The Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: snapshot
           path: "${{env.BUILD_DIR}}/bin/${{env.ARCHIVE_FILENAME}}"

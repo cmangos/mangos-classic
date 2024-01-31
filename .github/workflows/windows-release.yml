@@ -83,7 +83,7 @@ jobs:
           7z a -tzip ${{env.ARCHIVE_FILENAME}} "x64_${{env.BUILD_TYPE}}"
 
       - name: Archive The Artefact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: snapshot-${{matrix.TYPE}}
           path: "${{env.BUILD_DIR}}/bin/${{env.ARCHIVE_FILENAME}}"
