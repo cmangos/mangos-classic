@@ -736,7 +736,7 @@ struct npc_mistress_nagmaraAI : public ScriptedAI
         pRocknot->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
 
         m_creature->GetMotionMaster()->MoveIdle();
-        m_creature->GetMotionMaster()->MoveFollow(pRocknot, 2.0f, 0);
+        m_creature->GetMotionMaster()->MoveChase(pRocknot, 2.0f, 0);
         m_uiPhase = 1;
     }
 
@@ -771,7 +771,7 @@ struct npc_mistress_nagmaraAI : public ScriptedAI
                     m_uiPhaseTimer = 5000;
                 }
                 else
-                    m_creature->GetMotionMaster()->MoveFollow(pRocknot, 2.0f, 0);
+                    m_creature->GetMotionMaster()->MoveChase(pRocknot, 2.0f, 0);
                 break;
             case 2:     // Phase 2 : Nagmara is "seducing" Rocknot
                 DoScriptText(SAY_NAGMARA_2, m_creature);
@@ -954,7 +954,7 @@ struct npc_rocknotAI : public npc_escortAI
                     SetCurrentWaypoint(9);
                 }
                 else
-                    pNagmara->GetMotionMaster()->MoveFollow(m_creature, 2.0f, 0);
+                    pNagmara->GetMotionMaster()->MoveChase(m_creature, 2.0f, 0);
                 break;
             case 17:
                 // Open the bar back door if relevant
@@ -965,7 +965,7 @@ struct npc_rocknotAI : public npc_escortAI
                     m_pInstance->SetBarDoorIsOpen();
                 }
                 if (pNagmara)
-                    pNagmara->GetMotionMaster()->MoveFollow(m_creature, 2.0f, 0);
+                    pNagmara->GetMotionMaster()->MoveChase(m_creature, 2.0f, 0);
                 break;
             case 34: // Reach under the stair, make Nagmara move to her position and give the handle back to Nagmara AI script
                 if (!pNagmara)
