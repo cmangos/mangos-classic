@@ -350,21 +350,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
             case SPELLFAMILY_HUNTER:
                 break;
             case SPELLFAMILY_PALADIN:
-            {
-                switch (m_spellInfo->Id)
-                {
-                    case 20467: // Judgement of Command
-                    case 20963:
-                    case 20964:
-                    case 20965:
-                    case 20966:
-                    case 27171:
-                        if (!unitTarget->IsStunned())
-                            damage /= 2;
-                        break;
-                }
                 break;
-            }
         }
 
         if (damage >= 0)

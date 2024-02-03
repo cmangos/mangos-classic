@@ -226,7 +226,13 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (19977,'spell_blessing_of_light'),
 (19978,'spell_blessing_of_light'),
 (19979,'spell_blessing_of_light'),
-(20271,'spell_judgement');
+(20271,'spell_judgement'),
+(20467,'spell_judgement_of_command'),
+(20963,'spell_judgement_of_command'),
+(20964,'spell_judgement_of_command'),
+(20965,'spell_judgement_of_command'),
+(20966,'spell_judgement_of_command'),
+(27171,'spell_judgement_of_command');
 
 -- Warlock
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
