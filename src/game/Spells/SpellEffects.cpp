@@ -925,13 +925,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 23134:                                 // Goblin Bomb Dispenser
-                {
-                    if (m_CastItem)
-                        m_caster->CastSpell(m_caster, 13258, TRIGGERED_OLD_TRIGGERED, m_CastItem);
-
-                    return;
-                }
                 case 23138:                                 // Gate of Shazzrah
                 {
                     if (!unitTarget || m_scriptValue > 0)

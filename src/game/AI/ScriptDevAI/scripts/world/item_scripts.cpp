@@ -187,6 +187,42 @@ struct OrbOfDeception : public AuraScript
     }
 };
 
+enum
+{
+    SPELL_MALFUNCTION_EXPLOSION = 13261,
+    SPELL_SUMMON_GOBLIN_BOMB    = 13258,
+    SPELL_PET_BOMB_PASSIVE      = 13260, // triggers 13259 Explosion on successful melee hit
+};
+
+// 13258 - Summon Goblin Bomb
+struct SummonGoblinBomb : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        if (Player* player = dynamic_cast<Player*>(spell->GetCaster()))
+            summon->SelectLevel(uint16(player->GetSkillValue(SKILL_ENGINEERING) / 5));
+        summon->AI()->SetReactState(REACT_AGGRESSIVE);
+        summon->CastSpell(summon, SPELL_PET_BOMB_PASSIVE, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+// 23134 - Goblin Bomb
+struct GoblinBomb : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        Unit* caster = spell->GetCaster();
+        if (!target || !caster)
+            return;
+        uint32 roll = urand(0, 99);
+        if (roll < 10)
+            target->CastSpell(caster, SPELL_MALFUNCTION_EXPLOSION, TRIGGERED_OLD_TRIGGERED);
+        else
+            caster->CastSpell(caster, SPELL_SUMMON_GOBLIN_BOMB, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_item_scripts()
 {
     Script* pNewScript = new Script;
@@ -200,4 +236,6 @@ void AddSC_item_scripts()
     RegisterSpellScript<GDRPeriodicDamage>("spell_gdr_periodic");
     RegisterSpellScript<BanishExile>("spell_banish_exile");
     RegisterSpellScript<OrbOfDeception>("spell_orb_of_deception");
+    RegisterSpellScript<SummonGoblinBomb>("spell_summon_goblin_bomb");
+    RegisterSpellScript<GoblinBomb>("spell_goblin_bomb");
 }
