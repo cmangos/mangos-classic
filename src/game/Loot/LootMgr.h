@@ -282,7 +282,7 @@ class LootTemplate
                 // Rolls an item from the group, returns nullptr if all miss their chances
                 LootStoreItem const* Roll(Loot const& loot, Player const* lootOwner) const;
         };
-    using LootGroups = std::vector<LootGroup>;
+        using LootGroups = std::vector<LootGroup>;
 
     public:
         // Adds an entry to the group (at loading stage)
