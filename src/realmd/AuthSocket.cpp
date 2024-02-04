@@ -63,6 +63,8 @@ enum SecurityFlags
 #pragma pack(push,1)
 #endif
 
+# define AUTH_LOGON_MAX_NAME 16
+
 struct sAuthLogonChallengeBody
 {
     uint8   gamename[4];
@@ -76,7 +78,7 @@ struct sAuthLogonChallengeBody
     uint32  timezone_bias;
     uint32  ip;
     uint8   userName_len;
-    uint8   userName[11];
+    uint8   userName[AUTH_LOGON_MAX_NAME + 1];
 };
 
 struct sAuthLogonChallengeHeader
@@ -323,7 +325,7 @@ bool AuthSocket::_HandleLogonChallenge()
         EndianConvert(*pUint16);
         uint16 remaining = header->size;
 
-        if ((remaining < sizeof(sAuthLogonChallengeBody) - 10))
+        if ((remaining < sizeof(sAuthLogonChallengeBody) - AUTH_LOGON_MAX_NAME))
             return;
 
         DEBUG_LOG("[AuthChallenge] got header, body is %#04x bytes", remaining);
@@ -337,7 +339,7 @@ bool AuthSocket::_HandleLogonChallenge()
         {
             if (error) return;
 
-            if (body->userName_len > 10)
+            if (body->userName_len > AUTH_LOGON_MAX_NAME)
                 return;
 
             body->userName[body->userName_len] = '\0';
