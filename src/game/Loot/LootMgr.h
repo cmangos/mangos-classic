@@ -257,45 +257,6 @@ typedef std::vector<LootStoreItem> LootStoreItemList;
 typedef std::unordered_map<uint32, LootTemplate> LootTemplateMap;
 typedef std::set<uint32> LootIdSet;
 
-class LootStore
-{
-    public:
-        explicit LootStore(char const* name, char const* entryName, bool ratesAllowed)
-            : m_name(name), m_entryName(entryName), m_ratesAllowed(ratesAllowed) {}
-        virtual ~LootStore() { Clear(); }
-
-        void Verify() const;
-
-        void LoadAndCollectLootIds(LootIdSet& ids_set);
-        void LoadAndCheckReferenceNames();
-        bool CheckLootRefs(LootIdSet* ref_set = nullptr); // check existence reference and remove it from ref_set
-        void ReportUnusedIds(LootIdSet const& ids_set) const;
-        void ReportNotExistedId(uint32 id) const;
-
-        bool HaveLootFor(uint32 loot_id) const;
-        bool HaveQuestLootFor(uint32 loot_id) const;
-        bool HaveQuestLootForPlayer(uint32 loot_id, Player* player) const;
-
-        LootTemplate const* GetLootFor(uint32 loot_id) const;
-
-        char const* GetName() const { return m_name; }
-        char const* GetEntryName() const { return m_entryName; }
-        bool IsRatesAllowed() const { return m_ratesAllowed; }
-
-        // Checks if drop rules are valid for the item
-        bool IsValidItemTemplate(uint32 entry, uint32 itemId, uint32 group, int32 mincountOrRef, float chance, uint32 maxCount) const;
-
-    protected:
-        void LoadLootTable();
-        void Clear();
-
-    private:
-        LootTemplateMap m_LootTemplates;
-        char const* m_name;
-        char const* m_entryName;
-        bool m_ratesAllowed;
-};
-
 class LootTemplate
 {
     private:
@@ -342,6 +303,45 @@ class LootTemplate
     private:
         LootStoreItemList Entries;                          // not grouped only
         LootGroups        Groups;                           // groups have own (optimized) processing, grouped entries go there
+};
+
+class LootStore
+{
+    public:
+        explicit LootStore(char const* name, char const* entryName, bool ratesAllowed)
+            : m_name(name), m_entryName(entryName), m_ratesAllowed(ratesAllowed) {}
+        virtual ~LootStore() { Clear(); }
+
+        void Verify() const;
+
+        void LoadAndCollectLootIds(LootIdSet& ids_set);
+        void LoadAndCheckReferenceNames();
+        bool CheckLootRefs(LootIdSet* ref_set = nullptr); // check existence reference and remove it from ref_set
+        void ReportUnusedIds(LootIdSet const& ids_set) const;
+        void ReportNotExistedId(uint32 id) const;
+
+        bool HaveLootFor(uint32 loot_id) const;
+        bool HaveQuestLootFor(uint32 loot_id) const;
+        bool HaveQuestLootForPlayer(uint32 loot_id, Player* player) const;
+
+        LootTemplate const* GetLootFor(uint32 loot_id) const;
+
+        char const* GetName() const { return m_name; }
+        char const* GetEntryName() const { return m_entryName; }
+        bool IsRatesAllowed() const { return m_ratesAllowed; }
+
+        // Checks if drop rules are valid for the item
+        bool IsValidItemTemplate(uint32 entry, uint32 itemId, uint32 group, int32 mincountOrRef, float chance, uint32 maxCount) const;
+
+    protected:
+        void LoadLootTable();
+        void Clear();
+
+    private:
+        LootTemplateMap m_LootTemplates;
+        char const* m_name;
+        char const* m_entryName;
+        bool m_ratesAllowed;
 };
 
 //=====================================================
