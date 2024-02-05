@@ -2933,7 +2933,7 @@ int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry cons
         if (Player* modOwner = unitCaster->GetSpellModOwner())
             modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_ALL_EFFECTS, value, finalUse);
 
-    if (unitCaster && spellProto->HasAttribute(SPELL_ATTR_SCALES_WITH_CREATURE_LEVEL) && spellProto->spellLevel)
+    if (unitCaster && unitCaster->IsCreature() && spellProto->HasAttribute(SPELL_ATTR_SCALES_WITH_CREATURE_LEVEL) && spellProto->spellLevel)
     {
         // TODO: Drastically beter than before, but still needs some additional aura scaling research
         bool damage = false;
@@ -2971,7 +2971,15 @@ int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry cons
 
         if (damage)
         {
-            value = int32(value * 0.25f * exp(unitCaster->GetLevel() * (70 - spellProto->spellLevel) / 1000.0f));
+            CreatureInfo const* cInfo = static_cast<Creature const*>(unitCaster)->GetCreatureInfo();
+            CreatureClassLvlStats const* casterCLS = sObjectMgr.GetCreatureClassLvlStats(unitCaster->GetLevel(), cInfo->UnitClass);
+            CreatureClassLvlStats const* spellCLS = sObjectMgr.GetCreatureClassLvlStats(spellProto->spellLevel, cInfo->UnitClass);
+            if (casterCLS && spellCLS)
+            {
+                float CLSPowerCreature = casterCLS->BaseDamage;
+                float CLSPowerSpell = spellCLS->BaseDamage;
+                value = value * (CLSPowerCreature / CLSPowerSpell);
+            }
         }
     }
     return value;
