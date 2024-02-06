@@ -257,6 +257,54 @@ typedef std::vector<LootStoreItem> LootStoreItemList;
 typedef std::unordered_map<uint32, LootTemplate> LootTemplateMap;
 typedef std::set<uint32> LootIdSet;
 
+class LootTemplate
+{
+    private:
+        class LootGroup                           // A set of loot definitions for items (refs are not allowed)
+        {
+            public:
+                void AddEntry(LootStoreItem const& item);                 // Adds an entry to the group (at loading stage)
+                bool HasQuestDrop() const;                          // True if group includes at least 1 quest drop entry
+                bool HasQuestDropForPlayer(Player const* player) const;
+                // The same for active quests of the player
+                // Rolls an item from the group (if any) and adds the item to the loot
+                void Process(Loot& loot, Player const* lootOwner, bool rate, LootStatsData* lootStats = nullptr) const;
+                float RawTotalChance() const;                       // Overall chance for the group (without equal chanced items)
+                float TotalChance() const;                          // Overall chance for the group
+
+                void Verify(LootStore const& lootstore, uint32 id, uint32 group_id) const;
+                bool CheckLootRefs(LootIdSet* ref_set, LootIdSet& prevRefs);
+
+            private:
+                LootStoreItemList ExplicitlyChanced;                // Entries with chances defined in DB
+                LootStoreItemList EqualChanced;                     // Zero chances - every entry takes the same chance
+
+                // Rolls an item from the group, returns nullptr if all miss their chances
+                LootStoreItem const* Roll(Loot const& loot, Player const* lootOwner) const;
+        };
+    using LootGroups = std::vector<LootGroup>;
+
+    public:
+        // Adds an entry to the group (at loading stage)
+        void AddEntry(LootStoreItem const& item);
+        // Rolls for every item in the template and adds the rolled items the the loot
+        void Process(Loot& loot, Player const* lootOwner, bool rate, LootStatsData* lootStatsData = nullptr) const;
+
+        // True if template includes at least 1 quest drop entry
+        bool HasQuestDrop(LootTemplateMap const& store, uint8 groupId = 0) const;
+        // True if template includes at least 1 quest drop for an active quest of the player
+        bool HasQuestDropForPlayer(LootTemplateMap const& store, Player const* player, uint8 groupId = 0) const;
+        // True if at least one player fulfills loot condition
+        static bool PlayerOrGroupFulfilsCondition(const Loot& loot, Player const* lootOwner, uint16 conditionId);
+
+        // Checks integrity of the template
+        void Verify(LootStore const& lootstore, uint32 id) const;
+        bool CheckLootRefs(LootIdSet* ref_set, LootIdSet& prevRefs);
+    private:
+        LootStoreItemList Entries;                          // not grouped only
+        LootGroups        Groups;                           // groups have own (optimized) processing, grouped entries go there
+};
+
 class LootStore
 {
     public:
@@ -294,54 +342,6 @@ class LootStore
         char const* m_name;
         char const* m_entryName;
         bool m_ratesAllowed;
-};
-
-class LootTemplate
-{
-    private:
-        class LootGroup                           // A set of loot definitions for items (refs are not allowed)
-        {
-            public:
-                void AddEntry(LootStoreItem const& item);                 // Adds an entry to the group (at loading stage)
-                bool HasQuestDrop() const;                          // True if group includes at least 1 quest drop entry
-                bool HasQuestDropForPlayer(Player const* player) const;
-                // The same for active quests of the player
-                // Rolls an item from the group (if any) and adds the item to the loot
-                void Process(Loot& loot, Player const* lootOwner, bool rate, LootStatsData* lootStats = nullptr) const;
-                float RawTotalChance() const;                       // Overall chance for the group (without equal chanced items)
-                float TotalChance() const;                          // Overall chance for the group
-
-                void Verify(LootStore const& lootstore, uint32 id, uint32 group_id) const;
-                bool CheckLootRefs(LootIdSet* ref_set, LootIdSet& prevRefs);
-
-            private:
-                LootStoreItemList ExplicitlyChanced;                // Entries with chances defined in DB
-                LootStoreItemList EqualChanced;                     // Zero chances - every entry takes the same chance
-
-                // Rolls an item from the group, returns nullptr if all miss their chances
-                LootStoreItem const* Roll(Loot const& loot, Player const* lootOwner) const;
-        };
-        using LootGroups = std::vector<LootGroup>;
-
-    public:
-        // Adds an entry to the group (at loading stage)
-        void AddEntry(LootStoreItem const& item);
-        // Rolls for every item in the template and adds the rolled items the the loot
-        void Process(Loot& loot, Player const* lootOwner, bool rate, LootStatsData* lootStatsData = nullptr) const;
-
-        // True if template includes at least 1 quest drop entry
-        bool HasQuestDrop(LootTemplateMap const& store, uint8 groupId = 0) const;
-        // True if template includes at least 1 quest drop for an active quest of the player
-        bool HasQuestDropForPlayer(LootTemplateMap const& store, Player const* player, uint8 groupId = 0) const;
-        // True if at least one player fulfills loot condition
-        static bool PlayerOrGroupFulfilsCondition(const Loot& loot, Player const* lootOwner, uint16 conditionId);
-
-        // Checks integrity of the template
-        void Verify(LootStore const& lootstore, uint32 id) const;
-        bool CheckLootRefs(LootIdSet* ref_set, LootIdSet& prevRefs);
-    private:
-        LootStoreItemList Entries;                          // not grouped only
-        LootGroups        Groups;                           // groups have own (optimized) processing, grouped entries go there
 };
 
 //=====================================================
