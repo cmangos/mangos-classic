@@ -2039,10 +2039,10 @@ class Player : public Unit
 
         bool isMovingOrTurning() const { return m_movementInfo.HasMovementFlag(movementOrTurningFlagsMask); }
 
-        bool CanSwim() const { return true; }
+        bool CanSwim() const override { return true; }
         bool CanFly() const override { return m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING); }
-        bool CanWalk() const { return true; }
-        bool IsFlying() const { return false; }
+        bool CanWalk() const override { return true; }
+        bool IsFlying() const override { return false; }
         bool IsFreeFlying() const { return false; }
         bool IsSwimming() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_SWIMMING); }
 
@@ -2190,7 +2190,7 @@ class Player : public Unit
         virtual void AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto = nullptr, bool permanent = false, uint32 forcedDuration = 0, bool ignoreCat = false) override;
         virtual void RemoveSpellCooldown(SpellEntry const& spellEntry, bool updateClient = true) override;
         virtual void RemoveSpellCategoryCooldown(uint32 category, bool updateClient = true) override;
-        virtual void RemoveAllCooldowns(bool sendOnly = false);
+        virtual void RemoveAllCooldowns(bool sendOnly = false) override;
         virtual void LockOutSpells(SpellSchoolMask schoolMask, uint32 duration) override;
         void RemoveSpellLockout(SpellSchoolMask spellSchoolMask, std::set<uint32>* spellAlreadySent = nullptr);
         void SendClearCooldown(uint32 spell_id, Unit* target) const;

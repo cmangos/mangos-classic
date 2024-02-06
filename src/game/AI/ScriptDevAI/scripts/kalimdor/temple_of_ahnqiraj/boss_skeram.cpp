@@ -362,7 +362,7 @@ struct InitializeImage : public SpellScript
         }
     }
 
-    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
     {
         if (target->GetSpawnerGuid()) // only original spawn can be hit by this
             return false;

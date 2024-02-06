@@ -125,6 +125,8 @@ void CreatureSettings::updateFlag(CreatureStaticFlags flag, bool apply)
         case CreatureStaticFlags::SESSILE:
             m_owner->AI()->SetAIImmobilizedState(apply);
             break;
+        default:
+            break;
     }
 }
 

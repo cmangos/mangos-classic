@@ -279,6 +279,7 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode(WorldPacket& /*recv_d
             SendPacket(data);
             break;
         }
+        case BATTLEGROUND_TYPE_NONE: break;
     }
 }
 

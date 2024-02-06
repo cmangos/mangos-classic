@@ -876,7 +876,7 @@ class CreatureEventAI : public CreatureAI
         void SpellHit(Unit* unit, const SpellEntry* spellInfo) override;
         void SpellHitTarget(Unit* target, const SpellEntry* spell) override;
         void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType damagetype, SpellEntry const* spellInfo) override;
-        void JustPreventedDeath(Unit* attacker);
+        void JustPreventedDeath(Unit* attacker) override;
         void HealedBy(Unit* healer, uint32& healedAmount) override;
         void ReceiveEmote(Player* player, uint32 textEmote) override;
         void SummonedCreatureJustDied(Creature* summoned) override;

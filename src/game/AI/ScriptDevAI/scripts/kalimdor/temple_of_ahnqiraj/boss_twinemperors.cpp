@@ -237,12 +237,12 @@ struct boss_veknilashAI : public boss_twin_emperorsAI
         DoScriptText(SAY_VEKNILASH_DEATH, m_creature);
     }
 
-    bool DoHandleBugAbility()
+    bool DoHandleBugAbility() override
     {
         return DoCastSpellIfCan(nullptr, SPELL_MUTATE_BUG) == CAST_OK;
     }
 
-    bool DoHandleBerserk()
+    bool DoHandleBerserk() override
     {
         return DoCastSpellIfCan(nullptr, SPELL_BERSERK) == CAST_OK;
     }
@@ -360,7 +360,7 @@ struct boss_veklorAI : public boss_twin_emperorsAI
         return DoCastSpellIfCan(nullptr, SPELL_EXPLODE_BUG) == CAST_OK;
     }
 
-    bool DoHandleBerserk()
+    bool DoHandleBerserk() override
     {
         return DoCastSpellIfCan(nullptr, SPELL_FRENZY) == CAST_OK;
     }

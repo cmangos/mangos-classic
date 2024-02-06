@@ -242,7 +242,7 @@ class instance_stratholme : public ScriptedInstance
         bool CheckConditionCriteriaMeet(Player const* player, uint32 instanceConditionId, WorldObject const* conditionSource, uint32 conditionSourceType) const override;
 
         void OnCreatureEnterCombat(Creature* creature) override;
-        void OnCreatureEvade(Creature* creature);
+        void OnCreatureEvade(Creature* creature) override;
         void OnCreatureDeath(Creature* creature) override;
         void OnCreatureRespawn(Creature* creature) override;
 

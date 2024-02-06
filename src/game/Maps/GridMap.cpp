@@ -302,7 +302,7 @@ float GridMap::getHeightFromFloat(float x, float y) const
     x_int &= (MAP_RESOLUTION - 1);
     y_int &= (MAP_RESOLUTION - 1);
 
-    if (m_holes && isHole(x_int, y_int))
+    if (isHole(x_int, y_int))
         return INVALID_HEIGHT_VALUE;
 
     // Height stored as: h5 - its v8 grid, h1-h4 - its v9 grid

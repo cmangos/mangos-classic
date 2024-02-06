@@ -118,7 +118,7 @@ class PlayerbotDruidAI : PlayerbotClassAI
         // Resurrects the target
         CombatManeuverReturns ResurrectPlayer(Player* target) override;
         // Dispel disease or negative magic effects from an internally selected target
-        CombatManeuverReturns DispelPlayer(Player* target = nullptr);
+        CombatManeuverReturns DispelPlayer(Player* target = nullptr) override;
 
         static bool BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* target);
         // Callback method to reset shapeshift forms blocking buffs and heals
