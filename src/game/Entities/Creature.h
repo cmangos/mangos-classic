@@ -587,8 +587,8 @@ class Creature : public Unit
         bool IsNoAggroOnSight() const { return (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_AGGRO_ON_SIGHT) != 0; }
         bool IsGuard() const { return (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_GUARD) != 0; }
 
-        bool CanWalk() const { return (GetCreatureInfo()->InhabitType & INHABIT_GROUND) != 0; }
-        bool CanSwim() const { return (GetCreatureInfo()->InhabitType & INHABIT_WATER) != 0; }
+        bool CanWalk() const override { return (GetCreatureInfo()->InhabitType & INHABIT_GROUND) != 0; }
+        bool CanSwim() const override { return (GetCreatureInfo()->InhabitType & INHABIT_WATER) != 0; }
         bool IsSwimming() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_SWIMMING); }
         bool CanFly() const override { return (GetCreatureInfo()->InhabitType & INHABIT_AIR) || m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_LEVITATING | MOVEFLAG_HOVER | MOVEFLAG_CAN_FLY)); }
         bool IsFlying() const override { return m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_FLYING | MOVEFLAG_HOVER | MOVEFLAG_LEVITATING)); }
@@ -792,7 +792,7 @@ class Creature : public Unit
 
         bool hasWeapon(WeaponAttackType type) const override;
         bool hasWeaponForAttack(WeaponAttackType type) const override { return (Unit::hasWeaponForAttack(type) && hasWeapon(type)); }
-        virtual void SetCanDualWield(bool value);
+        virtual void SetCanDualWield(bool value) override;
 
         void SetInvisible(bool invisible) { m_isInvisible = invisible; }
         bool IsInvisible() const { return m_isInvisible; }
@@ -828,7 +828,7 @@ class Creature : public Unit
         void SetNoLoot(bool state);
         bool IsNoReputation() { return m_noReputation; }
         void SetNoReputation(bool state) { m_noReputation = state; }
-        bool IsIgnoringFeignDeath() const;
+        bool IsIgnoringFeignDeath() const override;
         void SetIgnoreFeignDeath(bool state);
 
         void SetNoWoundedSlowdown(bool state);
@@ -853,7 +853,7 @@ class Creature : public Unit
 
         // Spell Lists
         CreatureSpellList const& GetSpellList() const { return m_spellList; }
-        std::vector<uint32> GetCharmSpells() const;
+        std::vector<uint32> GetCharmSpells() const override;
         enum CooldownResult
         {
             COOLDOWN_RESULT_NOT_FOUND       = 0,

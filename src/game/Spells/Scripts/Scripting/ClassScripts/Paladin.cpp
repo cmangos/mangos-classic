@@ -22,7 +22,7 @@
 
 struct SealOfTheCrusader : public AuraScript
 {
-    void OnApply(Aura* aura, bool apply) const
+    void OnApply(Aura* aura, bool apply) const override
     {
         if (aura->GetEffIndex() != EFFECT_INDEX_1)
             return;

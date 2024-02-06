@@ -181,6 +181,7 @@ bool CombatConditionMgr::Meets(Unit const* self, int32 Id, float range)
                     case ConditionLogic::AND: if (!results[0] || !results[1]) return false; break;
                     case ConditionLogic::OR:  if (!results[0] && !results[1]) return false; break;
                     case ConditionLogic::XOR: if (results[0] == results[1])  return false; break;
+                    case ConditionLogic::NONE: break;
                 }
                 break;
         }
@@ -225,6 +226,7 @@ bool CombatConditionMgr::Meets(Unit const* self, int32 Id, float range)
                     case ConditionLogic::AND: if (!results[0] || !results[1]) return false; break;
                     case ConditionLogic::OR:  if (!results[0] && !results[1]) return false; break;
                     case ConditionLogic::XOR: if (results[0]  == results[1])  return false; break;
+                    default: break;
                 }
                 break;
         }

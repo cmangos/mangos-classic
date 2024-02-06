@@ -281,7 +281,7 @@ struct npc_buru_eggAI : public Scripted_NoMovementAI
         }
     }
 
-    void SpellHit(Unit* /*caster*/, const SpellEntry* spellInfo)
+    void SpellHit(Unit* /*caster*/, const SpellEntry* spellInfo) override
     {
         if (spellInfo->Id == SPELL_BURU_TRANSFORM)
         {

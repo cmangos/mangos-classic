@@ -67,51 +67,51 @@ class SessionAnticheat final : public SessionAnticheatInterface
     public:
         SessionAnticheat(WorldSession *session, const BigNumber &K);
 
-        virtual void Update(uint32 diff);
+        virtual void Update(uint32 diff) override;
 
-        virtual bool IsSilenced() const;
+        virtual bool IsSilenced() const override;
 
         // character enum packet has been built and is ready to send
-        virtual void SendCharEnum(WorldPacket &&packet);
+        virtual void SendCharEnum(WorldPacket &&packet) override;
 
-        virtual void NewPlayer();
-        virtual void LeaveWorld();
-        virtual void Disconnect();
+        virtual void NewPlayer() override;
+        virtual void LeaveWorld() override;
+        virtual void Disconnect() override;
 
         // addon checksum verification (and fingerprinting ;))))
-        virtual bool ReadAddonInfo(WorldPacket *, WorldPacket &);
+        virtual bool ReadAddonInfo(WorldPacket *, WorldPacket &) override;
 
-        virtual void SendPlayerInfo(ChatHandler *) const;
+        virtual void SendPlayerInfo(ChatHandler *) const override;
 
         // miscellaneous/generic anticheat detection from the core.  also from within the module, once an action has been determined
-        virtual void RecordCheat(uint32 actionMask, const char *detector, const char *format, ...);
+        virtual void RecordCheat(uint32 actionMask, const char *detector, const char *format, ...) override;
 
         // movement cheats
         // TODO: Mark these as const where possible
-        virtual bool Movement(MovementInfo &mi, const WorldPacket &packet);
-        virtual void TimeSkipped(const ObjectGuid &mover, uint32 ms);
-        virtual bool ExtrapolateMovement(MovementInfo const& mi, uint32 diffMs, Position &pos);
-        virtual bool SpeedChangeAck(MovementInfo &mi, const WorldPacket &packet, float newSpeed);
-        virtual bool IsInKnockBack() const;
-        virtual void KnockBack(float speedxy, float speedz, float cos, float sin);
-        virtual void OnExplore(const AreaTableEntry *p);
-        virtual void Teleport(const Position &pos);
+        virtual bool Movement(MovementInfo &mi, const WorldPacket &packet) override;
+        virtual void TimeSkipped(const ObjectGuid &mover, uint32 ms) override;
+        virtual bool ExtrapolateMovement(MovementInfo const& mi, uint32 diffMs, Position &pos) override;
+        virtual bool SpeedChangeAck(MovementInfo &mi, const WorldPacket &packet, float newSpeed) override;
+        virtual bool IsInKnockBack() const override;
+        virtual void KnockBack(float speedxy, float speedz, float cos, float sin) override;
+        virtual void OnExplore(const AreaTableEntry *p) override;
+        virtual void Teleport(const Position &pos) override;
 
-        virtual void OrderSent(uint16 opcode, uint32 counter);
-        virtual void OrderAck(uint16 opcode, uint32 counter);
+        virtual void OrderSent(uint16 opcode, uint32 counter) override;
+        virtual void OrderAck(uint16 opcode, uint32 counter) override;
 
         // warden
-        virtual void WardenPacket(WorldPacket &packet);
+        virtual void WardenPacket(WorldPacket &packet) override;
 
         // antispam
-        virtual void AutoReply(const std::string &msg);
-        virtual void Whisper(const std::string &msg, const ObjectGuid &to);
-        virtual void Say(const std::string &msg);
-        virtual void Yell(const std::string &msg);
-        virtual void Channel(const std::string &msg);
-        virtual void Mail(const std::string &subject, const std::string &body, const ObjectGuid &to);
+        virtual void AutoReply(const std::string &msg) override;
+        virtual void Whisper(const std::string &msg, const ObjectGuid &to) override;
+        virtual void Say(const std::string &msg) override;
+        virtual void Yell(const std::string &msg) override;
+        virtual void Channel(const std::string &msg) override;
+        virtual void Mail(const std::string &subject, const std::string &body, const ObjectGuid &to) override;
         virtual void ChannelInvite(const std::string& channelName, const ObjectGuid& to) override;
-        virtual void PartyInvite(const ObjectGuid& to);
+        virtual void PartyInvite(const ObjectGuid& to) override;
 
     /*** END PUBLIC INTERFACE PORTION ***/
 

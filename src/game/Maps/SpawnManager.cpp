@@ -189,6 +189,7 @@ void SpawnManager::RemoveSpawns(std::vector<uint32> const& creatureDbGuids, std:
                 if (std::find(creatureDbGuids.begin(), creatureDbGuids.end(), spawnInfo.GetDbGuid()) != creatureDbGuids.end())
                     spawnInfo.SetUsed(); // will be erased on next manager update
                 break;
+            default: break;
         }
     }
 }
@@ -211,6 +212,7 @@ void SpawnManager::AddEventGuid(uint32 dbguid, HighGuid high)
     {
         case HIGHGUID_GAMEOBJECT: m_eventGoDbGuids.insert(dbguid); break;
         case HIGHGUID_UNIT: m_eventCreatureDbGuids.insert(dbguid); break;
+        default: break;
     }
 }
 
@@ -220,6 +222,7 @@ void SpawnManager::RemoveEventGuid(uint32 dbguid, HighGuid high)
     {
         case HIGHGUID_GAMEOBJECT: m_eventGoDbGuids.erase(dbguid); break;
         case HIGHGUID_UNIT: m_eventCreatureDbGuids.erase(dbguid); break;
+        default: break;
     }
 }
 
@@ -229,7 +232,9 @@ bool SpawnManager::IsEventGuid(uint32 dbguid, HighGuid high) const
     {
         case HIGHGUID_GAMEOBJECT: return m_eventGoDbGuids.find(dbguid) != m_eventGoDbGuids.end();
         case HIGHGUID_UNIT: return m_eventCreatureDbGuids.find(dbguid) != m_eventCreatureDbGuids.end();
+        default: break;
     }
+    return false;
 }
 
 void SpawnManager::RespawnAll()

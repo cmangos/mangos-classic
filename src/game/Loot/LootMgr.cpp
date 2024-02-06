@@ -3163,7 +3163,7 @@ void LootMgr::CheckDropStats(ChatHandler& chat, uint32 amountOfCheck, uint32 loo
         }
         stream << "SELECT `name`, `entry` FROM reference_loot_template_names WHERE `entry` in (" << refIds << ");";
 
-        auto queryResult = WorldDatabase.PQuery(stream.str().c_str());
+        auto queryResult = WorldDatabase.Query(stream.str().c_str());
 
         std::map<int32, std::string> refNames;
         if (queryResult)
@@ -3247,7 +3247,7 @@ void LootMgr::CheckDropStats(ChatHandler& chat, uint32 amountOfCheck, uint32 loo
                         stream << "|Hitem:" << std::dec << itemId << ":0:0:0:0:0:0:0|h[" << name << "]|h|r ";
 
                         if (chat.GetSession())
-                            chat.PSendSysMessage(stream.str().c_str());
+                            chat.PSendSysMessage("%s", stream.str().c_str());
                         sLog.outString("%8d - %-45s \tfound %6u/%-6u \tso %8s%% drop", itemId, name.c_str(), count, amountOfCheck, std::to_string(computedStats).c_str());
                     }
                     else
@@ -3260,7 +3260,7 @@ void LootMgr::CheckDropStats(ChatHandler& chat, uint32 amountOfCheck, uint32 loo
                         stream << "  - |cffffffff" << std::fixed << std::setprecision(4) << std::setw(8) << std::setfill(' ') << computedStats << "%%|r - [";
                         stream << std::dec << -itemId << "] - " << *refName;
                         if (chat.GetSession())
-                            chat.PSendSysMessage(stream.str().c_str());
+                            chat.PSendSysMessage("%s", stream.str().c_str());
                         sLog.outString("%8d - %-45s \tfound %6u/%-6u \tso %8s%% drop", itemId, (*refName).c_str(), count, amountOfCheck, std::to_string(computedStats).c_str());
                     }
                 }
@@ -3298,7 +3298,7 @@ void LootMgr::CheckDropStats(ChatHandler& chat, uint32 amountOfCheck, uint32 loo
             ss << "|Hitem:" << std::dec << itemId << ":0:0:0:0:0:0:0|h[" << name << "]|h|r ";
 
             if (chat.GetSession())
-                chat.PSendSysMessage(ss.str().c_str());
+                chat.PSendSysMessage("%s", ss.str().c_str());
             sLog.outString("%6u - %-45s \tfound %6u/%-6u \tso %8s%% drop", itemStat.first, name.c_str(), itemStat.second, amountOfCheck, ss.str().c_str());
         }
     }

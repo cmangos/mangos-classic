@@ -77,7 +77,7 @@ struct boss_baron_geddonAI : public CombatAI
             m_instance->SetData(TYPE_GEDDON, NOT_STARTED);
     }
 
-    void ExecuteAction(uint32 action)
+    void ExecuteAction(uint32 action) override
     {
         switch (action)
         {
