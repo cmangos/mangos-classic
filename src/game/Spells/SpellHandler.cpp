@@ -268,6 +268,12 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
     if (!obj->IsWithinDistInMap(_player, obj->GetInteractionDistance()))
         return;
 
+    if (obj->GetSpellForLock(_player))
+    {
+        sLog.outError("HandleGameObjectUseOpcode: CMSG_GAMEOBJ_USE for spell locked object (Entry %u), didn't expect this to happen.", obj->GetEntry());
+        return;
+    }
+
     // Additional check preventing exploits (ie loot despawned chests)
     if (!obj->IsSpawned())
     {
