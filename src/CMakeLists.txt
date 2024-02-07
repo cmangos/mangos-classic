@@ -30,6 +30,7 @@ if(BUILD_LOGIN_SERVER)
   add_subdirectory(realmd)
 endif()
 
+# Mangosbots module
 if(BUILD_MANGOSBOTS)
   include(FetchContent)
 
@@ -38,17 +39,23 @@ if(BUILD_MANGOSBOTS)
     GIT_REPOSITORY "https://github.com/celguar/mangosbot-bots.git"
 	GIT_TAG "master"
   )
+
+  if(NOT mangosbots_POPULATED)
+	message(STATUS "Fetching Mangosbots module...")
   
-  message(STATUS "Fetching Mangosbots module...")
-  
-  FetchContent_Populate(mangosbots)
-  
+    FetchContent_Populate(mangosbots)
+	
+	if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
+      file(REMOVE_RECURSE ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
+    endif()
+	
+	file(COPY ${mangosbots_SOURCE_DIR}/. DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
+    message(STATUS "Mangosbots module fetched and populated in ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots")
+  endif()
+
+  add_subdirectory(modules/Bots)
+else()
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
     file(REMOVE_RECURSE ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
   endif()
-  
-  file(COPY ${mangosbots_SOURCE_DIR}/. DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
-  
-  message(STATUS "Mangosbots module fetched and populated in ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots")
-  add_subdirectory(modules/Bots)
 endif()
