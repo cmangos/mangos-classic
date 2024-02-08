@@ -74,8 +74,5 @@ extern DatabaseType WorldDatabase;
 extern DatabaseType CharacterDatabase;
 extern DatabaseType LoginDatabase;
 extern DatabaseType LogsDatabase;
-#ifdef ENABLE_MANGOSBOTS
-extern DatabaseType PlayerbotDatabase;
-#endif
 
 #endif

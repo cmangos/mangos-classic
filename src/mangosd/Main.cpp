@@ -62,9 +62,6 @@ DatabaseType WorldDatabase;                                 ///< Accessor to the
 DatabaseType CharacterDatabase;                             ///< Accessor to the character database
 DatabaseType LoginDatabase;                                 ///< Accessor to the realm/login database
 DatabaseType LogsDatabase;                                  ///< Accessor to the logs database
-#ifdef ENABLE_MANGOSBOTS
-DatabaseType PlayerbotDatabase;                             ///< Accessor to the playerbot database
-#endif
 
 uint32 realmID;                                             ///< Id of the realm
 

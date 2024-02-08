@@ -2222,9 +2222,6 @@ void World::UpdateResultQueue()
     CharacterDatabase.ProcessResultQueue();
     WorldDatabase.ProcessResultQueue();
     LoginDatabase.ProcessResultQueue();
-#ifdef ENABLE_MANGOSBOTS
-    PlayerbotDatabase.ProcessResultQueue();
-#endif
 }
 
 void World::UpdateRealmCharCount(uint32 accountId)
