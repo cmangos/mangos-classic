@@ -178,7 +178,7 @@ if(BUILD_MANGOSBOTS)
         ${CMAKE_SOURCE_DIR}/src/shared/Utilities
         ${CMAKE_SOURCE_DIR}/src/shared/Log
         ${CMAKE_SOURCE_DIR}/src/shared/Threading
-		${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot
+        ${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot
         ${CMAKE_SOURCE_DIR}/src/modules/Bots/ahbot
     )
 	
