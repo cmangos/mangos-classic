@@ -123,7 +123,6 @@ target_include_directories(${LIBRARY_NAME}
   PRIVATE ${Boost_INCLUDE_DIRS}
 )
 
-# This will be used for any module dependencies
 if(BUILD_MANGOSBOTS)
     include_directories(
         ${CMAKE_SOURCE_DIR}/src/game
@@ -179,14 +178,9 @@ if(BUILD_MANGOSBOTS)
         ${CMAKE_SOURCE_DIR}/src/shared/Utilities
         ${CMAKE_SOURCE_DIR}/src/shared/Log
         ${CMAKE_SOURCE_DIR}/src/shared/Threading
-    )
-endif()
-
-if(BUILD_MANGOSBOTS)
-    include_directories(
-        ${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot
+		${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot
         ${CMAKE_SOURCE_DIR}/src/modules/Bots/ahbot
-	)
+    )
 	
 	target_link_libraries(${LIBRARY_NAME} PUBLIC Bots)
     add_dependencies(${LIBRARY_NAME} Bots)

@@ -376,7 +376,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
     {
 #endif
     queryResult = CharacterDatabase.PQuery("SELECT playerguid FROM petition_sign WHERE player_account = '%u' AND petitionguid = '%u'", GetAccountId(), petitionLowGuid);
-    
+
     if (queryResult)
     {
         WorldPacket data(SMSG_PETITION_SIGN_RESULTS, (8 + 8 + 4));

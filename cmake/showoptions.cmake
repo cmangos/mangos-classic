@@ -68,7 +68,7 @@ else()
 endif()
 
 if(BUILD_MANGOSBOTS)
-  message(STATUS "Build Mangosbots	    : Yes")
+  message(STATUS "Build Mangosbots      : Yes")
 else()
   message(STATUS "Build Mangosbots      : No  (default)")
 endif()
