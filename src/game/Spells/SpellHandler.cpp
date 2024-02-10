@@ -189,6 +189,12 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
+    if (proto->RequiredLevel > pUser->GetLevel())
+    {
+        pUser->SendEquipError(EQUIP_ERR_LOOT_CANT_LOOT_THAT_NOW, pItem, nullptr);
+        return;
+    }
+
     // locked item
     uint32 lockId = proto->LockID;
     if (lockId && !pItem->HasFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_UNLOCKED))
