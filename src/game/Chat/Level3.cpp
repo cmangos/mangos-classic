@@ -7038,6 +7038,21 @@ bool ChatHandler::HandleScourgeInvasionStartZone(char* args)
     return true;
 }
 
+bool ChatHandler::HandleSetVariable(char* args)
+{
+    int32 variableId;
+    if (!ExtractInt32(&args, variableId))
+        return false;
+
+    int32 value;
+    if (!ExtractInt32(&args, value))
+        return false;
+
+    Player* player = GetSession()->GetPlayer();
+    player->GetMap()->GetVariableManager().SetVariable(variableId, value);
+    return true;
+}
+
 enum ModSpells
 {
     // client spells

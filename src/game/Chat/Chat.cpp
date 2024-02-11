@@ -858,6 +858,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "wareffort",      SEC_ADMINISTRATOR,  false, nullptr,                                        "", warEffortTable },
         { "scourgeinvasion",SEC_ADMINISTRATOR,  false, nullptr,                                        "", scourgeInvasionTable },
         { "variables",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleVariablePrint,              "", nullptr },
+        { "set",            SEC_ADMINISTRATOR,  false, &ChatHandler::HandleSetVariable,                "", nullptr },
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 
