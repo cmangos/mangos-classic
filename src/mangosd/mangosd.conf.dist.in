@@ -942,6 +942,10 @@ TalentsInspecting = 1
 #        Time during which at combat start check for help is disabled
 #        Default: 2000 (2 seconds)
 #
+#    CreatureLinkingAggroDelay
+#        Time after which spawn_group and linking aggro is triggered
+#        Default: 2000 (2 seconds)
+#
 #    CreatureFamilyFleeDelay
 #        Time during which creature can flee when no assistant found
 #        Default: 10000 (10s)

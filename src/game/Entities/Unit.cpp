@@ -553,11 +553,21 @@ void Unit::Heartbeat()
 
 void Unit::TriggerAggroLinkingEvent(Unit* enemy)
 {
-    if (IsLinkingEventTrigger())
-        GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_AGGRO, static_cast<Creature*>(this), enemy);
+    if (!IsCreature())
+        return;
 
-    if (IsCreature() && static_cast<Creature*>(this)->GetCreatureGroup())
-        static_cast<Creature*>(this)->GetCreatureGroup()->TriggerLinkingEvent(CREATURE_GROUP_EVENT_AGGRO, enemy);
+    m_events.AddEvent(new UnitLambdaEvent(*this, [enemyGuid = enemy->GetObjectGuid(), creatureGroup = static_cast<Creature*>(this)->GetCreatureGroup()](Unit& unit)
+    {
+        Unit* enemy = unit.GetMap()->GetUnit(enemyGuid);
+        if (!enemy)
+            return;
+
+        if (unit.IsLinkingEventTrigger())
+            unit.GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_AGGRO, static_cast<Creature*>(&unit), enemy);
+
+        if (creatureGroup) // if npc dies before event execution, group will be removed from him, however groups are persistent and safe to access like this
+            creatureGroup->TriggerLinkingEvent(CREATURE_GROUP_EVENT_AGGRO, enemy);
+    }), m_events.CalculateTime(sWorld.getConfig(CONFIG_UINT32_CREATURE_CHECK_FOR_HELP_AGGRO_DELAY)));
 }
 
 void Unit::TriggerEvadeEvents()
