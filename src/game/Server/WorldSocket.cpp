@@ -184,6 +184,7 @@ bool WorldSocket::ProcessIncomingData()
 
         self->Read(reinterpret_cast<char*>(packetBuffer->data()), packetBuffer->size(), [self, packetBuffer, opcode = opcode](const boost::system::error_code& error, std::size_t read) -> void
         {
+            if (error) return;
             std::unique_ptr<WorldPacket> pct = std::make_unique<WorldPacket>(opcode, packetBuffer->size());
             pct->append(*packetBuffer.get());
             if (sPacketLog->CanLogPacket() && self->IsLoggingPackets())
