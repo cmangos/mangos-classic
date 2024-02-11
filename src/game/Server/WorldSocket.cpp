@@ -202,7 +202,10 @@ bool WorldSocket::ProcessIncomingData()
             {
                 auto now = std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::now());
                 if (now < self->m_lastPacket[opcode]) // packet on cooldown
+                {
+                    self->ProcessIncomingData();
                     return;
+                }
                 else // start cooldown and allow execution
                     self->m_lastPacket[opcode] = now + std::chrono::milliseconds(WorldSocket::m_packetCooldowns[opcode]);
             }
