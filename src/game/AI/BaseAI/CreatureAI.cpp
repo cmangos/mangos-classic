@@ -192,7 +192,7 @@ void CreatureAI::OnCallForHelp(Unit* enemy)
 
 void CreatureAI::HandleAssistanceCall(Unit* sender, Unit* invoker)
 {
-    if (m_creature->IsInCombat() || !invoker)
+    if (!invoker || m_creature->IsCritter())
         return;
     if (m_creature->CanAssist(sender) && m_creature->CanAttackOnSight(invoker) && invoker->IsVisibleForOrDetect(m_creature, m_creature, false))
     {
