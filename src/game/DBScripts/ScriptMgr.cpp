@@ -2053,12 +2053,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
 
             if (m_script->changeDoor.goGuid)
             {
-                GameObjectData const* goData = sObjectMgr.GetGOData(m_script->changeDoor.goGuid);
-                if (!goData)                                // checked at load
-                    break;
-
-                // TODO - Was a change, before random map
-                door = m_map->GetGameObject(ObjectGuid(HIGHGUID_GAMEOBJECT, goData->id, m_script->changeDoor.goGuid));
+                door = m_map->GetGameObject(m_script->changeDoor.goGuid);
             }
             else
             {
