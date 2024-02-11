@@ -553,7 +553,7 @@ void Unit::Heartbeat()
 
 void Unit::TriggerAggroLinkingEvent(Unit* enemy)
 {
-    if (!IsCreature())
+    if (!IsCreature() || !enemy)
         return;
 
     m_events.AddEvent(new UnitLambdaEvent(*this, [enemyGuid = enemy->GetObjectGuid(), creatureGroup = static_cast<Creature*>(this)->GetCreatureGroup()](Unit& unit)
