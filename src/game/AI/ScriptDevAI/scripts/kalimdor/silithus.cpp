@@ -308,7 +308,6 @@ UnitAI* GetAI_npc_solenor(Creature* pCreature)
 void AddSC_silithus()
 {
     Script* pNewScript = new Script;
-    pNewScript = new Script;
     pNewScript->Name = "npc_solenor"; // npc_solenor_the_slayer
     pNewScript->GetAI = &GetAI_npc_solenor;
     pNewScript->pGossipHello = &GossipHello_npc_solenor;
