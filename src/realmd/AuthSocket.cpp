@@ -544,7 +544,7 @@ bool AuthSocket::_HandleLogonProof()
             *pkt << uint8(AUTH_LOGON_FAILED_VERSION_INVALID);
 
             BASIC_LOG("[AuthChallenge] Account %s tried to login with invalid client version %u!", self->_login.c_str(), self->_build);
-            self->Write((const char*)pkt->contents(), pkt->size(), [self](const boost::system::error_code& error, std::size_t read) {});
+            self->Write((const char*)pkt->contents(), pkt->size(), [self, pkt](const boost::system::error_code& error, std::size_t read) {});
             return;
         }
         /// </ul>
@@ -725,7 +725,7 @@ bool AuthSocket::_HandleReconnectChallenge()
             self->_reconnectProof.SetRand(16 * 8);
             pkt->append(self->_reconnectProof.AsByteArray(16));        // 16 bytes random
             pkt->append(VersionChallenge.data(), VersionChallenge.size());
-            self->Write((const char*)pkt->contents(), pkt->size(), [self](const boost::system::error_code& error, std::size_t read) {});
+            self->Write((const char*)pkt->contents(), pkt->size(), [self, pkt](const boost::system::error_code& error, std::size_t read) {});
 
             self->ProcessIncomingData();
         });
