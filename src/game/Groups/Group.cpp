@@ -33,7 +33,7 @@
 #include "Maps/MapPersistentStateMgr.h"
 #include "LFG/LFGMgr.h"
 #include "LFG/LFGQueue.h"
-#ifdef BUILD_PLAYERBOT
+#ifdef BUILD_DEPRECATED_PLAYERBOT
 #include "PlayerBot/Base/PlayerbotMgr.h"
 #endif
 
@@ -372,7 +372,7 @@ bool Group::AddMember(ObjectGuid guid, const char* name, uint8 joinMethod)
 uint32 Group::RemoveMember(ObjectGuid guid, uint8 method)
 {
     Player* player = sObjectMgr.GetPlayer(guid);
-#ifdef BUILD_PLAYERBOT
+#ifdef BUILD_DEPRECATED_PLAYERBOT
     // if master leaves group, all bots leave group
     if (player && player->GetPlayerbotMgr())
         player->GetPlayerbotMgr()->RemoveAllBotsFromGroup();

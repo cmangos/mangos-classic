@@ -1385,7 +1385,7 @@ void World::SetInitialWorldSettings()
 #endif // BUILD_METRICS
 
 
-#ifdef BUILD_PLAYERBOT
+#ifdef BUILD_DEPRECATED_PLAYERBOT
     PlayerbotMgr::SetInitialWorldSettings();
 #endif
     sLog.outString("---------------------------------------");

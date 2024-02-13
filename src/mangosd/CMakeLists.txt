@@ -90,7 +90,7 @@ if(WIN32)
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/game/Anticheat/module/warden_modules/ $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>/warden_modules
     DEPENDS ${EXECUTABLE_NAME})
 	
-  if(BUILD_PLAYERBOT)
+  if(BUILD_DEPRECATED_PLAYERBOT)
     add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
 	  COMMAND ${CMAKE_COMMAND} -E copy_if_different \"${CMAKE_SOURCE_DIR}/src/game/PlayerBot/playerbot.conf.dist.in\" \"$<TARGET_FILE_DIR:${EXECUTABLE_NAME}>/playerbot.conf.dist\")
   endif()
@@ -122,9 +122,9 @@ install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR})
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/mangosd.conf.dist.in ${CMAKE_CURRENT_BINARY_DIR}/mangosd.conf.dist)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/mangosd.conf.dist DESTINATION ${CONF_DIR})
 
-# Define BUILD_PLAYERBOT if need
-if (BUILD_PLAYERBOT)
-  add_definitions(-DBUILD_PLAYERBOT)
+# Define BUILD_DEPRECATED_PLAYERBOT if need
+if (BUILD_DEPRECATED_PLAYERBOT)
+  add_definitions(-DBUILD_DEPRECATED_PLAYERBOT)
   configure_file(${CMAKE_SOURCE_DIR}/src/game/PlayerBot/playerbot.conf.dist.in ${CMAKE_CURRENT_BINARY_DIR}/playerbot.conf.dist)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/playerbot.conf.dist DESTINATION ${CONF_DIR})
 endif()

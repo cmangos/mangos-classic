@@ -570,7 +570,7 @@ class Creature : public Unit
         bool IsTemporarySummon() const { return m_subtype == CREATURE_SUBTYPE_TEMPORARY_SUMMON; }
         bool IsCritter() const { return m_creatureInfo->CreatureType == CREATURE_TYPE_CRITTER; }
 
-#ifdef BUILD_PLAYERBOT
+#ifdef BUILD_DEPRECATED_PLAYERBOT
         // Adds functionality to load/unload bots from NPC, also need to apply SQL scripts
         void LoadBotMenu(Player* pPlayer);
 #endif

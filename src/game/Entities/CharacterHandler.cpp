@@ -41,7 +41,7 @@
 #include "Spells/SpellMgr.h"
 #include "Anticheat/Anticheat.hpp"
 
-#ifdef BUILD_PLAYERBOT
+#ifdef BUILD_DEPRECATED_PLAYERBOT
 #include "PlayerBot/Base/PlayerbotMgr.h"
 #endif
 
@@ -129,7 +129,7 @@ class CharacterHandler
             if (WorldSession* session = sWorld.FindSession(((LoginQueryHolder*)holder)->GetAccountId()))
                 session->HandlePlayerLogin((LoginQueryHolder*)holder);
         }
-#ifdef BUILD_PLAYERBOT
+#ifdef BUILD_DEPRECATED_PLAYERBOT
         // This callback is different from the normal HandlePlayerLoginCallback in that it
         // sets up the bot's world session and also stores the pointer to the bot player in the master's
         // world session m_playerBots map
@@ -513,7 +513,7 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recv_data)
     CharacterDatabase.DelayQueryHolder(&chrHandler, &CharacterHandler::HandlePlayerLoginCallback, holder);
 }
 
-#ifdef BUILD_PLAYERBOT
+#ifdef BUILD_DEPRECATED_PLAYERBOT
 // Can't easily reuse HandlePlayerLoginOpcode for logging in bots because it assumes
 // a WorldSession exists for the bot. The WorldSession for a bot is created after the character is loaded.
 void PlayerbotMgr::LoginPlayerBot(ObjectGuid playerGuid)

@@ -39,7 +39,7 @@
 
 bool WorldSession::CheckChatMessage(std::string& msg, bool addon/* = false*/)
 {
-#ifdef BUILD_PLAYERBOT
+#ifdef BUILD_DEPRECATED_PLAYERBOT
     // bot check can be avoided
     if (_player->GetPlayerbotAI())
         return true;

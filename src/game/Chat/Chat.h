@@ -749,7 +749,7 @@ class ChatHandler
         bool HandleStableCommand(char* args);
         bool HandleWaterwalkCommand(char* args);
         bool HandleQuitCommand(char* args);
-#ifdef BUILD_PLAYERBOT
+#ifdef BUILD_DEPRECATED_PLAYERBOT
         bool HandlePlayerbotCommand(char* args);
 #endif
 
