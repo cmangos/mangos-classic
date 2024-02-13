@@ -248,8 +248,7 @@ class WorldSession
         void SetPlayer(Player* plr, uint32 playerGuid);
 
         void InitializeAnticheat(const BigNumber& K);
-        void AssignAnticheat();
-        void SetDelayedAnticheat(std::unique_ptr<SessionAnticheatInterface>&& anticheat);
+        void AssignAnticheat(std::unique_ptr<SessionAnticheatInterface>&& anticheat);
         SessionAnticheatInterface* GetAnticheat() const { return m_anticheat.get(); }
 
 #if defined(BUILD_DEPRECATED_PLAYERBOT) || defined(ENABLE_PLAYERBOTS)
@@ -840,7 +839,6 @@ class WorldSession
         uint32 m_accountMaxLevel;
         uint32 m_orderCounter;
         uint32 m_lastAnticheatUpdate;
-        std::unique_ptr<SessionAnticheatInterface> m_delayedAnticheat;
         std::unique_ptr<SessionAnticheatInterface> m_anticheat;
 
         time_t _logoutTime;                                 // when logout will be processed after a logout request

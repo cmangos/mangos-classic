@@ -489,45 +489,37 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     if (m_session)
     {
-        // Session exist so player is reconnecting
-        // check if we can request a new socket
-        if (!m_session->RequestNewSocket(this))
-            return false;
+        DEBUG_LOG("WorldSocket::HandleAuthSession reconnecting for account '%s' from %s", account.c_str(), address.c_str());
 
-        uint32 counter = 0;
-
-        // wait session going to be ready
-        while (m_session->GetState() != WORLD_SESSION_STATE_CHAR_SELECTION)
+        // defer operation to session thread context to avoid any race conditions
+        auto self = shared_from_this();
+        m_session->GetMessager().AddMessage([self, ClientBuild, clientOS, clientPlatform, account, address = address, K, id, recvPacket = recvPacket](WorldSession* session)
         {
-            ++counter;
-            // just wait
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            // Session exist so player is reconnecting
+            // check if we can request a new socket
+            if (!session->RequestNewSocket(self.get()))
+                return;
 
-            if (IsClosed() || counter > 20)
-                return false;
-        }
+            DEBUG_LOG("WorldSocket::HandleAuthSession reconnect loading data for account '%s' from %s", account.c_str(), address.c_str());
+            session->SetGameBuild(ClientBuild);
+            session->SetOS(clientOS);
+            session->SetPlatform(clientPlatform);
 
-        m_session->SetGameBuild(ClientBuild);
-        m_session->SetOS(clientOS);
-        m_session->SetPlatform(clientPlatform);
+            std::unique_ptr<SessionAnticheatInterface> anticheat = sAnticheatLib->NewSession(session, K);
 
-        std::unique_ptr<SessionAnticheatInterface> anticheat = sAnticheatLib->NewSession(m_session, K);
+            // when false, the client sent invalid addon data.  kick!
+            WorldPacket addonPacket; // yes its copypasted atm cos of reconnect
+            if (!anticheat->ReadAddonInfo(const_cast<WorldPacket*>(&recvPacket), addonPacket))
+            {
+                sLog.outBasic("WorldSocket::HandleAuthSession: Account %s (id %u) IP %s sent bad addon info.  Kicking.",
+                    account.c_str(), id, address.c_str());
+                return;
+            }
+            else
+                self->SendPacket(addonPacket);
 
-        // when false, the client sent invalid addon data.  kick!
-        WorldPacket addonPacket; // yes its copypasted atm cos of reconnect
-        if (!anticheat->ReadAddonInfo(&recvPacket, addonPacket))
-        {
-            sLog.outBasic("WorldSocket::HandleAuthSession: Account %s (id %u) IP %s sent bad addon info.  Kicking.",
-                account.c_str(), id, address.c_str());
-            return false;
-        }
-        else
-            SendPacket(addonPacket);
-
-        m_session->SetDelayedAnticheat(std::move(anticheat));
-        m_session->GetMessager().AddMessage([](WorldSession* session)
-        {
-            session->AssignAnticheat();
+            DEBUG_LOG("WorldSocket::HandleAuthSession assigning anticheat for '%s' from %s", account.c_str(), address.c_str());
+            session->AssignAnticheat(std::move(anticheat));
         });
     }
     else

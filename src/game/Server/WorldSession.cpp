@@ -165,7 +165,6 @@ void WorldSession::SetInCharSelection()
 
 bool WorldSession::RequestNewSocket(WorldSocket* socket)
 {
-    std::lock_guard<std::mutex> guard(m_recvQueueLock);
     if (m_requestSocket)
         return false;
 
@@ -481,6 +480,7 @@ bool WorldSession::Update(uint32 diff)
         {
             if (m_requestSocket)
             {
+                std::lock_guard<std::mutex> guard(m_recvQueueLock);
                 if (!IsOffline())
                     SetOffline();
 
@@ -1289,14 +1289,9 @@ void WorldSession::InitializeAnticheat(const BigNumber& K)
     m_anticheat = sAnticheatLib->NewSession(this, K);
 }
 
-void WorldSession::AssignAnticheat()
+void WorldSession::AssignAnticheat(std::unique_ptr<SessionAnticheatInterface>&& anticheat)
 {
-    m_anticheat = std::move(m_delayedAnticheat);
-}
-
-void WorldSession::SetDelayedAnticheat(std::unique_ptr<SessionAnticheatInterface>&& anticheat)
-{
-    m_delayedAnticheat = std::move(anticheat);
+    m_anticheat = std::move(anticheat);
 }
 
 #ifdef BUILD_DEPRECATED_PLAYERBOT
