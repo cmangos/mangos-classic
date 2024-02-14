@@ -32,7 +32,7 @@ class CombatAI : public ScriptedAI
 
         void HandleDelayedInstantAnimation(SpellEntry const* spellInfo) override;
         void HandleTargetRestoration();
-        bool IsTargetingRestricted();
+        bool IsTargetingRestricted() override;
         void StopTargeting(bool state) { m_stopTargeting = state; }
         void OnTaunt() override;
 

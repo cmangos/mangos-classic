@@ -276,7 +276,11 @@ class ChatHandler
         bool HandleDebugByteFields(char* args);
         bool HandleDebugSpellVisual(char* args);
         bool HandleDebugMoveflags(char* args);
-        bool HandleDebugLootDropStats(char* args);
+
+        bool LootStatsHelper(char* args, bool full);
+        bool HandleLootStatsCommand(char* args);
+        bool HandleLootFullStatsCommand(char* args);
+
         bool HandleDebugOverflowCommand(char* args);
         bool HandleDebugChatFreezeCommand(char* args);
 
@@ -749,7 +753,7 @@ class ChatHandler
         bool HandleStableCommand(char* args);
         bool HandleWaterwalkCommand(char* args);
         bool HandleQuitCommand(char* args);
-#ifdef BUILD_PLAYERBOT
+#ifdef BUILD_DEPRECATED_PLAYERBOT
         bool HandlePlayerbotCommand(char* args);
 #endif
 

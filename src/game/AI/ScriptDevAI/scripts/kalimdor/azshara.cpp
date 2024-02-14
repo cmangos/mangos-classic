@@ -290,7 +290,7 @@ struct npc_felhound_trackerAI : public ScriptedPetAI
         m_uiWaitTimer = 20000;
     }
 
-    void ReceiveEmote(Player* pPlayer, uint32 uiTextEmote)
+    void ReceiveEmote(Player* pPlayer, uint32 uiTextEmote) override
     {
         // Only react if player is on the quest
         if (pPlayer->GetQuestStatus(QUEST_AZSHARITE) != QUEST_STATUS_INCOMPLETE)
@@ -491,7 +491,7 @@ struct boss_mawsAI : public ScriptedAI
         DoCastSpellIfCan(nullptr, SPELL_THRASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    void JustDied(Unit* /*pKiller*/)
+    void JustDied(Unit* /*pKiller*/) override
     {
         // Despawn visual lightning GO
         if (GameObject* lightning = GetClosestGameObjectWithEntry(m_creature, GO_THEATRIC_LIGHTNING, 200.0f))

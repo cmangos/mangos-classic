@@ -83,7 +83,7 @@ class WaypointMovementGenerator<Creature>
         bool Update(Creature& creature, const uint32& diff);
         void InitializeWaypointPath(Creature& u, int32 pathId, WaypointPathOrigin wpSource, uint32 initialDelay, uint32 overwriteEntry = 0);
 
-        MovementGeneratorType GetMovementGeneratorType() const { return WAYPOINT_MOTION_TYPE; }
+        MovementGeneratorType GetMovementGeneratorType() const override { return WAYPOINT_MOTION_TYPE; }
 
         bool GetResetPosition(Creature&, float& /*x*/, float& /*y*/, float& /*z*/, float& /*o*/) const;
         uint32 getLastReachedWaypoint() const { return m_lastReachedWaypoint; }

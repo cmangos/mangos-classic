@@ -720,7 +720,7 @@ class GameObject : public WorldObject
 
         ObjectGuid const& GetOwnerGuid() const override { return GetGuidValue(OBJECT_FIELD_CREATED_BY); }
         void SetOwnerGuid(ObjectGuid guid) override;
-        ObjectGuid const GetSpawnerGuid() const { return m_spawnerGuid; }
+        ObjectGuid const GetSpawnerGuid() const override { return m_spawnerGuid; }
         void SetSpawnerGuid(ObjectGuid guid) { m_spawnerGuid = guid; }
 
         Unit* GetOwner() const;

@@ -31,7 +31,7 @@
 #include "Groups/Group.h"
 #include "Tools/Formulas.h"
 
-#ifdef BUILD_PLAYERBOT
+#ifdef BUILD_DEPRECATED_PLAYERBOT
 #include "PlayerBot/Base/PlayerbotAI.h"
 #endif
 
@@ -582,12 +582,12 @@ void WorldSession::HandlePushQuestToParty(WorldPacket& recvPacket)
                     continue;
                 }
 
-#ifndef BUILD_PLAYERBOT
+#ifndef BUILD_DEPRECATED_PLAYERBOT
                 pPlayer->GetPlayerMenu()->SendQuestGiverQuestDetails(pQuest, _player->GetObjectGuid(), true);
 #endif
                 pPlayer->SetDividerGuid(_player->GetObjectGuid());
 
-#ifdef BUILD_PLAYERBOT
+#ifdef BUILD_DEPRECATED_PLAYERBOT
                 if (pPlayer->GetPlayerbotAI())
                     pPlayer->GetPlayerbotAI()->AcceptQuest(pQuest, _player);
                 else

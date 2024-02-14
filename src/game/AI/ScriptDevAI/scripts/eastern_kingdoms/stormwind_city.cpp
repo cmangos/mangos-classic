@@ -399,7 +399,7 @@ struct npc_squire_roweAI : public npc_escortAI, private DialogueHelper
     // Check if the event is already running
     bool IsStormwindQuestActive() const { return m_isEventInProgress; }
 
-    void UpdateEscortAI(const uint32 uiDiff) { DialogueUpdate(uiDiff); }
+    void UpdateEscortAI(const uint32 uiDiff) override { DialogueUpdate(uiDiff); }
 };
 
 UnitAI* GetAI_npc_squire_rowe(Creature* creature)

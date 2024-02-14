@@ -131,7 +131,7 @@ struct FlagAuraBg : public AuraScript, public SpellScript
         return SPELL_AURA_PROC_OK;
     }
 
-    void OnApply(Aura* aura, bool apply) const
+    void OnApply(Aura* aura, bool apply) const override
     {
         Unit* unitTarget = aura->GetTarget();
         if (!unitTarget || !unitTarget->IsPlayer())

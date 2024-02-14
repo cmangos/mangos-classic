@@ -58,7 +58,7 @@ class Spell;
 class Item;
 struct FactionTemplateEntry;
 
-#ifdef BUILD_PLAYERBOT
+#ifdef BUILD_DEPRECATED_PLAYERBOT
 #include "PlayerBot/Base/PlayerbotMgr.h"
 #include "PlayerBot/Base/PlayerbotAI.h"
 #endif
@@ -1349,7 +1349,7 @@ class Player : public Unit
         void AddTimedQuest(uint32 quest_id) { m_timedquests.insert(quest_id); }
         void RemoveTimedQuest(uint32 quest_id) { m_timedquests.erase(quest_id); }
 
-#ifdef BUILD_PLAYERBOT
+#ifdef BUILD_DEPRECATED_PLAYERBOT
         void chompAndTrim(std::string& str);
         bool getNextQuestId(const std::string& pString, unsigned int& pStartPos, unsigned int& pId);
         void skill(std::list<uint32>& m_spellsToLearn);
@@ -2054,10 +2054,10 @@ class Player : public Unit
 
         bool isMovingOrTurning() const { return m_movementInfo.HasMovementFlag(movementOrTurningFlagsMask); }
 
-        bool CanSwim() const { return true; }
+        bool CanSwim() const override { return true; }
         bool CanFly() const override { return m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING); }
-        bool CanWalk() const { return true; }
-        bool IsFlying() const { return false; }
+        bool CanWalk() const override { return true; }
+        bool IsFlying() const override { return false; }
         bool IsFreeFlying() const { return false; }
         bool IsSwimming() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_SWIMMING); }
 
@@ -2187,7 +2187,7 @@ class Player : public Unit
 
         void SendMessageToPlayer(std::string const& message) const; // debugging purposes
 
-#ifdef BUILD_PLAYERBOT
+#ifdef BUILD_DEPRECATED_PLAYERBOT
         // A Player can either have a playerbotMgr (to manage its bots), or have playerbotAI (if it is a bot), or
         // neither. Code that enables bots must create the playerbotMgr and set it using SetPlayerbotMgr.
         void SetPlayerbotAI(PlayerbotAI* ai) { assert(!m_playerbotAI && !m_playerbotMgr); m_playerbotAI = ai; }
@@ -2219,7 +2219,7 @@ class Player : public Unit
         virtual void AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto = nullptr, bool permanent = false, uint32 forcedDuration = 0, bool ignoreCat = false) override;
         virtual void RemoveSpellCooldown(SpellEntry const& spellEntry, bool updateClient = true) override;
         virtual void RemoveSpellCategoryCooldown(uint32 category, bool updateClient = true) override;
-        virtual void RemoveAllCooldowns(bool sendOnly = false);
+        virtual void RemoveAllCooldowns(bool sendOnly = false) override;
         virtual void LockOutSpells(SpellSchoolMask schoolMask, uint32 duration) override;
         void RemoveSpellLockout(SpellSchoolMask spellSchoolMask, std::set<uint32>* spellAlreadySent = nullptr);
         void SendClearCooldown(uint32 spell_id, Unit* target) const;
@@ -2511,7 +2511,7 @@ class Player : public Unit
         MapReference m_mapRef;
         std::unique_ptr<PlayerMenu> m_playerMenu;
 
-#ifdef BUILD_PLAYERBOT
+#ifdef BUILD_DEPRECATED_PLAYERBOT
         PlayerbotAI* m_playerbotAI;
         PlayerbotMgr* m_playerbotMgr;
 #endif

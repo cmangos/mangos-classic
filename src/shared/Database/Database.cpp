@@ -495,7 +495,7 @@ bool Database::CheckRequiredField(char const* table_name, char const* required_n
             sLog.outErrorDb("  [B] You need: --> `%s.sql`", req_sql_update_name);
             sLog.outErrorDb();
             sLog.outErrorDb("You must apply all updates after [A] to [B] to use mangos with this database.");
-#ifdef BUILD_PLAYERBOT
+#ifdef BUILD_DEPRECATED_PLAYERBOT
             if (reqName.find("playerbot") != std::string::npos)
             {
                 sLog.outErrorDb("These updates are included in the [sql/PlayerBot] folder.");

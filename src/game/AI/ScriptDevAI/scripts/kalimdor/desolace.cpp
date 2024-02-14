@@ -548,7 +548,7 @@ struct npc_cork_gizeltonAI : public npc_escortAI
     }
 
 
-    void CreatureGroupMemberDied(Unit* /*killed*/)
+    void CreatureGroupMemberDied(Unit* /*killed*/) override
     {
         StatusFailed = true;
     }

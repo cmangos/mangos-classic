@@ -252,7 +252,7 @@ struct npc_shay_leafrunnerAI : public FollowerAI
         }
     }
 
-    void UpdateFollowerAI(const uint32 uiDiff)
+    void UpdateFollowerAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         {

@@ -123,6 +123,45 @@ enum LootError
     LOOT_ERROR_NOT_WHILE_SHAPESHIFTED   = 16    // You can't do that while shapeshifted.
 };
 
+struct LootStats
+{
+    // itemId and count
+    struct GroupStats
+    {
+        using ItemIndex = std::pair<int32, uint32>;
+        using ItemStatsMap = std::map<ItemIndex, uint32>;
+        using GroupStatsMap = std::map<uint32, ItemStatsMap>;
+
+        GroupStatsMap groups;
+
+        void IncItemCount(uint32 group, ItemIndex itemIdx)
+        {
+            ++groups[group][itemIdx];
+        }
+    };
+
+    // lootId and item stats
+    std::map<int32, GroupStats> groupStatsMap;
+
+    GroupStats* GetStatsForLootId(int32 lootId)
+    {
+        return &groupStatsMap[lootId];
+    }
+};
+
+struct LootStatsData
+{
+    LootStatsData() = delete;
+    LootStatsData(uint32 _groupIdOrItemId, LootStats* _stats)
+        : groupIdOrItemId(_groupIdOrItemId), stats(_stats)
+    {}
+
+    uint32 groupIdOrItemId;
+    LootStats* stats;
+};
+
+using LootStatsUPtr = std::unique_ptr<LootStats>;
+
 struct PlayerRollVote
 {
     PlayerRollVote() : vote(ROLL_NOT_VALID), number(0) {}
@@ -162,6 +201,7 @@ typedef std::unordered_map<uint32, GroupLootRoll> GroupLootRollMap;
 
 struct LootStoreItem
 {
+    uint32  itemIndex;                                      // index in loot store
     uint32  itemid;                                         // id of the item
     float   chance;                                         // always positive, chance to drop for both quest and non-quest items, chance to be used for refs
     int32   mincountOrRef;                                  // mincount for drop items (positive) or minus referenced TemplateleId (negative)
@@ -172,14 +212,12 @@ struct LootStoreItem
 
     // Constructor, converting ChanceOrQuestChance -> (chance, needs_quest)
     // displayid is filled in IsValid() which must be called after
-    LootStoreItem(uint32 _itemid, float _chanceOrQuestChance, int8 _group, uint16 _conditionId, int32 _mincountOrRef, uint8 _maxcount)
-        : itemid(_itemid), chance(fabs(_chanceOrQuestChance)), mincountOrRef(_mincountOrRef),
+    LootStoreItem(uint32 _itemIndex, uint32 _itemid, float _chanceOrQuestChance, int8 _group, uint16 _conditionId, int32 _mincountOrRef, uint8 _maxcount)
+        : itemIndex(_itemIndex), itemid(_itemid), chance(fabs(_chanceOrQuestChance)), mincountOrRef(_mincountOrRef),
           group(_group), needs_quest(_chanceOrQuestChance < 0), maxcount(_maxcount), conditionId(_conditionId)
     {}
 
     bool Roll(bool rate) const;                             // Checks if the entry takes it's chance (at loot generation)
-    bool IsValid(LootStore const& store, uint32 entry) const;
-    // Checks correctness of values
 };
 
 struct LootItem
@@ -216,8 +254,56 @@ struct LootItem
 
 typedef std::vector<LootItem*> LootItemList;
 typedef std::vector<LootStoreItem> LootStoreItemList;
-typedef std::unordered_map<uint32, LootTemplate*> LootTemplateMap;
+typedef std::unordered_map<uint32, LootTemplate> LootTemplateMap;
 typedef std::set<uint32> LootIdSet;
+
+class LootTemplate
+{
+    private:
+        class LootGroup                           // A set of loot definitions for items (refs are not allowed)
+        {
+            public:
+                void AddEntry(LootStoreItem const& item);                 // Adds an entry to the group (at loading stage)
+                bool HasQuestDrop() const;                          // True if group includes at least 1 quest drop entry
+                bool HasQuestDropForPlayer(Player const* player) const;
+                // The same for active quests of the player
+                // Rolls an item from the group (if any) and adds the item to the loot
+                void Process(Loot& loot, Player const* lootOwner, bool rate, LootStatsData* lootStats = nullptr) const;
+                float RawTotalChance() const;                       // Overall chance for the group (without equal chanced items)
+                float TotalChance() const;                          // Overall chance for the group
+
+                void Verify(LootStore const& lootstore, uint32 id, uint32 group_id) const;
+                bool CheckLootRefs(LootIdSet* ref_set, LootIdSet& prevRefs);
+
+            private:
+                LootStoreItemList ExplicitlyChanced;                // Entries with chances defined in DB
+                LootStoreItemList EqualChanced;                     // Zero chances - every entry takes the same chance
+
+                // Rolls an item from the group, returns nullptr if all miss their chances
+                LootStoreItem const* Roll(Loot const& loot, Player const* lootOwner) const;
+        };
+    using LootGroups = std::vector<LootGroup>;
+
+    public:
+        // Adds an entry to the group (at loading stage)
+        void AddEntry(LootStoreItem const& item);
+        // Rolls for every item in the template and adds the rolled items the the loot
+        void Process(Loot& loot, Player const* lootOwner, bool rate, LootStatsData* lootStatsData = nullptr) const;
+
+        // True if template includes at least 1 quest drop entry
+        bool HasQuestDrop(LootTemplateMap const& store, uint8 groupId = 0) const;
+        // True if template includes at least 1 quest drop for an active quest of the player
+        bool HasQuestDropForPlayer(LootTemplateMap const& store, Player const* player, uint8 groupId = 0) const;
+        // True if at least one player fulfills loot condition
+        static bool PlayerOrGroupFulfilsCondition(const Loot& loot, Player const* lootOwner, uint16 conditionId);
+
+        // Checks integrity of the template
+        void Verify(LootStore const& lootstore, uint32 id) const;
+        bool CheckLootRefs(LootIdSet* ref_set, LootIdSet& prevRefs);
+    private:
+        LootStoreItemList Entries;                          // not grouped only
+        LootGroups        Groups;                           // groups have own (optimized) processing, grouped entries go there
+};
 
 class LootStore
 {
@@ -234,7 +320,7 @@ class LootStore
         void ReportUnusedIds(LootIdSet const& ids_set) const;
         void ReportNotExistedId(uint32 id) const;
 
-        bool HaveLootFor(uint32 loot_id) const { return m_LootTemplates.find(loot_id) != m_LootTemplates.end(); }
+        bool HaveLootFor(uint32 loot_id) const;
         bool HaveQuestLootFor(uint32 loot_id) const;
         bool HaveQuestLootForPlayer(uint32 loot_id, Player* player) const;
 
@@ -243,40 +329,19 @@ class LootStore
         char const* GetName() const { return m_name; }
         char const* GetEntryName() const { return m_entryName; }
         bool IsRatesAllowed() const { return m_ratesAllowed; }
+
+        // Checks if drop rules are valid for the item
+        bool IsValidItemTemplate(uint32 entry, uint32 itemId, uint32 group, int32 mincountOrRef, float chance, uint32 maxCount) const;
+
     protected:
         void LoadLootTable();
         void Clear();
+
     private:
         LootTemplateMap m_LootTemplates;
         char const* m_name;
         char const* m_entryName;
         bool m_ratesAllowed;
-};
-
-class LootTemplate
-{
-        class  LootGroup;                                   // A set of loot definitions for items (refs are not allowed inside)
-        typedef std::vector<LootGroup> LootGroups;
-
-    public:
-        // Adds an entry to the group (at loading stage)
-        void AddEntry(LootStoreItem& item);
-        // Rolls for every item in the template and adds the rolled items the the loot
-        void Process(Loot& loot, Player const* lootOwner, LootStore const& store, bool rate, uint8 groupId = 0) const;
-
-        // True if template includes at least 1 quest drop entry
-        bool HasQuestDrop(LootTemplateMap const& store, uint8 groupId = 0) const;
-        // True if template includes at least 1 quest drop for an active quest of the player
-        bool HasQuestDropForPlayer(LootTemplateMap const& store, Player const* player, uint8 groupId = 0) const;
-        // True if at least one player fulfils loot condition
-        static bool PlayerOrGroupFulfilsCondition(const Loot& loot, Player const* lootOwner, uint16 conditionId);
-
-        // Checks integrity of the template
-        void Verify(LootStore const& lootstore, uint32 id) const;
-        bool CheckLootRefs(LootIdSet* ref_set, LootIdSet& prevRefs);
-    private:
-        LootStoreItemList Entries;                          // not grouped only
-        LootGroups        Groups;                           // groups have own (optimized) processing, grouped entries go there
 };
 
 //=====================================================
@@ -421,7 +486,7 @@ class LootMgr
     public:
         void PlayerVote(Player* player, ObjectGuid const& lootTargetGuid, uint32 itemSlot, RollVote vote);
         Loot* GetLoot(Player* player, ObjectGuid const& targetGuid = ObjectGuid()) const;
-        void CheckDropStats(ChatHandler& chat, uint32 amountOfCheck, uint32 lootId, std::string lootStore) const;
+        void CheckDropStats(ChatHandler& chat, uint32 amountOfCheck, uint32 lootId, std::string lootStore, bool full) const;
         bool ExistsRefLootTemplate(uint32 refLootId) const;
 };
 

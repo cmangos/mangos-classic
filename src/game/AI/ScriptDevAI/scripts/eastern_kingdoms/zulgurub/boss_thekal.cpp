@@ -99,7 +99,7 @@ struct boss_thekalBaseAI : public CombatAI
     virtual void OnFakeingDeath() {}
     virtual bool OnRevive() { return false; }
 
-    void JustPreventedDeath(Unit* /*attacker*/)
+    void JustPreventedDeath(Unit* /*attacker*/) override
     {
         m_creature->InterruptNonMeleeSpells(true);
         m_creature->StopMoving();
@@ -304,7 +304,7 @@ struct boss_thekalAI : public boss_thekalBaseAI
             zath->AI()->EnterEvadeMode();
     }
 
-    void ExecuteAction(uint32 action)
+    void ExecuteAction(uint32 action) override
     {
         if (action == THEKAL_TIGER_ENRAGE)
         {

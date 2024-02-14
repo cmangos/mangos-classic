@@ -130,7 +130,7 @@ class PlayerbotShamanAI : PlayerbotClassAI
         // Resurrects the target
         CombatManeuverReturns ResurrectPlayer(Player* target) override;
         // Dispel disease or negative magic effects from an internally selected target
-        CombatManeuverReturns DispelPlayer(Player* target = nullptr);
+        CombatManeuverReturns DispelPlayer(Player* target = nullptr) override;
 
         void DropTotems();
         void CheckShields();
