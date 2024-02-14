@@ -2131,7 +2131,9 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
 
             SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
             if (spellInfo->HasAttribute(SPELL_ATTR_EX_EXCLUDE_CASTER) && pTarget == pSource)
-                pTarget = nullptr; // TODO: Add mechanism to opt not sending target
+                pTarget = nullptr;
+            if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
+                pTarget = nullptr;
 
             // TODO: when GO cast implemented, code below must be updated accordingly to also allow GO spell cast
             if (pSource && pSource->IsGameObject())

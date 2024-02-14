@@ -243,6 +243,7 @@ Defining a buddy could be done in several way:
                                             * datalong = spell id
                                             * datalong2 = TriggerCastFlags
                                             * dataint1-dataint4 optional. If some of these are set to a spell id, a random spell out of datalong, datint1, ..,dataintX is cast.
+                                            * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: do not pass target to spellcast
 
 16 SCRIPT_COMMAND_PLAY_SOUND                source = any object, target=any/player
                                             * datalong = sound_id
