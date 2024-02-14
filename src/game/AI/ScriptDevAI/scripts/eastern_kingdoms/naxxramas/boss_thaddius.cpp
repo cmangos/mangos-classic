@@ -518,7 +518,7 @@ struct boss_stalaggAI : public boss_thaddiusAddsAI
             DoScriptText(SAY_STAL_SLAY, m_creature);
     }
 
-    void UpdateAddAI(const uint32 diff)
+    void UpdateAddAI(const uint32 diff) override
     {
         if (m_powerSurgeTimer < diff)
         {
@@ -572,7 +572,7 @@ struct boss_feugenAI : public boss_thaddiusAddsAI
             DoScriptText(SAY_FEUG_SLAY, m_creature);
     }
 
-    void UpdateAddAI(const uint32 diff)
+    void UpdateAddAI(const uint32 diff) override
     {
         if (m_magneticPullTimer < diff)
         {

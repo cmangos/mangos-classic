@@ -24,7 +24,7 @@ class ScriptedPetAI : public CreatureAI
 
         void CombatStop() override;
 
-        virtual void Reset() {}
+        virtual void Reset() override {}
 
         virtual void UpdatePetAI(const uint32 diff);      // while in combat
 

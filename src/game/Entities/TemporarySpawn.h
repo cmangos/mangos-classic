@@ -32,7 +32,7 @@ class TemporarySpawn : public Creature
         void SetSummonProperties(TempSpawnType type, uint32 lifetime);
         void Summon(TempSpawnType type, uint32 lifetime);
         void UnSummon();
-        void SaveToDB();
+        void SaveToDB() override;
         ObjectGuid const GetSpawnerGuid() const override { return m_spawner ; }
         void SetLinkedToOwnerAura(uint32 flags) { m_linkedToOwnerAura |= flags; };
 

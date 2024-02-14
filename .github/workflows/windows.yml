@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ${{env.REPO_DIR}}
 
@@ -32,7 +32,7 @@ jobs:
 
       # install dependencies
       - name: Install Boost
-        uses: MarkusJx/install-boost@v2.4.4
+        uses: MarkusJx/install-boost@v2.4.5
         id: install-boost
         with:
           # REQUIRED: Specify the required boost version
@@ -62,7 +62,7 @@ jobs:
           7z a -tzip ${{env.ARCHIVE_FILENAME}} x64_Release
 
       - name: Archive The Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: snapshot
           path: "${{env.BUILD_DIR}}/bin/${{env.ARCHIVE_FILENAME}}"
@@ -83,7 +83,7 @@ jobs:
           echo "GIT_SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
 
       - name: Notify
-        uses: rjstone/discord-webhook-notify@v1.0.4
+        uses: rjstone/discord-webhook-notify@v1.1.1
         with:
           severity: error
           description: |

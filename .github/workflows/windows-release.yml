@@ -41,7 +41,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ${{env.REPO_DIR}}
 
@@ -53,7 +53,7 @@ jobs:
 
       # install dependencies
       - name: Install Boost
-        uses: MarkusJx/install-boost@v2.4.4
+        uses: MarkusJx/install-boost@v2.4.5
         id: install-boost
         with:
           # REQUIRED: Specify the required boost version
@@ -83,7 +83,7 @@ jobs:
           7z a -tzip ${{env.ARCHIVE_FILENAME}} "x64_${{env.BUILD_TYPE}}"
 
       - name: Archive The Artefact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: snapshot-${{matrix.TYPE}}
           path: "${{env.BUILD_DIR}}/bin/${{env.ARCHIVE_FILENAME}}"
@@ -96,27 +96,27 @@ jobs:
 
     steps:
       - name: Download Artifact snapshot-default
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: snapshot-default
           path: all_snapshots
       - name: Download Artifact snapshot-with-all
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: snapshot-with-all
           path: all_snapshots
       - name: Download Artifact snapshot-with-playerbot-ahbot
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: snapshot-with-playerbot-ahbot
           path: all_snapshots
       - name: Download Artifact snapshot-with-playerbot
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: snapshot-with-playerbot
           path: all_snapshots
       - name: Download Artifact snapshot-with-ahbot
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: snapshot-with-ahbot
           path: all_snapshots
@@ -158,7 +158,7 @@ jobs:
           echo "PB_AB_ARCH_NAME=${projectNames}-with-playerbot-ahbot-${shortSHA}.zip" >> $GITHUB_ENV
 
       - name: Notify
-        uses: rjstone/discord-webhook-notify@v1.0.4
+        uses: rjstone/discord-webhook-notify@v1.1.1
         with:
           severity: info
           description: |
@@ -193,7 +193,7 @@ jobs:
           echo "GIT_SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
 
       - name: Notify
-        uses: rjstone/discord-webhook-notify@v1.0.4
+        uses: rjstone/discord-webhook-notify@v1.1.1
         with:
           severity: error
           description: |

@@ -621,6 +621,7 @@ void WorldSession::HandleMoveFlagChangeOpcode(WorldPacket& recv_data)
         case CMSG_MOVE_HOVER_ACK: response = MSG_MOVE_HOVER; break;
         case CMSG_MOVE_FEATHER_FALL_ACK: response = MSG_MOVE_FEATHER_FALL; break;
         case CMSG_MOVE_WATER_WALK_ACK: response = MSG_MOVE_WATER_WALK; break;
+        default: response = MSG_NULL_ACTION; break;
     }
 
     WorldPacket data(response, 8);

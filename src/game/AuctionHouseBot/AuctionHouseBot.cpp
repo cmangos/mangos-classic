@@ -473,7 +473,7 @@ void AuctionHouseBot::AddLootToItemMap(LootStore* store, std::vector<int32>& loo
             continue;
         std::unique_ptr<Loot> loot = std::make_unique<Loot>(LOOT_DEBUG);
         for (uint32 repeat = urand(lootConfig[2], lootConfig[3]); repeat > 0; --repeat)
-            lootTable->Process(*loot, nullptr, *store, store->IsRatesAllowed());
+            lootTable->Process(*loot, nullptr, store->IsRatesAllowed());
 
         LootItem* lootItem;
         for (uint32 slot = 0; (lootItem = loot->GetLootItemInSlot(slot)); ++slot)

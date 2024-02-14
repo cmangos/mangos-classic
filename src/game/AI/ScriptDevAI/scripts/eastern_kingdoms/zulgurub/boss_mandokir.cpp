@@ -265,7 +265,7 @@ struct mob_ohganAI : public CombatAI
         }
     }
 
-    void ExecuteAction(uint32 action)
+    void ExecuteAction(uint32 action) override
     {
         if (action == 0)
         {

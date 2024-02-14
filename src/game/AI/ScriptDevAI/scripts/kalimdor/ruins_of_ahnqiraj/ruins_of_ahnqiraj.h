@@ -112,7 +112,7 @@ class instance_ruins_of_ahnqiraj : public ScriptedInstance
         void OnPlayerEnter(Player* pPlayer) override;
 
         void OnCreatureEnterCombat(Creature* pCreature) override;
-        void OnCreatureEvade(Creature* pCreature);
+        void OnCreatureEvade(Creature* pCreature) override;
         void OnCreatureDeath(Creature* pCreature) override;
         void OnCreatureRespawn(Creature* creature) override;
 

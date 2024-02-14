@@ -36,6 +36,7 @@
 #include "Maps/InstanceData.h"
 #include "Cinematics/M2Stores.h"
 #include "Entities/Transports.h"
+#include <string>
 
 bool ChatHandler::HandleDebugSendSpellFailCommand(char* args)
 {
@@ -1524,84 +1525,6 @@ bool ChatHandler::HandleSD2ScriptCommand(char* args)
         data->ExecuteChatCommand(this, args);
     else
         PSendSysMessage("Map script does not support chat commands.");
-    return true;
-}
-
-bool ChatHandler::HandleDebugLootDropStats(char* args)
-{
-    uint32 amountOfCheck = 100000;
-    uint32 lootId = 0;
-    std::string lootStore;
-
-    Creature* target = getSelectedCreature();
-    if (!target)
-    {
-        bool usageError = false;
-        char* storeStr = nullptr;
-        if (!ExtractUInt32(&args, lootId))
-            usageError = true;
-
-        if (!usageError)
-        {
-            storeStr = ExtractLiteralArg(&args);
-            if (!storeStr && *args)
-                usageError = true;
-
-            if (!usageError && *args && !ExtractUInt32(&args, amountOfCheck))
-                usageError = true;
-        }
-
-        if (usageError)
-        {
-            SendSysMessage("Usage: .debug lootdropstats lootId [lootTemplate amountOfCheck]");
-            SetSentErrorMessage(true);
-            return false;
-        }
-
-        if (storeStr)
-        {
-            lootStore = storeStr;
-            if (lootStore == "creature" || lootStore == "c")
-                lootStore = "creature";
-            else if (lootStore == "gameobject" || lootStore == "gob")
-                lootStore = "gameobject";
-            else if (lootStore == "fishing" || lootStore == "f")
-                lootStore = "fishing";
-            else if (lootStore == "item" || lootStore == "i")
-                lootStore = "item";
-            else if (lootStore == "pickpocketing" || lootStore == "pick")
-                lootStore = "pickpocketing";
-            else if (lootStore == "skinning" || lootStore == "skin")
-                lootStore = "skinning";
-            else if (lootStore == "disenchanting" || lootStore == "dis")
-                lootStore = "disenchanting";
-            else if (lootStore == "mail" || lootStore == "m")
-                lootStore = "mail";
-            else
-            {
-                PSendSysMessage("Provided loot template is not valid should be:");
-                PSendSysMessage("creature");
-                PSendSysMessage("gameobject");
-                PSendSysMessage("fishing");
-                PSendSysMessage("item");
-                PSendSysMessage("pickpocketing");
-                PSendSysMessage("skinning");
-                PSendSysMessage("disenchanting");
-                PSendSysMessage("mail");
-                return true;
-            }
-        }
-        else
-            lootStore = "creature";
-    }
-    else
-    {
-        lootStore = "creature";
-        lootId = target->GetCreatureInfo()->LootId;
-        ExtractUInt32(&args, amountOfCheck);
-    }
-
-    sLootMgr.CheckDropStats(*this, amountOfCheck, lootId, lootStore);
     return true;
 }
 

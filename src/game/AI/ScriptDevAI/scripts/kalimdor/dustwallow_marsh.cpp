@@ -733,7 +733,7 @@ struct npc_stinky_ignatzAI : public npc_escortAI
         }
     }
 
-    void WaypointStart(uint32 uiPointId)
+    void WaypointStart(uint32 uiPointId) override
     {
         if (uiPointId == 31)
         {

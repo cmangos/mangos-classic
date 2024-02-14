@@ -52,7 +52,7 @@ class CreatureAI : public UnitAI
 
         void AddUnreachabilityCheck(); // use in constructor
 
-        CreatureSpellList const& GetSpellList() const;
+        CreatureSpellList const& GetSpellList() const override;
 
         void TimedFleeingEnded() override;
 

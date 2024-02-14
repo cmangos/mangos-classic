@@ -1413,6 +1413,10 @@ void World::SetInitialWorldSettings()
 #ifdef ENABLE_MANGOSBOTS
     sPlayerbotAIConfig.Initialize();
 #endif
+	
+#ifdef BUILD_DEPRECATED_PLAYERBOT
+    PlayerbotMgr::SetInitialWorldSettings();
+#endif
 
     sLog.outString("---------------------------------------");
     sLog.outString("      CMANGOS: World initialized       ");

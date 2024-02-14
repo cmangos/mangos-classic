@@ -52,7 +52,7 @@ struct world_map_kalimdor : public ScriptedMap
     uint32 m_uiDronesTimer;
     uint32 m_freedSpriteDarter;
 
-    void Initialize()
+    void Initialize() override
     {
         m_uiMurkdeepAdds_KilledAddCount = 0;
         m_vGOEvents.clear();
@@ -67,7 +67,7 @@ struct world_map_kalimdor : public ScriptedMap
         memset(&m_encounter, 0, sizeof(m_encounter));
     }
 
-    void OnCreatureCreate(Creature* pCreature)
+    void OnCreatureCreate(Creature* pCreature) override
     {
         switch (pCreature->GetEntry())
         {
@@ -86,7 +86,7 @@ struct world_map_kalimdor : public ScriptedMap
         }
     }
 
-    void OnCreatureDeath(Creature* pCreature)
+    void OnCreatureDeath(Creature* pCreature) override
     {
         switch (pCreature->GetEntry())
         {
@@ -253,7 +253,7 @@ struct world_map_kalimdor : public ScriptedMap
         return false;
     }
 
-    void Update(uint32 diff)
+    void Update(uint32 diff) override
     {
         if (!m_vGOEvents.empty())
         {
@@ -317,7 +317,7 @@ struct world_map_kalimdor : public ScriptedMap
         }
     }
 
-    void SetData(uint32 uiType, uint32 uiData)
+    void SetData(uint32 uiType, uint32 uiData) override
     {
         switch (uiType)
         {

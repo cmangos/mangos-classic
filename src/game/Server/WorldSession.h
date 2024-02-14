@@ -237,7 +237,7 @@ class WorldSession
         char const* GetPlayerName() const;
         std::string GetChatType(uint32 type);
         void SetSecurity(AccountTypes security) { _security = security; }
-#if defined(BUILD_PLAYERBOT) || defined(ENABLE_MANGOSBOTS)
+#if defined(BUILD_DEPRECATED_PLAYERBOT) || defined(ENABLE_MANGOSBOTS)
         // Players connected without socket are bot
         const std::string GetRemoteAddress() const { return m_Socket ? m_Socket->GetRemoteAddress() : "disconnected/bot"; }
 #else
@@ -252,11 +252,7 @@ class WorldSession
         void SetDelayedAnticheat(std::unique_ptr<SessionAnticheatInterface>&& anticheat);
         SessionAnticheatInterface* GetAnticheat() const { return m_anticheat.get(); }
 
-#ifdef BUILD_PLAYERBOT
-        void SetNoAnticheat();
-#endif
-
-#ifdef ENABLE_MANGOSBOTS
+#if defined(BUILD_DEPRECATED_PLAYERBOT) || defined(ENABLE_MANGOSBOTS)
         void SetNoAnticheat();
 #endif
 
