@@ -30,27 +30,27 @@ if(BUILD_LOGIN_SERVER)
   add_subdirectory(realmd)
 endif()
 
-# Mangosbots module
-if(BUILD_MANGOSBOTS)
+# Playerbots module
+if(BUILD_PLAYERBOTS)
   include(FetchContent)
 
   FetchContent_Declare(
-    mangosbots
+    playerbots
     GIT_REPOSITORY "https://github.com/celguar/mangosbot-bots.git"
 	GIT_TAG "master"
   )
 
-  if(NOT mangosbots_POPULATED)
-	message(STATUS "Fetching Mangosbots module...")
+  if(NOT playerbots_POPULATED)
+	message(STATUS "Fetching Playerbots module...")
   
-    FetchContent_Populate(mangosbots)
+    FetchContent_Populate(playerbots)
 	
 	if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
       file(REMOVE_RECURSE ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
     endif()
 	
-	file(COPY ${mangosbots_SOURCE_DIR}/. DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
-    message(STATUS "Mangosbots module fetched and populated in ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots")
+	file(COPY ${playerbots_SOURCE_DIR}/. DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
+    message(STATUS "Playerbots module fetched and populated in ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots")
   endif()
 
   add_subdirectory(modules/Bots)

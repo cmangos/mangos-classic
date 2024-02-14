@@ -46,7 +46,7 @@
 
 #include <time.h>
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 #include "playerbot.h"
 #endif
 
@@ -159,7 +159,7 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId)
       m_activeNonPlayersIter(m_activeNonPlayers.end()), m_onEventNotifiedIter(m_onEventNotifiedObjects.end()),
       i_gridExpiry(expiry), m_TerrainData(sTerrainMgr.LoadTerrain(id)),
       i_data(nullptr), i_script_id(0), m_transportsIterator(m_transports.begin()), m_spawnManager(*this),
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
       m_activeZonesTimer(0), hasRealPlayers(false),
 #endif
       m_variableManager(this)
@@ -735,7 +735,7 @@ void Map::Update(const uint32& t_diff)
 #endif
     }
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     // Calculate the active zones every 10 seconds (An active zone is a zone where one or more real players are)
     constexpr uint32 maxActiveZonesTimer = 10000U;
     if (m_activeZonesTimer < maxActiveZonesTimer)
@@ -802,7 +802,7 @@ void Map::Update(const uint32& t_diff)
         Player* plr = m_mapRefIter->getSource();
         if (plr && plr->IsInWorld())
         {
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
             // Determine if the individual bot should update
             bool shouldUpdateBot = shouldUpdateBots;
 
@@ -846,13 +846,13 @@ void Map::Update(const uint32& t_diff)
 
             plr->Update(t_diff);
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
             plr->UpdateAI(t_diff, !shouldUpdateBot);
 #endif
         }
     }
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     // Log the active zones and characters
     if (IsContinent() && HasRealPlayers() && HasActiveZones() && m_activeZonesTimer == 0U)
     {
@@ -867,7 +867,7 @@ void Map::Update(const uint32& t_diff)
         if (!player || !player->IsInWorld() || !player->IsPositionValid())
             continue;
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
         // For non-players only load the grid
         if (!player->isRealPlayer()) 
         {
@@ -896,7 +896,7 @@ void Map::Update(const uint32& t_diff)
             VisitNearbyCellsOf(viewPoint, grid_object_update, world_object_update);
     }
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     // Calculate the chance that the objects (non players) should update based on server load and real players online
     // (default is a 10% on a avg diff of 100)
     float objectUpdateChance = avgDiff * 0.1f;
@@ -924,7 +924,7 @@ void Map::Update(const uint32& t_diff)
             if (!obj->IsInWorld() || !obj->IsPositionValid())
                 continue;
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
             // Skip objects on locations away from real players if world is laggy
             if (IsContinent() && avgDiff > 100)
             {
@@ -1312,7 +1312,7 @@ void Map::UpdateObjectVisibility(WorldObject* obj, Cell cell, const CellPair& ce
     {
         if (Player* player = GetPlayer(guid))
         {
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
             if (player->isRealPlayer())
 #endif
             player->UpdateVisibilityOf(player->GetCamera().GetBody(), obj);

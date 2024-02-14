@@ -67,10 +67,10 @@ else()
   message(STATUS "Build OLD Playerbot   : No  (default)")
 endif()
 
-if(BUILD_MANGOSBOTS)
-  message(STATUS "Build Mangosbots      : Yes")
+if(BUILD_PLAYERBOTS)
+  message(STATUS "Build Playerbots      : Yes")
 else()
-  message(STATUS "Build Mangosbots      : No  (default)")
+  message(STATUS "Build Playerbots      : No  (default)")
 endif()
 
 if(BUILD_EXTRACTORS)

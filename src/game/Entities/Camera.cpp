@@ -146,7 +146,7 @@ template void Camera::UpdateVisibilityOf(DynamicObject*, UpdateData&, WorldObjec
 
 void Camera::UpdateVisibilityForOwner(bool addToWorld)
 {
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     if (!m_owner.isRealPlayer())
         return;
 #endif

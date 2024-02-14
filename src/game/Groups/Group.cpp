@@ -357,7 +357,7 @@ bool Group::AddMember(ObjectGuid guid, const char* name, uint8 joinMethod)
             player->SendDirectMessage(groupDataPacket);
         }
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
         if (!IsLeader(player->GetObjectGuid()) && sWorld.GetLFGQueue().IsPlayerInQueue(player->GetObjectGuid()))
         {
             bool notifyPlayer = true; // show "you have left queue" message only if different dungeons

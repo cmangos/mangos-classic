@@ -35,7 +35,7 @@
 #include "Pools/PoolManager.h"
 #include "GameEvents/GameEventMgr.h"
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 #include "AhBot.h"
 #include "playerbot.h"
 #include "PlayerbotAIConfig.h"
@@ -908,7 +908,7 @@ ChatCommand* ChatHandler::getCommandTable()
 #ifdef BUILD_AHBOT
         { "ahbot",          SEC_ADMINISTRATOR,  true,  nullptr,                                           "", ahbotCommandTable    },
 #endif
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 #ifndef BUILD_AHBOT
         { "ahbot",            SEC_GAMEMASTER,    true,  &ChatHandler::HandleAhBotCommand,                      "", NULL },
 #endif

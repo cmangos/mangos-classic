@@ -341,7 +341,7 @@ struct EmotesTextEntry
     //          m_emoteText
 };
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 /**
 * \struct EmotesTextSoundEntry
 * \brief Entry resenting the text sound for given emote.
@@ -521,7 +521,7 @@ struct ItemRandomPropertiesEntry
     // char*     internalName                               // 1        m_Name
     uint32    enchant_id[3];                                // 2-4      m_Enchantment
     // 5-6 unused, 0 only values, reserved for additional enchantments
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     char*     nameSuffix[8];                             // 7-14     m_name_lang
 #else
     // char* nameSuffix[8];                             // 7-14     m_name_lang

@@ -118,9 +118,9 @@ if (BUILD_EXTRACTORS)
       COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FILES_LIST_TO_COPY} \"$<TARGET_FILE_DIR:${EXECUTABLE_NAME}>\")
   endif()
   
-  # Define ENABLE_MANGOSBOTS if need
-  if (BUILD_MANGOSBOTS)
-    add_definitions(-DENABLE_MANGOSBOTS)
+  # Define ENABLE_PLAYERBOTS if need
+  if (BUILD_PLAYERBOTS)
+    add_definitions(-DENABLE_PLAYERBOTS)
   endif()
 
   install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR}/tools)

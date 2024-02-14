@@ -289,7 +289,7 @@ class Group
         void CalculateLFGRoles(LFGGroupQueueInfo& data);
         bool FillPremadeLFG(ObjectGuid const& plrGuid, Classes playerClass, LfgRoles requiredRole, uint32& InitRoles, uint32& DpsCount, std::list<ObjectGuid>& processed);
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
         ObjectGuid GetTargetIcon(int index) { return m_targetIcons[index]; }
 #endif
 

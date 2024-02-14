@@ -477,7 +477,7 @@ void LFGQueue::RestoreOfflinePlayer(ObjectGuid playerGuid)
     }
 }
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 void LFGQueue::GetPlayerQueueInfo(LFGPlayerQueueInfo* info, ObjectGuid const& plrGuid)
 {
     QueuedPlayersMap::iterator iter = m_queuedPlayers.find(plrGuid);

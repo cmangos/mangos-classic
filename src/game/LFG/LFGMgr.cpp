@@ -68,7 +68,7 @@ void LFGMgr::AddToQueue(Player* leader, uint32 queueAreaID)
 
         playerInfo.team = leader->GetTeam();
         playerInfo.areaId = queueAreaID;
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
         playerInfo.hasQueuePriority = !leader->GetPlayerbotAI();
 #else
         playerInfo.hasQueuePriority = false;

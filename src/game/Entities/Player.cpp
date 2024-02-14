@@ -68,7 +68,7 @@
 #include "Config/Config.h"
 #endif
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 #include "playerbot.h"
 #include "PlayerbotAIConfig.h"
 #endif
@@ -469,7 +469,7 @@ void TradeData::SetAccepted(bool state, bool crosssend /*= false*/)
 
 Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(this), m_camera(this), m_reputationMgr(this), m_launched(false)
 {
-#if defined(BUILD_DEPRECATED_PLAYERBOT) || defined(ENABLE_MANGOSBOTS)
+#if defined(BUILD_DEPRECATED_PLAYERBOT) || defined(ENABLE_PLAYERBOTS)
     m_playerbotAI = nullptr;
     m_playerbotMgr = nullptr;
 #endif
@@ -689,7 +689,7 @@ Player::~Player()
     }
 #endif
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     RemovePlayerbotAI();
     RemovePlayerbotMgr();
 #endif
@@ -1537,7 +1537,7 @@ void Player::Update(const uint32 diff)
     {
         if (diff >= m_DetectInvTimer)
         {
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
             if (isRealPlayer())
 #endif
             HandleStealthedUnitsDetection();
@@ -1609,7 +1609,7 @@ void Player::Heartbeat()
     SendUpdateToOutOfRangeGroupMembers();
 }
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 void Player::CreatePlayerbotAI()
 {
     assert(!m_playerbotAI);
@@ -8251,7 +8251,7 @@ Item* Player::GetItemByPos(uint8 bag, uint8 slot) const
     return nullptr;
 }
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 Item* Player::GetItemByEntry(uint32 item) const
 {
     for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
@@ -12476,7 +12476,7 @@ void Player::AddQuest(Quest const* pQuest, Object* questGiver)
         questStatusData.uState = QUEST_CHANGED;
 
     // quest accept scripts
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     if (questGiver && this != questGiver)
 #else
     if (questGiver)
@@ -12655,7 +12655,7 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
         SendQuestReward(pQuest, xp);
 
     bool handled = false;
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     if (this != questGiver) 
     {
 #endif
@@ -12668,17 +12668,17 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
             handled = sScriptDevAIMgr.OnQuestRewarded(this, (GameObject*)questGiver, pQuest);
             break;
     }
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     }
 #endif
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     if (this != questGiver)
     {
 #endif
     if (!handled && pQuest->GetQuestCompleteScript() != 0)
         GetMap()->ScriptsStart(SCRIPT_TYPE_QUEST_END, pQuest->GetQuestCompleteScript(), questGiver, this, Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE);
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     }
 #endif
 
@@ -14083,7 +14083,7 @@ void Player::_LoadIntoDataField(const char* data, uint32 startOffset, uint32 cou
     }
 }
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 bool Player::MinimalLoadFromDB(QueryResult* result, uint32 guid)
 {
     bool delete_result = true;
@@ -16007,7 +16007,7 @@ void Player::_SaveInventory()
         m_items[i]->FSetState(ITEM_NEW);
     }
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     if (!GetPlayerbotAI())
     {
 #endif
@@ -16016,7 +16016,7 @@ void Player::_SaveInventory()
     {
         itr->item->SetEnchantmentDuration(itr->slot, itr->leftduration);
     }
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     }
 #endif
 
@@ -19397,7 +19397,7 @@ void Player::learnSpellHighRank(uint32 spellid)
     sSpellMgr.doForHighRanks(spellid, worker);
 }
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 void Player::learnClassLevelSpells(bool includeHighLevelQuestRewards)
 {
     ChrClassesEntry const* clsEntry = sChrClassesStore.LookupEntry(getClass());

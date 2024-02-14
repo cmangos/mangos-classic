@@ -45,7 +45,7 @@ typedef std::unordered_set<WorldObject*> WorldObjectUnSet;
 typedef std::list<Unit*> UnitList;
 typedef std::list<Creature*> CreatureList;
 typedef std::list<GameObject*> GameObjectList;
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 typedef std::list<DynamicObject*> DynamicObjectList;
 #endif
 typedef std::list<Corpse*> CorpseList;

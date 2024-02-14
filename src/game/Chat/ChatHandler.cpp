@@ -37,7 +37,7 @@
 #include "GMTickets/GMTicketMgr.h"
 #include "Anticheat/Anticheat.hpp"
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 #include "playerbot.h"
 #include "RandomPlayerbotMgr.h"
 #endif
@@ -185,7 +185,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             if (!CheckChatMessage(msg))
                 return;
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
             if (GetSecurity() > SEC_PLAYER && GetPlayer()->IsGameMaster())
             {
                 sRandomPlayerbotMgr.HandleCommand(type, msg, *_player, "", TEAM_BOTH_ALLOWED, lang);
@@ -283,7 +283,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                 }
             }
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
             if (player->GetPlayerbotAI())
             {
                 player->GetPlayerbotAI()->HandleCommand(type, msg, *GetPlayer(), lang);
@@ -331,7 +331,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             ChatHandler::BuildChatPacket(data, ChatMsg(type), msg.c_str(), Language(lang), _player->GetChatTag(), _player->GetObjectGuid(), _player->GetName());
             group->BroadcastPacket(data, false, group->GetMemberGroup(GetPlayer()->GetObjectGuid()));
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
             for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
             {
                 Player* player = itr->getSource();
@@ -368,7 +368,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                 if (Guild* guild = sGuildMgr.GetGuildById(GetPlayer()->GetGuildId()))
                     guild->BroadcastToGuild(this, msg, lang == LANG_ADDON ? LANG_ADDON : LANG_UNIVERSAL);
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
             PlayerbotMgr* mgr = GetPlayer()->GetPlayerbotMgr();
             if (mgr && GetPlayer()->GetGuildId())
             {
@@ -446,7 +446,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID, msg.c_str(), Language(lang), _player->GetChatTag(), _player->GetObjectGuid(), _player->GetName());
             group->BroadcastPacket(data, false);
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
             for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
             {
                 Player* player = itr->getSource();
@@ -490,7 +490,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID_LEADER, msg.c_str(), Language(lang), _player->GetChatTag(), _player->GetObjectGuid(), _player->GetName());
             group->BroadcastPacket(data, false);
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
             for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
             {
                 Player* player = itr->getSource();
@@ -533,7 +533,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID_WARNING, msg.c_str(), Language(lang), _player->GetChatTag(), _player->GetObjectGuid(), _player->GetName());
             group->BroadcastPacket(data, true);
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
             for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
             {
                 Player* player = itr->getSource();
@@ -618,7 +618,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                     if (lang != LANG_ADDON && (chn->HasFlag(Channel::ChannelFlags::CHANNEL_FLAG_GENERAL) || chn->IsStatic()))
                         m_anticheat->Channel(msg);
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
                     // if GM apply to all random bots
                     if (GetSecurity() > SEC_PLAYER && GetPlayer()->IsGameMaster())
                     {

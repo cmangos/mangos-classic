@@ -77,7 +77,7 @@
  #include "Metric/Metric.h"
 #endif
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 #include "AhBot.h"
 #include "PlayerbotAIConfig.h"
 #include "RandomPlayerbotMgr.h"
@@ -106,7 +106,7 @@ uint32 World::m_relocation_ai_notify_delay = 1000u;
 uint32 World::m_currentMSTime = 0;
 TimePoint World::m_currentTime = TimePoint();
 uint32 World::m_currentDiff = 0;
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 uint32 World::m_currentDiffSum = 0;
 uint32 World::m_currentDiffSumIndex = 0;
 uint32 World::m_averageDiff = 0;
@@ -167,7 +167,7 @@ World::~World()
 /// Cleanups before world stop
 void World::CleanupsBeforeStop()
 {
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     sRandomPlayerbotMgr.LogoutAllBots();
 #endif
 
@@ -1252,7 +1252,7 @@ void World::SetInitialWorldSettings()
     sLog.outString(">>> Localization strings loaded");
     sLog.outString();
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     sLog.outString("Loading Meeting Stones...");            // After load all static data
     sWorld.GetLFGQueue().LoadMeetingStones();
 #endif
@@ -1410,7 +1410,7 @@ void World::SetInitialWorldSettings()
     PlayerbotMgr::SetInitialWorldSettings();
 #endif
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     sPlayerbotAIConfig.Initialize();
 #endif
 	
@@ -1481,7 +1481,7 @@ void World::Update(uint32 diff)
     m_currentTime = std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::now());
     m_currentDiff = diff;
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     m_currentDiffSum += diff;
     m_currentDiffSumIndex++;
 
@@ -1555,7 +1555,7 @@ void World::Update(uint32 diff)
     }
 #endif
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 #ifndef BUILD_AHBOT
     /// <li> Handle AHBot operations
     if (m_timers[WUPDATE_AHBOT].Passed())

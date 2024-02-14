@@ -26,7 +26,7 @@
 
 #include <algorithm>
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 AbstractPathMovementGenerator::AbstractPathMovementGenerator(const Movement::PointsArray& path, float orientation, int32 offset/* = 0*/, bool cyclic/* = true*/) :
     m_pathIndex(offset), m_orientation(orientation), m_firstCycle(false), m_startPoint(0), m_speedChanged(false), m_cyclic(cyclic)
 #else

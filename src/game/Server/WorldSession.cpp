@@ -52,7 +52,7 @@
 #include "PlayerBot/Base/PlayerbotAI.h"
 #endif
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 #include "playerbot.h"
 #endif
 
@@ -197,8 +197,7 @@ void WorldSession::SetPlayer(Player* plr, uint32 playerGuid)
 /// Send a packet to the client
 void WorldSession::SendPacket(WorldPacket const& packet, bool forcedSend /*= false*/) const
 {
-#if defined(BUILD_PLAYERBOT) || defined(ENABLE_MANGOSBOTS)
-#ifdef BUILD_DEPRECATED_PLAYERBOT
+#if defined(BUILD_DEPRECATED_PLAYERBOT) || defined(ENABLE_PLAYERBOTS)
     // Send packet to bot AI
     if (GetPlayer())
     {
@@ -390,8 +389,7 @@ bool WorldSession::Update(uint32 diff)
 
                 // lag can cause STATUS_LOGGEDIN opcodes to arrive after the player started a transfer
 
-#if defined(BUILD_PLAYERBOT) || defined(ENABLE_MANGOSBOTS)
-#ifdef BUILD_DEPRECATED_PLAYERBOT
+#if defined(BUILD_DEPRECATED_PLAYERBOT) || defined(ENABLE_PLAYERBOTS)
                 if (_player && _player->GetPlayerbotMgr())
                     _player->GetPlayerbotMgr()->HandleMasterIncomingPacket(*packet);
 #endif
@@ -470,7 +468,7 @@ bool WorldSession::Update(uint32 diff)
     }
 #endif
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     if (GetPlayer() && GetPlayer()->GetPlayerbotMgr())
         GetPlayer()->GetPlayerbotMgr()->UpdateSessions(0);
 #endif
@@ -579,7 +577,7 @@ void WorldSession::UpdateMap(uint32 diff)
     }
 }
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 void WorldSession::HandleBotPackets()
 {
     while (!m_recvQueue.empty())
@@ -626,7 +624,7 @@ void WorldSession::LogoutPlayer()
         if (_player->GetPlayerbotMgr())
             _player->GetPlayerbotMgr()->LogoutAllBots(true);
 #endif
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
         if (_player->GetPlayerbotMgr() && (!_player->GetPlayerbotAI() || _player->GetPlayerbotAI()->IsRealPlayer()))
             _player->GetPlayerbotMgr()->LogoutAllBots();
 
@@ -730,7 +728,7 @@ void WorldSession::LogoutPlayer()
         ///- Leave all channels before player delete...
         _player->CleanupChannels();
 
-#ifndef ENABLE_MANGOSBOTS
+#ifndef ENABLE_PLAYERBOTS
         ///- If the player is in a group (or invited), remove him. If the group if then only 1 person, disband the group.
         _player->UninviteFromGroup();
 
@@ -754,8 +752,7 @@ void WorldSession::LogoutPlayer()
         // GM ticket notification
         sTicketMgr.OnPlayerOnlineState(*_player, false);
 
-#if defined(BUILD_PLAYERBOT) || defined(ENABLE_MANGOSBOTS)
-#ifdef BUILD_DEPRECATED_PLAYERBOT
+#if defined(BUILD_PLAYERBOT) || defined(ENABLE_PLAYERBOTS)
         // Remember player GUID for update SQL below
         uint32 guid = _player->GetGUIDLow();
 #endif
@@ -787,11 +784,11 @@ void WorldSession::LogoutPlayer()
 
         static SqlStatementID updChars;
 
-#if defined(BUILD_DEPRECATED_PLAYERBOT) || defined(ENABLE_MANGOSBOTS)
-        // Set for only character instead of accountid
+#if defined(BUILD_DEPRECATED_PLAYERBOT) || defined(ENABLE_PLAYERBOTS)
+        // Set for only character instead of account id
         // Different characters can be alive as bots
-        SqlStatement stmt = CharacterDatabase.CreateStatement(updChars, "UPDATE characters SET online = 0 WHERE guid = ?");
-        stmt.PExecute(guid);
+        SqlStatement stmt2 = CharacterDatabase.CreateStatement(updChars, "UPDATE characters SET online = 0 WHERE guid = ?");
+        stmt2.PExecute(guid);
 #else
         ///- Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
         // No SQL injection as AccountId is uint32
@@ -1316,7 +1313,7 @@ void WorldSession::HandleWardenDataOpcode(WorldPacket& recv_data)
     m_anticheat->WardenPacket(recv_data);
 }
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 void WorldSession::SetNoAnticheat()
 {
     m_anticheat.reset(new NullSessionAnticheat(this));

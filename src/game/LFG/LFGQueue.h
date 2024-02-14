@@ -53,7 +53,7 @@ struct LFGGroupQueueInfo
     uint32 playerCount;
 };
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 struct MeetingStoneInfo
 {
     uint32 area;
@@ -87,7 +87,7 @@ class LFGQueue
         void AddGroup(LFGGroupQueueInfo const& groupInfo, uint32 groupId);
         void AddPlayer(LFGPlayerQueueInfo const& playerInfo, ObjectGuid playerGuid);
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
         void GetPlayerQueueInfo(LFGPlayerQueueInfo* info, ObjectGuid const& plrGuid);
         void GetGroupQueueInfo(LFGGroupQueueInfo* info, uint32 groupId);
 
@@ -110,7 +110,7 @@ class LFGQueue
 
         uint32 m_groupSize = 5;
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
         typedef std::map<uint32, MeetingStoneInfo> MeetingStonesMap;
         MeetingStonesMap m_MeetingStonesMap;
 #endif

@@ -286,7 +286,7 @@ void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)
 
     WorldLocation const& dest = plMover->GetTeleportDest();
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     // send MSG_MOVE_TELEPORT to observers around old position
     SendTeleportToObservers(dest.coord_x, dest.coord_y, dest.coord_z, dest.orientation);
 
@@ -302,7 +302,7 @@ void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)
 
     plMover->SetPosition(dest.coord_x, dest.coord_y, dest.coord_z, dest.orientation, true);
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     plMover->m_movementInfo.ChangePosition(dest.coord_x, dest.coord_y, dest.coord_z, dest.orientation);
 #endif
 
@@ -318,7 +318,7 @@ void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)
     uint32 newzone, newarea;
     plMover->GetZoneAndAreaId(newzone, newarea);
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     // new zone
     if (old_zone != newzone)
         plMover->UpdateZone(newzone, newarea);
@@ -580,7 +580,7 @@ void WorldSession::SendKnockBack(Unit* who, float angle, float horizontalSpeed, 
     m_anticheat->KnockBack(horizontalSpeed, -verticalSpeed, vcos, vsin);
 }
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 void WorldSession::SendTeleportToObservers(float x, float y, float z, float orientation)
 {
     WorldPacket data(MSG_MOVE_TELEPORT, 64);

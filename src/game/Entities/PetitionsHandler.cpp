@@ -371,7 +371,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
 
     // client doesn't allow to sign petition two times by one character, but not check sign by another character from same account
     // not allow sign another player from already sign player account
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     if(!_player->GetPlayerbotAI())
     {
 #endif
@@ -392,7 +392,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
             owner->GetSession()->SendPacket(data);
         return;
     }
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     }
 #endif
 

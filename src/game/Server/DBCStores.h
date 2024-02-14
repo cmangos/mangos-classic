@@ -66,7 +66,7 @@ bool IsPointInAreaTriggerZone(AreaTriggerEntry const* atEntry, uint32 mapid, flo
 
 uint32 GetCreatureModelRace(uint32 model_id);
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 EmotesTextSoundEntry const* FindTextSoundEmoteFor(uint32 emote, uint32 race, uint32 gender);
 CharSectionsEntry const* GetCharSectionEntry(uint8 race, CharSectionType genType, uint8 gender, uint8 type, uint8 color);
 typedef std::multimap<uint32, CharSectionsEntry const*> CharSectionsMap;
@@ -77,7 +77,7 @@ extern DBCStorage <AreaTableEntry>               sAreaStore;// recommend access 
 extern DBCStorage <AreaTriggerEntry>             sAreaTriggerStore;
 extern DBCStorage <AuctionHouseEntry>            sAuctionHouseStore;
 extern DBCStorage <BankBagSlotPricesEntry>       sBankBagSlotPricesStore;
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 extern DBCStorage <ChatChannelsEntry>            sChatChannelsStore; //has function for access aswell
 #else
 // extern DBCStorage <ChatChannelsEntry>            sChatChannelsStore; //has function for access aswell, no usable index

@@ -134,9 +134,9 @@ if (BUILD_AHBOT)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ahbot.conf.dist DESTINATION ${CONF_DIR})
 endif()
 
-# Define ENABLE_MANGOSBOTS if need
-if (BUILD_MANGOSBOTS)
-  add_definitions(-DENABLE_MANGOSBOTS)
+# Define ENABLE_PLAYERBOTS if need
+if (BUILD_PLAYERBOTS)
+  add_definitions(-DENABLE_PLAYERBOTS)
 endif()
 
 if(MSVC)

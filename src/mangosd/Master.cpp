@@ -262,7 +262,7 @@ int Master::Run()
     // send all still queued mass mails (before DB connections shutdown)
     sMassMailMgr.Update(true);
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     // kick and save all players
     sWorld.KickAll(true);
 #endif

@@ -45,7 +45,7 @@
 #include "PlayerBot/Base/PlayerbotMgr.h"
 #endif
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 #include "playerbot.h"
 #include "PlayerbotAIConfig.h"
 #endif
@@ -71,7 +71,7 @@ class LoginQueryHolder : public SqlQueryHolder
         bool Initialize();
 };
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 class PlayerbotLoginQueryHolder : public LoginQueryHolder
 {
 private:
@@ -233,7 +233,7 @@ class CharacterHandler
         {
             if (!holder) return;
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
             WorldSession* session = sWorld.FindSession(((LoginQueryHolder*)holder)->GetAccountId());
             if (!session)
             {
@@ -595,7 +595,7 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recv_data)
         return;
     }
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     if (pCurrChar && pCurrChar->GetPlayerbotAI())
     {
         WorldSession* botSession = pCurrChar->GetSession();

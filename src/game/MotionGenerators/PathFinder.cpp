@@ -50,7 +50,7 @@ PathFinder::PathFinder(const Unit* owner, bool ignoreNormalization) :
     createFilter();
 }
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 PathFinder::PathFinder() :
     m_polyLength(0), m_type(PATHFIND_BLANK),
     m_useStraightPath(false), m_forceDestination(false), m_straightLine(false), m_pointPathLimit(MAX_POINT_PATH_LENGTH), // TODO: Fix legitimate long paths
@@ -89,7 +89,7 @@ void PathFinder::SetCurrentNavMesh()
 
             m_navMeshQuery = m_defaultNavMeshQuery;
         }
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
         if (m_navMeshQuery)
             m_navMesh = m_navMeshQuery->getAttachedNavMesh();
 
@@ -166,7 +166,7 @@ bool PathFinder::calculate(Vector3 const& start, Vector3 const& dest, bool force
     return true;
 }
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 void PathFinder::setArea(uint32 mapId, float x, float y, float z, uint32 area, float range)
 {
     if (!MaNGOS::IsValidMapCoord(x, y, z))
@@ -441,7 +441,7 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
                 buildShotrcut = true;
         }
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
         if (m_sourceUnit && m_sourceUnit->IsPlayer() && IsPointHigherThan(getActualEndPosition(), getStartPosition()))
         {
             sLog.outDebug("%s (%u) Path Shortcut skipped: endPoint is higher", m_sourceUnit->GetName(), m_sourceUnit->GetGUIDLow());
@@ -645,7 +645,7 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
                     &m_filter,          // polygon search filter
                     m_pathPolyRefs.data(), // [out] path
                     (int*)&m_polyLength,
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
                     m_pointPathLimit / 2);
 #else
                     m_pointPathLimit);  // max number of polygons in output path
@@ -665,7 +665,7 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
                             hitNormal,
                             m_pathPolyRefs.data(),
                             (int*)&m_polyLength,
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
                             m_pointPathLimit / 2);
 #else
                             m_pointPathLimit);
@@ -720,7 +720,7 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
             // only happens if we passed bad data to findPath(), or navmesh is messed up
             sLog.outError("%u's Path Build failed: 0 length path", m_sourceUnit->GetGUIDLow());
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
             if (m_sourceUnit && m_sourceUnit->IsPlayer() && IsPointHigherThan(getActualEndPosition(), getStartPosition()))
             {
                 sLog.outDebug("%s (%u) Path Shortcut skipped: endPoint is higher", m_sourceUnit->GetName(), m_sourceUnit->GetGUIDLow());
@@ -972,7 +972,7 @@ void PathFinder::BuildShortcut()
     m_type = PATHFIND_SHORTCUT;
 }
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 bool PathFinder::IsPointHigherThan(const Vector3& posOne, const Vector3& posTwo)
 {
     return posOne.z > posTwo.z;
@@ -984,7 +984,7 @@ void PathFinder::createFilter()
     uint16 includeFlags = 0;
     uint16 excludeFlags = 0;
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     if (!m_sourceUnit || m_sourceUnit->GetTypeId() == TYPEID_PLAYER)
     {
         // perfect support not possible, just stay 'safe'

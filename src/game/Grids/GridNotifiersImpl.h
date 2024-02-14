@@ -480,7 +480,7 @@ void MaNGOS::GameObjectListSearcher<Check>::Visit(GameObjectMapType& m)
             i_objects.push_back(itr->getSource());
 }
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 
 // Dynamicobject searchers
 

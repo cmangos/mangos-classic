@@ -93,7 +93,7 @@ bool GameObjectModel::initialize(const GameObject* const pGo, const GameObjectDi
     if (!iModel)
         return false;
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     // Bots need this to see the game objects
     if (it->second.name.find(".m2") != std::string::npos)
         iModel->setModelFlags(VMAP::MOD_M2);

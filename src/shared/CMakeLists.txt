@@ -267,9 +267,9 @@ if(APPLE OR "${CMAKE_SYSTEM_NAME}" STREQUAL "FreeBSD")
   add_compile_definitions(_GNU_SOURCE)
 endif()
 
-# Define ENABLE_MANGOSBOTS if need
-if (BUILD_MANGOSBOTS)
-  add_definitions(-DENABLE_MANGOSBOTS)
+# Define ENABLE_PLAYERBOTS if need
+if (BUILD_PLAYERBOTS)
+  add_definitions(-DENABLE_PLAYERBOTS)
 endif()
 
 # Generate precompiled header

@@ -5731,7 +5731,7 @@ void Spell::EffectSpiritHeal(SpellEffectIndex /*eff_idx*/)
 
     if (Player* player = static_cast<Player*>(unitTarget))
     {
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
         player->RemoveAurasDueToSpell(2584);
 #endif
         player->ResurrectPlayer(1.0f);

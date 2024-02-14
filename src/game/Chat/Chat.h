@@ -101,7 +101,7 @@ class ChatHandler
 
         bool HasSentErrorMessage() const { return sentErrorMessage;}
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
         WorldSession* GetSession() { return m_session; }
 #endif
 
@@ -757,7 +757,7 @@ class ChatHandler
         bool HandlePlayerbotCommand(char* args);
 #endif
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
         bool HandlePlayerbotCommand(char* args);
         bool HandleRandomPlayerbotCommand(char* args);
         bool HandleAhBotCommand(char* args);

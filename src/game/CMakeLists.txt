@@ -51,8 +51,8 @@ if(NOT BUILD_DEPRECATED_PLAYERBOT)
   endforeach()
 endif()
 
-if(NOT BUILD_MANGOSBOTS)
-  # exclude Mangosbots folder
+if(NOT BUILD_PLAYERBOTS)
+  # exclude Playerbots folder
   set (EXCLUDE_DIR "Bots/")
   foreach (TMP_PATH ${LIBRARY_SRCS})
       string (FIND ${TMP_PATH} ${EXCLUDE_DIR} EXCLUDE_DIR_FOUND)
@@ -96,7 +96,7 @@ target_link_libraries(${LIBRARY_NAME}
 
 # include additionals headers
 # TO DO: Remove this if when old playerbots get removed
-if(NOT BUILD_MANGOSBOTS)
+if(NOT BUILD_PLAYERBOTS)
   set(ADDITIONAL_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/vmap
@@ -123,7 +123,7 @@ target_include_directories(${LIBRARY_NAME}
   PRIVATE ${Boost_INCLUDE_DIRS}
 )
 
-if(BUILD_MANGOSBOTS)
+if(BUILD_PLAYERBOTS)
     include_directories(
         ${CMAKE_SOURCE_DIR}/src/game
         ${CMAKE_SOURCE_DIR}/src/game/AI
@@ -213,9 +213,9 @@ if (BUILD_DEPRECATED_PLAYERBOT)
   add_definitions(-DBUILD_DEPRECATED_PLAYERBOT)
 endif()
 
-# Define ENABLE_MANGOSBOTS if need
-if (BUILD_MANGOSBOTS)
-  add_definitions(-DENABLE_MANGOSBOTS)
+# Define ENABLE_PLAYERBOTS if need
+if (BUILD_PLAYERBOTS)
+  add_definitions(-DENABLE_PLAYERBOTS)
 endif()
 
 if (MSVC)

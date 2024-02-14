@@ -63,7 +63,7 @@ struct FactionTemplateEntry;
 #include "PlayerBot/Base/PlayerbotAI.h"
 #endif
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 class PlayerbotAI;
 class PlayerbotMgr;
 #endif
@@ -1076,7 +1076,7 @@ class Player : public Unit
         Item* GetItemByGuid(ObjectGuid guid) const;
         Item* GetItemByPos(uint16 pos) const;
         Item* GetItemByPos(uint8 bag, uint8 slot) const;
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
         Item* GetItemByEntry(uint32 item) const;
 #endif
         Item* GetWeaponForAttack(WeaponAttackType attackType) const { return GetWeaponForAttack(attackType, false, false); }
@@ -1361,7 +1361,7 @@ class Player : public Unit
         /***                   LOAD SYSTEM                     ***/
         /*********************************************************/
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
         bool MinimalLoadFromDB(QueryResult* result, uint32 guid);
 #endif
 
@@ -1489,7 +1489,7 @@ class Player : public Unit
         void learnQuestRewardedSpells();
         void learnQuestRewardedSpells(Quest const* quest);
         void learnSpellHighRank(uint32 spellid);
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
         void learnClassLevelSpells(bool includeHighLevelQuestRewards = false);
 #endif
 
@@ -2198,7 +2198,7 @@ class Player : public Unit
         bool IsInDuel() const { return duel && duel->startTime != 0; }
 #endif
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
         // A Player can either have a playerbotMgr (to manage its bots), or have playerbotAI (if it is a bot), or
         // neither. Code that enables bots must create the playerbotMgr and set it using SetPlayerbotMgr.
         void UpdateAI(const uint32 diff, bool minimal = false);
@@ -2516,7 +2516,7 @@ class Player : public Unit
         PlayerbotMgr* m_playerbotMgr;
 #endif
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
         std::unique_ptr<PlayerbotAI> m_playerbotAI;
         std::unique_ptr<PlayerbotMgr> m_playerbotMgr;
 #endif

@@ -1465,7 +1465,7 @@ uint32 BattleGround::GetSingleCreatureGuid(uint8 event1, uint8 event2)
     return ObjectGuid();
 }
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 /**
   Function returns a gameobject guid from event map
 

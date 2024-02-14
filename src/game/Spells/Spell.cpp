@@ -47,7 +47,7 @@
 #include "Spells/Scripts/SpellScript.h"
 #include "Entities/ObjectGuid.h"
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
 #include "PlayerbotAI.h"
 #endif
 
@@ -4921,7 +4921,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (m_spellInfo->MaxTargetLevel && target->GetLevel() > m_spellInfo->MaxTargetLevel)
                 return SPELL_FAILED_HIGHLEVEL;
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
             if (target->IsPlayer())
             {
                 PlayerbotAI* bot = ((Player*)target)->GetPlayerbotAI();
@@ -7067,7 +7067,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
     if (m_spellInfo->MaxTargetLevel && target->GetLevel() > m_spellInfo->MaxTargetLevel)
         return false;
 
-#ifdef ENABLE_MANGOSBOTS
+#ifdef ENABLE_PLAYERBOTS
     if (target->IsPlayer())
     {
         PlayerbotAI* bot = ((Player*)target)->GetPlayerbotAI();
