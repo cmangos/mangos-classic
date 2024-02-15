@@ -927,7 +927,7 @@ TalentsInspecting = 1
 #
 #    CreatureFamilyAssistanceRadius
 #        Radius which creature will use to call assistance without moving
-#        Default: 10
+#        Default: 5
 #                 0   - off
 #
 #    CreatureFamilyAssistanceDelay
@@ -1030,7 +1030,7 @@ Rate.Creature.Aggro = 1
 CreatureRespawnAggroDelay = 5000
 LeashRadius = 30
 CreatureFamilyFleeAssistanceRadius = 30
-CreatureFamilyAssistanceRadius = 10
+CreatureFamilyAssistanceRadius = 5
 CreatureFamilyAssistanceDelay = 1500
 CreatureCheckForHelpRadius = 5
 CreatureCheckForHelpAggroDelay = 2000
