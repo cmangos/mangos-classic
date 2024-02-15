@@ -38,12 +38,14 @@ enum
 {
     QUEST_PROTECTING_THE_SHIPMENT = 309,
 
-    SAY_MIRAN_1           = -1000571,
-    SAY_DARK_IRON_DWARF   = -1000572,
-    SAY_MIRAN_2           = -1000573,
-    SAY_MIRAN_3           = -1000574,
+    SAY_MIRAN_1           = 510,
+    SAY_MIRAN_2           = 511,
+    SAY_MIRAN_3           = 498,
 
-    NPC_DARK_IRON_DWARF   = 2149
+    SAY_DARK_IRON_RAIDER  = 512,
+    NPC_DARK_IRON_RAIDER  = 2149,
+
+    MIRAN_ESCORT_PATH     = 1379
 };
 
 struct Location
@@ -53,13 +55,13 @@ struct Location
 
 static const Location m_afAmbushSpawn[] =
 {
-    { -5691.93f, -3745.91f, 319.159f, 2.21f},
-    { -5706.98f, -3745.39f, 318.728f, 1.04f}
+    { -5705.012f, -3736.6575f, 318.56738f, 0.57595f},
+    { -5696.1943f, -3736.78f, 318.58145f, 2.40855f}
 };
 
 struct npc_miranAI: public npc_escortAI
 {
-    npc_miranAI(Creature* pCreature): npc_escortAI(pCreature)
+    npc_miranAI(Creature* creature): npc_escortAI(creature)
     {
         Reset();
     }
@@ -76,57 +78,61 @@ struct npc_miranAI: public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 19:
-                DoScriptText(SAY_MIRAN_1, m_creature);
-                m_creature->SummonCreature(NPC_DARK_IRON_DWARF, m_afAmbushSpawn[0].m_fX, m_afAmbushSpawn[0].m_fY, m_afAmbushSpawn[0].m_fZ, m_afAmbushSpawn[0].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 25000);
-                m_creature->SummonCreature(NPC_DARK_IRON_DWARF, m_afAmbushSpawn[1].m_fX, m_afAmbushSpawn[1].m_fY, m_afAmbushSpawn[1].m_fZ, m_afAmbushSpawn[1].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 25000);
+            case 16:
+                DoBroadcastText(SAY_MIRAN_1, m_creature);
                 break;
-            case 23:
-                DoScriptText(SAY_MIRAN_3, m_creature);
-                if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_PROTECTING_THE_SHIPMENT, m_creature);
+            case 17:
+                SetEscortPaused(true);
+                m_creature->SummonCreature(NPC_DARK_IRON_RAIDER, m_afAmbushSpawn[0].m_fX, m_afAmbushSpawn[0].m_fY, m_afAmbushSpawn[0].m_fZ, m_afAmbushSpawn[0].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 25000);
+                m_creature->SummonCreature(NPC_DARK_IRON_RAIDER, m_afAmbushSpawn[1].m_fX, m_afAmbushSpawn[1].m_fY, m_afAmbushSpawn[1].m_fZ, m_afAmbushSpawn[1].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 25000);
                 break;
-            case 24:
-                m_creature->ForcedDespawn(5000);
+            case 21:
+                DoBroadcastText(SAY_MIRAN_3, m_creature);
+                if (Player* player = GetPlayerForEscort())
+                    player->RewardPlayerAndGroupAtEventExplored(QUEST_PROTECTING_THE_SHIPMENT, m_creature);
+                SetEscortPaused(true); 
+                m_creature->ForcedDespawn(15000);
                 break;
         }
     }
 
-    void SummonedCreatureJustDied(Creature* pSummoned) override
+    void SummonedCreatureJustDied(Creature* summoned) override
     {
-        if (pSummoned->GetEntry() == NPC_DARK_IRON_DWARF)
+        if (summoned->GetEntry() == NPC_DARK_IRON_RAIDER)
         {
             --m_uiDwarves;
             if (!m_uiDwarves)
-                DoScriptText(SAY_MIRAN_2, m_creature);
+            {
+                DoBroadcastText(SAY_MIRAN_2, m_creature);
+                SetEscortPaused(false);
+            }
         }
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (pSummoned->GetEntry() == NPC_DARK_IRON_DWARF)
+        if (summoned->GetEntry() == NPC_DARK_IRON_RAIDER)
         {
-            if (!m_uiDwarves)
-                DoScriptText(SAY_DARK_IRON_DWARF, pSummoned);
             ++m_uiDwarves;
-            pSummoned->AI()->AttackStart(m_creature);
+            summoned->AI()->AttackStart(m_creature);
+            DoBroadcastText(SAY_DARK_IRON_RAIDER, summoned);
         }
     }
 };
 
-bool QuestAccept_npc_miran(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+bool QuestAccept_npc_miran(Player* player, Creature* creature, const Quest* quest)
 {
-    if (pQuest->GetQuestId() == QUEST_PROTECTING_THE_SHIPMENT)
+    if (quest->GetQuestId() == QUEST_PROTECTING_THE_SHIPMENT)
     {
-        if (npc_miranAI* pEscortAI = dynamic_cast<npc_miranAI*>(pCreature->AI()))
-            pEscortAI->Start(false, pPlayer, pQuest);
+        if (npc_miranAI* pEscortAI = dynamic_cast<npc_miranAI*>(creature->AI()))
+            pEscortAI->Start(false, player, quest, false, false, MIRAN_ESCORT_PATH);
     }
     return true;
 }
 
-UnitAI* GetAI_npc_miran(Creature* pCreature)
+UnitAI* GetAI_npc_miran(Creature* creature)
 {
-    return new npc_miranAI(pCreature);
+    return new npc_miranAI(creature);
 }
 
 void AddSC_loch_modan()
