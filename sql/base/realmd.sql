@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `realmd_db_version`;
 CREATE TABLE `realmd_db_version` (
-  `required_z2800_01_realmd_platform` bit(1) DEFAULT NULL
+  `required_z2820_01_realmd_joindate_datetime` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Last applied sql update to DB';
 
 --
@@ -48,7 +48,7 @@ CREATE TABLE `account` (
   `v` longtext,
   `s` longtext,
   `email` text,
-  `joindate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `joindate` DATETIME NOT NULL DEFAULT NOW(),
   `lockedIp` varchar(30) NOT NULL DEFAULT '0.0.0.0',
   `failed_logins` int(11) unsigned NOT NULL DEFAULT '0',
   `locked` tinyint(3) unsigned NOT NULL DEFAULT '0',
