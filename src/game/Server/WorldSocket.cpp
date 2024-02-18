@@ -177,6 +177,12 @@ bool WorldSocket::ProcessIncomingData()
         EndianConvertReverse(header->size);
         EndianConvert(header->cmd);
 
+        if ((header->size < 4) || (header->size > 0x2800) || (header->cmd >= NUM_MSG_TYPES))
+        {
+            sLog.outError("WorldSocket::ProcessIncomingData: client sent malformed packet size = %u , cmd = %u", header->size, header->cmd);
+            return;
+        }
+
         const Opcodes opcode = static_cast<Opcodes>(header->cmd);
 
         size_t packetSize = header->size - 4;
