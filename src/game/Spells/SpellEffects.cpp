@@ -354,7 +354,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
         }
 
         if (damage >= 0)
-            m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, damage, m_damageDoneMultiplier[eff_idx]);
+            m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, damage, m_damageDoneMultiplier[eff_idx], eff_idx);
     }
 }
 
@@ -1557,7 +1557,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                                         + unitTarget->SpellBaseDamageBonusTaken(GetSpellSchoolMask(m_spellInfo));
                     // Does Amplify Magic/Dampen Magic influence flametongue? If not, the above addition must be removed.
                     float weaponSpeed = float(m_CastItem->GetProto()->Delay) / IN_MILLISECONDS;
-                    bonusDamage = m_caster->SpellBonusWithCoeffs(m_spellInfo, 0, bonusDamage, 0, SPELL_DIRECT_DAMAGE, false); // apply spell coeff
+                    bonusDamage = m_caster->SpellBonusWithCoeffs(m_spellInfo, eff_idx, 0, bonusDamage, 0, SPELL_DIRECT_DAMAGE, false); // apply spell coeff
                     int32 totalDamage = (damage * 0.01 * weaponSpeed) + bonusDamage;
 
                     m_caster->CastCustomSpell(unitTarget, 10444, &totalDamage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, m_CastItem);
@@ -1883,8 +1883,8 @@ void Spell::EffectPowerDrain(SpellEffectIndex eff_idx)
     uint32 curPower = unitTarget->GetPower(powerType);
 
     // add spell damage bonus
-    damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellSchoolMask, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
-    damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellSchoolMask, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
+    damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellSchoolMask, m_spellInfo, eff_idx, uint32(damage), SPELL_DIRECT_DAMAGE);
+    damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellSchoolMask, m_spellInfo, eff_idx, uint32(damage), SPELL_DIRECT_DAMAGE);
 
     int32 new_damage;
     if (curPower < uint32(damage)) // damage should not be under zero at this point (checked above)
@@ -1945,7 +1945,7 @@ void Spell::EffectPowerBurn(SpellEffectIndex eff_idx)
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_MULTIPLE_VALUE, multiplier);
 
     new_damage = int32(new_damage * multiplier);
-    m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, new_damage, m_damageDoneMultiplier[eff_idx]);
+    m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, new_damage, m_damageDoneMultiplier[eff_idx], eff_idx);
 
     // should use here effect POWER_DRAIN because POWER_BURN is not implemented on client
     m_spellLog.AddLog(uint32(SPELL_EFFECT_POWER_DRAIN), unitTarget->GetObjectGuid(), new_damage, uint32(powertype), multiplier);
@@ -2000,9 +2000,9 @@ void Spell::EffectHeal(SpellEffectIndex eff_idx)
             addhealth += tickheal * tickcount;
         }
 
-        addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
+        addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, eff_idx, addhealth, HEAL);
         addhealth *= m_damageDoneMultiplier[eff_idx];
-        addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
+        addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, eff_idx, addhealth, HEAL);
 
         m_healingPerEffect[eff_idx] = addhealth;
     }
@@ -2018,8 +2018,8 @@ void Spell::EffectHealMechanical(SpellEffectIndex eff_idx)
         if (!caster)
             return;
 
-        uint32 addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, damage, HEAL);
-        addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
+        uint32 addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, eff_idx, damage, HEAL);
+        addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, eff_idx, addhealth, HEAL);
 
         m_healingPerEffect[eff_idx] = addhealth;
     }
@@ -2050,7 +2050,7 @@ void Spell::EffectHealthLeech(SpellEffectIndex eff_idx)
     uint32 heal = uint32(damage * multiplier);
     if (m_caster->IsAlive())
     {
-        heal = m_caster->SpellHealingBonusTaken(m_caster, m_spellInfo, heal, HEAL);
+        heal = m_caster->SpellHealingBonusTaken(m_caster, m_spellInfo, eff_idx, heal, HEAL);
 
         // TODO: at hit need to schedule a (delayed) heal effect execution on caster
         // order of packets for death coil - start, go, delay, dmg log, delay, heal log
@@ -3732,7 +3732,7 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
     bonus = int32(bonus * totalDamagePercentMod);
 
     // prevent negative damage
-    m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, bonus, m_damageDoneMultiplier[eff_idx]);
+    m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, bonus, m_damageDoneMultiplier[eff_idx], eff_idx);
 
     // Mangle (Cat): CP
     if (m_spellInfo->IsFitToFamily(SPELLFAMILY_DRUID, uint64(0x0000040000000000)))

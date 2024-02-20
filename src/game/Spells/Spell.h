@@ -476,7 +476,7 @@ class Spell
 
         int32 CalculateSpellEffectValue(SpellEffectIndex i, Unit* target, bool maximum = false, bool finalUse = true)
         { return m_trueCaster->CalculateSpellEffectValue(target, m_spellInfo, i, &m_currentBasePoints[i], maximum, finalUse); }
-        int32 CalculateSpellEffectDamage(Unit* unitTarget, int32 damage, float damageDoneMod);
+        int32 CalculateSpellEffectDamage(Unit* unitTarget, int32 damage, float damageDoneMod, SpellEffectIndex effectIndex);
         static uint32 CalculatePowerCost(SpellEntry const* spellInfo, Unit* caster, Spell* spell = nullptr, Item* castItem = nullptr, bool finalUse = false);
 
         bool HaveTargetsForEffect(SpellEffectIndex effect) const;

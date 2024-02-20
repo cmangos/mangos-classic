@@ -785,10 +785,11 @@ struct SpellEntry
         uint32    MinFactionId;                             // 170 not used, and 0 in 2.4.2
         uint32    MinReputation;                            // 171 not used, and 0 in 2.4.2
         uint32    RequiredAuraVision;                       // 172 not used
+        float     effectBonusCoefficient[MAX_EFFECT_INDEX]; // 173-175 (filled from SpellEffects.db2)
 
         // custom
-        uint32    IsServerSide;                             // 173
-        uint32    AttributesServerside;                     // 174
+        uint32    IsServerSide;                             // 176
+        uint32    AttributesServerside;                     // 177
 
         // helpers
         int32 CalculateSimpleValue(SpellEffectIndex eff) const { return EffectBasePoints[eff] + int32(EffectBaseDice[eff]); }

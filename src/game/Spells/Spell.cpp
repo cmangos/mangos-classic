@@ -6263,7 +6263,7 @@ SpellCastResult Spell::CheckRange(bool strict)
     return SPELL_CAST_OK;
 }
 
-int32 Spell::CalculateSpellEffectDamage(Unit* unitTarget, int32 damage, float damageDoneMod)
+int32 Spell::CalculateSpellEffectDamage(Unit* unitTarget, int32 damage, float damageDoneMod, SpellEffectIndex effectIndex)
 {
     // damage bonus (per damage class)
     switch (m_spellInfo->DmgClass)
@@ -6274,9 +6274,9 @@ int32 Spell::CalculateSpellEffectDamage(Unit* unitTarget, int32 damage, float da
         {
             // Calculate damage bonus
             if (!m_trueCaster->IsGameObject())
-                damage = m_caster->MeleeDamageBonusDone(unitTarget, damage, m_attackType, m_spellSchoolMask, m_spellInfo, SPELL_DIRECT_DAMAGE);
+                damage = m_caster->MeleeDamageBonusDone(unitTarget, damage, m_attackType, m_spellSchoolMask, m_spellInfo, effectIndex, SPELL_DIRECT_DAMAGE);
             damage *= damageDoneMod;
-            damage = unitTarget->MeleeDamageBonusTaken(m_trueCaster->IsGameObject() ? nullptr : m_caster, damage, m_attackType, m_spellSchoolMask, m_spellInfo, SPELL_DIRECT_DAMAGE);
+            damage = unitTarget->MeleeDamageBonusTaken(m_trueCaster->IsGameObject() ? nullptr : m_caster, damage, m_attackType, m_spellSchoolMask, m_spellInfo, effectIndex, SPELL_DIRECT_DAMAGE);
         }
         break;
         // Magical Attacks
@@ -6285,9 +6285,9 @@ int32 Spell::CalculateSpellEffectDamage(Unit* unitTarget, int32 damage, float da
         {
             // Calculate damage bonus
             if (!m_trueCaster->IsGameObject())
-                damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellSchoolMask, m_spellInfo, damage, SPELL_DIRECT_DAMAGE);
+                damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellSchoolMask, m_spellInfo, effectIndex, damage, SPELL_DIRECT_DAMAGE);
             damage *= damageDoneMod;
-            damage = unitTarget->SpellDamageBonusTaken(m_trueCaster->IsGameObject() ? nullptr : m_caster, m_spellSchoolMask, m_spellInfo, damage, SPELL_DIRECT_DAMAGE);
+            damage = unitTarget->SpellDamageBonusTaken(m_trueCaster->IsGameObject() ? nullptr : m_caster, m_spellSchoolMask, m_spellInfo, effectIndex, damage, SPELL_DIRECT_DAMAGE);
         }
         break;
     }
