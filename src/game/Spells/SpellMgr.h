@@ -2088,16 +2088,7 @@ struct SpellProcEventEntry
     uint32      cooldown;                                   // hidden cooldown used for some spell proc events, applied to _triggered_spell_
 };
 
-struct SpellBonusEntry
-{
-    float  direct_damage;
-    float  dot_damage;
-    float  ap_bonus;
-    float  ap_dot_bonus;
-};
-
 typedef std::unordered_map<uint32, SpellProcEventEntry> SpellProcEventMap;
-typedef std::unordered_map<uint32, SpellBonusEntry>     SpellBonusMap;
 
 #define ELIXIR_FLASK_MASK     0x03                          // 2 bit mask for batter compatibility with more recent client version, flaks must have both bits set
 #define ELIXIR_WELL_FED       0x10                          // Some foods have SPELLFAMILY_POTION
@@ -2284,7 +2275,6 @@ typedef std::map<uint32, uint32> SpellFacingFlagMap;
 
 class SpellMgr
 {
-        friend struct DoSpellBonuses;
         friend struct DoSpellProcEvent;
         friend struct DoSpellProcItemEnchant;
 
@@ -2536,17 +2526,6 @@ class SpellMgr
         }
 
         static bool IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellProcEvent, uint32 EventProcFlag, SpellEntry const* spellInfo, uint32 procFlags, uint32 procExtra);
-
-        // Spell bonus data
-        SpellBonusEntry const* GetSpellBonusData(uint32 spellId) const
-        {
-            // Lookup data
-            SpellBonusMap::const_iterator itr = mSpellBonusMap.find(spellId);
-            if (itr != mSpellBonusMap.end())
-                return &itr->second;
-
-            return nullptr;
-        }
 
         uint32 GetSpellFacingFlag(uint32 spellId) const
         {
@@ -2866,7 +2845,6 @@ class SpellMgr
         void LoadSpellElixirs();
         void LoadSpellProcEvents();
         void LoadSpellProcItemEnchant();
-        void LoadSpellBonuses();
         void LoadSpellTargetPositions();
         void LoadSpellThreats();
         void LoadSkillLineAbilityMaps();
@@ -2886,7 +2864,6 @@ class SpellMgr
         SpellThreatMap     mSpellThreatMap;
         SpellProcEventMap  mSpellProcEventMap;
         SpellProcItemEnchantMap mSpellProcItemEnchantMap;
-        SpellBonusMap      mSpellBonusMap;
         SkillLineAbilityMap mSkillLineAbilityMapBySpellId;
         SkillLineAbilityMap mSkillLineAbilityMapBySkillId;
         SkillRaceClassInfoMap mSkillRaceClassInfoMap;
