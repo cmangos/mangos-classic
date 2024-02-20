@@ -122,7 +122,7 @@ namespace MMAP
 
     void IntermediateValues::debugWrite(FILE* file, const rcCompactHeightfield* chf)
     {
-        if (!file | !chf)
+        if (!file || !chf)
             return;
 
         fwrite(&(chf->width), sizeof(chf->width), 1, file);
