@@ -276,49 +276,22 @@ void System::init() {
 #   elif defined(G3D_OSX)
 
         // Operating System:
-        SInt32 macVersion;
-        Gestalt(gestaltSystemVersion, &macVersion);
 
-        int major = (macVersion >> 8) & 0xFF;
-        int minor = (macVersion >> 4) & 0xF;
-        int revision = macVersion & 0xF;
+        char osVersion[256];
+        size_t size = sizeof(osVersion);
+        sysctlbyname("kern.osrelease", &osVersion, &size, NULL, 0);
 
-        {
-            char c[1000];
-            sprintf(c, "OS X %x.%x.%x", major, minor, revision);
-            m_operatingSystem = c;
-        }
+        m_operatingSystem = "macOS ";
+        m_operatingSystem += osVersion;
 
         // Clock Cycle Timing Information:
-        Gestalt('pclk', &m_OSXCPUSpeed);
-        m_cpuSpeed = iRound((double)m_OSXCPUSpeed / (1024 * 1024));
         m_secondsPerNS = 1.0 / 1.0e9;
 
         // System Architecture:
-	const NXArchInfo* pInfo = NXGetLocalArchInfo();
-
-	if (pInfo) {
-	    m_cpuArch = pInfo->description;
-
-	    switch (pInfo->cputype) {
-	    case CPU_TYPE_POWERPC:
-	        switch(pInfo->cpusubtype){
-		case CPU_SUBTYPE_POWERPC_750:
-		case CPU_SUBTYPE_POWERPC_7400:
-		case CPU_SUBTYPE_POWERPC_7450:
-		    m_cpuVendor = "Motorola";
-		    break;
-		case CPU_SUBTYPE_POWERPC_970:
-		    m_cpuVendor = "IBM";
-		    break;
-		}
-		break;
-
-            case CPU_TYPE_I386:
-                m_cpuVendor = "Intel";
-                break;
-	    }
-	}
+#       ifdef (__aarch64__)
+            m_cpuArch = "ARM64";
+            m_cpuVendor = "Apple";
+#       endif
 #   endif
 
     initTime();
