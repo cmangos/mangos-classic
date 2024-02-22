@@ -6896,8 +6896,16 @@ int32 Unit::SpellBonusWithCoeffs(SpellEntry const* spellProto, SpellEffectIndex 
     if (GetTypeId() == TYPEID_UNIT && !((Creature*)this)->IsPet())
         coeff = 1.0f;
     // Check for table values
-    if (spellProto->effectBonusCoefficient[effectIndex] > 0)
+    if (spellProto->effectBonusCoefficient[effectIndex] > 0 || spellProto->effectBonusCoefficientFromAP[effectIndex] > 0)
+    {
         coeff = spellProto->effectBonusCoefficient[effectIndex];
+
+        if (donePart && spellProto->effectBonusCoefficientFromAP[effectIndex] > 0)
+        {
+            float ap_bonus = spellProto->effectBonusCoefficientFromAP[effectIndex];
+            total += int32(ap_bonus * (GetTotalAttackPowerValue(IsSpellRequiresRangedAP(spellProto) ? RANGED_ATTACK : BASE_ATTACK) + ap_benefit));
+        }
+    }
     // Default calculation
     else if (benefit)
         coeff = CalculateDefaultCoefficient(spellProto, damagetype);

@@ -786,6 +786,7 @@ struct SpellEntry
         uint32    MinReputation;                            // 171 not used, and 0 in 2.4.2
         uint32    RequiredAuraVision;                       // 172 not used
         float     effectBonusCoefficient[MAX_EFFECT_INDEX]; // 173-175 (filled from SpellEffects.db2)
+        float     effectBonusCoefficientFromAP[MAX_EFFECT_INDEX]; // 232-234
 
         // custom
         uint32    IsServerSide;                             // 176
