@@ -334,3 +334,28 @@ UPDATE `spell_template` SET `InterruptFlags` = 15 WHERE `Id` in (8016,7901);
 UPDATE spell_template SET AttributesServerside=AttributesServerside|0x00000008 WHERE Id IN(15582);
 UPDATE `spell_template` SET AttributesServerside=AttributesServerside|0x00000008 WHERE `Id` IN (53,2589,2590,2591,6595,7159,8355,8721,11279,11280,11281,15582,15657,22416,24016,25300,26863); -- SPELL_ATTR_SS_FACING_BACK
 
+-- Bonus coeff fixes
+UPDATE spell_template SET EffectBonusCoefficient1=0.8 WHERE Id IN (1454,1455,1456,11687,11688,11689); -- Life Tap
+UPDATE spell_template SET EffectBonusCoefficient1=0.1 WHERE Id IN (1463,8494,8495,10191,10192,10193); -- Mana Shield
+UPDATE spell_template SET EffectBonusCoefficient1=0.1 WHERE Id IN (6229,11739,11740,28610); -- Shadow Ward
+UPDATE spell_template SET EffectBonusCoefficient1=0.1 WHERE Id IN (8188,10582,10583,10584); -- Magma Totem Passive
+UPDATE spell_template SET EffectBonusCoefficient1=0.2142 WHERE Id IN (8443,8504,8505,11310,11311); -- Fire Nova Totem
+UPDATE spell_template SET EffectBonusCoefficient1=0.1 WHERE Id IN (8026,8028,8029,10445,16343,16344); -- Flametongue Weapon Proc
+UPDATE spell_template SET EffectBonusCoefficient1=0.96 WHERE Id IN (18220,18937,18938); -- Dark Pact
+UPDATE spell_template SET EffectBonusCoefficient1=1 WHERE Id IN (25997); -- Eye for an Eye
+UPDATE spell_template SET EffectBonusCoefficient1=0.1 WHERE Id IN (17,592,600,3747,6065,6066,10898,10899,10900,10901); -- Power Word: Shield
+UPDATE spell_template SET EffectBonusCoefficient1=0.1 WHERE Id IN (543,8457,8458,10223,10225); -- Fire Ward
+UPDATE spell_template SET EffectBonusCoefficient1=0.1 WHERE Id IN (6143,8461,8462,10177,28609); -- Frost Ward
+UPDATE spell_template SET EffectBonusCoefficient1=0.1 WHERE Id IN (11426,13031,13032,13033); -- Ice Barrier
+UPDATE spell_template SET EffectBonusCoefficient1=0.4485 WHERE Id IN (755,3698,3699,3700,11693,11694,11695); -- Health Funnel
+UPDATE spell_template SET EffectBonusCoefficient1=0.33 WHERE Id IN (7001,27873,27874); -- Lightwell Renew
+
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.03 WHERE Id IN (703,8631,8632,8633,11289,11290); -- Garrote
+-- UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.2 WHERE Id IN (1495,14269,14270,14271); -- Mongoose Bite
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.01, EffectBonusCoefficientFromAP2=0.02 WHERE Id IN (1822,1823,1824,9904); -- Rake
+-- UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.02 WHERE Id IN (1978,13549,13550,13551,13552,13553,13554,13555,25295); -- Serpent Sting
+-- UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.15 WHERE Id IN (3044,14281,14282,14283,14284,14285,14286,14287); -- Arcane Shot
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.03 WHERE Id IN (9007,9824,9826); -- Pounce Bleed
+-- UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.02 WHERE Id IN (13797,14298,14299,14300,14301); -- Immolation Trap Effect
+-- UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.1, EffectBonusCoefficientFromAP2=0.1 WHERE Id IN (13812,14314,14315); -- Explosive Trap Effect
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.08 WHERE Id IN (779,780,769,9754,9908); -- Swipe

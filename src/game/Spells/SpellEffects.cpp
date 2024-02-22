@@ -332,6 +332,9 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                     // converts each extra point of energy into additional damage
                     damage += int32(m_caster->GetPower(POWER_ENERGY) * m_spellInfo->DmgMultiplier[eff_idx]);
                     m_caster->SetPower(POWER_ENERGY, 0);
+                    // scaled AP bonus
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.03f * m_caster->GetComboPoints());
                 }
                 break;
             }
