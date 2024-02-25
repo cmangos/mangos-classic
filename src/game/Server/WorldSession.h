@@ -269,6 +269,8 @@ class WorldSession
             m_kickSession = kickSession;
         }
 
+        void AfkStateChange(bool state);
+
         /// Is logout cooldown expired?
         bool ShouldLogOut(time_t currTime) const
         {
@@ -278,6 +280,11 @@ class WorldSession
         bool ShouldDisconnect(time_t currTime)
         {
             return (_logoutTime > 0 && currTime >= _logoutTime + 60);
+        }
+
+        bool ShouldAfkDisconnect(time_t currTime) const
+        {
+            return (m_afkTime > 0 && currTime >= m_afkTime + 15 * MINUTE);
         }
 
         void LogoutPlayer();
@@ -843,6 +850,7 @@ class WorldSession
 
         time_t _logoutTime;                                 // when logout will be processed after a logout request
         time_t m_kickTime;
+        time_t m_afkTime;
         bool m_playerSave;                                  // should we have to save the player after logout request
         bool m_inQueue;                                     // session wait in auth.queue
         bool m_playerLoading;                               // code processed in LoginPlayer
