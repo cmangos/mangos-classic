@@ -1730,13 +1730,14 @@ bool FormationSlotData::IsFormationMaster()
 
 float FormationSlotData::GetAngle()
 {
-#ifdef ENABLE_SPAWNGROUP_FORMATION_MIRRORING
-    if (!GetFormationData()->GetMirrorState())
-        return m_angleVariation;
-    return (2 * M_PI_F) - m_angleVariation;
-#else
+    if (GetCreatureGroup()->GetGroupEntry().IsMirroring())
+    {
+        if (!GetFormationData()->GetMirrorState())
+            return m_angleVariation;
+        return (2 * M_PI_F) - m_angleVariation;
+    }
+
     return m_angleVariation;
-#endif // ENABLE_SPAWNGROUP_FORMATION_MIRRORING
 }
 
 float FormationSlotData::GetDistance() const

@@ -25,10 +25,6 @@
 #include <map>
 #include <memory>
 
-
- // uncomment this if you want mirroring at start and end of the LINEAR_WP_MOTION_TYPE movement
- //#define ENABLE_SPAWNGROUP_FORMATION_MIRRORING
-
 struct FormationEntry;
 class FormationData;
 class FormationSlotData;
@@ -74,6 +70,7 @@ enum CreatureGroupFlags
     CREATURE_GROUP_RESPAWN_TOGETHER = 0x02,
     CREATURE_GROUP_EVADE_TOGETHER   = 0x04,
     // SPAWN_GROUP_DESPAWN_ON_COND_FAIL
+    CREATURE_GROUP_FORMATION_MIRRORING = 0x10, // mirrors position during linear path movement
 };
 
 enum CreatureGroupEvent : uint32
@@ -112,6 +109,8 @@ struct SpawnGroupEntry
         auto const& itr = std::find_if(DbGuids.begin(), DbGuids.end(), [dbGuid](SpawnGroupDbGuids const& x) { return x.DbGuid == dbGuid; });
         return itr != DbGuids.end() ? (*itr).SlotId : -1;
     }
+
+    bool IsMirroring() const { return Flags & CREATURE_GROUP_FORMATION_MIRRORING; }
 };
 
 // Formation defines

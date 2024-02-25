@@ -614,7 +614,7 @@ bool WaypointMovementGenerator<Creature>::SetNextWaypoint(uint32 pointId)
     return true;
 }
 
-void LinearWPMovementGenerator<Creature>::SwitchToNextNode(Creature& /*creature*/, WaypointPath::const_iterator& nodeItr)
+void LinearWPMovementGenerator<Creature>::SwitchToNextNode(Creature& creature, WaypointPath::const_iterator& nodeItr)
 {
     // switch to next node
     if (!m_driveWayBack)
@@ -624,11 +624,9 @@ void LinearWPMovementGenerator<Creature>::SwitchToNextNode(Creature& /*creature*
             --nodeItr;
 
             m_driveWayBack = true;
-#ifdef ENABLE_SPAWNGROUP_FORMATION_MIRRORING
             // call end of path hook
             if (creature.GetFormationSlot())
                 creature.GetFormationSlot()->GetFormationData()->OnWPEndNode();
-#endif
         }
         else
             ++nodeItr;
@@ -639,11 +637,9 @@ void LinearWPMovementGenerator<Creature>::SwitchToNextNode(Creature& /*creature*
         {
             m_driveWayBack = false;
             ++nodeItr;
-#ifdef ENABLE_SPAWNGROUP_FORMATION_MIRRORING
             // call start of path hook
             if (creature.GetFormationSlot())
                 creature.GetFormationSlot()->GetFormationData()->OnWPStartNode();
-#endif
         }
         else
             --nodeItr;
