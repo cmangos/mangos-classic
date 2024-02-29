@@ -36,7 +36,7 @@ if(BUILD_PLAYERBOTS)
 
   FetchContent_Declare(
     playerbots
-    GIT_REPOSITORY "https://github.com/celguar/mangosbot-bots.git"
+    GIT_REPOSITORY "https://github.com/cmangos/playerbots.git"
 	GIT_TAG "master"
   )
 
