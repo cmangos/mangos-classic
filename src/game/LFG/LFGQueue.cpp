@@ -476,3 +476,100 @@ void LFGQueue::RestoreOfflinePlayer(ObjectGuid playerGuid)
         });
     }
 }
+
+#ifdef ENABLE_PLAYERBOTS
+void LFGQueue::GetPlayerQueueInfo(LFGPlayerQueueInfo* info, ObjectGuid const& plrGuid)
+{
+    QueuedPlayersMap::iterator iter = m_queuedPlayers.find(plrGuid);
+    if (iter != m_queuedPlayers.end())
+        *info = iter->second;
+
+    return;
+}
+
+void LFGQueue::GetGroupQueueInfo(LFGGroupQueueInfo* info, uint32 groupId)
+{
+    QueuedGroupsMap::iterator iter = m_queuedGroups.find(groupId);
+    if (iter != m_queuedGroups.end())
+        *info = iter->second;
+
+    return;
+}
+
+void LFGQueue::LoadMeetingStones()
+{
+    m_MeetingStonesMap.clear();
+    uint32 count = 0;
+    for (uint32 i = 0; i < sGOStorage.GetMaxEntry(); ++i)
+    {
+        auto data = sGOStorage.LookupEntry<GameObjectInfo>(i);
+        if (data && data->type == GAMEOBJECT_TYPE_MEETINGSTONE)
+        {
+            AreaTableEntry const* area = GetAreaEntryByAreaID(data->meetingstone.areaID);
+            if (area)
+            {
+                MeetingStoneInfo info;
+                info.area = data->meetingstone.areaID;
+                info.minlevel = data->meetingstone.minLevel;
+                info.maxlevel = data->meetingstone.maxLevel;
+                info.name = area->area_name[0];
+                // get stone position
+                Position stonePosition = Position();
+                uint32 mapId = 0;
+                FindGOData worker(i, nullptr);
+                sObjectMgr.DoGOData(worker);
+                GameObjectDataPair const* dataPair = worker.GetResult();
+                if (dataPair)
+                {
+                    GameObjectData const* objData = &dataPair->second;
+                    stonePosition = Position(objData->posX, objData->posY, objData->posZ, 0.f);
+                    mapId = objData->mapid;
+                }
+                info.position = stonePosition;
+                info.mapId = mapId;
+                switch (info.area)
+                {
+                case 1977:
+                case 2159:
+                    info.dungeonType = MAP_RAID;
+                    break;
+                default:
+                    info.dungeonType = MAP_INSTANCE;
+                }
+                /*if (MapEntry const* mEntry = sMapStore.LookupEntry(area->mapid))
+                {
+                    info.dungeonType = mEntry->map_type;
+                }
+                else
+                    info.dungeonType = MAP_COMMON;*/
+
+                m_MeetingStonesMap.insert(std::make_pair(data->id, info));
+                sLog.outBasic(">> Loaded Meeting Stone Entry:%d, Area:%d, Level:%d - %d, Name:%s, Dungeon Type:%u", i, info.area, info.minlevel, info.maxlevel, info.name, info.dungeonType);
+                count++;
+            }
+        }
+    }
+
+    sLog.outString(">> Loaded %u Meeting Stones", count);
+    sLog.outString();
+}
+
+MeetingStoneSet LFGQueue::GetDungeonsForPlayer(Player* player)
+{
+    MeetingStoneSet list;
+    uint32 level = player->GetLevel();
+    for (MeetingStonesMap::iterator it = m_MeetingStonesMap.begin(); it != m_MeetingStonesMap.end(); ++it)
+    {
+        MeetingStoneInfo data = it->second;
+
+        if (data.maxlevel && data.maxlevel < level)
+            continue;
+
+        if (data.minlevel && data.minlevel > level)
+            continue;
+
+        list.insert(list.end(), data);
+    }
+    return list;
+}
+#endif

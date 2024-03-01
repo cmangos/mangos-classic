@@ -40,6 +40,9 @@ const char CreatureTypefmt[] = "nxxxxxxxxxx";
 const char DurabilityCostsfmt[] = "niiiiiiiiiiiiiiiiiiiiiiiiiiiii";
 const char DurabilityQualityfmt[] = "nf";
 const char EmotesEntryfmt[] = "nxxiiix";
+#ifdef ENABLE_PLAYERBOTS
+char const EmotesTextSoundEntryfmt[] = "niiii";
+#endif
 const char EmotesTextEntryfmt[] = "nxixxxxxxxxxxxxxxxx";
 const char FactionEntryfmt[] = "niiiiiiiiiiiiiiiiiissssssssxxxxxxxxxx";
 const char FactionTemplateEntryfmt[] = "niiiiiiiiiiiii";
@@ -52,7 +55,11 @@ const char GMTicketCategoryfmt[] = "nssssssssx";
 const char ItemBagFamilyfmt[] = "nxxxxxxxxx";
 const char ItemClassfmt[] = "nxxssssssssx";
 // const char ItemDisplayTemplateEntryfmt[]="nxxxxxxxxxxixxxxxxxxxxx";
+#ifdef ENABLE_PLAYERBOTS
+const char ItemRandomPropertiesfmt[] = "nxiiixxssssssssx";
+#else
 const char ItemRandomPropertiesfmt[] = "nxiiixxxxxxxxxxx";
+#endif
 const char ItemSetEntryfmt[] = "dssssssssxxxxxxxxxxxxxxxxxxiiiiiiiiiiiiiiiiii";
 const char LiquidTypefmt[] = "niii";
 const char LockEntryfmt[] = "niiiiiiiiiiiiiiiiiiiiiiiixxxxxxxx";

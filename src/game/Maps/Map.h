@@ -373,6 +373,12 @@ class Map : public GridRefManager<NGridType>
         // debug
         std::set<ObjectGuid> m_objRemoveList; // this will eventually eat up too much memory - only used for debugging VisibleNotifier::Notify() customlog leak
 
+#ifdef ENABLE_PLAYERBOTS
+        bool HasRealPlayers() { return hasRealPlayers; }
+        bool HasActiveZones() { return !m_activeZones.empty(); }
+        bool HasActiveZone(uint32 zoneId) { return find(m_activeZones.begin(), m_activeZones.end(), zoneId) != m_activeZones.end(); }
+#endif
+
     private:
         void LoadMapAndVMap(int gx, int gy);
 
@@ -499,6 +505,12 @@ class Map : public GridRefManager<NGridType>
         std::shared_ptr<CreatureSpellListContainer> m_spellListContainer;
 
         WorldStateVariableManager m_variableManager;
+
+#ifdef ENABLE_PLAYERBOTS
+        std::vector<uint32> m_activeZones;
+        uint32 m_activeZonesTimer;
+        bool hasRealPlayers;
+#endif
 };
 
 class WorldMap : public Map

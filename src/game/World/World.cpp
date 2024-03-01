@@ -77,6 +77,12 @@
  #include "Metric/Metric.h"
 #endif
 
+#ifdef ENABLE_PLAYERBOTS
+#include "AhBot.h"
+#include "PlayerbotAIConfig.h"
+#include "RandomPlayerbotMgr.h"
+#endif
+
 #include <algorithm>
 #include <mutex>
 #include <cstdarg>
@@ -100,6 +106,13 @@ uint32 World::m_relocation_ai_notify_delay = 1000u;
 uint32 World::m_currentMSTime = 0;
 TimePoint World::m_currentTime = TimePoint();
 uint32 World::m_currentDiff = 0;
+#ifdef ENABLE_PLAYERBOTS
+uint32 World::m_currentDiffSum = 0;
+uint32 World::m_currentDiffSumIndex = 0;
+uint32 World::m_averageDiff = 0;
+uint32 World::m_maxDiff = 0;
+std::list<uint32> World::m_histDiff;
+#endif
 
 /// World constructor
 World::World(): mail_timer(0), mail_timer_expires(0), m_NextWeeklyQuestReset(0), m_opcodeCounters(NUM_MSG_TYPES)
@@ -154,6 +167,10 @@ World::~World()
 /// Cleanups before world stop
 void World::CleanupsBeforeStop()
 {
+#ifdef ENABLE_PLAYERBOTS
+    sRandomPlayerbotMgr.LogoutAllBots();
+#endif
+
     KickAll(true);                                   // save and kick all players
     UpdateSessions(1);                               // real players unload required UpdateSessions call
     sBattleGroundMgr.DeleteAllBattleGrounds();       // unload battleground templates before different singletons destroyed
@@ -1232,6 +1249,11 @@ void World::SetInitialWorldSettings()
     sLog.outString(">>> Localization strings loaded");
     sLog.outString();
 
+#ifdef ENABLE_PLAYERBOTS
+    sLog.outString("Loading Meeting Stones...");            // After load all static data
+    sWorld.GetLFGQueue().LoadMeetingStones();
+#endif
+
     ///- Load dynamic data tables from the database
     sLog.outString("Loading Auctions...");
     sAuctionMgr.LoadAuctionItems();
@@ -1381,10 +1403,14 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_METRICS].SetInterval(1 * IN_MILLISECONDS);
 #endif // BUILD_METRICS
 
-
 #ifdef BUILD_DEPRECATED_PLAYERBOT
     PlayerbotMgr::SetInitialWorldSettings();
 #endif
+
+#ifdef ENABLE_PLAYERBOTS
+    sPlayerbotAIConfig.Initialize();
+#endif
+
     sLog.outString("---------------------------------------");
     sLog.outString("      CMANGOS: World initialized       ");
     sLog.outString("---------------------------------------");
@@ -1448,6 +1474,33 @@ void World::Update(uint32 diff)
     m_currentTime = std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::now());
     m_currentDiff = diff;
 
+#ifdef ENABLE_PLAYERBOTS
+    m_currentDiffSum += diff;
+    m_currentDiffSumIndex++;
+
+    m_histDiff.push_back(diff);
+    m_maxDiff = std::max(m_maxDiff, diff);
+
+    while (m_histDiff.size() >= 600)
+    {
+        m_currentDiffSum -= m_histDiff.front();
+        m_histDiff.pop_front();
+    }
+
+    m_averageDiff = (uint32)(m_currentDiffSum / m_histDiff.size());
+
+    if (m_currentDiffSumIndex && m_currentDiffSumIndex % 60 == 0)
+    {
+        sLog.outBasic("Avg Diff: %u. Sessions online: %u.", m_averageDiff, (uint32)GetActiveSessionCount());
+        sLog.outBasic("Max Diff: %u.", m_maxDiff);
+    }
+
+    if (m_currentDiffSum % 3000 == 0)
+    {
+        m_maxDiff = *std::max_element(m_histDiff.begin(), m_histDiff.end());
+    }
+#endif
+
     ///- Update the different timers
     for (auto& m_timer : m_timers)
     {
@@ -1493,6 +1546,19 @@ void World::Update(uint32 diff)
         sAuctionHouseBot.Update();
         m_timers[WUPDATE_AHBOT].Reset();
     }
+#endif
+
+#ifdef ENABLE_PLAYERBOTS
+#ifndef BUILD_AHBOT
+    /// <li> Handle AHBot operations
+    if (m_timers[WUPDATE_AHBOT].Passed())
+    {
+        auctionbot.Update();
+        m_timers[WUPDATE_AHBOT].Reset();
+    }
+#endif
+    sRandomPlayerbotMgr.UpdateAI(diff);
+    sRandomPlayerbotMgr.UpdateSessions(diff);
 #endif
 
     /// <li> Handle session updates

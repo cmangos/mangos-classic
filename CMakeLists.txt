@@ -329,6 +329,18 @@ if(NOT BUILD_GAME_SERVER AND BUILD_DEPRECATED_PLAYERBOT)
   message(STATUS "BUILD_DEPRECATED_PLAYERBOT forced to OFF due to BUILD_GAME_SERVER is not set")
 endif()
 
+if(BUILD_PLAYERBOTS)
+  if(BUILD_DEPRECATED_PLAYERBOT)
+    set(BUILD_DEPRECATED_PLAYERBOT OFF)
+    message(STATUS "BUILD_DEPRECATED_PLAYERBOT forced to OFF because BUILD_PLAYERBOTS is set")
+  endif()
+
+  if(NOT BUILD_GAME_SERVER)
+    set(BUILD_PLAYERBOTS OFF)
+    message(STATUS "BUILD_PLAYERBOTS forced to OFF due to BUILD_GAME_SERVER is not set")
+  endif()
+endif()
+
 if(PCH)
   if(${CMAKE_VERSION} VERSION_LESS "3.16")
     message("PCH is not supported by your CMake version")

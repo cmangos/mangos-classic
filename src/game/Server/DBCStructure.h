@@ -341,6 +341,21 @@ struct EmotesTextEntry
     //          m_emoteText
 };
 
+#ifdef ENABLE_PLAYERBOTS
+/**
+* \struct EmotesTextSoundEntry
+* \brief Entry resenting the text sound for given emote.
+*/
+struct EmotesTextSoundEntry
+{
+    uint32 Id;                                              // 0
+    uint32 EmotesTextId;                                    // 1
+    uint32 RaceId;                                          // 2
+    uint32 SexId;                                           // 3, 0 male / 1 female
+    uint32 SoundId;                                         // 4
+};
+#endif
+
 struct FactionEntry
 {
     uint32      ID;                                         // 0        m_ID
@@ -506,7 +521,11 @@ struct ItemRandomPropertiesEntry
     // char*     internalName                               // 1        m_Name
     uint32    enchant_id[3];                                // 2-4      m_Enchantment
     // 5-6 unused, 0 only values, reserved for additional enchantments
-    // char*     nameSuffix[8];                             // 7-14     m_name_lang
+#ifdef ENABLE_PLAYERBOTS
+    char*     nameSuffix[8];                             // 7-14     m_name_lang
+#else
+    // char* nameSuffix[8];                             // 7-14     m_name_lang
+#endif
     // 15 string flags
 };
 

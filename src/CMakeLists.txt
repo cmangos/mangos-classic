@@ -29,3 +29,33 @@ endif()
 if(BUILD_LOGIN_SERVER)
   add_subdirectory(realmd)
 endif()
+
+# Playerbots module
+if(BUILD_PLAYERBOTS)
+  include(FetchContent)
+
+  FetchContent_Declare(
+    playerbots
+    GIT_REPOSITORY "https://github.com/cmangos/playerbots.git"
+	GIT_TAG "master"
+  )
+
+  if(NOT playerbots_POPULATED)
+	message(STATUS "Fetching Playerbots module...")
+  
+    FetchContent_Populate(playerbots)
+	
+	if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
+      file(REMOVE_RECURSE ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
+    endif()
+	
+	file(COPY ${playerbots_SOURCE_DIR}/. DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
+    message(STATUS "Playerbots module fetched and populated in ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots")
+  endif()
+
+  add_subdirectory(modules/Bots)
+else()
+  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
+    file(REMOVE_RECURSE ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
+  endif()
+endif()

@@ -356,7 +356,23 @@ bool Group::AddMember(ObjectGuid guid, const char* name, uint8 joinMethod)
             WorldPacket groupDataPacket = groupData.BuildPacket(0, false);
             player->SendDirectMessage(groupDataPacket);
         }
-        
+
+#ifdef ENABLE_PLAYERBOTS
+        if (!IsLeader(player->GetObjectGuid()) && sWorld.GetLFGQueue().IsPlayerInQueue(player->GetObjectGuid()))
+        {
+            bool notifyPlayer = true; // show "you have left queue" message only if different dungeons
+            if (IsInLFG())
+            {
+                LFGGroupQueueInfo grpLfgInfo;
+                LFGPlayerQueueInfo plrLfgInfo;
+                sWorld.GetLFGQueue().GetGroupQueueInfo(&grpLfgInfo, GetId());
+                sWorld.GetLFGQueue().GetPlayerQueueInfo(&plrLfgInfo, player->GetObjectGuid());
+                notifyPlayer = grpLfgInfo.areaId != plrLfgInfo.areaId;
+            }
+            sWorld.GetLFGQueue().RemovePlayerFromQueue(player->GetObjectGuid(), notifyPlayer ? PLAYER_CLIENT_LEAVE : PLAYER_SYSTEM_LEAVE);
+        }
+#endif
+
         if (IsInLFG())
         {
             if (joinMethod != GROUP_LFG)

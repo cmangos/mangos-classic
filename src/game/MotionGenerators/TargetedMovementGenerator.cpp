@@ -580,7 +580,11 @@ void ChaseMovementGenerator::CutPath(Unit& owner, PointsArray& path)
 {
     if (this->i_offset != 0.f) // need to cut path until most distant viable point
     {
+#ifdef ENABLE_PLAYERBOTS
+        const float dist = (i_offset * (owner.IsPlayer() ? 1.0f : CHASE_MOVE_CLOSER_FACTOR)) + (this->i_target->GetCombinedCombatReach(&owner, false) * CHASE_DEFAULT_RANGE_FACTOR);
+#else
         const float dist = (i_offset * CHASE_MOVE_CLOSER_FACTOR) + (this->i_target->GetCombinedCombatReach(&owner, false) * CHASE_DEFAULT_RANGE_FACTOR);
+#endif
         const float distSquared = (dist * dist);
         float tarX, tarY, tarZ;
         this->i_target->GetPosition(tarX, tarY, tarZ);
@@ -732,7 +736,12 @@ float FollowMovementGenerator::GetSpeed(Unit& owner) const
     // Followers sync with master's speed when not in combat
     // Use default speed when a mix of PC and NPC units involved (escorting?)
     if (owner.HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) == i_target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+    {
+#ifdef ENABLE_PLAYERBOTS
+        if (!(!m_boost && owner.IsPlayer() && !((Player*)(&owner))->isRealPlayer())) //Do not speed up bots when not boosting. 
+#endif
         speed = i_target->GetSpeedInMotion();
+    }
 
     // Catchup boost is not allowed, stop here:
     if (!IsBoostAllowed(owner))

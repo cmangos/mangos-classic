@@ -507,6 +507,11 @@ class BattleGround
         // Get creature guid from event
         uint32 GetSingleCreatureGuid(uint8 /*event1*/, uint8 /*event2*/);
 
+#ifdef ENABLE_PLAYERBOTS
+        // Get gameobject guid from event
+        uint32 GetSingleGameObjectGuid(uint8 /*event1*/, uint8 /*event2*/);
+#endif
+
         // Handle door events
         void OpenDoorEvent(uint8 /*event1*/, uint8 event2 = 0);
         bool IsDoorEvent(uint8 /*event1*/, uint8 /*event2*/) const;

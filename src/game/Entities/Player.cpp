@@ -68,6 +68,11 @@
 #include "Config/Config.h"
 #endif
 
+#ifdef ENABLE_PLAYERBOTS
+#include "playerbot.h"
+#include "PlayerbotAIConfig.h"
+#endif
+
 #include <cmath>
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
@@ -464,10 +469,11 @@ void TradeData::SetAccepted(bool state, bool crosssend /*= false*/)
 
 Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(this), m_camera(this), m_reputationMgr(this), m_launched(false)
 {
-#ifdef BUILD_DEPRECATED_PLAYERBOT
-    m_playerbotAI = 0;
-    m_playerbotMgr = 0;
+#if defined(BUILD_DEPRECATED_PLAYERBOT) || defined(ENABLE_PLAYERBOTS)
+    m_playerbotAI = nullptr;
+    m_playerbotMgr = nullptr;
 #endif
+
     m_speakTime = 0;
     m_speakCount = 0;
 
@@ -674,13 +680,18 @@ Player::~Player()
     if (m_playerbotAI)
     {
         delete m_playerbotAI;
-        m_playerbotAI = 0;
+        m_playerbotAI = nullptr;
     }
     if (m_playerbotMgr)
     {
         delete m_playerbotMgr;
-        m_playerbotMgr = 0;
+        m_playerbotMgr = nullptr;
     }
+#endif
+
+#ifdef ENABLE_PLAYERBOTS
+    RemovePlayerbotAI();
+    RemovePlayerbotMgr();
 #endif
 }
 
@@ -1526,6 +1537,9 @@ void Player::Update(const uint32 diff)
     {
         if (diff >= m_DetectInvTimer)
         {
+#ifdef ENABLE_PLAYERBOTS
+            if (isRealPlayer())
+#endif
             HandleStealthedUnitsDetection();
             m_DetectInvTimer = GetMap()->IsBattleGround() ? 500 : 2000;
         }
@@ -1594,6 +1608,43 @@ void Player::Heartbeat()
     Unit::Heartbeat();
     SendUpdateToOutOfRangeGroupMembers();
 }
+
+#ifdef ENABLE_PLAYERBOTS
+void Player::CreatePlayerbotAI()
+{
+    assert(!m_playerbotAI);
+    m_playerbotAI = std::make_unique<PlayerbotAI>(this);
+}
+
+void Player::RemovePlayerbotAI()
+{
+    m_playerbotAI = nullptr;
+}
+
+void Player::CreatePlayerbotMgr()
+{
+    assert(!m_playerbotMgr);
+    m_playerbotMgr = std::make_unique<PlayerbotMgr>(this);
+}
+
+void Player::RemovePlayerbotMgr()
+{
+    m_playerbotMgr = nullptr;
+}
+
+void Player::UpdateAI(const uint32 diff, bool minimal)
+{
+    if (m_playerbotAI)
+    {
+        m_playerbotAI->UpdateAI(diff);
+    }
+
+    if (m_playerbotMgr)
+    {
+        m_playerbotMgr->UpdateAI(diff);
+    }
+}
+#endif
 
 void Player::SetDeathState(DeathState s)
 {
@@ -8200,6 +8251,35 @@ Item* Player::GetItemByPos(uint8 bag, uint8 slot) const
     return nullptr;
 }
 
+#ifdef ENABLE_PLAYERBOTS
+Item* Player::GetItemByEntry(uint32 item) const
+{
+    for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
+        if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            if (pItem->GetEntry() == item)
+            {
+                return pItem;
+            }
+        }
+    }
+
+    for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
+        if (Bag* pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            if (Item* itemPtr = pBag->GetItemByEntry(item))
+            {
+                return itemPtr;
+            }
+        }
+    }
+
+    return nullptr;
+}
+#endif
+
 Item* Player::GetWeaponForAttack(WeaponAttackType attackType, bool nonbroken, bool useable) const
 {
     uint8 slot;
@@ -12396,7 +12476,11 @@ void Player::AddQuest(Quest const* pQuest, Object* questGiver)
         questStatusData.uState = QUEST_CHANGED;
 
     // quest accept scripts
+#ifdef ENABLE_PLAYERBOTS
+    if (questGiver && this != questGiver)
+#else
     if (questGiver)
+#endif
     {
         switch (questGiver->GetTypeId())
         {
@@ -12571,7 +12655,10 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
         SendQuestReward(pQuest, xp);
 
     bool handled = false;
-
+#ifdef ENABLE_PLAYERBOTS
+    if (this != questGiver) 
+    {
+#endif
     switch (questGiver->GetTypeId())
     {
         case TYPEID_UNIT:
@@ -12581,9 +12668,19 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
             handled = sScriptDevAIMgr.OnQuestRewarded(this, (GameObject*)questGiver, pQuest);
             break;
     }
+#ifdef ENABLE_PLAYERBOTS
+    }
+#endif
 
+#ifdef ENABLE_PLAYERBOTS
+    if (this != questGiver)
+    {
+#endif
     if (!handled && pQuest->GetQuestCompleteScript() != 0)
         GetMap()->ScriptsStart(SCRIPT_TYPE_QUEST_END, pQuest->GetQuestCompleteScript(), questGiver, this, Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE);
+#ifdef ENABLE_PLAYERBOTS
+    }
+#endif
 
     // Find spell cast on spell reward if any, then find the appropriate caster and cast it
     uint32 spellId = pQuest->GetRewSpellCast();
@@ -13985,6 +14082,54 @@ void Player::_LoadIntoDataField(const char* data, uint32 startOffset, uint32 cou
         m_uint32Values[startOffset + index] = std::stoul(*iter);
     }
 }
+
+#ifdef ENABLE_PLAYERBOTS
+bool Player::MinimalLoadFromDB(QueryResult* result, uint32 guid)
+{
+    bool delete_result = true;
+    if (!result)
+    {
+        //                                        0     1           2           3           4    5          6          7
+        auto results = CharacterDatabase.PQuery("SELECT name, position_x, position_y, position_z, map, totaltime, leveltime, at_login FROM characters WHERE guid = '%u'", guid);
+        if (!result)
+            return false;
+    }
+    else
+    {
+        delete_result = false;
+    }
+
+    Field* fields = result->Fetch();
+
+    // overwrite possible wrong/corrupted guid
+    Object::_Create(0, guid, 0, HIGHGUID_PLAYER);
+
+    m_name = fields[0].GetString();
+
+    Relocate(fields[1].GetFloat(), fields[2].GetFloat(), fields[3].GetFloat());
+    SetLocationMapId(fields[4].GetUInt32());
+
+    m_Played_time[PLAYED_TIME_TOTAL] = fields[5].GetUInt32();
+    m_Played_time[PLAYED_TIME_LEVEL] = fields[6].GetUInt32();
+
+    m_atLoginFlags = fields[7].GetUInt32();
+
+    if (delete_result)
+    {
+        for (int i = 0; i < PLAYER_SLOTS_COUNT; ++i)
+        {
+            m_items[i] = NULL;
+        }
+    }
+
+    if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+    {
+        m_deathState = DEAD;
+    }
+
+    return true;
+}
+#endif
 
 bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 {
@@ -15862,11 +16007,18 @@ void Player::_SaveInventory()
         m_items[i]->FSetState(ITEM_NEW);
     }
 
+#ifdef ENABLE_PLAYERBOTS
+    if (!GetPlayerbotAI())
+    {
+#endif
     // update enchantment durations
     for (EnchantDurationList::const_iterator itr = m_enchantDuration.begin(); itr != m_enchantDuration.end(); ++itr)
     {
         itr->item->SetEnchantmentDuration(itr->slot, itr->leftduration);
     }
+#ifdef ENABLE_PLAYERBOTS
+    }
+#endif
 
     // if no changes
     if (m_itemUpdateQueue.empty()) return;
@@ -19244,6 +19396,164 @@ void Player::learnSpellHighRank(uint32 spellid)
     DoPlayerLearnSpell worker(*this);
     sSpellMgr.doForHighRanks(spellid, worker);
 }
+
+#ifdef ENABLE_PLAYERBOTS
+void Player::learnClassLevelSpells(bool includeHighLevelQuestRewards)
+{
+    ChrClassesEntry const* clsEntry = sChrClassesStore.LookupEntry(getClass());
+    if (!clsEntry)
+        return;
+
+    uint32 family = clsEntry->spellfamily;
+
+    // special cases which aren't sourced from trainers and normally require quests to obtain - added here for convenience
+    ObjectMgr::QuestMap const& qTemplates = sObjectMgr.GetQuestTemplates();
+    for (const auto& qTemplate : qTemplates)
+    {
+        Quest const* quest = qTemplate.second;
+        if (!quest)
+            continue;
+
+        // only class quests player could do
+        if (quest->GetRequiredClasses() == 0 || !SatisfyQuestClass(quest, false) || !SatisfyQuestRace(quest, false) || !SatisfyQuestLevel(quest, false))
+            continue;
+
+        // custom filter for scripting purposes
+        if (!includeHighLevelQuestRewards && quest->GetMinLevel() >= 60)
+            continue;
+
+        learnQuestRewardedSpells(quest);
+    }
+
+    // learn trainer spells
+    for (uint32 id = 0; id < sCreatureStorage.GetMaxEntry(); ++id)
+    {
+        CreatureInfo const* co = sCreatureStorage.LookupEntry<CreatureInfo>(id);
+        if (!co)
+            continue;
+
+        if (co->TrainerType != TRAINER_TYPE_CLASS)
+            continue;
+
+        if (co->TrainerType == TRAINER_TYPE_CLASS && co->TrainerClass != getClass())
+            continue;
+
+        uint32 trainerId = co->TrainerTemplateId;
+        if (!trainerId)
+            trainerId = co->Entry;
+
+        TrainerSpellData const* trainer_spells = sObjectMgr.GetNpcTrainerTemplateSpells(trainerId);
+        if (!trainer_spells)
+            trainer_spells = sObjectMgr.GetNpcTrainerSpells(trainerId);
+
+        if (!trainer_spells)
+            continue;
+
+        for (TrainerSpellMap::const_iterator itr = trainer_spells->spellList.begin(); itr != trainer_spells->spellList.end(); ++itr)
+        {
+            TrainerSpell const* tSpell = &itr->second;
+
+            if (!tSpell)
+                continue;
+
+            uint32 reqLevel = 0;
+
+            // skip wrong class/race skills
+            if (!IsSpellFitByClassAndRace(tSpell->learnedSpell, &reqLevel))
+                continue;
+
+            if (tSpell->conditionId && !sObjectMgr.IsConditionSatisfied(tSpell->conditionId, this, GetMap(), this, CONDITION_FROM_TRAINER))
+                continue;
+
+            // skip spells with first rank learned as talent (and all talents then also)
+            uint32 first_rank = sSpellMgr.GetFirstSpellInChain(tSpell->learnedSpell);
+            reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
+            bool isValidTalent = GetTalentSpellCost(first_rank) && HasSpell(first_rank) && reqLevel <= GetLevel();
+
+            TrainerSpellState state = GetTrainerSpellState(tSpell, reqLevel);
+            if (state != TRAINER_SPELL_GREEN && !isValidTalent)
+                continue;
+
+            SpellEntry const* proto = sSpellTemplate.LookupEntry<SpellEntry>(tSpell->learnedSpell);
+            if (!proto)
+                continue;
+
+            // fix activate state for non-stackable low rank (and find next spell for !active case)
+            if (uint32 nextId = sSpellMgr.GetSpellBookSuccessorSpellId(proto->Id))
+            {
+                if (HasSpell(nextId))
+                {
+                    // high rank already known so this must !active
+                    continue;
+                }
+            }
+
+            // skip other spell families (minus a few exceptions)
+            if (proto->SpellFamilyName != family)
+            {
+                SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBoundsBySpellId(tSpell->learnedSpell);
+                if (bounds.first == bounds.second)
+                    continue;
+
+                SkillLineAbilityEntry const* skillInfo = bounds.first->second;
+                if (!skillInfo)
+                    continue;
+
+                switch (skillInfo->skillId)
+                {
+                    case SKILL_SUBTLETY:
+                    case SKILL_BEAST_MASTERY:
+                    case SKILL_SURVIVAL:
+                    case SKILL_DEFENSE:
+                    case SKILL_DUAL_WIELD:
+                    case SKILL_FERAL_COMBAT:
+                    case SKILL_PROTECTION:
+                    case SKILL_PLATE_MAIL:
+                    case SKILL_DEMONOLOGY:
+                    case SKILL_ENHANCEMENT:
+                    case SKILL_MAIL:
+                    case SKILL_HOLY2:
+                    case SKILL_LOCKPICKING:
+                    break;
+
+                    default: continue;
+                }
+            }
+
+            // skip wrong class/race skills
+            if (!IsSpellFitByClassAndRace(tSpell->learnedSpell))
+                continue;
+
+            // skip broken spells
+            if (!SpellMgr::IsSpellValid(proto, this, false))
+                continue;
+
+            if (tSpell->learnedSpell)
+            {
+                bool learned = false;
+                for (int j = 0; j < 3; ++j)
+                {
+                    if (proto->Effect[j] == SPELL_EFFECT_LEARN_SPELL)
+                    {
+                        uint32 learnedSpell = proto->EffectTriggerSpell[j];
+                        learnSpell(learnedSpell, false);
+                        learned = true;
+                    }
+                }
+
+                if (!learned)
+                {
+                    learnSpell(tSpell->learnedSpell, false);
+                }
+            }
+            else
+            {
+                CastSpell(this, tSpell->spell, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+    }
+}
+#endif
 
 void Player::_LoadSkills(std::unique_ptr<QueryResult> queryResult)
 {

@@ -1465,6 +1465,25 @@ uint32 BattleGround::GetSingleCreatureGuid(uint8 event1, uint8 event2)
     return ObjectGuid();
 }
 
+#ifdef ENABLE_PLAYERBOTS
+/**
+  Function returns a gameobject guid from event map
+
+  @param    event1
+  @param    event2
+*/
+uint32 BattleGround::GetSingleGameObjectGuid(uint8 event1, uint8 event2)
+{
+    auto itr = m_eventObjects[MAKE_PAIR32(event1, event2)].gameobjects.begin();
+    if (itr != m_eventObjects[MAKE_PAIR32(event1, event2)].gameobjects.end())
+    {
+        return *itr;
+    }
+
+    return ObjectGuid();
+}
+#endif
+
 /**
   Method that handles gameobject load from DB event map
 

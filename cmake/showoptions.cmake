@@ -67,6 +67,12 @@ else()
   message(STATUS "Build OLD Playerbot   : No  (default)")
 endif()
 
+if(BUILD_PLAYERBOTS)
+  message(STATUS "Build Playerbots      : Yes")
+else()
+  message(STATUS "Build Playerbots      : No  (default)")
+endif()
+
 if(BUILD_EXTRACTORS)
   message(STATUS "Build extractors      : Yes")
 else()

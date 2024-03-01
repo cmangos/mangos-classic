@@ -46,6 +46,10 @@
 
 #include <time.h>
 
+#ifdef ENABLE_PLAYERBOTS
+#include "playerbot.h"
+#endif
+
 Map::~Map()
 {
     UnloadAll(true);
@@ -155,6 +159,9 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId)
       m_activeNonPlayersIter(m_activeNonPlayers.end()), m_onEventNotifiedIter(m_onEventNotifiedObjects.end()),
       i_gridExpiry(expiry), m_TerrainData(sTerrainMgr.LoadTerrain(id)),
       i_data(nullptr), i_script_id(0), m_transportsIterator(m_transports.begin()), m_spawnManager(*this),
+#ifdef ENABLE_PLAYERBOTS
+      m_activeZonesTimer(0), hasRealPlayers(false),
+#endif
       m_variableManager(this)
 {
     m_weatherSystem = new WeatherSystem(this);
@@ -728,19 +735,159 @@ void Map::Update(const uint32& t_diff)
 #endif
     }
 
+#ifdef ENABLE_PLAYERBOTS
+    // Calculate the active zones every 10 seconds (An active zone is a zone where one or more real players are)
+    constexpr uint32 maxActiveZonesTimer = 10000U;
+    if (m_activeZonesTimer < maxActiveZonesTimer)
+    {
+        m_activeZonesTimer += t_diff;
+    }
+    else
+    {
+        m_activeZonesTimer = 0U;
+        m_activeZones.clear();
+
+        // Recalculate active zones
+        if (IsContinent() && HasRealPlayers())
+        {
+            for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
+            {
+                Player* plr = m_mapRefIter->getSource();
+                if (plr && plr->IsInWorld())
+                {
+                    // Only consider real players
+                    if (plr->GetPlayerbotAI() && !plr->GetPlayerbotAI()->IsRealPlayer())
+                        continue;
+
+                    // Ignore afk players
+                    if (plr->isAFK())
+                        continue;
+
+                    // Ignore gm players
+                    if (!plr->isGMVisible())
+                        continue;
+
+                    // Register an active zone when a real player is on the zone
+                    if (find(m_activeZones.begin(), m_activeZones.end(), plr->GetZoneId()) == m_activeZones.end())
+                    {
+                        m_activeZones.push_back(plr->GetZoneId());
+                    }
+                }
+            }
+        }
+    }
+
+    // Reset the has real players flag and check for it again
+    const bool hadRealPlayers = hasRealPlayers;
+    hasRealPlayers = false;
+
+    uint32 activePlayers = 0;
+    uint32 avgDiff = sWorld.GetAverageDiff();
+
+    // Calculate the chance that the bots in this map should update based on server load and real players online
+    // (default is a 10% on a avg diff of 100)
+    float botUpdateChance = avgDiff * 0.1f;
+    if (!hadRealPlayers)
+    {
+        // If no real players are on the map then lower the chances of updating by 300%
+        botUpdateChance *= 3.0f;
+    }
+
+    bool shouldUpdateBots = urand(0, (uint32)(botUpdateChance * 100)) < 100;
+#endif
+
     /// update players at tick
     for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
     {
         Player* plr = m_mapRefIter->getSource();
         if (plr && plr->IsInWorld())
+        {
+#ifdef ENABLE_PLAYERBOTS
+            // Determine if the individual bot should update
+            bool shouldUpdateBot = shouldUpdateBots;
+
+            // Real players should update always (it will update alt bots)
+            if (!plr->GetPlayerbotAI() || plr->GetPlayerbotAI()->IsRealPlayer())
+            {
+                shouldUpdateBot = true;
+                hasRealPlayers = true;
+            }
+            else
+            {
+                // If there are real players in the map, check if the bot is on a zone with players
+                if (hadRealPlayers)
+                {
+                    // Check if the bot is in an active zone (or instance)
+                    shouldUpdateBot = IsContinent() ? HasActiveZone(plr->GetZoneId()) : true;
+                }
+
+                // Check for edge case reasons to force update the bot
+                if (!shouldUpdateBot)
+                {
+                    // Force bots to be active if:
+                    // - The bot is playing with a real player
+                    // - The bot is in a battleground
+                    // - The bot is in combat
+                    if ((plr->GetPlayerbotAI() && plr->GetPlayerbotAI()->HasRealPlayerMaster()) ||
+                        plr->InBattleGroundQueue() || plr->InBattleGround() ||
+                        plr->IsInCombat())
+                    {
+                        shouldUpdateBot = true;
+                    }
+                }
+            }
+
+            // Save the active characters for later logs
+            if (shouldUpdateBot)
+            {
+                activePlayers++;
+            }
+#endif
+
             plr->Update(t_diff);
+
+#ifdef ENABLE_PLAYERBOTS
+            plr->UpdateAI(t_diff, !shouldUpdateBot);
+#endif
+        }
     }
+
+#ifdef ENABLE_PLAYERBOTS
+    // Log the active zones and characters
+    if (IsContinent() && HasRealPlayers() && HasActiveZones() && m_activeZonesTimer == 0U)
+    {
+        sLog.outBasic("Map %u: Active Zones - %u", GetId(), m_activeZones.size());
+        sLog.outBasic("Map %u: Active Zone Players - %u of %u", GetId(), activePlayers, m_mapRefManager.getSize());
+    }
+#endif
 
     for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
     {
         Player* player = m_mapRefIter->getSource();
-        if (!player->IsInWorld() || !player->IsPositionValid())
+        if (!player || !player->IsInWorld() || !player->IsPositionValid())
             continue;
+
+#ifdef ENABLE_PLAYERBOTS
+        // For non-players only load the grid
+        if (!player->isRealPlayer()) 
+        {
+            CellPair center = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY()).normalize();
+            uint32 cell_id = (center.y_coord * TOTAL_NUMBER_OF_CELLS_PER_MAP) + center.x_coord;
+
+            if (!isCellMarked(cell_id))
+            {
+                Cell cell(center);
+                const uint32 x = cell.GridX();
+                const uint32 y = cell.GridY();
+                if (!cell.NoCreate() || loaded(GridPair(x, y)))
+                {
+                    EnsureGridLoaded(player->GetCurrentCell());
+                }
+            }
+
+            continue;
+        }
+#endif
 
         VisitNearbyCellsOf(player, grid_object_update, world_object_update);
 
@@ -748,6 +895,19 @@ void Map::Update(const uint32& t_diff)
         if (WorldObject* viewPoint = GetWorldObject(player->GetFarSightGuid()))
             VisitNearbyCellsOf(viewPoint, grid_object_update, world_object_update);
     }
+
+#ifdef ENABLE_PLAYERBOTS
+    // Calculate the chance that the objects (non players) should update based on server load and real players online
+    // (default is a 10% on a avg diff of 100)
+    float objectUpdateChance = avgDiff * 0.1f;
+    if (!HasRealPlayers())
+    {
+        // If no real players are on the map then lower the chances of updating by 300%
+        objectUpdateChance *= 3.0f;
+    }
+
+    const bool shouldUpdateObjects = urand(0, (uint32)(objectUpdateChance * 100)) < 100;
+#endif
 
     // non-player active objects
     if (!m_activeNonPlayers.empty())
@@ -763,6 +923,18 @@ void Map::Update(const uint32& t_diff)
 
             if (!obj->IsInWorld() || !obj->IsPositionValid())
                 continue;
+
+#ifdef ENABLE_PLAYERBOTS
+            // Skip objects on locations away from real players if world is laggy
+            if (IsContinent() && avgDiff > 100)
+            {
+                const bool isInActiveZone = IsContinent() ? HasActiveZone(obj->GetZoneId()) : HasRealPlayers();
+                if (!isInActiveZone && !shouldUpdateObjects)
+                {
+                    continue;
+                }
+            }
+#endif
 
             objToUpdate.insert(obj);
 
@@ -876,6 +1048,7 @@ void Map::Remove(Player* player, bool remove)
     UpdateObjectVisibility(player, cell, p);
 
     player->ResetMap();
+
     if (remove)
         DeleteFromWorld(player);
 }
@@ -1136,8 +1309,15 @@ void Map::UpdateObjectVisibility(WorldObject* obj, Cell cell, const CellPair& ce
     TypeContainerVisitor<MaNGOS::VisibleChangesNotifier, WorldTypeMapContainer > player_notifier(notifier);
     cell.Visit(cellpair, player_notifier, *this, *obj, obj->GetVisibilityData().GetVisibilityDistance());
     for (auto guid : notifier.GetUnvisitedGuids())
+    {
         if (Player* player = GetPlayer(guid))
+        {
+#ifdef ENABLE_PLAYERBOTS
+            if (player->isRealPlayer())
+#endif
             player->UpdateVisibilityOf(player->GetCamera().GetBody(), obj);
+        }
+    }
 }
 
 void Map::SendInitSelf(Player* player) const

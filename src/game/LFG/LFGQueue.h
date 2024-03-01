@@ -53,6 +53,21 @@ struct LFGGroupQueueInfo
     uint32 playerCount;
 };
 
+#ifdef ENABLE_PLAYERBOTS
+struct MeetingStoneInfo
+{
+    uint32 area;
+    uint32 minlevel;
+    uint32 maxlevel;
+    char* name;
+    uint32 mapId;
+    Position position;
+    uint32 dungeonType;
+};
+
+typedef std::vector<MeetingStoneInfo> MeetingStoneSet;
+#endif
+
 class LFGQueue
 {
     public:
@@ -71,6 +86,15 @@ class LFGQueue
 
         void AddGroup(LFGGroupQueueInfo const& groupInfo, uint32 groupId);
         void AddPlayer(LFGPlayerQueueInfo const& playerInfo, ObjectGuid playerGuid);
+
+#ifdef ENABLE_PLAYERBOTS
+        void GetPlayerQueueInfo(LFGPlayerQueueInfo* info, ObjectGuid const& plrGuid);
+        void GetGroupQueueInfo(LFGGroupQueueInfo* info, uint32 groupId);
+
+        void LoadMeetingStones();
+        MeetingStoneSet GetDungeonsForPlayer(Player* player);
+#endif
+
     private:
         void FindInArea(std::list<ObjectGuid>& players, uint32 area, uint32 team, ObjectGuid const& exclude);
         bool FindRoleToGroup(ObjectGuid playerGuid, uint32 groupId, LfgRoles role);
@@ -85,6 +109,11 @@ class LFGQueue
         Messager<LFGQueue> m_messager;
 
         uint32 m_groupSize = 5;
+
+#ifdef ENABLE_PLAYERBOTS
+        typedef std::map<uint32, MeetingStoneInfo> MeetingStonesMap;
+        MeetingStonesMap m_MeetingStonesMap;
+#endif
 };
 
 #endif
