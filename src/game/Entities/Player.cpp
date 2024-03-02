@@ -20099,7 +20099,7 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, uint32& m
             return AREA_LOCKSTATUS_RAID_LOCKED;
 
 #ifdef ENABLE_PLAYERBOTS
-    if (!isRealPlayer() && GetPlayerbotAI()->CanEnterArea(at))
+    if (!isRealPlayer() && GetPlayerbotAI() && GetPlayerbotAI()->CanEnterArea(at))
         return AREA_LOCKSTATUS_OK;
 #endif
 
