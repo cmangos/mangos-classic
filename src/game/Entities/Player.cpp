@@ -20098,6 +20098,11 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, uint32& m
         if (!GetGroup() || !GetGroup()->IsRaidGroup())
             return AREA_LOCKSTATUS_RAID_LOCKED;
 
+#ifdef ENABLE_PLAYERBOTS
+    if (!isRealPlayer() && GetPlayerbotAI()->CanEnterArea(at))
+        return AREA_LOCKSTATUS_OK;
+#endif
+
     // Item Requirements: must have requiredItem OR requiredItem2, report the first one that's missing
     if (at->requiredItem)
     {
