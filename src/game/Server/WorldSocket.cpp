@@ -147,16 +147,8 @@ void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
 bool WorldSocket::OnOpen()
 {
     // Send startup packet.
-    WorldPacket packet(SMSG_AUTH_CHALLENGE, 40);
+    WorldPacket packet(SMSG_AUTH_CHALLENGE, 4);
     packet << m_seed;
-
-    BigNumber seed1;
-    seed1.SetRand(16 * 8);
-    packet.append(seed1.AsByteArray(16).data(), 16);               // new encryption seeds
-
-    BigNumber seed2;
-    seed2.SetRand(16 * 8);
-    packet.append(seed2.AsByteArray(16).data(), 16);               // new encryption seeds
 
     SendPacket(packet);
 
