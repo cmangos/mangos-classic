@@ -17,7 +17,7 @@
  */
 
 #include "Entities/Unit.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Server/Opcodes.h"
 #include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"

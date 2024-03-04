@@ -23,7 +23,7 @@
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
 #include "Server/Opcodes.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "World/World.h"
 #include "Globals/ObjectMgr.h"
 #include "Spells/SpellMgr.h"
@@ -48,7 +48,7 @@
 #include "Entities/ObjectGuid.h"
 
 #ifdef ENABLE_PLAYERBOTS
-#include "PlayerbotAI.h"
+#include "playerbot/PlayerbotAI.h"
 #endif
 
 extern pEffect SpellEffects[MAX_SPELL_EFFECTS];

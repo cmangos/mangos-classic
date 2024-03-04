@@ -14,7 +14,7 @@
 #include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "World/World.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Server/Opcodes.h"
 #include "Util/ByteBuffer.h"
 #include "Database/DatabaseEnv.h"

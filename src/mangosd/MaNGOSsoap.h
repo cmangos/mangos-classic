@@ -22,7 +22,7 @@
 #include "Common.h"
 #include "World/World.h"
 #include "Accounts/AccountMgr.h"
-#include "Log.h"
+#include "Log/Log.h"
 
 #include "soapH.h"
 #include "soapStub.h"

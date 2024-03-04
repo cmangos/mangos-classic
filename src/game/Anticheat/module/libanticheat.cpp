@@ -21,7 +21,7 @@
 #include "Chat/Chat.h"
 #include "Tools/Language.h"
 #include "Globals/ObjectMgr.h"
-#include "Log.h"
+#include "Log/Log.h"
 
 #include "Antispam/antispammgr.hpp"
 #include "Antispam/antispam.hpp"

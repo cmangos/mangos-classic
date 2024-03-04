@@ -27,7 +27,7 @@
 #include <thread>
 #include <boost/asio.hpp>
 #include "Common.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Server/SQLStorages.h"
 #include "Server/DBCStructure.h"
 #include "Server/DBCStores.h"

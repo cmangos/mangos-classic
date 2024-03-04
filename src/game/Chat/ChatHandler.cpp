@@ -17,7 +17,7 @@
  */
 
 #include "Common.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "World/World.h"
@@ -38,8 +38,8 @@
 #include "Anticheat/Anticheat.hpp"
 
 #ifdef ENABLE_PLAYERBOTS
-#include "playerbot.h"
-#include "RandomPlayerbotMgr.h"
+#include "playerbot/playerbot.h"
+#include "playerbot/RandomPlayerbotMgr.h"
 #endif
 
 bool WorldSession::CheckChatMessage(std::string& msg, bool addon/* = false*/)

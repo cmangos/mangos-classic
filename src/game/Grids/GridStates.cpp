@@ -17,7 +17,7 @@
  */
 
 #include "Grids/GridStates.h"
-#include "Log.h"
+#include "Log/Log.h"
 
 void
 InvalidState::Update(Map&, NGridType&, GridInfo&, const uint32& /*x*/, const uint32& /*y*/, const uint32&) const

@@ -12,7 +12,7 @@
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
 #include "Util/Util.h"
-#include "Log.h"
+#include "Log/Log.h"
 
 #include <vector>
 #include <string>

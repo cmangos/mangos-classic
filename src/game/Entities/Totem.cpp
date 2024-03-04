@@ -17,7 +17,7 @@
  */
 
 #include "Entities/Totem.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Groups/Group.h"
 #include "Entities/Player.h"
 #include "Globals/ObjectMgr.h"

@@ -30,7 +30,7 @@
 #include "Database/DatabaseEnv.h"
 #include "Auth/CryptoHash.h"
 #include "Server/WorldSession.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Server/DBCStores.h"
 #include "Util/CommonDefines.h"
 #include "Anticheat/Anticheat.hpp"

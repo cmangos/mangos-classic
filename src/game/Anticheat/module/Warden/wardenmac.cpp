@@ -13,7 +13,7 @@
 #include "Auth/CryptoHash.h"
 #include "World/World.h"
 #include "../config.hpp"
-#include "Log.h"
+#include "Log/Log.h"
 
 #include <memory>
 #include <vector>

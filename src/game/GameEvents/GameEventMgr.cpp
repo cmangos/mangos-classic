@@ -23,7 +23,7 @@
 #include "Pools/PoolManager.h"
 #include "Util/ProgressBar.h"
 #include "Tools/Language.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Maps/MapManager.h"
 #include "BattleGround/BattleGroundMgr.h"
 #include "Mails/MassMailMgr.h"

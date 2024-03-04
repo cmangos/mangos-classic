@@ -27,7 +27,7 @@
 #include "Server/Opcodes.h"
 #include "Chat/Chat.h"
 #include "Chat/ChannelMgr.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Globals/ObjectAccessor.h"
 #include "Tools/Language.h"
 #include "Grids/CellImpl.h"

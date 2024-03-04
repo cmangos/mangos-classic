@@ -20,7 +20,7 @@
 #include "Maps/MapPersistentStateMgr.h"
 #include "Policies/Singleton.h"
 #include "Database/DatabaseEnv.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Entities/Transports.h"
 #include "Maps/GridDefines.h"
 #include "World/World.h"

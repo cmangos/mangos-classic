@@ -22,7 +22,7 @@
 #include "World/World.h"
 #include "Tools/Language.h"
 #include "Movement/MoveSpline.h"
-#include "Log.h"
+#include "Log/Log.h"
 
 namespace
 {

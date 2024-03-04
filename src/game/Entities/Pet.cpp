@@ -18,7 +18,7 @@
 
 #include "Entities/Pet.h"
 #include "Database/DatabaseEnv.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Server/WorldPacket.h"
 #include "Globals/ObjectMgr.h"
 #include "Spells/SpellMgr.h"

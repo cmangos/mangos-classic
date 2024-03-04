@@ -20,7 +20,7 @@
 #define SQLSTORAGE_IMPL_H
 
 #include "Util/ProgressBar.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "DBCFileLoader.h"
 
 template<class DerivedLoader, class StorageClass>

@@ -17,7 +17,7 @@
  */
 
 #include "Loot/LootMgr.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Util/ProgressBar.h"
 #include "World/World.h"
 #include "Util/Util.h"

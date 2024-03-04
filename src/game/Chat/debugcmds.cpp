@@ -22,7 +22,7 @@
 #include "Entities/Player.h"
 #include "Server/Opcodes.h"
 #include "Chat/Chat.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Entities/Unit.h"
 #include "Entities/GossipDef.h"
 #include "Tools/Language.h"

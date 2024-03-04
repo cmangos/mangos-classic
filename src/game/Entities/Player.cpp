@@ -19,7 +19,7 @@
 #include "Entities/Player.h"
 #include "Tools/Language.h"
 #include "Database/DatabaseEnv.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Server/Opcodes.h"
 #include "Spells/SpellMgr.h"
 #include "World/World.h"
@@ -69,8 +69,8 @@
 #endif
 
 #ifdef ENABLE_PLAYERBOTS
-#include "playerbot.h"
-#include "PlayerbotAIConfig.h"
+#include "playerbot/playerbot.h"
+#include "playerbot/PlayerbotAIConfig.h"
 #endif
 
 #include <cmath>
@@ -5753,7 +5753,7 @@ void Player::UpdateSpellTrainedSkills(uint32 spellId, bool apply)
                         uint16 newSkillValue = 1;
 
                         // World of Warcraft Client Patch 1.11.0 (2006-06-20)
-                        // - Two-Handed Axes/Maces (Enhancement Talent) - Skill levels gained 
+                        // - Two-Handed Axes/Maces (Enhancement Talent) - Skill levels gained
                         //   with these two weapons will now be retained if you decide to unspend
                         //   this talent point and return to it later.
                         if (pSkill->categoryId == SKILL_CATEGORY_WEAPON)
@@ -5793,7 +5793,7 @@ void Player::UpdateSpellTrainedSkills(uint32 spellId, bool apply)
 
                     default:
                         // World of Warcraft Client Patch 1.11.0 (2006-06-20)
-                        // - Two-Handed Axes/Maces (Enhancement Talent) - Skill levels gained 
+                        // - Two-Handed Axes/Maces (Enhancement Talent) - Skill levels gained
                         //   with these two weapons will now be retained if you decide to unspend
                         //   this talent point and return to it later.
                         if (pSkill->categoryId == SKILL_CATEGORY_WEAPON)
@@ -8251,7 +8251,6 @@ Item* Player::GetItemByPos(uint8 bag, uint8 slot) const
     return nullptr;
 }
 
-#ifdef ENABLE_PLAYERBOTS
 Item* Player::GetItemByEntry(uint32 item) const
 {
     for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
@@ -8278,7 +8277,6 @@ Item* Player::GetItemByEntry(uint32 item) const
 
     return nullptr;
 }
-#endif
 
 Item* Player::GetWeaponForAttack(WeaponAttackType attackType, bool nonbroken, bool useable) const
 {
@@ -12656,7 +12654,7 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
 
     bool handled = false;
 #ifdef ENABLE_PLAYERBOTS
-    if (this != questGiver) 
+    if (this != questGiver)
     {
 #endif
     switch (questGiver->GetTypeId())
@@ -14082,54 +14080,6 @@ void Player::_LoadIntoDataField(const char* data, uint32 startOffset, uint32 cou
         m_uint32Values[startOffset + index] = std::stoul(*iter);
     }
 }
-
-#ifdef ENABLE_PLAYERBOTS
-bool Player::MinimalLoadFromDB(QueryResult* result, uint32 guid)
-{
-    bool delete_result = true;
-    if (!result)
-    {
-        //                                        0     1           2           3           4    5          6          7
-        auto results = CharacterDatabase.PQuery("SELECT name, position_x, position_y, position_z, map, totaltime, leveltime, at_login FROM characters WHERE guid = '%u'", guid);
-        if (!result)
-            return false;
-    }
-    else
-    {
-        delete_result = false;
-    }
-
-    Field* fields = result->Fetch();
-
-    // overwrite possible wrong/corrupted guid
-    Object::_Create(0, guid, 0, HIGHGUID_PLAYER);
-
-    m_name = fields[0].GetString();
-
-    Relocate(fields[1].GetFloat(), fields[2].GetFloat(), fields[3].GetFloat());
-    SetLocationMapId(fields[4].GetUInt32());
-
-    m_Played_time[PLAYED_TIME_TOTAL] = fields[5].GetUInt32();
-    m_Played_time[PLAYED_TIME_LEVEL] = fields[6].GetUInt32();
-
-    m_atLoginFlags = fields[7].GetUInt32();
-
-    if (delete_result)
-    {
-        for (int i = 0; i < PLAYER_SLOTS_COUNT; ++i)
-        {
-            m_items[i] = NULL;
-        }
-    }
-
-    if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
-    {
-        m_deathState = DEAD;
-    }
-
-    return true;
-}
-#endif
 
 bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 {
@@ -16783,7 +16733,7 @@ void Player::PossessSpellInitialize()
     charmInfo->BuildActionBar(data);
 
     data << uint8(0);                                       // spells count
-    
+
     charm->CharmCooldownInitialize(data);
 
     GetSession()->SendPacket(data);
@@ -19623,7 +19573,7 @@ void Player::_LoadSkills(std::unique_ptr<QueryResult> queryResult)
                 {
                     if (entry->flags & SKILL_FLAG_DISPLAY_AS_MONO)
                         max = GetSkillMaxForLevel();
-                    
+
                     value = max;
                 }
 

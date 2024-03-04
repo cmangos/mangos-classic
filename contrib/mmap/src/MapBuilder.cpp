@@ -31,7 +31,6 @@
 
 using namespace VMAP;
 
-#ifdef ENABLE_MANGOSBOTS
 void rcModAlmostUnwalkableTriangles(rcContext* ctx, const float walkableSlopeAngle,
     const float* verts, int /*nv*/,
     const int* tris, int nt,
@@ -61,7 +60,6 @@ void rcModAlmostUnwalkableTriangles(rcContext* ctx, const float walkableSlopeAng
         }
     }
 }
-#endif
 
 void from_json(const json& j, rcConfig& config)
 {
@@ -1029,9 +1027,10 @@ namespace MMAP
         unsigned char* triFlags = new unsigned char[tTriCount];
         memset(triFlags, NAV_AREA_GROUND, tTriCount * sizeof(unsigned char));
         rcClearUnwalkableTriangles(m_rcContext, tileCfg.walkableSlopeAngle, tVerts, tVertCount, tTris, tTriCount, triFlags);
-#ifdef ENABLE_MANGOSBOTS
+
+        // mark almost unwalkable triangles with steep flag
         rcModAlmostUnwalkableTriangles(m_rcContext, 50.0f, tVerts, tVertCount, tTris, tTriCount, triFlags);
-#endif
+
         rcRasterizeTriangles(m_rcContext, tVerts, tVertCount, tTris, triFlags, tTriCount, *tile.solid, tileCfg.walkableClimb);
         delete[] triFlags;
 

@@ -21,6 +21,38 @@ if(BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER OR BUILD_EXTRACTORS)
   add_subdirectory(shared)
 endif()
 
+# Playerbots module
+if(BUILD_PLAYERBOTS)
+  include(FetchContent)
+
+  FetchContent_Declare(
+    PlayerBots
+    SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/modules/PlayerBots"
+    GIT_REPOSITORY "https://github.com/cmangos/playerbots.git"
+    GIT_TAG "master"
+  )
+
+  FetchContent_GetProperties(PlayerBots)
+  if (NOT playerbots_POPULATED)
+    FetchContent_Populate(PlayerBots)
+    message(STATUS "Playerbots module source dir: ${playerbots_SOURCE_DIR}")
+  else()
+    message(STATUS "Playerbots module already populated: ${playerbots_POPULATED}")
+  endif()
+
+  #target_include_directories(Bots PUBLIC ${playerbots_SOURCE_DIR})
+  message(STATUS "Playerbots module source dir: ${playerbots_SOURCE_DIR}")
+  message(STATUS "Playerbots module binary dir: ${playerbots_BINARY_DIR}")
+  message(STATUS "Playerbots module populated: ${playerbots_POPULATED}")
+
+  add_subdirectory(${playerbots_SOURCE_DIR})
+
+else()
+  # if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/modules/PlayerBots)
+  #   file(REMOVE_RECURSE ${CMAKE_CURRENT_SOURCE_DIR}/modules/PlayerBots)
+  # endif()
+endif()
+
 if(BUILD_GAME_SERVER)
   add_subdirectory(game)
   add_subdirectory(mangosd)
@@ -28,34 +60,4 @@ endif()
 
 if(BUILD_LOGIN_SERVER)
   add_subdirectory(realmd)
-endif()
-
-# Playerbots module
-if(BUILD_PLAYERBOTS)
-  include(FetchContent)
-
-  FetchContent_Declare(
-    playerbots
-    GIT_REPOSITORY "https://github.com/cmangos/playerbots.git"
-	GIT_TAG "master"
-  )
-
-  if(NOT playerbots_POPULATED)
-	message(STATUS "Fetching Playerbots module...")
-  
-    FetchContent_Populate(playerbots)
-	
-	if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
-      file(REMOVE_RECURSE ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
-    endif()
-	
-	file(COPY ${playerbots_SOURCE_DIR}/. DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
-    message(STATUS "Playerbots module fetched and populated in ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots")
-  endif()
-
-  add_subdirectory(modules/Bots)
-else()
-  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
-    file(REMOVE_RECURSE ${CMAKE_CURRENT_SOURCE_DIR}/modules/Bots)
-  endif()
 endif()

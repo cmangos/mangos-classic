@@ -24,7 +24,7 @@
 #include "Database/DatabaseEnv.h"
 #include "Config/Config.h"
 #include "Util/ProgressBar.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Master.h"
 #include "SystemConfig.h"
 #include "AuctionHouseBot/AuctionHouseBot.h"

@@ -20,7 +20,7 @@
 #include "Globals/ObjectMgr.h"
 #include "Entities/ObjectGuid.h"
 #include "Util/ProgressBar.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Maps/MapPersistentStateMgr.h"
 #include "World/World.h"
 #include "Policies/Singleton.h"

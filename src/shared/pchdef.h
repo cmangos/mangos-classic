@@ -26,7 +26,7 @@
 #include <thread>
 #include <boost/asio.hpp>
 #include "Common.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Util/ByteBuffer.h"
 #include "Util/ProgressBar.h"
 #include "Server/WorldPacket.h"

@@ -30,7 +30,7 @@
 #include "GameEvents/GameEventMgr.h"
 #include "Pools/PoolManager.h"
 #include "Server/Opcodes.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Loot/LootMgr.h"
 #include "Maps/MapManager.h"
 #include "AI/BaseAI/CreatureAI.h"

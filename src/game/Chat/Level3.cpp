@@ -27,7 +27,7 @@
 #include "Entities/Player.h"
 #include "Entities/GameObject.h"
 #include "Chat/Chat.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Guilds/Guild.h"
 #include "Guilds/GuildMgr.h"
 #include "Globals/ObjectAccessor.h"

@@ -20,7 +20,7 @@
 #include "M2Structure.h"
 #include "M2Stores.h"
 #include "Common.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "World/World.h"
 #include <fstream>
 #include <iomanip>

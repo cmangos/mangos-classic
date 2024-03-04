@@ -24,7 +24,7 @@
 #include "Common.h"
 #include "Auth/CryptoHash.h"
 #include "Database/DatabaseEnv.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Server/Opcodes.h"
 #include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
@@ -53,7 +53,7 @@
 #endif
 
 #ifdef ENABLE_PLAYERBOTS
-#include "playerbot.h"
+#include "playerbot/playerbot.h"
 #endif
 
 // select opcodes appropriate for processing in Map::Update context for current session state

@@ -101,9 +101,7 @@ class ChatHandler
 
         bool HasSentErrorMessage() const { return sentErrorMessage;}
 
-#ifdef ENABLE_PLAYERBOTS
         WorldSession* GetSession() { return m_session; }
-#endif
 
         /**
         * \brief Prepare SMSG_GM_MESSAGECHAT/SMSG_MESSAGECHAT

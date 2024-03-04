@@ -18,7 +18,7 @@
 
 #include "Guilds/GuildMgr.h"
 #include "Guilds/Guild.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Entities/ObjectGuid.h"
 #include "Database/DatabaseEnv.h"
 #include "Policies/Singleton.h"

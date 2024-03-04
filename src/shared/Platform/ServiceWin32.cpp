@@ -19,7 +19,7 @@
 #ifdef _WIN32
 
 #include "Common.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include <cstring>
 #include <windows.h>
 #include <winsvc.h>

@@ -19,7 +19,7 @@
 #include "Common.h"
 #include "Tools/Language.h"
 #include "Server/WorldPacket.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "GMTickets/GMTicketMgr.h"
 #include "Globals/ObjectAccessor.h"
 #include "Entities/Player.h"
