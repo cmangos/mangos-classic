@@ -21,7 +21,7 @@
 #include "Server/WorldSession.h"
 #include "World/World.h"
 #include "Globals/ObjectMgr.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Server/Opcodes.h"
 #include "Guilds/Guild.h"
 #include "Guilds/GuildMgr.h"

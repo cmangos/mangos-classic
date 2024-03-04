@@ -20,7 +20,6 @@
 #define DATABASEENV_H
 
 #include "Common.h"
-#include "Log.h"
 #include "Util/Errors.h"
 
 #include "Database/Field.h"

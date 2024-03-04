@@ -23,7 +23,7 @@
 #include "Util/ByteBuffer.h"
 #include "Database/DatabaseEnv.h"
 #include "Entities/Player.h"
-#include "Log.h"
+#include "Log/Log.h"
 
 #include <string>
 #include <vector>

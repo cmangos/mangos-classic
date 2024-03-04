@@ -11,7 +11,7 @@
 #include "Server/WorldSession.h"
 #include "World/World.h"
 #include "Accounts/AccountMgr.h"
-#include "Log.h"
+#include "Log/Log.h"
 
 #include "Database/DatabaseEnv.h"
 #include "Policies/Singleton.h"

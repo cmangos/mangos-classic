@@ -17,7 +17,7 @@
  */
 
 #include "Common.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "Entities/ObjectGuid.h"

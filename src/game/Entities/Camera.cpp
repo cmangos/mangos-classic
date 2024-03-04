@@ -19,7 +19,7 @@
 #include "Entities/Camera.h"
 #include "Grids/GridNotifiersImpl.h"
 #include "Grids/CellImpl.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Util/Errors.h"
 #include "Entities/Player.h"
 

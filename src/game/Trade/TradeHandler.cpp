@@ -21,7 +21,7 @@
 #include "Server/WorldSession.h"
 #include "World/World.h"
 #include "Globals/ObjectAccessor.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Server/Opcodes.h"
 #include "Entities/Player.h"
 #include "Entities/Item.h"

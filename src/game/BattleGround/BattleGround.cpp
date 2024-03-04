@@ -1465,7 +1465,6 @@ uint32 BattleGround::GetSingleCreatureGuid(uint8 event1, uint8 event2)
     return ObjectGuid();
 }
 
-#ifdef ENABLE_PLAYERBOTS
 /**
   Function returns a gameobject guid from event map
 
@@ -1482,7 +1481,6 @@ uint32 BattleGround::GetSingleGameObjectGuid(uint8 event1, uint8 event2)
 
     return ObjectGuid();
 }
-#endif
 
 /**
   Method that handles gameobject load from DB event map

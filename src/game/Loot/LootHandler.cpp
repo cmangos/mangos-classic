@@ -18,7 +18,7 @@
 
 #include "Common.h"
 #include "Server/WorldPacket.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Entities/Player.h"
 #include "Globals/ObjectAccessor.h"
 #include "Entities/ObjectGuid.h"

@@ -18,7 +18,7 @@
 
 #include <stdarg.h>
 #include "Common.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Server/WorldPacket.h"
 #include "Database/DatabaseEnv.h"
 #include "PlayerbotAI.h"

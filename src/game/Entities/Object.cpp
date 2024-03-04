@@ -20,7 +20,7 @@
 #include "Globals/SharedDefines.h"
 #include "Server/WorldPacket.h"
 #include "Server/Opcodes.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "World/World.h"
 #include "Entities/Creature.h"
 #include "Entities/Player.h"
@@ -2465,12 +2465,13 @@ struct WorldObjectChangeAccumulator
     {
         // send self fields changes in another way, otherwise
         // with new camera system when player's camera too far from player, camera wouldn't receive packets and changes from player
-        if (i_object.isType(TYPEMASK_PLAYER))
+        if (i_object.IsPlayer())
         {
+            Player* plr = static_cast<Player*>(&i_object);
 #ifdef ENABLE_PLAYERBOTS
-            if (((Player*)&i_object)->isRealPlayer())
+            if (plr->isRealPlayer())
 #endif
-            i_object.BuildUpdateDataForPlayer((Player*)&i_object, i_updateDatas);
+            i_object.BuildUpdateDataForPlayer(plr, i_updateDatas);
         }
     }
 

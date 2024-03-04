@@ -22,7 +22,7 @@
 #include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "Server/Opcodes.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "World/World.h"
 #include "Globals/ObjectMgr.h"
 #include "Globals/ObjectAccessor.h"
@@ -36,9 +36,9 @@
 #include "GameEvents/GameEventMgr.h"
 
 #ifdef ENABLE_PLAYERBOTS
-#include "AhBot.h"
-#include "playerbot.h"
-#include "PlayerbotAIConfig.h"
+#include "ahbot/AhBot.h"
+#include "playerbot/playerbot.h"
+#include "playerbot/PlayerbotAIConfig.h"
 #endif
 
 #include <cstdarg>

@@ -25,7 +25,7 @@
 #include "Accounts/AccountMgr.h"
 #include "Entities/Item.h"
 #include "Tools/Language.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Globals/ObjectMgr.h"
 #include "Entities/ObjectGuid.h"
 #include "Entities/Player.h"

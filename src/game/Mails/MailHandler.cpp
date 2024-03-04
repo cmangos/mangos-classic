@@ -27,7 +27,7 @@
 
 #include "Mails/Mail.h"
 #include "Tools/Language.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Entities/ObjectGuid.h"
 #include "Globals/ObjectMgr.h"
 #include "Entities/Item.h"

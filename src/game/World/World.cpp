@@ -25,7 +25,7 @@
 #include "Config/Config.h"
 #include "Platform/Define.h"
 #include "SystemConfig.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Server/Opcodes.h"
 #include "Server/WorldSession.h"
 #include "Server/WorldPacket.h"
@@ -78,9 +78,9 @@
 #endif
 
 #ifdef ENABLE_PLAYERBOTS
-#include "AhBot.h"
-#include "PlayerbotAIConfig.h"
-#include "RandomPlayerbotMgr.h"
+#include "ahbot/AhBot.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/RandomPlayerbotMgr.h"
 #endif
 
 #include <algorithm>

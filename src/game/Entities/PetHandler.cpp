@@ -21,7 +21,7 @@
 #include "Server/WorldSession.h"
 #include "Globals/ObjectMgr.h"
 #include "Spells/SpellMgr.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Server/Opcodes.h"
 #include "Spells/Spell.h"
 #include "AI/BaseAI/CreatureAI.h"

@@ -20,7 +20,7 @@
 #include "Maps/GridMap.h"
 #include "Entities/Creature.h"
 #include "PathFinder.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "World/World.h"
 #include "Entities/Transports.h"
 #include <Detour/Include/DetourCommon.h>

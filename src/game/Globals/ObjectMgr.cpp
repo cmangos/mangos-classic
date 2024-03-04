@@ -21,7 +21,7 @@
 #include "Policies/Singleton.h"
 
 #include "Server/SQLStorages.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Maps/MapManager.h"
 #include "Entities/ObjectGuid.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"

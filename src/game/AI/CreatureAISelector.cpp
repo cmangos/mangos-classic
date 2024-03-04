@@ -25,7 +25,7 @@
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Entities/Pet.h"
 #include "Entities/Player.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "BaseAI/PetAI.h"
 #include "BaseAI/PossessedAI.h"
 #include "AI/PlayerAI/PlayerAI.h"

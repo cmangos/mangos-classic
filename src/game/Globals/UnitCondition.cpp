@@ -24,7 +24,7 @@
 #include "MotionGenerators/MovementGenerator.h"
 #include "Spells/SpellAuras.h"
 #include "Util/ProgressBar.h"
-#include "Log.h"
+#include "Log/Log.h"
 
 std::shared_ptr<std::map<int32, UnitConditionEntry>> UnitConditionMgr::Load()
 {

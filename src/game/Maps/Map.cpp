@@ -20,7 +20,7 @@
 #include "Maps/MapManager.h"
 #include "Entities/Player.h"
 #include "Grids/GridNotifiers.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Grids/ObjectGridLoader.h"
 #include "Grids/CellImpl.h"
 #include "GridDefines.h"
@@ -47,7 +47,7 @@
 #include <time.h>
 
 #ifdef ENABLE_PLAYERBOTS
-#include "playerbot.h"
+#include "playerbot/playerbot.h"
 #endif
 
 Map::~Map()

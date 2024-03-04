@@ -480,8 +480,6 @@ void MaNGOS::GameObjectListSearcher<Check>::Visit(GameObjectMapType& m)
             i_objects.push_back(itr->getSource());
 }
 
-#ifdef ENABLE_PLAYERBOTS
-
 // Dynamicobject searchers
 
 template<class Check>
@@ -491,8 +489,6 @@ void MaNGOS::DynamicObjectListSearcher<Check>::Visit(DynamicObjectMapType& m)
         if (i_check(itr->getSource()))
             i_objects.push_back(itr->getSource());
 }
-
-#endif
 
 // Unit searchers
 

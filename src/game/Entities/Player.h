@@ -1076,9 +1076,8 @@ class Player : public Unit
         Item* GetItemByGuid(ObjectGuid guid) const;
         Item* GetItemByPos(uint16 pos) const;
         Item* GetItemByPos(uint8 bag, uint8 slot) const;
-#ifdef ENABLE_PLAYERBOTS
         Item* GetItemByEntry(uint32 item) const;
-#endif
+
         Item* GetWeaponForAttack(WeaponAttackType attackType) const { return GetWeaponForAttack(attackType, false, false); }
         Item* GetWeaponForAttack(WeaponAttackType attackType, bool nonbroken, bool useable) const;
         Item* GetShield(bool useable = false) const;
@@ -1360,10 +1359,6 @@ class Player : public Unit
         /*********************************************************/
         /***                   LOAD SYSTEM                     ***/
         /*********************************************************/
-
-#ifdef ENABLE_PLAYERBOTS
-        bool MinimalLoadFromDB(QueryResult* result, uint32 guid);
-#endif
 
         bool LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder);
 

@@ -17,7 +17,7 @@
  */
 
 #include "Entities/TemporarySpawn.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "AI/BaseAI/CreatureAI.h"
 
 TemporarySpawn::TemporarySpawn(ObjectGuid summoner) :

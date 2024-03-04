@@ -22,7 +22,7 @@
 
 #include "Common.h"
 #include "Tools/Language.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "World/World.h"
 #include "Globals/ObjectMgr.h"
 #include "Server/WorldSession.h"

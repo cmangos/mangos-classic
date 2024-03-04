@@ -22,7 +22,7 @@
 #include "Entities/UpdateData.h"
 #include "Util/ByteBuffer.h"
 #include "Server/WorldPacket.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Server/Opcodes.h"
 #include "World/World.h"
 #include "Entities/ObjectGuid.h"

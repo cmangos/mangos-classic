@@ -19,7 +19,7 @@
 #include "Common.h"
 #include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Entities/Player.h"
 
 void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)

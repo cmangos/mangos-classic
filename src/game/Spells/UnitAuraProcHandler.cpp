@@ -17,7 +17,7 @@
  */
 
 #include "Common.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Globals/ObjectMgr.h"
 #include "Spells/SpellMgr.h"
 #include "Entities/Player.h"

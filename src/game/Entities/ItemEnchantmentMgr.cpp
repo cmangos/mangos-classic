@@ -18,7 +18,7 @@
 
 #include "Entities/ItemEnchantmentMgr.h"
 #include "Database/DatabaseEnv.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Globals/ObjectMgr.h"
 #include "Util/ProgressBar.h"
 #include "Util/Util.h"

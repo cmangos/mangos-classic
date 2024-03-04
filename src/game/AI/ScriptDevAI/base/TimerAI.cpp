@@ -16,7 +16,7 @@
 
 #include "TimerAI.h"
 #include "Chat/Chat.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include <string>
 
 Timer::Timer(uint32 id, std::function<void()> functor, uint32 timerMin, uint32 timerMax, TimerCombat combatSetting, bool disabled)

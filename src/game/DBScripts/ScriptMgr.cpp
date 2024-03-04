@@ -18,7 +18,7 @@
 
 #include "DBScripts/ScriptMgr.h"
 #include "Policies/Singleton.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Util/ProgressBar.h"
 #include "Globals/ObjectMgr.h"
 #include "Globals/ObjectAccessor.h"

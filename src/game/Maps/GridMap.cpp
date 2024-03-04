@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "Log.h"
+#include "Log/Log.h"
 #include "Grids/CellImpl.h"
 #include "GridDefines.h"
 #include "Maps/Map.h"

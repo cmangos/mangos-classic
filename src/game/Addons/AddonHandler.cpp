@@ -21,7 +21,7 @@
 #include "Addons/AddonHandler.h"
 #include "Database/DatabaseEnv.h"
 #include "Server/Opcodes.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Policies/Singleton.h"
 
 INSTANTIATE_SINGLETON_1(AddonHandler);

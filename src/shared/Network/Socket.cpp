@@ -17,7 +17,7 @@
 */
 
 #include "Socket.hpp"
-#include "Log.h"
+#include "Log/Log.h"
 
 #include <boost/asio.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>

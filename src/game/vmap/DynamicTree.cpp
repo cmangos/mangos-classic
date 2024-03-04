@@ -17,7 +17,7 @@
  */
 
 #include "DynamicTree.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Util/Timer.h"
 #include "BIHWrap.h"
 #include "RegularGrid.h"

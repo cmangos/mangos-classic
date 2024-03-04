@@ -21,7 +21,7 @@
 #include "Spells/SpellMgr.h"
 #include "Server/DBCStructure.h"
 #include "Server/SQLStorages.h"
-#include "Log.h"
+#include "Log/Log.h"
 
 SpellTargetInfo::SpellTargetInfo(char const* name, SpellTargetImplicitType type, SpellTargetFilter filter, SpellTargetEnumerator enumerator, SpellTargetLOS los) :
     name(name), type(type), filter(filter), enumerator(enumerator), los(los)
