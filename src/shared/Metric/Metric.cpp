@@ -20,7 +20,7 @@
 #include <functional>
 
 #include "Config/Config.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Metric.h"
 
 metric::measurement::measurement(std::string name, std::function<bool()> condition)
