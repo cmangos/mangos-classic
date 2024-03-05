@@ -53,7 +53,7 @@ endif()
 
 if(NOT BUILD_PLAYERBOTS)
   # exclude Playerbots folder
-  set (EXCLUDE_DIR "Bots/")
+  set (EXCLUDE_DIR "playerbots/")
   foreach (TMP_PATH ${LIBRARY_SRCS})
       string (FIND ${TMP_PATH} ${EXCLUDE_DIR} EXCLUDE_DIR_FOUND)
       if (NOT ${EXCLUDE_DIR_FOUND} EQUAL -1)
@@ -125,7 +125,7 @@ target_include_directories(${LIBRARY_NAME}
 
 if(BUILD_PLAYERBOTS)
   target_link_libraries(${LIBRARY_NAME} PUBLIC playerbots)
-  target_include_directories(${LIBRARY_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/src/modules/PlayerBots)
+  target_include_directories(${LIBRARY_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/src/modules/playerbots)
   add_dependencies(${LIBRARY_NAME} playerbots)
 endif()
 

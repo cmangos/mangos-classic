@@ -26,15 +26,15 @@ if(BUILD_PLAYERBOTS)
   include(FetchContent)
 
   FetchContent_Declare(
-    PlayerBots
-    SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/modules/PlayerBots"
+    playerbots
+    SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/modules/playerbots"
     GIT_REPOSITORY "https://github.com/cmangos/playerbots.git"
     GIT_TAG "master"
   )
 
-  FetchContent_GetProperties(PlayerBots)
+  FetchContent_GetProperties(playerbots)
   if (NOT playerbots_POPULATED)
-    FetchContent_Populate(PlayerBots)
+    FetchContent_Populate(playerbots)
     message(STATUS "Playerbots module source dir: ${playerbots_SOURCE_DIR}")
   else()
     message(STATUS "Playerbots module already populated: ${playerbots_POPULATED}")
@@ -48,8 +48,8 @@ if(BUILD_PLAYERBOTS)
   add_subdirectory(${playerbots_SOURCE_DIR})
 
 else()
-  # if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/modules/PlayerBots)
-  #   file(REMOVE_RECURSE ${CMAKE_CURRENT_SOURCE_DIR}/modules/PlayerBots)
+  # if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/modules/playerbots)
+  #   file(REMOVE_RECURSE ${CMAKE_CURRENT_SOURCE_DIR}/modules/playerbots)
   # endif()
 endif()
 
