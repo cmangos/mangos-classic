@@ -48,9 +48,9 @@ if(BUILD_PLAYERBOTS)
   add_subdirectory(${playerbots_SOURCE_DIR})
 
 else()
-  # if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/modules/playerbots)
-  #   file(REMOVE_RECURSE ${CMAKE_CURRENT_SOURCE_DIR}/modules/playerbots)
-  # endif()
+  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/modules/playerbots)
+    file(REMOVE_RECURSE ${CMAKE_CURRENT_SOURCE_DIR}/modules/playerbots)
+  endif()
 endif()
 
 if(BUILD_GAME_SERVER)
