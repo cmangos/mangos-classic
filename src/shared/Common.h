@@ -50,6 +50,7 @@
 
 #include "Util/Errors.h"
 #include "Multithreading/Threading.h"
+#include "Log/Log.h"
 
 // included to use sleep_for()
 #include <thread>
