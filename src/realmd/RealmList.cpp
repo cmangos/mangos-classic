@@ -26,6 +26,7 @@
 #include "Util/Util.h"                                           // for Tokens typedef
 #include "Policies/Singleton.h"
 #include "Database/DatabaseEnv.h"
+#include "Log/Log.h"
 
 INSTANTIATE_SINGLETON_1(RealmList);
 
