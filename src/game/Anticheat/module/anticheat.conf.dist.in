@@ -3,6 +3,16 @@
 #   This file is intended to be used in a setting where the anticheat should run
 #   purely in a read-only mode.  It will do all of its tasks, but take no action,
 #   aside from sending out notifications.  It is intended for testing purposes.
+#
+# 	To overwrite configuration fields with environment variables
+# 	use the following pattern to generate environment variable names:
+#
+# 		For Enable:
+# 			export Anticheat_Enable=0
+#
+# 		For IPBanDelay.Max:
+# 			export Anticheat_IPBanDelay_Max=120
+#
 
 [AnticheatConf]
 ConfVersion=2017102301

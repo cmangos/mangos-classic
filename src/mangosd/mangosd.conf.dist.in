@@ -1,5 +1,15 @@
 #####################################
-# MaNGOS Configuration file         #
+# MaNGOS Configuration file         
+# 
+# 	To overwrite configuration fields with environment variables
+# 	use the following pattern to generate environment variable names:
+#
+# 		For Rate.Health:
+# 			export Mangosd_Rate_Health=1.2
+#
+# 		For DataDir:
+# 			export Mangosd_DataDir=/tmp
+#
 #####################################
 
 [MangosdConf]

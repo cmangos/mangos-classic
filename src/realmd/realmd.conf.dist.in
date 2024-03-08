@@ -1,5 +1,15 @@
 ############################################
-# MaNGOS realmd configuration file         #
+# MaNGOS realmd configuration file
+#
+# 	To overwrite configuration fields with environment variables
+# 	use the following pattern to generate environment variable names:
+#
+# 		For WrongPass.MaxCount:
+# 			export Realmd_WrongPass_MaxCount=10
+#
+# 		For RealmServerPort:
+# 			export Realmd_RealmServerPort=3333
+#
 ############################################
 
 [RealmdConf]

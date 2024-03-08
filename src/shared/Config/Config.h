@@ -31,10 +31,11 @@ class Config
 {
     private:
         std::string m_filename;
+        std::string m_envVarPrefix;
         std::unordered_map<std::string, std::string> m_entries; // keys are converted to lower case.  values cannot be.
 
     public:
-        bool SetSource(const std::string& file);
+        bool SetSource(const std::string& file, const std::string& envVarPrefix);
         bool Reload();
 
         bool IsSet(const std::string& name) const;
