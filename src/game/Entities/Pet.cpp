@@ -1503,7 +1503,6 @@ void Pet::_LoadSpellCooldowns()
         {
             WorldPacket data(SMSG_SPELL_COOLDOWN, 8 + 1 + cdData.size());
             data << GetObjectGuid();
-            //data << uint8(0x0);                                     // flags (0x1, 0x2)
             data.append(cdData);
             static_cast<Player*>(GetOwner())->GetSession()->SendPacket(data);
         }

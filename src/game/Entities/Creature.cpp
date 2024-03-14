@@ -2977,7 +2977,6 @@ void Creature::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* /*
                 // send to client
                 WorldPacket data(SMSG_SPELL_COOLDOWN, 8 + 1 + 4);
                 data << GetObjectGuid();
-                // data << uint8(1);
                 data << uint32(spellEntry.Id);
                 data << uint32(recTime);
                 player->GetSession()->SendPacket(data);
