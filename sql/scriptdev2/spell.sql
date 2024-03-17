@@ -303,6 +303,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Druid
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(18562,'spell_swiftmend'),
 (5215,'spell_stealth'),
 (6783,'spell_stealth'),
 (9913,'spell_stealth'),

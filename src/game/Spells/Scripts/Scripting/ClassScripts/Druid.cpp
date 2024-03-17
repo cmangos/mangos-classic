@@ -19,6 +19,18 @@
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
 
+// 18562 - Swiftmend
+struct Swiftmend : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || !target->GetAura(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_DRUID, uint64(0x50))) // Rejuvenation or Regrowth
+            return SPELL_FAILED_TARGET_AURASTATE;
+        return SPELL_CAST_OK;
+    }
+};
+
 enum
 {
     SPELL_BLESSING_OF_THE_CLAW = 28750,
@@ -57,6 +69,7 @@ struct FormScalingAttackPowerAuras : public AuraScript
 
 void LoadDruidScripts()
 {
+    RegisterSpellScript<Swiftmend>("spell_swiftmend");
     RegisterSpellScript<Regrowth>("spell_regrowth");
     RegisterSpellScript<FormScalingAttackPowerAuras>("spell_druid_form_scaling_ap_auras");
 }
