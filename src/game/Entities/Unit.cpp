@@ -645,7 +645,7 @@ bool Unit::UpdateMeleeAttackingState()
         swingError = SWING_ERROR_BAD_FACING;
     else if (!victim->IsAlive())
         swingError = SWING_ERROR_TARGET_NOT_ALIVE;
-    else if (!CanAttackInCombat(victim))
+    else if (!CanAttackInCombat(victim, false, false))
         swingError = SWING_ERROR_CANT_ATTACK_TARGET;
     else
     {

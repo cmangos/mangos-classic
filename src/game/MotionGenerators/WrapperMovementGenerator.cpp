@@ -47,7 +47,7 @@ void AbstractWrapperMovementGenerator::Initialize(Unit& owner)
         {
             if (Unit* target = ObjectAccessor::GetUnit(owner, ObjectGuid(owner.movespline->GetFacing().target)))
             {
-                if (owner.CanAttackInCombat(target))
+                if (owner.CanAttackInCombat(target, false, false))
                 {
                     owner.Attack(target, owner.AI()->IsMeleeEnabled());
                     owner.SetTarget(target);

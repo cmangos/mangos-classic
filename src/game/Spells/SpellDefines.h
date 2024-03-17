@@ -163,7 +163,7 @@ enum SpellAttributesEx3
     SPELL_ATTR_EX3_TREAT_AS_PERIODIC           = 0x02000000,// 25 Treated as periodic spell
     SPELL_ATTR_EX3_CAN_PROC_FROM_PROCS         = 0x04000000,// 26 Auras with this attribute can proc off procced spells (periodic triggers etc)
     SPELL_ATTR_EX3_ONLY_PROC_ON_CASTER         = 0x08000000,// 27
-    SPELL_ATTR_EX3_IGNORE_CASTER_AND_TARGET_RESTRICTIONS = 0x10000000,// 28 NYI
+    SPELL_ATTR_EX3_IGNORE_CASTER_AND_TARGET_RESTRICTIONS = 0x10000000,// 28
     SPELL_ATTR_EX3_IGNORE_CASTER_MODIFIERS     = 0x20000000,// 29 Resistances should still affect damage
     SPELL_ATTR_EX3_DO_NOT_DISPLAY_RANGE        = 0x40000000,// 30
     SPELL_ATTR_EX3_NOT_ON_AOE_IMMUNE           = 0x80000000,// 31
