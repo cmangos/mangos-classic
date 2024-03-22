@@ -2612,7 +2612,7 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
 
     SendAttackStateUpdate(&meleeDamageInfo);
     DealMeleeDamage(&meleeDamageInfo, true);
-    ProcDamageAndSpell(ProcSystemArguments(this, meleeDamageInfo.target, meleeDamageInfo.procAttacker, meleeDamageInfo.procVictim, meleeDamageInfo.procEx, meleeDamageInfo.totalDamage, meleeDamageInfo.attackType));
+    ProcDamageAndSpell(ProcSystemArguments(this, meleeDamageInfo.target, meleeDamageInfo.procAttacker, meleeDamageInfo.procVictim, meleeDamageInfo.procEx, meleeDamageInfo.totalDamage, meleeDamageInfo.absorb, meleeDamageInfo.attackType));
 
     uint32 totalAbsorb = 0;
     uint32 totalResist = 0;
