@@ -336,12 +336,15 @@ UnitAI* GetAI_npc_daphne_stilwell(Creature* creature)
 
 enum
 {
-    SAY_START                = -1000101,
-    SAY_PROGRESS             = -1000102,
-    SAY_END                  = -1000103,
-    SAY_AGGRO_1              = -1000104,
-    SAY_AGGRO_2              = -1000105,
+    SAY_START                = 9,
+    SAY_PROGRESS             = 10,
+    SAY_END                  = 11,
 
+    SAY_AGGRO_1              = 487,
+    SAY_AGGRO_2              = 485,
+    SAY_AGGRO_3              = 489,
+
+    DEFIAS_TRAITOR_PATH      = 467,
     QUEST_DEFIAS_BROTHERHOOD = 155
 };
 
@@ -357,26 +360,30 @@ struct npc_defias_traitorAI : public npc_escortAI
     {
         switch (pointId)
         {
-            case 36:
+            case 65:
                 SetRun(false);
+                if (Player* player = GetPlayerForEscort())
+                    DoBroadcastText(SAY_PROGRESS, m_creature, player);
                 break;
-            case 37:
-                if (Player* pPlayer = GetPlayerForEscort())
-                    DoScriptText(SAY_PROGRESS, m_creature, pPlayer);
-                break;
-            case 45:
-                if (Player* pPlayer = GetPlayerForEscort())
+            case 94:
+                if (Player* player = GetPlayerForEscort())
                 {
-                    DoScriptText(SAY_END, m_creature, pPlayer);
-                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_DEFIAS_BROTHERHOOD, m_creature);
+                    DoBroadcastText(SAY_END, m_creature, player);
+                    player->RewardPlayerAndGroupAtEventExplored(QUEST_DEFIAS_BROTHERHOOD, m_creature);
                 }
+                m_creature->ForcedDespawn(3000, true);
                 break;
         }
     }
 
     void Aggro(Unit* who) override
     {
-        DoScriptText(urand(0, 1) ? SAY_AGGRO_1 : SAY_AGGRO_2, m_creature, who);
+        switch (urand(0, 3))
+        {
+            case 0: DoBroadcastText(SAY_AGGRO_1, m_creature, who); break;
+            case 1: DoBroadcastText(SAY_AGGRO_2, m_creature, who); break;
+            case 2: DoBroadcastText(SAY_AGGRO_3, m_creature, who); break;
+        }
     }
 
     void Reset() override { }
@@ -386,18 +393,13 @@ bool QuestAccept_npc_defias_traitor(Player* player, Creature* creature, const Qu
 {
     if (quest->GetQuestId() == QUEST_DEFIAS_BROTHERHOOD)
     {
-        DoScriptText(SAY_START, creature, player);
+        DoBroadcastText(SAY_START, creature, player);
 
         if (npc_defias_traitorAI* escortAI = dynamic_cast<npc_defias_traitorAI*>(creature->AI()))
-            escortAI->Start(true, player, quest);
+            escortAI->Start(true, player, quest, true, false, DEFIAS_TRAITOR_PATH); // instant respawn
     }
 
     return true;
-}
-
-UnitAI* GetAI_npc_defias_traitor(Creature* creature)
-{
-    return new npc_defias_traitorAI(creature);
 }
 
 /*######
@@ -434,7 +436,7 @@ void AddSC_westfall()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_defias_traitor";
-    pNewScript->GetAI = &GetAI_npc_defias_traitor;
+    pNewScript->GetAI = &GetNewAIInstance<npc_defias_traitorAI>;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_defias_traitor;
     pNewScript->RegisterSelf();
 
