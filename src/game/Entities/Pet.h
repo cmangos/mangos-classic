@@ -23,6 +23,7 @@
 #include "Entities/ObjectGuid.h"
 #include "Entities/Creature.h"
 #include "Entities/Unit.h"
+#include "Maps/InstanceData.h"
 
 enum PetType
 {
