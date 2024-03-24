@@ -130,9 +130,9 @@ void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
     if (pct.size() > 0)
     {
         // allocate array for full message
-        std::shared_ptr<std::vector<char>> fullMessage = std::make_shared<std::vector<char>>(sizeof(header) + pct.size());
-        std::memcpy(fullMessage->data(), reinterpret_cast<const char*>(&header), sizeof(header)); // copy header
-        std::memcpy((fullMessage->data() + sizeof(header)), reinterpret_cast<const char*>(pct.contents()), pct.size()); // copy packet
+        std::shared_ptr<std::vector<char>> fullMessage = std::make_shared<std::vector<char>>(header.headerSize() + pct.size());
+        std::memcpy(fullMessage->data(), header.data(), header.headerSize()); // copy header
+        std::memcpy((fullMessage->data() + header.headerSize()), reinterpret_cast<const char*>(pct.contents()), pct.size()); // copy packet
         auto self(shared_from_this());
         Write(fullMessage->data(), fullMessage->size(), [self, fullMessage](const boost::system::error_code& error, std::size_t read) {});
     }
