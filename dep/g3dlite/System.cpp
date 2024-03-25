@@ -288,7 +288,7 @@ void System::init() {
         m_secondsPerNS = 1.0 / 1.0e9;
 
         // System Architecture:
-#       ifdef (__aarch64__)
+#       if defined(__aarch64__)
             m_cpuArch = "ARM64";
             m_cpuVendor = "Apple";
 #       endif
