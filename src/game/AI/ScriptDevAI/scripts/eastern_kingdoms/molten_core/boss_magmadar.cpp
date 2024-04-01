@@ -102,7 +102,7 @@ struct boss_magmadarAI : public CombatAI
             case MAGMADAR_PANIC:
             {
                 if (DoCastSpellIfCan(nullptr, SPELL_PANIC) == CAST_OK)
-                    ResetCombatAction(action, urand(16000, 21000));
+                    ResetCombatAction(action, urand(30000, 35000));
                 break;
             }
             case MAGMADAR_LAVABOMB:
