@@ -106,6 +106,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (26591,'spell_teleport_image'),
 (26608,'spell_viscidus_despawn_adds'),
 (26619,'spell_periodic_scarab_trigger'),
+(26656,'spell_summon_black_qiraji_battle_tank'),
 (26686,'spell_aq_whirlwind'),
 (26767,'spell_cthun_tentacles_summon'),
 (26769,'spell_cthun_periodic_eye_trigger'),
