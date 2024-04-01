@@ -347,6 +347,7 @@ class ChatHandler
         bool HandleGMCommand(char* args);
         bool HandleGMChatCommand(char* args);
         bool HandleGMFlyCommand(char* args);
+        bool HandleGMUnkillableCommand(char* args);
         bool HandleGMListFullCommand(char* args);
         bool HandleGMListIngameCommand(char* args);
         bool HandleGMMountUpCommand(char* args);

@@ -5458,6 +5458,21 @@ bool ChatHandler::HandleGMFlyCommand(char* args)
     return true;
 }
 
+bool ChatHandler::HandleGMUnkillableCommand(char* args)
+{
+    bool value;
+    if (!ExtractOnOff(&args, value))
+    {
+        SendSysMessage(LANG_USE_BOL);
+        SetSentErrorMessage(true);
+        return false;
+    }
+    Player* target = m_session->GetPlayer();
+    target->SetDeathPrevention(value);
+    PSendSysMessage("GM Unkillability %s.", value ? "enabled" : "disabled");
+    return true;
+}
+
 bool ChatHandler::HandlePDumpLoadCommand(char* args)
 {
     char* file = ExtractQuotedOrLiteralArg(&args);
