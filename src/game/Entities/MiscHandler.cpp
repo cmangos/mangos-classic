@@ -271,38 +271,33 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recv_data*/)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_LOGOUT_REQUEST, security %u", GetSecurity());
 
-    // Can not logout if...
-    if (GetPlayer()->IsInCombat() ||                        //...is in combat
-            //...is jumping ...is falling
-            GetPlayer()->m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_JUMPING | MOVEFLAG_FALLINGFAR)))
-    {
-        WorldPacket data(SMSG_LOGOUT_RESPONSE, (2 + 4)) ;
-        data << (uint8)0xC;
-        data << uint32(0);
-        data << uint8(0);
-        SendPacket(data);
-        LogoutRequest(0);
-        return;
-    }
+    bool cantLogout = GetPlayer()->IsInCombat() || GetPlayer()->duel ||
+        GetPlayer()->m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_JUMPING | MOVEFLAG_FALLINGFAR));
+    bool instLogout = GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || GetPlayer()->IsTaxiFlying() ||
+        GetSecurity() >= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_INSTANT_LOGOUT);
 
-    // instant logout in taverns/cities or on taxi or for admins, gm's, mod's if its enabled in mangosd.conf
-    if (GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || GetPlayer()->IsTaxiFlying() ||
-            GetSecurity() >= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_INSTANT_LOGOUT))
-    {
-        LogoutPlayer();
-        return;
-    }
-
-    WorldPacket data(SMSG_LOGOUT_RESPONSE, 5);
-    data << uint32(0);
-    data << uint8(0);
+    WorldPacket data(SMSG_LOGOUT_RESPONSE, 4 + 1);
+    data << uint32(cantLogout ? 1 : 0);
+    data << uint8(instLogout && !cantLogout ? 1 : 0);
     SendPacket(data);
-    LogoutRequest(time(nullptr));
-
-    // Set flags and states set by logout:
-    GetPlayer()->SetStunnedByLogout(true);
 
     DEBUG_LOG("WORLD: Sent SMSG_LOGOUT_RESPONSE Message");
+
+    if (cantLogout)
+    {
+        LogoutRequest(0);
+    }
+    else if (instLogout)
+    {
+        LogoutPlayer();
+    }
+    else
+    {
+        LogoutRequest(time(nullptr));
+
+        // Set flags and states set by logout:
+        GetPlayer()->SetStunnedByLogout(true);
+    }
 }
 
 void WorldSession::HandlePlayerLogoutOpcode(WorldPacket& /*recv_data*/)
