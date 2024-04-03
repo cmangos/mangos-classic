@@ -18080,10 +18080,10 @@ void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaTrigg
             GetSession()->SendAreaTriggerMessage(GetSession()->GetMangosString(LANG_LEVEL_MINREQUIRED), miscRequirement);
             break;
         case AREA_LOCKSTATUS_ZONE_IN_COMBAT:
-            GetSession()->SendTransferAborted(mapEntry->MapID, TRANSFER_ABORT_ZONE_IN_COMBAT);
+            GetSession()->SendTransferAborted(TRANSFER_ABORT_ZONE_IN_COMBAT);
             break;
         case AREA_LOCKSTATUS_INSTANCE_IS_FULL:
-            GetSession()->SendTransferAborted(mapEntry->MapID, TRANSFER_ABORT_MAX_PLAYERS);
+            GetSession()->SendTransferAborted(TRANSFER_ABORT_MAX_PLAYERS);
             break;
         case AREA_LOCKSTATUS_QUEST_NOT_COMPLETED:
             if (mapEntry->IsContinent())               // do not report anything for quest areatrigge
@@ -18098,7 +18098,7 @@ void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaTrigg
                 GetSession()->SendAreaTriggerMessage(GetSession()->GetMangosString(LANG_LEVEL_MINREQUIRED_AND_ITEM), at->requiredLevel, sObjectMgr.GetItemPrototype(miscRequirement)->Name1);
             break;
         case AREA_LOCKSTATUS_TOO_MANY_INSTANCE:
-            GetSession()->SendTransferAborted(mapEntry->MapID, TRANSFER_ABORT_TOO_MANY_INSTANCES);
+            GetSession()->SendTransferAborted(TRANSFER_ABORT_TOO_MANY_INSTANCES);
             break;
         case AREA_LOCKSTATUS_NOT_ALLOWED:
         case AREA_LOCKSTATUS_RAID_LOCKED:
