@@ -13890,14 +13890,13 @@ void Player::SendQuestConfirmAccept(const Quest* pQuest, Player* pReceiver) cons
     }
 }
 
-void Player::SendPushToPartyResponse(Player* pPlayer, uint32 msg) const
+void Player::SendPushToPartyResponse(Player* pPlayer, QuestShareMessages msg) const
 {
     if (pPlayer)
     {
-        WorldPacket data(MSG_QUEST_PUSH_RESULT, (8 + 4 + 1));
+        WorldPacket data(MSG_QUEST_PUSH_RESULT, 8 + 1);
         data << pPlayer->GetObjectGuid();
-        data << uint32(msg);                                // valid values: 0-8
-        data << uint8(0);
+        data << uint8(msg);
         GetSession()->SendPacket(data);
         DEBUG_LOG("WORLD: Sent MSG_QUEST_PUSH_RESULT");
     }
