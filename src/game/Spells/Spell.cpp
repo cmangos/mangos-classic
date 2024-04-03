@@ -6397,6 +6397,17 @@ bool Spell::IgnoreItemRequirements() const
     if (m_channelOnly || m_ignoreCosts)
         return true;
 
+#ifdef ENABLE_PLAYERBOTS
+    if (m_caster->IsPlayer())
+    {
+        PlayerbotAI* bot = ((Player*)m_caster)->GetPlayerbotAI();
+        if (bot && bot->HasSpellItems(m_spellInfo->Id, m_CastItem))
+        {
+            return true;
+        }
+    }
+#endif
+
     // Workaround for double shard problem
     if (m_IsTriggeredSpell || this->m_spellInfo->Id == 46546)
     {
