@@ -84,6 +84,17 @@ void instance_ruins_of_ahnqiraj::OnObjectCreate(GameObject* go)
         m_goEntryGuidCollection[go->GetEntry()].push_back(go->GetObjectGuid());
 }
 
+void instance_ruins_of_ahnqiraj::OnObjectDestroy(GameObject* go)
+{
+   if (go->GetEntry() == GO_OSSIRIAN_CRYSTAL)
+   {
+      auto it = m_goEntryGuidCollection.find(go->GetEntry());
+
+      if (it != m_goEntryGuidCollection.end())
+         m_goEntryGuidCollection.erase(it);
+   }
+}
+
 void instance_ruins_of_ahnqiraj::OnCreatureEnterCombat(Creature* pCreature)
 {
     switch (pCreature->GetEntry())

@@ -109,6 +109,7 @@ class instance_ruins_of_ahnqiraj : public ScriptedInstance
 
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* go) override;
+        void OnObjectDestroy(GameObject* go) override;
         void OnPlayerEnter(Player* pPlayer) override;
 
         void OnCreatureEnterCombat(Creature* pCreature) override;

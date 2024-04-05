@@ -89,6 +89,9 @@ class InstanceData
         // Called when a gameobject is created
         virtual void OnObjectCreate(GameObject*) {}
 
+        // Called when a gameobject is destroyed
+        virtual void OnObjectDestroy(GameObject*) {}
+
         // Called when a gameobject is spawned into map
         virtual void OnObjectSpawn(GameObject*) {}
 
