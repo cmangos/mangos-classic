@@ -813,35 +813,6 @@ uint32 Guild::GetAccountsNumber()
     return m_accountsNumber;
 }
 
-// *************************************************
-// Guild Eventlog part
-// *************************************************
-// Display guild eventlog
-void Guild::DisplayGuildEventLog(WorldSession* session)
-{
-    // Sending result
-    WorldPacket data(MSG_GUILD_EVENT_LOG_QUERY, 0);
-    // count, max count == 100
-    data << uint8(m_GuildEventLog.size());
-    for (GuildEventLog::const_iterator itr = m_GuildEventLog.begin(); itr != m_GuildEventLog.end(); ++itr)
-    {
-        // Event type
-        data << uint8(itr->EventType);
-        // Player 1
-        data << ObjectGuid(HIGHGUID_PLAYER, itr->PlayerGuid1);
-        // Player 2 not for left/join guild events
-        if (itr->EventType != GUILD_EVENT_LOG_JOIN_GUILD && itr->EventType != GUILD_EVENT_LOG_LEAVE_GUILD)
-            data << ObjectGuid(HIGHGUID_PLAYER, itr->PlayerGuid2);
-        // New Rank - only for promote/demote guild events
-        if (itr->EventType == GUILD_EVENT_LOG_PROMOTE_PLAYER || itr->EventType == GUILD_EVENT_LOG_DEMOTE_PLAYER)
-            data << uint8(itr->NewRank);
-        // Event timestamp
-        data << uint32(time(nullptr) - itr->TimeStamp);
-    }
-    session->SendPacket(data);
-    DEBUG_LOG("WORLD: Sent (MSG_GUILD_EVENT_LOG_QUERY)");
-}
-
 // Load guild eventlog from DB
 void Guild::LoadGuildEventLogFromDB()
 {

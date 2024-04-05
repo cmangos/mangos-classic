@@ -259,7 +259,6 @@ class Group
         void BroadcastPacket(WorldPacket const& packet, bool ignorePlayersInBGRaid, int group = -1, ObjectGuid ignore = ObjectGuid()) const;
         void BroadcastPacketInRange(WorldObject const* who, WorldPacket const& packet, bool ignorePlayersInBGRaid, int group = -1, ObjectGuid ignore = ObjectGuid()) const;
         void BroadcastReadyCheck(WorldPacket const& packet) const;
-        void OfflineReadyCheck();
 
         void RewardGroupAtKill(Unit* pVictim, Player* player_tap);
 

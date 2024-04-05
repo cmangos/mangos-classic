@@ -716,13 +716,6 @@ uint32 WorldSession::getDialogStatus(const Player* pPlayer, const Object* questg
     return dialogStatus;
 }
 
-void WorldSession::HandleQuestgiverStatusMultipleQuery(WorldPacket& /*recvPacket*/)
-{
-    DEBUG_LOG("WORLD: Received opcode CMSG_QUESTGIVER_STATUS_MULTIPLE_QUERY");
-
-    _player->SendQuestGiverStatusMultiple();
-}
-
 bool WorldSession::CanInteractWithQuestGiver(ObjectGuid guid, char const* descr) const
 {
     if (guid.IsCreature())

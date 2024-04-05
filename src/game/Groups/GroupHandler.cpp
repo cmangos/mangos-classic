@@ -544,36 +544,6 @@ void WorldSession::HandleGroupAssistantLeaderOpcode(WorldPacket& recv_data)
     group->SetAssistant(guid, (flag != 0));
 }
 
-void WorldSession::HandlePartyAssignmentOpcode(WorldPacket& recv_data)
-{
-    uint8 flag1, flag2;
-    ObjectGuid guid;
-    recv_data >> flag1 >> flag2;
-    recv_data >> guid;
-
-    DEBUG_LOG("MSG_PARTY_ASSIGNMENT");
-
-    Group* group = GetPlayer()->GetGroup();
-    if (!group)
-        return;
-
-    // if(flag1) Main Assist
-    //     0x4
-    // if(flag2) Main Tank
-    //     0x2
-
-    /** error handling **/
-    if (!group->IsLeader(GetPlayer()->GetObjectGuid()))
-        return;
-    /********************/
-
-    // everything is fine, do it
-    if (flag1 == 1)
-        group->SetMainAssistant(guid);
-    if (flag2 == 1)
-        group->SetMainTank(guid);
-}
-
 void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& recv_data)
 {
     if (recv_data.empty())                                  // request
@@ -591,8 +561,6 @@ void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& recv_data)
         // everything is fine, do it
         WorldPacket data(MSG_RAID_READY_CHECK, 0);
         group->BroadcastPacket(data, true, -1);
-
-        group->OfflineReadyCheck();
     }
     else                                                    // answer
     {
@@ -612,20 +580,6 @@ void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& recv_data)
             gleader->GetSession()->SendPacket(data);
         }
     }
-}
-
-void WorldSession::HandleRaidReadyCheckFinishedOpcode(WorldPacket& /*recv_data*/)
-{
-    Group* group = GetPlayer()->GetGroup();
-    if (!group)
-        return;
-
-    if (!group->IsLeader(GetPlayer()->GetObjectGuid()) && !group->IsAssistant(GetPlayer()->GetObjectGuid()))
-        return;
-
-    // Broadcast finish:
-    WorldPacket data(MSG_RAID_READY_CHECK_FINISHED, 0);
-    group->BroadcastPacket(data, true, -1);
 }
 
 void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket& data)
@@ -942,25 +896,6 @@ void WorldSession::HandleRequestRaidInfoOpcode(WorldPacket& /*recv_data*/)
 {
     // every time the player checks the character screen
     _player->SendRaidInfo();
-}
-
-void WorldSession::HandleOptOutOfLootOpcode(WorldPacket& recv_data)
-{
-    DEBUG_LOG("WORLD: Received opcode CMSG_OPT_OUT_OF_LOOT");
-
-    uint32 unkn;
-    recv_data >> unkn;
-
-    // ignore if player not loaded
-    if (!GetPlayer())                                       // needed because STATUS_AUTHED
-    {
-        if (unkn != 0)
-            sLog.outError("CMSG_GROUP_PASS_ON_LOOT value<>0 for not-loaded character!");
-        return;
-    }
-
-    if (unkn != 0)
-        sLog.outError("CMSG_GROUP_PASS_ON_LOOT: activation not implemented!");
 }
 
 void WorldSession::HandleGroupSwapSubGroupOpcode(WorldPacket& recv_data)

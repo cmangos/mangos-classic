@@ -868,80 +868,6 @@ enum Opcodes
     CMSG_MOVE_FLIGHT_ACK                            = 0x340,
     MSG_MOVE_START_SWIM_CHEAT                       = 0x341,
     MSG_MOVE_STOP_SWIM_CHEAT                        = 0x342,
-    // [-ZERO] Last existed in 1.12.1 opcode, maybe some renumbering from other side
-    CMSG_CANCEL_MOUNT_AURA                          = 0x375,
-    CMSG_CANCEL_TEMP_ENCHANTMENT                    = 0x379,
-    CMSG_MAELSTROM_INVALIDATE_CACHE                 = 0x387,
-    CMSG_SET_TAXI_BENCHMARK_MODE                    = 0x389,
-    CMSG_MOVE_CHNG_TRANSPORT                        = 0x38D,
-    MSG_PARTY_ASSIGNMENT                            = 0x38E,
-    SMSG_OFFER_PETITION_ERROR                       = 0x38F,
-    SMSG_RESET_FAILED_NOTIFY                        = 0x396,
-    SMSG_REAL_GROUP_UPDATE                          = 0x397,
-    SMSG_INIT_EXTRA_AURA_INFO                       = 0x3A3,
-    SMSG_SET_EXTRA_AURA_INFO                        = 0x3A4,
-    SMSG_SET_EXTRA_AURA_INFO_NEED_UPDATE            = 0x3A5,
-    SMSG_SPELL_CHANCE_PROC_LOG                      = 0x3AA,
-    CMSG_MOVE_SET_RUN_SPEED                         = 0x3AB,
-    SMSG_DISMOUNT                                   = 0x3AC,
-    MSG_RAID_READY_CHECK_CONFIRM                    = 0x3AE,
-    SMSG_CLEAR_TARGET                               = 0x3BE,
-    CMSG_BOT_DETECTED                               = 0x3BF,
-    SMSG_KICK_REASON                                = 0x3C4,
-    MSG_RAID_READY_CHECK_FINISHED                   = 0x3C5,
-    CMSG_TARGET_CAST                                = 0x3CF,
-    CMSG_TARGET_SCRIPT_CAST                         = 0x3D0,
-    CMSG_CHANNEL_DISPLAY_LIST                       = 0x3D1,
-    CMSG_GET_CHANNEL_MEMBER_COUNT                   = 0x3D3,
-    SMSG_CHANNEL_MEMBER_COUNT                       = 0x3D4,
-    CMSG_DEBUG_LIST_TARGETS                         = 0x3D7,
-    SMSG_DEBUG_LIST_TARGETS                         = 0x3D8,
-    CMSG_PARTY_SILENCE                              = 0x3DC,
-    CMSG_PARTY_UNSILENCE                            = 0x3DD,
-    MSG_NOTIFY_PARTY_SQUELCH                        = 0x3DE,
-    SMSG_COMSAT_RECONNECT_TRY                       = 0x3DF,
-    SMSG_COMSAT_DISCONNECT                          = 0x3E0,
-    SMSG_COMSAT_CONNECT_FAIL                        = 0x3E1,
-    CMSG_SET_CHANNEL_WATCH                          = 0x3EE,
-    SMSG_USERLIST_ADD                               = 0x3EF,
-    SMSG_USERLIST_REMOVE                            = 0x3F0,
-    SMSG_USERLIST_UPDATE                            = 0x3F1,
-    CMSG_CLEAR_CHANNEL_WATCH                        = 0x3F2,
-    SMSG_GOGOGO_OBSOLETE                            = 0x3F4,
-    SMSG_ECHO_PARTY_SQUELCH                         = 0x3F5,
-    CMSG_SPELLCLICK                                 = 0x3F7,
-    SMSG_LOOT_LIST                                  = 0x3F8,
-    MSG_GUILD_PERMISSIONS                           = 0x3FC,
-    MSG_GUILD_EVENT_LOG_QUERY                       = 0x3FE,
-    CMSG_MAELSTROM_RENAME_GUILD                     = 0x3FF,
-    CMSG_GET_MIRRORIMAGE_DATA                       = 0x400,
-    SMSG_MIRRORIMAGE_DATA                           = 0x401,
-    SMSG_FORCE_DISPLAY_UPDATE                       = 0x402,
-    SMSG_SPELL_CHANCE_RESIST_PUSHBACK               = 0x403,
-    CMSG_IGNORE_DIMINISHING_RETURNS_CHEAT           = 0x404,
-    SMSG_IGNORE_DIMINISHING_RETURNS_CHEAT           = 0x405,
-    CMSG_KEEP_ALIVE                                 = 0x406,
-    SMSG_RAID_READY_CHECK_ERROR                     = 0x407,
-    CMSG_OPT_OUT_OF_LOOT                            = 0x408,
-    CMSG_SET_GRANTABLE_LEVELS                       = 0x40B,
-    CMSG_GRANT_LEVEL                                = 0x40C,
-    CMSG_DECLINE_CHANNEL_INVITE                     = 0x40F,
-    CMSG_GROUPACTION_THROTTLED                      = 0x410,
-    SMSG_OVERRIDE_LIGHT                             = 0x411,
-    SMSG_TOTEM_CREATED                              = 0x412,
-    CMSG_TOTEM_DESTROYED                            = 0x413,
-    CMSG_EXPIRE_RAID_INSTANCE                       = 0x414,
-    CMSG_NO_SPELL_VARIANCE                          = 0x415,
-    CMSG_QUESTGIVER_STATUS_MULTIPLE_QUERY           = 0x416,
-    SMSG_QUESTGIVER_STATUS_MULTIPLE                 = 0x417,
-    CMSG_QUERY_SERVER_BUCK_DATA                     = 0x41A,
-    CMSG_CLEAR_SERVER_BUCK_DATA                     = 0x41B,
-    SMSG_SERVER_BUCK_DATA                           = 0x41C,
-    SMSG_SEND_UNLEARN_SPELLS                        = 0x41D,
-    SMSG_PROPOSE_LEVEL_GRANT                        = 0x41E,
-    CMSG_ACCEPT_LEVEL_GRANT                         = 0x41F,
-    SMSG_REFER_A_FRIEND_FAILURE                     = 0x420,
-    SMSG_SUMMON_CANCEL                              = 0x423
 };
 
 // Don't forget to change this value and add opcode name to Opcodes.cpp when you add new opcode!
@@ -977,56 +903,13 @@ struct OpcodeHandler
     void (WorldSession::*handler)(WorldPacket& recvPacket);
 };
 
-typedef std::map< uint16, OpcodeHandler> OpcodeMap;
+extern OpcodeHandler opcodeTable[NUM_MSG_TYPES];
 
-class OpcodeStore
+// Lookup opcode name for human understandable logging
+inline const char* LookupOpcodeName(uint16 id)
 {
-    public:
-        OpcodeStore();
-        ~OpcodeStore();
-    public:
-        void BuildOpcodeList();
-        void StoreOpcode(uint16 Opcode, char const* name, SessionStatus status, PacketProcessing process, void (WorldSession::*handler)(WorldPacket& recvPacket))
-        {
-            OpcodeHandler& ref = mOpcodeMap[Opcode];
-            ref.name = name;
-            ref.status = status;
-            ref.packetProcessing = process;
-            ref.handler = handler;
-        }
-
-        /// Lookup opcode
-        inline OpcodeHandler const* LookupOpcode(uint16 id) const
-        {
-            OpcodeMap::const_iterator itr = mOpcodeMap.find(id);
-            if (itr != mOpcodeMap.end())
-                return &itr->second;
-            return nullptr;
-        }
-
-        /// compatible with other mangos branches access
-
-        inline OpcodeHandler const& operator[](uint16 id) const
-        {
-            OpcodeMap::const_iterator itr = mOpcodeMap.find(id);
-            if (itr != mOpcodeMap.end())
-                return itr->second;
-            return emptyHandler;
-        }
-
-        static OpcodeHandler const emptyHandler;
-
-        OpcodeMap mOpcodeMap;
-};
-
-#define opcodeTable MaNGOS::Singleton<OpcodeStore>::Instance()
-
-/// Lookup opcode name for human understandable logging
-inline char const* LookupOpcodeName(uint16 id)
-{
-    if (OpcodeHandler const* op = opcodeTable.LookupOpcode(id))
-        return op->name;
-    return "Received unknown opcode, it's more than max!";
+    if (id >= NUM_MSG_TYPES)
+        return "Received unknown opcode, it's more than max!";
+    return opcodeTable[id].name;
 }
 #endif
-/// @}

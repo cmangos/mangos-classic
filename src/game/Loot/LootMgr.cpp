@@ -1979,20 +1979,6 @@ void Loot::SendAllowedLooter()
 {
     if (m_lootMethod == FREE_FOR_ALL || m_lootMethod == NOT_GROUP_TYPE_LOOT)
         return;
-
-    WorldPacket data(SMSG_LOOT_LIST);
-    data << GetLootGuid();
-
-    if (m_lootMethod == MASTER_LOOT)
-        data << m_masterOwnerGuid.WriteAsPacked();
-    else
-        data << uint8(0);
-
-    data << m_currentLooterGuid.WriteAsPacked();
-
-    for (auto itr : m_ownerSet)
-        if (Player* plr = ObjectAccessor::FindPlayer(itr))
-            plr->GetSession()->SendPacket(data);
 }
 
 InventoryResult Loot::SendItem(Player* target, uint32 itemSlot)

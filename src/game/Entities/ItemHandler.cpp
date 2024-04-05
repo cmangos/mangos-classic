@@ -1160,27 +1160,3 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
     uint32 count = 1;
     _player->DestroyItemCount(gift, count, true);
 }
-
-void WorldSession::HandleCancelTempEnchantmentOpcode(WorldPacket& recv_data)
-{
-    DEBUG_LOG("WORLD: CMSG_CANCEL_TEMP_ENCHANTMENT");
-
-    uint32 eslot;
-
-    recv_data >> eslot;
-
-    // apply only to equipped item
-    if (!Player::IsEquipmentPos(INVENTORY_SLOT_BAG_0, eslot))
-        return;
-
-    Item* item = GetPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, eslot);
-
-    if (!item)
-        return;
-
-    if (!item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT))
-        return;
-
-    GetPlayer()->ApplyEnchantment(item, TEMP_ENCHANTMENT_SLOT, false);
-    item->ClearEnchantment(TEMP_ENCHANTMENT_SLOT);
-}

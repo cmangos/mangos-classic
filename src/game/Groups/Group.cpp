@@ -814,21 +814,6 @@ void Group::BroadcastReadyCheck(WorldPacket const& packet) const
     }
 }
 
-void Group::OfflineReadyCheck()
-{
-    for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
-    {
-        Player* pl = sObjectMgr.GetPlayer(citr->guid);
-        if (!pl || !pl->GetSession())
-        {
-            WorldPacket data(MSG_RAID_READY_CHECK_CONFIRM, 9);
-            data << citr->guid;
-            data << uint8(0);
-            BroadcastReadyCheck(data);
-        }
-    }
-}
-
 bool Group::_addMember(ObjectGuid guid, const char* name, bool isAssistant)
 {
     // get first not-full group

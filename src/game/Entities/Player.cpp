@@ -2758,7 +2758,6 @@ void Player::GiveLevel(uint32 level)
 
     // resend quests status directly
     GetSession()->SetCurrentPlayerLevel(level);
-    SendQuestGiverStatusMultiple();
 }
 
 void Player::UpdateFreeTalentPoints(bool resetIfNeed)
@@ -3017,53 +3016,6 @@ void Player::SendInitialSpells() const
     DETAIL_LOG("CHARACTER: Sent Initial Spells");
 }
 
-void Player::SendUnlearnSpells() const
-{
-    WorldPacket data(SMSG_SEND_UNLEARN_SPELLS, 4 + 4 * m_spells.size());
-
-    uint32 spellCount = 0;
-    size_t countPos = data.wpos();
-    data << uint32(spellCount);                             // spell count placeholder
-
-    for (auto& spellData : m_spells)
-    {
-        if (spellData.second.state == PLAYERSPELL_REMOVED)
-            continue;
-
-        if (spellData.second.active || spellData.second.disabled)
-            continue;
-
-        auto skillLineAbilities = sSpellMgr.GetSkillLineAbilityMapBoundsBySpellId(spellData.first);
-        if (skillLineAbilities.first == skillLineAbilities.second)
-            continue;
-
-        bool hasSupercededSpellInfoInClient = false;
-        for (auto boundsItr = skillLineAbilities.first; boundsItr != skillLineAbilities.second; ++boundsItr)
-        {
-            if (boundsItr->second->forward_spellid)
-            {
-                hasSupercededSpellInfoInClient = true;
-                break;
-            }
-        }
-
-        if (hasSupercededSpellInfoInClient)
-            continue;
-
-        uint32 nextRank = sSpellMgr.GetNextSpellInChain(spellData.first);
-        if (!nextRank || !HasSpell(nextRank))
-            continue;
-
-        data << uint32(spellData.first);
-
-        ++spellCount;
-    }
-
-    data.put<uint32>(countPos, spellCount);                  // write real count value
-
-    SendDirectMessage(data);
-}
-
 void Player::SendSupercededSpell(uint32 oldSpell, uint32 newSpell) const
 {
     WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
@@ -3249,8 +3201,6 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                 {
                     // update spell ranks in spellbook and action bar
                     SendSupercededSpell(spell_id, next_active_spell_id);
-                    if (IsUnlearnSpellsPacketNeededForSpell(spell_id))
-                        SendUnlearnSpells();
                 }
                 else
                     SendRemovedSpell(spell_id);
@@ -3409,9 +3359,6 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
         }
 
         m_spells[spell_id] = newspell;
-
-        if (needsUnlearnSpellsPacket)
-            SendUnlearnSpells();
 
         // return false if spell disabled
         if (newspell.disabled)
@@ -3650,9 +3597,6 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank, bo
             }
         }
     }
-
-    if (needsUnlearnSpellsPacket)
-        SendUnlearnSpells();
 
     // remove from spell book if not replaced by lesser rank
     if (!prev_activate && sendUpdate)
@@ -12728,9 +12672,6 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(0);
     for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
         itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, false);
-
-    // resend quests status directly
-    SendQuestGiverStatusMultiple();
 }
 
 bool Player::IsQuestExplored(uint32 quest_id) const
@@ -13938,60 +13879,6 @@ void Player::SendQuestUpdateAddCreatureOrGo(Quest const* pQuest, ObjectGuid guid
     uint16 slot = FindQuestSlot(pQuest->GetQuestId());
     if (slot < MAX_QUEST_LOG_SIZE)
         SetQuestSlotCounter(slot, uint8(creatureOrGO_idx), uint8(count));
-}
-
-void Player::SendQuestGiverStatusMultiple() const
-{
-    uint32 count = 0;
-
-    WorldPacket data(SMSG_QUESTGIVER_STATUS_MULTIPLE, 4);
-    data << uint32(count);                                  // placeholder
-
-    for (auto m_clientGUID : m_clientGUIDs)
-    {
-        if (m_clientGUID.IsAnyTypeCreature())
-        {
-            // need also pet quests case support
-            Creature* questgiver = GetMap()->GetAnyTypeCreature(m_clientGUID);
-
-            if (!questgiver || !CanInteract(questgiver))
-                continue;
-
-            if (!questgiver->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER))
-                continue;
-
-            uint8 dialogStatus = sScriptDevAIMgr.GetDialogStatus(this, questgiver);
-
-            if (dialogStatus == DIALOG_STATUS_UNDEFINED)
-                dialogStatus = GetSession()->getDialogStatus(this, questgiver, DIALOG_STATUS_NONE);
-
-            data << questgiver->GetObjectGuid();
-            data << uint8(dialogStatus);
-            ++count;
-        }
-        else if (m_clientGUID.IsGameObject())
-        {
-            GameObject* questgiver = GetMap()->GetGameObject(m_clientGUID);
-
-            if (!questgiver)
-                continue;
-
-            if (questgiver->GetGoType() != GAMEOBJECT_TYPE_QUESTGIVER)
-                continue;
-
-            uint8 dialogStatus = sScriptDevAIMgr.GetDialogStatus(this, questgiver);
-
-            if (dialogStatus == DIALOG_STATUS_UNDEFINED)
-                dialogStatus = GetSession()->getDialogStatus(this, questgiver, DIALOG_STATUS_NONE);
-
-            data << questgiver->GetObjectGuid();
-            data << uint8(dialogStatus);
-            ++count;
-        }
-    }
-
-    data.put<uint32>(0, count);                             // write real count
-    GetSession()->SendPacket(data);
 }
 
 /*********************************************************/
@@ -16474,13 +16361,6 @@ void Player::SendExplorationExperience(uint32 Area, uint32 Experience) const
     GetSession()->SendPacket(data);
 }
 
-void Player::SendResetFailedNotify(uint32 mapid) const
-{
-    WorldPacket data(SMSG_RESET_FAILED_NOTIFY, 4);
-    data << uint32(mapid);
-    GetSession()->SendPacket(data);
-}
-
 /// Reset all solo instances and optionally send a message on success for each
 void Player::ResetInstances(InstanceResetMethod method)
 {
@@ -18098,8 +17978,6 @@ void Player::SendInitialPacketsBeforeAddToMap()
     GetSession()->SendTutorialsData();
 
     SendInitialSpells();
-
-    SendUnlearnSpells();
 
     SendInitialActionButtons();
     m_reputationMgr.SendInitialReputations();

@@ -1909,9 +1909,7 @@ bool DungeonMap::Reset(InstanceResetMethod method)
     {
         if (method == INSTANCE_RESET_ALL)
         {
-            // notify the players to leave the instance so it can be reset
-            for (auto& itr : m_mapRefManager)
-                itr.getSource()->SendResetFailedNotify(GetId());
+
         }
         else
         {

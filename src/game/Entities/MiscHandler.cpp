@@ -1123,39 +1123,10 @@ void WorldSession::HandleResetInstancesOpcode(WorldPacket& /*recv_data*/)
         _player->ResetInstances(INSTANCE_RESET_ALL);
 }
 
-void WorldSession::HandleCancelMountAuraOpcode(WorldPacket& /*recv_data*/)
-{
-    DEBUG_LOG("WORLD: Received opcode  CMSG_CANCEL_MOUNT_AURA");
-
-    // If player is not mounted, so go out :)
-    if (!_player->IsMounted())                              // not blizz like; no any messages on blizz
-    {
-        ChatHandler(this).SendSysMessage(LANG_CHAR_NON_MOUNTED);
-        return;
-    }
-
-    if (_player->IsTaxiFlying())                            // not blizz like; no any messages on blizz
-    {
-        ChatHandler(this).SendSysMessage(LANG_YOU_IN_FLIGHT);
-        return;
-    }
-
-    _player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
-    _player->Unmount();
-}
-
 void WorldSession::HandleRequestPetInfoOpcode(WorldPacket& /*recv_data */)
 {
     if (_player->GetPet())
         _player->PetSpellInitialize();
     else if (_player->GetCharm())
         _player->CharmSpellInitialize();
-}
-
-void WorldSession::HandleSetTaxiBenchmarkOpcode(WorldPacket& recv_data)
-{
-    uint8 mode;
-    recv_data >> mode;
-
-    DEBUG_LOG("Client used \"/timetest %d\" command", mode);
 }

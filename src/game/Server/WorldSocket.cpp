@@ -226,9 +226,6 @@ bool WorldSocket::ProcessIncomingData()
                         if (!self->HandlePing(*pct))
                             return;
                         break;
-                    case CMSG_KEEP_ALIVE:
-                        DEBUG_LOG("CMSG_KEEP_ALIVE, size: " SIZEFMTD " ", pct->size());
-                        break;
                     default:
                     {
                         self->m_opcodeHistoryInc.push_front(uint32(pct->GetOpcode()));

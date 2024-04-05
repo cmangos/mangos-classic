@@ -767,16 +767,6 @@ void WorldSession::HandleSaveGuildEmblemOpcode(WorldPacket& recvPacket)
     guild->Query(this);
 }
 
-void WorldSession::HandleGuildEventLogQueryOpcode(WorldPacket& /* recvPacket */)
-{
-    // empty
-    DEBUG_LOG("WORLD: Received (MSG_GUILD_EVENT_LOG_QUERY)");
-
-    if (uint32 GuildId = GetPlayer()->GetGuildId())
-        if (Guild* pGuild = sGuildMgr.GetGuildById(GuildId))
-            pGuild->DisplayGuildEventLog(this);
-}
-
 void WorldSession::SendSaveGuildEmblem(uint32 msg) const
 {
     WorldPacket data(MSG_SAVE_GUILD_EMBLEM, 4);

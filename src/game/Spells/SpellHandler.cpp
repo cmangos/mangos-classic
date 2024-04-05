@@ -547,23 +547,6 @@ void WorldSession::HandleCancelChanneling(WorldPacket& recv_data)
     _player->InterruptSpell(CURRENT_CHANNELED_SPELL);
 }
 
-void WorldSession::HandleTotemDestroyed(WorldPacket& recvPacket)
-{
-    uint8 slotId;
-
-    recvPacket >> slotId;
-
-    // ignore for remote control state
-    if (!_player->IsSelfMover())
-        return;
-
-    if (int(slotId) >= MAX_TOTEM_SLOT)
-        return;
-
-    if (Totem* totem = GetPlayer()->GetTotem(TotemSlot(slotId)))
-        totem->UnSummon();
-}
-
 void WorldSession::HandleSelfResOpcode(WorldPacket& /*recv_data*/)
 {
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: CMSG_SELF_RES");                  // empty opcode
