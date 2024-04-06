@@ -120,7 +120,7 @@ struct CreateHealthStoneWarlock : public SpellScript
 
     uint32 GetUsableHealthStoneItemType(Unit* target, SpellEntry const* spellInfo) const
     {
-        if (!target || target->IsPlayer())
+        if (!target || !target->IsPlayer())
             return 0;
 
         uint32 itemtype = 0;
