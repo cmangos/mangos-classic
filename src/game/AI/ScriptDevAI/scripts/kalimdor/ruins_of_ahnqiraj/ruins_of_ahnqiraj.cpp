@@ -88,10 +88,14 @@ void instance_ruins_of_ahnqiraj::OnObjectDestroy(GameObject* go)
 {
    if (go->GetEntry() == GO_OSSIRIAN_CRYSTAL)
    {
-      auto it = m_goEntryGuidCollection.find(go->GetEntry());
+      auto& crystal_vect = m_goEntryGuidCollection[go->GetEntry()];
 
-      if (it != m_goEntryGuidCollection.end())
-         m_goEntryGuidCollection.erase(it);
+      auto it = std::find(crystal_vect.begin(), crystal_vect.end(), go->GetObjectGuid());
+
+      if (it != crystal_vect.end())
+      {
+         crystal_vect.erase(it);
+      }
    }
 }
 
