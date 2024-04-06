@@ -861,11 +861,12 @@ enum Opcodes
     SMSG_LOTTERY_RESULT_OBSOLETE                    = 0x337,
     SMSG_CHARACTER_PROFILE                          = 0x338,
     SMSG_CHARACTER_PROFILE_REALM_CONNECTED          = 0x339,
-    SMSG_DEFENSE_MESSAGE                            = 0x33A,
+    SMSG_UNK                                        = 0x33A,
+    SMSG_DEFENSE_MESSAGE                            = 0x33B,
 };
 
 // Don't forget to change this value and add opcode name to Opcodes.cpp when you add new opcode!
-#define NUM_MSG_TYPES 0x33B
+#define NUM_MSG_TYPES 0x33C
 
 /// Player state
 enum SessionStatus
