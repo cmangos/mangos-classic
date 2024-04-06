@@ -52,9 +52,6 @@ uint16 GetOrderResponse(uint16 opcode)
         case SMSG_MOVE_SET_HOVER:
         case SMSG_MOVE_UNSET_HOVER:
             return CMSG_MOVE_HOVER_ACK;
-        case SMSG_MOVE_SET_FLIGHT:
-        case SMSG_MOVE_UNSET_FLIGHT:
-            return CMSG_MOVE_FLIGHT_ACK;
         case SMSG_MOVE_WATER_WALK:
         case SMSG_MOVE_LAND_WALK:
             return CMSG_MOVE_WATER_WALK_ACK;

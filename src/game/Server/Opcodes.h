@@ -844,6 +844,7 @@ enum Opcodes
     SMSG_GHOSTEE_GONE                               = 0x326,
     CMSG_GM_UPDATE_TICKET_STATUS                    = 0x327,
     SMSG_GM_TICKET_STATUS_UPDATE                    = 0x328,
+    MSG_SET_DUNGEON_DIFFICULTY                      = 0x329,
     CMSG_GMSURVEY_SUBMIT                            = 0x32A,
     SMSG_UPDATE_INSTANCE_OWNERSHIP                  = 0x32B,
     CMSG_IGNORE_KNOCKBACK_CHEAT                     = 0x32C,
@@ -861,17 +862,10 @@ enum Opcodes
     SMSG_CHARACTER_PROFILE                          = 0x338,
     SMSG_CHARACTER_PROFILE_REALM_CONNECTED          = 0x339,
     SMSG_DEFENSE_MESSAGE                            = 0x33A,
-    MSG_GM_RESETINSTANCELIMIT                       = 0x33C,
-    // SMSG_MOTD                                       = 0x33D,
-    SMSG_MOVE_SET_FLIGHT                            = 0x33E,
-    SMSG_MOVE_UNSET_FLIGHT                          = 0x33F,
-    CMSG_MOVE_FLIGHT_ACK                            = 0x340,
-    MSG_MOVE_START_SWIM_CHEAT                       = 0x341,
-    MSG_MOVE_STOP_SWIM_CHEAT                        = 0x342,
 };
 
 // Don't forget to change this value and add opcode name to Opcodes.cpp when you add new opcode!
-#define NUM_MSG_TYPES 0x424
+#define NUM_MSG_TYPES 0x33B
 
 /// Player state
 enum SessionStatus
