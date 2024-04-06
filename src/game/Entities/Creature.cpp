@@ -2282,6 +2282,16 @@ void Creature::UpdateSpell(int32 index, int32 newSpellId)
 
 void Creature::SetSpellList(uint32 spellSet)
 {
+    if (spellSet == 0)
+    {
+        m_spellList.Disabled = true;
+        m_spellList.Spells.clear();
+
+        if (AI())
+            AI()->SpellListChanged();
+        return;
+    }
+
     // Try difficulty dependent version before falling back to base entry
     auto spellList = GetMap()->GetMapDataContainer().GetCreatureSpellList(spellSet);
     if (!spellList)
