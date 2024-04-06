@@ -215,10 +215,11 @@ void instance_ruins_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
                 {
                     if (GameObject* go = instance->GetGameObject(crystals[i]))
                     {
-                        go->SetForcedDespawn();
                         go->SetLootState(GO_JUST_DEACTIVATED);
+                        go->SetForcedDespawn();
                     }
                 }
+                m_goEntryGuidCollection[GO_OSSIRIAN_CRYSTAL].resize(1); // keeps first
             }
             m_auiEncounter[uiType] = uiData;
             break;
