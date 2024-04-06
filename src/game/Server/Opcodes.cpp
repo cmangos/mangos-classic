@@ -536,6 +536,8 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x1FC*/ {       "SMSG_ENVIRONMENTALDAMAGELOG",      STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide},
     /*0x1FD*/ {              "CMSG_RWHOIS_OBSOLETE",             STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL},
     /*0x1FE*/ {                       "SMSG_RWHOIS",                      STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide},
+    /*0x1FF*/ {             "MSG_LOOKING_FOR_GROUP",                 STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL },
+    /*0x200*/ {        "CMSG_SET_LOOKING_FOR_GROUP",                 STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL },
     /*0x201*/ {                "CMSG_UNLEARN_SPELL",               STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL},
     /*0x202*/ {                "CMSG_UNLEARN_SKILL",               STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleUnlearnSkillOpcode},
     /*0x203*/ {                "SMSG_REMOVED_SPELL",               STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide},
