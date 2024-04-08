@@ -4530,6 +4530,15 @@ void Player::DurabilityLossAll(double percent, bool inventory)
 
 void Player::DurabilityLoss(Item* item, double percent)
 {
+#ifdef ENABLE_PLAYERBOTS
+    PlayerbotAI * bot = GetPlayerbotAI();
+    if (bot)
+    {
+        bot->DurabilityLoss(item, percent);
+        return;
+    }
+#endif
+
     if (!item)
         return;
 
