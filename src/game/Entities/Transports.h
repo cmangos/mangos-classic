@@ -38,7 +38,6 @@ class GenericTransport : public GameObject
         void UpdatePosition(float x, float y, float z, float o);
         void UpdatePassengerPosition(WorldObject* object);
 
-        typedef std::set<Player*> PlayerSet;
         PassengerSet& GetPassengers() { return m_passengers; }
 
         /// This method transforms supplied transport offsets into global coordinates
