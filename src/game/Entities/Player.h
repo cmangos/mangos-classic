@@ -2199,12 +2199,12 @@ class Player : public Unit
         void UpdateAI(const uint32 diff, bool minimal = false);
         void CreatePlayerbotAI();
         void RemovePlayerbotAI();
-        PlayerbotAI* GetPlayerbotAI() { return m_playerbotAI.get(); }
+        PlayerbotAI* GetPlayerbotAI() const { return m_playerbotAI.get(); }
         void CreatePlayerbotMgr();
         void RemovePlayerbotMgr();
-        PlayerbotMgr* GetPlayerbotMgr() { return m_playerbotMgr.get(); }
+        PlayerbotMgr* GetPlayerbotMgr() const { return m_playerbotMgr.get(); }
         void SetBotDeathTimer() { m_deathTimer = 0; }
-        bool isRealPlayer() { return m_session && (m_session->GetRemoteAddress() != "disconnected/bot"); }
+        bool isRealPlayer() const { return m_session && (m_session->GetRemoteAddress() != "disconnected/bot"); }
 #endif
 
         void SendLootError(ObjectGuid guid, LootError error) const;
