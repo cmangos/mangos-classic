@@ -1266,6 +1266,15 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
     float meleeAttackPwr = 0.f;
     float rangedAttackPwr = 0.f;
 
+    float healthMultiplier = 1.f;
+    float manaMultiplier = 1.f;
+
+    float strength = 0.f;
+    float agility = 0.f;
+    float stamina = 0.f;
+    float intellect = 0.f;
+    float spirit = 0.f;
+
     float damageMod = _GetDamageMod(rank);
     float damageMulti = cinfo->DamageMultiplier * damageMod;
     bool usedDamageMulti = false;
@@ -1274,13 +1283,17 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
     {
         // Use Creature Stats to calculate stat values
 
-        // health
         if (cinfo->HealthMultiplier >= 0)
-            health = std::round(cCLS->BaseHealth * cinfo->HealthMultiplier);
+            health = cCLS->BaseHealth;
+        // health
+        if (cinfo->HealthMultiplier > 0)
+            healthMultiplier = cinfo->HealthMultiplier;
 
-        // mana
         if (cinfo->PowerMultiplier >= 0)
-            mana = std::round(cCLS->BaseMana * cinfo->PowerMultiplier);
+            mana = cCLS->BaseMana;
+        // mana
+        if (cinfo->PowerMultiplier > 0)
+            manaMultiplier = cinfo->PowerMultiplier;
 
         // armor
         if (cinfo->ArmorMultiplier >= 0)
@@ -1301,6 +1314,18 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
             meleeAttackPwr = cCLS->BaseMeleeAttackPower;
             rangedAttackPwr = cCLS->BaseRangedAttackPower;
         }
+
+        // attributes
+        if (cinfo->StrengthMultiplier >= 0)
+            strength = cCLS->Strength * cinfo->StrengthMultiplier;
+        if (cinfo->AgilityMultiplier >= 0)
+            agility = cCLS->Agility * cinfo->AgilityMultiplier;
+        if (cinfo->StaminaMultiplier >= 0)
+            stamina = cCLS->Stamina * cinfo->StaminaMultiplier;
+        if (cinfo->IntellectMultiplier >= 0)
+            intellect = cCLS->Intellect * cinfo->IntellectMultiplier;
+        if (cinfo->SpiritMultiplier >= 0)
+            spirit = cCLS->Spirit * cinfo->SpiritMultiplier;
     }
 
     if (!usedDamageMulti || armor == -1.f) // some field needs to default to old db fields
@@ -1406,6 +1431,17 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
     // attack power
     SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, meleeAttackPwr * damageMod);
     SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED, BASE_VALUE, rangedAttackPwr * damageMod);
+
+    // primary attributes
+    SetCreateStat(STAT_STRENGTH, strength);
+    SetCreateStat(STAT_AGILITY, agility);
+    SetCreateStat(STAT_STAMINA, stamina);
+    SetCreateStat(STAT_INTELLECT, intellect);
+    SetCreateStat(STAT_SPIRIT, spirit);
+
+    // multipliers
+    SetModifierValue(UNIT_MOD_HEALTH, TOTAL_PCT, healthMultiplier);
+    SetModifierValue(UNIT_MOD_MANA, TOTAL_PCT, manaMultiplier);
 
     UpdateAllStats();
 }

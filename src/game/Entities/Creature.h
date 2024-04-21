@@ -123,6 +123,11 @@ struct CreatureInfo
     float   DamageVariance;
     float   ArmorMultiplier;
     float   ExperienceMultiplier;
+    float   StrengthMultiplier;
+    float   AgilityMultiplier;
+    float   StaminaMultiplier;
+    float   IntellectMultiplier;
+    float   SpiritMultiplier;
     uint32  MinLevelHealth;
     uint32  MaxLevelHealth;
     uint32  MinLevelMana;
@@ -297,6 +302,11 @@ struct CreatureClassLvlStats
     float   BaseMeleeAttackPower;
     float   BaseRangedAttackPower;
     uint32  BaseArmor;
+    uint32  Strength;
+    uint32  Agility;
+    uint32  Stamina;
+    uint32  Intellect;
+    uint32  Spirit;
 };
 
 struct CreatureModelInfo
@@ -662,8 +672,6 @@ class Creature : public Unit
         bool UpdateAllStats() override;
         void UpdateResistances(uint32 school) override;
         void UpdateArmor() override;
-        void UpdateMaxHealth() override;
-        void UpdateMaxPower(Powers power) override;
         void UpdateAttackPowerAndDamage(bool ranged = false) override;
         void UpdateDamagePhysical(WeaponAttackType attType) override;
         uint32 GetCurrentEquipmentId() const { return m_equipmentId; }

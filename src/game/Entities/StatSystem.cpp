@@ -141,27 +141,37 @@ void Player::UpdateArmor()
     m_auraModifiersGroup[UNIT_MOD_ARMOR][TOTAL_VALUE] -= dynamic;
 }
 
-float Player::GetHealthBonusFromStamina() const
+float Unit::GetHealthBonusFromStamina(float stamina)
 {
-    float stamina = GetStat(STAT_STAMINA);
-
     float baseStam = stamina < 20 ? stamina : 20;
     float moreStam = stamina - baseStam;
 
     return baseStam + (moreStam * 10.0f);
 }
 
-float Player::GetManaBonusFromIntellect() const
+float Unit::GetHealthBonusFromStamina() const
 {
-    float intellect = GetStat(STAT_INTELLECT);
+    float stamina = GetStat(STAT_STAMINA);
 
+    return Unit::GetHealthBonusFromStamina(stamina);
+}
+
+float Unit::GetManaBonusFromIntellect(float intellect)
+{
     float baseInt = intellect < 20 ? intellect : 20;
     float moreInt = intellect - baseInt;
 
     return baseInt + (moreInt * 15.0f);
 }
 
-void Player::UpdateMaxHealth()
+float Unit::GetManaBonusFromIntellect() const
+{
+    float intellect = GetStat(STAT_INTELLECT);
+
+    return Unit::GetManaBonusFromIntellect(intellect);
+}
+
+void Unit::UpdateMaxHealth()
 {
     UnitMods unitMod = UNIT_MOD_HEALTH;
 
@@ -173,7 +183,7 @@ void Player::UpdateMaxHealth()
     SetMaxHealth((uint32)value);
 }
 
-void Player::UpdateMaxPower(Powers power)
+void Unit::UpdateMaxPower(Powers power)
 {
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + power);
 
@@ -603,6 +613,13 @@ bool Creature::UpdateStats(Stats /*stat*/)
 
 bool Creature::UpdateAllStats()
 {
+    for (int i = STAT_STRENGTH; i < MAX_STATS; ++i)
+    {
+        float value = GetTotalStatValue(Stats(i));
+        SetStat(Stats(i), (int32)value);
+    }
+
+    UpdateArmor();
     UpdateMaxHealth();
     UpdateAttackPowerAndDamage();
     UpdateAttackPowerAndDamage(true);
@@ -629,36 +646,20 @@ void Creature::UpdateResistances(uint32 school)
 
 void Creature::UpdateArmor()
 {
+    float dynamic = (GetStat(STAT_AGILITY) * 2.0f);
+
+    m_auraModifiersGroup[UNIT_MOD_ARMOR][TOTAL_VALUE] += dynamic;
     int32 value = GetTotalResistanceValue(SPELL_SCHOOL_NORMAL);
+    int32 oldValue = GetArmor();
     SetArmor(value);
-}
-
-void Creature::UpdateMaxHealth()
-{
-    UnitMods unitMod = UNIT_MOD_HEALTH;
-
-    float value = GetModifierValue(unitMod, BASE_VALUE) + GetCreateHealth();
-    value *= GetModifierValue(unitMod, BASE_PCT);
-    value += GetModifierValue(unitMod, TOTAL_VALUE);
-    value *= GetModifierValue(unitMod, TOTAL_PCT);
-
-    SetMaxHealth((uint32)value);
-}
-
-void Creature::UpdateMaxPower(Powers power)
-{
-    UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + power);
-
-    float value = GetModifierValue(unitMod, BASE_VALUE) + GetCreatePowers(power);
-    value *= GetModifierValue(unitMod, BASE_PCT);
-    value += GetModifierValue(unitMod, TOTAL_VALUE);
-    value *= GetModifierValue(unitMod, TOTAL_PCT);
-
-    SetMaxPower(power, uint32(value));
+    m_auraModifiersGroup[UNIT_MOD_ARMOR][TOTAL_VALUE] -= dynamic;
 }
 
 void Creature::UpdateAttackPowerAndDamage(bool ranged)
 {
+    float val2 = 0.0f;
+    float level = float(GetLevel());
+
     UnitMods unitMod = ranged ? UNIT_MOD_ATTACK_POWER_RANGED : UNIT_MOD_ATTACK_POWER;
 
     uint16 index = UNIT_FIELD_ATTACK_POWER;
@@ -670,25 +671,40 @@ void Creature::UpdateAttackPowerAndDamage(bool ranged)
         index = UNIT_FIELD_RANGED_ATTACK_POWER;
         index_mod = UNIT_FIELD_RANGED_ATTACK_POWER_MODS;
         index_mult = UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER;
+
+        val2 = GetStat(STAT_AGILITY) - 10.0f;
+    }
+    else
+    {
+        switch (getClass())
+        {
+            case CLASS_ROGUE:
+                val2 = (GetStat(STAT_STRENGTH) - 10.0f) + GetStat(STAT_AGILITY);
+                break;
+            default:
+                val2 = (GetStat(STAT_STRENGTH) - 10.0f) * 2.f;
+                break;
+        }
     }
 
-    float base_attPower  = GetModifierValue(unitMod, BASE_VALUE) * GetModifierValue(unitMod, BASE_PCT);
+    SetModifierValue(unitMod, BASE_VALUE, val2);
+    float base_attPower = GetModifierValue(unitMod, BASE_VALUE) * GetModifierValue(unitMod, BASE_PCT);
     float attPowerMod = GetModifierValue(unitMod, TOTAL_VALUE);
+
     float attPowerMultiplier = GetModifierValue(unitMod, TOTAL_PCT) - 1.0f;
 
     SetInt32Value(index, (uint32)base_attPower);            // UNIT_FIELD_(RANGED)_ATTACK_POWER field
     SetInt32Value(index_mod, (uint32)attPowerMod);          // UNIT_FIELD_(RANGED)_ATTACK_POWER_MODS field
     SetFloatValue(index_mult, attPowerMultiplier);          // UNIT_FIELD_(RANGED)_ATTACK_POWER_MULTIPLIER field
 
-    if (ranged)
-    {
-        UpdateDamagePhysical(RANGED_ATTACK);
-        return;
-    }
-
     // automatically update weapon damage after attack power modification
-    UpdateDamagePhysical(BASE_ATTACK);
-    UpdateDamagePhysical(OFF_ATTACK);
+    if (!ranged)
+    {
+        UpdateDamagePhysical(BASE_ATTACK);
+        UpdateDamagePhysical(OFF_ATTACK);
+    }
+    else
+        UpdateDamagePhysical(RANGED_ATTACK);
 }
 
 void Creature::UpdateDamagePhysical(WeaponAttackType attType)

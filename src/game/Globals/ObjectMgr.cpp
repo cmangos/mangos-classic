@@ -717,7 +717,7 @@ void ObjectMgr::LoadCreatureClassLvlStats()
     // initialize data array
     memset(&m_creatureClassLvlStats, 0, sizeof(m_creatureClassLvlStats));
 
-    std::string queryStr = "SELECT Class, Level, BaseMana, BaseMeleeAttackPower, BaseRangedAttackPower, BaseArmor, BaseHealthExp0, BaseDamageExp0 "
+    std::string queryStr = "SELECT Class, Level, BaseMana, BaseMeleeAttackPower, BaseRangedAttackPower, BaseArmor, Strength, Agility, Stamina, Intellect, Spirit, BaseHealthExp0, BaseDamageExp0 "
                            "FROM creature_template_classlevelstats ORDER BY Class, Level";
 
     auto queryResult = WorldDatabase.Query(queryStr.c_str());
@@ -760,9 +760,22 @@ void ObjectMgr::LoadCreatureClassLvlStats()
         cCLS.BaseMeleeAttackPower   = fields[3].GetFloat();
         cCLS.BaseRangedAttackPower  = fields[4].GetFloat();
         cCLS.BaseArmor              = fields[5].GetUInt32();
-        cCLS.BaseHealth             = fields[6].GetUInt32();
-        cCLS.BaseDamage             = fields[7].GetFloat();
+    	cCLS.Strength               = fields[6].GetUInt32();
+        cCLS.Agility                = fields[7].GetUInt32();
+        cCLS.Stamina                = fields[8].GetUInt32();
+        cCLS.Intellect              = fields[9].GetUInt32();
+        cCLS.Spirit                 = fields[10].GetUInt32();
+        cCLS.BaseHealth             = fields[11].GetUInt32();
+        cCLS.BaseDamage             = fields[12].GetFloat();
 
+        // should ensure old data does not need change (not wanting to recalculate to avoid losing data)
+        // if any mistake is made, it will be in these formulae that make asumptions about the new calculations
+        // AP, RAP, HP, Mana and armor should stay the same pre-change and post-change when using multipliers == 1
+        cCLS.BaseHealth -= std::min(cCLS.BaseHealth, std::max(0u, (uint32)Unit::GetHealthBonusFromStamina(cCLS.Stamina)));
+        cCLS.BaseMana -= std::min(cCLS.BaseMana, std::max(0u, (uint32)Unit::GetManaBonusFromIntellect(cCLS.Intellect)));
+        cCLS.BaseMeleeAttackPower -= std::min(cCLS.BaseMeleeAttackPower, std::max(0.f, float(cCLS.Strength >= 10 ? (cCLS.Strength - 10) * 2 : 0)));
+        cCLS.BaseRangedAttackPower -= std::min(cCLS.BaseRangedAttackPower, std::max(0.f, float(cCLS.Agility >= 10 ? (cCLS.Agility - 10) : 0)));
+        cCLS.BaseArmor -= std::min(cCLS.BaseArmor, std::max(0u, cCLS.Agility * 2));
         ++storedRow;
     }
     while (queryResult->NextRow());
