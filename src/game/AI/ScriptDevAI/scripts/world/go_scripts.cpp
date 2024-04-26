@@ -468,6 +468,29 @@ GameObjectAI* GetAI_go_containment(GameObject* go)
     return new go_containment(go);
 }
 
+struct go_ectoplasmic_distiller_trap : public GameObjectAI
+{
+    go_ectoplasmic_distiller_trap(GameObject* go) : GameObjectAI(go), m_castTimer(1000) {}
+
+    uint32 m_castTimer;
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_castTimer <= uiDiff)
+        {
+            m_go->CastSpell(nullptr, nullptr, m_go->GetGOInfo()->trap.spellId, TRIGGERED_OLD_TRIGGERED);
+            m_castTimer = 2 * IN_MILLISECONDS;
+        }
+        else
+            m_castTimer -= uiDiff;
+    }
+};
+
+GameObjectAI* GetAI_go_ectoplasmic_distiller_trap(GameObject* go)
+{
+    return new go_ectoplasmic_distiller_trap(go);
+}
+
 void AddSC_go_scripts()
 {
     Script* pNewScript;
@@ -510,5 +533,10 @@ void AddSC_go_scripts()
     pNewScript = new Script;
     pNewScript->Name = "go_containment_coffer";
     pNewScript->GetGameObjectAI = &GetAI_go_containment;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_ectoplasmic_distiller_trap";
+    pNewScript->GetGameObjectAI = &GetAI_go_ectoplasmic_distiller_trap;
     pNewScript->RegisterSelf();
 }
