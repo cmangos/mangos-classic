@@ -335,7 +335,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
             {
                 Player* player = itr->getSource();
-                if (player && player->GetPlayerbotAI())
+                if (player && player->GetPlayerbotAI() && player->IsInGroup(GetPlayer(), true))
                 {
                     player->GetPlayerbotAI()->HandleCommand(type, msg, *GetPlayer(), lang);
                     GetPlayer()->m_speakTime = 0;
