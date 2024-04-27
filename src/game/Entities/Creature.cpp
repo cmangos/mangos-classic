@@ -649,26 +649,25 @@ uint32 Creature::ChooseDisplayId(const CreatureInfo* cinfo, const CreatureData* 
 
     // use defaults from the template
     uint32 display_id = 0;
+    // pick based on probability
+    uint32 chanceTotal = 0;
+    for (uint32 i = 0; i < MAX_CREATURE_MODEL; ++i)
+        if (cinfo->DisplayId[i])
+            chanceTotal += cinfo->DisplayIdProbability[i];
 
-    // The follow decision tree needs to be updated if MAX_CREATURE_MODEL is changed.
-    static_assert(MAX_CREATURE_MODEL == 4, "Need to update model selection code for new or removed model fields");
-
-    // model selected here may be replaced with other_gender using own function
-    if (!cinfo->ModelId[1])
+    int32 roll = irand(0, std::max(int32(chanceTotal) - 1, 0)); // avoid 0
+    for (uint32 i = 0; i < MAX_CREATURE_MODEL; ++i)
     {
-        display_id = cinfo->ModelId[0];
-    }
-    else if (!cinfo->ModelId[2])
-    {
-        display_id = cinfo->ModelId[urand(0, 1)];
-    }
-    else if (!cinfo->ModelId[3])
-    {
-        display_id = cinfo->ModelId[urand(0, 2)];
-    }
-    else
-    {
-        display_id = cinfo->ModelId[urand(0, 3)];
+        if (cinfo->DisplayId[i])
+        {
+            if (roll < cinfo->DisplayIdProbability[i])
+            {
+                display_id = cinfo->DisplayId[i];
+                break;
+            }
+            else
+                roll -= cinfo->DisplayIdProbability[i];
+        }
     }
 
     // fail safe, we use creature entry 1 and make error
@@ -677,7 +676,7 @@ uint32 Creature::ChooseDisplayId(const CreatureInfo* cinfo, const CreatureData* 
         sLog.outErrorDb("Call customer support, ChooseDisplayId can not select native model for creature entry %u, model from creature entry 1 will be used instead.", cinfo->Entry);
 
         if (const CreatureInfo* creatureDefault = ObjectMgr::GetCreatureTemplate(1))
-            display_id = creatureDefault->ModelId[0];
+            display_id = creatureDefault->DisplayId[0];
     }
 
     return display_id;
@@ -1177,12 +1176,12 @@ void Creature::SaveToDB(uint32 mapid)
         // The following if-else assumes that there are 4 model fields and needs updating if this is changed.
         static_assert(MAX_CREATURE_MODEL == 4, "Need to update custom model check for new/removed model fields.");
 
-        if (displayId != cinfo->ModelId[0] && displayId != cinfo->ModelId[1] &&
-                displayId != cinfo->ModelId[2] && displayId != cinfo->ModelId[3])
+        if (displayId != cinfo->DisplayId[0] && displayId != cinfo->DisplayId[1] &&
+                displayId != cinfo->DisplayId[2] && displayId != cinfo->DisplayId[3])
         {
             for (int i = 0; i < MAX_CREATURE_MODEL && displayId; ++i)
-                if (cinfo->ModelId[i])
-                    if (CreatureModelInfo const* minfo = sObjectMgr.GetCreatureModelInfo(cinfo->ModelId[i]))
+                if (cinfo->DisplayId[i])
+                    if (CreatureModelInfo const* minfo = sObjectMgr.GetCreatureModelInfo(cinfo->DisplayId[i]))
                         if (displayId == minfo->modelid_other_gender)
                             displayId = 0;
         }

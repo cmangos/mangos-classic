@@ -175,7 +175,7 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recv_data)
         data << uint32(ci->Rank);                           // Creature Rank (elite, boss, etc)
         data << uint32(0);                                  // unknown        wdbFeild11
         data << uint32(ci->PetSpellDataId);                 // Id from CreatureSpellData.dbc    wdbField12
-        data << uint32(ci->ModelId[0]);                     // DisplayID      wdbFeild13
+        data << uint32(ci->DisplayId[0]);                   // DisplayID      wdbFeild13
 
         data << uint16(ci->Civilian);                       // wdbFeild14
         SendPacket(data);

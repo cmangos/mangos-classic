@@ -91,7 +91,8 @@ struct CreatureInfo
     char*   SubName;
     uint32  MinLevel;
     uint32  MaxLevel;
-    uint32  ModelId[MAX_CREATURE_MODEL];
+    uint32  DisplayId[MAX_CREATURE_MODEL];
+    uint32  DisplayIdProbability[MAX_CREATURE_MODEL];
     uint32  Faction;
     float   Scale;
     uint32  Family;                                         // enum CreatureFamily values (optional)

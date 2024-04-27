@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2822_01_mangos_creature_cls_stats` bit(1) DEFAULT NULL
+  `required_z2823_01_mangos_displayid_probability` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1219,10 +1219,15 @@ CREATE TABLE `creature_template` (
   `SubName` char(100) DEFAULT NULL,
   `MinLevel` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `MaxLevel` tinyint(3) unsigned NOT NULL DEFAULT '1',
-  `ModelId1` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `ModelId2` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `ModelId3` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `ModelId4` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `HeroicEntry` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `DisplayId1` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `DisplayId2` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `DisplayId3` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `DisplayId4` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `DisplayIdProbability1` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  `DisplayIdProbability2` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  `DisplayIdProbability3` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  `DisplayIdProbability4` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
   `Faction` smallint(5) unsigned NOT NULL DEFAULT '0',
   `Scale` float NOT NULL DEFAULT '1',
   `Family` tinyint(4) NOT NULL DEFAULT '0',
@@ -1317,7 +1322,7 @@ CREATE TABLE `creature_template` (
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
 INSERT INTO `creature_template` VALUES
-(1,'Waypoint (Only GM can see it)','Visual',63,63,10045,0,0,0,35,0,8,8,7,1,0,0,4096,0,130,5242886,0,0,0,0,0.91,1.14286,20,0,0,0,0,0,3,1,1,1,1,1,1,1,1,1,1,1,9999,9999,0,0,7,7,1.76,2.42,0,3,100,2000,2200,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,'','');
+(1,'Waypoint (Only GM can see it)','Visual',63,63,10045,0,0,0,100,0,0,0,35,0,8,8,7,1,0,0,4096,0,130,5242886,0,0,0,0,0.91,1.14286,20,0,0,0,0,0,3,1,1,1,1,1,1,1,1,1,1,1,9999,9999,0,0,7,7,1.76,2.42,0,3,100,2000,2200,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,'','');
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
