@@ -9,6 +9,7 @@ ALTER TABLE `creature_template` ADD COLUMN `DisplayIdProbability2` SMALLINT UNSI
 ALTER TABLE `creature_template` ADD COLUMN `DisplayIdProbability3` SMALLINT UNSIGNED NOT NULL DEFAULT 0 AFTER `DisplayIdProbability2`;
 ALTER TABLE `creature_template` ADD COLUMN `DisplayIdProbability4` SMALLINT UNSIGNED NOT NULL DEFAULT 0 AFTER `DisplayIdProbability3`;
 
+SET sql_safe_updates=0;
 -- setting probabilities to exactly replicate previous behaviour
 UPDATE creature_template SET DisplayIdProbability1=100 WHERE DisplayId1!=0;
 UPDATE creature_template SET DisplayIdProbability1=50,DisplayIdProbability2=50 WHERE DisplayId1!=0 AND DisplayId2!=0 AND EXISTS(SELECT modelid FROM creature_model_info WHERE creature_template.DisplayId2=creature_model_info.modelid AND modelid_alternative > 0);
@@ -16,4 +17,4 @@ UPDATE creature_template SET DisplayIdProbability1=0,DisplayIdProbability2=0 WHE
 UPDATE creature_template SET DisplayIdProbability1=33,DisplayIdProbability2=33,DisplayIdProbability3=33 WHERE DisplayId1!=0 AND DisplayId2!=0 AND DisplayId3!=0 AND EXISTS(SELECT modelid FROM creature_model_info WHERE creature_template.DisplayId2=creature_model_info.modelid AND modelid_alternative > 0);
 UPDATE creature_template SET DisplayIdProbability1=0,DisplayIdProbability2=0,DisplayIdProbability3=100 WHERE DisplayId1!=0 AND DisplayId2!=0 AND DisplayId3!=0 AND NOT EXISTS(SELECT modelid FROM creature_model_info WHERE creature_template.DisplayId2=creature_model_info.modelid AND modelid_alternative > 0);
 UPDATE creature_template SET DisplayIdProbability1=25,DisplayIdProbability2=25,DisplayIdProbability3=25,DisplayIdProbability4=25 WHERE DisplayId1!=0 AND DisplayId2!=0 AND DisplayId3!=0 AND DisplayId4!=0;
-
+SET sql_safe_updates=1;
