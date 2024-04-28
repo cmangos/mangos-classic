@@ -678,6 +678,9 @@ void Creature::UpdateAttackPowerAndDamage(bool ranged)
     {
         switch (getClass())
         {
+            case CLASS_MAGE:
+                val2 = GetStat(STAT_STRENGTH) - 10.0f;
+                break;
             case CLASS_ROGUE:
                 val2 = (GetStat(STAT_STRENGTH) - 10.0f) + GetStat(STAT_AGILITY);
                 break;
