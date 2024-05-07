@@ -1476,7 +1476,7 @@ void ObjectMgr::LoadEquipmentTemplates()
 uint32 ObjectMgr::GetCreatureModelOtherTeamModel(uint32 modelId) const
 {
     if (const CreatureModelInfo* modelInfo = GetCreatureModelInfo(modelId))
-        return modelInfo->modelid_other_team;
+        return modelInfo->modelid_alternative;
 
     return 0;
 }
@@ -1535,17 +1535,17 @@ void ObjectMgr::LoadCreatureModelInfo()
             }
         }
 
-        if (minfo->modelid_other_team)
+        if (minfo->modelid_alternative)
         {
-            if (minfo->modelid_other_team == minfo->modelid)
+            if (minfo->modelid_alternative == minfo->modelid)
             {
-                sLog.outErrorDb("Table `creature_model_info` has redundant modelid_other_team model (%u) defined for model id %u.", minfo->modelid_other_team, minfo->modelid);
-                const_cast<CreatureModelInfo*>(minfo)->modelid_other_team = 0;
+                sLog.outErrorDb("Table `creature_model_info` has redundant modelid_alternative model (%u) defined for model id %u.", minfo->modelid_alternative, minfo->modelid);
+                const_cast<CreatureModelInfo*>(minfo)->modelid_alternative = 0;
             }
-            else if (!sCreatureDisplayInfoStore.LookupEntry(minfo->modelid_other_team))
+            else if (!sCreatureDisplayInfoStore.LookupEntry(minfo->modelid_alternative))
             {
-                sLog.outErrorDb("Table `creature_model_info` has nonexistent modelid_other_team model (%u) defined for model id %u.", minfo->modelid_other_team, minfo->modelid);
-                const_cast<CreatureModelInfo*>(minfo)->modelid_other_team = 0;
+                sLog.outErrorDb("Table `creature_model_info` has nonexistent modelid_alternative model (%u) defined for model id %u.", minfo->modelid_alternative, minfo->modelid);
+                const_cast<CreatureModelInfo*>(minfo)->modelid_alternative = 0;
             }
         }
     }

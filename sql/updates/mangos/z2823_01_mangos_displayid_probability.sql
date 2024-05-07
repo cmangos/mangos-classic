@@ -9,6 +9,8 @@ ALTER TABLE `creature_template` ADD COLUMN `DisplayIdProbability2` SMALLINT UNSI
 ALTER TABLE `creature_template` ADD COLUMN `DisplayIdProbability3` SMALLINT UNSIGNED NOT NULL DEFAULT 0 AFTER `DisplayIdProbability2`;
 ALTER TABLE `creature_template` ADD COLUMN `DisplayIdProbability4` SMALLINT UNSIGNED NOT NULL DEFAULT 0 AFTER `DisplayIdProbability3`;
 
+ALTER TABLE `creature_model_info` RENAME COLUMN `modelid_other_team` TO `modelid_alternative`;
+
 SET sql_safe_updates=0;
 -- setting probabilities to exactly replicate previous behaviour
 UPDATE creature_template SET DisplayIdProbability1=100 WHERE DisplayId1!=0;
