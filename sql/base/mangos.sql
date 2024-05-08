@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2823_01_mangos_displayid_probability` bit(1) DEFAULT NULL
+  `required_z2824_01_mangos_model_unification` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1074,7 +1074,7 @@ CREATE TABLE `creature_model_info` (
   `SpeedRun` FLOAT NOT NULL DEFAULT '1.14286' COMMENT 'Default running speed for any creature with model',
   `gender` tinyint(3) unsigned NOT NULL DEFAULT '2',
   `modelid_other_gender` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `modelid_other_team` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `modelid_alternative` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`modelid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Creature System (Model related info)';
 
@@ -1219,7 +1219,6 @@ CREATE TABLE `creature_template` (
   `SubName` char(100) DEFAULT NULL,
   `MinLevel` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `MaxLevel` tinyint(3) unsigned NOT NULL DEFAULT '1',
-  `HeroicEntry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `DisplayId1` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `DisplayId2` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `DisplayId3` mediumint(8) unsigned NOT NULL DEFAULT '0',

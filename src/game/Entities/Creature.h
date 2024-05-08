@@ -319,7 +319,7 @@ struct CreatureModelInfo
     float SpeedRun;
     uint8 gender;
     uint32 modelid_other_gender;                            // The oposite gender for this modelid (male/female)
-    uint32 modelid_other_team;                              // The oposite team. Generally for alliance totem
+    uint32 modelid_alternative;                              // The oposite team. Generally for alliance totem
 };
 
 struct CreatureConditionalSpawn
