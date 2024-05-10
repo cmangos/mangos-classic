@@ -675,6 +675,7 @@ class Creature : public Unit
         void UpdateArmor() override;
         void UpdateAttackPowerAndDamage(bool ranged = false) override;
         void UpdateDamagePhysical(WeaponAttackType attType) override;
+        virtual float GetConditionalTotalPhysicalDamageModifier(WeaponAttackType type) const;
         uint32 GetCurrentEquipmentId() const { return m_equipmentId; }
 
         static float _GetHealthMod(int32 Rank);             ///< Get custom factor to scale health (default 1, CONFIG_FLOAT_RATE_CREATURE_*_HP)
