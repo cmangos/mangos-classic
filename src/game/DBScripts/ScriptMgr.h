@@ -583,6 +583,7 @@ struct ScriptInfo
             case SCRIPT_COMMAND_TEMP_SPAWN_CREATURE:
             case SCRIPT_COMMAND_ACTIVATE_OBJECT:
             case SCRIPT_COMMAND_CAST_SPELL:
+            case SCRIPT_COMMAND_PLAY_SOUND:
             case SCRIPT_COMMAND_CREATE_ITEM:
             case SCRIPT_COMMAND_MOVEMENT:
             case SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL:
