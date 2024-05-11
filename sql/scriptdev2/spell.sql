@@ -233,8 +233,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (20963,'spell_judgement_of_command'),
 (20964,'spell_judgement_of_command'),
 (20965,'spell_judgement_of_command'),
-(20966,'spell_judgement_of_command'),
-(27171,'spell_judgement_of_command');
+(20966,'spell_judgement_of_command');
 
 -- Warlock
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
