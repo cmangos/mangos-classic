@@ -1992,7 +1992,7 @@ class Unit : public WorldObject
         void SetCanModifyStats(bool modifyStats) { m_canModifyStats = modifyStats; }
 
         static float GetHealthBonusFromStamina(float stamina);
-        float GetHealthBonusFromStamina() const;
+        virtual float GetHealthBonusFromStamina() const;
         static float GetManaBonusFromIntellect(float intellect);
         float GetManaBonusFromIntellect() const;
 

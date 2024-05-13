@@ -791,6 +791,13 @@ float Creature::GetConditionalTotalPhysicalDamageModifier(WeaponAttackType attTy
     return result;
 }
 
+float Creature::GetHealthBonusFromStamina() const
+{
+    // only use diff until stamina per level coefficient for npcs is known
+    float stamina = GetStat(STAT_STAMINA);
+    return Unit::GetHealthBonusFromStamina(stamina) - Unit::GetHealthBonusFromStamina(GetCreateStat(STAT_STAMINA));
+}
+
 /*#######################################
 ########                         ########
 ########    PETS STAT SYSTEM     ########
