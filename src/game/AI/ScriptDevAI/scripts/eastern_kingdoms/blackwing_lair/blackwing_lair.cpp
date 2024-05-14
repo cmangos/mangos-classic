@@ -422,6 +422,7 @@ void instance_blackwing_lair::OnCreatureRespawn(Creature* creature)
     {
         creature->SetNoLoot(true);
         creature->SetCorpseDelay(5);
+        creature->SetInCombatWithZone();
         return;
     }
 
