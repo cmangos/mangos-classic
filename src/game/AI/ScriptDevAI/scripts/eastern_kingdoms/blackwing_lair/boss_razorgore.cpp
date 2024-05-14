@@ -272,15 +272,20 @@ struct PossessRazorgore : public AuraScript
         {
             if (apply)
             {
-                if (Unit* caster = aura->GetCaster())
-                    caster->CastSpell(caster, SPELL_MIND_EXHAUSTION, TRIGGERED_OLD_TRIGGERED);
                 aura->GetTarget()->CastSpell(nullptr, SPELL_DRAGON_ORB, TRIGGERED_OLD_TRIGGERED);
             }
             else
             {
-                Unit* target = aura->GetTarget();
-                target->RemoveAurasDueToSpell(SPELL_POSSESS_VISUAL);
-                target->RemoveAurasDueToSpell(SPELL_DRAGON_ORB);
+                if (Unit* caster = aura->GetCaster())
+                {
+                    caster->CastSpell(caster, SPELL_MIND_EXHAUSTION, TRIGGERED_OLD_TRIGGERED);
+                }
+
+                if (Unit* target = aura->GetTarget())
+                {
+                    target->RemoveAurasDueToSpell(SPELL_POSSESS_VISUAL);
+                    target->RemoveAurasDueToSpell(SPELL_DRAGON_ORB);
+                }
             }
         }
     }
