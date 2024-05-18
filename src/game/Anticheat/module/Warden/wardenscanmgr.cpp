@@ -75,6 +75,12 @@ void WardenScanMgr::loadFromDB()
 
     m_scans = std::move(new_scans);
 
+    if (!result)
+    {
+        sLog.outBasic(">> 0 Warden scans loaded from world database. Table warden_scans is empty.");
+        return;
+    }
+
     do
     {
         auto fields = result->Fetch();
