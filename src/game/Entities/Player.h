@@ -2050,6 +2050,7 @@ class Player : public Unit
         bool IsFlying() const override { return false; }
         bool IsFreeFlying() const { return false; }
         bool IsSwimming() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_SWIMMING); }
+        void SetCanFly(bool enable) override;
 
         void UpdateClientControl(Unit const* target, bool enabled, bool forced = false) const;
 
