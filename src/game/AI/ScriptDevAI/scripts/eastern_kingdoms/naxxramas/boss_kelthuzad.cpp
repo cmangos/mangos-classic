@@ -576,7 +576,7 @@ struct npc_icecrown_guardianAI : public ScriptedAI
 
     void EnterEvadeMode() override
     {
-         m_creature->RemoveAurasDueToSpell(SPELL_BLOOD_TAP);
+        m_creature->RemoveAurasDueToSpell(SPELL_BLOOD_TAP);
 
         ScriptedAI::EnterEvadeMode();
     }

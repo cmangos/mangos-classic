@@ -127,9 +127,9 @@ struct boss_viscidusAI : public CombatAI
         AddCombatAction(VISCIDUS_TOXIN, 30000u);
         AddCombatAction(VISCIDUS_POISON_SHOCK, 7000, 12000);
         AddCombatAction(VISCIDUS_POISON_BOLT_VOLLEY, 10000, 15000);
-        AddCustomAction(VISCIDUS_EXPLODE, true, [&]() { HandleExplode(); });
-        AddCustomAction(VISCIDUS_REJOIN, true, [&]() { HandleRejoin(); });
-        m_creature->GetCombatManager().SetLeashingCheck([&](Unit* unit, float x, float y, float z) -> bool
+        AddCustomAction(VISCIDUS_EXPLODE, true, [&]() { HandleExplode(); }, TIMER_COMBAT_COMBAT);
+        AddCustomAction(VISCIDUS_REJOIN, true, [&]() { HandleRejoin(); }, TIMER_COMBAT_COMBAT);
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit* /*unit*/, float /*x*/, float /*y*/, float /*z*/) -> bool
         {
             return m_creature->GetDistance(resetPoint.m_fX, resetPoint.m_fY, resetPoint.m_fZ, DIST_CALC_COMBAT_REACH) < 10.0f;
         });

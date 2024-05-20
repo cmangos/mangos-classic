@@ -87,7 +87,7 @@ struct boss_twin_emperorsAI : public CombatAI
     {
         AddCombatAction(EMPEROR_BERSERK, 15u * MINUTE * IN_MILLISECONDS);
         AddCombatAction(EMPEROR_BUG_ABILITY, urand(7000, 14000));
-        AddCustomAction(EMPEROR_TELEPORT_DELAY, true, [&]() { HandleDelayedAttack(); });
+        AddCustomAction(EMPEROR_TELEPORT_DELAY, true, [&]() { HandleDelayedAttack(); }, TIMER_COMBAT_COMBAT);
     }
 
     instance_temple_of_ahnqiraj* m_instance;

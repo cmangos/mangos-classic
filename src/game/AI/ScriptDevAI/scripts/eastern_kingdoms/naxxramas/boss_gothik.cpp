@@ -166,18 +166,8 @@ struct boss_gothikAI : public ScriptedAI
         if (m_instance)
             m_instance->SetData(TYPE_GOTHIK, FAIL);
 
+        m_creature->SetRespawnDelay(30, true);
         m_creature->ForcedDespawn();
-        m_creature->Respawn();
-
-        ScriptedAI::EnterEvadeMode();
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_instance)
-            m_instance->SetData(TYPE_GOTHIK, FAIL);
-
-        SetCombatMovement(false);
     }
 
     void UpdateAI(const uint32 diff) override

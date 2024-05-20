@@ -104,6 +104,7 @@ void FollowerAI::CorpseRemoved(uint32& /*respawnDelay*/)
 
 void FollowerAI::EnterEvadeMode()
 {
+    ResetTimersOnEvade();
     m_creature->RemoveAllAurasOnEvade();
     m_creature->CombatStopWithPets(true);
 

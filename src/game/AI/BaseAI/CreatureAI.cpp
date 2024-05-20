@@ -44,7 +44,7 @@ CreatureAI::CreatureAI(Creature* creature, uint32 combatActions) :
 
 void CreatureAI::Reset()
 {
-    ResetTimersOnEvade();
+
     m_currentRangedMode = m_rangedMode;
     m_attackDistance = m_chaseDistance;
 }

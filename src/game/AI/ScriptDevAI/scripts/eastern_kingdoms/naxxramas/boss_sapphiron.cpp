@@ -94,9 +94,9 @@ struct boss_sapphironAI : public CombatAI
         AddCombatAction(SAPPHIRON_FROST_BREATH, true);
         AddCombatAction(SAPPHIRON_ICEBOLT, true);
         AddCombatAction(SAPPHIRON_BERSERK, 15u * MINUTE * IN_MILLISECONDS);
-        AddCustomAction(SAPPHIRON_AIR_PHASE, true, [&]() { HandleAirPhase(); });
-        AddCustomAction(SAPPHIRON_LANDING_PHASE, true, [&]() { HandleLandingPhase(); });
-        AddCustomAction(SAPPHIRON_GROUND_PHASE, true, [&]() { HandleGroundPhase(); });
+        AddCustomAction(SAPPHIRON_AIR_PHASE, true, [&]() { HandleAirPhase(); }, TIMER_COMBAT_COMBAT);
+        AddCustomAction(SAPPHIRON_LANDING_PHASE, true, [&]() { HandleLandingPhase(); }, TIMER_COMBAT_COMBAT);
+        AddCustomAction(SAPPHIRON_GROUND_PHASE, true, [&]() { HandleGroundPhase(); }, TIMER_COMBAT_COMBAT);
     }
 
     ScriptedInstance* m_instance;

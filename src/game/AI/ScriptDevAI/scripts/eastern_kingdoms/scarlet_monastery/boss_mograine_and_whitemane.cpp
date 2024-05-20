@@ -89,7 +89,7 @@ struct boss_scarlet_commander_mograineAI : public CombatAI
         AddCustomAction(MOGRAINE_ACTION_LAY_ON_HANDS, false, [&]()
         {
             HandleLayOnHandsTimer(); 
-        });
+        }, TIMER_COMBAT_COMBAT);
         AddCustomAction(MOGRAINE_ACTION_REVIVED, true, [&]()
         {
             HandleRevivedTimer();

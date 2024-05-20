@@ -80,7 +80,7 @@ struct boss_buruAI : public CombatAI
         AddCombatAction(BURU_CREEPING_PLAGUE, true);
         AddCombatAction(BURU_GATHERING_SPEED, 9000u);
         AddCombatAction(BURU_FULL_SPEED, 60000u);
-        AddCustomAction(BURU_PHASE_2_TRANSITION_STEP, true, [&]() { HandlePhaseTwo(); });
+        AddCustomAction(BURU_PHASE_2_TRANSITION_STEP, true, [&]() { HandlePhaseTwo(); }, TIMER_COMBAT_COMBAT);
     }
 
     uint8 m_uiPhase;

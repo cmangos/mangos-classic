@@ -90,10 +90,10 @@ struct boss_heiganAI : public CombatAI
         AddCombatAction(HEIGAN_TELEPORT_PLAYERS, 35u * IN_MILLISECONDS, 45u * IN_MILLISECONDS);
         AddCombatAction(HEIGAN_TAUNT, 25u * IN_MILLISECONDS, 90u * IN_MILLISECONDS);
         AddCustomAction(HEIGAN_ERUPTION, true, [&]() { StartEruptions(m_phase == PHASE_GROUND ? SPELL_PLAGUE_WAVE_SLOW : SPELL_PLAGUE_WAVE_FAST); });
-        AddCustomAction(HEIGAN_GROUND_PHASE, true, [&]() { HandleGroundPhase(); });
-        AddCustomAction(HEIGAN_PLATFORM_PHASE, true, [&]() { HandlePlatformPhase(); });
+        AddCustomAction(HEIGAN_GROUND_PHASE, true, [&]() { HandleGroundPhase(); }, TIMER_COMBAT_COMBAT);
+        AddCustomAction(HEIGAN_PLATFORM_PHASE, true, [&]() { HandlePlatformPhase(); }, TIMER_COMBAT_COMBAT);
         AddCustomAction(HEIGAN_DOOR, true, [&]() { CloseEntrance(); });
-        AddCustomAction(HEIGAN_CHANNELING, true, [&]() { HandleChanneling(); });
+        AddCustomAction(HEIGAN_CHANNELING, true, [&]() { HandleChanneling(); }, TIMER_COMBAT_COMBAT);
     }
 
     ScriptedInstance* m_instance;
@@ -159,12 +159,12 @@ struct boss_heiganAI : public CombatAI
 
     void EnterEvadeMode() override
     {
+        ScriptedAI::EnterEvadeMode();
+
         if (m_instance)
             m_instance->SetData(TYPE_HEIGAN, FAIL);
 
         StopEruptions();
-
-        ScriptedAI::EnterEvadeMode();
     }
 
     void HandleGroundPhase()

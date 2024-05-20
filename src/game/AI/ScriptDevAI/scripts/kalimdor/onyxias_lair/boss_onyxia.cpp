@@ -160,8 +160,8 @@ struct boss_onyxiaAI : public CombatAI
         AddCombatAction(ONYXIA_KNOCK_AWAY, 20000, 30000);
         AddCombatAction(ONYXIA_FIREBALL, true);
         AddCombatAction(ONYXIA_MOVEMENT, true);
-        AddCustomAction(ONYXIA_SUMMON_WHELPS, true, [&]() { SummonWhelps(); });
-        AddCustomAction(ONYXIA_PHASE_TRANSITIONS, true, [&]() { PhaseTransition(); });
+        AddCustomAction(ONYXIA_SUMMON_WHELPS, true, [&]() { SummonWhelps(); }, TIMER_COMBAT_COMBAT);
+        AddCustomAction(ONYXIA_PHASE_TRANSITIONS, true, [&]() { PhaseTransition(); }, TIMER_COMBAT_COMBAT);
         m_creature->SetWalk(false); // onyxia should run when flying
         AddOnKillText(SAY_KILL);
     }

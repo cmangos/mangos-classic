@@ -121,8 +121,8 @@ struct boss_nothAI : public CombatAI
         AddCombatAction(NOTH_BLINK, 25u * IN_MILLISECONDS);
         AddCombatAction(NOTH_CURSE, 4u * IN_MILLISECONDS);
         AddCombatAction(NOTH_SUMMON, 12u * IN_MILLISECONDS);
-        AddCustomAction(NOTH_BALCONY_PHASE, true, [&]() { HandleBalconyPhase(); });
-        AddCustomAction(NOTH_GROUND_PHASE, true, [&]() { HandleGroundPhase(); });
+        AddCustomAction(NOTH_BALCONY_PHASE, true, [&]() { HandleBalconyPhase(); }, TIMER_COMBAT_COMBAT);
+        AddCustomAction(NOTH_GROUND_PHASE, true, [&]() { HandleGroundPhase(); }, TIMER_COMBAT_COMBAT);
         AddOnKillText(SAY_SLAY1, SAY_SLAY1);
     }
 
