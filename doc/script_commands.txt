@@ -257,7 +257,7 @@ Defining a buddy could be done in several way:
                                             * datalong2 = amount
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: remove the item from player by the given amount
 
-18 SCRIPT_COMMAND_DESPAWN_SELF              resultingSource = Creature
+18 SCRIPT_COMMAND_DESPAWN_SELF              resultingTarget = Creature
                                             * datalong = despawn delay
 
 19 SCRIPT_COMMAND_PLAY_MOVIE                target can only be a player
