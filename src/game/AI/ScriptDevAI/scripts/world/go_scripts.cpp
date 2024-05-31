@@ -401,6 +401,27 @@ GameObjectAI* GetAI_go_dragon_head(GameObject* go)
     return new go_dragon_head(go);
 }
 
+enum class GoBubblyFissure
+{
+    SPELL_BUBBLY_FISSURE = 17775,
+};
+
+struct go_bubbly_fissure_caster : public GameObjectAI, public TimerManager
+{
+    go_bubbly_fissure_caster(GameObject* go) : GameObjectAI(go)
+    {
+        AddCustomAction(1, 2000u, [&]()
+        {
+            m_go->CastSpell(nullptr, nullptr, (uint32)GoBubblyFissure::SPELL_BUBBLY_FISSURE, TRIGGERED_OLD_TRIGGERED);
+        });
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+        UpdateTimers(diff);
+    }
+};
+
 enum
 {
     SPELL_WARCHIEFS_BLESSING = 16609,
@@ -523,6 +544,11 @@ void AddSC_go_scripts()
     pNewScript = new Script;
     pNewScript->Name = "go_dragon_head";
     pNewScript->GetGameObjectAI = &GetAI_go_dragon_head;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_bubbly_fissure";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<go_bubbly_fissure_caster>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

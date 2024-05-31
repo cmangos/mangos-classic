@@ -87,6 +87,7 @@ UPDATE gameobject_template SET ScriptName='go_bells' WHERE entry IN(175885,17657
 UPDATE gameobject_template SET ScriptName='go_darkmoon_faire_music' WHERE entry=180335;
 UPDATE gameobject_template SET ScriptName='go_elemental_rift' WHERE entry IN (179664, 179665, 179666, 179667);
 UPDATE gameobject_template SET ScriptName='go_dragon_head' WHERE entry IN(179556,179558,179881,179882);
+UPDATE gameobject_template SET ScriptName='go_bubbly_fissure' WHERE entry=177524;
 UPDATE gameobject_template SET ScriptName='go_unadorned_spike' WHERE entry IN(175787);
 UPDATE gameobject_template SET ScriptName='go_containment_coffer' WHERE entry=122088;
 UPDATE gameobject_template SET ScriptName='go_ectoplasmic_distiller_trap' WHERE entry=181054;
