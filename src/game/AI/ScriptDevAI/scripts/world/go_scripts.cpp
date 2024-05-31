@@ -413,6 +413,7 @@ struct go_bubbly_fissure_caster : public GameObjectAI, public TimerManager
         AddCustomAction(1, 2000u, [&]()
         {
             m_go->CastSpell(nullptr, nullptr, (uint32)GoBubblyFissure::SPELL_BUBBLY_FISSURE, TRIGGERED_OLD_TRIGGERED);
+            ResetTimer(1, 2000);
         });
     }
 
