@@ -229,7 +229,11 @@ bool AuthSocket::ProcessIncomingData()
     std::shared_ptr<eAuthCmd> cmd = std::make_shared<eAuthCmd>();
     Read((char*)cmd.get(), sizeof(eAuthCmd), [self = shared_from_this(), cmd, tableLength](const boost::system::error_code& error, std::size_t read)
     {
-        if (error) return;
+        if (error)
+        {
+            self->Close();
+            return;
+        }
 
         int i;
         // Circle through known commands and call the correct command handler
@@ -319,7 +323,11 @@ bool AuthSocket::_HandleLogonChallenge()
 
     Read((char*)header.get(), sizeof(sAuthLogonChallengeHeader), [self = shared_from_this(), header](const boost::system::error_code& error, std::size_t read)
     {
-        if (error) return;
+        if (error)
+        {
+            self->Close();
+            return;
+        }
 
         uint16* pUint16 = reinterpret_cast<uint16*>(header.get());
         EndianConvert(*pUint16);
@@ -337,7 +345,11 @@ bool AuthSocket::_HandleLogonChallenge()
         ///- Read the remaining of the packet
         self->Read((char*)body.get(), remaining, [self, header, body](const boost::system::error_code& error, std::size_t read)
         {
-            if (error) return;
+            if (error)
+            {
+                self->Close();
+                return;
+            }
 
             if (body->userName_len > AUTH_LOGON_MAX_NAME)
                 return;
@@ -529,7 +541,11 @@ bool AuthSocket::_HandleLogonProof()
     std::shared_ptr<sAuthLogonProof_C> lp = std::make_shared<sAuthLogonProof_C>();
     Read((char*)lp.get(), sizeof(sAuthLogonProof_C), [self = shared_from_this(), lp](const boost::system::error_code& error, std::size_t read)
     {
-        if (error) return;
+        if (error)
+        {
+            self->Close();
+            return;
+        }
 
         ///- Session is closed unless overriden
         self->_status = STATUS_CLOSED;
@@ -544,7 +560,7 @@ bool AuthSocket::_HandleLogonProof()
             *pkt << uint8(AUTH_LOGON_FAILED_VERSION_INVALID);
 
             BASIC_LOG("[AuthChallenge] Account %s tried to login with invalid client version %u!", self->_login.c_str(), self->_build);
-            self->Write((const char*)pkt->contents(), pkt->size(), [self, pkt](const boost::system::error_code& error, std::size_t read) {});
+            self->Write((const char*)pkt->contents(), pkt->size(), [self, pkt](const boost::system::error_code& error, std::size_t read) { self->Close();});
             return;
         }
         /// </ul>
@@ -569,7 +585,7 @@ bool AuthSocket::_HandleLogonProof()
                 {
                     if (error)
                     {
-                        self->Write(logonProofUnknownAccountPinInvalid, sizeof(logonProofUnknownAccountPinInvalid), [self](const boost::system::error_code& error, std::size_t read) {});
+                        self->Write(logonProofUnknownAccountPinInvalid, sizeof(logonProofUnknownAccountPinInvalid), [self](const boost::system::error_code& error, std::size_t read) { self->Close();});
                         return;
                     }
 
@@ -578,7 +594,7 @@ bool AuthSocket::_HandleLogonProof()
                     {
                         if (error)
                         {
-                            self->Write(logonProofUnknownAccountPinInvalid, sizeof(logonProofUnknownAccountPinInvalid), [self](const boost::system::error_code& error, std::size_t read) {});
+                            self->Write(logonProofUnknownAccountPinInvalid, sizeof(logonProofUnknownAccountPinInvalid), [self](const boost::system::error_code& error, std::size_t read) { self->Close();});
                             return;
                         }
 
@@ -668,7 +684,11 @@ bool AuthSocket::_HandleReconnectChallenge()
 
     Read((char*)header.get(), sizeof(sAuthLogonChallengeHeader), [self = shared_from_this(), header](const boost::system::error_code& error, std::size_t read)
     {
-        if (error) return;
+        if (error)
+        {
+            self->Close();
+            return;
+        }
 
         uint16* pUint16 = reinterpret_cast<uint16*>(header.get());
         EndianConvert(*pUint16);
@@ -685,7 +705,11 @@ bool AuthSocket::_HandleReconnectChallenge()
         // Read the remaining of the packet
         self->Read((char*)body.get(), remaining, [self, header, body](const boost::system::error_code& error, std::size_t read) -> void
         {
-            if (error) return;
+            if (error)
+            {
+                self->Close();
+                return;
+            }
 
             if (body->userName_len > 10)
                 return;
@@ -742,7 +766,11 @@ bool AuthSocket::_HandleReconnectProof()
     std::shared_ptr<sAuthReconnectProof_C> lp = std::make_shared<sAuthReconnectProof_C>();
     Read((char*)lp.get(), sizeof(sAuthReconnectProof_C), [self = shared_from_this(), lp](const boost::system::error_code& error, std::size_t read)
     {
-        if (error) return;
+        if (error)
+        {
+            self->Close();
+            return;
+        }
 
         ///- Session is closed unless overriden
         self->_status = STATUS_CLOSED;
@@ -795,7 +823,10 @@ bool AuthSocket::_HandleRealmList()
     ReadSkip(4, [self = shared_from_this()](const boost::system::error_code& error, std::size_t read) -> void
     {
         if (error)
+        {
+            self->Close();
             return;
+        }
 
         // Get the user id (else close the connection)
         // No SQL injection (escaped user name)

@@ -78,6 +78,12 @@ bool RASocket::ProcessIncomingData()
     auto self = shared_from_this();
     ReadUntil(*buffer.get(), '\n', [self, buffer](const boost::system::error_code& error, std::size_t read)
     {
+        if (error)
+        {
+            self->Close();
+            return;
+        }
+
         static const std::string NEWLINE = "\n\r";
 
         auto pos = 0;
