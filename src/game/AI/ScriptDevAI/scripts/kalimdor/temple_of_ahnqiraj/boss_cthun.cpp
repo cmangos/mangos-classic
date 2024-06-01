@@ -332,11 +332,6 @@ struct boss_cthunAI : public CombatAI
             m_instance->SetData(TYPE_CTHUN, FAIL);
     }
 
-    void SummonedCreatureDespawn(Creature* /*summoned*/) override
-    {
-        m_creature->AI()->EnterEvadeMode();
-    }
-
     void JustDied(Unit* /*killer*/) override
     {
         m_creature->SetActiveObjectState(false);
