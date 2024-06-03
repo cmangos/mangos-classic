@@ -2580,9 +2580,9 @@ void Creature::ClearTemporaryFaction()
     if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_NON_ATTACKABLE && GetCreatureInfo()->UnitFlags & UNIT_FLAG_SPAWNING)
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
     if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_IMMUNE_TO_PLAYER && GetCreatureInfo()->UnitFlags & UNIT_FLAG_IMMUNE_TO_PLAYER)
-        SetImmuneToPlayer(false);
+        SetImmuneToPlayer(true);
     if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_IMMUNE_TO_NPC && GetCreatureInfo()->UnitFlags & UNIT_FLAG_IMMUNE_TO_NPC)
-        SetImmuneToNPC(false);
+        SetImmuneToNPC(true);
     if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_PACIFIED && GetCreatureInfo()->UnitFlags & UNIT_FLAG_PACIFIED)
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
     if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_NOT_SELECTABLE && GetCreatureInfo()->UnitFlags & UNIT_FLAG_UNINTERACTIBLE)
