@@ -1182,12 +1182,10 @@ void WorldSession::SaveTutorialsData()
 }
 
 // Send chat information about aborted transfer (mostly used by Player::SendTransferAbortedByLockstatus())
-void WorldSession::SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg) const
+void WorldSession::SendTransferAborted(TransferAbortReason reason) const
 {
-    WorldPacket data(SMSG_TRANSFER_ABORTED, 4 + 2);
-    data << uint32(mapid);
-    data << uint8(reason);                                  // transfer abort reason
-    data << uint8(0);                                       // arg. not used
+    WorldPacket data(SMSG_TRANSFER_ABORTED, 1);
+    data << uint8(reason);
     SendPacket(data);
 }
 

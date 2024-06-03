@@ -38,6 +38,8 @@
 #include <mutex>
 #include <memory>
 
+enum TransferAbortReason;
+
 struct ItemPrototype;
 struct AuctionEntry;
 struct AuctionHouseEntry;
@@ -221,7 +223,7 @@ class WorldSession
         void SendPetNameInvalid(uint32 error, const std::string& name) const;
         void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res) const;
         void SendAreaTriggerMessage(const char* Text, ...) const ATTR_PRINTF(2, 3);
-        void SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg = 0) const;
+        void SendTransferAborted(TransferAbortReason reason) const;
         void SendQueryTimeResponse() const;
 
         bool IsInitialZoneUpdated() { return m_initialZoneUpdated; }
