@@ -1335,7 +1335,7 @@ class Player : public Unit
         void SendQuestTimerFailed(uint32 quest_id) const;
         void SendCanTakeQuestResponse(uint32 msg) const;
         void SendQuestConfirmAccept(Quest const* pQuest, Player* pReceiver) const;
-        void SendPushToPartyResponse(Player* pPlayer, uint32 msg) const;
+        void SendPushToPartyResponse(Player* pPlayer, QuestShareMessages msg) const;
         void SendQuestUpdateAddItem(Quest const* pQuest, uint32 item_idx, uint32 current, uint32 count);
         void SendQuestUpdateAddCreatureOrGo(Quest const* pQuest, ObjectGuid guid, uint32 creatureOrGO_idx, uint32 count);
 
