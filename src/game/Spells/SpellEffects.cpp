@@ -4170,25 +4170,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         unitTarget->CastSpell(nullptr, 26529, TRIGGERED_NONE);
                     return;
                 }
-                case 26656:                                 // Summon Black Qiraji Battle Tank
-                {
-                    if (!unitTarget)
-                        return;
-
-                    if (unitTarget->HasAura(25863) || unitTarget->HasAura(26655))
-                        return; // protection against visual glitch
-
-                    // Prevent stacking of mounts
-                    unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
-
-                    // Two separate mounts depending on area id (allows use both in and out of specific instance)
-                    if (unitTarget->GetAreaId() == 3428)
-                        unitTarget->CastSpell(unitTarget, 25863, TRIGGERED_NONE);
-                    else
-                        unitTarget->CastSpell(unitTarget, 26655, TRIGGERED_NONE);
-
-                    return;
-                }
                 case 26663:                                 // Valentine - Orgrimmar Grunt
                 case 26923:                                 // Valentine - Thunderbluff Watcher
                 case 26924:                                 // Valentine - Undercity Guardian
