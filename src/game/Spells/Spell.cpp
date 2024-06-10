@@ -5455,7 +5455,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                 else if (Item* item = m_targets.getItemTarget())
                 {
                     // not own (trade?)
-                    if (item->GetOwner() != m_caster)
+                    Player* itemOwner = item->GetOwner();
+                    Player* itemTrader = itemOwner->GetTrader();
+
+                    if (itemOwner != m_caster && itemTrader != m_caster)
                         return SPELL_FAILED_ITEM_GONE;
 
                     lockId = item->GetProto()->LockID;
