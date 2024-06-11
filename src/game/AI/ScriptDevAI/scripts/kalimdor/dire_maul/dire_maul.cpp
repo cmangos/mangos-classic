@@ -90,6 +90,8 @@ enum
     SUMMON_WAVES_RELAY_SCRIPT_START_ID = 1450100,
 };
 
+static const float pedestalCords[3] = { -38.5f, 811.8f, -29.5f};
+
 struct npc_warlock_mount_ritualAI : public  Scripted_NoMovementAI
 {
     npc_warlock_mount_ritualAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
@@ -101,12 +103,14 @@ struct npc_warlock_mount_ritualAI : public  Scripted_NoMovementAI
     instance_dire_maul* m_pInstance;
     uint8 m_uiPhase;
     uint32 m_uiPhaseTimer;
+    uint32 m_uiDeactivateTimer;
     GuidList m_luiSummonedMobGUIDs;
 
     void Reset() override
     {
         m_uiPhase = 0;
-        m_uiPhaseTimer = 50000;
+        m_uiPhaseTimer = 48000;
+        m_uiDeactivateTimer = 70000;
     }
 
     void DoSummonPack(uint8 uiIndex)
@@ -118,20 +122,48 @@ struct npc_warlock_mount_ritualAI : public  Scripted_NoMovementAI
     void JustSummoned(Creature* pSummoned) override
     {
         m_luiSummonedMobGUIDs.push_back(pSummoned->GetObjectGuid());
+        // The spawning of the waves is handled in the DB relay scripts, the movement to the center I'm doing here because simply using a 
+        // single point in the center of the room will result in the demons floating jankily through the air because the floor is uneven.
+        // So move halfway to the pedestal with a certain Z height, then move to the atual pedestal.
+        // Maybe it'd be better to handle the spawning of the waves here too, but whatever, this works.
+        pSummoned->GetMotionMaster()->MovePoint(0, (pSummoned->GetPositionX() + pedestalCords[0]) / 2.0f, (pSummoned->GetPositionY() + pedestalCords[1]) / 2.0f, -32.0f);
+        pSummoned->SetRespawnCoord(pedestalCords[0], pedestalCords[1], pedestalCords[2], 0.0f);
+    }
+
+    void SummonedMovementInform(Creature* pSummoned, uint32 pMotionType, uint32 pData) override 
+    {
+        switch (pData)
+        {
+            case 0:
+                pSummoned->GetMotionMaster()->MovePoint(1, pedestalCords[0], pedestalCords[1], pedestalCords[2]);
+                break;
+            case 1:
+                pSummoned->GetMotionMaster()->MoveRandomAroundPoint(pedestalCords[0], pedestalCords[1], pedestalCords[2], 15.0f);
+                break;
+        }
+    }
+
+    void SummonedJustReachedHome(Creature* pSummoned) override
+    {
+        pSummoned->GetMotionMaster()->MoveRandomAroundPoint(pedestalCords[0], pedestalCords[1], pedestalCords[2], 15.0f);
     }
 
     void UpdateAI(uint32 const diff) override
     {
-        if (m_uiPhaseTimer <= diff)
+        if (m_uiPhaseTimer <= diff) // Handle spawning waves and cleanup at the end
         {
             switch (m_uiPhase)
             {
                 case 1:
                     m_pInstance->ProcessDreadsteedRitualStart();
-                    m_uiPhaseTimer = 2000;
+                    m_uiPhaseTimer = 1000;
                     break;
-                case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: // 9 waves of demons - each spawned by relay script in DB
-                    m_uiPhaseTimer = 40000;
+                case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9: // 9 waves of demons - each spawned by relay script in DB
+                    m_uiPhaseTimer = 45000;
+                    DoSummonPack(m_uiPhase - 1);
+                    break;
+                case 10: // Final wave, short, make players sweat just before ending
+                    m_uiPhaseTimer = 17500;
                     DoSummonPack(m_uiPhase - 1);
                     break;
                 case 11:
@@ -154,6 +186,39 @@ struct npc_warlock_mount_ritualAI : public  Scripted_NoMovementAI
         }
         else
             m_uiPhaseTimer -= diff;
+
+        if (m_uiDeactivateTimer <= diff) // Periodically deactivate the helping objects
+        {
+            uint32 rand = urand(0, 2); // Pick one of the 3 objects to deactivate
+            GameObject* toBeDeactivated = nullptr;
+
+            for (int i = 0; i < 3; ++i) // Use the rand variable as a starting point, but if needed, cylce through the other objects if the chosen one is already deactivated
+            {
+                switch ((rand + i) % 3)
+                {
+                    case 0:
+                        toBeDeactivated = m_pInstance->GetSingleGameObjectFromStorage(GO_BELL_OF_DETHMOORA);
+                        break;
+                    case 1:
+                        toBeDeactivated = m_pInstance->GetSingleGameObjectFromStorage(GO_WHEEL_OF_BLACK_MARCH);
+                        break;
+                    case 2:
+                        toBeDeactivated = m_pInstance->GetSingleGameObjectFromStorage(GO_DOOMSDAY_CANDLE);
+                        break;
+                }
+
+                // instance_dire_maul.cpp handles failing the event if all objects are deactivated
+                if (toBeDeactivated != nullptr && toBeDeactivated->GetLootState() == GO_ACTIVATED)
+                {
+                    toBeDeactivated->ResetDoorOrButton();
+                    break;
+                }
+            }
+
+            m_uiDeactivateTimer = urand(30000, 45000);
+        }
+        else
+            m_uiDeactivateTimer -= diff;
     }
 };
 
@@ -170,6 +235,13 @@ struct DreadsteedQuestObjects : public GameObjectAI
 
     void JustSpawned() override
     {
+        if (instance_dire_maul* instance = (instance_dire_maul*)m_go->GetInstanceData()) // Without this check, the 3 objects are spawning when first loaded in. Couldn't find another way to stop them from doing this
+            if (instance->GetData(TYPE_DREADSTEED) != IN_PROGRESS)
+            {
+                m_go->ForcedDespawn();
+                m_go->SetLootState(GO_JUST_DEACTIVATED);
+                return;
+            }
         m_go->SetRespawnDelay(0);
     }
 
@@ -218,7 +290,10 @@ struct DreadsteedQuestObjects : public GameObjectAI
 
     void OnUse(Unit* user, SpellEntry const* /*spellInfo*/) override
     {
-        m_lastUserGuid = user->GetObjectGuid();
+        if (user->IsPlayer())
+            m_lastUserGuid = user->GetObjectGuid();
+        else // The candle won't work until a player reactivates it unless we check for this because the npc imp is the first "user" of it
+            m_lastUserGuid = user->GetSpawnerGuid();
         m_uiPulseTimer = 1;
     }
 };

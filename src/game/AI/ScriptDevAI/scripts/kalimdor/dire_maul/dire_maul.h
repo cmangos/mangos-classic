@@ -89,7 +89,7 @@ enum
     NPC_DREAD_GUARD             = 14483,
     NPC_LORD_HELNURATH          = 14506,
 
-    SAY_UNSUMMON_DEMON          = -1429004,
+    SAY_UNSUMMON_DEMON          = -1429005,
 
     // North
     NPC_GUARD_MOLDAR            = 14326,
