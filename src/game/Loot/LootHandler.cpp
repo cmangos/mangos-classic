@@ -55,7 +55,8 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
     }
 
     // item may be blocked by roll system or already looted or another cheating possibility
-    if (lootItem->isBlocked || lootItem->GetSlotTypeForSharedLoot(_player, loot) == MAX_LOOT_SLOT_TYPE)
+    LootSlotType slotType = lootItem->GetSlotTypeForSharedLoot(_player, loot);
+    if (lootItem->isBlocked || slotType == LOOT_SLOT_VIEW || slotType == LOOT_SLOT_REQS || slotType == MAX_LOOT_SLOT_TYPE)
     {
         sLog.outError("HandleAutostoreLootItemOpcode> %s have no right to loot itemId(%u)", _player->GetGuidStr().c_str(), lootItem->itemId);
         loot->Release(_player);
@@ -213,7 +214,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
     }
 
     // item may be already looted or another cheating possibility
-    if (lootItem->GetSlotTypeForSharedLoot(_player, pLoot) == MAX_LOOT_SLOT_TYPE)
+    if (lootItem->GetSlotTypeForSharedLoot(_player, pLoot) != LOOT_SLOT_MASTER)
     {
         sLog.outError("HandleAutostoreLootItemOpcode> %s have no right to loot itemId(%u)", _player->GetGuidStr().c_str(), lootItem->itemId);
         return;
