@@ -6282,15 +6282,26 @@ int32 Player::CalculateReputationGain(ReputationSource source, int32 rep, int32 
 
     uint32 currentLevel = GetLevel();
 
-    if (MaNGOS::XP::IsTrivialLevelDifference(currentLevel, creatureOrQuestLevel))
-        percent *= minRate;
-    else
+    // Level zero seems to be treated as always equal to players current level in IsTrivialLevelDifference therefore I have skipped level difference penalty computations for that value
+    if (creatureOrQuestLevel > 0)
     {
-        // Pre-3.0.8: Declines with 20% for each level if 6 levels or more below the player down to a minimum (default: 20%)
-        const uint32 treshold = (creatureOrQuestLevel + 5);
+        // Old code seems to have been correct for computing level difference penalties for quests
+        if (source == REPUTATION_SOURCE_QUEST)
+        {
+            // Pre-3.0.8: Declines with 20% for each level if 6 levels or more below the player down to a minimum (default: 20%)
+            const uint32 treshold = (creatureOrQuestLevel + 5);
 
-        if (currentLevel > treshold)
-            percent *= std::max(minRate, (1.0f - (0.2f * (currentLevel - treshold))));
+            if (currentLevel > treshold)
+                percent *= std::max(minRate, (1.0f - (0.2f * (currentLevel - treshold))));
+        }
+        else if (source == REPUTATION_SOURCE_KILL)
+        {
+            // For kill reputiation gains the penalties value seems to have been 20% for each level below lowest green level down to a minimum (default: 20%)
+            const uint32_t lastGreenLevel = MaNGOS::XP::GetGrayLevel(currentLevel) + 1;
+
+            if (lastGreenLevel > creatureOrQuestLevel)
+                percent *= std::max(minRate, (1.0f - (0.2f * (lastGreenLevel - creatureOrQuestLevel))));
+        }
     }
 
     if (percent <= 0.0f)
