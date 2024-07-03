@@ -28,7 +28,7 @@ EndScriptData
 
 enum
 {
-    SPELL_THOUSAND_BLADES   = 24649,
+    SPELL_THOUSAND_BLADES   = 24767,
     SPELL_VANISH            = 24699,
     SPELL_GOUGE             = 24698,
     SPELL_TRASH             = 3391,
