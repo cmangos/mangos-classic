@@ -554,6 +554,11 @@ bool CreatureGroup::IsEvading()
     return false;
 }
 
+bool CreatureGroup::HasGroupMember(WorldObject* wo) const
+{
+    return m_objects.find(wo->GetDbGuid()) != m_objects.end();
+}
+
 void CreatureGroup::ClearRespawnTimes()
 {
     time_t now = time(nullptr);

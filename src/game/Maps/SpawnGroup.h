@@ -95,6 +95,8 @@ class CreatureGroup : public SpawnGroup
         bool IsOutOfCombat();
         bool IsEvading();
 
+        bool HasGroupMember(WorldObject* wo) const;
+
     private:
         void ClearRespawnTimes();
         FormationDataSPtr m_formationData;
