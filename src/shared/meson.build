@@ -3,7 +3,7 @@ shared_sources = [
     'Metric/Metric.cpp',
     'Util/Util.cpp',
     'Multithreading/Messager.cpp',
-    'Log.cpp',
+    'Log/Log.cpp',
     'Util/ProgressBar.cpp',
     'Multithreading/Threading.cpp',
     'Util/ByteBuffer.cpp',
@@ -24,10 +24,6 @@ shared_sources = [
     'Auth/HMACSHA1.cpp',
     'Auth/BigNumber.cpp',
     'Common.cpp',
-    'Network/Socket.cpp',
-    'Network/PacketBuffer.cpp',
-    'Network/NetworkThread.cpp',
-    'Network/Listener.cpp',
     'Config/Config.cpp'
 ]
 
