@@ -38,8 +38,6 @@
 #include <mutex>
 #include <memory>
 
-enum TransferAbortReason;
-
 struct ItemPrototype;
 struct AuctionEntry;
 struct AuctionHouseEntry;
@@ -132,6 +130,15 @@ enum WorldSessionState
     WORLD_SESSION_STATE_CHAR_SELECTION = 1,
     WORLD_SESSION_STATE_READY          = 2,
     WORLD_SESSION_STATE_OFFLINE        = 3
+};
+
+enum TransferAbortReason
+{
+    TRANSFER_ABORT_NONE                         = 0x00,
+    TRANSFER_ABORT_MAX_PLAYERS                  = 0x01,     // Transfer Aborted: instance is full
+    TRANSFER_ABORT_NOT_FOUND                    = 0x02,     // Transfer Aborted: instance not found
+    TRANSFER_ABORT_TOO_MANY_INSTANCES           = 0x03,     // You have entered too many instances recently.
+    TRANSFER_ABORT_ZONE_IN_COMBAT               = 0x05,     // Unable to zone in while an encounter is in progress.
 };
 
 struct CharacterNameQueryResponse
