@@ -2475,6 +2475,21 @@ class Unit : public WorldObject
         AuraList m_modAuras[TOTAL_AURAS];
         float m_auraModifiersGroup[UNIT_MOD_END][MODIFIER_TYPE_END];
 
+        enum class AttackPowerMod
+        {
+            MELEE_ATTACK_POWER  = 0,
+            RANGED_ATTACK_POWER = 1,
+            ATTACK_POWER_MOD_MAX
+        };
+
+        enum class AttackPowerModSign
+        {
+            MOD_SIGN_POS,
+            MOD_SIGN_NEG,
+            MOD_SIGN_MAX
+        };
+        float m_attackPowerMod[size_t(AttackPowerMod::ATTACK_POWER_MOD_MAX)][size_t(AttackPowerModSign::MOD_SIGN_MAX)];
+
         WeaponDamageInfo m_weaponDamageInfo;
 
         bool m_canModifyStats;
