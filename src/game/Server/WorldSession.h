@@ -31,6 +31,7 @@
 #include "Entities/Item.h"
 #include "Server/WorldSocket.h"
 #include "Multithreading/Messager.h"
+#include "Entities/TransferAbortReason.h"
 
 #include <atomic>
 #include <map>

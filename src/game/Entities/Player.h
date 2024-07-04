@@ -634,16 +634,6 @@ enum TradeSlots
     TRADE_SLOT_NONTRADED        = 6
 };
 
-// [-ZERO] Need fix, or maybe not exists
-enum TransferAbortReason
-{
-    TRANSFER_ABORT_NONE                         = 0x00,
-    TRANSFER_ABORT_MAX_PLAYERS                  = 0x01,     // Transfer Aborted: instance is full
-    TRANSFER_ABORT_NOT_FOUND                    = 0x02,     // Transfer Aborted: instance not found
-    TRANSFER_ABORT_TOO_MANY_INSTANCES           = 0x03,     // You have entered too many instances recently.
-    TRANSFER_ABORT_ZONE_IN_COMBAT               = 0x05,     // Unable to zone in while an encounter is in progress.
-};
-
 enum InstanceResetWarningType
 {
     RAID_INSTANCE_WARNING_HOURS     = 1,                    // WARNING! %s is scheduled to reset in %d hour(s).
