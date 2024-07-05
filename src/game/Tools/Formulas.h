@@ -271,6 +271,36 @@ namespace MaNGOS
             return false;
         }
 
+        inline uint32 GetQuestGreenRange(uint32 unitLvl)
+        {
+            switch (unitLvl / 5)
+            {
+                case 0:     // 0-4
+                case 1:     // 5-9
+                    return 4;
+                case 2:     // 10-14
+                case 3:     // 15-19
+                    return 5;
+                case 4:     // 20-24
+                case 5:     // 25-29
+                    return 6;
+                case 6:     // 30-34
+                case 7:     // 35-39
+                    return 7;
+                case 8:     // 40-44
+                    return 8;
+                case 9:     // 45-49
+                    return 9;
+                case 10:    // 50-54
+                    return 10;
+                case 11:    // 55-59
+                    return 11;
+                default:    // 60+
+                    return 12;
+            }
+            return false;
+        }
+
         enum XPColorChar { RED, ORANGE, YELLOW, GREEN, GRAY };
 
         inline uint32 GetGrayLevel(uint32 pl_level)
