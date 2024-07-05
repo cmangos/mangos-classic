@@ -30,7 +30,7 @@
 
 INSTANTIATE_SINGLETON_1(AuctionHouseBot);
 
-AuctionHouseBot::AuctionHouseBot() : m_configFileName(_AUCTIONHOUSEBOT_CONFIG), m_houseAction(-1)
+AuctionHouseBot::AuctionHouseBot() : m_configFileName(_AUCTIONHOUSEBOT_CONFIG), m_houseAction(-1), m_isInitialized(false)
 {
 }
 
@@ -148,6 +148,8 @@ void AuctionHouseBot::Initialize()
             }
             while (queryResult->NextRow());
         }
+
+        m_isInitialized = true;
     }
 }
 

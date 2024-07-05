@@ -58,6 +58,7 @@ class AuctionHouseBot
         void PrepareStatusInfos(AuctionHouseBotStatusInfo& statusInfo) const;
         void SetItemData(uint32 item, AuctionHouseBotItemData& itemData, bool reset = false);
         AuctionHouseBotItemData GetItemData(uint32 item);
+        bool IsInitialized() const { return m_isInitialized; };
 
     private:
         uint32 GetMinMaxConfig(const char* config, uint32 minValue, uint32 maxValue, uint32 defaultValue);
@@ -110,6 +111,8 @@ class AuctionHouseBot
         std::unordered_set<uint32> m_vendorItems;
 
         std::unordered_map<uint32, AuctionHouseBotItemData> m_itemData;
+
+        bool m_isInitialized;
 };
 
 #define sAuctionHouseBot MaNGOS::Singleton<AuctionHouseBot>::Instance()
