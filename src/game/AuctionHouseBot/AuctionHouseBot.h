@@ -58,6 +58,8 @@ class AuctionHouseBot
         void PrepareStatusInfos(AuctionHouseBotStatusInfo& statusInfo) const;
         void SetItemData(uint32 item, AuctionHouseBotItemData& itemData, bool reset = false);
         AuctionHouseBotItemData GetItemData(uint32 item);
+
+        // Following method was added for playerbot interaction so GetItemData is only used when AuctionHouseBot is enabled in config.
         bool IsInitialized() const { return m_isInitialized; };
 
     private:
