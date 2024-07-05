@@ -271,6 +271,7 @@ void AuctionHouseBot::Update()
 
 bool AuctionHouseBot::ReloadAllConfig()
 {
+    m_isInitialized = false;
     Initialize();
     return true;
 }
