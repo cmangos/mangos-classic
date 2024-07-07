@@ -88,6 +88,19 @@ void GossipMenu::AddMenuItem(uint8 Icon, int32 itemText, uint32 dtSender, uint32
     AddMenuItem(Icon, std::string(item_text), dtSender, dtAction, std::string(box_text), Coded);
 }
 
+void GossipMenu::AddMenuItemBct(uint8 Icon, int32 itemText, Gender gender, uint32 dtSender, uint32 dtAction, int32 boxText, bool Coded)
+{
+    uint32 loc_idx = m_session->GetSessionDbLocaleIndex();
+
+    BroadcastText const* bctOption = sObjectMgr.GetBroadcastText(itemText);
+    MANGOS_ASSERT(bctOption); // should never be null
+    std::string const& strOptionText = bctOption->GetText(loc_idx, gender);
+
+    BroadcastText const* bctBox = sObjectMgr.GetBroadcastText(boxText);
+
+    AddMenuItem(Icon, strOptionText, dtSender, dtAction, bctBox != nullptr ? bctBox->GetText(loc_idx, gender) : "", Coded);
+}
+
 uint32 GossipMenu::MenuItemSender(unsigned int ItemId)
 {
     if (ItemId >= m_gItems.size())

@@ -135,6 +135,7 @@ enum
 // Coded
 #define ADD_GOSSIP_ITEM(icon, text, sender, optionId)   GetPlayerMenu()->GetGossipMenu().AddMenuItem(icon, text, sender, optionId, "", 0)
 #define ADD_GOSSIP_ITEM_ID(icon, textId, sender, optionId)   GetPlayerMenu()->GetGossipMenu().AddMenuItem(icon, textId, sender, optionId, 0, 0)
+#define ADD_GOSSIP_ITEM_ID_BCT(icon, textId, gender, sender, optionId)   GetPlayerMenu()->GetGossipMenu().AddMenuItemBct(icon, textId, gender, sender, optionId, 0, 0)
 #define ADD_GOSSIP_ITEM_EXTENDED(icon, text, sender, optionId, boxMessage, boxMoney, code)   GetPlayerMenu()->GetGossipMenu().AddMenuItem(icon, text, sender, optionId, boxMessage, code)
 
 // This fuction Sends the current menu to show to client
