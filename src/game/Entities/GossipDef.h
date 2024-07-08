@@ -23,6 +23,7 @@
 #include "Quests/QuestDef.h"
 #include "Entities/NPCHandler.h"
 #include "Entities/ObjectGuid.h"
+#include "Globals/SharedDefines.h"
 
 class WorldSession;
 
