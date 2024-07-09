@@ -8,7 +8,7 @@ env:
   REPO_DIR : ${{github.workspace}}
   BUILD_DIR: ${{github.workspace}}/bin/builddir
   BOOST_VERSION: "1.83.0"
-  BOOST_PLATFORM_VERSION: "11"
+  BOOST_PLATFORM_VERSION: "12"
 
 permissions:
   contents: read
