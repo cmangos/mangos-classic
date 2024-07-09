@@ -1087,17 +1087,22 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket& data, BattleGround* bg)
   Send battleground joined packet
 
   @param    packet
-  @param    result
+  @param    battleground type id
+  @param    battleground group join status
 */
-void BattleGroundMgr::BuildGroupJoinedBattlegroundPacket(WorldPacket& data, BattleGroundTypeId bgTypeId) const
+void BattleGroundMgr::BuildGroupJoinedBattlegroundPacket(WorldPacket& data, BattleGroundTypeId bgTypeId, BattleGroundGroupJoinStatus status) const
 {
-    /*bgTypeId is:
-    0 - Your group has joined a battleground queue, but you are not eligible
-    1 - Your group has joined the queue for AV
-    2 - Your group has joined the queue for WS
-    3 - Your group has joined the queue for AB*/
     data.Initialize(SMSG_GROUP_JOINED_BATTLEGROUND, 4);
-    data << uint32(bgTypeId);
+    switch (status)
+    {
+        case BG_GROUP_JOIN_STATUS_DESERTERS:    // You cannot join the battleground yet because you or one of your party members is flagged as a Deserter.
+        case BG_GROUP_JOIN_STATUS_NOT_ELIGIBLE: // Your group has joined a battleground queue, but you are not eligible
+            data << int32(status);
+            break;
+        case BG_GROUP_JOIN_STATUS_SUCCESS:      // Your group has joined the queue for [map]
+            data << int32(GetBattleGrounMapIdByTypeId(bgTypeId));
+            break;
+    }
 }
 
 /**
