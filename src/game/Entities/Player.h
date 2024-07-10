@@ -307,11 +307,9 @@ typedef std::list<Item*> ItemDurationList;
 
 enum RaidGroupError
 {
-    ERR_RAID_GROUP_NONE                 = 0,
-    ERR_RAID_GROUP_LOWLEVEL             = 1,
-    ERR_RAID_GROUP_ONLY                 = 2,
-    ERR_RAID_GROUP_FULL                 = 3,
-    ERR_RAID_GROUP_REQUIREMENTS_UNMATCH = 4
+    ERR_RAID_GROUP_NONE         = 0,
+    ERR_RAID_GROUP_REQUIRED     = 1,
+    ERR_RAID_GROUP_FULL         = 2,
 };
 
 enum DrunkenState
