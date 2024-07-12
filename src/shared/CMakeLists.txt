@@ -134,6 +134,7 @@ set(SRC_GRP_UTIL
     Util/Util.h
     Util/ProducerConsumerQueue.h
     Util/CommonDefines.h
+    Util/UniqueTrackablePtr.h
 )
 
 set(LIBRARY_SRCS
