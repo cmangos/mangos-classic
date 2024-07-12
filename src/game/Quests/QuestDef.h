@@ -21,6 +21,7 @@
 
 #include "Platform/Define.h"
 #include "Database/DatabaseEnv.h"
+#include "Util/UniqueTrackablePtr.h"
 
 #include <vector>
 
@@ -276,6 +277,8 @@ class Quest
         uint32 GetRewChoiceItemsCount() const { return m_rewchoiceitemscount; }
         uint32 GetRewItemsCount() const { return m_rewitemscount; }
 
+        MaNGOS::unique_weak_ptr<Quest> GetWeakPtr() const { return m_weakRef; }
+
         typedef std::vector<int32> PrevQuests;
         PrevQuests prevQuests;
         typedef std::vector<uint32> PrevChainQuests;
@@ -346,6 +349,8 @@ class Quest
         uint32 CompleteEmoteDelay;
         uint32 QuestStartScript;
         uint32 QuestCompleteScript;
+
+        MaNGOS::unique_weak_ptr<Quest> m_weakRef;
 };
 
 enum QuestUpdateState

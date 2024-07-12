@@ -27,6 +27,7 @@
 #include "Server/DBCEnums.h"
 #include "Globals/SharedDefines.h"
 #include "LFG/LFGMgr.h"
+#include "Util/UniqueTrackablePtr.h"
 
 class WorldSession;
 class Map;
@@ -290,6 +291,8 @@ class Group
 
         ObjectGuid GetTargetIcon(int index) { return m_targetIcons[index]; }
 
+        MaNGOS::unique_weak_ptr<Group> GetWeakPtr() const { return m_scriptRef; }
+
     protected:
         bool _addMember(ObjectGuid guid, const char* name, bool isAssistant = false);
         bool _addMember(ObjectGuid guid, const char* name, bool isAssistant, uint8 group);
@@ -367,5 +370,8 @@ class Group
         BoundInstancesMap   m_boundInstances;
         uint8*              m_subGroupsCounts;
         uint32              m_LFGAreaId;
+
+        struct NoopGroupDeleter { void operator()(Group*) const { /*noop - not managed*/ } };
+        MaNGOS::unique_trackable_ptr<Group> m_scriptRef;
 };
 #endif

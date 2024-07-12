@@ -33,13 +33,13 @@ GuildMgr::GuildMgr()
 
 GuildMgr::~GuildMgr()
 {
-    for (auto& itr : m_GuildMap)
-        delete itr.second;
 }
 
 void GuildMgr::AddGuild(Guild* guild)
 {
-    m_GuildMap[guild->GetId()] = guild;
+    MaNGOS::unique_trackable_ptr<Guild>& ptr = m_GuildMap[guild->GetId()];
+    ptr.reset(guild);
+    guild->SetWeakPtr(ptr);
 }
 
 void GuildMgr::RemoveGuild(uint32 guildId)
@@ -51,7 +51,7 @@ Guild* GuildMgr::GetGuildById(uint32 guildId) const
 {
     GuildMap::const_iterator itr = m_GuildMap.find(guildId);
     if (itr != m_GuildMap.end())
-        return itr->second;
+        return itr->second.get();
 
     return nullptr;
 }
@@ -60,7 +60,7 @@ Guild* GuildMgr::GetGuildByName(std::string const& name) const
 {
     for (const auto& itr : m_GuildMap)
         if (itr.second->GetName() == name)
-            return itr.second;
+            return itr.second.get();
 
     return nullptr;
 }
@@ -69,7 +69,7 @@ Guild* GuildMgr::GetGuildByLeader(ObjectGuid const& guid) const
 {
     for (const auto& itr : m_GuildMap)
         if (itr.second->GetLeaderGuid() == guid)
-            return itr.second;
+            return itr.second.get();
 
     return nullptr;
 }

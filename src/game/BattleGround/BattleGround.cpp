@@ -259,7 +259,6 @@ BattleGround::~BattleGround()
 {
     // remove objects and creatures
     // (this is done automatically in mapmanager update, when the instance is reset after the reset time)
-    sBattleGroundMgr.RemoveBattleGround(GetInstanceId(), GetTypeId());
 
     // skip template bgs as they were never added to visible bg list
     BattleGroundBracketId bracketId = GetBracketId();

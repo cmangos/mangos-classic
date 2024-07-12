@@ -20,13 +20,14 @@
 #define _GUILDMGR_H
 
 #include "Common.h"
+#include "Util/UniqueTrackablePtr.h"
 
 class Guild;
 class ObjectGuid;
 
 class GuildMgr
 {
-        typedef std::unordered_map<uint32, Guild*> GuildMap;
+        typedef std::unordered_map<uint32, MaNGOS::unique_trackable_ptr<Guild>> GuildMap;
 
         GuildMap m_GuildMap;
     public:

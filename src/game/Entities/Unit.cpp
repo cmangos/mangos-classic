@@ -5341,6 +5341,7 @@ void Unit::RemoveAura(Aura* Aur, AuraRemoveMode mode)
 
     // Set remove mode
     Aur->SetRemoveMode(mode);
+    Aur->InvalidateScriptRef();
 
     // some ShapeshiftBoosts at remove trigger removing other auras including parent Shapeshift aura
     // remove aura from list before to prevent deleting it before
