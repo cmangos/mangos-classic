@@ -77,6 +77,11 @@ enum EventAI_Type
     EVENT_T_DEATH_PREVENTED         = 35,                   //
     EVENT_T_TARGET_NOT_REACHABLE    = 36,                   //
     EVENT_T_SPELL_CAST              = 37,                   // SpellId
+    EVENT_T_BOARD_VEHICLE           = 38,                   // Boarding, SeatID
+    EVENT_T_PASSENGER_BOARDED       = 39,                   // Boarding, SeatID
+    EVENT_T_VEHICLE_RETURN          = 40,                   // SeatID
+    EVENT_T_PASSENGER_SPAWN         = 41,                   // SeatID
+    EVENT_T_PASSENGER_CONTROL_END   = 42,                   // SeatID
 
     EVENT_T_END,
 };
