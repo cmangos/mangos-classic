@@ -6291,10 +6291,8 @@ int32 Player::CalculateReputationGain(ReputationSource source, int32 rep, int32 
             if (MaNGOS::XP::IsTrivialLevelDifference(currentLevel, creatureOrQuestLevel))
             {
                 // For kill reputiation gains the penalties value seems to have been 20% for each level below lowest green level down to a minimum (default: 20%)
-                const uint32_t lastGreenLevel = MaNGOS::XP::GetGrayLevel(currentLevel) + 1;
-
-                if (lastGreenLevel > creatureOrQuestLevel)
-                    percent *= std::max(minRate, (1.0f - (0.2f * (lastGreenLevel - creatureOrQuestLevel))));
+                const uint32 greenRange = MaNGOS::XP::GetQuestGreenRange(currentLevel);
+                percent *= std::max(minRate, (1.0f - (0.2f * (currentLevel - greenRange - creatureOrQuestLevel))));
             }
 
         } else if (source == REPUTATION_SOURCE_QUEST)
