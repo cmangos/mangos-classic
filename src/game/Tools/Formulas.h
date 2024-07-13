@@ -281,7 +281,7 @@ namespace MaNGOS
                 return pl_level - 5 - pl_level / 10;
             if (pl_level <= 59)
                 return pl_level - 1 - pl_level / 5;
-            return pl_level - 9;
+            return pl_level - 13;
         }
 
         inline XPColorChar GetColorCode(uint32 pl_level, uint32 mob_level)
