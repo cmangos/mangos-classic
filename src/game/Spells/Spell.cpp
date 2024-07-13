@@ -386,7 +386,7 @@ void SpellLog::SendToSet()
 Spell::Spell(WorldObject* caster, SpellEntry const* info, uint32 triggeredFlags, ObjectGuid originalCasterGUID, SpellEntry const* triggeredBy) :
     m_partialApplicationMask(0), m_spellScript(SpellScriptMgr::GetSpellScript(info->Id)), m_auraScript(SpellScriptMgr::GetAuraScript(info->Id)),
     m_effectSkipMask(0),
-    m_spellLog(this), m_param1(0), m_param2(0), m_trueCaster(caster)
+    m_spellEvent(nullptr), m_spellLog(this), m_param1(0), m_param2(0), m_trueCaster(caster)
 {
     MANGOS_ASSERT(caster != nullptr && info != nullptr);
     MANGOS_ASSERT(info == sSpellTemplate.LookupEntry<SpellEntry>(info->Id) && "`info` must be pointer to sSpellTemplate element");
@@ -2901,8 +2901,8 @@ SpellCastResult Spell::SpellStart(SpellCastTargets const* targets, Aura* trigger
         m_triggeredByAuraSpell = triggeredByAura->GetSpellProto();
 
     // create and add update event for this spell
-    SpellEvent* Event = new SpellEvent(this);
-    m_trueCaster->m_events.AddEvent(Event, m_trueCaster->m_events.CalculateTime(1));
+    m_spellEvent = new SpellEvent(this);
+    m_trueCaster->m_events.AddEvent(m_spellEvent, m_trueCaster->m_events.CalculateTime(1));
 
     SpellCastResult result = PreCastCheck();
     if (result != SPELL_CAST_OK)
@@ -8119,4 +8119,9 @@ SpellModRAII::~SpellModRAII()
         }
         m_modOwner->SetSpellModSpell(nullptr);
     }
+}
+
+MaNGOS::unique_weak_ptr<Spell> Spell::GetWeakPtr() const
+{
+    return m_spellEvent->GetSpellWeakPtr();
 }

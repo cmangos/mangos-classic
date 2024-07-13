@@ -608,6 +608,8 @@ class Object
         inline bool IsGameObject() const { return GetTypeId() == TYPEID_GAMEOBJECT; }
         inline bool IsCorpse() const { return GetTypeId() == TYPEID_CORPSE; }
 
+        MaNGOS::unique_weak_ptr<Object> GetWeakPtr() const { return m_scriptRef; }
+
     protected:
         Object();
 

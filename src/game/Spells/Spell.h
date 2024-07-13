@@ -286,6 +286,8 @@ class SpellEvent : public BasicEvent
         virtual bool IsDeletable() const override;
 
         Spell* GetSpell() const { return m_Spell.get(); }
+        MaNGOS::unique_weak_ptr<Spell> GetSpellWeakPtr() const { return m_Spell; }
+
     protected:
         MaNGOS::unique_trackable_ptr<Spell> m_Spell;
 };
@@ -775,6 +777,9 @@ class Spell
         void SetOverridenSpeed(float newSpeed);
         void SetIgnoreRoot(bool state) { m_ignoreRoot = state; }
         void SetDamageDoneModifier(float mod, SpellEffectIndex effIdx);
+
+        MaNGOS::unique_weak_ptr<Spell> GetWeakPtr() const;
+
     protected:
         void SendLoot(ObjectGuid guid, LootType loottype, LockType lockType);
         bool IgnoreItemRequirements() const;                // some item use spells have unexpected reagent data
@@ -944,6 +949,9 @@ class Spell
         // and in same time need aura data and after aura deleting.
         SpellEntry const* m_triggeredByAuraSpell;
 
+        SpellEvent* m_spellEvent;
+
+    private:
         // needed to store all log for this spell
         SpellLog m_spellLog;
 
