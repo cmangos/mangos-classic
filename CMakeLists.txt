@@ -170,9 +170,11 @@ if(WIN32)
       # Only MSVC. TODO:: check why x64 is not provided
       set(BIN_LIBS ${BIN_LIBS} ${DEV_PROVIDED_LIBS_FOLDER}/dbghelp.dll)
     endif()
-    set(BIN_LIBS ${BIN_LIBS} ${DEV_PROVIDED_LIBS_FOLDER}/libcrypto-1_1.dll)
+    set(BIN_LIBS ${BIN_LIBS} ${DEV_PROVIDED_LIBS_FOLDER}/libcrypto-3.dll)
+    set(BIN_LIBS ${BIN_LIBS} ${DEV_PROVIDED_LIBS_FOLDER}/legacy.dll)
   else()
-    set(BIN_LIBS ${BIN_LIBS} ${DEV_PROVIDED_LIBS_FOLDER}/libcrypto-1_1-x64.dll)
+    set(BIN_LIBS ${BIN_LIBS} ${DEV_PROVIDED_LIBS_FOLDER}/libcrypto-3-x64.dll)
+    set(BIN_LIBS ${BIN_LIBS} ${DEV_PROVIDED_LIBS_FOLDER}/legacy.dll)
   endif()
   install(FILES
       ${BIN_LIBS}
@@ -238,12 +240,12 @@ if(WIN32 AND (BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER OR BUILD_EXTRACTORS))
   set(MYSQL_DEBUG_LIBRARY "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libmySQL.lib")
   set(OPENSSL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/dep/lib/include")
   set(OPENSSL_LIBRARIES
-     "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libcrypto.dll.a"
-     "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libssl.dll.a"
+     "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libcrypto.lib"
+     "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libssl.lib"
   )
   set(OPENSSL_DEBUG_LIBRARIES
-     "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libcrypto.dll.a"
-     "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libssl.dll.a"
+     "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libcrypto.lib"
+     "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libssl.lib"
   )
 endif()
 
