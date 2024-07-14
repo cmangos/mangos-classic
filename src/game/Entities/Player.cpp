@@ -6785,7 +6785,11 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea, bool force)
         sOutdoorPvPMgr.HandlePlayerEnterZone(this, newZone);
         sWorldState.HandlePlayerEnterZone(this, newZone);
 
-        SendInitWorldStates(newZone);                       // only if really enters to new zone, not just area change, works strange...
+//        SendInitWorldStates(newZone);                       // only if really enters to new zone, not just area change, works strange...
+	if ((newZone == 139 || newZone == 1377) && !sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_EP_ENABLED))
+	{}
+	else
+		SendInitWorldStates(newZone);                       // never send when entering EP/SI end outdoorpvp is disabled	    
 
         if (sWorld.getConfig(CONFIG_BOOL_WEATHER))
         {
