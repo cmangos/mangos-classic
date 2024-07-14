@@ -32,9 +32,7 @@
 
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
-#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
 #include <openssl/provider.h>
-#endif
 
 #include <boost/program_options.hpp>
 #include <boost/version.hpp>
@@ -180,7 +178,6 @@ int main(int argc, char* argv[])
     sLog.outString("Using configuration file %s.", configFile.c_str());
 
     DETAIL_LOG("%s (Library: %s)", OPENSSL_VERSION_TEXT, OpenSSL_version(OPENSSL_VERSION));
-#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
     // Load OpenSSL 3.0+ providers
     OSSL_PROVIDER* openssl_legacy = OSSL_PROVIDER_load(nullptr, "legacy");
     if (!openssl_legacy)
@@ -195,7 +192,6 @@ int main(int argc, char* argv[])
         OSSL_PROVIDER_unload(openssl_legacy);
         return 1;
     }
-#endif
 
     DETAIL_LOG("Using Boost: %s", BOOST_LIB_VERSION);
 
