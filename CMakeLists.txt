@@ -242,10 +242,12 @@ if(WIN32 AND (BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER OR BUILD_EXTRACTORS))
   set(OPENSSL_LIBRARIES
      "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libcrypto.lib"
      "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libssl.lib"
+     "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/legacy.lib"
   )
   set(OPENSSL_DEBUG_LIBRARIES
      "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libcrypto.lib"
      "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libssl.lib"
+     "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/legacy.lib"
   )
 endif()
 
