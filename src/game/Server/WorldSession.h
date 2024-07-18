@@ -132,6 +132,15 @@ enum WorldSessionState
     WORLD_SESSION_STATE_OFFLINE        = 3
 };
 
+enum TransferAbortReason
+{
+    TRANSFER_ABORT_NONE                         = 0x00,
+    TRANSFER_ABORT_MAX_PLAYERS                  = 0x01,     // Transfer Aborted: instance is full
+    TRANSFER_ABORT_NOT_FOUND                    = 0x02,     // Transfer Aborted: instance not found
+    TRANSFER_ABORT_TOO_MANY_INSTANCES           = 0x03,     // You have entered too many instances recently.
+    TRANSFER_ABORT_ZONE_IN_COMBAT               = 0x05,     // Unable to zone in while an encounter is in progress.
+};
+
 struct CharacterNameQueryResponse
 {
     ObjectGuid          guid;                   // pc's guid
@@ -218,10 +227,10 @@ class WorldSession
         void SendOfflineNameQueryResponses();
         void SendNotification(const char* format, ...) const ATTR_PRINTF(2, 3);
         void SendNotification(int32 string_id, ...) const;
-        void SendPetNameInvalid(uint32 error, const std::string& name) const;
+        void SendPetNameInvalid() const;
         void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res) const;
         void SendAreaTriggerMessage(const char* Text, ...) const ATTR_PRINTF(2, 3);
-        void SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg = 0) const;
+        void SendTransferAborted(TransferAbortReason reason) const;
         void SendQueryTimeResponse() const;
 
         bool IsInitialZoneUpdated() { return m_initialZoneUpdated; }
@@ -235,7 +244,6 @@ class WorldSession
         std::string const& GetAccountName() const { return m_accountName; }
         Player* GetPlayer() const { return _player; }
         char const* GetPlayerName() const;
-        std::string GetChatType(uint32 type);
         void SetSecurity(AccountTypes security) { _security = security; }
 #if defined(BUILD_DEPRECATED_PLAYERBOT) || defined(ENABLE_PLAYERBOTS)
         // Players connected without socket are bot
@@ -420,7 +428,6 @@ class WorldSession
 
         void SendAuthOk() const;
         void SendAuthQueued() const;
-        void SendKickReason(uint8 reason, std::string const& string) const;
         // opcodes handlers
         void Handle_NULL(WorldPacket& recvPacket);          // not used
         void Handle_EarlyProccess(WorldPacket& recvPacket); // just mark packets processed in WorldSocket::OnRead
@@ -542,18 +549,15 @@ class WorldSession
         void HandleGroupUninviteGuidOpcode(WorldPacket& recvPacket);
         void HandleGroupSetLeaderOpcode(WorldPacket& recvPacket);
         void HandleGroupDisbandOpcode(WorldPacket& recvPacket);
-        void HandleOptOutOfLootOpcode(WorldPacket& recv_data);
         void HandleLootMethodOpcode(WorldPacket& recvPacket);
         void HandleLootRoll(WorldPacket& recv_data);
         void HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data);
         void HandleRaidTargetUpdateOpcode(WorldPacket& recv_data);
         void HandleRaidReadyCheckOpcode(WorldPacket& recv_data);
-        void HandleRaidReadyCheckFinishedOpcode(WorldPacket& recv_data);
         void HandleGroupRaidConvertOpcode(WorldPacket& recv_data);
         void HandleGroupChangeSubGroupOpcode(WorldPacket& recv_data);
         void HandleGroupSwapSubGroupOpcode(WorldPacket& recv_data);
         void HandleGroupAssistantLeaderOpcode(WorldPacket& recv_data);
-        void HandlePartyAssignmentOpcode(WorldPacket& recv_data);
 
         void HandlePetitionBuyOpcode(WorldPacket& recv_data);
         void HandlePetitionShowSignOpcode(WorldPacket& recv_data);
@@ -571,7 +575,6 @@ class WorldSession
         void HandleGuildAcceptOpcode(WorldPacket& recvPacket);
         void HandleGuildDeclineOpcode(WorldPacket& recvPacket);
         void HandleGuildInfoOpcode(WorldPacket& recvPacket);
-        void HandleGuildEventLogQueryOpcode(WorldPacket& recvPacket);
         void HandleGuildRosterOpcode(WorldPacket& recvPacket);
         void HandleGuildPromoteOpcode(WorldPacket& recvPacket);
         void HandleGuildDemoteOpcode(WorldPacket& recvPacket);
@@ -682,7 +685,6 @@ class WorldSession
         void HandleUnlearnSkillOpcode(WorldPacket& recvPacket);
 
         void HandleQuestgiverStatusQueryOpcode(WorldPacket& recvPacket);
-        void HandleQuestgiverStatusMultipleQuery(WorldPacket& recvPacket);
         void HandleQuestgiverHelloOpcode(WorldPacket& recvPacket);
         void HandleQuestgiverAcceptQuestOpcode(WorldPacket& recvPacket);
         void HandleQuestgiverQueryQuestOpcode(WorldPacket& recvPacket);
@@ -730,9 +732,6 @@ class WorldSession
         void HandleChannelUnbanOpcode(WorldPacket& recvPacket);
         void HandleChannelAnnouncementsOpcode(WorldPacket& recvPacket);
         void HandleChannelModerateOpcode(WorldPacket& recvPacket);
-        void HandleChannelDisplayListQueryOpcode(WorldPacket& recvPacket);
-        void HandleGetChannelMemberCountOpcode(WorldPacket& recvPacket);
-        void HandleSetChannelWatchOpcode(WorldPacket& recvPacket);
 
         void HandleCompleteCinematic(WorldPacket& recvPacket);
         void HandleNextCinematicCamera(WorldPacket& recvPacket);
@@ -761,8 +760,6 @@ class WorldSession
         void HandleCharRenameOpcode(WorldPacket& recv_data);
         static void HandleChangePlayerNameOpcodeCallBack(QueryResult* result, uint32 accountId, std::string newname);
 
-        void HandleTotemDestroyed(WorldPacket& recv_data);
-
         // BattleGround
         void HandleBattlemasterHelloOpcode(WorldPacket& recv_data);
         void HandleBattlemasterJoinOpcode(WorldPacket& recv_data);
@@ -782,13 +779,8 @@ class WorldSession
 
         void HandleAreaSpiritHealerQueryOpcode(WorldPacket& recv_data);
         void HandleAreaSpiritHealerQueueOpcode(WorldPacket& recv_data);
-        void HandleCancelMountAuraOpcode(WorldPacket& recv_data);
         void HandleSelfResOpcode(WorldPacket& recv_data);
         void HandleRequestPetInfoOpcode(WorldPacket& recv_data);
-
-        void HandleCancelTempEnchantmentOpcode(WorldPacket& recv_data);
-
-        void HandleSetTaxiBenchmarkOpcode(WorldPacket& recv_data);
 
         // Meetingstone
         void SendMeetingstoneFailed(uint8 status);

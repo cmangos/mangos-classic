@@ -90,10 +90,14 @@ struct boss_renatakiAI : public CombatAI
     }
 };
 
+// 24649 - Thousand Blades
 struct ThousandBladesRenataki : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
+        if (spell->m_IsTriggeredSpell) // only initial normal cast
+            return;
+
         if (effIdx != EFFECT_INDEX_1)
             return;
 
@@ -105,7 +109,7 @@ struct ThousandBladesRenataki : public SpellScript
         std::shuffle(selectedTargets.begin(), selectedTargets.end(), *GetRandomGenerator());
         selectedTargets.resize(9);
         for (Unit* target : selectedTargets)
-            caster->CastSpell(target, SPELL_THOUSAND_BLADES, TRIGGERED_OLD_TRIGGERED);
+            caster->CastSpell(target, SPELL_THOUSAND_BLADES, TRIGGERED_OLD_TRIGGERED | TRIGGERED_INSTANT_CAST);
     }
 };
 

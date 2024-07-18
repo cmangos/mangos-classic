@@ -529,13 +529,13 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcG
 
     if (Completable)
     {
-        data << pQuest->GetCompleteEmoteDelay();
-        data << pQuest->GetCompleteEmote();
+        data << int32(pQuest->GetCompleteEmoteDelay());
+        data << uint32(pQuest->GetCompleteEmote());
     }
     else
     {
-        data << pQuest->GetIncompleteEmoteDelay();
-        data << pQuest->GetIncompleteEmote();
+        data << int32(pQuest->GetIncompleteEmoteDelay());
+        data << uint32(pQuest->GetIncompleteEmote());
     }
 
     // Close Window after cancel
@@ -559,16 +559,15 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcG
             data << uint32(0);
     }
 
-    data << uint32(0x02);
+    data << uint32(0x02);                                   // flags1
 
     if (!Completable)                                       // Completable = flags1 && flags2 && flags3 && flags4
-        data << uint32(0x00);                               // flags1
+        data << uint32(0x00);                               // flags2
     else
-        data << uint32(0x03);
+        data << uint32(0x03);                               // flags2
 
-    data << uint32(0x04);                                   // flags2
-    data << uint32(0x08);                                   // flags3
-    data << uint32(0x10);                                   // flags4
+    data << uint32(0x04);                                   // flags3
+    data << uint32(0x08);                                   // flags4
 
     GetMenuSession()->SendPacket(data);
     DEBUG_LOG("WORLD: Sent SMSG_QUESTGIVER_REQUEST_ITEMS NPCGuid = %s, questid = %u", npcGUID.GetString().c_str(), pQuest->GetQuestId());

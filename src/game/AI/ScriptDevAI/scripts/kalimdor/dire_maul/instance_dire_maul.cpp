@@ -53,7 +53,7 @@ void instance_dire_maul::Update(uint32 /*uiDiff*/)
             GameObject* bell = instance->GetGameObject(m_goEntryGuidStore[GO_BELL_OF_DETHMOORA]);
             GameObject* wheel = instance->GetGameObject(m_goEntryGuidStore[GO_WHEEL_OF_BLACK_MARCH]);
             GameObject* candle = instance->GetGameObject(m_goEntryGuidStore[GO_DOOMSDAY_CANDLE]);
-            if (bell && bell->GetGoState() != GO_STATE_ACTIVE && wheel && wheel->GetGoState() != GO_STATE_ACTIVE && candle && candle->GetGoState() != GO_STATE_ACTIVE)
+            if (bell && bell->GetLootState() != GO_ACTIVATED && wheel && wheel->GetLootState() != GO_ACTIVATED && candle && candle->GetLootState() != GO_ACTIVATED)
                 SetData(TYPE_DREADSTEED, FAIL);
         }
     }
@@ -619,9 +619,10 @@ void instance_dire_maul::ProcessDreadsteedRitualStart()
         go->SetRespawnTime(900);
         go->Refresh();
     }
+
     for (auto portal : m_lDreadsteedPortalsGUIDs)
         if (GameObject* go = instance->GetGameObject(portal))
-            DoRespawnGameObject(portal, 360);
+            DoRespawnGameObject(portal, 380);
 }
 
 InstanceData* GetInstanceData_instance_dire_maul(Map* pMap)

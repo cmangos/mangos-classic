@@ -141,8 +141,8 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
         // check Deserter debuff
         if (!_player->CanJoinToBattleground())
         {
-            WorldPacket data(SMSG_GROUP_JOINED_BATTLEGROUND, 4);
-            data << uint32(0xFFFFFFFE);
+            WorldPacket data;
+            sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(data, bgTypeId, BG_GROUP_JOIN_STATUS_DESERTERS);
             _player->GetSession()->SendPacket(data);
             return;
         }
@@ -193,7 +193,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
             // send status packet (in queue)
             sBattleGroundMgr.BuildBattleGroundStatusPacket(data, bg, queueSlot, STATUS_WAIT_QUEUE, avgTime, 0);
             member->GetSession()->SendPacket(data);
-            sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(data, bgTypeId);
+            sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(data, bgTypeId, BG_GROUP_JOIN_STATUS_SUCCESS);
             member->GetSession()->SendPacket(data);
             DEBUG_LOG("Battleground: player joined queue for bg queue type %u bg type %u: GUID %u, NAME %s", bgQueueTypeId, bgTypeId, member->GetGUIDLow(), member->GetName());
         }
@@ -380,8 +380,8 @@ void WorldSession::HandleBattlefieldPortOpcode(WorldPacket& recv_data)
         if (!_player->CanJoinToBattleground())
         {
             // send bg command result to show nice message
-            WorldPacket data2(SMSG_GROUP_JOINED_BATTLEGROUND, 4);
-            data2 << uint32(0xFFFFFFFE);
+            WorldPacket data2;
+            sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(data2, bgTypeId, BG_GROUP_JOIN_STATUS_DESERTERS);
             _player->GetSession()->SendPacket(data2);
             action = 0;
 

@@ -223,6 +223,27 @@ struct GoblinBomb : public SpellScript
     }
 };
 
+// 26656 - Summon Black Qiraji Battle Tank
+struct SummonBlackQirajiBattleTank : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* unitTarget = spell->GetUnitTarget();
+        if (!unitTarget)
+            return;
+
+        // Prevent stacking of mounts
+        unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+
+        // Two separate mounts depending on area id (allows use both in and out of specific instance)
+        switch (unitTarget->GetAreaId())
+        {
+            [[unlikely]] case 3428: unitTarget->CastSpell(nullptr, 25863, TRIGGERED_NONE); break;
+            default: unitTarget->CastSpell(nullptr, 26655, TRIGGERED_NONE);
+        }
+    }
+};
+
 void AddSC_item_scripts()
 {
     Script* pNewScript = new Script;
@@ -238,4 +259,5 @@ void AddSC_item_scripts()
     RegisterSpellScript<OrbOfDeception>("spell_orb_of_deception");
     RegisterSpellScript<SummonGoblinBomb>("spell_summon_goblin_bomb");
     RegisterSpellScript<GoblinBomb>("spell_goblin_bomb");
+    RegisterSpellScript<SummonBlackQirajiBattleTank>("spell_summon_black_qiraji_battle_tank");
 }

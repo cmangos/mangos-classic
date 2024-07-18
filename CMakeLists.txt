@@ -164,15 +164,17 @@ if(WIN32)
   endif()
 
   # Define install rules for provided libs
-  set(BIN_LIBS ${DEV_PROVIDED_LIBS_FOLDER}/libmySQL.dll)
+  set(BIN_LIBS ${DEV_PROVIDED_LIBS_FOLDER}/libmysql.dll)
   if(PLATFORM MATCHES X86)
     if(MSVC)
       # Only MSVC. TODO:: check why x64 is not provided
       set(BIN_LIBS ${BIN_LIBS} ${DEV_PROVIDED_LIBS_FOLDER}/dbghelp.dll)
     endif()
-    set(BIN_LIBS ${BIN_LIBS} ${DEV_PROVIDED_LIBS_FOLDER}/libcrypto-1_1.dll)
+    set(BIN_LIBS ${BIN_LIBS} ${DEV_PROVIDED_LIBS_FOLDER}/libcrypto-3.dll)
+    set(BIN_LIBS ${BIN_LIBS} ${DEV_PROVIDED_LIBS_FOLDER}/legacy.dll)
   else()
-    set(BIN_LIBS ${BIN_LIBS} ${DEV_PROVIDED_LIBS_FOLDER}/libcrypto-1_1-x64.dll)
+    set(BIN_LIBS ${BIN_LIBS} ${DEV_PROVIDED_LIBS_FOLDER}/libcrypto-3-x64.dll)
+    set(BIN_LIBS ${BIN_LIBS} ${DEV_PROVIDED_LIBS_FOLDER}/legacy.dll)
   endif()
   install(FILES
       ${BIN_LIBS}
@@ -234,16 +236,18 @@ endif()
 # Win32 delivered packages
 if(WIN32 AND (BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER OR BUILD_EXTRACTORS))
   set(MYSQL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/dep/lib/include/mysql")
-  set(MYSQL_LIBRARY "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libmySQL.lib")
-  set(MYSQL_DEBUG_LIBRARY "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libmySQL.lib")
+  set(MYSQL_LIBRARY "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libmysql.lib")
+  set(MYSQL_DEBUG_LIBRARY "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libmysql.lib")
   set(OPENSSL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/dep/lib/include")
   set(OPENSSL_LIBRARIES
-     "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libcrypto.dll.a"
-     "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libssl.dll.a"
+     "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libcrypto.lib"
+     "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libssl.lib"
+     "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/legacy.lib"
   )
   set(OPENSSL_DEBUG_LIBRARIES
-     "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libcrypto.dll.a"
-     "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libssl.dll.a"
+     "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libcrypto.lib"
+     "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libssl.lib"
+     "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/legacy.lib"
   )
 endif()
 
@@ -260,10 +264,10 @@ if(UNIX AND (BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER OR BUILD_EXTRACTORS))
   find_package(OpenSSL REQUIRED)
 
   message(STATUS "Found OpenSSL libraries: ${OPENSSL_LIBRARIES}")
-  if(OPENSSL_VERSION VERSION_LESS 1.1)
-    message(SEND_ERROR "OpenSSL: This project requires OpenSSL version 1.1.0 or higher")
+  if(OPENSSL_VERSION VERSION_LESS 3.0)
+    message(SEND_ERROR "OpenSSL: This project requires OpenSSL version 3.0 or higher")
   endif()
-  if(OPENSSL_VERSION VERSION_LESS 1.1.1 OR (OPENSSL_VERSION VERSION_GREATER 3.0 AND OPENSSL_VERSION VERSION_LESS 3.0.7))
+  if(OPENSSL_VERSION VERSION_GREATER 3.0 AND OPENSSL_VERSION VERSION_LESS 3.0.14)
     message(WARNING "OpenSSL: Your OpenSSL version is critically vulnerable or no longer being maintained, consider upgrading")
   endif()
 endif()

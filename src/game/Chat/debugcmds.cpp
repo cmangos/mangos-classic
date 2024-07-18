@@ -391,7 +391,7 @@ bool ChatHandler::HandleDebugSendQuestPartyMsgCommand(char* args)
     if (!ExtractUInt32(&args, msg))
         return false;
 
-    m_session->GetPlayer()->SendPushToPartyResponse(m_session->GetPlayer(), msg);
+    m_session->GetPlayer()->SendPushToPartyResponse(m_session->GetPlayer(), static_cast<QuestShareMessages>(msg));
     return true;
 }
 
