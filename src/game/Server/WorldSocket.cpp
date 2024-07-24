@@ -465,7 +465,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     static SqlStatementID updAccount;
 
     SqlStatement stmt = LoginDatabase.CreateStatement(updAccount, "INSERT INTO account_logons(accountId,ip,loginTime,loginSource) VALUES(?,?," _NOW_ ",?)");
-    stmt.PExecute(id, address.c_str(), std::to_string(LOGIN_TYPE_MANGOSD).c_str());
+    stmt.PExecute(id, address.c_str(), std::to_string(realmID).c_str());
 
     m_crypt.Init(&K);
 
