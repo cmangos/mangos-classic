@@ -36,9 +36,12 @@ OutdoorPvPSI::OutdoorPvPSI() : OutdoorPvP(),
 // Send initial world states
 void OutdoorPvPSI::FillInitialWorldStates(WorldPacket& data, uint32& count)
 {
-    FillInitialWorldState(data, count, WORLD_STATE_SI_GATHERED_A, m_resourcesAlliance);
-    FillInitialWorldState(data, count, WORLD_STATE_SI_GATHERED_H, m_resourcesHorde);
-    FillInitialWorldState(data, count, WORLD_STATE_SI_SILITHYST_MAX, MAX_SILITHYST);
+    if (sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_SI_ENABLED))
+    {
+        FillInitialWorldState(data, count, WORLD_STATE_SI_GATHERED_A, m_resourcesAlliance);
+        FillInitialWorldState(data, count, WORLD_STATE_SI_GATHERED_H, m_resourcesHorde);
+        FillInitialWorldState(data, count, WORLD_STATE_SI_SILITHYST_MAX, MAX_SILITHYST);
+    }
 }
 
 // Handle buffs when player enters the zone
