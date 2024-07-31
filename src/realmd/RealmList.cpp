@@ -82,6 +82,25 @@ RealmBuildInfo const* FindBuildInfo(uint16 _build)
     return nullptr;
 }
 
+static const uint8 RealmCategoryIdsByRealmZoneByMajorVersion[4][MAX_REALM_ZONES] =
+{
+    { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1 }, // 0 - Alpha
+    { 0, 1, 1, 5, 1, 1, 1, 1, 1, 2,  3,  5,  1,  1,  1,  1,  1,  1,  1,  2,  1,  1,  1,  3,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1 }, // 1 - Classic
+    { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,  0,  0,  0,  0,  0,  0,  0 }, // 2 - TBC
+    { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37 }  // 3 - WotLK
+};
+
+uint8 GetRealmCategoryIdByBuildAndZone(uint16 _build, RealmZone _realmZone)
+{
+    if (_realmZone >= MAX_REALM_ZONES)
+    {
+        _realmZone = REALM_ZONE_DEVELOPMENT;
+    }
+
+    RealmBuildInfo const* buildInfo = FindBuildInfo(_build);
+    return buildInfo ? RealmCategoryIdsByRealmZoneByMajorVersion[buildInfo->major_version][_realmZone] : _realmZone;
+}
+
 RealmList::RealmList() : m_UpdateInterval(0), m_NextUpdateTime(time(nullptr))
 {
 }
