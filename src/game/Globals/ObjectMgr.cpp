@@ -4132,8 +4132,8 @@ void ObjectMgr::LoadQuests()
                           "IncompleteEmote, IncompleteEmoteDelay, CompleteEmote, CompleteEmoteDelay,  OfferRewardEmote1, OfferRewardEmote2, OfferRewardEmote3, OfferRewardEmote4,"
                           //   122                 123                     124                     125
                           "OfferRewardEmoteDelay1, OfferRewardEmoteDelay2, OfferRewardEmoteDelay3, OfferRewardEmoteDelay4,"
-                          //   126      127             128                129
-                          "StartScript, CompleteScript, RequiredCondition, BreadcrumbForQuestId"
+                          //   126      127             128                129                   130
+                          "StartScript, CompleteScript, RequiredCondition, BreadcrumbForQuestId, ReputationSpilloverMask"
                           " FROM quest_template");
     if (!queryResult)
     {
