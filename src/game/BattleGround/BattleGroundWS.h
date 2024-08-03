@@ -70,8 +70,8 @@ enum WSWorldStates
     BG_WS_STATE_CAPTURES_HORDE          = 1582,
     BG_WS_STATE_CAPTURES_MAX            = 1601,             // shows the max allowed flags
 
-    BG_WS_STATE_FLAG_HORDE              = 2338,             // shows who captured the current flag
-    BG_WS_STATE_FLAG_ALLIANCE           = 2339,
+    BG_WS_STATE_FLAG_ALLIANCE           = 2338,             // shows who captured the current flag
+    BG_WS_STATE_FLAG_HORDE              = 2339,
 };
 
 enum WSFlagActions
