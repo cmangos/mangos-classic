@@ -189,9 +189,6 @@ void BattleGroundWS::ProcessPlayerFlagScoreEvent(Player* player)
     int32 pointsWorldState = team == ALLIANCE ? BG_WS_STATE_CAPTURES_ALLIANCE : BG_WS_STATE_CAPTURES_HORDE;
     GetBgMap()->GetVariableManager().SetVariable(pointsWorldState, GetBgMap()->GetVariableManager().GetVariable(pointsWorldState) + 1);
 
-    GetBgMap()->GetVariableManager().SetVariable(wsFlagPickedUp[teamIdx], BG_WS_FLAG_STATE_ON_BASE);
-    GetBgMap()->GetVariableManager().SetVariable(wsFlagHUDPickedUp[teamIdx], BG_WS_FLAG_ICON_INVISIBLE);
-
     // despawn flags
     SpawnEvent(WS_EVENT_FLAG_A, 0, false);
     SpawnEvent(WS_EVENT_FLAG_H, 0, false);
