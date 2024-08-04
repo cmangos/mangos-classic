@@ -286,6 +286,7 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|4 WH
 11011, -- Stone Watcher of Norgannon Passive
 11048, -- Perm. Illusion Bishop Tyriona
 13377, -- Fire Shield
+13886, -- Withering Poison Proc
 15978, -- Puncture
 21911, -- Puncture
 24692, -- Hakkar Power
