@@ -36,7 +36,7 @@ bool FollowerAI::AssistPlayerInCombat(Unit* who)
         return false;
 
     // experimental (unknown) flag not present
-    if (!(m_creature->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_CAN_ASSIST))
+    if (!(m_creature->GetCreatureInfo()->HasFlag(CreatureTypeFlags::CAN_ASSIST)))
         return false;
 
     // unit state prevents (similar check is done in CanInitiateAttack which also include checking unit_flags. We skip those here)

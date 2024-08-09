@@ -1218,6 +1218,8 @@ class ObjectMgr
 
         uint32 GetMaxGoDbGuid() const { return m_maxGoDbGuid; }
         uint32 GetMaxCreatureDbGuid() const { return m_maxCreatureDbGuid; }
+
+        uint32 GetTypeFlagsFromStaticFlags(CreatureTypeFlags typeFlags, uint32 staticFlags1, uint32 staticFlags2, uint32 staticFlags3, uint32 staticFlags4) const;
     protected:
 
         // current locale settings

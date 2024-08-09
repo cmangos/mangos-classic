@@ -279,4 +279,42 @@ enum class CreatureStaticFlags8 : uint32
 
 DEFINE_ENUM_FLAG(CreatureStaticFlags8);
 
+enum class CreatureTypeFlags : uint32
+{
+    TAMEABLE                                = 0x00000001,       // Tameable by any hunter
+    VISIBLE_TO_GHOSTS                       = 0x00000002,       // Creatures which can _also_ be seen when player is a ghost, used in CanInteract function by client, can't be attacked
+    BOSS_MOB                                = 0x00000004,       // "BOSS" flag for tooltips
+    DO_NOT_PLAY_WOUND_ANIM                  = 0x00000008,
+    NO_FACTION_TOOLTIP                      = 0x00000010,       // controls something in client tooltip related to creature faction
+    MORE_AUDIBLE                            = 0x00000020,       // may be sound related
+    SPELL_ATTACKABLE                        = 0x00000040,       // may be related to attackable / not attackable creatures with spells, used together with lua_IsHelpfulSpell/lua_IsHarmfulSpell
+    INTERACT_WHILE_DEAD                     = 0x00000080,       // Creature can be interacted with even if it's dead
+    SKIN_WITH_HERBALISM                     = 0x00000100,       // Can be looted by herbalist
+    SKIN_WITH_MINING                        = 0x00000200,       // Can be looted by miner
+    NO_DEATH_MESSAGE                        = 0x00000400,       // no idea, but it used by client
+    ALLOW_MOUNTED_COMBAT                    = 0x00000800,       // possibility to attack and cast spells while mounted
+    CAN_ASSIST                              = 0x00001000,       // Can aid any player (and group) in combat. Typically seen for escorting NPC's
+    NO_PET_BAR                              = 0x00002000,       // checked from calls in Lua_PetHasActionBar
+    MASK_UID                                = 0x00004000,       // Lua_UnitGUID, client does guid_low &= 0xFF000000 if this flag is set
+    SKIN_WITH_ENGINEERING                   = 0x00008000,       // Can be looted by engineer
+    TAMEABLE_EXOTIC                         = 0x00010000,       // Can be tamed by hunter as exotic pet
+    USE_MODEL_COLLISION_SIZE                = 0x00020000,       // related to CreatureDisplayInfo and scaling in some way
+    ALLOW_INTERACTION_WHILE_IN_COMBAT       = 0x00040000,       // Related to vehicle/siege weapons
+    COLLIDE_WITH_MISSILES                   = 0x00080000,       // may be has something to do with missiles
+    NO_NAME_PLATE                           = 0x00100000,       // no idea, but it used by client, may be related to rendering
+    DO_NOT_PLAY_MOUNTED_ANIMATIONS          = 0x00200000,       // may be has something to do with animation (disable animation?)
+    LINK_ALL                                = 0x00400000,       // this one probably controls some creature visual
+    INTERACT_ONLY_WITH_CREATOR              = 0x00800000,       // First seen in 3.2.2. Related to banner/backpack of creature/companion, used in CanInteract function by client
+    DO_NOT_PLAY_UNIT_EVENT_SOUNDS           = 0x01000000,       // pet sounds related?
+    HAS_NO_SHADOW_BLOB                      = 0x02000000,       // this one probably controls some creature visual
+    TREAT_AS_RAID_UNIT_FOR_HELPFUL_SPELLS   = 0x04000000,       // creature has no type, or forces creature to be considered as in party, may be related to creature assistance
+    FORCE_GOSSIP                            = 0x08000000,       // used in Lua_ForceGossip
+    DO_NOT_SHEATHE                          = 0x10000000,       // no idea, but it used by client
+    DO_NOT_TARGET_ON_INTERACTION            = 0x20000000,
+    DO_NOT_RENDER_OBJECT_NAME               = 0x40000000,
+    QUEST_BOSS                              = 0x80000000,       // Lua_UnitIsQuestBoss
+};
+
+DEFINE_ENUM_FLAG(CreatureTypeFlags);
+
 #endif

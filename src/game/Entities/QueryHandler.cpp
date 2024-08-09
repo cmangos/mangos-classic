@@ -169,7 +169,7 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recv_data)
         data << name;
         data << uint8(0) << uint8(0) << uint8(0);           // name2, name3, name4, always empty
         data << subName;
-        data << uint32(ci->CreatureTypeFlags);              // flags
+        data << uint32(ci->TypeFlags);                      // flags
         data << uint32(ci->CreatureType);                   // CreatureType.dbc   wdbFeild8
         data << uint32(ci->Family);                         // CreatureFamily.dbc
         data << uint32(ci->Rank);                           // Creature Rank (elite, boss, etc)

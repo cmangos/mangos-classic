@@ -4001,6 +4001,53 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
         return;
     }
 
+<<<<<<< HEAD
+=======
+    if (m_botState == BOTSTATE_TAME)
+    {
+        Unit* pTarget = ObjectAccessor::GetUnit(*m_bot, m_targetGuidCommand);
+        if (!pTarget)
+            return;
+
+        m_bot->SetSelectionGuid(m_targetGuidCommand);
+
+        if (!In_Range(pTarget, TAME_BEAST_1))
+            m_bot->clearUnitState(UNIT_STAT_CHASE);
+
+        if (!m_bot->hasUnitState(UNIT_STAT_CHASE))
+        {
+            m_bot->GetMotionMaster()->MoveChase(pTarget);
+            return;
+        }
+
+        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(TAME_BEAST_1);
+        if (!spellInfo)
+            return;
+
+        Spell* spell = new Spell(m_bot, spellInfo, false);
+        if (!spell)
+            return;
+
+        if (m_bot->GetPetGuid() || spell->CheckCast(true) != SPELL_CAST_OK || !pTarget ||
+                pTarget->IsDead() || !m_bot->IsInMap(pTarget) || !(((Creature*) pTarget)->GetCreatureInfo()->CreatureTypeFlags & CreatureTypeFlags::TAMEABLE))
+        {
+            MovementReset();
+            m_bot->SetSelectionGuid(ObjectGuid());
+            SetState(BOTSTATE_NORMAL);
+            SetIgnoreUpdateTime(0);
+        }
+        else if (!m_bot->HasAura(TAME_BEAST_1, EFFECT_INDEX_1))
+        {
+            m_bot->SetFacingTo(m_bot->GetAngle(pTarget));
+            SpellCastTargets targets;
+            targets.setUnitTarget(pTarget);
+            spell->SpellStart(&targets);
+            SetIgnoreUpdateTime(10);
+        }
+        return;
+    }
+
+>>>>>>> 9a3287fd794 (StaticFlags: Implement CreatureTypeFlags from StaticFlags)
     // direct cast command from master
     if (m_spellIdCommand != 0)
     {

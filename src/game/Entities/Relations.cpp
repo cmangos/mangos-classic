@@ -357,7 +357,7 @@ bool Unit::CanAttack(const Unit* unit) const
     // Creatures cannot attack player ghosts, unless it is a specially flagged ghost creature
     if (GetTypeId() == TYPEID_UNIT && unit->GetTypeId() == TYPEID_PLAYER && static_cast<const Player*>(unit)->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
     {
-        if (!(static_cast<const Creature*>(this)->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_GHOST_VISIBLE))
+        if (!(static_cast<const Creature*>(this)->GetCreatureInfo()->HasFlag(CreatureTypeFlags::VISIBLE_TO_GHOSTS)))
             return false;
     }
 
@@ -600,7 +600,7 @@ bool Unit::CanInteract(const Unit* unit) const
     // We can't interact with anyone as a ghost except specially flagged NPCs
     if (GetTypeId() == TYPEID_PLAYER && static_cast<const Player*>(this)->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
     {
-        if (unit->GetTypeId() != TYPEID_UNIT || !(static_cast<const Creature*>(unit)->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_GHOST_VISIBLE))
+        if (unit->GetTypeId() != TYPEID_UNIT || !(static_cast<const Creature*>(unit)->GetCreatureInfo()->HasFlag(CreatureTypeFlags::VISIBLE_TO_GHOSTS)))
             return false;
     }
 
@@ -645,7 +645,7 @@ bool Unit::CanInteractNow(const Unit* unit) const
     // We can't interact with dead units, unless it's a creature with special flag
     if (!unit->IsAlive())
     {
-        if (GetTypeId() != TYPEID_UNIT || !(static_cast<const Creature*>(unit)->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_INTERACT_DEAD))
+        if (GetTypeId() != TYPEID_UNIT || !(static_cast<const Creature*>(unit)->GetCreatureInfo()->HasFlag(CreatureTypeFlags::INTERACT_WHILE_DEAD)))
             return false;
     }
 
@@ -1212,7 +1212,7 @@ bool Unit::CanAttackServerside(Unit const* unit, bool ignoreFlagsSource, bool ig
     // Creatures cannot attack player ghosts, unless it is a specially flagged ghost creature
     if (GetTypeId() == TYPEID_UNIT && unit->GetTypeId() == TYPEID_PLAYER && static_cast<const Player*>(unit)->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
     {
-        if (!(static_cast<const Creature*>(this)->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_GHOST_VISIBLE))
+        if (!(static_cast<const Creature*>(this)->GetCreatureInfo()->HasFlag(CreatureTypeFlags::VISIBLE_TO_GHOSTS)))
             return false;
     }
 
