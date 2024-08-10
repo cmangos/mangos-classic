@@ -19964,7 +19964,7 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, uint32& m
     }
 
     if (at->entry == 2532 || at->entry == 2527) // champions hall and hall of legends - need pvp rank
-        if (GetHonorRankInfo().rank < ENTER_HALL_RANK)
+        if (GetHonorRankInfo().visualRank < ENTER_HALL_RANK)
             return AREA_LOCKSTATUS_PVP_RANK;
 
     // If the map is not created, assume it is possible to enter it.
