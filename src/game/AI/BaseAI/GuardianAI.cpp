@@ -98,10 +98,7 @@ void GuardianAI::OnUnsummon()
 
 void GuardianAI::EnterEvadeMode()
 {
-    m_creature->RemoveAllAurasOnEvade();
-    m_creature->CombatStopWithPets(true);
-
-    m_creature->TriggerEvadeEvents();
+    UnitAI::EnterEvadeMode();
 
     // Handle Evade events
     IncreaseDepthIfNecessary();
