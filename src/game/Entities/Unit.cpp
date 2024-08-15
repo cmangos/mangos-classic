@@ -602,8 +602,18 @@ void Unit::TriggerHomeEvents()
             GetMap()->GetCreatureLinkingHolder()->TryFollowMaster((Creature*)this);
     }
 
-    if (IsCreature() && static_cast<Creature*>(this)->GetCreatureGroup())
-        static_cast<Creature*>(this)->GetCreatureGroup()->TriggerLinkingEvent(CREATURE_GROUP_EVENT_HOME, this);
+    if (IsCreature())
+    {
+        Creature* me = static_cast<Creature*>(this);
+        if (me->GetCreatureGroup())
+            me->GetCreatureGroup()->TriggerLinkingEvent(CREATURE_GROUP_EVENT_HOME, this);
+        if (me->IsPet())
+        {
+            Unit* owner = me->GetOwner();
+            if (!owner->IsAlive() && static_cast<Pet*>(this)->IsGuardian())
+                static_cast<Pet*>(this)->Unsummon(PET_SAVE_REAGENTS);
+        }
+    }
 }
 
 void Unit::EvadeTimerExpired()
