@@ -73,34 +73,39 @@ class BattleGroundMgr
 
         void ToggleTesting();
 
-        void LoadBattleMastersEntry();
+        void LoadBattleMastersEntry(bool reload);
         BattleGroundTypeId GetBattleMasterBG(uint32 entry) const
         {
-            BattleMastersMap::const_iterator itr = m_battleMastersMap.find(entry);
-            if (itr != m_battleMastersMap.end())
+            BattleMastersMap::const_iterator itr = m_battleMastersMap->find(entry);
+            if (itr != m_battleMastersMap->end())
                 return itr->second;
 
             return BATTLEGROUND_TYPE_NONE;
         }
+        std::shared_ptr<BattleMastersMap> GetBattleMastersMap() const { return m_battleMastersMap; }
 
-        void LoadBattleEventIndexes();
+        void LoadBattleEventIndexes(bool reload);
         const BattleGroundEventIdx GetCreatureEventIndex(uint32 dbGuid) const
         {
-            CreatureBattleEventIndexesMap::const_iterator itr = m_creatureBattleEventIndexMap.find(dbGuid);
-            if (itr != m_creatureBattleEventIndexMap.end())
+            CreatureBattleEventIndexesMap::const_iterator itr = m_creatureBattleEventIndexMap->find(dbGuid);
+            if (itr != m_creatureBattleEventIndexMap->end())
                 return itr->second;
 
-            return m_creatureBattleEventIndexMap.find(static_cast<uint32>(-1))->second;
+            return m_creatureBattleEventIndexMap->find(static_cast<uint32>(-1))->second;
         }
+
+        std::shared_ptr<CreatureBattleEventIndexesMap> GetCreatureEventIndexes() const { return m_creatureBattleEventIndexMap; }
 
         const BattleGroundEventIdx GetGameObjectEventIndex(uint32 dbGuid) const
         {
-            GameObjectBattleEventIndexesMap::const_iterator itr = m_gameObjectBattleEventIndexMap.find(dbGuid);
-            if (itr != m_gameObjectBattleEventIndexMap.end())
+            GameObjectBattleEventIndexesMap::const_iterator itr = m_gameObjectBattleEventIndexMap->find(dbGuid);
+            if (itr != m_gameObjectBattleEventIndexMap->end())
                 return itr->second;
 
-            return m_gameObjectBattleEventIndexMap.find(static_cast<uint32>(-1))->second;
+            return m_gameObjectBattleEventIndexMap->find(static_cast<uint32>(-1))->second;
         }
+
+        std::shared_ptr<GameObjectBattleEventIndexesMap> GetGameObjectEventIndexes() const { return m_gameObjectBattleEventIndexMap; }
 
         bool IsTesting() const { return m_testing; }
 
@@ -116,16 +121,20 @@ class BattleGroundMgr
         uint32 GetMinLevelForBattleGroundBracketId(BattleGroundBracketId bracket_id, BattleGroundTypeId bgTypeId) const;
         uint32 GetMaxLevelForBattleGroundBracketId(BattleGroundBracketId bracket_id, BattleGroundTypeId bgTypeId) const;
         BattleGroundBracketId GetBattleGroundBracketIdFromLevel(BattleGroundTypeId bgTypeId, uint32 playerLevel) const;
+
+        Messager<BattleGroundMgr>& GetMessager() { return m_messager; }
     private:
         std::mutex schedulerLock;
-        BattleMastersMap m_battleMastersMap;
-        CreatureBattleEventIndexesMap m_creatureBattleEventIndexMap;
-        GameObjectBattleEventIndexesMap m_gameObjectBattleEventIndexMap;
+        std::shared_ptr<BattleMastersMap> m_battleMastersMap;
+        std::shared_ptr<CreatureBattleEventIndexesMap> m_creatureBattleEventIndexMap;
+        std::shared_ptr<GameObjectBattleEventIndexesMap> m_gameObjectBattleEventIndexMap;
 
         /* Battlegrounds */
         BattleGroundSet m_battleGrounds[MAX_BATTLEGROUND_TYPE_ID];
         bool m_testing;
         std::set<uint32> m_usedRefloot;
+
+        Messager<BattleGroundMgr> m_messager;
 };
 
 #define sBattleGroundMgr MaNGOS::Singleton<BattleGroundMgr>::Instance()

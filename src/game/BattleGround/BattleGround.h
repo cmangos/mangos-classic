@@ -541,7 +541,7 @@ class BattleGround
         // returns the other team index
         static PvpTeamIndex GetOtherTeamIndex(PvpTeamIndex teamIdx) { return teamIdx == TEAM_INDEX_ALLIANCE ? TEAM_INDEX_HORDE : TEAM_INDEX_ALLIANCE; }
 
-        // checke if player is inside battleground
+        // check if player is inside battleground
         bool IsPlayerInBattleGround(ObjectGuid /*playerGuid*/);
 
         // Handle script condition fulfillment

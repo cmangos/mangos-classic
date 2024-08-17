@@ -723,7 +723,10 @@ bool ChatHandler::HandleDebugGetItemStateCommand(char* args)
 
 bool ChatHandler::HandleDebugBattlegroundCommand(char* /*args*/)
 {
-    sBattleGroundMgr.ToggleTesting();
+    sBattleGroundMgr.GetMessager().AddMessage([](BattleGroundMgr* mgr)
+    {
+        mgr->ToggleTesting();
+    });
     return true;
 }
 

@@ -2069,7 +2069,10 @@ void BattleGroundMap::Update(const uint32& diff)
         // BattleGround Template instance cannot be updated, because it would be deleted
         if (!m_bg->GetInvitedCount(HORDE) && !m_bg->GetInvitedCount(ALLIANCE))
         {
-            sBattleGroundMgr.RemoveBattleGround(GetInstanceId(), m_bg->GetTypeId());
+            sBattleGroundMgr.GetMessager().AddMessage([instanceId = GetInstanceId(), typeId = m_bg->GetTypeId()](BattleGroundMgr* mgr)
+            {
+                mgr->RemoveBattleGround(instanceId, typeId);
+            });
             m_bg = nullptr;
         }
     }

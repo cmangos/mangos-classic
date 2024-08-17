@@ -69,7 +69,7 @@ void BattleGroundMgr::DeleteAllBattleGrounds()
 */
 void BattleGroundMgr::Update(uint32 /*diff*/)
 {
-
+    m_messager.Execute(this);
 }
 
 /**
@@ -623,9 +623,9 @@ uint32 BattleGroundMgr::GetPrematureFinishTime() const
 /**
   Method that loads battlemaster entries from DB
 */
-void BattleGroundMgr::LoadBattleMastersEntry()
+void BattleGroundMgr::LoadBattleMastersEntry(bool reload)
 {
-    m_battleMastersMap.clear();                              // need for reload case
+    std::shared_ptr<BattleMastersMap> newBattleMastersMap = std::make_shared<BattleMastersMap>();
 
     auto queryResult = WorldDatabase.Query("SELECT entry,bg_template FROM battlemaster_entry");
 
@@ -657,9 +657,22 @@ void BattleGroundMgr::LoadBattleMastersEntry()
             continue;
         }
 
-        m_battleMastersMap[entry] = BattleGroundTypeId(bgTypeId);
+        (*newBattleMastersMap)[entry] = BattleGroundTypeId(bgTypeId);
     }
     while (queryResult->NextRow());
+
+    m_battleMastersMap = newBattleMastersMap;
+
+    if (reload)
+    {
+        sMapMgr.DoForAllMaps([battleMasters = newBattleMastersMap](Map* map)
+        {
+            map->GetMessager().AddMessage([battleMasters](Map* map)
+            {
+                map->GetMapDataContainer().SetBattleMastersMap(battleMasters);
+            });
+        });
+    }
 
     sLog.outString(">> Loaded %u battlemaster entries", count);
     sLog.outString();
@@ -710,15 +723,15 @@ bool BattleGroundMgr::IsBgWeekend(BattleGroundTypeId bgTypeId)
 /**
   Method that loads battleground events used in battleground scripts
 */
-void BattleGroundMgr::LoadBattleEventIndexes()
+void BattleGroundMgr::LoadBattleEventIndexes(bool reload)
 {
     BattleGroundEventIdx events;
     events.event1 = BG_EVENT_NONE;
     events.event2 = BG_EVENT_NONE;
-    m_gameObjectBattleEventIndexMap.clear();             // need for reload case
-    m_gameObjectBattleEventIndexMap[static_cast<uint32>(-1)] = events;
-    m_creatureBattleEventIndexMap.clear();               // need for reload case
-    m_creatureBattleEventIndexMap[static_cast<uint32>(-1)] = events;
+    std::shared_ptr<GameObjectBattleEventIndexesMap> newGameObjectIndexes = std::make_shared<GameObjectBattleEventIndexesMap>();
+    (*newGameObjectIndexes)[static_cast<uint32>(-1)] = events;
+    std::shared_ptr<CreatureBattleEventIndexesMap> newCreatureIndexes = std::make_shared<CreatureBattleEventIndexesMap>();
+    (*newCreatureIndexes)[static_cast<uint32>(-1)] = events;
 
     uint32 count = 0;
 
@@ -807,13 +820,28 @@ void BattleGroundMgr::LoadBattleEventIndexes()
         }
 
         if (gameobject)
-            m_gameObjectBattleEventIndexMap[dbTableGuidLow] = events;
+            (*newGameObjectIndexes)[dbTableGuidLow] = events;
         else
-            m_creatureBattleEventIndexMap[dbTableGuidLow] = events;
+            (*newCreatureIndexes)[dbTableGuidLow] = events;
 
         ++count;
     }
     while (queryResult->NextRow());
+
+    m_gameObjectBattleEventIndexMap = newGameObjectIndexes;
+    m_creatureBattleEventIndexMap = newCreatureIndexes;
+
+    if (reload)
+    {
+        sMapMgr.DoForAllMaps([gameobjects = newGameObjectIndexes, creatures = newCreatureIndexes](Map* map)
+        {
+            map->GetMessager().AddMessage([gameobjects, creatures](Map* map)
+            {
+                map->GetMapDataContainer().SetGameObjectEventIndexes(gameobjects);
+                map->GetMapDataContainer().SetCreatureEventIndexes(creatures);
+            });
+        });
+    }
 
     sLog.outString(">> Loaded %u battleground eventindexes", count);
     sLog.outString();

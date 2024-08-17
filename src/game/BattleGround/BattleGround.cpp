@@ -1477,7 +1477,7 @@ Team BattleGround::GetPrematureWinner()
 */
 void BattleGround::OnObjectDBLoad(Creature* creature)
 {
-    const BattleGroundEventIdx eventId = sBattleGroundMgr.GetCreatureEventIndex(creature->GetDbGuid());
+    const BattleGroundEventIdx eventId = GetBgMap()->GetMapDataContainer().GetCreatureEventIndex(creature->GetDbGuid());
     if (eventId.event1 == BG_EVENT_NONE)
         return;
 
@@ -1525,7 +1525,7 @@ uint32 BattleGround::GetSingleGameObjectGuid(uint8 event1, uint8 event2)
 */
 void BattleGround::OnObjectDBLoad(GameObject* obj)
 {
-    const BattleGroundEventIdx eventId = sBattleGroundMgr.GetGameObjectEventIndex(obj->GetDbGuid());
+    const BattleGroundEventIdx eventId = GetBgMap()->GetMapDataContainer().GetGameObjectEventIndex(obj->GetDbGuid());
     if (eventId.event1 == BG_EVENT_NONE)
         return;
 

@@ -1237,10 +1237,10 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadGameObjectForQuests();
 
     sLog.outString("Loading BattleMasters...");
-    sBattleGroundMgr.LoadBattleMastersEntry();
+    sBattleGroundMgr.LoadBattleMastersEntry(false);
 
     sLog.outString("Loading BattleGround event indexes...");
-    sBattleGroundMgr.LoadBattleEventIndexes();
+    sBattleGroundMgr.LoadBattleEventIndexes(false);
 
     sLog.outString("Loading GameTeleports...");
     sObjectMgr.LoadGameTele();

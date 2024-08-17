@@ -24,12 +24,15 @@
 #include "Globals/UnitCondition.h"
 #include "World/WorldStateExpression.h"
 #include "Globals/CombatCondition.h"
+#include "BattleGround/BattleGroundMgr.h"
 
 MapDataContainer::MapDataContainer() : m_spellListContainer(sObjectMgr.GetCreatureSpellListContainer()),
     m_spawnGroupContainer(sObjectMgr.GetSpawnGroupContainer()), m_CreatureEventAIEventEntryMap(sEventAIMgr.GetCreatureEventEntryAIMap()),
     m_CreatureEventAIEventGuidMap(sEventAIMgr.GetCreatureEventGuidAIMap()), m_creatureEventAIComputedDataMap(sEventAIMgr.GetEAIComputedDataMap()),
     m_stringIds(sScriptMgr.GetStringIdMap()), m_stringIdsByString(sScriptMgr.GetStringIdByStringMap()),
-    m_unitConditions(sObjectMgr.GetUnitConditions()), m_worldStateExpressions(sObjectMgr.GetWorldStateExpressions()), m_combatConditions(sObjectMgr.GetCombatConditions())
+    m_unitConditions(sObjectMgr.GetUnitConditions()), m_worldStateExpressions(sObjectMgr.GetWorldStateExpressions()), m_combatConditions(sObjectMgr.GetCombatConditions()),
+    m_creatureBattleEventIndexMap(sBattleGroundMgr.GetCreatureEventIndexes()), m_gameObjectBattleEventIndexMap(sBattleGroundMgr.GetGameObjectEventIndexes()),
+    m_battleMastersMap(sBattleGroundMgr.GetBattleMastersMap())
 {
     for (uint32 i = 0; i < SCRIPT_TYPE_MAX; ++i)
         SetScriptMap(ScriptMapType(i), sScriptMgr.GetScriptMap(ScriptMapType(i)));
@@ -141,6 +144,48 @@ std::shared_ptr<std::map<int32, WorldStateExpressionEntry>> MapDataContainer::Ge
 std::shared_ptr<std::map<int32, CombatConditionEntry>> MapDataContainer::GetCombatConditions() const
 {
     return m_combatConditions;
+}
+
+const BattleGroundEventIdx MapDataContainer::GetCreatureEventIndex(uint32 dbGuid) const
+{
+    CreatureBattleEventIndexesMap::const_iterator itr = m_creatureBattleEventIndexMap->find(dbGuid);
+    if (itr != m_creatureBattleEventIndexMap->end())
+        return itr->second;
+
+    return m_creatureBattleEventIndexMap->find(static_cast<uint32>(-1))->second;
+}
+
+void MapDataContainer::SetCreatureEventIndexes(std::shared_ptr<CreatureBattleEventIndexesMap> indexes)
+{
+    m_creatureBattleEventIndexMap = indexes;
+}
+
+const BattleGroundEventIdx MapDataContainer::GetGameObjectEventIndex(uint32 dbGuid) const
+{
+    GameObjectBattleEventIndexesMap::const_iterator itr = m_gameObjectBattleEventIndexMap->find(dbGuid);
+    if (itr != m_gameObjectBattleEventIndexMap->end())
+        return itr->second;
+
+    return m_gameObjectBattleEventIndexMap->find(static_cast<uint32>(-1))->second;
+}
+
+void MapDataContainer::SetGameObjectEventIndexes(std::shared_ptr<GameObjectBattleEventIndexesMap> indexes)
+{
+    m_gameObjectBattleEventIndexMap = indexes;
+}
+
+BattleGroundTypeId MapDataContainer::GetBattleMasterBG(uint32 entry) const
+{
+    BattleMastersMap::const_iterator itr = m_battleMastersMap->find(entry);
+    if (itr != m_battleMastersMap->end())
+        return itr->second;
+
+    return BATTLEGROUND_TYPE_NONE;
+}
+
+void MapDataContainer::SetBattleMastersMap(std::shared_ptr<BattleMastersMap> battleMasters)
+{
+    m_battleMastersMap = battleMasters;
 }
 
 void MapDataContainer::SetStringIdMaps(std::shared_ptr<StringIdMap> stringIds, std::shared_ptr<StringIdMapByString> stringIdsByString)
