@@ -88,7 +88,7 @@ namespace VMAP
             VMapManager2();
             ~VMapManager2();
 
-            void InitializeThreadUnsafe(const std::vector<uint32>& mapIds);
+            void InitializeThreadUnsafe(const std::vector<uint32>& mapIds) override;
 
             VMAPLoadResult loadMap(const char* pBasePath, unsigned int pMapId, int x, int y) override;
             bool IsTileLoaded(uint32 mapId, uint32 x, uint32 y) const override;

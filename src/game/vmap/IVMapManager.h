@@ -21,6 +21,7 @@
 
 #include <string>
 #include <Platform/Define.h>
+#include <vector>
 
 //===========================================================
 
