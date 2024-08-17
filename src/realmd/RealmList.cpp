@@ -193,6 +193,12 @@ void RealmList::UpdateRealms(bool init)
             uint8 realmflags           = fields[5].GetUInt8();
             uint8 allowedSecurityLevel = fields[7].GetUInt8();
 
+            if (Id == 0)
+            {
+                sLog.outErrorDb("Realm ID must be > 0 for %s", name.c_str());
+                continue;
+            }
+
             if (realmflags & ~(REALM_FLAG_OFFLINE | REALM_FLAG_NEW_PLAYERS | REALM_FLAG_RECOMMENDED | REALM_FLAG_SPECIFYBUILD))
             {
                 sLog.outError("Realm (id %u, name '%s') can only be flagged as OFFLINE (mask 0x02), NEWPLAYERS (mask 0x20), RECOMMENDED (mask 0x40), or SPECIFICBUILD (mask 0x04) in DB", Id, name.c_str());
