@@ -51,7 +51,6 @@ namespace VMAP
         }
     }
 
-    std::mutex m_vmapMutex;
     IVMapManager* gVMapManager = nullptr;
 
     //===============================================
@@ -83,12 +82,8 @@ namespace VMAP
     // just return the instance
     IVMapManager* VMapFactory::createOrGetVMapManager()
     {
-        if (!gVMapManager)
-        {
-            std::lock_guard<std::mutex> lock(m_vmapMutex);
-            if (!gVMapManager)
-                gVMapManager = new VMapManager2();              // should be taken from config ... Please change if you like :-)
-        }
+        if (!gVMapManager) // called once on load
+            gVMapManager = new VMapManager2();              // should be taken from config ... Please change if you like :-)
         return gVMapManager;
     }
 
@@ -96,9 +91,7 @@ namespace VMAP
     // delete all internal data structures
     void VMapFactory::clear()
     {
-        std::lock_guard<std::mutex> lock(m_vmapMutex);
-
-        delete gVMapManager;
+        delete gVMapManager; // called once on world destruction where single threaded is guaranteed
         gVMapManager = nullptr;
     }
 }
