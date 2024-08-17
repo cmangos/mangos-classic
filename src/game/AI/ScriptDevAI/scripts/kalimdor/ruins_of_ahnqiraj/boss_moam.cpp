@@ -34,6 +34,7 @@ enum
     EMOTE_ENERGIZING         = -1509028,
 
     SPELL_TRAMPLE            = 15550,
+    SPELL_DOUBLE_ATTACK      = 18941,
     SPELL_DRAIN_MANA         = 25676,
     SPELL_ARCANE_ERUPTION    = 25672,
     SPELL_SUMMON_MANAFIENDS  = 25684,
@@ -52,6 +53,7 @@ enum MoamActions
     MOAM_MANA_FIENDS,
     MOAM_ENERGIZE,
     MOAM_TRAMPLE,
+    MOAM_DOUBLE_ATTACK,
     MOAM_MANA_DRAIN,
     MOAM_ACTION_MAX,
     MOAM_CANCEL_ENERGIZE,
@@ -65,6 +67,7 @@ struct boss_moamAI : public CombatAI
     {
         AddCombatAction(MOAM_ARCANE_ERUPTION, 0u);
         AddCombatAction(MOAM_TRAMPLE, 9000u);
+        AddCombatAction(MOAM_DOUBLE_ATTACK, 8000, 12000);
         AddCombatAction(MOAM_MANA_DRAIN, 6000u);
         AddCombatAction(MOAM_MANA_FIENDS, 90000u);
         AddCombatAction(MOAM_ENERGIZE, 90000u);
@@ -136,6 +139,12 @@ struct boss_moamAI : public CombatAI
             {
                 if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_TRAMPLE) == CAST_OK)
                     ResetCombatAction(action, 15000);
+                break;
+            }
+            case MOAM_DOUBLE_ATTACK:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK) == CAST_OK)
+                    ResetCombatAction(action, urand(8000, 12000));
                 break;
             }
             case MOAM_MANA_DRAIN:

@@ -31,6 +31,7 @@ EndScriptData
 enum
 {
     // ground spells
+    SPELL_DOUBLE_ATTACK     = 18941,
     SPELL_SWEEP             = 26103,
     SPELL_SANDBLAST         = 26102,
     SPELL_BOULDER           = 26616,
@@ -75,6 +76,7 @@ enum OuroActions
     OURO_BOULDER,
     OURO_SAND_BLAST,
     OURO_SWEEP,
+    OURO_DOUBLE_ATTACK,
     OURO_NO_MELEE_BURROW,
     OURO_ACTION_MAX,
     OURO_SPAWN_DELAY_ATTACK,
@@ -112,6 +114,7 @@ struct boss_ouroAI : public CombatAI
         AddCombatAction(OURO_BOULDER, true);
         AddCombatAction(OURO_SAND_BLAST, 25000u);
         AddCombatAction(OURO_SWEEP, 20000u);
+        AddCombatAction(OURO_DOUBLE_ATTACK, urand(1000, 10000));
         AddCombatAction(OURO_NO_MELEE_BURROW, 2000u);
         AddCustomAction(OURO_SPAWN_DELAY_ATTACK, true, [&]() {HandleSpawnDelay(); });
         m_creature->SetImmobilizedState(true);
@@ -270,6 +273,12 @@ struct boss_ouroAI : public CombatAI
             {
                 if (DoCastSpellIfCan(nullptr, SPELL_SWEEP) == CAST_OK)
                     ResetCombatAction(action, 20000);
+                break;
+            }
+            case OURO_DOUBLE_ATTACK:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK) == CAST_OK)
+                    ResetCombatAction(action, urand(7000, 13000));
                 break;
             }
             case OURO_BOULDER:
