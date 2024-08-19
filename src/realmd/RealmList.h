@@ -38,6 +38,7 @@ struct RealmBuildInfo
 };
 
 RealmBuildInfo const* FindBuildInfo(uint16 _build);
+uint8 GetRealmCategoryIdByBuildAndZone(uint16 _build, RealmZone _realmZone);
 
 typedef std::set<uint32> RealmBuilds;
 
