@@ -229,7 +229,7 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
                     auto pool = sPoolMgr.GetPoolCreatures(tmp.searchRadiusOrGuid);
                     if (pool.isEmpty())
                     {
-                        sLog.outErrorDb("Table `%s` for script id %u has go-buddy defined by pool (SCRIPT_FLAG_BUDDY_BY_POOL %u set) but pool %u is empty, skipping.", tablename, tmp.id, tmp.data_flags, tmp.searchRadiusOrGuid);
+                        sLog.outErrorDb("Table `%s` for script id %u has buddy defined by pool (SCRIPT_FLAG_BUDDY_BY_POOL %u set) but pool %u is empty, skipping.", tablename, tmp.id, tmp.data_flags, tmp.searchRadiusOrGuid);
                         continue;
                     }
                 }
@@ -248,7 +248,7 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
                 uint32 groupEntry = tmp.buddyEntry;
                 if (sObjectMgr.GetSpawnGroupContainer()->spawnGroupMap.find(groupEntry) == sObjectMgr.GetSpawnGroupContainer()->spawnGroupMap.end())
                 {
-                    sLog.outErrorDb("Table `%s` for script id %u has go-buddy defined by group (SCRIPT_FLAG_BUDDY_BY_SPAWN_GROUP %u set) but group %u is empty, skipping.", tablename, tmp.id, tmp.data_flags, tmp.searchRadiusOrGuid);
+                    sLog.outErrorDb("Table `%s` for script id %u has buddy defined by group (SCRIPT_FLAG_BUDDY_BY_SPAWN_GROUP %u set) but group %u is empty, skipping.", tablename, tmp.id, tmp.data_flags, tmp.searchRadiusOrGuid);
                     continue;
                 }
             }
