@@ -32,8 +32,9 @@ struct PeriodicTriggerData
     Unit* caster; Unit* target; WorldObject* targetObject;
     SpellEntry const* spellInfo;
     int32* basePoints;
+    uint32 triggerFlags;
     PeriodicTriggerData(WorldObject* trueCaster, Unit* caster, Unit* target, WorldObject* targetObject, SpellEntry const* spellInfo, int32* basePoints) :
-        trueCaster(trueCaster), caster(caster), target(target), targetObject(targetObject), spellInfo(spellInfo), basePoints(basePoints) {}
+        trueCaster(trueCaster), caster(caster), target(target), targetObject(targetObject), spellInfo(spellInfo), basePoints(basePoints), triggerFlags(TRIGGERED_OLD_TRIGGERED) {}
 };
 
 struct SpellScript
