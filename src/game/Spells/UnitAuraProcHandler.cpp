@@ -512,9 +512,7 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
                 case SPELL_AURA_PROC_CANT_TRIGGER:
                     continue;
                 case SPELL_AURA_PROC_FAILED:
-                    // example - drain soul vanilla - third effect fails when not have talent but charge should drop
-                    if (!triggeredByHolder->GetSpellProto()->HasAttribute(SPELL_ATTR_PROC_FAILURE_BURNS_CHARGE))
-                        procSuccess = false;
+                    procSuccess = false;
                     break;
                 case SPELL_AURA_PROC_OK:
                     if (execData.procOnce && execData.spell)
@@ -525,11 +523,12 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
             anyAuraProc = true;
         }
 
-        if (procSuccess && execData.cooldown)
+        if ((procSuccess || triggeredByHolder->GetSpellProto()->HasAttribute(SPELL_ATTR_EX2_PROC_COOLDOWN_ON_FAILURE)) && anyAuraProc && execData.cooldown)
             triggeredByHolder->SetProcCooldown(std::chrono::seconds(execData.cooldown), GetMap()->GetCurrentClockTime());
 
         // Remove charge (aura can be removed by triggers)
-        if (useCharges && procSuccess && anyAuraProc && !triggeredByHolder->IsDeleted())
+        // Attribute example - drain soul vanilla - third effect fails when not have talent but charge should drop
+        if (useCharges && (procSuccess || triggeredByHolder->GetSpellProto()->HasAttribute(SPELL_ATTR_PROC_FAILURE_BURNS_CHARGE)) && anyAuraProc && !triggeredByHolder->IsDeleted())
         {
             // If last charge dropped add spell to remove list
             if (triggeredByHolder->DropAuraCharge())
