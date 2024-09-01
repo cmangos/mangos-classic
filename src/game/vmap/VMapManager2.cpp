@@ -288,7 +288,7 @@ namespace VMAP
     bool VMapManager2::GetLiquidLevel(uint32 pMapId, float x, float y, float z, uint8 ReqLiquidTypeMask, float& level, float& floor, uint32& type) const
     {
         InstanceTreeMap::const_iterator instanceTree = iInstanceMapTrees.find(pMapId);
-        if (instanceTree != iInstanceMapTrees.end())
+        if (instanceTree != iInstanceMapTrees.end() && instanceTree->second)
         {
             LocationInfo info;
             Vector3 pos = convertPositionToInternalRep(x, y, z);
