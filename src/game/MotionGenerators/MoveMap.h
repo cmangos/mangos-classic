@@ -91,12 +91,12 @@ namespace MMAP
     class MMapManager
     {
         public:
-            MMapManager() : loadedTiles(0) {}
+            MMapManager() : loadedTiles(0), m_enabled(true) {}
             ~MMapManager();
 
-            bool loadMap(uint32 mapId, int32 x, int32 y);
-            void loadAllGameObjectModels(std::vector<uint32> const& displayIds);
-            bool loadGameObject(uint32 displayId);
+            bool loadMap(std::string const& basePath, uint32 mapId, int32 x, int32 y);
+            void loadAllGameObjectModels(std::string const& basePath, std::vector<uint32> const& displayIds);
+            bool loadGameObject(std::string const& basePath, uint32 displayId);
             bool unloadMap(uint32 mapId, int32 x, int32 y);
             bool unloadMap(uint32 mapId);
             bool unloadMapInstance(uint32 mapId, uint32 instanceId);
@@ -110,8 +110,11 @@ namespace MMAP
 
             uint32 getLoadedTilesCount() const { return loadedTiles; }
             uint32 getLoadedMapsCount() const { return loadedMMaps.size(); }
+
+            void SetEnabled(bool state) { m_enabled = state; }
+            bool IsEnabled() const { return m_enabled; }
         private:
-            bool loadMapData(uint32 mapId);
+            bool loadMapData(std::string const& basePath, uint32 mapId);
             uint32 packTileID(int32 x, int32 y) const;
 
             std::unordered_map<uint32, std::unique_ptr<MMapData>> loadedMMaps;
@@ -119,6 +122,8 @@ namespace MMAP
 
             std::unordered_map<uint32, std::unique_ptr<MMapGOData>> m_loadedModels;
             std::mutex m_modelsMutex;
+
+            bool m_enabled;
     };
 
     // static class
@@ -131,8 +136,6 @@ namespace MMAP
             static void clear();
             static void preventPathfindingOnMaps(const char* ignoreMapIds);
             static bool IsPathfindingEnabled(uint32 mapId, const Unit* unit);
-            static bool IsPathfindingForceEnabled(const Unit* unit);
-            static bool IsPathfindingForceDisabled(const Unit* unit);
     };
 }
 

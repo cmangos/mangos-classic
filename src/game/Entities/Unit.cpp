@@ -12241,6 +12241,14 @@ void Unit::SelectAttackingTargets(std::vector<Unit*>& selectedTargets, Attacking
     }
 }
 
+Unit::MmapForcingStatus Unit::IsIgnoringMMAP() const
+{
+    if (IsPlayer() || IsPlayerControlled())
+        return MmapForcingStatus::FORCED;
+
+    return MmapForcingStatus::DEFAULT;
+}
+
 void Unit::SetLevitate(bool enable)
 {
     if (!IsClientControlled())

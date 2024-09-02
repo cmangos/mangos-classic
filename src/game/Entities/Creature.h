@@ -811,7 +811,7 @@ class Creature : public Unit
         bool IsInvisible() const { return m_isInvisible; }
 
         void SetIgnoreMMAP(bool ignore) { m_ignoreMMAP = ignore; }
-        bool IsIgnoringMMAP() const { return m_ignoreMMAP; }
+        virtual MmapForcingStatus IsIgnoringMMAP() const override;
 
         void OnEventHappened(uint16 eventId, bool activate, bool resume) override { return AI()->OnEventHappened(eventId, activate, resume); }
 
