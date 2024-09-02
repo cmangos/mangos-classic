@@ -65,6 +65,8 @@ namespace MMAP
         // we have to use single dtNavMeshQuery for every instance, since those are not thread safe
         NavMeshQuerySet navMeshQueries;     // instanceId to query
         MMapTileSet mmapLoadedTiles;        // maps [map grid coords] to [dtTile]
+
+        std::mutex mutex;
     };
 
     struct MMapGOData
@@ -97,6 +99,7 @@ namespace MMAP
             bool loadMap(std::string const& basePath, uint32 mapId, int32 x, int32 y);
             void loadAllGameObjectModels(std::string const& basePath, std::vector<uint32> const& displayIds);
             bool loadGameObject(std::string const& basePath, uint32 displayId);
+            bool loadMapInstance(std::string const& basePath, uint32 mapId, uint32 instanceId);
             bool unloadMap(uint32 mapId, int32 x, int32 y);
             bool unloadMap(uint32 mapId);
             bool unloadMapInstance(uint32 mapId, uint32 instanceId);

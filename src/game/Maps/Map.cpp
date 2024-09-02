@@ -199,6 +199,8 @@ void Map::Initialize(bool loadInstanceData /*= true*/)
 
     m_spawnManager.Initialize();
 
+    MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), GetId(), GetInstanceId());
+
     sObjectMgr.LoadActiveEntities(this);
 
     LoadTransports();

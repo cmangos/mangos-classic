@@ -319,6 +319,32 @@ namespace MMAP
         return true;
     }
 
+    bool MMapManager::loadMapInstance(std::string const& basePath, uint32 mapId, uint32 instanceId)
+    {
+        if (!loadMapData(basePath, mapId))
+            return false;
+
+        auto& mmap = loadedMMaps[mapId];
+        auto [queryItr, inserted] = mmap->navMeshQueries.try_emplace(instanceId, nullptr);
+        if (!inserted)
+            return true;
+
+        // allocate mesh query
+        dtNavMeshQuery* query = dtAllocNavMeshQuery();
+        MANGOS_ASSERT(query);
+        if (dtStatusFailed(query->init(mmap->navMesh, 1024)))
+        {
+            dtFreeNavMeshQuery(query);
+            mmap->navMeshQueries.erase(queryItr);
+            ERROR_DB_FILTER_LOG(LOG_FILTER_MAP_LOADING, "MMAP:GetNavMeshQuery: Failed to initialize dtNavMeshQuery for mapId %03u instanceId %u", mapId, instanceId);
+            return false;
+        }
+
+        DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "MMAP:GetNavMeshQuery: created dtNavMeshQuery for mapId %03u instanceId %u", mapId, instanceId);
+        queryItr->second = query;
+        return true;
+    }
+
     bool MMapManager::unloadMap(uint32 mapId, int32 x, int32 y)
     {
         // check if we have this map loaded
@@ -438,28 +464,15 @@ namespace MMAP
 
     dtNavMeshQuery const* MMapManager::GetNavMeshQuery(uint32 mapId, uint32 instanceId)
     {
-        if (loadedMMaps.find(mapId) == loadedMMaps.end())
+        auto itr = loadedMMaps.find(mapId);
+        if (itr == loadedMMaps.end())
             return nullptr;
 
-        const auto& mmapData = loadedMMaps[mapId];
-        if (mmapData->navMeshQueries.find(instanceId) == mmapData->navMeshQueries.end())
-        {
-            // allocate mesh query
-            dtNavMeshQuery* query = dtAllocNavMeshQuery();
-            MANGOS_ASSERT(query);
-            dtStatus dtResult = query->init(mmapData->navMesh, 1024);
-            if (dtStatusFailed(dtResult))
-            {
-                dtFreeNavMeshQuery(query);
-                sLog.outError("MMAP:GetNavMeshQuery: Failed to initialize dtNavMeshQuery for mapId %03u instanceId %u", mapId, instanceId);
-                return nullptr;
-            }
+        auto queryItr = itr->second->navMeshQueries.find(instanceId);
+        if (queryItr == itr->second->navMeshQueries.end())
+            return nullptr;
 
-            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "MMAP:GetNavMeshQuery: created dtNavMeshQuery for mapId %03u instanceId %u", mapId, instanceId);
-            mmapData->navMeshQueries.insert(std::pair<uint32, dtNavMeshQuery*>(instanceId, query));
-        }
-
-        return mmapData->navMeshQueries[instanceId];
+        return queryItr->second;
     }
 
     dtNavMeshQuery const* MMapManager::GetModelNavMeshQuery(uint32 displayId)
@@ -482,11 +495,11 @@ namespace MMAP
                 if (dtStatusFailed(query->init(mmapGOData->navMesh, 2048)))
                 {
                     dtFreeNavMeshQuery(query);
-                    sLog.outError("MMAP:GetNavMeshQuery: Failed to initialize dtNavMeshQuery for displayid %03u tid %s", displayId, ss.str().data());
+                    sLog.outError("MMAP:GetModelNavMeshQuery: Failed to initialize dtNavMeshQuery for displayid %03u tid %s", displayId, ss.str().data());
                     return nullptr;
                 }
 
-                DETAIL_LOG("MMAP:GetNavMeshQuery: created dtNavMeshQuery for displayid %03u tid %s", displayId, ss.str().data());
+                DETAIL_LOG("MMAP:GetModelNavMeshQuery: created dtNavMeshQuery for displayid %03u tid %s", displayId, ss.str().data());
                 mmapGOData->navMeshGOQueries.insert(std::pair<std::thread::id, dtNavMeshQuery*>(threadId, query));
             }
         }
