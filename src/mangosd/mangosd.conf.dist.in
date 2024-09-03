@@ -195,6 +195,11 @@ SD2ErrorLogFile = "SD2Errors.log"
 #        Disable mmap pathfinding on the listed maps.
 #        List of map ids with delimiter ','
 #
+#    mmap.preload
+#        Enable/Disable preloading on first mapId load - expensive but thread safe - use only for big servers
+#        Default: 1 (enable)
+#                 0 (disable)
+#
 #    PathFinder.OptimizePath
 #        Use or not path finder path optimization (cut calculated points).
 #                 0  (disable)
@@ -258,6 +263,7 @@ vmap.enableIndoorCheck = 1
 DetectPosCollision = 1
 mmap.enabled = 1
 mmap.ignoreMapIds = ""
+mmap.preload = 0
 PathFinder.OptimizePath = 1
 PathFinder.NormalizeZ = 0
 UpdateUptimeInterval = 10

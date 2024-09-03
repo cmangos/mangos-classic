@@ -50,7 +50,7 @@ namespace MMAP
     // dummy struct to hold map's mmap data
     struct MMapData
     {
-        MMapData(dtNavMesh* mesh) : navMesh(mesh) {}
+        MMapData(dtNavMesh* mesh) : navMesh(mesh), fullLoaded(false) {}
         ~MMapData()
         {
             for (auto& navMeshQuerie : navMeshQueries)
@@ -66,7 +66,7 @@ namespace MMAP
         NavMeshQuerySet navMeshQueries;     // instanceId to query
         MMapTileSet mmapLoadedTiles;        // maps [map grid coords] to [dtTile]
 
-        std::mutex mutex;
+        bool fullLoaded;
     };
 
     struct MMapGOData
@@ -96,7 +96,9 @@ namespace MMAP
             MMapManager() : loadedTiles(0), m_enabled(true) {}
             ~MMapManager();
 
+            void loadAllMapTiles(std::string const& basePath, uint32 mapId);
             bool loadMap(std::string const& basePath, uint32 mapId, int32 x, int32 y);
+            bool loadMapInternal(const char* filePath, const std::unique_ptr<MMapData>& mmapData, uint32 packedGridPos, uint32 mapId, int32 x, int32 y);
             void loadAllGameObjectModels(std::string const& basePath, std::vector<uint32> const& displayIds);
             bool loadGameObject(std::string const& basePath, uint32 displayId);
             bool loadMapInstance(std::string const& basePath, uint32 mapId, uint32 instanceId);
@@ -121,7 +123,7 @@ namespace MMAP
             uint32 packTileID(int32 x, int32 y) const;
 
             std::unordered_map<uint32, std::unique_ptr<MMapData>> loadedMMaps;
-            uint32 loadedTiles;
+            std::atomic<uint32> loadedTiles;
 
             std::unordered_map<uint32, std::unique_ptr<MMapGOData>> m_loadedModels;
             std::mutex m_modelsMutex;

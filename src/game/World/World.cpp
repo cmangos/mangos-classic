@@ -825,6 +825,7 @@ void World::LoadConfigSettings(bool reload)
 
     setConfig(CONFIG_BOOL_MMAP_ENABLED, "mmap.enabled", true);
     std::string ignoreMapIds = sConfig.GetStringDefault("mmap.ignoreMapIds");
+    setConfig(CONFIG_BOOL_PRELOAD_MMAP_TILES, "mmap.preload", false);
     MMAP::MMapFactory::preventPathfindingOnMaps(ignoreMapIds.c_str());
     bool enabledPathfinding = getConfig(CONFIG_BOOL_MMAP_ENABLED);
     sLog.outString("WORLD: MMap pathfinding %sabled", enabledPathfinding ? "en" : "dis");
