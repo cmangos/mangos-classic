@@ -197,8 +197,8 @@ SD2ErrorLogFile = "SD2Errors.log"
 #
 #    mmap.preload
 #        Enable/Disable preloading on first mapId load - expensive but thread safe - use only for big servers
-#        Default: 1 (enable)
-#                 0 (disable)
+#                 1 (enable)
+#        Default: 0 (disable)
 #
 #    PathFinder.OptimizePath
 #        Use or not path finder path optimization (cut calculated points).
