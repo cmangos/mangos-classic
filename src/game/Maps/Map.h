@@ -370,6 +370,8 @@ class Map : public GridRefManager<NGridType>
         WorldStateVariableManager& GetVariableManager() { return m_variableManager; }
         WorldStateVariableManager const& GetVariableManager() const { return m_variableManager; }
 
+        virtual BattleGround* GetBG() const { return nullptr; }
+
         // debug
         std::set<ObjectGuid> m_objRemoveList; // this will eventually eat up too much memory - only used for debugging VisibleNotifier::Notify() customlog leak
 
@@ -571,7 +573,7 @@ class BattleGroundMap : public Map
         void UnloadAll(bool pForce) override;
 
         virtual void InitVisibilityDistance() override;
-        BattleGround* GetBG() const { return m_bg; }
+        BattleGround* GetBG() const override { return m_bg; }
         void SetBG(BattleGround* bg) { m_bg = bg; }
 
         // can't be nullptr for loaded map

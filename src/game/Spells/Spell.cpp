@@ -4583,8 +4583,8 @@ SpellCastResult Spell::CheckCast(bool strict)
             return SPELL_FAILED_NOT_STANDING;
 
         // only allow triggered spells if at an ended battleground
-        if (!m_IsTriggeredSpell && m_caster->GetTypeId() == TYPEID_PLAYER)
-            if (BattleGround* bg = ((Player*)m_caster)->GetBattleGround())
+        if (!m_IsTriggeredSpell && m_caster->IsPlayer())
+            if (BattleGround* bg = static_cast<Player*>(m_caster)->GetBattleGround())
                 if (bg->GetStatus() == STATUS_WAIT_LEAVE)
                     return SPELL_FAILED_DONT_REPORT;
 

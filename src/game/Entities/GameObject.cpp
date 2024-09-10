@@ -1531,10 +1531,10 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
             if (goInfo->trap.charges > 0)
                 AddUse();
 
-            if (IsBattleGroundTrap && user->GetTypeId() == TYPEID_PLAYER)
+            if (IsBattleGroundTrap && user->IsPlayer())
             {
                 // BattleGround gameobjects case
-                if (BattleGround* bg = ((Player*)user)->GetBattleGround())
+                if (BattleGround* bg = static_cast<Player*>(user)->GetBattleGround())
                     bg->HandleTriggerBuff(GetObjectGuid());
             }
 
@@ -1545,7 +1545,6 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
             if (goInfo->ExtraFlags & GAMEOBJECT_EXTRA_FLAG_CUSTOM_ANIM_ON_USE)
                 SendGameObjectCustomAnim(GetObjectGuid());
 
-            // TODO: Despawning of traps? (Also related to code in ::Update)
             return;
         }
         case GAMEOBJECT_TYPE_CHAIR:                         // 7 Sitting: Wooden bench, chairs
