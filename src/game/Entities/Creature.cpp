@@ -660,7 +660,7 @@ uint32 Creature::ChooseDisplayId(const CreatureInfo* cinfo, const CreatureData* 
     {
         if (cinfo->DisplayId[i])
         {
-            if (roll < cinfo->DisplayIdProbability[i])
+            if (roll < int32(cinfo->DisplayIdProbability[i]))
             {
                 display_id = cinfo->DisplayId[i];
                 break;
@@ -1015,7 +1015,7 @@ bool Creature::CanInteractWithBattleMaster(Player* pPlayer, bool msg) const
     if (!isBattleMaster())
         return false;
 
-    BattleGroundTypeId bgTypeId = sBattleGroundMgr.GetBattleMasterBG(GetEntry());
+    BattleGroundTypeId bgTypeId = GetMap()->GetMapDataContainer().GetBattleMasterBG(GetEntry());
     if (bgTypeId == BATTLEGROUND_TYPE_NONE)
         return false;
 

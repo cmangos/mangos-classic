@@ -27,6 +27,7 @@
 #include "Grids/CellImpl.h"
 #include "Globals/ObjectMgr.h"
 #include "Maps/MapWorkers.h"
+#include "BattleGround/BattleGroundMgr.h"
 #include <future>
 
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<MapManager, std::recursive_mutex>
@@ -147,12 +148,12 @@ Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
     return m;
 }
 
-Map* MapManager::CreateBgMap(uint32 mapid, BattleGround* bg)
+Map* MapManager::CreateBgMap(uint32 mapid, uint32 instanceId, BattleGround* bg)
 {
     sTerrainMgr.LoadTerrain(mapid);
 
     Guard _guard(*this);
-    return CreateBattleGroundMap(mapid, sMapMgr.GenerateInstanceId(), bg);
+    return CreateBattleGroundMap(mapid, instanceId, bg);
 }
 
 Map* MapManager::FindMap(uint32 mapid, uint32 instanceId) const

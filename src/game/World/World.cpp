@@ -162,6 +162,7 @@ World::~World()
     MMAP::MMapFactory::clear();
 
     m_lfgQueueThread.join();
+    m_bgQueueThread.join();
 }
 
 /// Cleanups before world stop
@@ -1236,10 +1237,10 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadGameObjectForQuests();
 
     sLog.outString("Loading BattleMasters...");
-    sBattleGroundMgr.LoadBattleMastersEntry();
+    sBattleGroundMgr.LoadBattleMastersEntry(false);
 
     sLog.outString("Loading BattleGround event indexes...");
-    sBattleGroundMgr.LoadBattleEventIndexes();
+    sBattleGroundMgr.LoadBattleEventIndexes(false);
 
     sLog.outString("Loading GameTeleports...");
     sObjectMgr.LoadGameTele();
@@ -2030,14 +2031,6 @@ bool World::RemoveBanAccount(BanMode mode, const std::string& source, const std:
     return true;
 }
 
-void World::StartLFGQueueThread()
-{
-    m_lfgQueueThread = std::thread([&]()
-    {
-        m_lfgQueue.Update();
-    });
-}
-
 /// Update the game time
 void World::_UpdateGameTime()
 {
@@ -2721,4 +2714,20 @@ void World::LoadWorldSafeLocs() const
 {
     sWorldSafeLocsStore.Load(true);
     sLog.outString(">> Loaded %u world safe locs", sWorldSafeLocsStore.GetRecordCount());
+}
+
+void World::StartLFGQueueThread()
+{
+    m_lfgQueueThread = std::thread([&]()
+    {
+        m_lfgQueue.Update();
+    });
+}
+
+void World::StartBGQueueThread()
+{
+    m_bgQueueThread = std::thread([&]()
+    {
+        m_bgQueue.Update();
+    });
 }

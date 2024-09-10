@@ -268,7 +268,7 @@ void BattleGroundAB::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
     uint32 factionStrig = 0;
 
     // process battleground event
-    uint8 event = (sBattleGroundMgr.GetGameObjectEventIndex(go->GetDbGuid())).event1;
+    uint8 event = (GetBgMap()->GetMapDataContainer().GetGameObjectEventIndex(go->GetDbGuid())).event1;
     if (event >= BG_AB_MAX_NODES)                           // not a node
         return;
 

@@ -21,6 +21,7 @@
 
 #include "Platform/Define.h"
 #include "DBScripts/ScriptMgrDefines.h"
+#include "BattleGround/BattleGroundDefines.h"
 #include <memory>
 #include <vector>
 #include <unordered_map>
@@ -36,6 +37,7 @@ struct ScriptInfo;
 struct UnitConditionEntry;
 struct WorldStateExpressionEntry;
 struct CombatConditionEntry;
+struct BattleGroundEventIdx;
 
 // Event_Map
 typedef std::vector<CreatureEventAI_Event> CreatureEventAI_Event_Vec;
@@ -46,6 +48,11 @@ typedef std::unordered_map<uint32, CreatureEventAI_EventComputedData> CreatureEv
 typedef std::multimap < uint32 /*delay*/, std::shared_ptr<ScriptInfo>> ScriptMap;
 typedef std::map < uint32 /*id*/, ScriptMap > ScriptMapMap;
 typedef std::pair<const char*, ScriptMapMap> ScriptMapMapName;
+
+// Battleground
+typedef std::unordered_map<uint32, BattleGroundTypeId> BattleMastersMap;
+typedef std::unordered_map<uint32, BattleGroundEventIdx> CreatureBattleEventIndexesMap;
+typedef std::unordered_map<uint32, BattleGroundEventIdx> GameObjectBattleEventIndexesMap;
 
 class MapDataContainer
 {
@@ -74,6 +81,14 @@ class MapDataContainer
         std::shared_ptr<std::map<int32, UnitConditionEntry>> GetUnitConditions() const;
         std::shared_ptr<std::map<int32, WorldStateExpressionEntry>> GetWorldStateExpressions() const;
         std::shared_ptr<std::map<int32, CombatConditionEntry>> GetCombatConditions() const;
+
+        const BattleGroundEventIdx GetCreatureEventIndex(uint32 dbGuid) const;
+        void SetCreatureEventIndexes(std::shared_ptr<CreatureBattleEventIndexesMap> indexes);
+        const BattleGroundEventIdx GetGameObjectEventIndex(uint32 dbGuid) const;
+        void SetGameObjectEventIndexes(std::shared_ptr<GameObjectBattleEventIndexesMap> indexes);
+
+        BattleGroundTypeId GetBattleMasterBG(uint32 entry) const;
+        void SetBattleMastersMap(std::shared_ptr<BattleMastersMap> battleMasters);
     private:
         std::shared_ptr<CreatureSpellListContainer> m_spellListContainer;
         std::shared_ptr<SpawnGroupEntryContainer> m_spawnGroupContainer;
@@ -91,6 +106,10 @@ class MapDataContainer
         std::shared_ptr<std::map<int32, UnitConditionEntry>> m_unitConditions;
         std::shared_ptr<std::map<int32, WorldStateExpressionEntry>> m_worldStateExpressions;
         std::shared_ptr<std::map<int32, CombatConditionEntry>> m_combatConditions;
+
+        std::shared_ptr<CreatureBattleEventIndexesMap> m_creatureBattleEventIndexMap;
+        std::shared_ptr<GameObjectBattleEventIndexesMap> m_gameObjectBattleEventIndexMap;
+        std::shared_ptr<BattleMastersMap> m_battleMastersMap;
 };
 
 #endif
