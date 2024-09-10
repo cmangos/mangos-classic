@@ -31,6 +31,7 @@
 #include "Multithreading/Messager.h"
 #include "Globals/GraveyardManager.h"
 #include "LFG/LFGQueue.h"
+#include "BattleGround/BattleGroundQueue.h"
 
 #include <set>
 #include <list>
@@ -600,7 +601,9 @@ class World
         void SendGMTextFlags(uint32 accountFlag, int32 stringId, std::string type, const char* message);
 
         LFGQueue& GetLFGQueue() { return m_lfgQueue; }
+        BattleGroundQueue& GetBGQueue() { return m_bgQueue; }
         void StartLFGQueueThread();
+        void StartBGQueueThread();
     protected:
         void _UpdateGameTime();
         // callback for UpdateRealmCharacters
@@ -720,9 +723,11 @@ class World
 
         GraveyardManager m_graveyardManager;
 
-        // Housing this here but logically it is completely asynchronous - TODO: Separate this and unify with BG queue
+        // Housing this here but logically it is completely asynchronous
         LFGQueue m_lfgQueue;
         std::thread m_lfgQueueThread;
+        BattleGroundQueue m_bgQueue;
+        std::thread m_bgQueueThread;
 };
 
 extern uint32 realmID;

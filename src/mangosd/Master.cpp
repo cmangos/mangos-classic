@@ -150,6 +150,7 @@ int Master::Run()
     }
 
     sWorld.StartLFGQueueThread();
+    sWorld.StartBGQueueThread();
 
     MaNGOS::Thread* cliThread = nullptr;
 

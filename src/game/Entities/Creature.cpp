@@ -660,7 +660,7 @@ uint32 Creature::ChooseDisplayId(const CreatureInfo* cinfo, const CreatureData* 
     {
         if (cinfo->DisplayId[i])
         {
-            if (roll < cinfo->DisplayIdProbability[i])
+            if (roll < int32(cinfo->DisplayIdProbability[i]))
             {
                 display_id = cinfo->DisplayId[i];
                 break;
