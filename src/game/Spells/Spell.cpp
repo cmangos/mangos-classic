@@ -872,12 +872,6 @@ void Spell::PrepareMasksForProcSystem(uint8 effectMask, uint32& procAttacker, ui
         procVictim |= PROC_FLAG_TAKE_MELEE_SWING;
     }
 
-    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TREAT_AS_PERIODIC))
-    {
-        procAttacker = PROC_FLAG_DEAL_HARMFUL_PERIODIC;
-        procVictim = PROC_FLAG_TAKE_HARMFUL_PERIODIC;
-    }
-
     if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_SUPPRESS_CASTER_PROCS))
         procAttacker = 0;
 
