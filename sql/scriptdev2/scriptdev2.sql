@@ -191,7 +191,6 @@ UPDATE creature_template SET ScriptName='npc_feero_ironhand' WHERE entry=4484;
 
 /* AZSHARA */
 UPDATE creature_template SET ScriptName='mobs_spitelashes' WHERE entry IN (6190,6193,6194,6195,6196);
-UPDATE creature_template SET ScriptName='npc_loramus_thalipedes' WHERE entry=7783;
 UPDATE creature_template SET ScriptName='npc_felhound_tracker' WHERE entry=8668;
 UPDATE creature_template SET ScriptName='boss_maws' WHERE entry=15571;
 UPDATE gameobject_template SET ScriptName='go_lightning' WHERE entry=183356;
