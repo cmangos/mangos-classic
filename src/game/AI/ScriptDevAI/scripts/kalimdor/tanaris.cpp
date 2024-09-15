@@ -26,7 +26,6 @@ EndScriptData
 #include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
 mob_aquementas
 npc_oox17tn
-npc_stone_watcher_of_norgannon
 npc_tooga
 EndContentData */
 
@@ -248,62 +247,6 @@ bool QuestAccept_npc_oox17tn(Player* pPlayer, Creature* pCreature, const Quest* 
     return true;
 }
 
-/*######
-## npc_stone_watcher_of_norgannon
-######*/
-
-#define GOSSIP_ITEM_NORGANNON_1     "What function do you serve?"
-#define GOSSIP_ITEM_NORGANNON_2     "What are the Plates of Uldum?"
-#define GOSSIP_ITEM_NORGANNON_3     "Where are the Plates of Uldum?"
-#define GOSSIP_ITEM_NORGANNON_4     "Excuse me? We've been \"reschedueled for visitations\"? What does that mean?!"
-#define GOSSIP_ITEM_NORGANNON_5     "So, what's inside Uldum?"
-#define GOSSIP_ITEM_NORGANNON_6     "I will return when i have the Plates of Uldum."
-
-bool GossipHello_npc_stone_watcher_of_norgannon(Player* pPlayer, Creature* pCreature)
-{
-    if (pCreature->isQuestGiver())
-        pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
-
-    if (pPlayer->GetQuestStatus(2954) == QUEST_STATUS_INCOMPLETE)
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NORGANNON_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
-
-    pPlayer->SEND_GOSSIP_MENU(1674, pCreature->GetObjectGuid());
-
-    return true;
-}
-
-bool GossipSelect_npc_stone_watcher_of_norgannon(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
-{
-    switch (uiAction)
-    {
-        case GOSSIP_ACTION_INFO_DEF:
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NORGANNON_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-            pPlayer->SEND_GOSSIP_MENU(1675, pCreature->GetObjectGuid());
-            break;
-        case GOSSIP_ACTION_INFO_DEF+1:
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NORGANNON_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-            pPlayer->SEND_GOSSIP_MENU(1676, pCreature->GetObjectGuid());
-            break;
-        case GOSSIP_ACTION_INFO_DEF+2:
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NORGANNON_4, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
-            pPlayer->SEND_GOSSIP_MENU(1677, pCreature->GetObjectGuid());
-            break;
-        case GOSSIP_ACTION_INFO_DEF+3:
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NORGANNON_5, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
-            pPlayer->SEND_GOSSIP_MENU(1678, pCreature->GetObjectGuid());
-            break;
-        case GOSSIP_ACTION_INFO_DEF+4:
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NORGANNON_6, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
-            pPlayer->SEND_GOSSIP_MENU(1679, pCreature->GetObjectGuid());
-            break;
-        case GOSSIP_ACTION_INFO_DEF+5:
-            pPlayer->CLOSE_GOSSIP_MENU();
-            pPlayer->AreaExploredOrEventHappens(2954);
-            break;
-    }
-    return true;
-}
-
 /*####
 # npc_tooga
 ####*/
@@ -474,12 +417,6 @@ void AddSC_tanaris()
     pNewScript->Name = "npc_oox17tn";
     pNewScript->GetAI = &GetAI_npc_oox17tn;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_oox17tn;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_stone_watcher_of_norgannon";
-    pNewScript->pGossipHello =  &GossipHello_npc_stone_watcher_of_norgannon;
-    pNewScript->pGossipSelect = &GossipSelect_npc_stone_watcher_of_norgannon;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
