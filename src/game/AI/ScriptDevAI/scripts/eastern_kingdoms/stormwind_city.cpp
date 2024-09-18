@@ -889,6 +889,7 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                 m_creature->ClearAllReactives();
                 m_creature->SetImmobilizedState(true, true);
                 m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+                m_creature->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
                 break;
             case SAY_PRESTOR_KEEP_14:
                 if (Creature* onyxia = m_scriptedMap->GetSingleCreatureFromStorage(NPC_PRESTOR))
@@ -941,6 +942,7 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                     onyxia->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
                 // Allow creature to despawn
                 SetEscortPaused(false);
+                m_creature->Suicide();
                 break;
         }
     }
