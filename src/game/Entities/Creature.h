@@ -750,6 +750,7 @@ class Creature : public Unit
         void RemoveCorpse(bool inPlace = false);
 
         virtual void ForcedDespawn(uint32 timeMSToDespawn = 0, bool onlyAlive = false);
+        virtual void ForcedDespawn(std::chrono::milliseconds timeToDespawn, bool onlyAlive = false) { ForcedDespawn(timeToDespawn.count(), onlyAlive); }
 
         time_t const& GetRespawnTime() const { return m_respawnTime; }
         time_t GetRespawnTimeEx() const;
