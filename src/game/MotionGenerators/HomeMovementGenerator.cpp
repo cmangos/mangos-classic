@@ -103,7 +103,7 @@ void HomeMovementGenerator<Creature>::Finalize(Creature& owner)
                         pSummoner->AI()->SummonedJustReachedHome(&owner);
         }
 
-        if (!wasActive)
+        if (!wasActive && owner.IsInWorld())
             owner.SetActiveObjectState(false);
 
         owner.SetCombatStartPosition(Position());
