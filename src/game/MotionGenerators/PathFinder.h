@@ -129,6 +129,9 @@ class PathFinder
 
         const dtNavMeshQuery*   m_defaultNavMeshQuery;     // the nav mesh query used to find the path
         uint32                  m_defaultMapId;
+#ifdef ENABLE_PLAYERBOTS
+        uint32                  m_defaultInstanceId;
+#endif
 
         bool                    m_ignoreNormalization;
 
