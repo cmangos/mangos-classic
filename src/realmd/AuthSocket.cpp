@@ -87,11 +87,11 @@ struct sAuthLogonChallengeHeader
     uint16  size;
 };
 
-typedef struct AUTH_LOGON_PIN_DATA_C
+struct sAuthLogonPinData_C
 {
     uint8 salt[16];
     uint8 hash[20];
-} sAuthLogonPinData_C;
+};
 
 // typedef sAuthLogonChallenge_C sAuthReconnectChallenge_C;
 /*
@@ -117,7 +117,11 @@ struct sAuthLogonProof_C
     uint8   crc_hash[20];
     uint8   number_of_keys;
     uint8   securityFlags;                                  // 0x00-0x04
-    PINData pinData;
+    sAuthLogonPinData_C pinData;                                        // PINData for PIN authentication (classic only). Conditional read if PIN was requested
+    static size_t getSize(bool withPin)
+    {
+        return sizeof(sAuthLogonProof_C) - (withPin ? 0 : sizeof(sAuthLogonPinData_C));
+    }
 };
 /*
 typedef struct
@@ -547,7 +551,7 @@ bool AuthSocket::_HandleLogonProof()
     DEBUG_LOG("Entering _HandleLogonProof");
     ///- Read the packet
     std::shared_ptr<sAuthLogonProof_C> lp = std::make_shared<sAuthLogonProof_C>();
-    auto size = m_promptPin ? sizeof(sAuthLogonProof_C) : sizeof(sAuthLogonProof_C) - sizeof(PINData);
+    auto size = sAuthLogonProof_C::getSize(m_promptPin);
     Read((char*)lp.get(), size, [self = shared_from_this(), lp](const boost::system::error_code& error, std::size_t read)
     {
         if (error)
@@ -584,21 +588,8 @@ bool AuthSocket::_HandleLogonProof()
         self->srp.HashSessionKey();
         self->srp.CalculateProof(self->_login);
 
-        bool pinResult = true;
-
-        if (self->m_promptPin && (lp->securityFlags & SECURITY_FLAG_PIN))
-            pinResult = false;
-
-        if (self->m_promptPin && (lp->securityFlags & SECURITY_FLAG_PIN) && !self->_token.empty())
-        {
-            auto pin = self->generateToken(self->_token.c_str());
-
-            if (pin != uint32(-1))
-                pinResult = self->VerifyPinData(pin, lp->pinData);
-        }
-
         ///- Check if SRP6 results match (password is correct), else send an error
-        if (!self->srp.Proof(lp->M1, 20) && pinResult)
+        if (!self->srp.Proof(lp->M1, 20))
         {
             if (self->_build > 6141 && (lp->securityFlags & SECURITY_FLAG_AUTHENTICATOR || !self->_token.empty()))
             {
@@ -635,7 +626,26 @@ bool AuthSocket::_HandleLogonProof()
                 });
                 return;
             }
+            bool pinResult = true;
 
+            if (self->m_promptPin && (lp->securityFlags & SECURITY_FLAG_PIN))
+                pinResult = false;
+
+            if (self->m_promptPin && (lp->securityFlags & SECURITY_FLAG_PIN) && !self->_token.empty())
+            {
+                auto pin = self->generateToken(self->_token.c_str());
+
+                if (pin != uint32(-1))
+                    pinResult = self->VerifyPinData(pin, lp->pinData);
+
+            }
+
+            if (!pinResult)
+            {
+                BASIC_LOG("[AuthChallenge] Account %s tried to login with wrong pincode!", self->_login.c_str());
+                self->Write(logonProofUnknownAccount, sizeof(logonProofUnknownAccount), [self](const boost::system::error_code& error, std::size_t read) {});
+                return;
+            }
             self->verifyVersionAndFinalizeAuthentication(lp);
         }
         else
@@ -1063,7 +1073,7 @@ bool AuthSocket::_HandleXferAccept()
 }
 
 // Verify PIN entry data
-bool AuthSocket::VerifyPinData(uint32 pin, const PINData& clientData)
+bool AuthSocket::VerifyPinData(uint32 pin, const sAuthLogonPinData_C& clientData)
 {
     // remap the grid to match the client's layout
     std::vector<uint8> grid { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };

@@ -37,13 +37,8 @@
 
 #define HMAC_RES_SIZE 20
 
-struct PINData
-{
-    uint8 salt[16];
-    uint8 hash[20];
-};
-
 struct sAuthLogonProof_C;
+struct sAuthLogonPinData_C;
 
 class AuthSocket : public MaNGOS::AsyncSocket<AuthSocket>
 {
@@ -56,7 +51,7 @@ class AuthSocket : public MaNGOS::AsyncSocket<AuthSocket>
 
         void SendProof(Sha1Hash sha);
         void LoadRealmlist(ByteBuffer& pkt, uint32 acctid, uint8 accountSecurityLevel = 0);
-        bool VerifyPinData(uint32 pin, const PINData& clientData);
+        bool VerifyPinData(uint32 pin, const sAuthLogonPinData_C& clientData);
         int32 generateToken(char const* b32key);
 
         uint8 getEligibleRealmCount(uint8 accountSecurityLevel);
