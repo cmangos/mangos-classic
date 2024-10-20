@@ -596,7 +596,7 @@ bool AuthSocket::_HandleLogonProof()
                 std::shared_ptr<uint8> pinCount = std::make_shared<uint8>();
                 self->Read((char*)pinCount.get(), sizeof(uint8), [self, pinCount, lp](const boost::system::error_code& error, std::size_t read)
                 {
-                    if (error)
+                    if (error || *pinCount > 16)
                     {
                         self->Write(logonProofUnknownAccountPinInvalid, sizeof(logonProofUnknownAccountPinInvalid), [self](const boost::system::error_code& error, std::size_t read) { self->Close();});
                         return;
