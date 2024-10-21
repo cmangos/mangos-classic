@@ -626,26 +626,18 @@ bool AuthSocket::_HandleLogonProof()
                 });
                 return;
             }
-            bool pinResult = true;
 
-            if (self->m_promptPin && (lp->securityFlags & SECURITY_FLAG_PIN))
-                pinResult = false;
-
-            if (self->m_promptPin && (lp->securityFlags & SECURITY_FLAG_PIN) && !self->_token.empty())
+            if ((lp->securityFlags & SECURITY_FLAG_PIN) && !self->_token.empty())
             {
-                auto pin = self->generateToken(self->_token.c_str());
-
-                if (pin != uint32(-1))
-                    pinResult = self->VerifyPinData(pin, lp->pinData);
-
+                int32 serverToken = self->generateToken(self->_token.c_str());
+                if (!self->VerifyPinData(serverToken, lp->pinData))
+                {
+                    BASIC_LOG("[AuthChallenge] Account %s tried to login with wrong pincode!", self->_login.c_str());
+                    self->Write(logonProofUnknownAccount, sizeof(logonProofUnknownAccount), [self](const boost::system::error_code& error, std::size_t read) {});
+                    return;
+                }
             }
 
-            if (!pinResult)
-            {
-                BASIC_LOG("[AuthChallenge] Account %s tried to login with wrong pincode!", self->_login.c_str());
-                self->Write(logonProofUnknownAccount, sizeof(logonProofUnknownAccount), [self](const boost::system::error_code& error, std::size_t read) {});
-                return;
-            }
             self->verifyVersionAndFinalizeAuthentication(lp);
         }
         else
