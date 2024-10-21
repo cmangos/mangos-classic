@@ -916,11 +916,11 @@ void World::SetInitialWorldSettings()
     sSpellMgr.LoadSkillRaceClassInfoMap();
 
     ///- Clean up and pack instances
-    sLog.outString("Cleaning up instances...");
-    sMapPersistentStateMgr.CleanupInstances();              // must be called before `creature_respawn`/`gameobject_respawn` tables
-
     sLog.outString("Packing instances...");
     sMapPersistentStateMgr.PackInstances();
+
+    sLog.outString("Cleaning up instances...");
+    sMapPersistentStateMgr.CleanupInstances();              // must be called before `creature_respawn`/`gameobject_respawn` tables
 
     sLog.outString("Packing groups...");
     sObjectMgr.PackGroupIds();                              // must be after CleanupInstances
