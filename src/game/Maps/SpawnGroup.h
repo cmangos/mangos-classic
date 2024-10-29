@@ -100,6 +100,7 @@ class CreatureGroup : public SpawnGroup
     private:
         void ClearRespawnTimes();
         FormationDataSPtr m_formationData;
+        std::set<Unit*> m_linkageTargets;
 };
 
 struct RespawnPosition

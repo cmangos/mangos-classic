@@ -410,6 +410,11 @@ void CreatureGroup::TriggerLinkingEvent(uint32 event, Unit* target)
             if (!target->HasCharmer() && m_objects.find(target->GetDbGuid()) != m_objects.end())
                 return;
 
+            if (m_linkageTargets.find(target) != m_linkageTargets.end()) // already triggering for target
+                return;
+
+            m_linkageTargets.insert(target);
+
             for (auto& data : m_objects)
             {
                 uint32 dbGuid = data.first;
@@ -428,6 +433,8 @@ void CreatureGroup::TriggerLinkingEvent(uint32 event, Unit* target)
                 CreatureGroup* group = static_cast<CreatureGroup*>(m_map.GetSpawnManager().GetSpawnGroup(linkedGroup));
                 group->TriggerLinkingEvent(event, target);
             }
+
+            m_linkageTargets.erase(target);
             break;
         case CREATURE_GROUP_EVENT_EVADE:
             if ((m_entry.Flags & CREATURE_GROUP_EVADE_TOGETHER) != 0)
