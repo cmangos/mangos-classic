@@ -508,7 +508,7 @@ void UnitAI::CheckForHelp(Unit* who, Unit* me, float distance)
         return;
 
     // pulling happens once panic/retreating ends
-    if (who->hasUnitState(UNIT_STAT_PANIC | UNIT_STAT_RETREATING))
+    if (who->hasUnitState(UNIT_STAT_PANIC | UNIT_STAT_RETREATING) || who->IsPolymorphed())
         return;
 
     if (me->CanInitiateAttack() && me->CanAttackOnSight(victim) && victim->isInAccessablePlaceFor(me) && victim->IsVisibleForOrDetect(me, me, false))
