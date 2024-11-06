@@ -300,6 +300,7 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 4133,  -- Bruise
 5301,  -- Defensive State (DND)
 6742,  -- Bloodlust
+7486, -- Butcher Drain
 8852,  -- Moss Hide
 11816, -- Land Mine Arming
 11966, -- Fire Shield
