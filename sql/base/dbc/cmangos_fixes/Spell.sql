@@ -318,6 +318,7 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 13879, -- Magma Splash
 16331, -- Incorporeal Defense
 16577, -- Disease Cloud
+16592, -- Shadowform
 17205, -- Winterfall Firewater
 17327, -- Spirit Particles
 18115, -- Viewing Room Student Transform
