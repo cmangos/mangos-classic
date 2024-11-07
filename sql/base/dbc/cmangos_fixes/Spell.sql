@@ -307,6 +307,7 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 8434, -- Leech Pulse
 8852,  -- Moss Hide
 9463, -- Mirefin Fungus
+9941, -- Spell Reflection
 11816, -- Land Mine Arming
 11966, -- Fire Shield
 12002, -- Plague Cloud
