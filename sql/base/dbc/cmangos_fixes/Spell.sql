@@ -310,6 +310,7 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 9941, -- Spell Reflection
 11816, -- Land Mine Arming
 11966, -- Fire Shield
+11984, -- Immolate
 12002, -- Plague Cloud
 12782, -- Shield Spike
 12896, -- Helboar
