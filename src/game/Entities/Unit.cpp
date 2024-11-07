@@ -7663,6 +7663,22 @@ float Unit::GetPPMProcChance(uint32 WeaponSpeed, float PPM) const
     return WeaponSpeed * PPM / 600.0f;                      // result is chance in percents (probability = Speed_in_sec * (PPM / 60))
 }
 
+bool Unit::MountEntry(uint32 templateEntry, const Aura* aura)
+{
+    CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(templateEntry);
+    uint32 display_id = Creature::ChooseDisplayId(ci);
+
+    SetMountInfo(ci);
+
+    return Mount(display_id, aura);
+}
+
+bool Unit::UnmountEntry(const Aura* aura)
+{
+    SetMountInfo(nullptr);
+    return Unmount(aura);
+}
+
 bool Unit::Mount(uint32 displayid, const Aura* aura/* = nullptr*/)
 {
     // Custom mount (non-aura such as taxi or command) overwrites aura mounts
@@ -7671,6 +7687,12 @@ bool Unit::Mount(uint32 displayid, const Aura* aura/* = nullptr*/)
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MOUNTING);
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, displayid);
+
+    if (GetMountInfo())
+    {
+        SetBaseRunSpeed(1.f); // overriden inside
+        UpdateSpeed(MOVE_RUN, true);
+    }
     return true;
 }
 
@@ -7681,6 +7703,13 @@ bool Unit::Unmount(const Aura* aura/* = nullptr*/)
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DISMOUNT);
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
+
+    if (GetMountInfo())
+    {
+        SetBaseRunSpeed(1.f); // overriden inside
+        UpdateSpeed(MOVE_RUN, true);
+    }
+
     return true;
 }
 
@@ -8306,7 +8335,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
     if (slow)
         speed *= (100.0f + slow) / 100.0f;
 
-    if (GetTypeId() == TYPEID_UNIT)
+    if (IsCreature())
     {
         switch (mtype)
         {
@@ -10163,6 +10192,7 @@ void Unit::UpdateModelData()
         SetFloatValue(UNIT_FIELD_COMBATREACH, normalizedScale * modelInfo->combat_reach);
 
         SetBaseWalkSpeed(modelInfo->SpeedWalk);
+        SetModelRunSpeed(modelInfo->SpeedRun);
         SetBaseRunSpeed(modelInfo->SpeedRun, false);
     }
 }

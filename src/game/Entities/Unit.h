@@ -1445,6 +1445,8 @@ class Unit : public WorldObject
 
         bool IsMounted() const { return !!GetMountID(); }
         uint32 GetMountID() const { return GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID); }
+        bool MountEntry(uint32 templateEntry, const Aura* aura = nullptr);
+        bool UnmountEntry(const Aura* aura = nullptr);
         virtual bool Mount(uint32 displayid, const Aura* aura = nullptr);
         virtual bool Unmount(const Aura* aura = nullptr);
 
@@ -2425,6 +2427,10 @@ class Unit : public WorldObject
 
         virtual bool IsNoWeaponSkillGain() const { return false; }
         virtual bool IsPreventingDeath() const { return false; }
+
+        virtual CreatureInfo const* GetMountInfo() const { return nullptr; } // TODO: Meant to be used by players during taxi
+        virtual void SetMountInfo(CreatureInfo const* info) {} // does nothing for base unit
+        virtual void SetModelRunSpeed(float runSpeed) {} // does nothing for base unit
 
     protected:
         bool MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spellInfo, uint32 selectFlags, SelectAttackingTargetParams params, int32 unitConditionId) const;

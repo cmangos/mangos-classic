@@ -147,7 +147,7 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_settings(this),
     m_countSpawns(false),
     m_creatureGroup(nullptr), m_imposedCooldown(false),
-    m_creatureInfo(nullptr)
+    m_creatureInfo(nullptr), m_mountInfo(nullptr)
 {
     m_valuesCount = UNIT_END;
 
@@ -1542,6 +1542,21 @@ void Creature::ClearCreatureGroup()
     m_creatureGroup = nullptr;
 }
 
+void Creature::SetMountInfo(CreatureInfo const* info)
+{
+    if (info)
+    {
+        if (info->SpeedRun)
+            SetBaseRunSpeed(info->SpeedRun);
+    }
+    else if (GetCreatureInfo()->SpeedRun)
+        SetBaseRunSpeed(GetCreatureInfo()->SpeedRun);
+    else
+        UpdateModelData();
+
+    m_mountInfo = info;
+}
+
 bool Creature::CreateFromProto(uint32 dbGuid, uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data /*=nullptr*/, GameEventCreatureData const* eventData /*=nullptr*/)
 {
     m_originalEntry = cinfo->Entry;
@@ -2790,8 +2805,15 @@ void Creature::SetBaseWalkSpeed(float speed)
 void Creature::SetBaseRunSpeed(float speed, bool force)
 {
     float newSpeed = speed;
-    if (!force && m_creatureInfo->SpeedRun) // Creature template should still override
-        newSpeed = m_creatureInfo->SpeedRun;
+    if (!force)
+    {
+        if (m_mountInfo && m_mountInfo->SpeedRun) // mount precedes everything
+            newSpeed = m_mountInfo->SpeedRun;
+        else if (m_creatureInfo->SpeedRun) // Creature template should still override
+            newSpeed = m_creatureInfo->SpeedRun;
+        else if (m_modelRunSpeed > 0)
+            newSpeed = m_modelRunSpeed;
+    }
 
     if (newSpeed != m_baseSpeedRun)
     {
