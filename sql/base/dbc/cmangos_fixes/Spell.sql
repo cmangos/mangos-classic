@@ -304,6 +304,7 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 7486, -- Butcher Drain
 8273, -- Bonus Dodge
 8393, -- Barbs
+8434, -- Leech Pulse
 8852,  -- Moss Hide
 9463, -- Mirefin Fungus
 11816, -- Land Mine Arming
