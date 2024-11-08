@@ -900,6 +900,9 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forc
             entry = group->GetGuidEntry(dbGuid);
     }
 
+    if (uint32 randomEntry = sObjectMgr.GetRandomGameObjectEntry(dbGuid))
+        entry = randomEntry;
+
     bool dynguid = false;
     if (map->IsDynguidForced())
         dynguid = true;
@@ -912,9 +915,6 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forc
 
     if (dynguid || newGuid == 0)
         newGuid = map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT);
-
-    if (uint32 randomEntry = sObjectMgr.GetRandomGameObjectEntry(dbGuid))
-        entry = randomEntry;
 
     if (!Create(dbGuid, newGuid, entry, map, x, y, z, ang, rotation0, rotation1, rotation2, rotation3, animprogress, GO_STATE_READY))
         return false;

@@ -1565,9 +1565,6 @@ bool Creature::CreateFromProto(uint32 dbGuid, uint32 guidlow, CreatureInfo const
 
     Object::_Create(dbGuid, guidlow, newEntry, cinfo->GetHighGuid());
 
-    if (uint32 entry = sObjectMgr.GetRandomCreatureEntry(GetDbGuid()))
-        newEntry = entry;
-
     return UpdateEntry(newEntry, data, eventData, false);
 }
 
@@ -1590,10 +1587,6 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
 
     uint32 entry = forcedEntry ? forcedEntry : data->id;
 
-    // get data for dual spawn instances
-    if (entry == 0)
-        entry = GetCreatureConditionalSpawnEntry(dbGuid, map);
-
     SpawnGroupEntry* groupEntry = map->GetMapDataContainer().GetSpawnGroupByGuid(dbGuid, TYPEID_UNIT); // use dynguid by default \o/
     CreatureGroup* group = nullptr;
     if (groupEntry)
@@ -1602,6 +1595,13 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
         if (!entry)
             entry = group->GetGuidEntry(dbGuid);
     }
+
+    // get data for dual spawn instances - spawn group precedes it because
+    if (entry == 0)
+        entry = GetCreatureConditionalSpawnEntry(dbGuid, map);
+
+    if (entry == 0)
+        entry = sObjectMgr.GetRandomCreatureEntry(GetDbGuid());
 
     GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(dbGuid);
     if (!entry && eventData)
