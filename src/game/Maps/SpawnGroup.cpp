@@ -252,9 +252,8 @@ void SpawnGroup::Spawn(bool force)
             }
             else // filling redundant entries when a group has chanced spawns for optimization so we can stop at start
                 m_chosenSpawns[dbGuid] = true;
-
-            ++itr;
         }
+        ++itr;
     }
 
     eligibleGuids.resize(m_entry.MaxCount - m_objects.size()); // now we have final count for processing
