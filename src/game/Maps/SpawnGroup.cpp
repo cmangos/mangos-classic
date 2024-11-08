@@ -113,9 +113,6 @@ uint32 SpawnGroup::GetEligibleEntry(std::map<uint32, uint32>& existingEntries, s
         auto itr = minEntries.begin();
         std::advance(itr, urand(0, minEntries.size() - 1));
         uint32 entry = (*itr).first;
-        --(*itr).second;
-        if ((*itr).second == 0)
-            minEntries.erase(itr);
         return entry;
     }
 
@@ -256,7 +253,7 @@ void SpawnGroup::Spawn(bool force)
         ++itr;
     }
 
-    eligibleGuids.resize(m_entry.MaxCount - m_objects.size()); // now we have final count for processing
+    eligibleGuids.resize(std::min(eligibleGuids.size(), m_entry.MaxCount - m_objects.size())); // now we have final count for processing
 
     auto pickCreatureEntry = [&](const SpawnGroupDbGuids* guids) -> uint32
     {
@@ -286,6 +283,23 @@ void SpawnGroup::Spawn(bool force)
         return entry;
     };
 
+    auto eraseEntry = [&](uint32 entry)
+    {
+        if (entry)
+        {
+            if (validEntries[entry])
+                --validEntries[entry];
+
+            auto itr = minEntries.find(entry);
+            if (itr != minEntries.end())
+            {
+                (*itr).second -= 1;
+                if ((*itr).second == 0)
+                    minEntries.erase(itr);
+            }
+        }
+    };
+
     // pick static and random entry first in dungeons so spawn group logic can decide after
     if (m_map.IsDungeon() && GetObjectTypeId() == TYPEID_UNIT)
     {
@@ -295,8 +309,7 @@ void SpawnGroup::Spawn(bool force)
             {
                 uint32 entry = pickCreatureEntry(data);
                 m_chosenEntries[data->DbGuid] = entry;
-                if (entry && validEntries[entry])
-                    --validEntries[entry];
+                eraseEntry(entry);
             }
         }
         for (auto data : eligibleGuids)
@@ -305,8 +318,7 @@ void SpawnGroup::Spawn(bool force)
             {
                 uint32 entry = pickCreatureEntry(data);
                 m_chosenEntries[data->DbGuid] = entry;
-                if (entry && validEntries[entry])
-                    --validEntries[entry];
+                eraseEntry(entry);
             }
         }
     }
@@ -324,8 +336,7 @@ void SpawnGroup::Spawn(bool force)
                 entry = pickCreatureEntry(*itr);
             else // GOs always pick random entry
                 entry = pickGoEntry(*itr);
-            if (entry && validEntries[entry])
-                --validEntries[entry];
+            eraseEntry(entry);
         }   
 
         float x, y;
