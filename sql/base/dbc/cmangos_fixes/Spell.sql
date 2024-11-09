@@ -328,6 +328,7 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 19817, -- Double Attack
 18951, -- Spirit Particles (green)
 21080, -- Putrid Breath
+21190, -- Aerie Gryphon Speed Buff
 23378, -- Magma Splash
 21130, -- Grip of Command
 21788, -- Deadly Poison
