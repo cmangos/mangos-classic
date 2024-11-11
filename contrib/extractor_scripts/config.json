@@ -45,5 +45,12 @@
 			"detailSampleMaxError": 0.2,
 			"walkableClimb": 10
 		}
+	},
+	"230": {
+		"3230": {
+			"walkableHeight": 6.9,
+			"walkableClimb": 6.4,
+			"_Info": "Makes BRD arena spectator stairs walkable"
+		}
 	}
 }
