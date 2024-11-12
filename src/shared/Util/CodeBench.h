@@ -16,8 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MANGOS_TIMER_H
-#define MANGOS_TIMER_H
+#ifndef MANGOS_CODEBENCH_H
+#define MANGOS_CODEBENCH_H
 
 struct ChronoTimeTracker
 {
@@ -51,3 +51,4 @@ struct ChronoTimeTracker
 };
 
 #endif
+
