@@ -593,12 +593,13 @@ static const DialogueEntry aMasqueradeDialogue[] =
     {SAY_BOLVAR_KEEP_10,        NPC_BOLVAR,     3000},
     {SAY_PRESTOR_KEEP_11,       NPC_PRESTOR,    2000},
     {SPELL_WINDSOR_DEATH,       0,              1500},
+    {NPC_PRESTOR,               0,              400},
     {SAY_WINDSOR_KEEP_12,       NPC_WINDSOR,    4000},
     {SAY_PRESTOR_KEEP_14,       NPC_PRESTOR,    0},
 
     {NPC_GUARD_ONYXIA,          0,              14000},
     {NPC_BOLVAR,                0,              2000},
-    {SAY_BOLVAR_KEEP_15,        NPC_BOLVAR,     8000},
+    {SAY_BOLVAR_KEEP_15,        NPC_BOLVAR,     6000},
     {NPC_GUARD_PATROLLER,       0,              0},
     {0, 0, 0},
 };
@@ -874,6 +875,9 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                 if (Creature* onyxia = m_scriptedMap->GetSingleCreatureFromStorage(NPC_PRESTOR))
                     onyxia->CastSpell(m_creature, SPELL_WINDSOR_DEATH, TRIGGERED_NONE);
                 break;
+            case NPC_PRESTOR:
+                m_creature->HandleEmote(EMOTE_ONESHOT_KNEEL);
+                break;
             case SAY_WINDSOR_KEEP_12:
                 if (Creature* onyxia = m_scriptedMap->GetSingleCreatureFromStorage(NPC_PRESTOR))
                     DoScriptText(SAY_PRESTOR_KEEP_13, onyxia);
@@ -941,6 +945,7 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                     onyxia->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
                 // Allow creature to despawn
                 SetEscortPaused(false);
+                m_creature->ForcedDespawn(1);
                 break;
         }
     }
