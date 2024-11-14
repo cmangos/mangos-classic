@@ -52,6 +52,7 @@ void BossAI::JustReachedHome()
     if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
         instance->SetData(m_instanceDataType, FAIL);
     OpenEntrances();
+    Reset();
 }
 
 void BossAI::Aggro(Unit* who)

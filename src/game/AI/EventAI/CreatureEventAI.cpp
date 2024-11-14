@@ -1126,11 +1126,7 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 // set model based on entry from creature_template
                 if (action.mount.creatureId)
                 {
-                    if (CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(action.mount.creatureId))
-                    {
-                        uint32 display_id = Creature::ChooseDisplayId(cInfo);
-                        m_creature->Mount(display_id);
-                    }
+                    m_creature->MountEntry(action.mount.creatureId);
                 }
                 // if no param1, then use value from param2 (modelId)
                 else
@@ -1386,6 +1382,10 @@ void CreatureEventAI::JustRespawned()                       // NOTE that this is
         SetReactState(REACT_DEFENSIVE);
     else
         SetReactState(REACT_AGGRESSIVE);
+    if (m_creature->GetSettings().HasFlag(CreatureStaticFlags2::SPAWN_DEFENSIVE))
+        SetReactState(REACT_DEFENSIVE);
+    else if (m_creature->GetSettings().HasFlag(CreatureStaticFlags::IGNORE_COMBAT))
+        m_creature->SetCanEnterCombat(false);
     m_EventUpdateTime = EVENT_UPDATE_TIME;
     m_EventDiff = 0;
     m_throwAIEventStep = 0;

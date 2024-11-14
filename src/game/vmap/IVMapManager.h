@@ -21,6 +21,7 @@
 
 #include <string>
 #include <Platform/Define.h>
+#include <vector>
 
 //===========================================================
 
@@ -52,6 +53,8 @@ namespace VMAP
             IVMapManager() : iEnableLineOfSightCalc(true), iEnableHeightCalc(true) {}
 
             virtual ~IVMapManager(void) {}
+
+            virtual void InitializeThreadUnsafe(const std::vector<uint32>& mapIds) = 0;
 
             virtual VMAPLoadResult loadMap(const char* pBasePath, unsigned int pMapId, int x, int y) = 0;
 

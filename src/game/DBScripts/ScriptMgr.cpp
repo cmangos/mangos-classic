@@ -196,7 +196,7 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
                 sLog.outErrorDb("Table `%s` has invalid data_flags %u in command %u for script id %u, skipping.", tablename, tmp.data_flags, tmp.command, tmp.id);
                 continue;
             }
-            if ((tmp.data_flags & SCRIPT_FLAG_BUDDY_AS_TARGET) != 0 && (tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_POOL) == 0 && (tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_GUID) == 0 && (tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_GO) == 0 && !tmp.buddyEntry)
+            if ((tmp.data_flags & SCRIPT_FLAG_BUDDY_AS_TARGET) != 0 && (tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_POOL) == 0 && (tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_SPAWN_GROUP) == 0 && (tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_STRING_ID) == 0 && (tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_GUID) == 0 && (tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_GO) == 0 && !tmp.buddyEntry)
             {
                 sLog.outErrorDb("Table `%s` has buddy required in data_flags %u in command %u for script id %u, but no buddy defined, skipping.", tablename, tmp.data_flags, tmp.command, tmp.id);
                 continue;
@@ -229,7 +229,7 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
                     auto pool = sPoolMgr.GetPoolCreatures(tmp.searchRadiusOrGuid);
                     if (pool.isEmpty())
                     {
-                        sLog.outErrorDb("Table `%s` for script id %u has go-buddy defined by pool (SCRIPT_FLAG_BUDDY_BY_POOL %u set) but pool %u is empty, skipping.", tablename, tmp.id, tmp.data_flags, tmp.searchRadiusOrGuid);
+                        sLog.outErrorDb("Table `%s` for script id %u has buddy defined by pool (SCRIPT_FLAG_BUDDY_BY_POOL %u set) but pool %u is empty, skipping.", tablename, tmp.id, tmp.data_flags, tmp.searchRadiusOrGuid);
                         continue;
                     }
                 }
@@ -245,10 +245,10 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
             }
             else if (tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_SPAWN_GROUP)
             {
-                uint32 groupEntry = tmp.searchRadiusOrGuid;
+                uint32 groupEntry = tmp.buddyEntry;
                 if (sObjectMgr.GetSpawnGroupContainer()->spawnGroupMap.find(groupEntry) == sObjectMgr.GetSpawnGroupContainer()->spawnGroupMap.end())
                 {
-                    sLog.outErrorDb("Table `%s` for script id %u has go-buddy defined by group (SCRIPT_FLAG_BUDDY_BY_SPAWN_GROUP %u set) but group %u is empty, skipping.", tablename, tmp.id, tmp.data_flags, tmp.searchRadiusOrGuid);
+                    sLog.outErrorDb("Table `%s` for script id %u has buddy defined by group (SCRIPT_FLAG_BUDDY_BY_SPAWN_GROUP %u set) but group %u is empty, skipping.", tablename, tmp.id, tmp.data_flags, tmp.searchRadiusOrGuid);
                     continue;
                 }
             }
@@ -1426,7 +1426,7 @@ std::pair<bool, bool> ScriptAction::GetScriptProcessTargets(WorldObject* origina
             if (origin->GetTypeId() == TYPEID_PLAYER && originalSource && originalSource->GetTypeId() != TYPEID_PLAYER)
                 origin = originalTarget;
 
-            SpawnGroupEntry* entry = m_map->GetMapDataContainer().GetSpawnGroup(m_script->searchRadiusOrGuid);
+            SpawnGroupEntry* entry = m_map->GetMapDataContainer().GetSpawnGroup(m_script->buddyEntry);
             WorldObject* closest = nullptr;
             if (entry->Type == SPAWN_GROUP_CREATURE)
             {
@@ -2388,27 +2388,25 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 break;
 
             Creature* creatureSource = static_cast<Creature*>(pSource);
-            if (!m_script->mount.creatureOrModelEntry)
+            if (m_script->mount.speedChange) // new flow
             {
-                creatureSource->Unmount();
-                if (m_script->mount.speedChange)
-                {
-                    creatureSource->SetBaseRunSpeed(creatureSource->GetCreatureInfo()->SpeedRun);
-                    creatureSource->UpdateSpeed(MOVE_RUN, true);
-                }
+                if (m_script->mount.creatureOrModelEntry)
+                    creatureSource->MountEntry(m_script->mount.creatureOrModelEntry);
+                else
+                    creatureSource->UnmountEntry();
             }
-            else if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
-                creatureSource->Mount(m_script->mount.creatureOrModelEntry);
             else
             {
-                CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(m_script->mount.creatureOrModelEntry);
-                uint32 display_id = Creature::ChooseDisplayId(ci);
-
-                creatureSource->Mount(display_id);
-                if (m_script->mount.speedChange)
+                if (!m_script->mount.creatureOrModelEntry)
+                    creatureSource->Unmount();
+                else if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
+                    creatureSource->Mount(m_script->mount.creatureOrModelEntry);
+                else
                 {
-                    creatureSource->SetBaseRunSpeed(ci->SpeedRun);
-                    creatureSource->UpdateSpeed(MOVE_RUN, true);
+                    CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(m_script->mount.creatureOrModelEntry);
+                    uint32 display_id = Creature::ChooseDisplayId(ci);
+
+                    creatureSource->Mount(display_id);
                 }
             }
 

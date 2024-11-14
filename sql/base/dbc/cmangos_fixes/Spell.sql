@@ -286,6 +286,7 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|4 WH
 11011, -- Stone Watcher of Norgannon Passive
 11048, -- Perm. Illusion Bishop Tyriona
 13377, -- Fire Shield
+13886, -- Withering Poison Proc
 15978, -- Puncture
 21911, -- Puncture
 24692, -- Hakkar Power
@@ -298,11 +299,20 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|4 WH
 UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00000004 WHERE `Id` IN (
 4044,  -- Target Dummy Passive
 4133,  -- Bruise
+4161, -- Quick Snap
 5301,  -- Defensive State (DND)
 6742,  -- Bloodlust
+7486, -- Butcher Drain
+8273, -- Bonus Dodge
+8393, -- Barbs
+8434, -- Leech Pulse
 8852,  -- Moss Hide
+9463, -- Mirefin Fungus
+9941, -- Spell Reflection
 11816, -- Land Mine Arming
 11966, -- Fire Shield
+11984, -- Immolate
+12002, -- Plague Cloud
 12782, -- Shield Spike
 12896, -- Helboar
 12898, -- Smoke Aura Visual
@@ -310,6 +320,7 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 13879, -- Magma Splash
 16331, -- Incorporeal Defense
 16577, -- Disease Cloud
+16592, -- Shadowform
 17205, -- Winterfall Firewater
 17327, -- Spirit Particles
 18115, -- Viewing Room Student Transform
@@ -318,6 +329,7 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 19817, -- Double Attack
 18951, -- Spirit Particles (green)
 21080, -- Putrid Breath
+21190, -- Aerie Gryphon Speed Buff
 23378, -- Magma Splash
 21130, -- Grip of Command
 21788, -- Deadly Poison

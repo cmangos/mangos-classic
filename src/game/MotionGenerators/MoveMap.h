@@ -50,7 +50,7 @@ namespace MMAP
     // dummy struct to hold map's mmap data
     struct MMapData
     {
-        MMapData(dtNavMesh* mesh) : navMesh(mesh) {}
+        MMapData(dtNavMesh* mesh) : navMesh(mesh), fullLoaded(false) {}
         ~MMapData()
         {
             for (auto& navMeshQuerie : navMeshQueries)
@@ -65,6 +65,8 @@ namespace MMAP
         // we have to use single dtNavMeshQuery for every instance, since those are not thread safe
         NavMeshQuerySet navMeshQueries;     // instanceId to query
         MMapTileSet mmapLoadedTiles;        // maps [map grid coords] to [dtTile]
+
+        bool fullLoaded;
     };
 
     struct MMapGOData
@@ -91,12 +93,15 @@ namespace MMAP
     class MMapManager
     {
         public:
-            MMapManager() : loadedTiles(0) {}
+            MMapManager() : loadedTiles(0), m_enabled(true) {}
             ~MMapManager();
 
-            bool loadMap(uint32 mapId, int32 x, int32 y);
-            void loadAllGameObjectModels(std::vector<uint32> const& displayIds);
-            bool loadGameObject(uint32 displayId);
+            void loadAllMapTiles(std::string const& basePath, uint32 mapId);
+            bool loadMap(std::string const& basePath, uint32 mapId, int32 x, int32 y);
+            bool loadMapInternal(const char* filePath, const std::unique_ptr<MMapData>& mmapData, uint32 packedGridPos, uint32 mapId, int32 x, int32 y);
+            void loadAllGameObjectModels(std::string const& basePath, std::vector<uint32> const& displayIds);
+            bool loadGameObject(std::string const& basePath, uint32 displayId);
+            bool loadMapInstance(std::string const& basePath, uint32 mapId, uint32 instanceId);
             bool unloadMap(uint32 mapId, int32 x, int32 y);
             bool unloadMap(uint32 mapId);
             bool unloadMapInstance(uint32 mapId, uint32 instanceId);
@@ -110,15 +115,20 @@ namespace MMAP
 
             uint32 getLoadedTilesCount() const { return loadedTiles; }
             uint32 getLoadedMapsCount() const { return loadedMMaps.size(); }
+
+            void SetEnabled(bool state) { m_enabled = state; }
+            bool IsEnabled() const { return m_enabled; }
         private:
-            bool loadMapData(uint32 mapId);
+            bool loadMapData(std::string const& basePath, uint32 mapId);
             uint32 packTileID(int32 x, int32 y) const;
 
             std::unordered_map<uint32, std::unique_ptr<MMapData>> loadedMMaps;
-            uint32 loadedTiles;
+            std::atomic<uint32> loadedTiles;
 
             std::unordered_map<uint32, std::unique_ptr<MMapGOData>> m_loadedModels;
             std::mutex m_modelsMutex;
+
+            bool m_enabled;
     };
 
     // static class
@@ -131,8 +141,6 @@ namespace MMAP
             static void clear();
             static void preventPathfindingOnMaps(const char* ignoreMapIds);
             static bool IsPathfindingEnabled(uint32 mapId, const Unit* unit);
-            static bool IsPathfindingForceEnabled(const Unit* unit);
-            static bool IsPathfindingForceDisabled(const Unit* unit);
     };
 }
 

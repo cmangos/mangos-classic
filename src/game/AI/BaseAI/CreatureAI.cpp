@@ -31,13 +31,18 @@ CreatureAI::CreatureAI(Creature* creature, uint32 combatActions) :
     m_deathPrevented(false), m_followAngle(0.f), m_followDist(0.f)
 {
     m_dismountOnAggro = !(m_creature->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_MOUNTED_COMBAT);
-    SetMeleeEnabled(!m_creature->GetSettings().HasFlag(CreatureStaticFlags::NO_MELEE_FLEE));
+    SetMeleeEnabled(!(m_creature->GetSettings().HasFlag(CreatureStaticFlags::NO_MELEE_FLEE)
+        || m_creature->GetSettings().HasFlag(CreatureStaticFlags4::NO_MELEE_APPROACH)));
     if (m_creature->GetSettings().HasFlag(CreatureStaticFlags::SESSILE))
         SetAIImmobilizedState(true);
 
     SetMeleeEnabled(!(m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE));
     if (m_creature->IsNoAggroOnSight())
         SetReactState(REACT_DEFENSIVE);
+    if (m_creature->GetSettings().HasFlag(CreatureStaticFlags2::SPAWN_DEFENSIVE))
+        SetReactState(REACT_DEFENSIVE);
+    else if (m_creature->GetSettings().HasFlag(CreatureStaticFlags::IGNORE_COMBAT))
+        m_creature->SetCanEnterCombat(false);
     if (m_creature->IsGuard() || m_unit->GetCharmInfo()) // guards and charmed targets
         m_visibilityDistance = sWorld.getConfig(CONFIG_FLOAT_SIGHT_GUARDER);
 }
@@ -96,6 +101,13 @@ void CreatureAI::DamageTaken(Unit* dealer, uint32& damage, DamageEffectType dama
             }
         }        
     }
+}
+
+void CreatureAI::JustReachedHome()
+{
+    if (m_dismountOnAggro)
+        if (CreatureInfo const* mountInfo = m_creature->GetMountInfo())
+            m_creature->Mount(Creature::ChooseDisplayId(mountInfo));
 }
 
 void CreatureAI::SetDeathPrevention(bool state)

@@ -38,6 +38,7 @@
 #define HMAC_RES_SIZE 20
 
 struct sAuthLogonProof_C;
+struct sAuthLogonPinData_C;
 
 class AuthSocket : public MaNGOS::AsyncSocket<AuthSocket>
 {
@@ -50,6 +51,7 @@ class AuthSocket : public MaNGOS::AsyncSocket<AuthSocket>
 
         void SendProof(Sha1Hash sha);
         void LoadRealmlist(ByteBuffer& pkt, uint32 acctid, uint8 accountSecurityLevel = 0);
+        bool VerifyPinData(uint32 pin, const sAuthLogonPinData_C& clientData);
         int32 generateToken(char const* b32key);
 
         uint8 getEligibleRealmCount(uint8 accountSecurityLevel);
@@ -93,6 +95,10 @@ class AuthSocket : public MaNGOS::AsyncSocket<AuthSocket>
         std::string _safelocale;
         uint16 _build;
         AccountTypes _accountSecurityLevel;
+
+        BigNumber m_serverSecuritySalt;
+        uint32 m_gridSeed = 0;
+        bool m_promptPin = false;
 
         boost::asio::deadline_timer m_timeoutTimer;
 

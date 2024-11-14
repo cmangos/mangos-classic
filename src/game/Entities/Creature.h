@@ -734,6 +734,7 @@ class Creature : public Unit
 
         void CallForHelp(float radius);
         void CallAssistance();
+        void CallAssistance(Unit* enemy);
         void SetNoCallAssistance(bool val) { m_AlreadyCallAssistance = val; }
         bool CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction = true) const;
         bool CanInitiateAttack() const;
@@ -749,6 +750,7 @@ class Creature : public Unit
         void RemoveCorpse(bool inPlace = false);
 
         virtual void ForcedDespawn(uint32 timeMSToDespawn = 0, bool onlyAlive = false);
+        virtual void ForcedDespawn(std::chrono::milliseconds timeToDespawn, bool onlyAlive = false) { ForcedDespawn(timeToDespawn.count(), onlyAlive); }
 
         time_t const& GetRespawnTime() const { return m_respawnTime; }
         time_t GetRespawnTimeEx() const;
@@ -758,6 +760,7 @@ class Creature : public Unit
 
         uint32 GetRespawnDelay() const { return m_respawnDelay; }
         void SetRespawnDelay(uint32 delay, bool once = false) { m_respawnDelay = delay; m_respawnOverriden = true; m_respawnOverrideOnce = once; } // in seconds
+        void SetRespawnDelay(std::chrono::seconds delay, bool once = false) { SetRespawnDelay(delay.count(), once); }
 
         float GetRespawnRadius() const { return m_respawnradius; }
         void SetRespawnRadius(float dist) { m_respawnradius = dist; }
@@ -811,7 +814,7 @@ class Creature : public Unit
         bool IsInvisible() const { return m_isInvisible; }
 
         void SetIgnoreMMAP(bool ignore) { m_ignoreMMAP = ignore; }
-        bool IsIgnoringMMAP() const { return m_ignoreMMAP; }
+        virtual MmapForcingStatus IsIgnoringMMAP() const override;
 
         void OnEventHappened(uint16 eventId, bool activate, bool resume) override { return AI()->OnEventHappened(eventId, activate, resume); }
 
@@ -886,6 +889,11 @@ class Creature : public Unit
 
         ObjectGuid GetKillerGuid() const { return m_killer; }
         void SetKillerGuid(ObjectGuid guid) { m_killer = guid; }
+
+        CreatureInfo const* GetMountInfo() const override{ return m_mountInfo; }
+        void SetMountInfo(CreatureInfo const* info) override;
+
+        void SetModelRunSpeed(float runSpeed) override { m_modelRunSpeed = runSpeed; }
 
     protected:
         bool CreateFromProto(uint32 dbGuid, uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
@@ -967,6 +975,9 @@ class Creature : public Unit
     private:
         GridReference<Creature> m_gridRef;
         CreatureInfo const* m_creatureInfo;
+
+        CreatureInfo const* m_mountInfo;
+        float m_modelRunSpeed;
 };
 
 class ForcedDespawnDelayEvent : public BasicEvent

@@ -23,6 +23,7 @@
 #include "Server/DBCEnums.h"
 #include "Entities/ObjectGuid.h"
 #include "Spells/Scripts/SpellScript.h"
+#include "Util/UniqueTrackablePtr.h"
 
 /**
  * Used to modify what an Aura does to a player/npc.
@@ -514,6 +515,9 @@ class Aura
         void ForcePeriodicity(uint32 periodicTime);
         void SetAffectOverriden() { m_affectOverriden = true; } // spell script must implement condition
 
+        MaNGOS::unique_weak_ptr<Aura> GetWeakPtr() const { return m_scriptRef; }
+        void InvalidateScriptRef() { m_scriptRef = nullptr; }
+
     protected:
         Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = nullptr, Item* castItem = nullptr);
 
@@ -554,6 +558,9 @@ class Aura
         uint64 m_scriptValue; // persistent value for spell script state
         ScriptStorage* m_storage;
         bool m_affectOverriden;
+
+        struct NoopAuraDeleter { void operator()(Aura*) const { /*noop - not managed*/ } };
+        MaNGOS::unique_trackable_ptr<Aura> m_scriptRef;
     private:
         void ReapplyAffectedPassiveAuras(Unit* target);
 };

@@ -26,6 +26,7 @@
 #include "Maps/Map.h"
 #include "Grids/GridStates.h"
 #include "Maps/MapUpdater.h"
+#include "Util/UniqueTrackablePtr.h"
 
 class Transport;
 class BattleGround;
@@ -59,7 +60,7 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         typedef MaNGOS::ClassLevelLockable<MapManager, std::recursive_mutex>::Lock Guard;
 
     public:
-        typedef std::map<MapID, Map* > MapMapType;
+        typedef std::map<MapID, MaNGOS::unique_trackable_ptr<Map> > MapMapType;
 
         void CreateContinents();
         Map* CreateMap(uint32, const WorldObject* obj);
@@ -152,7 +153,7 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         {
             for (auto& mapData : i_maps)
             {
-                _do(mapData.second);
+                _do(mapData.second.get());
             }
         }
         template<typename Do> void DoForAllMapsWithMapId(uint32 mapId, Do& _do);
@@ -196,7 +197,7 @@ inline void MapManager::DoForAllMapsWithMapId(uint32 mapId, Do& _do)
     MapMapType::const_iterator start = i_maps.lower_bound(MapID(mapId, 0));
     MapMapType::const_iterator end   = i_maps.lower_bound(MapID(mapId + 1, 0));
     for (MapMapType::const_iterator itr = start; itr != end; ++itr)
-        _do(itr->second);
+        _do(itr->second.get());
 }
 
 template<typename Check>
@@ -204,7 +205,7 @@ inline WorldObject* MapManager::SearchOnAllLoadedMap(Check& check)
 {
     for (auto& mapItr : i_maps)
     {
-        WorldObject* result = check(mapItr.second);
+        WorldObject* result = check(mapItr.second.get());
         if (result)
             return result;
     }

@@ -17,13 +17,16 @@
  */
 
 #include "Log/Log.h"
-#include "World/World.h"
-#include "Entities/Creature.h"
-#include "MoveMap.h"
+#include "Entities/Unit.h"
+#include "MotionGenerators/MoveMap.h"
 #include "MoveMapSharedDefines.h"
 
 namespace MMAP
 {
+    constexpr char MAP_FILE_NAME_FORMAT[] = "mmaps/%03i.mmap";
+    constexpr char TILE_FILE_NAME_FORMAT[] = "mmaps/%03i%02i%02i.mmtile";
+    constexpr char GO_FILE_NAME_FORMAT[] = "mmaps/go%04i.mmtile";
+
     // ######################## MMapFactory ########################
     // our global singleton copy
     MMapManager* g_MMapManager = nullptr;
@@ -60,25 +63,21 @@ namespace MMAP
 
     bool MMapFactory::IsPathfindingEnabled(uint32 mapId, const Unit* unit = nullptr)
     {
-        if (!sWorld.getConfig(CONFIG_BOOL_MMAP_ENABLED))
+        if (!createOrGetMMapManager()->IsEnabled())
             return false;
 
         if (unit)
         {
-            // always use mmaps for players
-            if (unit->GetTypeId() == TYPEID_PLAYER)
-                return true;
-
-            if (IsPathfindingForceDisabled(unit))
-                return false;
-
-            if (IsPathfindingForceEnabled(unit))
-                return true;
-
-            // always use mmaps for pets of players (can still be disabled by extra-flag for pet creature)
-            if (unit->GetTypeId() == TYPEID_UNIT && ((Creature*)unit)->IsPet() && unit->GetOwner() &&
-                    unit->GetOwner()->GetTypeId() == TYPEID_PLAYER)
-                return true;
+            Unit::MmapForcingStatus status = unit->IsIgnoringMMAP();
+            switch (status)
+            {
+                case Unit::MmapForcingStatus::DEFAULT:
+                    break;
+                case Unit::MmapForcingStatus::FORCED:
+                    return true;
+                case Unit::MmapForcingStatus::IGNORED:
+                    return false;
+            }
         }
 
         return g_mmapDisabledIds->find(mapId) == g_mmapDisabledIds->end();
@@ -93,28 +92,6 @@ namespace MMAP
         g_MMapManager = nullptr;
     }
 
-    bool MMapFactory::IsPathfindingForceEnabled(const Unit* unit)
-    {
-        if (const Creature* pCreature = dynamic_cast<const Creature*>(unit))
-        {
-            if (const CreatureInfo* pInfo = pCreature->GetCreatureInfo())
-            {
-                if (pInfo->ExtraFlags & CREATURE_EXTRA_FLAG_MMAP_FORCE_ENABLE)
-                    return true;
-            }
-        }
-
-        return false;
-    }
-
-    bool MMapFactory::IsPathfindingForceDisabled(const Unit* unit)
-    {
-        if (const Creature* pCreature = dynamic_cast<const Creature*>(unit))
-            return pCreature->IsIgnoringMMAP();
-
-        return false;
-    }
-
     // ######################## MMapManager ########################
     MMapManager::~MMapManager()
     {
@@ -122,16 +99,16 @@ namespace MMAP
         // if we had, tiles in MMapData->mmapLoadedTiles, their actual data is lost!
     }
 
-    bool MMapManager::loadMapData(uint32 mapId)
+    bool MMapManager::loadMapData(std::string const& basePath, uint32 mapId)
     {
         // we already have this map loaded?
         if (loadedMMaps.find(mapId) != loadedMMaps.end())
             return true;
 
         // load and init dtNavMesh - read parameters from file
-        uint32 pathLen = sWorld.GetDataPath().length() + strlen("mmaps/%03i.mmap") + 1;
+        uint32 pathLen = basePath.length() + strlen(MAP_FILE_NAME_FORMAT) + 1;
         char* fileName = new char[pathLen];
-        snprintf(fileName, pathLen, (sWorld.GetDataPath() + "mmaps/%03i.mmap").c_str(), mapId);
+        snprintf(fileName, pathLen, (basePath + MAP_FILE_NAME_FORMAT).c_str(), mapId);
 
         FILE* file = fopen(fileName, "rb");
         if (!file)
@@ -188,15 +165,43 @@ namespace MMAP
         return false;
     }
 
-    bool MMapManager::loadMap(uint32 mapId, int32 x, int32 y)
+    void MMapManager::loadAllMapTiles(std::string const& basePath, uint32 mapId)
     {
-        // make sure the mmap is loaded and ready to load tiles
-        if (!loadMapData(mapId))
-            return false;
+        auto itr = loadedMMaps.find(mapId);
+        MANGOS_ASSERT(itr != loadedMMaps.end());
+        const auto& mmapData = itr->second;
 
+        if (mmapData->fullLoaded)
+            return;
+
+        for (const auto& entry : boost::filesystem::directory_iterator(basePath + "mmaps"))
+        {
+            if (entry.path().extension() == ".mmtile")
+            {
+                auto filename = entry.path().filename();
+                auto fileNameString = filename.c_str();
+                // trying to avoid string copy
+                uint32 fileMapId = (fileNameString[0] - '0') * 100 + (fileNameString[1] - '0') * 10 + (fileNameString[2] - '0');
+                if (fileMapId != mapId)
+                    continue;
+
+                uint32 x = (fileNameString[3] - '0') * 10 + (fileNameString[4] - '0');
+                uint32 y = (fileNameString[5] - '0') * 10 + (fileNameString[6] - '0');
+                uint32 packedGridPos = packTileID(x, y);
+                loadMapInternal(entry.path().string().c_str(), mmapData, packedGridPos, mapId, x, y); // yes using a temporary - wchar_t on windows
+            }
+        }
+
+        mmapData->fullLoaded = true;
+    }
+
+    bool MMapManager::loadMap(std::string const& basePath, uint32 mapId, int32 x, int32 y)
+    {
         // get this mmap data
-        const auto& mmapData = loadedMMaps[mapId];
-        MANGOS_ASSERT(mmapData->navMesh);
+        auto itr = loadedMMaps.find(mapId);
+        MANGOS_ASSERT(itr != loadedMMaps.end()); // must not occur here as it would not be thread safe - only in loadMapData through loadMapInstance
+
+        const auto& mmapData = itr->second;
 
         // check if we already have this tile loaded
         uint32 packedGridPos = packTileID(x, y);
@@ -207,18 +212,21 @@ namespace MMAP
         }
 
         // load this tile :: mmaps/MMMXXYY.mmtile
-        uint32 pathLen = sWorld.GetDataPath().length() + strlen("mmaps/%03i%02i%02i.mmtile") + 1;
-        char* fileName = new char[pathLen];
-        snprintf(fileName, pathLen, (sWorld.GetDataPath() + "mmaps/%03i%02i%02i.mmtile").c_str(), mapId, x, y);
+        uint32 pathLen = basePath.length() + strlen(TILE_FILE_NAME_FORMAT) + 1;
+        std::unique_ptr<char[]> fileName(new char[pathLen]);
+        snprintf(fileName.get(), pathLen, (basePath + TILE_FILE_NAME_FORMAT).c_str(), mapId, x, y);
 
-        FILE* file = fopen(fileName, "rb");
+        return loadMapInternal(fileName.get(), mmapData, packedGridPos, mapId, x, y);
+    }
+
+    bool MMapManager::loadMapInternal(const char* filePath, const std::unique_ptr<MMapData>& mmapData, uint32 packedGridPos, uint32 mapId, int32 x, int32 y)
+    {
+        FILE* file = fopen(filePath, "rb");
         if (!file)
         {
-            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "ERROR: MMAP:loadMap: Could not open mmtile file '%s'", fileName);
-            delete[] fileName;
+            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "ERROR: MMAP:loadMap: Could not open mmtile file '%s'", filePath);
             return false;
         }
-        delete[] fileName;
 
         // read header
         MmapTileHeader fileHeader;
@@ -234,7 +242,7 @@ namespace MMAP
         if (fileHeader.mmapVersion != MMAP_VERSION)
         {
             sLog.outError("MMAP:loadMap: %03u%02i%02i.mmtile was built with generator v%i, expected v%i",
-                          mapId, x, y, fileHeader.mmapVersion, MMAP_VERSION);
+                mapId, x, y, fileHeader.mmapVersion, MMAP_VERSION);
             fclose(file);
             return false;
         }
@@ -270,22 +278,22 @@ namespace MMAP
         return true;
     }
 
-    void MMapManager::loadAllGameObjectModels(std::vector<uint32> const& displayIds)
+    void MMapManager::loadAllGameObjectModels(std::string const& basePath, std::vector<uint32> const& displayIds)
     {
         for (uint32 displayId : displayIds)
-            loadGameObject(displayId);
+            loadGameObject(basePath, displayId);
     }
 
-    bool MMapManager::loadGameObject(uint32 displayId)
+    bool MMapManager::loadGameObject(std::string const& basePath, uint32 displayId)
     {
         // we already have this map loaded?
         if (m_loadedModels.find(displayId) != m_loadedModels.end())
             return true;
 
         // load and init dtNavMesh - read parameters from file
-        uint32 pathLen = sWorld.GetDataPath().length() + strlen("mmaps/go%04i.mmtile") + 1;
+        uint32 pathLen = basePath.length() + strlen(GO_FILE_NAME_FORMAT) + 1;
         char* fileName = new char[pathLen];
-        snprintf(fileName, pathLen, (sWorld.GetDataPath() + "mmaps/go%04i.mmtile").c_str(), displayId);
+        snprintf(fileName, pathLen, (basePath + GO_FILE_NAME_FORMAT).c_str(), displayId);
 
         FILE* file = fopen(fileName, "rb");
         if (!file)
@@ -339,6 +347,32 @@ namespace MMAP
         delete[] fileName;
 
         m_loadedModels.emplace(displayId, std::make_unique<MMapGOData>(mesh));
+        return true;
+    }
+
+    bool MMapManager::loadMapInstance(std::string const& basePath, uint32 mapId, uint32 instanceId)
+    {
+        if (!loadMapData(basePath, mapId))
+            return false;
+
+        auto& mmap = loadedMMaps[mapId];
+        auto [queryItr, inserted] = mmap->navMeshQueries.try_emplace(instanceId, nullptr);
+        if (!inserted)
+            return true;
+
+        // allocate mesh query
+        dtNavMeshQuery* query = dtAllocNavMeshQuery();
+        MANGOS_ASSERT(query);
+        if (dtStatusFailed(query->init(mmap->navMesh, 1024)))
+        {
+            dtFreeNavMeshQuery(query);
+            mmap->navMeshQueries.erase(queryItr);
+            ERROR_DB_FILTER_LOG(LOG_FILTER_MAP_LOADING, "MMAP:GetNavMeshQuery: Failed to initialize dtNavMeshQuery for mapId %03u instanceId %u", mapId, instanceId);
+            return false;
+        }
+
+        DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "MMAP:GetNavMeshQuery: created dtNavMeshQuery for mapId %03u instanceId %u", mapId, instanceId);
+        queryItr->second = query;
         return true;
     }
 
@@ -461,28 +495,15 @@ namespace MMAP
 
     dtNavMeshQuery const* MMapManager::GetNavMeshQuery(uint32 mapId, uint32 instanceId)
     {
-        if (loadedMMaps.find(mapId) == loadedMMaps.end())
+        auto itr = loadedMMaps.find(mapId);
+        if (itr == loadedMMaps.end())
             return nullptr;
 
-        const auto& mmapData = loadedMMaps[mapId];
-        if (mmapData->navMeshQueries.find(instanceId) == mmapData->navMeshQueries.end())
-        {
-            // allocate mesh query
-            dtNavMeshQuery* query = dtAllocNavMeshQuery();
-            MANGOS_ASSERT(query);
-            dtStatus dtResult = query->init(mmapData->navMesh, 1024);
-            if (dtStatusFailed(dtResult))
-            {
-                dtFreeNavMeshQuery(query);
-                sLog.outError("MMAP:GetNavMeshQuery: Failed to initialize dtNavMeshQuery for mapId %03u instanceId %u", mapId, instanceId);
-                return nullptr;
-            }
+        auto queryItr = itr->second->navMeshQueries.find(instanceId);
+        if (queryItr == itr->second->navMeshQueries.end())
+            return nullptr;
 
-            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "MMAP:GetNavMeshQuery: created dtNavMeshQuery for mapId %03u instanceId %u", mapId, instanceId);
-            mmapData->navMeshQueries.insert(std::pair<uint32, dtNavMeshQuery*>(instanceId, query));
-        }
-
-        return mmapData->navMeshQueries[instanceId];
+        return queryItr->second;
     }
 
     dtNavMeshQuery const* MMapManager::GetModelNavMeshQuery(uint32 displayId)
@@ -505,11 +526,11 @@ namespace MMAP
                 if (dtStatusFailed(query->init(mmapGOData->navMesh, 2048)))
                 {
                     dtFreeNavMeshQuery(query);
-                    sLog.outError("MMAP:GetNavMeshQuery: Failed to initialize dtNavMeshQuery for displayid %03u tid %s", displayId, ss.str().data());
+                    sLog.outError("MMAP:GetModelNavMeshQuery: Failed to initialize dtNavMeshQuery for displayid %03u tid %s", displayId, ss.str().data());
                     return nullptr;
                 }
 
-                DETAIL_LOG("MMAP:GetNavMeshQuery: created dtNavMeshQuery for displayid %03u tid %s", displayId, ss.str().data());
+                DETAIL_LOG("MMAP:GetModelNavMeshQuery: created dtNavMeshQuery for displayid %03u tid %s", displayId, ss.str().data());
                 mmapGOData->navMeshGOQueries.insert(std::pair<std::thread::id, dtNavMeshQuery*>(threadId, query));
             }
         }

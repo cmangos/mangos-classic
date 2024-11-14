@@ -602,8 +602,18 @@ void Unit::TriggerHomeEvents()
             GetMap()->GetCreatureLinkingHolder()->TryFollowMaster((Creature*)this);
     }
 
-    if (IsCreature() && static_cast<Creature*>(this)->GetCreatureGroup())
-        static_cast<Creature*>(this)->GetCreatureGroup()->TriggerLinkingEvent(CREATURE_GROUP_EVENT_HOME, this);
+    if (IsCreature())
+    {
+        Creature* me = static_cast<Creature*>(this);
+        if (me->GetCreatureGroup())
+            me->GetCreatureGroup()->TriggerLinkingEvent(CREATURE_GROUP_EVENT_HOME, this);
+        if (me->IsPet())
+        {
+            Unit* owner = me->GetOwner();
+            if (!owner->IsAlive() && static_cast<Pet*>(this)->IsGuardian())
+                static_cast<Pet*>(this)->Unsummon(PET_SAVE_REAGENTS);
+        }
+    }
 }
 
 void Unit::EvadeTimerExpired()
@@ -2460,7 +2470,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
                 currentAbsorb = maxAbsorb;
 
             int32 manaReduction = int32(currentAbsorb * manaMultiplier);
-            ApplyPowerMod(POWER_MANA, manaReduction, false);
+            ModifyPower(POWER_MANA, -manaReduction);
         }
 
         (*i)->OnManaAbsorb(currentAbsorb);
@@ -5331,6 +5341,7 @@ void Unit::RemoveAura(Aura* Aur, AuraRemoveMode mode)
 
     // Set remove mode
     Aur->SetRemoveMode(mode);
+    Aur->InvalidateScriptRef();
 
     // some ShapeshiftBoosts at remove trigger removing other auras including parent Shapeshift aura
     // remove aura from list before to prevent deleting it before
@@ -7653,6 +7664,22 @@ float Unit::GetPPMProcChance(uint32 WeaponSpeed, float PPM) const
     return WeaponSpeed * PPM / 600.0f;                      // result is chance in percents (probability = Speed_in_sec * (PPM / 60))
 }
 
+bool Unit::MountEntry(uint32 templateEntry, const Aura* aura)
+{
+    CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(templateEntry);
+    uint32 display_id = Creature::ChooseDisplayId(ci);
+
+    SetMountInfo(ci);
+
+    return Mount(display_id, aura);
+}
+
+bool Unit::UnmountEntry(const Aura* aura)
+{
+    SetMountInfo(nullptr);
+    return Unmount(aura);
+}
+
 bool Unit::Mount(uint32 displayid, const Aura* aura/* = nullptr*/)
 {
     // Custom mount (non-aura such as taxi or command) overwrites aura mounts
@@ -7661,6 +7688,12 @@ bool Unit::Mount(uint32 displayid, const Aura* aura/* = nullptr*/)
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MOUNTING);
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, displayid);
+
+    if (GetMountInfo())
+    {
+        SetBaseRunSpeed(1.f); // overriden inside
+        UpdateSpeed(MOVE_RUN, true);
+    }
     return true;
 }
 
@@ -7671,6 +7704,13 @@ bool Unit::Unmount(const Aura* aura/* = nullptr*/)
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DISMOUNT);
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
+
+    if (GetMountInfo())
+    {
+        SetBaseRunSpeed(1.f); // overriden inside
+        UpdateSpeed(MOVE_RUN, true);
+    }
+
     return true;
 }
 
@@ -8296,7 +8336,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
     if (slow)
         speed *= (100.0f + slow) / 100.0f;
 
-    if (GetTypeId() == TYPEID_UNIT)
+    if (IsCreature())
     {
         switch (mtype)
         {
@@ -10153,6 +10193,7 @@ void Unit::UpdateModelData()
         SetFloatValue(UNIT_FIELD_COMBATREACH, normalizedScale * modelInfo->combat_reach);
 
         SetBaseWalkSpeed(modelInfo->SpeedWalk);
+        SetModelRunSpeed(modelInfo->SpeedRun);
         SetBaseRunSpeed(modelInfo->SpeedRun, false);
     }
 }
@@ -12229,6 +12270,14 @@ void Unit::SelectAttackingTargets(std::vector<Unit*>& selectedTargets, Attacking
             sLog.outError("Creature::SelectAttackingTarget> Target have unimplemented value!");
             break;
     }
+}
+
+Unit::MmapForcingStatus Unit::IsIgnoringMMAP() const
+{
+    if (IsPlayer() || IsPlayerControlled())
+        return MmapForcingStatus::FORCED;
+
+    return MmapForcingStatus::DEFAULT;
 }
 
 void Unit::SetLevitate(bool enable)

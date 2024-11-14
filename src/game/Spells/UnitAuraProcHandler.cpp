@@ -231,6 +231,7 @@ struct ProcTriggeredData
     {}
     SpellProcEventEntry const* spellProcEvent;
     SpellAuraHolder* triggeredByHolder;
+    bool canProc[MAX_EFFECT_INDEX];
 };
 
 typedef std::list< ProcTriggeredData > ProcTriggeredList;
@@ -421,8 +422,9 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
         if (holder->GetState() != SPELLAURAHOLDER_STATE_READY || holder->IsDeleted())
             continue;
 
-        SpellProcEventEntry const* spellProcEvent = nullptr;
-        SpellProcEventTriggerCheck result = IsTriggeredAtSpellProcEvent(execData, holder, spellProcEvent);
+        ProcTriggeredData procTriggeredData(nullptr, itr->second);
+
+        SpellProcEventTriggerCheck result = IsTriggeredAtSpellProcEvent(execData, holder, procTriggeredData.spellProcEvent, procTriggeredData.canProc);
         if (holder->GetSpellProto()->HasAttribute(SPELL_ATTR_PROC_FAILURE_BURNS_CHARGE) &&
             result == SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_ROLL_FAILED && holder->GetAuraCharges() > 0)
             holdersForDeletion.push_back(holder);
@@ -430,8 +432,8 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
         if (holder->GetSpellProto()->HasAttribute(SPELL_ATTR_EX2_PROC_COOLDOWN_ON_FAILURE) && result == SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_ROLL_FAILED)
         {
             uint32 cooldown = 0;
-            if (spellProcEvent && spellProcEvent->cooldown)
-                cooldown = spellProcEvent->cooldown;
+            if (procTriggeredData.spellProcEvent && procTriggeredData.spellProcEvent->cooldown)
+                cooldown = procTriggeredData.spellProcEvent->cooldown;
             if (cooldown)
                 holder->SetProcCooldown(std::chrono::seconds(cooldown), GetMap()->GetCurrentClockTime());
         }
@@ -439,7 +441,7 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
         if (result != SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_OK)
             continue;
 
-        procTriggered.push_back(ProcTriggeredData(spellProcEvent, itr->second));
+        procTriggered.emplace_back(procTriggeredData);
     }
 
     for (SpellAuraHolder* holder : holdersForDeletion)
@@ -474,33 +476,8 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
                 continue;
 
             Modifier* auraModifier = execData.triggeredByAura->GetModifier();
-
-            if (execData.spellInfo)
-            {
-                if (spellProcEvent)
-                {
-                    if (spellProcEvent->spellFamilyMask[i])
-                    {
-                        if (!execData.spellInfo->IsFitToFamilyMask(spellProcEvent->spellFamilyMask[i]))
-                            continue;
-
-                        // don't allow proc from cast end for non modifier spells
-                        // unless they have proc ex defined for that
-                        if (IsCastEndProcModifierAura(triggeredByHolder->GetSpellProto(), SpellEffectIndex(i), execData.spellInfo))
-                        {
-                            if (useCharges && execData.procExtra != PROC_EX_CAST_END && spellProcEvent->procEx == PROC_EX_NONE)
-                                continue;
-                        }
-                        else if (spellProcEvent->procEx == PROC_EX_NONE && execData.procExtra == PROC_EX_CAST_END)
-                            continue;
-                    }
-                    // don't check dbc FamilyFlags if schoolMask exists
-                    else if (!execData.triggeredByAura->CanProcFrom(execData.spellInfo, spellProcEvent->procEx, execData.procExtra, execData.damage != 0, execData.absorb != 0, !spellProcEvent->schoolMask))
-                        continue;
-                }
-                else if (!execData.triggeredByAura->CanProcFrom(execData.spellInfo, PROC_EX_NONE, execData.procExtra, execData.damage != 0, execData.absorb != 0, true))
-                    continue;
-            }
+            if (itr->canProc[i] == false)
+                continue;
 
             execData.triggeredSpellId = 0;
             execData.basepoints = { 0, 0, 0 };
@@ -512,9 +489,7 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
                 case SPELL_AURA_PROC_CANT_TRIGGER:
                     continue;
                 case SPELL_AURA_PROC_FAILED:
-                    // example - drain soul vanilla - third effect fails when not have talent but charge should drop
-                    if (!triggeredByHolder->GetSpellProto()->HasAttribute(SPELL_ATTR_PROC_FAILURE_BURNS_CHARGE))
-                        procSuccess = false;
+                    procSuccess = false;
                     break;
                 case SPELL_AURA_PROC_OK:
                     if (execData.procOnce && execData.spell)
@@ -525,11 +500,12 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
             anyAuraProc = true;
         }
 
-        if (procSuccess && execData.cooldown)
+        if ((procSuccess || triggeredByHolder->GetSpellProto()->HasAttribute(SPELL_ATTR_EX2_PROC_COOLDOWN_ON_FAILURE)) && anyAuraProc && execData.cooldown)
             triggeredByHolder->SetProcCooldown(std::chrono::seconds(execData.cooldown), GetMap()->GetCurrentClockTime());
 
         // Remove charge (aura can be removed by triggers)
-        if (useCharges && procSuccess && anyAuraProc && !triggeredByHolder->IsDeleted())
+        // Attribute example - drain soul vanilla - third effect fails when not have talent but charge should drop
+        if (useCharges && (procSuccess || triggeredByHolder->GetSpellProto()->HasAttribute(SPELL_ATTR_PROC_FAILURE_BURNS_CHARGE)) && anyAuraProc && !triggeredByHolder->IsDeleted())
         {
             // If last charge dropped add spell to remove list
             if (triggeredByHolder->DropAuraCharge())
@@ -538,7 +514,7 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
     }
 }
 
-Unit::SpellProcEventTriggerCheck Unit::IsTriggeredAtSpellProcEvent(ProcExecutionData& data, SpellAuraHolder* holder, SpellProcEventEntry const*& spellProcEvent)
+Unit::SpellProcEventTriggerCheck Unit::IsTriggeredAtSpellProcEvent(ProcExecutionData& data, SpellAuraHolder* holder, SpellProcEventEntry const*& spellProcEvent, bool (&canProc)[MAX_EFFECT_INDEX])
 {
     SpellEntry const* spellProto = holder->GetSpellProto();
 
@@ -641,13 +617,67 @@ Unit::SpellProcEventTriggerCheck Unit::IsTriggeredAtSpellProcEvent(ProcExecution
         for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
             if (Aura* aura = holder->m_auras[i])
                 if (data.spell->IsAuraProcced(aura))
-                    return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
+                    canProc[i] = false;
     }
 
     for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
         if (Aura* aura = holder->m_auras[i])
             if (!aura->OnCheckProc(data))
-                return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
+                canProc[i] = false;
+
+    if (data.spellInfo)
+    {
+        bool useCharges = holder->GetAuraCharges() > 0;
+        for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+        {
+            if (Aura* aura = holder->m_auras[i])
+            {
+                if (spellProcEvent)
+                {
+                    if (spellProcEvent->spellFamilyMask[i])
+                    {
+                        if (!data.spellInfo->IsFitToFamilyMask(spellProcEvent->spellFamilyMask[i]))
+                        {
+                            canProc[i] = false;
+                            continue;
+                        }
+
+                        // don't allow proc from cast end for non modifier spells
+                        // unless they have proc ex defined for that
+                        if (IsCastEndProcModifierAura(holder->GetSpellProto(), SpellEffectIndex(i), data.spellInfo))
+                        {
+                            if (useCharges && data.procExtra != PROC_EX_CAST_END && spellProcEvent->procEx == PROC_EX_NONE)
+                            {
+                                canProc[i] = false;
+                                continue;
+                            }
+                        }
+                        else if (spellProcEvent->procEx == PROC_EX_NONE && data.procExtra == PROC_EX_CAST_END)
+                        {
+                            canProc[i] = false;
+                            continue;
+                        }
+                    }
+                    // don't check dbc FamilyFlags if schoolMask exists
+                    else if (!aura->CanProcFrom(data.spellInfo, spellProcEvent->procEx, data.procExtra, data.damage != 0, data.absorb != 0, !spellProcEvent->schoolMask))
+                    {
+                        canProc[i] = false;
+                        continue;
+                    }
+                }
+                else if (!aura->CanProcFrom(data.spellInfo, PROC_EX_NONE, data.procExtra, data.damage != 0, data.absorb != 0, true))
+                {
+                    canProc[i] = false;
+                    continue;
+                }
+            }
+            else
+                canProc[i] = false;
+        }
+    }
+
+    if (!canProc[EFFECT_INDEX_0] && !canProc[EFFECT_INDEX_1] && !canProc[EFFECT_INDEX_2])
+        return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
 
     if (roll_chance_f(chance))
         return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_OK;

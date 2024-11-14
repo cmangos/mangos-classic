@@ -87,11 +87,11 @@ struct sAuthLogonChallengeHeader
     uint16  size;
 };
 
-typedef struct AUTH_LOGON_PIN_DATA_C
+struct sAuthLogonPinData_C
 {
     uint8 salt[16];
     uint8 hash[20];
-} sAuthLogonPinData_C;
+};
 
 // typedef sAuthLogonChallenge_C sAuthReconnectChallenge_C;
 /*
@@ -117,6 +117,11 @@ struct sAuthLogonProof_C
     uint8   crc_hash[20];
     uint8   number_of_keys;
     uint8   securityFlags;                                  // 0x00-0x04
+    sAuthLogonPinData_C pinData;                                        // PINData for PIN authentication (classic only). Conditional read if PIN was requested
+    static size_t getSize(bool withPin)
+    {
+        return sizeof(sAuthLogonProof_C) - (withPin ? 0 : sizeof(sAuthLogonPinData_C));
+    }
 };
 /*
 typedef struct
@@ -492,13 +497,20 @@ bool AuthSocket::_HandleLogonChallenge()
                             if (!self->_token.empty() && self->_build >= 8606) // authenticator was added in 2.4.3
                                 securityFlags = SECURITY_FLAG_AUTHENTICATOR;
 
+                            if (!self->_token.empty() && self->_build <= 6141)
+                                securityFlags = SECURITY_FLAG_PIN;
+
                             *pkt << uint8(securityFlags);                    // security flags (0x0...0x04)
 
                             if (securityFlags & SECURITY_FLAG_PIN)          // PIN input
                             {
-                                *pkt << uint32(0);
-                                *pkt << uint64(0);
-                                *pkt << uint64(0);
+                                uint32 gridSeedPkt = self->m_gridSeed = static_cast<uint32>(0);
+                                EndianConvert(gridSeedPkt);
+                                self->m_serverSecuritySalt.SetRand(16 * 8); // 16 bytes random
+                                self->m_promptPin = true;
+
+                                *pkt << gridSeedPkt;
+                                pkt->append(self->m_serverSecuritySalt.AsByteArray(16).data(), 16);
                             }
 
                             if (securityFlags & SECURITY_FLAG_UNK)          // Matrix input
@@ -539,7 +551,8 @@ bool AuthSocket::_HandleLogonProof()
     DEBUG_LOG("Entering _HandleLogonProof");
     ///- Read the packet
     std::shared_ptr<sAuthLogonProof_C> lp = std::make_shared<sAuthLogonProof_C>();
-    Read((char*)lp.get(), sizeof(sAuthLogonProof_C), [self = shared_from_this(), lp](const boost::system::error_code& error, std::size_t read)
+    auto size = sAuthLogonProof_C::getSize(m_promptPin);
+    Read((char*)lp.get(), size, [self = shared_from_this(), lp](const boost::system::error_code& error, std::size_t read)
     {
         if (error)
         {
@@ -578,12 +591,12 @@ bool AuthSocket::_HandleLogonProof()
         ///- Check if SRP6 results match (password is correct), else send an error
         if (!self->srp.Proof(lp->M1, 20))
         {
-            if (lp->securityFlags & SECURITY_FLAG_AUTHENTICATOR || !self->_token.empty())
+            if (self->_build > 6141 && (lp->securityFlags & SECURITY_FLAG_AUTHENTICATOR || !self->_token.empty()))
             {
                 std::shared_ptr<uint8> pinCount = std::make_shared<uint8>();
                 self->Read((char*)pinCount.get(), sizeof(uint8), [self, pinCount, lp](const boost::system::error_code& error, std::size_t read)
                 {
-                    if (error)
+                    if (error || *pinCount > 16)
                     {
                         self->Write(logonProofUnknownAccountPinInvalid, sizeof(logonProofUnknownAccountPinInvalid), [self](const boost::system::error_code& error, std::size_t read) { self->Close();});
                         return;
@@ -612,6 +625,17 @@ bool AuthSocket::_HandleLogonProof()
                     });
                 });
                 return;
+            }
+
+            if ((lp->securityFlags & SECURITY_FLAG_PIN) && !self->_token.empty())
+            {
+                int32 serverToken = self->generateToken(self->_token.c_str());
+                if (!self->VerifyPinData(serverToken, lp->pinData))
+                {
+                    BASIC_LOG("[AuthChallenge] Account %s tried to login with wrong pincode!", self->_login.c_str());
+                    self->Write(logonProofUnknownAccount, sizeof(logonProofUnknownAccount), [self](const boost::system::error_code& error, std::size_t read) {});
+                    return;
+                }
             }
 
             self->verifyVersionAndFinalizeAuthentication(lp);
@@ -911,13 +935,15 @@ void AuthSocket::LoadRealmlist(ByteBuffer& pkt, uint32 acctid, uint8 securityLev
                 if (!ok_build || (i.second.allowedSecurityLevel > _accountSecurityLevel))
                     realmflags = RealmFlags(realmflags | REALM_FLAG_OFFLINE);
 
+                uint8 categoryId = GetRealmCategoryIdByBuildAndZone(_build, RealmZone(i.second.timezone));
+
                 pkt << uint32(i.second.icon);              // realm type
                 pkt << uint8(realmflags);                   // realmflags
                 pkt << name;                                // name
                 pkt << i.second.address;                   // address
                 pkt << float(i.second.populationLevel);
                 pkt << uint8(AmountOfCharacters);
-                pkt << uint8(i.second.timezone);           // realm category
+                pkt << uint8(categoryId);                   // realm category
                 pkt << uint8(0x00);                         // unk, may be realm number/id?
             }
 
@@ -971,6 +997,8 @@ void AuthSocket::LoadRealmlist(ByteBuffer& pkt, uint32 acctid, uint8 securityLev
                 if (!buildInfo)
                     realmFlags = RealmFlags(realmFlags & ~REALM_FLAG_SPECIFYBUILD);
 
+                uint8 categoryId = GetRealmCategoryIdByBuildAndZone(_build, RealmZone(i.second.timezone));
+
                 pkt << uint8(i.second.icon);               // realm type (this is second column in Cfg_Configs.dbc)
                 pkt << uint8(lock);                         // flags, if 0x01, then realm locked
                 pkt << uint8(realmFlags);                   // see enum RealmFlags
@@ -978,7 +1006,7 @@ void AuthSocket::LoadRealmlist(ByteBuffer& pkt, uint32 acctid, uint8 securityLev
                 pkt << i.second.address;                   // address
                 pkt << float(i.second.populationLevel);
                 pkt << uint8(AmountOfCharacters);
-                pkt << uint8(i.second.timezone);           // realm category (Cfg_Categories.dbc)
+                pkt << uint8(categoryId);                   // realm category (Cfg_Categories.dbc)
                 pkt << uint8(0x2C);                         // unk, may be realm number/id?
 
                 if (realmFlags & REALM_FLAG_SPECIFYBUILD)
@@ -1034,6 +1062,78 @@ bool AuthSocket::_HandleXferAccept()
     ProcessIncomingData();
 
     return true;
+}
+
+// Verify PIN entry data
+bool AuthSocket::VerifyPinData(uint32 pin, const sAuthLogonPinData_C& clientData)
+{
+    // remap the grid to match the client's layout
+    std::vector<uint8> grid { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    std::vector<uint8> remappedGrid(grid.size());
+
+    uint8* remappedIndex = remappedGrid.data();
+    uint32 seed = m_gridSeed;
+
+    for (size_t i = grid.size(); i > 0; --i)
+    {
+        auto remainder = seed % i;
+        seed /= i;
+        *remappedIndex = grid[remainder];
+
+        size_t copySize = i;
+        copySize -= remainder;
+        --copySize;
+
+        uint8* srcPtr = grid.data() + remainder + 1;
+        uint8* dstPtr = grid.data() + remainder;
+
+        std::copy(srcPtr, srcPtr + copySize, dstPtr);
+        ++remappedIndex;
+    }
+
+    // convert the PIN to bytes (for ex. '1234' to {1, 2, 3, 4})
+    std::vector<uint8> pinBytes;
+
+    while (pin != 0)
+    {
+        pinBytes.push_back(pin % 10);
+        pin /= 10;
+    }
+
+    std::reverse(pinBytes.begin(), pinBytes.end());
+
+    // validate PIN length
+    if (pinBytes.size() < 4 || pinBytes.size() > 10)
+        return false; // PIN outside of expected range
+
+    // remap the PIN to calculate the expected client input sequence
+    for (size_t i = 0; i < pinBytes.size(); ++i)
+    {
+        auto index = std::find(remappedGrid.begin(), remappedGrid.end(), pinBytes[i]);
+        pinBytes[i] = std::distance(remappedGrid.begin(), index);
+    }
+
+    // convert PIN bytes to their ASCII values
+    for (size_t i = 0; i < pinBytes.size(); ++i)
+        pinBytes[i] += 0x30;
+
+    // validate the PIN, x = H(client_salt | H(server_salt | ascii(pin_bytes)))
+    Sha1Hash sha;
+    sha.UpdateData(m_serverSecuritySalt.AsByteArray());
+    sha.UpdateData(pinBytes.data(), pinBytes.size());
+    sha.Finalize();
+
+    BigNumber hash, clientHash;
+    hash.SetBinary(sha.GetDigest(), sha.GetLength());
+    clientHash.SetBinary(clientData.hash, 20);
+
+    sha.Initialize();
+    sha.UpdateData(clientData.salt, sizeof(clientData.salt));
+    sha.UpdateData(hash.AsByteArray());
+    sha.Finalize();
+    hash.SetBinary(sha.GetDigest(), sha.GetLength());
+
+    return !memcmp(hash.AsDecStr(), clientHash.AsDecStr(), 20);
 }
 
 void AuthSocket::verifyVersionAndFinalizeAuthentication(std::shared_ptr<sAuthLogonProof_C> lp)

@@ -69,6 +69,8 @@ namespace VMAP
             std::mutex m_vmStaticMapMutex;
             std::mutex m_vmModelMutex;
 
+            bool m_thread_safe_environment;
+
         protected:
             // Tree to check collision
             ModelFileMap iLoadedModelFiles;
@@ -80,10 +82,13 @@ namespace VMAP
         public:
             // public for debug
             G3D::Vector3 convertPositionToInternalRep(float x, float y, float z) const;
+            InstanceTreeMap::const_iterator GetMapTree(uint32 mapId) const;
             static std::string getMapFileName(unsigned int pMapId);
 
             VMapManager2();
             ~VMapManager2();
+
+            void InitializeThreadUnsafe(const std::vector<uint32>& mapIds) override;
 
             VMAPLoadResult loadMap(const char* pBasePath, unsigned int pMapId, int x, int y) override;
             bool IsTileLoaded(uint32 mapId, uint32 x, uint32 y) const override;

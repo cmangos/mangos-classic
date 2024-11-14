@@ -88,17 +88,38 @@ UnitAI* GetAI_npc_bartleby(Creature* pCreature)
 ## npc_dashel_stonefist
 ######*/
 
-enum
+enum DashelStonefistData
 {
+    // ids from "broadcast_text" table
+    SAY_PROGRESS_1_DAS          = 1961,     // Now you're gonna get it good, "PlayerName".
+    SAY_PROGRESS_2_DAS          = 1712,     // Okay, okay! Enough fighting. No one else needs to get hurt.
+    SAY_PROGRESS_3_DAS          = 1713,     // It's okay, boys. Back off. You've done enough. I'll meet up with you later.
+    SAY_PROGRESS_4_THU          = 1716,     // All right, boss. You sure though? Just seems like a waste of good practice.
+    SAY_PROGRESS_5_THU          = 1715,     // Yeah, okay, boss. No problem.
+    // quest id
     QUEST_MISSING_DIPLO_PT8     = 1447,
-    FACTION_HOSTILE             = 7,
+    // NPCs that helps Dashel
     NPC_OLD_TOWN_THUG           = 4969,
+    // factions
+    FACTION_NEUTRAL             = 189,
+    FACTION_FRIENDLY_TO_ALL     = 35,
 
     SPELL_UNKILLABLE_OFF        = 13835,
+};
 
-    SAY_STONEFIST_1             = -1001274,
-    SAY_STONEFIST_2             = -1001275,
-    SAY_STONEFIST_3             = -1001276,
+float aThugSpawnPosition[][4] = {
+    { -8687.311f, 446.7531f, 100.05593f, 5.12632f }, 
+    { -8669.205f, 448.4405f, 99.74935f, 3.75387f }
+};
+
+float aThugWaypointPosition[][3] = {
+    { -8684.558f, 442.7352f, 99.480316f },
+    { -8675.7f, 443.8787f, 99.641556f }
+};
+
+float aThugResetPosition[][3] = {
+    { -8686.397461f, 447.595703f, 99.994408f },
+    { -8669.338867f, 448.362976f, 99.740005f },
 };
 
 enum DashelStonefistActions
@@ -107,6 +128,8 @@ enum DashelStonefistActions
     DASHEL_ACTION_MAX,
     DASHEL_START_EVENT,
     DASHEL_END_EVENT,
+    DASHEL_END_FINISHED,
+    DASHEL_EVADE_EVENT,
 };
 
 struct npc_dashel_stonefistAI : public CombatAI
@@ -114,29 +137,93 @@ struct npc_dashel_stonefistAI : public CombatAI
     npc_dashel_stonefistAI(Creature* creature) : CombatAI(creature, DASHEL_ACTION_MAX)
     {
         AddTimerlessCombatAction(DASHEL_LOW_HP, true);
-        AddCustomAction(DASHEL_START_EVENT, true, [&]() { HandleStartEvent(); });
-        AddCustomAction(DASHEL_END_EVENT, true, [&]() { HandleEndEvent(); });
+        AddCustomAction(DASHEL_START_EVENT, true, [&]() { HandleStartEvent(); }, TIMER_COMBAT_OOC);
+        AddCustomAction(DASHEL_EVADE_EVENT, true, [&]() { HandleStartEvadeEvent(); }, TIMER_COMBAT_OOC);
+        AddCustomAction(DASHEL_END_EVENT, true, [&]() { HandleEndEvent(); }, TIMER_COMBAT_OOC);
     }
 
+    // old town thugs
+    ObjectGuid m_thugs[2];
+    bool m_thugsAlive;
+    // player guid to trigger: quest completed
     ObjectGuid m_playerGuid;
 
+    // EndEvent stages
+    uint32 m_phaseThugEventStage;
+
+    // check if an event has been started.
+    bool m_dialogStarted;
+
+    // used to check if its a quest fight or not.
+    bool m_questFightStarted;
+
     void Reset() override
-   {
+    {
         CombatAI::Reset();
+        if (m_questFightStarted)
+        {
+            // Reset() during quest fight -> quest failed.
+            Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid);
+            if (player)
+                player->FailQuestForGroup(QUEST_MISSING_DIPLO_PT8);
+            // remove thugs
+            for (auto& guid : m_thugs)
+            {
+                if (Creature* thug = m_creature->GetMap()->GetCreature(guid))
+                    thug->ForcedDespawn();
+            }
+        }
+
+        // clear thug guids
+        for (auto& guid : m_thugs)
+            guid.Clear();
+
+        m_questFightStarted = false;
+        m_phaseThugEventStage = 0;
+        m_dialogStarted = false;
+        m_thugsAlive = false;
+        // restore some flags
+        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+        // reset player guid
+        m_playerGuid.Clear();
+
         SetReactState(REACT_PASSIVE);
     }
 
     void JustRespawned() override
     {
         CombatAI::Reset();
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
     }
 
     void StartEvent(ObjectGuid guid)
     {
+        // 2 seconds delay after quest accept npc starts attacking players.
         m_playerGuid = guid;
-        ResetTimer(DASHEL_START_EVENT, 3000);
+        ResetTimer(DASHEL_START_EVENT, 2000);
+        m_questFightStarted = true;
+    }
+
+    void HandleStartEvadeEvent()
+    {
+        // Move TargetHome after Emote
+        m_creature->GetMotionMaster()->MoveTargetedHome();      
+    }
+
+    void SummonedMovementInform(Creature* summoned, uint32 /*motionType*/, uint32 pointId) override
+    {
+        // When Thugs reached their waypoint they attack player that started the quest
+        if (pointId == 1)
+        {
+            summoned->GetMotionMaster()->MoveIdle();
+            if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                summoned->AI()->AttackStart(player);
+        }
+        if (pointId == 10)
+        {
+            summoned->GetMotionMaster()->MoveIdle();      
+            summoned->SetFacingToObject(m_creature);
+            summoned->ForcedDespawn(2000);
+        }
     }
 
     void HandleStartEvent()
@@ -145,35 +232,180 @@ struct npc_dashel_stonefistAI : public CombatAI
         {
             SetDeathPrevention(true);
             AttackStart(player);
+        }
+    }
 
-            if (Creature* thug = m_creature->SummonCreature(NPC_OLD_TOWN_THUG, -8672.33f, 442.88f, 99.98f, 3.5f, TEMPSPAWN_DEAD_DESPAWN, 300000))
-                thug->AI()->AttackStart(player);
+    void ResetThug(int m_thug)
+    {
+        if (m_thug >= 2)
+            return;
 
-            if (Creature* thug = m_creature->SummonCreature(NPC_OLD_TOWN_THUG, -8691.59f, 441.66f, 99.41f, 6.1f, TEMPSPAWN_DEAD_DESPAWN, 300000))
-                thug->AI()->AttackStart(player);
+        if (Creature* thug = m_creature->GetMap()->GetCreature(m_thugs[m_thug]))
+        {
+            if (thug->IsAlive())
+                thug->GetMotionMaster()->MovePoint(10, aThugResetPosition[m_thug][0], aThugResetPosition[m_thug][1], aThugResetPosition[m_thug][2], FORCED_MOVEMENT_WALK);
+        }
+    }
+
+    // Dashel returns to his spawn point
+    void JustReachedHome() override
+    {
+        // switch to correct dialog phase, depends if thugs are alive.
+        if (m_dialogStarted)
+        {
+            // This Text gets called no matter thugs are alive
+            DoBroadcastText(SAY_PROGRESS_3_DAS, m_creature);
+
+            if (m_thugsAlive)
+            {
+                // if thugs are alive trigger small rp
+                m_phaseThugEventStage = 1;
+                ResetTimer(DASHEL_END_EVENT, 3000);
+            }
+            else
+            { 
+                // if thugs are dead skip rp and instantly reward quest
+                m_phaseThugEventStage = 5;
+                ResetTimer(DASHEL_END_EVENT, 3000);
+            }                
         }
     }
 
     void HandleEndEvent()
     {
-        SetDeathPrevention(false);
-        DoScriptText(SAY_STONEFIST_3, m_creature);
-        m_creature->CastSpell(nullptr, SPELL_UNKILLABLE_OFF, TRIGGERED_OLD_TRIGGERED);
+        // Occurs only if thugs are alive
+        if (m_thugsAlive)
+        {
+            uint32 timer = 0;
+            switch (m_phaseThugEventStage)
+            {
+                case 1:
+                {
+                    if (Creature* thug = m_creature->GetMap()->GetCreature(m_thugs[0]))
+                        if (thug->IsAlive())
+                            DoBroadcastText(SAY_PROGRESS_4_THU, thug);
 
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                    timer = 1500;
+                    break;
+                }
+                case 2:
+                {
+                    if (Creature* thug = m_creature->GetMap()->GetCreature(m_thugs[1]))
+                        if (thug->IsAlive())
+                            DoBroadcastText(SAY_PROGRESS_5_THU, thug);
 
-        if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
-            player->AreaExploredOrEventHappens(QUEST_MISSING_DIPLO_PT8);
+                    // switch phase
+                    timer = 1000;
+                    break;
+                }
+                case 3:
+                {
+                    ResetThug(0);
+                    timer = 1500;
+                    break;
+                }
+                case 4:
+                {
+                    ResetThug(1);
+                    timer = 1000;
+                    break;
+                }
+                case 5:
+                {
+                    // Set quest completed
+                    if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                        player->AreaExploredOrEventHappens(QUEST_MISSING_DIPLO_PT8);
+
+                    Reset();
+                    break;
+                }
+                default: 
+                    break;
+            }
+            ++m_phaseThugEventStage;
+            if (timer)
+                ResetTimer(DASHEL_END_EVENT, timer);
+        }
+    }
+    void JustDied(Unit* pUnit) override
+    {
+        // case: something weird happened, killed by GM command, etc.
+        if (m_dialogStarted || m_questFightStarted)
+        {
+            // remove thugs
+            for (auto& guid : m_thugs)
+            {
+                if (Creature* thug = m_creature->GetMap()->GetCreature(guid))
+                    thug->ForcedDespawn();
+                guid.Clear();
+            }
+        }
+    }
+
+    void SummonedCreatureJustDied(Creature* creature) override
+    {
+        // If the thug died for whatever reason, clear the pointer. Otherwise, if
+        // combat is extended, the thug may despawn and we'll access a dangling
+        // pointer
+        for (auto& guid : m_thugs)
+        {
+            if (guid == creature->GetObjectGuid())
+                guid.Clear();
+        }
+    }
+
+    void SummonedCreatureDespawn(Creature* creature) override
+    {
+        for (auto& guid : m_thugs)
+        {
+            if (guid == creature->GetObjectGuid())
+                guid.Clear();
+        }
+
+        // Safty Check: Quest failed if npcs despawn and we are not in fight anymore
+        if (m_questFightStarted && !m_creature->IsInCombat())
+        {
+            Reset();
+        }
     }
 
     void ExecuteAction(uint32 action) override
     {
-        if (action == DASHEL_LOW_HP && m_creature->GetHealthPercent() <= 15.f)
+        if (action == DASHEL_LOW_HP && m_creature->GetHealthPercent() <= 20.f)
         {
-            DoScriptText(SAY_STONEFIST_2, m_creature);
-            ResetTimer(DASHEL_END_EVENT, 5000);
-            EnterEvadeMode();
+            if (m_questFightStarted)
+            {
+                // Dashel says: Okay, okay! Enough fighting. No one else needs to get hurt.
+                DoBroadcastText(SAY_PROGRESS_2_DAS, m_creature);                
+                m_creature->RemoveAllAuras();
+                m_creature->SetFactionTemporary(FACTION_FRIENDLY_TO_ALL, TEMPFACTION_RESTORE_RESPAWN);
+                m_creature->AttackStop();
+                m_creature->CombatStop();
+                m_creature->SetTarget(nullptr);
+                m_creature->AI()->DoResetThreat();
+
+                m_creature->HandleEmote(EMOTE_ONESHOT_BEG);
+                // check if thugs are alive
+                for (const auto& guid : m_thugs)
+                {
+                    if (Creature* thug = m_creature->GetMap()->GetCreature(guid))
+                    {
+                        if (!thug->IsAlive())
+                            continue;
+
+                        thug->RemoveAllAuras();
+                        thug->SetFactionTemporary(FACTION_FRIENDLY_TO_ALL, TEMPFACTION_RESTORE_RESPAWN);
+                        thug->AttackStop();
+                        thug->SetTarget(nullptr);
+                        thug->AI()->DoResetThreat();
+                        thug->AI()->EnterEvadeMode();
+                        m_thugsAlive = true;
+                    }
+                }
+                ResetTimer(DASHEL_EVADE_EVENT, 2000);
+                m_dialogStarted = true;
+                m_questFightStarted = false;
+            }
         }
     }
 };
@@ -181,15 +413,36 @@ struct npc_dashel_stonefistAI : public CombatAI
 bool QuestAccept_npc_dashel_stonefist(Player* player, Creature* creature, const Quest* quest)
 {
     if (quest->GetQuestId() == QUEST_MISSING_DIPLO_PT8)
-    {
-        creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_RESPAWN);
-        creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-        creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-        creature->AI()->SetReactState(REACT_AGGRESSIVE);
-        DoScriptText(SAY_STONEFIST_1, creature, player);
+    {  
+        npc_dashel_stonefistAI* dashelStonefistAI = dynamic_cast<npc_dashel_stonefistAI*>(creature->AI());
+        if (dashelStonefistAI)
+        {
+            // Dashel says: Now you're gonna get it good, "PlayerName".
+            DoBroadcastText(SAY_PROGRESS_1_DAS, creature, player);
+            creature->SetFactionTemporary(FACTION_NEUTRAL, TEMPFACTION_RESTORE_RESPAWN);
+            creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            creature->AI()->SetReactState(REACT_AGGRESSIVE);
 
-        if (npc_dashel_stonefistAI* stonefistAI = dynamic_cast<npc_dashel_stonefistAI*>(creature->AI()))
-           stonefistAI->StartEvent(player->GetObjectGuid());
+            // spawn thugs and let them move wayppoint, on waypoint reach they attack the player
+            if (Creature* thug1 = creature->SummonCreature(NPC_OLD_TOWN_THUG, aThugSpawnPosition[0][0], aThugSpawnPosition[0][1], aThugSpawnPosition[0][2], aThugSpawnPosition[0][3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000))
+            {
+                thug1->GetMotionMaster()->MovePoint(1, aThugWaypointPosition[0][0], aThugWaypointPosition[0][1], aThugWaypointPosition[0][2], FORCED_MOVEMENT_RUN);
+                dashelStonefistAI->m_thugs[0] = thug1->GetObjectGuid();
+                thug1->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+            }                
+
+            // thug 2
+            if (Creature* thug2 = creature->SummonCreature(NPC_OLD_TOWN_THUG, aThugSpawnPosition[1][0], aThugSpawnPosition[1][1], aThugSpawnPosition[1][2], aThugSpawnPosition[1][3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000))
+            {
+                thug2->GetMotionMaster()->MovePoint(1, aThugWaypointPosition[1][0], aThugWaypointPosition[1][1], aThugWaypointPosition[1][2], FORCED_MOVEMENT_RUN);
+                dashelStonefistAI->m_thugs[1] = thug2->GetObjectGuid();
+                thug2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+            }
+            // Let npc attack players after 2 seconds
+            dashelStonefistAI->StartEvent(player->GetObjectGuid());
+        }
+        else
+            return false;
     }
     return true;
 }
@@ -593,12 +846,13 @@ static const DialogueEntry aMasqueradeDialogue[] =
     {SAY_BOLVAR_KEEP_10,        NPC_BOLVAR,     3000},
     {SAY_PRESTOR_KEEP_11,       NPC_PRESTOR,    2000},
     {SPELL_WINDSOR_DEATH,       0,              1500},
+    {NPC_PRESTOR,               0,              400},
     {SAY_WINDSOR_KEEP_12,       NPC_WINDSOR,    4000},
     {SAY_PRESTOR_KEEP_14,       NPC_PRESTOR,    0},
 
     {NPC_GUARD_ONYXIA,          0,              14000},
     {NPC_BOLVAR,                0,              2000},
-    {SAY_BOLVAR_KEEP_15,        NPC_BOLVAR,     8000},
+    {SAY_BOLVAR_KEEP_15,        NPC_BOLVAR,     6000},
     {NPC_GUARD_PATROLLER,       0,              0},
     {0, 0, 0},
 };
@@ -874,6 +1128,9 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                 if (Creature* onyxia = m_scriptedMap->GetSingleCreatureFromStorage(NPC_PRESTOR))
                     onyxia->CastSpell(m_creature, SPELL_WINDSOR_DEATH, TRIGGERED_NONE);
                 break;
+            case NPC_PRESTOR:
+                m_creature->HandleEmote(EMOTE_ONESHOT_KNEEL);
+                break;
             case SAY_WINDSOR_KEEP_12:
                 if (Creature* onyxia = m_scriptedMap->GetSingleCreatureFromStorage(NPC_PRESTOR))
                     DoScriptText(SAY_PRESTOR_KEEP_13, onyxia);
@@ -941,6 +1198,7 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                     onyxia->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
                 // Allow creature to despawn
                 SetEscortPaused(false);
+                m_creature->ForcedDespawn(1);
                 break;
         }
     }

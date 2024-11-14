@@ -147,7 +147,7 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_settings(this),
     m_countSpawns(false),
     m_creatureGroup(nullptr), m_imposedCooldown(false),
-    m_creatureInfo(nullptr)
+    m_creatureInfo(nullptr), m_mountInfo(nullptr)
 {
     m_valuesCount = UNIT_END;
 
@@ -1542,6 +1542,21 @@ void Creature::ClearCreatureGroup()
     m_creatureGroup = nullptr;
 }
 
+void Creature::SetMountInfo(CreatureInfo const* info)
+{
+    if (info)
+    {
+        if (info->SpeedRun)
+            SetBaseRunSpeed(info->SpeedRun);
+    }
+    else if (GetCreatureInfo()->SpeedRun)
+        SetBaseRunSpeed(GetCreatureInfo()->SpeedRun);
+    else
+        UpdateModelData();
+
+    m_mountInfo = info;
+}
+
 bool Creature::CreateFromProto(uint32 dbGuid, uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data /*=nullptr*/, GameEventCreatureData const* eventData /*=nullptr*/)
 {
     m_originalEntry = cinfo->Entry;
@@ -1549,9 +1564,6 @@ bool Creature::CreateFromProto(uint32 dbGuid, uint32 guidlow, CreatureInfo const
     uint32 newEntry = cinfo->Entry;
 
     Object::_Create(dbGuid, guidlow, newEntry, cinfo->GetHighGuid());
-
-    if (uint32 entry = sObjectMgr.GetRandomCreatureEntry(GetDbGuid()))
-        newEntry = entry;
 
     return UpdateEntry(newEntry, data, eventData, false);
 }
@@ -1575,10 +1587,6 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
 
     uint32 entry = forcedEntry ? forcedEntry : data->id;
 
-    // get data for dual spawn instances
-    if (entry == 0)
-        entry = GetCreatureConditionalSpawnEntry(dbGuid, map);
-
     SpawnGroupEntry* groupEntry = map->GetMapDataContainer().GetSpawnGroupByGuid(dbGuid, TYPEID_UNIT); // use dynguid by default \o/
     CreatureGroup* group = nullptr;
     if (groupEntry)
@@ -1587,6 +1595,13 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
         if (!entry)
             entry = group->GetGuidEntry(dbGuid);
     }
+
+    // get data for dual spawn instances - spawn group precedes it because
+    if (entry == 0)
+        entry = GetCreatureConditionalSpawnEntry(dbGuid, map);
+
+    if (entry == 0)
+        entry = sObjectMgr.GetRandomCreatureEntry(GetDbGuid());
 
     GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(dbGuid);
     if (!entry && eventData)
@@ -1816,7 +1831,10 @@ void Creature::SetDeathState(DeathState s)
         else if (m_respawnOverrideOnce)
             m_respawnOverriden = false;
 
-        m_corpseExpirationTime = GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(m_corpseDelay * IN_MILLISECONDS); // the max/default time for corpse decay (before creature is looted/AllLootRemovedFromCorpse() is called)
+        if (m_settings.HasFlag(CreatureStaticFlags3::FOREVER_CORPSE_DURATION))
+            m_corpseExpirationTime = GetMap()->GetCurrentClockTime() + std::chrono::hours(24*7);
+        else
+            m_corpseExpirationTime = GetMap()->GetCurrentClockTime() + std::chrono::seconds(m_corpseDelay); // the max/default time for corpse decay (before creature is looted/AllLootRemovedFromCorpse() is called)
         m_respawnTime = time(nullptr) + m_respawnDelay; // respawn delay (spawntimesecs)
 
         // always save boss respawn time at death to prevent crash cheating
@@ -2091,8 +2109,13 @@ bool Creature::IsVisibleInGridForPlayer(Player* pl) const
 
 void Creature::CallAssistance()
 {
+    CallAssistance(GetVictim());
+}
+
+void Creature::CallAssistance(Unit* enemy)
+{
     // FIXME: should player pets call for assistance?
-    if (!m_AlreadyCallAssistance && GetVictim() && !HasCharmer())
+    if (!m_AlreadyCallAssistance && enemy && !HasCharmer())
     {
         MANGOS_ASSERT(AI());
 
@@ -2104,7 +2127,7 @@ void Creature::CallAssistance()
         float radius = sWorld.getConfig(CONFIG_FLOAT_CREATURE_FAMILY_ASSISTANCE_RADIUS);
         if (GetCreatureInfo()->CallForHelp > 0)
             radius = GetCreatureInfo()->CallForHelp;
-        AI()->SendAIEventAround(AI_EVENT_CALL_ASSISTANCE, GetVictim(), sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_ASSISTANCE_DELAY), radius);
+        AI()->SendAIEventAround(AI_EVENT_CALL_ASSISTANCE, enemy, sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_ASSISTANCE_DELAY), radius);
     }
 }
 
@@ -2700,6 +2723,8 @@ void Creature::InspectingLoot()
 {
     // until multiple corpse for creature is not supported
     // this will not have effect after re spawn delay (corpse will be removed anyway)
+    if (m_settings.HasFlag(CreatureStaticFlags3::FOREVER_CORPSE_DURATION))
+        return;
 
     // check if player have enough time to inspect loot
     if (m_corpseExpirationTime < GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(m_corpseAccelerationDecayDelay))
@@ -2710,6 +2735,9 @@ void Creature::InspectingLoot()
 void Creature::ReduceCorpseDecayTimer()
 {
     if (!IsInWorld())
+        return;
+
+    if (m_settings.HasFlag(CreatureStaticFlags3::FOREVER_CORPSE_DURATION))
         return;
 
     if (m_corpseExpirationTime > GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(m_corpseAccelerationDecayDelay))
@@ -2790,8 +2818,15 @@ void Creature::SetBaseWalkSpeed(float speed)
 void Creature::SetBaseRunSpeed(float speed, bool force)
 {
     float newSpeed = speed;
-    if (!force && m_creatureInfo->SpeedRun) // Creature template should still override
-        newSpeed = m_creatureInfo->SpeedRun;
+    if (!force)
+    {
+        if (m_mountInfo && m_mountInfo->SpeedRun) // mount precedes everything
+            newSpeed = m_mountInfo->SpeedRun;
+        else if (m_creatureInfo->SpeedRun) // Creature template should still override
+            newSpeed = m_creatureInfo->SpeedRun;
+        else if (m_modelRunSpeed > 0)
+            newSpeed = m_modelRunSpeed;
+    }
 
     if (newSpeed != m_baseSpeedRun)
     {
@@ -2942,6 +2977,17 @@ void Creature::SetCanDualWield(bool state)
 {
     Unit::SetCanDualWield(state);
     UpdateDamagePhysical(OFF_ATTACK);
+}
+
+Unit::MmapForcingStatus Creature::IsIgnoringMMAP() const
+{
+    if (m_ignoreMMAP)
+        return MmapForcingStatus::IGNORED;
+
+    if (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_MMAP_FORCE_ENABLE)
+        return MmapForcingStatus::FORCED;
+
+    return Unit::IsIgnoringMMAP();
 }
 
 bool Creature::CanRestockPickpocketLoot() const

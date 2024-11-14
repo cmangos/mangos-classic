@@ -113,9 +113,6 @@ uint32 SpawnGroup::GetEligibleEntry(std::map<uint32, uint32>& existingEntries, s
         auto itr = minEntries.begin();
         std::advance(itr, urand(0, minEntries.size() - 1));
         uint32 entry = (*itr).first;
-        --(*itr).second;
-        if ((*itr).second == 0)
-            minEntries.erase(itr);
         return entry;
     }
 
@@ -227,10 +224,9 @@ void SpawnGroup::Spawn(bool force)
 
     std::shuffle(eligibleGuids.begin(), eligibleGuids.end(), *GetRandomGenerator());
 
-    for (auto itr = eligibleGuids.begin(); itr != eligibleGuids.end() && !eligibleGuids.empty() && m_objects.size() < m_entry.MaxCount; ++itr)
+    for (auto itr = eligibleGuids.begin(); itr != eligibleGuids.end() && !eligibleGuids.empty() && m_objects.size() < m_entry.MaxCount;)
     {
         uint32 dbGuid = (*itr)->DbGuid;
-        uint32 entry = 0;
         if (m_entry.HasChancedSpawns)
         {
             if ((*itr)->Chance)
@@ -246,44 +242,102 @@ void SpawnGroup::Spawn(bool force)
                     spawn = spawnItr->second;
 
                 if (!spawn)
+                {
+                    itr = eligibleGuids.erase(itr);
                     continue;
+                }
             }
             else // filling redundant entries when a group has chanced spawns for optimization so we can stop at start
                 m_chosenSpawns[dbGuid] = true;
         }
+        ++itr;
+    }
 
-        // creatures pick random entry on first spawn in dungeons - else always pick random entry
-        if (GetObjectTypeId() == TYPEID_UNIT)
+    eligibleGuids.resize(std::min(eligibleGuids.size(), m_entry.MaxCount - m_objects.size())); // now we have final count for processing
+
+    auto pickCreatureEntry = [&](const SpawnGroupDbGuids* guids) -> uint32
+    {
+        uint32 entry;
+        // some group members can have static entry, or selfcontained random entry
+        if (guids->RandomEntry)
+            entry = sObjectMgr.GetRandomCreatureEntry(guids->DbGuid);
+        else if (guids->OwnEntry)
+            entry = guids->OwnEntry;
+        else
+            entry = GetEligibleEntry(validEntries, minEntries);
+
+        return entry;
+    };
+
+    auto pickGoEntry = [&](const SpawnGroupDbGuids* guids) -> uint32
+    {
+        uint32 entry;
+        // some group members can have static entry, or selfcontained random entry
+        if (guids->RandomEntry)
+            entry = sObjectMgr.GetRandomGameObjectEntry(guids->DbGuid);
+        else if (guids->OwnEntry)
+            entry = guids->OwnEntry;
+        else
+            entry = GetEligibleEntry(validEntries, minEntries);
+
+        return entry;
+    };
+
+    auto eraseEntry = [&](uint32 entry)
+    {
+        if (entry)
         {
-            if (m_map.IsDungeon())
+            if (validEntries[entry])
+                --validEntries[entry];
+
+            auto itr = minEntries.find(entry);
+            if (itr != minEntries.end())
             {
-                // only held in memory - implement saving to db if it becomes a major issue
-                if (m_chosenEntries.find(dbGuid) == m_chosenEntries.end())
-                {
-                    // some group members can have static entry, or selfcontained random entry
-                    if ((*itr)->RandomEntry)
-                        entry = sObjectMgr.GetRandomCreatureEntry(dbGuid);
-                    else if ((*itr)->OwnEntry)
-                        entry = (*itr)->OwnEntry;
-                    else
-                        entry = GetEligibleEntry(validEntries, minEntries);
-                    m_chosenEntries[dbGuid] = entry;
-                }
-                else
-                    entry = m_chosenEntries[dbGuid];
+                (*itr).second -= 1;
+                if ((*itr).second == 0)
+                    minEntries.erase(itr);
             }
-            else
-                entry = GetEligibleEntry(validEntries, minEntries);
         }
-        else // GOs always pick random entry
+    };
+
+    // pick static and random entry first in dungeons so spawn group logic can decide after
+    if (m_map.IsDungeon() && GetObjectTypeId() == TYPEID_UNIT)
+    {
+        for (auto data : eligibleGuids)
         {
-            if ((*itr)->RandomEntry)
-                entry = sObjectMgr.GetRandomGameObjectEntry(dbGuid);
-            else if ((*itr)->OwnEntry)
-                entry = (*itr)->OwnEntry;
-            else
-                entry = GetEligibleEntry(validEntries, minEntries);
+            if (data->RandomEntry || data->OwnEntry)
+            {
+                uint32 entry = pickCreatureEntry(data);
+                m_chosenEntries[data->DbGuid] = entry;
+                eraseEntry(entry);
+            }
         }
+        for (auto data : eligibleGuids)
+        {
+            if (!data->RandomEntry && !data->OwnEntry)
+            {
+                uint32 entry = pickCreatureEntry(data);
+                m_chosenEntries[data->DbGuid] = entry;
+                eraseEntry(entry);
+            }
+        }
+    }
+
+    for (auto itr = eligibleGuids.begin(); itr != eligibleGuids.end(); ++itr)
+    {
+        uint32 dbGuid = (*itr)->DbGuid;
+        uint32 entry = 0;
+        // creatures pick random entry on first spawn in dungeons - else always pick random entry
+        if (m_map.IsDungeon() && GetObjectTypeId() == TYPEID_UNIT)
+            entry = m_chosenEntries[dbGuid]; // only held in memory - implement saving to db if it becomes a major issue
+        else
+        {
+            if (GetObjectTypeId() == TYPEID_UNIT)
+                entry = pickCreatureEntry(*itr);
+            else // GOs always pick random entry
+                entry = pickGoEntry(*itr);
+            eraseEntry(entry);
+        }   
 
         float x, y;
         if (GetObjectTypeId() == TYPEID_UNIT)
@@ -306,8 +360,6 @@ void SpawnGroup::Spawn(bool force)
             else
                 WorldObject::SpawnGameObject(dbGuid, &m_map, entry);
         }
-        if (entry && validEntries[entry])
-            --validEntries[entry];
     }
 }
 
@@ -410,6 +462,11 @@ void CreatureGroup::TriggerLinkingEvent(uint32 event, Unit* target)
             if (!target->HasCharmer() && m_objects.find(target->GetDbGuid()) != m_objects.end())
                 return;
 
+            if (m_linkageTargets.find(target) != m_linkageTargets.end()) // already triggering for target
+                return;
+
+            m_linkageTargets.insert(target);
+
             for (auto& data : m_objects)
             {
                 uint32 dbGuid = data.first;
@@ -428,6 +485,8 @@ void CreatureGroup::TriggerLinkingEvent(uint32 event, Unit* target)
                 CreatureGroup* group = static_cast<CreatureGroup*>(m_map.GetSpawnManager().GetSpawnGroup(linkedGroup));
                 group->TriggerLinkingEvent(event, target);
             }
+
+            m_linkageTargets.erase(target);
             break;
         case CREATURE_GROUP_EVENT_EVADE:
             if ((m_entry.Flags & CREATURE_GROUP_EVADE_TOGETHER) != 0)

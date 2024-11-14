@@ -446,6 +446,7 @@ enum TriggerCastFlags : uint32
     TRIGGERED_DO_NOT_RESET_LEASH                = 0x00004000,   // Does not reset leash on cast
     TRIGGERED_CHANNEL_ONLY                      = 0x00008000,   // Only starts channel and no effects - used for summoning portal GO anims
     TRIGGERED_IGNORE_CASTER_AURA_STATE          = 0x00010000,   // Ignores the Aurastate of the caster
+    TRIGGERED_FORCE_COSTS                       = 0x00020000,   // Forces costs for triggered spells
     TRIGGERED_FULL_MASK                         = 0xFFFFFFFF
 };
 

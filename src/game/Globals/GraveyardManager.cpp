@@ -143,6 +143,9 @@ WorldSafeLocsEntry const* GraveyardManager::GetClosestGraveYard(float x, float y
     const uint32 zoneId = sTerrainMgr.GetZoneId(mapId, x, y, z);
     const uint32 areaId = sTerrainMgr.GetAreaId(mapId, x, y, z);
 
+    constexpr uint32 defaultGraveyardA = 4;
+    constexpr uint32 defaultGraveyardH = 10;
+
     WorldSafeLocsEntry const* graveyard = nullptr;
     if (areaId != 0)
     {
@@ -163,9 +166,12 @@ WorldSafeLocsEntry const* GraveyardManager::GetClosestGraveYard(float x, float y
     }
 
     if (graveyard == nullptr)
+    {
         sLog.outErrorDb("Table `game_graveyard_zone` incomplete: Map %u Zone "
             "%u Area %u Team %u does not have a linked graveyard.",
             mapId, zoneId, areaId, uint32(team));
+        graveyard = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(team == Team::HORDE ? defaultGraveyardH : defaultGraveyardA);
+    }
     return graveyard;
 }
 

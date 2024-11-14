@@ -23,6 +23,7 @@
 #include "Entities/Item.h"
 #include "Globals/ObjectAccessor.h"
 #include "Globals/SharedDefines.h"
+#include "Util/UniqueTrackablePtr.h"
 
 class Item;
 
@@ -299,6 +300,8 @@ class Guild
         void   LogGuildEvent(uint8 EventType, ObjectGuid playerGuid1, ObjectGuid playerGuid2 = ObjectGuid(), uint8 newRank = 0);
         ObjectGuid GetGuildInviter(ObjectGuid playerGuid) const;
 
+        MaNGOS::unique_weak_ptr<Guild> GetWeakPtr() const { return m_weakRef; }
+        void SetWeakPtr(MaNGOS::unique_weak_ptr<Guild> weakRef) { m_weakRef = std::move(weakRef); }
     protected:
         void AddRank(const std::string& name_, uint32 rights);
 
@@ -327,6 +330,8 @@ class Guild
         GuildEventLog m_GuildEventLog;
 
         uint32 m_GuildEventLogNextGuid;
+
+        MaNGOS::unique_weak_ptr<Guild> m_weakRef;
 
     private:
         void UpdateAccountsNumber() { m_accountsNumber = 0;}// mark for lazy calculation at request in GetAccountsNumber
