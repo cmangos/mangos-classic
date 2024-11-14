@@ -20,6 +20,10 @@
 #include "Tools/Language.h"
 #include "World/World.h"
 #include "BattleGround/BattleGroundMgr.h"
+#include "Globals/ObjectMgr.h"
+#include "Entities/Player.h"
+#include "Maps/MapManager.h"
+#include "Server/WorldPacket.h"
 
  /*********************************************************/
  /***            BATTLEGROUND QUEUE SYSTEM              ***/
