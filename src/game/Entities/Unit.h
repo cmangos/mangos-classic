@@ -1792,7 +1792,7 @@ class Unit : public WorldObject
 
         void SetLevitate(bool enabled);
         void SetSwim(bool enabled);
-        void SetCanFly(bool enabled);
+        virtual void SetCanFly(bool enabled);
         void SetFeatherFall(bool enabled);
         void SetHover(bool enabled);
         void SetWaterWalk(bool enabled);
