@@ -137,6 +137,7 @@ Quest::Quest(Field* questRecord)
     QuestCompleteScript = questRecord[127].GetUInt32();
 
     RequiredCondition = questRecord[128].GetUInt32();
+    ReputationSpilloverMask = questRecord[130].GetUInt32();
 
     m_isActive = true;
 
