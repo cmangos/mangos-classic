@@ -87,13 +87,13 @@ class ReputationMgr
         ReputationRank const* GetForcedRankIfAny(FactionTemplateEntry const* factionTemplateEntry) const;
 
     public:                                                 // modifiers
-        bool SetReputation(FactionEntry const* factionEntry, int32 standing, bool reputationSpillover = true)
+        bool SetReputation(FactionEntry const* factionEntry, int32 standing, bool noSpillover = false)
         {
-            return SetReputation(factionEntry, standing, false, reputationSpillover);
+            return SetReputation(factionEntry, standing, false, noSpillover);
         }
-        bool ModifyReputation(FactionEntry const* factionEntry, int32 standing, bool reputationSpillover = true)
+        bool ModifyReputation(FactionEntry const* factionEntry, int32 standing, bool noSpillover = false)
         {
-            return SetReputation(factionEntry, standing, true, reputationSpillover);
+            return SetReputation(factionEntry, standing, true, noSpillover);
         }
 
         void SetVisible(FactionTemplateEntry const* factionTemplateEntry);
