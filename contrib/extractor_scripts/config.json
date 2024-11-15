@@ -7,6 +7,13 @@
 			"_Info": "walkableClimb <= 8 else .go c 1000403 goes over the edge"
 		}
 	},
+	"230": {
+		"3230": {
+			"walkableHeight": 7,
+			"walkableClimb": 6,
+			"_Info": "Makes BRD arena spectator stairs walkable"
+		}
+	},
 	"530": {
 		"2029": {
 			"detailSampleDist": 1,
