@@ -70,7 +70,7 @@ actual_rev = vcs_tag(
 if not get_option('PCH')
   pch_files = []
 else
-  pch_files = ['../shared/pchdef.h', '../shared/pchdef.cpp']
+  pch_files = ['../shared/pchdef.h']
 endif
 
 if get_option('BUILD_GAME_SERVER') or get_option('BUILD_LOGIN_SERVER') or get_option('BUILD_EXTRACTORS')
