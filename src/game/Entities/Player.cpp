@@ -6393,8 +6393,6 @@ void Player::RewardReputation(Quest const* pQuest)
                 GetReputationMgr().ModifyReputation(factionEntry, rep, noSpillover);
         }
     }
-
-    // TODO: implement reputation spillover
 }
 
 // Update honor fields , cleanKills is only used during char saving
