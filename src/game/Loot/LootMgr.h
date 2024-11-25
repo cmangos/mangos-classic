@@ -394,13 +394,14 @@ class Loot
 
         std::tuple<uint32, uint32, uint32> GetQualifiedWeapons();
 
+        bool IsLootedFor(Player const* player) const;
+
     private:
         Loot(): m_lootTarget(nullptr), m_itemTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(),
             m_clientLootType(), m_lootMethod(), m_threshold(), m_maxEnchantSkill(0), m_haveItemOverThreshold(false),
             m_isChecked(false), m_isChest(false), m_isChanged(false), m_isFakeLoot(false)
         {}
         void Clear();
-        bool IsLootedFor(Player const* player) const;
         bool IsLootedForAll() const;
         void SendReleaseFor(ObjectGuid const& guid);
         void SendReleaseFor(Player* plr);
