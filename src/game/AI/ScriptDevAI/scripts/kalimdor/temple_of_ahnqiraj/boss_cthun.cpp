@@ -262,7 +262,7 @@ struct boss_cthunAI : public CombatAI
         // There are 30 seconds offset between Giant Eye and Giant Claw Tentacles which are both on a 60 seconds period handled by periodic spells
         AddCombatAction(CTHUN_CLAWTENTACLEDELAY, 10000u);
         AddCombatAction(CTHUN_EYETENTACLEDELAY, 40000u);
-        AddCustomAction(CTHUN_EMERGE, true, [&]() { HandleEmerge(); }, TIMER_COMBAT_COMBAT);
+        AddCustomAction(CTHUN_EMERGE, true, [&]() { HandleEmerge(); }, TIMER_ALWAYS);
         AddCustomAction(CTHUN_WEAKENED_END, true, [&]() { HandleEndWeaken(); }, TIMER_COMBAT_COMBAT);
         // Set active in order to be used during the instance progress
         m_creature->SetActiveObjectState(true);
