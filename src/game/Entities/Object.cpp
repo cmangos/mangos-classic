@@ -527,6 +527,13 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                                     value &= ~UNIT_FLAG_TAXI_FLIGHT;
                     }
 
+                    // On login/reconnect: delay combat state application at client UI to not interfere with secure frames init
+                    if (target == this && (value & UNIT_FLAG_IN_COMBAT))
+                    {
+                        if (static_cast<Player const*>(this)->GetSession()->PlayerLoading())
+                            value &= ~UNIT_FLAG_IN_COMBAT;
+                    }
+
                     *data << value;
                 }
                 // Hide lootable animation for unallowed players
