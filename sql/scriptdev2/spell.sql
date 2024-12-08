@@ -39,6 +39,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (26569,'spell_hate_to_zero'),
 (26637,'spell_hate_to_zero'),
 (10255,'spell_stoned'),
+(11920,'spell_net_guard'),
 (12639,'spell_summon_hakkar'),
 (12948,'spell_hakkar_summoned'),
 (13278,'spell_gdr_channel'),
