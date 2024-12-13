@@ -165,7 +165,7 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
         }
 
         // generic command args check
-        if (tmp.buddyEntry && !(tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_GUID) && (tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_STRING_ID) == 0)
+        if (tmp.buddyEntry && !(tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_GUID) && (tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_SPAWN_GROUP) == 0 && (tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_STRING_ID) == 0)
         {
             if (tmp.IsCreatureBuddy() && !ObjectMgr::GetCreatureTemplate(tmp.buddyEntry))
             {
