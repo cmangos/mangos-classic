@@ -255,8 +255,8 @@ void SpawnManager::Update()
     m_updated = true;
     if (!m_deferredSpawns.empty()) // cannot insert during update
     {
-        m_spawns.reserve(m_spawns.size() + m_spawns.size());
-        std::move(std::begin(m_deferredSpawns), std::end(m_deferredSpawns), std::back_inserter(m_deferredSpawns));
+        m_spawns.reserve(m_spawns.size() + m_deferredSpawns.size());
+        std::move(std::begin(m_deferredSpawns), std::end(m_deferredSpawns), std::back_inserter(m_spawns));
         m_deferredSpawns.clear();
     }
     auto now = m_map.GetCurrentClockTime();
