@@ -1518,7 +1518,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
             float radius = float(goInfo->trap.diameter) / 2.0f;
             bool IsBattleGroundTrap = !radius && goInfo->trap.cooldown == 3 && m_respawnTime == 0;
 
-            if (goInfo->trap.spellId == 6636)
+            if (goInfo->trap.spellId == 6636 || goInfo->trap.spellId == 8733)
                 caster = nullptr;
 
             if (goInfo->trap.spellId)

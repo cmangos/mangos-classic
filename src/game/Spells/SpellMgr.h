@@ -1428,6 +1428,8 @@ inline bool IsIgnoreLosSpell(SpellEntry const* spellInfo)
 {
     switch (spellInfo->Id)
     {
+        case 8733:                                  // Blessing of Blackfathom - potentially hints at trap GO casts not respecting los
+        case 8735:                                  // Blackfathom Teleport - same
         case 24742:                                 // Magic Wings
         // case 42867:                              // both need LOS, likely TARGET_UNIT_CASTER should use LOS ignore from normal radius, not per-effect radius WIP
             return true;
