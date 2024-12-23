@@ -8810,7 +8810,6 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (2,7,9125,'Generic'),
 (2,7,20573,'Hardiness'),
 (2,7,20574,'Axe Specialization'),
-(2,7,21563,'Command'),
 (2,7,21651,'Opening'),
 (2,7,21652,'Closing'),
 (2,7,22027,'Remove Insignia'),
