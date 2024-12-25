@@ -3454,6 +3454,12 @@ void Spell::update(uint32 difftime)
         {
             if (m_timer)
             {
+                if (m_targets.getUnitTarget() && !m_IsTriggeredSpell && !IsAllowingDeadTarget(m_spellInfo) && !m_targets.getUnitTarget()->IsAlive())
+                {
+                    cancel();
+                    return;
+                }
+
                 if (difftime >= m_timer)
                     m_timer = 0;
                 else
@@ -3471,14 +3477,20 @@ void Spell::update(uint32 difftime)
                 {
                     // check if player has jumped before the channeling finished
                     if (m_caster->m_movementInfo.HasMovementFlag(MOVEFLAG_JUMPING))
+                    {
                         cancel();
+                        return;
+                    }
 
                     // check for incapacitating player states
                     if (m_caster->IsCrowdControlled())
                     {
                         // certain channel spells are not interrupted
                         if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX_IS_CHANNELED) && !m_spellInfo->HasAttribute(SPELL_ATTR_EX3_IGNORE_CASTER_AND_TARGET_RESTRICTIONS))
+                        {
                             cancel();
+                            return;
+                        }
                     }
 
                     if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_SPECIAL_TAMING_FLAG)) // these fail on lost target attention (aggro)
@@ -3487,7 +3499,10 @@ void Spell::update(uint32 difftime)
                         {
                             Unit* targetsTarget = target->GetTarget();
                             if (targetsTarget && targetsTarget != m_caster)
+                            {
                                 cancel();
+                                return;
+                            }
                         }
                     }
 
@@ -3536,6 +3551,7 @@ void Spell::update(uint32 difftime)
                             if (!m_caster->IsWithinCombatDistInMap(channelTarget, m_maxRange * 1.5f))
                             {
                                 cancel();
+                                return;
                             }
                         }
                     }
