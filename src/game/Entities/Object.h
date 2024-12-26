@@ -1177,6 +1177,8 @@ class WorldObject : public Object
         bool HasStringId(uint32 stringId) const; // not to be used in sd2
         void SetStringId(uint32 stringId, bool apply); // not to be used outside of scriptmgr
 
+        virtual uint32 GetRespawnDelay() const { return 0; }
+
     protected:
         explicit WorldObject();
 

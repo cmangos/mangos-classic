@@ -24,6 +24,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <optional>
 
 struct FormationEntry;
 class FormationData;
@@ -51,6 +52,12 @@ struct SpawnGroupDbGuids
     uint32 Chance;
     uint32 OwnEntry;
     bool RandomEntry;
+};
+
+struct SpawnGroupSquad
+{
+    uint32 SquadId;
+    std::map<uint32, uint32> GuidToEntry;
 };
 
 enum SpawnGroupType
@@ -92,6 +99,8 @@ struct SpawnGroupEntry
     int32 WorldStateExpression; // Exclusive with condition
     uint32 Flags;
     uint32 StringId;
+    std::optional<uint32> RespawnOverrideMin;
+    std::optional<uint32> RespawnOverrideMax;
     bool Active;
     bool EnabledByDefault;
     bool HasChancedSpawns;
@@ -100,6 +109,8 @@ struct SpawnGroupEntry
     std::vector<SpawnGroupRandomEntry*> EquallyChanced;
     std::vector<SpawnGroupRandomEntry*> ExplicitlyChanced;
     std::vector<uint32> LinkedGroups;
+
+    std::vector<SpawnGroupSquad> Squads;
 
     // may be nullptr
     FormationEntrySPtr formationEntry;

@@ -60,14 +60,19 @@ class SpawnGroup
 
         void RespawnIfInVicinity(Position pos, float range);
 
+        bool IsRespawnOverriden() const;
+        uint32 GetRandomRespawnTime() const;
+
     protected:
         SpawnGroupEntry const& m_entry;
         Map& m_map;
         std::map<uint32, uint32> m_objects;
         std::map<uint32, uint32> m_chosenEntries; // dungeon saving for entry per dynguid
         std::map<uint32, bool> m_chosenSpawns;
+        int32 m_chosenSquad;
         uint32 m_objectTypeId;
         bool m_enabled;
+        TimePoint m_cooldown; // used for full wipe scenario only - data is still saved per spawn to db
 };
 
 class CreatureGroup : public SpawnGroup

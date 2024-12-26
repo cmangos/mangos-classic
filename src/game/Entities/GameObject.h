@@ -757,7 +757,7 @@ class GameObject : public WorldObject
                    (m_respawnTime == 0 && m_spawnedByDefault);
         }
         bool IsSpawnedByDefault() const { return m_spawnedByDefault; }
-        uint32 GetRespawnDelay() const { return m_respawnDelay; }
+        uint32 GetRespawnDelay() const override { return m_respawnDelay; }
         void SetRespawnDelay(uint32 delay, bool once = false) { m_respawnDelay = delay; m_respawnOverriden = true; m_respawnOverrideOnce = once; }
         void SetForcedDespawn() { m_forcedDespawn = true; };
         void SetChestDespawn();

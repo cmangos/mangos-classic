@@ -1031,7 +1031,7 @@ void ObjectMgr::LoadSpawnGroups()
     std::shared_ptr<SpawnGroupEntryContainer> newContainer = std::make_shared<SpawnGroupEntryContainer>();
     uint32 count = 0;
 
-    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Id, Name, Type, MaxCount, WorldState, WorldStateExpression, Flags, StringId FROM spawn_group"));
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Id, Name, Type, MaxCount, WorldState, WorldStateExpression, Flags, StringId, RespawnOverrideMin, RespawnOverrideMax FROM spawn_group"));
     if (result)
     {
         do
@@ -1090,7 +1090,11 @@ void ObjectMgr::LoadSpawnGroups()
             entry.EnabledByDefault = true;
             entry.formationEntry = nullptr;
             entry.HasChancedSpawns = false;
-            newContainer->spawnGroupMap.emplace(entry.Id, entry);
+            if (!fields[8].IsNULL())
+                entry.RespawnOverrideMin = fields[8].GetUInt32();
+            if (!fields[9].IsNULL())
+                entry.RespawnOverrideMax = fields[9].GetUInt32();
+            newContainer->spawnGroupMap.emplace(entry.Id, std::move(entry));
         } while (result->NextRow());
     }
 
@@ -1326,6 +1330,46 @@ void ObjectMgr::LoadSpawnGroups()
 
             group.LinkedGroups.push_back(linkedId);
         } while (result->NextRow());
+    }
+
+    result = WorldDatabase.Query("SELECT Id, SquadId, Guid, Entry FROM spawn_group_squad");
+    if (result)
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+            uint32 Id = fields[0].GetUInt32();
+
+            uint32 squadId = fields[1].GetUInt32();
+            uint32 dbGuid = fields[2].GetUInt32();
+            uint32 entry = fields[3].GetUInt32();
+
+            auto itr = newContainer->spawnGroupMap.find(Id);
+            if (itr == newContainer->spawnGroupMap.end())
+            {
+                sLog.outErrorDb("LoadSpawnGroups: Invalid spawn_group_squad Id %u. Skipping.", Id);
+                continue;
+            }
+
+            auto& spawnGroup = itr->second;
+            if (!spawnGroup.RandomEntries.empty())
+                sLog.outErrorDb("LoadSpawnGroups: spawn_group_squad Id %u has spawn_group_entry. Will be overriden by squad", Id);
+
+            auto squadItr = std::find_if(spawnGroup.Squads.begin(), spawnGroup.Squads.end(), [squadId](const SpawnGroupSquad& obj) -> bool { return obj.SquadId == squadId; });
+
+            if (squadItr == spawnGroup.Squads.end())
+            {
+                SpawnGroupSquad squad;
+                squad.SquadId = squadId;
+                squad.GuidToEntry.emplace(dbGuid, entry);
+                spawnGroup.Squads.push_back(std::move(squad));
+            }
+            else
+            {
+                squadItr->GuidToEntry.emplace(dbGuid, entry);
+            }
+        }
+        while (result->NextRow());
     }
 
     for (auto& data : newContainer->spawnGroupMap)

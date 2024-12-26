@@ -1825,7 +1825,9 @@ void Creature::SetDeathState(DeathState s)
     {
         if (!m_respawnOverriden)
         {
-            if (CreatureData const* data = sObjectMgr.GetCreatureData(GetDbGuid()))
+            if (GetCreatureGroup() && GetCreatureGroup()->IsRespawnOverriden())
+                m_respawnDelay = GetCreatureGroup()->GetRandomRespawnTime();
+            else if (CreatureData const* data = sObjectMgr.GetCreatureData(GetDbGuid()))
                 m_respawnDelay = data->GetRandomRespawnTime();
         }
         else if (m_respawnOverrideOnce)

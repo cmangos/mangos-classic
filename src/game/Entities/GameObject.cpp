@@ -686,8 +686,12 @@ void GameObject::Update(const uint32 diff)
             {
                 // since pool system can fail to roll unspawned object, this one can remain spawned, so must set respawn nevertheless
                 if (IsSpawnedByDefault())
-                    if (GameObjectData const* data = sObjectMgr.GetGOData(GetDbGuid()))
+                {
+                    if (GetGameObjectGroup() && GetGameObjectGroup()->IsRespawnOverriden())
+                        m_respawnDelay = GetGameObjectGroup()->GetRandomRespawnTime();
+                    else if (GameObjectData const* data = sObjectMgr.GetGOData(GetDbGuid()))
                         m_respawnDelay = data->GetRandomRespawnTime();
+                }
             }
             else if (m_respawnOverrideOnce)
                 m_respawnOverriden = false;

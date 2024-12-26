@@ -62,7 +62,7 @@ namespace
     }
 }
 
-SpawnGroup::SpawnGroup(SpawnGroupEntry const& entry, Map& map, uint32 typeId) : m_entry(entry), m_map(map), m_objectTypeId(typeId), m_enabled(m_entry.EnabledByDefault)
+SpawnGroup::SpawnGroup(SpawnGroupEntry const& entry, Map& map, uint32 typeId) : m_entry(entry), m_map(map), m_chosenSquad(-1), m_objectTypeId(typeId), m_enabled(m_entry.EnabledByDefault)
 {
 }
 
@@ -75,17 +75,27 @@ void SpawnGroup::RemoveObject(WorldObject* wo)
 {
     m_objects.erase(wo->GetDbGuid());
 
-    if (!m_map.IsDungeon() && m_objects.empty() && m_entry.HasChancedSpawns)
+    if (!m_map.IsDungeon() && m_objects.empty())
     {
-        m_chosenSpawns.clear();
-        // save same respawn time for all guids so they all respawn at the same time if chanced
-        time_t lastRespawnTime = m_map.GetPersistentState()->GetObjectRespawnTime(GetObjectTypeId(), wo->GetDbGuid());
-        for (auto& dbGuid : m_entry.DbGuids)
-        {
-            if (dbGuid.DbGuid == wo->GetDbGuid())
-                continue;
+        if (m_entry.RespawnOverrideMin)
+            m_cooldown = m_map.GetCurrentClockTime() + std::chrono::seconds(urand(*m_entry.RespawnOverrideMin, m_entry.RespawnOverrideMax ? *m_entry.RespawnOverrideMax : *m_entry.RespawnOverrideMin));
+        else if (m_chosenSquad != -1) // avoid instant respawn artifacts - schedule respawn so full group is around after full wipe
+            m_cooldown = m_map.GetCurrentClockTime() + std::chrono::seconds(wo->GetRespawnDelay());
 
-            m_map.GetPersistentState()->SaveObjectRespawnTime(GetObjectTypeId(), dbGuid.DbGuid, lastRespawnTime);
+        m_chosenSquad = -1;
+
+        if (m_entry.HasChancedSpawns)
+        {
+            m_chosenSpawns.clear();
+            // save same respawn time for all guids so they all respawn at the same time if chanced
+            time_t lastRespawnTime = m_map.GetPersistentState()->GetObjectRespawnTime(GetObjectTypeId(), wo->GetDbGuid());
+            for (auto& dbGuid : m_entry.DbGuids)
+            {
+                if (dbGuid.DbGuid == wo->GetDbGuid())
+                    continue;
+
+                m_map.GetPersistentState()->SaveObjectRespawnTime(GetObjectTypeId(), dbGuid.DbGuid, lastRespawnTime);
+            }
         }
     }
 }
@@ -149,6 +159,9 @@ void SpawnGroup::Spawn(bool force)
     if (!m_enabled && !force)
         return;
 
+    if (m_cooldown > m_map.GetCurrentClockTime())
+        return;
+
     // duplicated code for optimization - way fewer cond fails
     if ((m_entry.Flags & SPAWN_GROUP_DESPAWN_ON_COND_FAIL) != 0) // must be before count check
     {
@@ -168,92 +181,12 @@ void SpawnGroup::Spawn(bool force)
     if (m_entry.HasChancedSpawns && m_chosenSpawns.size() >= m_entry.MaxCount)
         return;
 
+    if (!m_entry.Squads.empty() && m_chosenSquad != -1 && m_entry.Squads[m_chosenSquad].GuidToEntry.size() == m_objects.size())
+        return;
+
     std::vector<SpawnGroupDbGuids const*> eligibleGuids;
     std::map<uint32, uint32> validEntries;
     std::map<uint32, uint32> minEntries;
-
-    for (auto& randomEntry : m_entry.RandomEntries)
-    {
-        validEntries[randomEntry.Entry] = randomEntry.MaxCount > 0 ? randomEntry.MaxCount : std::numeric_limits<uint32>::max();
-        if (randomEntry.MinCount > 0)
-            minEntries.emplace(randomEntry.Entry, randomEntry.MinCount);
-    }
-
-    for (auto& guid : m_entry.DbGuids)
-        eligibleGuids.push_back(&guid);
-
-    for (auto& data : m_objects)
-    {
-        eligibleGuids.erase(std::remove_if(eligibleGuids.begin(), eligibleGuids.end(), [dbGuid = data.first](SpawnGroupDbGuids const* entry) { return entry->DbGuid == dbGuid; }), eligibleGuids.end());
-        if (validEntries.size() > 0)
-        {
-            uint32 curCount = validEntries[data.second];
-            validEntries[data.second] = curCount > 0 ? curCount - 1 : 0;
-        }
-        if (minEntries.size() > 0)
-        {
-            auto itr = minEntries.find(data.second);
-            if (itr != minEntries.end())
-            {
-                --(*itr).second;
-                if ((*itr).second == 0)
-                    minEntries.erase(itr);
-            }
-        }
-    }
-
-    time_t now = time(nullptr);
-    for (auto itr = eligibleGuids.begin(); itr != eligibleGuids.end();)
-    {
-        if (m_map.GetPersistentState()->GetObjectRespawnTime(GetObjectTypeId(), (*itr)->DbGuid) > now)
-        {
-            if (!force)
-            {
-                if (m_entry.MaxCount == 1) // rare mob case - prevent respawn until all are off CD
-                    return;
-                itr = eligibleGuids.erase(itr);
-                continue;
-            }
-            else
-                m_map.GetPersistentState()->SaveObjectRespawnTime(GetObjectTypeId(), (*itr)->DbGuid, now);
-        }
-        ++itr;
-    }
-
-    // on tbc+ spawnmask block located here
-
-    std::shuffle(eligibleGuids.begin(), eligibleGuids.end(), *GetRandomGenerator());
-
-    for (auto itr = eligibleGuids.begin(); itr != eligibleGuids.end() && !eligibleGuids.empty() && m_objects.size() < m_entry.MaxCount;)
-    {
-        uint32 dbGuid = (*itr)->DbGuid;
-        if (m_entry.HasChancedSpawns)
-        {
-            if ((*itr)->Chance)
-            {
-                auto spawnItr = m_chosenSpawns.find(dbGuid);
-                bool spawn = true;
-                if (spawnItr == m_chosenSpawns.end())
-                {
-                    spawn = roll_chance_i((*itr)->Chance);
-                    m_chosenSpawns[dbGuid] = spawn;
-                }
-                else
-                    spawn = spawnItr->second;
-
-                if (!spawn)
-                {
-                    itr = eligibleGuids.erase(itr);
-                    continue;
-                }
-            }
-            else // filling redundant entries when a group has chanced spawns for optimization so we can stop at start
-                m_chosenSpawns[dbGuid] = true;
-        }
-        ++itr;
-    }
-
-    eligibleGuids.resize(std::min(eligibleGuids.size(), m_entry.MaxCount - m_objects.size())); // now we have final count for processing
 
     auto pickCreatureEntry = [&](const SpawnGroupDbGuids* guids) -> uint32
     {
@@ -300,27 +233,135 @@ void SpawnGroup::Spawn(bool force)
         }
     };
 
-    // pick static and random entry first in dungeons so spawn group logic can decide after
-    if (m_map.IsDungeon() && GetObjectTypeId() == TYPEID_UNIT)
+    if (m_entry.Squads.empty())
     {
-        for (auto data : eligibleGuids)
+        for (auto& guid : m_entry.DbGuids)
+            eligibleGuids.push_back(&guid);
+
+        for (auto& randomEntry : m_entry.RandomEntries)
         {
-            if (data->RandomEntry || data->OwnEntry)
+            validEntries[randomEntry.Entry] = randomEntry.MaxCount > 0 ? randomEntry.MaxCount : std::numeric_limits<uint32>::max();
+            if (randomEntry.MinCount > 0)
+                minEntries.emplace(randomEntry.Entry, randomEntry.MinCount);
+        }
+
+        for (auto& data : m_objects)
+        {
+            eligibleGuids.erase(std::remove_if(eligibleGuids.begin(), eligibleGuids.end(), [dbGuid = data.first](SpawnGroupDbGuids const* entry) { return entry->DbGuid == dbGuid; }), eligibleGuids.end());
+            if (validEntries.size() > 0)
             {
-                uint32 entry = pickCreatureEntry(data);
-                m_chosenEntries[data->DbGuid] = entry;
-                eraseEntry(entry);
+                uint32 curCount = validEntries[data.second];
+                validEntries[data.second] = curCount > 0 ? curCount - 1 : 0;
+            }
+            if (minEntries.size() > 0)
+            {
+                auto itr = minEntries.find(data.second);
+                if (itr != minEntries.end())
+                {
+                    --(*itr).second;
+                    if ((*itr).second == 0)
+                        minEntries.erase(itr);
+                }
             }
         }
-        for (auto data : eligibleGuids)
+    }
+    else // squad code
+    {
+        if (!m_map.IsDungeon() || m_chosenSquad == -1) // choose only on first spawn in dungeon
         {
-            if (!data->RandomEntry && !data->OwnEntry)
+            auto randIdx = urand(0, m_entry.Squads.size() - 1);
+            m_chosenSquad = randIdx;
+        }
+        auto& chosenSquad = m_entry.Squads[m_chosenSquad];
+        for (auto& guid : m_entry.DbGuids)
+            if (chosenSquad.GuidToEntry.find(guid.DbGuid) != chosenSquad.GuidToEntry.end())
+                eligibleGuids.push_back(&guid);
+    }
+
+    time_t now = time(nullptr);
+    for (auto itr = eligibleGuids.begin(); itr != eligibleGuids.end();)
+    {
+        if (m_map.GetPersistentState()->GetObjectRespawnTime(GetObjectTypeId(), (*itr)->DbGuid) > now)
+        {
+            if (!force)
             {
-                uint32 entry = pickCreatureEntry(data);
-                m_chosenEntries[data->DbGuid] = entry;
-                eraseEntry(entry);
+                if (m_entry.MaxCount == 1) // rare mob case - prevent respawn until all are off CD
+                    return;
+                itr = eligibleGuids.erase(itr);
+                continue;
+            }
+            else
+                m_map.GetPersistentState()->SaveObjectRespawnTime(GetObjectTypeId(), (*itr)->DbGuid, now);
+        }
+        ++itr;
+    }
+
+    // TBC has difficulty block here
+
+    if (m_entry.Squads.empty())
+    {
+        std::shuffle(eligibleGuids.begin(), eligibleGuids.end(), *GetRandomGenerator());
+
+        for (auto itr = eligibleGuids.begin(); itr != eligibleGuids.end() && !eligibleGuids.empty() && m_objects.size() < m_entry.MaxCount;)
+        {
+            uint32 dbGuid = (*itr)->DbGuid;
+            if (m_entry.HasChancedSpawns)
+            {
+                if ((*itr)->Chance)
+                {
+                    auto spawnItr = m_chosenSpawns.find(dbGuid);
+                    bool spawn = true;
+                    if (spawnItr == m_chosenSpawns.end())
+                    {
+                        spawn = roll_chance_i((*itr)->Chance);
+                        m_chosenSpawns[dbGuid] = spawn;
+                    }
+                    else
+                        spawn = spawnItr->second;
+
+                    if (!spawn)
+                    {
+                        itr = eligibleGuids.erase(itr);
+                        continue;
+                    }
+                }
+                else // filling redundant entries when a group has chanced spawns for optimization so we can stop at start
+                    m_chosenSpawns[dbGuid] = true;
+            }
+            ++itr;
+        }
+
+        eligibleGuids.resize(std::min(eligibleGuids.size(), m_entry.MaxCount - m_objects.size())); // now we have final count for processing
+
+        // pick static and random entry first in dungeons so spawn group logic can decide after
+        if (m_map.IsDungeon() && GetObjectTypeId() == TYPEID_UNIT)
+        {
+            for (auto data : eligibleGuids)
+            {
+                if (data->RandomEntry || data->OwnEntry)
+                {
+                    uint32 entry = pickCreatureEntry(data);
+                    m_chosenEntries[data->DbGuid] = entry;
+                    eraseEntry(entry);
+                }
+            }
+            for (auto data : eligibleGuids)
+            {
+                if (!data->RandomEntry && !data->OwnEntry)
+                {
+                    uint32 entry = pickCreatureEntry(data);
+                    m_chosenEntries[data->DbGuid] = entry;
+                    eraseEntry(entry);
+                }
             }
         }
+    }
+    else // squad code
+    {
+        auto& chosenSquad = m_entry.Squads[m_chosenSquad];
+        if (m_map.IsDungeon() && GetObjectTypeId() == TYPEID_UNIT)
+            for (auto& squadSpawn : chosenSquad.GuidToEntry)
+                m_chosenEntries[squadSpawn.first] = squadSpawn.second;
     }
 
     for (auto itr = eligibleGuids.begin(); itr != eligibleGuids.end(); ++itr)
@@ -332,11 +373,19 @@ void SpawnGroup::Spawn(bool force)
             entry = m_chosenEntries[dbGuid]; // only held in memory - implement saving to db if it becomes a major issue
         else
         {
-            if (GetObjectTypeId() == TYPEID_UNIT)
-                entry = pickCreatureEntry(*itr);
-            else // GOs always pick random entry
-                entry = pickGoEntry(*itr);
-            eraseEntry(entry);
+            if (m_chosenSquad == -1)
+            {
+                if (GetObjectTypeId() == TYPEID_UNIT)
+                    entry = pickCreatureEntry(*itr);
+                else // GOs always pick random entry
+                    entry = pickGoEntry(*itr);
+                eraseEntry(entry);
+            }
+            else
+            {
+                auto& chosenSquad = m_entry.Squads[m_chosenSquad];
+                entry = chosenSquad.GuidToEntry.find(dbGuid)->second; // always exists
+            }
         }   
 
         float x, y;
@@ -410,6 +459,19 @@ void SpawnGroup::RespawnIfInVicinity(Position pos, float range)
 
     for (auto& dbGuid : m_entry.DbGuids)
         m_map.GetPersistentState()->SaveObjectRespawnTime(GetObjectTypeId(), dbGuid.DbGuid, now);
+}
+
+bool SpawnGroup::IsRespawnOverriden() const
+{
+    return m_entry.RespawnOverrideMin.has_value();
+}
+
+uint32 SpawnGroup::GetRandomRespawnTime() const
+{
+    if (!m_entry.RespawnOverrideMax.has_value())
+        return *m_entry.RespawnOverrideMin;
+
+    return urand(*m_entry.RespawnOverrideMin, *m_entry.RespawnOverrideMax);
 }
 
 std::string SpawnGroup::to_string() const
