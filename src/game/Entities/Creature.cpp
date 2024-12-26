@@ -394,8 +394,28 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
     }
     else if (!data || (data->spawnTemplate->equipmentId == -1))
     {
-        // use default from the template
-        LoadEquipment(cinfo->EquipmentTemplateId, true);
+        if (cinfo->EquipmentTemplateId == 0)
+            LoadEquipment(normalInfo->EquipmentTemplateId, true); // use default from normal template if diff does not have any
+        else
+            LoadEquipment(cinfo->EquipmentTemplateId); // else use from diff template
+
+        if (GetSettings().HasFlag(CreatureStaticFlags::CAN_WIELD_LOOT)) // override from loot if any
+        {
+            PrepareBodyLootState();
+            if (m_loot != nullptr)
+            {
+                auto [mh, oh, ranged] = m_loot->GetQualifiedWeapons();
+
+                if (mh != 0)
+                    SetVirtualItem(VIRTUAL_ITEM_SLOT_0, mh);
+
+                if (oh != 0)
+                    SetVirtualItem(VIRTUAL_ITEM_SLOT_1, oh);
+
+                if (ranged != 0)
+                    SetVirtualItem(VIRTUAL_ITEM_SLOT_2, ranged);
+            }            
+        }
     }
     else if (data)
     {
@@ -1046,6 +1066,10 @@ bool Creature::CanTrainAndResetTalentsOf(Player* pPlayer) const
 
 void Creature::PrepareBodyLootState()
 {
+    // if can weild loot - already generated on spawn
+    if (GetSettings().HasFlag(CreatureStaticFlags::CAN_WIELD_LOOT) && m_loot != nullptr && m_loot->GetLootType() == LOOT_CORPSE)
+        return;
+
     // loot may already exist (pickpocket case)
     delete m_loot;
     m_loot = nullptr;

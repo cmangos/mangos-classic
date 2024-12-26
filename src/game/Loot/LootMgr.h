@@ -392,6 +392,8 @@ class Loot
         GuidSet const& GetOwnerSet() const { return m_ownerSet; }
         TimePoint const& GetCreateTime() const { return m_createTime; }
 
+        std::tuple<uint32, uint32, uint32> GetQualifiedWeapons();
+
     private:
         Loot(): m_lootTarget(nullptr), m_itemTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(),
             m_clientLootType(), m_lootMethod(), m_threshold(), m_maxEnchantSkill(0), m_haveItemOverThreshold(false),
