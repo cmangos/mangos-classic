@@ -155,6 +155,7 @@ struct WondervoltTrap : public SpellScript
 *  Quests 9121, 9122, 9123, 9378 - Naxxramas, The Dread Citadel
 **************************************************************/
 
+// 28006 - Arcane Cloaking
 struct ArcaneCloaking : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -162,9 +163,10 @@ struct ArcaneCloaking : public SpellScript
         if (effIdx == EFFECT_INDEX_0)
         {
             Unit* caster = spell->GetCaster();
+            Unit* target = spell->GetUnitTarget();
             // Naxxramas Entry Flag Effect DND
-            if (caster && caster->GetTypeId() == TYPEID_PLAYER)
-                caster->CastSpell(caster, 29296, TRIGGERED_OLD_TRIGGERED);  // Cast Naxxramas Entry Flag Trigger DND
+            if (target && target->IsPlayer())
+                caster->CastSpell(target, 29296, TRIGGERED_OLD_TRIGGERED);  // Cast Naxxramas Entry Flag Trigger DND
         }
     }
 };
