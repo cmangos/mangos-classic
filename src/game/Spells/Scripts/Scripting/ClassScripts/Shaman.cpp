@@ -55,20 +55,6 @@ struct SentryTotemAI : public TotemAI
 {
     using TotemAI::TotemAI;
 
-    void AttackStart(Unit* who) override
-    {
-        TotemAI::AttackStart(who);
-        // Sentry totem sends ping on attack
-        if (Player* owner = dynamic_cast<Player*>(m_creature->GetSpawner()))
-        {
-            WorldPacket data(MSG_MINIMAP_PING, (8 + 4 + 4));
-            data << m_creature->GetObjectGuid();
-            data << m_creature->GetPositionX();
-            data << m_creature->GetPositionY();
-            owner->SendDirectMessage(data);
-        }
-    }
-
     void RemoveAura()
     {
         if (Unit* spawner = m_creature->GetSpawner())

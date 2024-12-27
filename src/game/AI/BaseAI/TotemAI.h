@@ -33,7 +33,6 @@ class TotemAI : public CreatureEventAI
         explicit TotemAI(Creature* creature);
 
         void MoveInLineOfSight(Unit* who) override;
-        void AttackStart(Unit* who) override;
         void EnterEvadeMode() override;
         bool IsVisible(Unit* who) const override;
 
