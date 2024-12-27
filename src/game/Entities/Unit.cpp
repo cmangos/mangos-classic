@@ -1402,6 +1402,11 @@ void Unit::JustKilledCreature(Unit* killer, Creature* victim, Player* responsibl
 
     bool isPet = victim->IsPet();
 
+    /* ******************************** Prepare loot if can ************************************ */
+    // only lootable if it has loot or can drop gold, must be done before threat list is cleared
+    if (!isPet || !victim->GetSettings().HasFlag(CreatureStaticFlags::DESPAWN_INSTANTLY))
+        victim->PrepareBodyLootState(killer);
+
     /* ********************************* Set Death finally ************************************* */
     DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "SET JUST_DIED");
     victim->SetDeathState(JUST_DIED);                       // if !spiritOfRedemtionTalentReady always true for unit
@@ -1417,11 +1422,7 @@ void Unit::JustKilledCreature(Unit* killer, Creature* victim, Player* responsibl
     if (isPet)
         return;                                             // Pets might have been unsummoned at this place, do not handle them further!
 
-    /* ******************************** Prepare loot if can ************************************ */
     victim->DeleteThreatList();
-
-    // only lootable if it has loot or can drop gold
-    victim->PrepareBodyLootState();
 }
 
 void Unit::PetOwnerKilledUnit(Unit* pVictim)

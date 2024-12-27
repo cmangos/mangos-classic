@@ -713,7 +713,7 @@ class Creature : public Unit
         virtual void DeleteFromDB();                        // overwrited in Pet
         static void DeleteFromDB(uint32 lowguid, CreatureData const* data);
 
-        void PrepareBodyLootState();
+        void PrepareBodyLootState(Unit* killer);
         CreatureLootStatus GetLootStatus() const { return m_lootStatus; }
         virtual void InspectingLoot() override;
         void SetLootStatus(CreatureLootStatus status, bool forced = false);

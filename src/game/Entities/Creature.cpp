@@ -401,7 +401,7 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
 
         if (GetSettings().HasFlag(CreatureStaticFlags::CAN_WIELD_LOOT)) // override from loot if any
         {
-            PrepareBodyLootState();
+            PrepareBodyLootState(nullptr);
             if (m_loot != nullptr)
             {
                 auto [mh, oh, ranged] = m_loot->GetQualifiedWeapons();
@@ -1064,7 +1064,7 @@ bool Creature::CanTrainAndResetTalentsOf(Player* pPlayer) const
            && pPlayer->getClass() == GetCreatureInfo()->TrainerClass;
 }
 
-void Creature::PrepareBodyLootState()
+void Creature::PrepareBodyLootState(Unit* killer)
 {
     // if can weild loot - already generated on spawn
     if (GetSettings().HasFlag(CreatureStaticFlags::CAN_WIELD_LOOT) && m_loot != nullptr && m_loot->GetLootType() == LOOT_CORPSE)
@@ -1078,10 +1078,14 @@ void Creature::PrepareBodyLootState()
         SetLootStatus(CREATURE_LOOT_STATUS_LOOTED);
     else
     {
-        Player* killer = GetLootRecipient();
+        Player* looter = nullptr;
+        if (GetSettings().HasFlag(CreatureStaticFlags3::CAN_BE_MULTITAPPED))
+            looter = dynamic_cast<Player*>(killer);
+        else
+            looter = GetLootRecipient();
 
-        if (killer)
-            m_loot = new Loot(killer, this, LOOT_CORPSE);
+        if (looter || GetSettings().HasFlag(CreatureStaticFlags::CAN_WIELD_LOOT))
+            m_loot = new Loot(looter, this, LOOT_CORPSE);
     }
 
     if (m_lootStatus == CREATURE_LOOT_STATUS_LOOTED && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
@@ -1157,6 +1161,9 @@ void Creature::SetLootRecipient(Unit* unit)
         ForceValuesUpdateAtIndex(UNIT_DYNAMIC_FLAGS);       // needed to be sure tapping status is updated
         return;
     }
+
+    if (GetSettings().HasFlag(CreatureStaticFlags3::CAN_BE_MULTITAPPED))
+        return;
 
     Player* player = unit->GetBeneficiaryPlayer();
     if (!player)                                            // normal creature, no player involved

@@ -2083,7 +2083,7 @@ InventoryResult Loot::SendItem(Player* target, LootItem* lootItem, bool sendErro
 
 std::tuple<uint32, uint32, uint32> Loot::GetQualifiedWeapons()
 {
-    uint32 mh, oh, ranged;
+    uint32 mh = 0, oh = 0, ranged = 0;
     uint32 mhType = 0;
     for (auto const& itr : m_lootItems)
     {
