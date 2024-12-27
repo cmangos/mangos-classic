@@ -1404,7 +1404,7 @@ void Unit::JustKilledCreature(Unit* killer, Creature* victim, Player* responsibl
 
     /* ******************************** Prepare loot if can ************************************ */
     // only lootable if it has loot or can drop gold, must be done before threat list is cleared
-    if (!isPet || !victim->GetSettings().HasFlag(CreatureStaticFlags::DESPAWN_INSTANTLY))
+    if (!isPet && !victim->GetSettings().HasFlag(CreatureStaticFlags::DESPAWN_INSTANTLY))
         victim->PrepareBodyLootState(killer);
 
     /* ********************************* Set Death finally ************************************* */
