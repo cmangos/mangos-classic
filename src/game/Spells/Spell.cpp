@@ -695,6 +695,7 @@ void Spell::FillTargetMap()
         {
             SendCastResult(SPELL_FAILED_IMMUNE); // guessed error
             finish(false);
+            return;
         }
     }
 
@@ -707,9 +708,10 @@ void Spell::FillTargetMap()
                 for (auto& ihit : m_UniqueTargetInfo)
                 {
                     ihit.effectHitMask = 0;
-                    ihit.effectMask = 0;
+                    ihit.missCondition = SPELL_MISS_IMMUNE2;
+                    ihit.effectDuration = 0;
                 }
-                return;
+                m_duration = 0;
             }
         }
     }
