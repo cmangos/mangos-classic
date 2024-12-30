@@ -3872,8 +3872,10 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 case 18945:
                 case 19633:
                 case 20686:
+                case 22920:
                 case 23382:
                 case 25778:
+                case 30013:
                 case 30121:                                 // Forceful Howl - Plagued Deathhound
                 {
                     // Knock Away variants and derrivatives with scripted threat reduction component
