@@ -3888,6 +3888,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         case 25778:
                             pct = -25;
                             break;
+                        case 22920:                                 // Arcane Blast - Prince Tortheldrin 11486
                         case 10101:
                             pct = -100;
                             break;
