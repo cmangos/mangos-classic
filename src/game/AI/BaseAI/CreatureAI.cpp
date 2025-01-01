@@ -56,12 +56,6 @@ void CreatureAI::Reset()
 void CreatureAI::EnterCombat(Unit* enemy)
 {
     UnitAI::EnterCombat(enemy);
-    // TODO: Monitor this condition to see if it conflicts with any pets
-    if (m_creature->GetSettings().HasFlag(CreatureStaticFlags::NO_MELEE_FLEE) && !m_creature->IsRooted() && !m_creature->IsInPanic() && !m_creature->IsNonMeleeSpellCasted(false) && enemy && enemy->IsPlayerControlled())
-    {
-        DoFlee(30000);
-        SetAIOrder(ORDER_CRITTER_FLEE); // mark as critter flee for custom handling
-    }
     if (enemy && (m_creature->IsGuard() || m_creature->IsCivilian()))
     {
         // Send Zone Under Attack message to the LocalDefense and WorldDefense Channels

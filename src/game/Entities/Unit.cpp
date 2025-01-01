@@ -7919,6 +7919,13 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         if (creature->AI())
             creature->AI()->EnterCombat(enemy);
 
+        // can be overriden by spellcast on Aggro hook, hence must be done after EnterCombat hook
+        if (!creature->GetCreatedBySpellId() && creature->GetSettings().HasFlag(CreatureStaticFlags::NO_MELEE_FLEE) && !creature->IsRooted() && !creature->IsInPanic() && !creature->IsNonMeleeSpellCasted(false) && enemy && enemy->IsPlayerControlled())
+        {
+            creature->AI()->DoFlee(30000);
+            creature->AI()->SetAIOrder(ORDER_CRITTER_FLEE); // mark as critter flee for custom handling
+        }
+
         // Some bosses are set into combat with zone
         if (GetMap()->IsDungeon() && (creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_AGGRO_ZONE) && enemy && enemy->IsControlledByPlayer())
             creature->SetInCombatWithZone();
