@@ -1237,6 +1237,8 @@ bool ChatHandler::HandleGameObjectNearCommand(char* args)
             const char* name = "Random (gameobject_spawn_entry)";
             if (gInfo)
                 name = gInfo->name;
+            else if (sObjectMgr.GetRandomGameObjectEntry(guid) == 0)
+                name = "Random (spawn_group_entry)";
 
             uint32 spawnGroupId = 0;
             if (SpawnGroupEntry* groupEntry = pl->GetMap()->GetMapDataContainer().GetSpawnGroupByGuid(guid, TYPEID_GAMEOBJECT))
