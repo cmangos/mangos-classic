@@ -64,6 +64,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (20038,'spell_explosion_razorgore'),
 (21651,'spell_opening_capping'),
 (22858,'spell_retaliation_creature'),
+(22876,'spell_summon_netherwalker'),
 (23134,'spell_goblin_bomb'),
 (23226,'spell_ritual_candle_aura'),
 (24228,'spell_arlokk_vanish'),
