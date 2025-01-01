@@ -827,10 +827,6 @@ void UnitAI::TimedFleeingEnded()
 
 bool UnitAI::DoFlee(uint32 duration)
 {
-    Unit* victim = m_unit->GetVictim();
-    if (!victim)
-        return false;
-
     if (!duration)
         duration = sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_FLEE_DELAY);
 
