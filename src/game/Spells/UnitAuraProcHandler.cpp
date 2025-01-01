@@ -227,7 +227,7 @@ pAuraProcHandler AuraProcHandler[TOTAL_AURAS] =
 struct ProcTriggeredData
 {
     ProcTriggeredData(SpellProcEventEntry const* _spellProcEvent, SpellAuraHolder* _triggeredByHolder)
-        : spellProcEvent(_spellProcEvent), triggeredByHolder(_triggeredByHolder)
+        : spellProcEvent(_spellProcEvent), triggeredByHolder(_triggeredByHolder), canProc{true, true, true}
     {}
     SpellProcEventEntry const* spellProcEvent;
     SpellAuraHolder* triggeredByHolder;
