@@ -475,8 +475,8 @@ class UnitAI : public CombatActions
         virtual void JustStunnedTarget(SpellEntry const* spellInfo, Unit* victim) { JustStoppedMovementOfTarget(spellInfo, victim); }
 
         // AI selection - works in connection with IsPossessCharmType
-        virtual bool CanHandleCharm() { return false; }
-        virtual void JustGotCharmed(Unit* charmer) {}
+        virtual bool CanHandleCharm() const { return false; }
+        virtual void JustGotCharmed(Unit* /*charmer*/) {}
 
         // Movement generator responses
         virtual void TimedFleeingEnded();

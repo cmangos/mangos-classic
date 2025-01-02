@@ -35,7 +35,12 @@ int PetAI::Permissible(const Creature* creature)
     return PERMIT_BASE_NO;
 }
 
-PetAI::PetAI(Creature* creature) : CreatureAI(creature), inCombat(false)
+PetAI::PetAI(Creature* creature) : PetAI(creature, 0)
+{
+
+}
+
+PetAI::PetAI(Creature* creature, uint32 combatActions) : CreatureAI(creature, combatActions), inCombat(false)
 {
     m_followAngle = M_PI_F / 2;
     m_followDist = 1.5f;
@@ -130,12 +135,19 @@ void PetAI::EnterEvadeMode()
 
 void PetAI::UpdateAI(const uint32 diff)
 {
+    Unit* owner = m_unit->GetMaster();
+
+    if (CanHandleCharm() && !owner)
+    {
+        CreatureAI::UpdateAI(diff);
+        return;
+    }
+
     UpdateTimers(diff, m_creature->IsInCombat());
 
     Creature* creature = (m_unit->GetTypeId() == TYPEID_UNIT) ? static_cast<Creature*>(m_unit) : nullptr;
     Pet* pet = (creature && creature->IsPet()) ? static_cast<Pet*>(m_unit) : nullptr;
 
-    Unit* owner = m_unit->GetMaster();
     if (!owner)
         return;
 
@@ -177,6 +189,8 @@ void PetAI::UpdateAI(const uint32 diff)
         }
         charminfo->SetIsRetreating();
     }
+
+    ExecuteActions();
 
     // Stop here if casting spell (No melee and no movement)
     if (m_unit->IsNonMeleeSpellCasted(false))
@@ -438,6 +452,12 @@ void PetAI::JustDied(Unit* killer)
 void PetAI::AttackedBy(Unit* attacker)
 {
     CharmInfo* charminfo = m_unit->GetCharmInfo();
+    if (CanHandleCharm() && !charminfo)
+    {
+        CreatureAI::AttackedBy(attacker);
+        return;
+    }
+
     MANGOS_ASSERT(charminfo);
 
     // when attacked, fight back if no victim unless we have a charm state set to passive
