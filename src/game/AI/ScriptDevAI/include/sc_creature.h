@@ -67,7 +67,7 @@ struct ScriptedAI : public CreatureAI
         void EnterCombat(Unit* enemy) override;
 
         // Called at stoping attack by any attacker
-        void EnterEvadeMode() override;
+        // void EnterEvadeMode() override;
 
         // Called when reached home after MoveTargetHome (in evade)
         // void JustReachedHome() override {}
@@ -116,7 +116,7 @@ struct ScriptedAI : public CreatureAI
         // void AttackedBy(Unit* pAttacker) override { UnitAI::AttackedBy(pAttacker); }
 
         // Called when creature is respawned (for reseting variables)
-        void JustRespawned() override;
+        // void JustRespawned() override;
 
         // Called at waypoint reached or point movement finished
         // void MovementInform(uint32 /*movementType*/, uint32 /*data*/) override {}

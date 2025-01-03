@@ -40,31 +40,6 @@ void ScriptedAI::EnterCombat(Unit* enemy)
         Aggro(enemy);
 }
 
-/**
- * This function cleans up the combat state if the creature evades
- * It will:
- * - Drop Auras
- * - Drop all threat
- * - Stop combat
- * - Move the creature home
- * - Clear tagging for loot
- * - call Reset()
- */
-void ScriptedAI::EnterEvadeMode()
-{
-    CreatureAI::EnterEvadeMode();
-
-    ResetTimersOnEvade();
-    Reset();
-}
-
-/// This function calls Reset() to reset variables as expected
-void ScriptedAI::JustRespawned()
-{
-    ResetAllTimers();
-    Reset();
-}
-
 void ScriptedAI::DoStartMovement(Unit* victim)
 {
     if (victim)

@@ -34,10 +34,12 @@ class CreatureAI : public UnitAI
         virtual void OnRemoveFromWorld() {}
 
         virtual void EnterCombat(Unit* enemy) override;
+        virtual void EnterEvadeMode() override;
         virtual void AttackStart(Unit* who) override;
         virtual void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType damageType, SpellEntry const* spellInfo) override;
         virtual void JustPreventedDeath(Unit* /*attacker*/) {}
         virtual void JustReachedHome() override;
+        virtual void JustRespawned() override;
 
         void DoFakeDeath(uint32 spellId = 0);
         void SetDeathPrevention(bool state);

@@ -48,7 +48,6 @@ CreatureAI::CreatureAI(Creature* creature, uint32 combatActions) :
 
 void CreatureAI::Reset()
 {
-
     m_currentRangedMode = m_rangedMode;
     m_attackDistance = m_chaseDistance;
 }
@@ -62,6 +61,13 @@ void CreatureAI::EnterCombat(Unit* enemy)
         if (Player* pKiller = enemy->GetBeneficiaryPlayer())
             m_creature->SendZoneUnderAttackMessage(pKiller);
     }
+}
+
+void CreatureAI::EnterEvadeMode()
+{
+    UnitAI::EnterEvadeMode();
+    ResetTimersOnEvade();
+    Reset();
 }
 
 void CreatureAI::AttackStart(Unit* who)
@@ -113,6 +119,12 @@ void CreatureAI::JustReachedHome()
     if (m_dismountOnAggro)
         if (CreatureInfo const* mountInfo = m_creature->GetMountInfo())
             m_creature->Mount(Creature::ChooseDisplayId(mountInfo));
+}
+
+void CreatureAI::JustRespawned()
+{
+    ResetAllTimers();
+    Reset();
 }
 
 void CreatureAI::SetDeathPrevention(bool state)

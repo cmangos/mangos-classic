@@ -43,6 +43,7 @@ class PetAI : public CreatureAI
 
         void OnUnsummon() override;
         void JustDied(Unit* killer) override;
+        void JustRespawned() override;
 
     protected:
         std::string GetAIName() override { return "PetAI"; }

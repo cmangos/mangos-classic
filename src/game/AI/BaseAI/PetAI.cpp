@@ -120,6 +120,13 @@ void PetAI::AttackStart(Unit* who)
 
 void PetAI::EnterEvadeMode()
 {
+    CharmInfo* charminfo = m_unit->GetCharmInfo();
+    if (CanHandleCharm() && !charminfo)
+    {
+        CreatureAI::EnterEvadeMode();
+        return;
+    }
+
     // check for "chain pull" scenario - pet has already been sent to attack while exiting from an earlier combat
     // avoid AttackStop in CombatStop so that pet doesn't lose current target and return to follow owner in this case
     if (m_unit->GetTarget() && m_unit->GetVictim())
@@ -447,6 +454,15 @@ void PetAI::JustDied(Unit* killer)
 {
     CreatureAI::JustDied(killer);
     RelinquishFollow(m_unit->GetOwnerGuid());
+}
+
+void PetAI::JustRespawned()
+{
+    if (CanHandleCharm())
+    {
+        CreatureAI::JustRespawned();
+        return;
+    }
 }
 
 void PetAI::AttackedBy(Unit* attacker)
