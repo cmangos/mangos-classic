@@ -180,7 +180,7 @@ void Unit::UpdateMaxHealth()
     value += GetModifierValue(unitMod, TOTAL_VALUE) + GetHealthBonusFromStamina();
     value *= GetModifierValue(unitMod, TOTAL_PCT);
 
-    SetMaxHealth((uint32)std::max(value, 1.f));
+    SetMaxHealth(uint32(std::ceil(std::max(value, 1.f))));
 }
 
 void Unit::UpdateMaxPower(Powers power)
