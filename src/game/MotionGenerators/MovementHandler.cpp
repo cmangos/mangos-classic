@@ -214,7 +214,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
         m_anticheat->Teleport({ loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation });
 
-        GetPlayer()->SendInitialPacketsAfterAddToMap();
+        GetPlayer()->SendInitialPacketsAfterAddToMap(false);
 
         // flight fast teleport case
         if (_player->InBattleGround())
