@@ -35,7 +35,7 @@
 
 // Uncomment the following line to turn off G3D::System memory
 // allocation and use the operating system's malloc.
-//#define NO_BUFFERPOOL
+#define NO_BUFFERPOOL
 
 #if defined(__i386__) || defined(__x86_64__) || defined(G3D_WIN32)
 #    define G3D_NOT_OSX_PPC
