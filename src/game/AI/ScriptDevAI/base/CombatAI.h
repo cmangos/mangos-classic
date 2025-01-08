@@ -44,6 +44,7 @@ class CombatAI : public ScriptedAI
             AddOnKillText(fargs...);
         }
         void AddOnKillSound(int32 soundId);
+        void ClearOnKillReactions();
         void KilledUnit(Unit* /*victim*/) override;
 
         // virtual void ExecuteAction(uint32 action) {}

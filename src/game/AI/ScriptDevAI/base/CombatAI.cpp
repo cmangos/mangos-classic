@@ -86,6 +86,11 @@ void CombatAI::AddOnKillSound(int32 soundId)
     m_onDeathReactions.emplace_back(soundId, true);
 }
 
+void CombatAI::ClearOnKillReactions()
+{
+    m_onDeathReactions.clear();
+}
+
 void CombatAI::KilledUnit(Unit* victim)
 {
     if (!m_creature->IsAlive() || !victim->IsPlayer())
