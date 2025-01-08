@@ -133,7 +133,7 @@ uint32 SpawnGroup::GetEligibleEntry(std::map<uint32, uint32>& existingEntries, s
         {
             if (existingEntries[explicitly->Entry] > 0)
             {
-                if (roll < static_cast<int>(explicitly->Chance))
+                if (roll <= static_cast<int>(explicitly->Chance))
                     return explicitly->Entry;
 
                 roll -= int32(explicitly->Chance);
