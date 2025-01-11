@@ -949,6 +949,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Page Texts...");
     sObjectMgr.LoadPageTexts();
 
+    sLog.outString("Loading String Ids...");
+    sScriptMgr.LoadStringIds(); // must be before LoadCreatureSpawnDataTemplates
+
     sLog.outString("Loading Game Object Templates...");     // must be after LoadPageTexts
     std::vector<uint32> transportDisplayIds = sObjectMgr.LoadGameobjectInfo();
     MMAP::MMapFactory::createOrGetMMapManager()->loadAllGameObjectModels(GetDataPath(), transportDisplayIds);
@@ -1007,9 +1010,6 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Creature Stats...");
     sObjectMgr.LoadCreatureClassLvlStats();
-
-    sLog.outString("Loading String Ids...");
-    sScriptMgr.LoadStringIds(); // must be before LoadCreatureSpawnDataTemplates
 
     sLog.outString("Loading Creature templates...");
     sObjectMgr.LoadCreatureTemplates();
