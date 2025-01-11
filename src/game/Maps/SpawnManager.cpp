@@ -58,7 +58,8 @@ void SpawnManager::Initialize()
             if (m_map.GetPersistentState()->GetCreatureRespawnTime(dbGuid) < now)
             {
                 auto data = sObjectMgr.GetCreatureData(dbGuid);
-                m_map.GetPersistentState()->AddCreatureToGrid(dbGuid, data);
+                if (m_map.GetCreatureLinkingHolder()->CanSpawn(dbGuid, &m_map, nullptr, 0.f, 0.f)) // copy of Map::CanSpawn
+                    m_map.GetPersistentState()->AddCreatureToGrid(dbGuid, data);
             }
             else
                 AddCreature(dbGuid);
@@ -72,7 +73,8 @@ void SpawnManager::Initialize()
             if (m_map.GetPersistentState()->GetGORespawnTime(dbGuid) < now)
             {
                 auto data = sObjectMgr.GetGOData(dbGuid);
-                m_map.GetPersistentState()->AddGameobjectToGrid(dbGuid, data);
+                if ((data->spawnMask & (1 << m_map.GetDifficulty())) != 0) // copy of Map::CanSpawn
+                    m_map.GetPersistentState()->AddGameobjectToGrid(dbGuid, data);
             }
             else
                 AddGameObject(dbGuid);
@@ -239,14 +241,17 @@ bool SpawnManager::IsEventGuid(uint32 dbguid, HighGuid high) const
 
 void SpawnManager::RespawnAll()
 {
-    for (auto itr = m_spawns.begin(); itr != m_spawns.end();)
+    for (auto itr = m_spawns.begin(); itr != m_spawns.end(); )
     {
         auto& spawnInfo = *itr;
         if (spawnInfo.GetHighGuid() == HIGHGUID_GAMEOBJECT)
             m_map.GetPersistentState()->SaveGORespawnTime(spawnInfo.GetDbGuid(), 0);
         if (spawnInfo.GetHighGuid() == HIGHGUID_UNIT)
             m_map.GetPersistentState()->SaveCreatureRespawnTime(spawnInfo.GetDbGuid(), 0);
-        spawnInfo.ConstructForMap(m_map);
+        if (spawnInfo.ConstructForMap(m_map))
+            itr = m_spawns.erase(itr);
+        else
+            ++itr;
     }
 }
 
