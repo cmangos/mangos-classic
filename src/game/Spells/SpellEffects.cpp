@@ -281,6 +281,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                     // percent from health with min
                     case 25599:                             // Thundercrash
                     {
+                        m_caster->getThreatManager().modifyThreatPercent(unitTarget, 100);
                         damage = unitTarget->GetHealth() / 2;
                         if (damage < 200)
                             damage = 200;
