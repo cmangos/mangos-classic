@@ -83,18 +83,18 @@ struct SortingParameters
 {
     uint32 m_uiEntry;
     int32 m_uiYellEntry;
-    float m_fSearchDist;
+    std::string m_stringId;
 };
 
 static const SortingParameters aArmySortingParameters[MAX_ARMY_WAVES] =
 {
-    {NPC_CAPTAIN_QEEZ,   0,         20.0f},
-    {NPC_CAPTAIN_TUUBID, 0,         22.0f},
-    {NPC_CAPTAIN_DRENN,  SAY_WAVE3, 22.0f},
-    {NPC_CAPTAIN_XURREM, SAY_WAVE4, 22.0f},
-    {NPC_MAJOR_YEGGETH,  SAY_WAVE5, 20.0f},
-    {NPC_MAJOR_PAKKON,   SAY_WAVE6, 21.0f},
-    {NPC_COLONEL_ZERRAN, SAY_WAVE7, 17.0f},
+    {NPC_CAPTAIN_QEEZ,   0,         "AQ20_QEEZ"},
+    {NPC_CAPTAIN_TUUBID, 0,         "AQ20_TUUBID"},
+    {NPC_CAPTAIN_DRENN,  SAY_WAVE3, "AQ20_DRENN"},
+    {NPC_CAPTAIN_XURREM, SAY_WAVE4, "AQ20_XURREM"},
+    {NPC_MAJOR_YEGGETH,  SAY_WAVE5, "AQ20_YEGGETH"},
+    {NPC_MAJOR_PAKKON,   SAY_WAVE6, "AQ20_PAKKON"},
+    {NPC_COLONEL_ZERRAN, SAY_WAVE7, "AQ20_ZERRAN"},
 };
 
 class instance_ruins_of_ahnqiraj : public ScriptedInstance
@@ -105,21 +105,23 @@ class instance_ruins_of_ahnqiraj : public ScriptedInstance
 
         void Initialize() override;
 
-        // bool IsEncounterInProgress() const override;              // not active in AQ20
+        bool IsEncounterInProgress() const override;              // not active in AQ20
 
-        void OnCreatureCreate(Creature* pCreature) override;
+        void OnCreatureCreate(Creature* creature) override;
         void OnObjectCreate(GameObject* go) override;
-        void OnPlayerEnter(Player* pPlayer) override;
+        void OnPlayerEnter(Player* player) override;
 
-        void OnCreatureEnterCombat(Creature* pCreature) override;
-        void OnCreatureEvade(Creature* pCreature) override;
-        void OnCreatureDeath(Creature* pCreature) override;
+        void OnCreatureEnterCombat(Creature* creature) override;
+        void OnCreatureEvade(Creature* creature) override;
+        void OnCreatureDeath(Creature* creature) override;
         void OnCreatureRespawn(Creature* creature) override;
 
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
+        void OnCreatureGroupDespawn(CreatureGroup* group, Creature* creature) override;
 
-        void GetKaldoreiGuidList(GuidList& lList) const { lList = m_lKaldoreiGuidList; }
+        void SetData(uint32 type, uint32 data) override;
+        uint32 GetData(uint32 type) const override;
+
+        void GetKaldoreiGuidList(GuidList& lList) const { lList = m_kaldoreiGuidList; }
 
         void Update(const uint32 diff) override;
 
@@ -131,13 +133,12 @@ class instance_ruins_of_ahnqiraj : public ScriptedInstance
         void DoSortArmyWaves();
         void DoSendNextArmyWave();
 
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
+        uint32 m_encounter[MAX_ENCOUNTER];
         std::string m_strInstData;
 
-        GuidList m_lKaldoreiGuidList;
-        GuidSet m_sArmyWavesGuids[MAX_ARMY_WAVES];
+        GuidList m_kaldoreiGuidList;
 
-        uint32 m_uiArmyDelayTimer;
-        uint8 m_uiCurrentArmyWave;
+        uint32 m_armyDelayTimer;
+        uint8 m_currentArmyWave;
 };
 #endif

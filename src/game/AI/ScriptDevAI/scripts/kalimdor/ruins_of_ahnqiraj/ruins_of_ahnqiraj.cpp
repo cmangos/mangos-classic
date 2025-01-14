@@ -26,33 +26,43 @@ EndScriptData
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "ruins_of_ahnqiraj.h"
 
-instance_ruins_of_ahnqiraj::instance_ruins_of_ahnqiraj(Map* pMap) : ScriptedInstance(pMap),
-    m_uiArmyDelayTimer(0),
-    m_uiCurrentArmyWave(0)
+instance_ruins_of_ahnqiraj::instance_ruins_of_ahnqiraj(Map* map) : ScriptedInstance(map),
+    m_armyDelayTimer(0),
+    m_currentArmyWave(0)
 {
     Initialize();
 }
 
 void instance_ruins_of_ahnqiraj::Initialize()
 {
-    memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+    memset(&m_encounter, 0, sizeof(m_encounter));
 }
 
-void instance_ruins_of_ahnqiraj::OnPlayerEnter(Player* /*pPlayer*/)
+bool instance_ruins_of_ahnqiraj::IsEncounterInProgress() const
+{
+    for (uint32 i : m_encounter)
+    {
+        if (i == IN_PROGRESS)
+            return true;
+    }
+    return false;
+}
+
+void instance_ruins_of_ahnqiraj::OnPlayerEnter(Player* /*player*/)
 {
     // Spawn andorov if necessary
-    if (m_auiEncounter[TYPE_KURINNAXX] == DONE)
+    if (GetData(TYPE_KURINNAXX) == DONE)
         DoSpawnAndorovIfCan();
 }
 
-void instance_ruins_of_ahnqiraj::OnCreatureCreate(Creature* pCreature)
+void instance_ruins_of_ahnqiraj::OnCreatureCreate(Creature* creature)
 {
-    switch (pCreature->GetEntry())
+    switch (creature->GetEntry())
     {
         case NPC_OSSIRIAN_TRIGGER:
         {
-            GuidVector& vector = m_npcEntryGuidCollection[pCreature->GetEntry()];
-            vector.push_back(pCreature->GetObjectGuid());
+            GuidVector& vector = m_npcEntryGuidCollection[creature->GetEntry()];
+            vector.push_back(creature->GetObjectGuid());
             std::sort(vector.begin(), vector.end(), [&](ObjectGuid const& a, ObjectGuid const& b) -> bool
             {
                 return a.GetCounter() < b.GetCounter();
@@ -70,10 +80,10 @@ void instance_ruins_of_ahnqiraj::OnCreatureCreate(Creature* pCreature)
         case NPC_CAPTAIN_DRENN:
         case NPC_CAPTAIN_TUUBID:
         case NPC_CAPTAIN_QEEZ:
-            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
             break;
         case NPC_KALDOREI_ELITE:
-            m_lKaldoreiGuidList.push_back(pCreature->GetObjectGuid());
+            m_kaldoreiGuidList.push_back(creature->GetObjectGuid());
             break;
     }
 }
@@ -84,9 +94,9 @@ void instance_ruins_of_ahnqiraj::OnObjectCreate(GameObject* go)
         m_goEntryGuidCollection[go->GetEntry()].push_back(go->GetObjectGuid());
 }
 
-void instance_ruins_of_ahnqiraj::OnCreatureEnterCombat(Creature* pCreature)
+void instance_ruins_of_ahnqiraj::OnCreatureEnterCombat(Creature* creature)
 {
-    switch (pCreature->GetEntry())
+    switch (creature->GetEntry())
     {
         case NPC_KURINNAXX: SetData(TYPE_KURINNAXX, IN_PROGRESS); break;
         case NPC_MOAM:      SetData(TYPE_MOAM, IN_PROGRESS);      break;
@@ -96,9 +106,9 @@ void instance_ruins_of_ahnqiraj::OnCreatureEnterCombat(Creature* pCreature)
     }
 }
 
-void instance_ruins_of_ahnqiraj::OnCreatureEvade(Creature* pCreature)
+void instance_ruins_of_ahnqiraj::OnCreatureEvade(Creature* creature)
 {
-    switch (pCreature->GetEntry())
+    switch (creature->GetEntry())
     {
         case NPC_KURINNAXX: SetData(TYPE_KURINNAXX, FAIL); break;
         case NPC_MOAM:      SetData(TYPE_MOAM, FAIL);      break;
@@ -107,7 +117,7 @@ void instance_ruins_of_ahnqiraj::OnCreatureEvade(Creature* pCreature)
         case NPC_OSSIRIAN:  SetData(TYPE_OSSIRIAN, FAIL);  break;
         case NPC_RAJAXX:
             // Rajaxx yells on evade
-            // DoScriptText(SAY_DEAGGRO, pCreature); - unconfirmed
+            // DoScriptText(SAY_DEAGGRO, creature); - unconfirmed
         // no break;
         case NPC_COLONEL_ZERRAN:
         case NPC_MAJOR_PAKKON:
@@ -121,9 +131,9 @@ void instance_ruins_of_ahnqiraj::OnCreatureEvade(Creature* pCreature)
     }
 }
 
-void instance_ruins_of_ahnqiraj::OnCreatureDeath(Creature* pCreature)
+void instance_ruins_of_ahnqiraj::OnCreatureDeath(Creature* creature)
 {
-    switch (pCreature->GetEntry())
+    switch (creature->GetEntry())
     {
         case NPC_KURINNAXX: SetData(TYPE_KURINNAXX, DONE); break;
         case NPC_RAJAXX:    SetData(TYPE_RAJAXX, DONE);    break;
@@ -145,15 +155,7 @@ void instance_ruins_of_ahnqiraj::OnCreatureDeath(Creature* pCreature)
             if (GetData(TYPE_RAJAXX) != IN_PROGRESS)
                 return;
 
-            // Check if the dead creature belongs to the current wave
-            if (m_sArmyWavesGuids[m_uiCurrentArmyWave - 1].find(pCreature->GetObjectGuid()) != m_sArmyWavesGuids[m_uiCurrentArmyWave - 1].end())
-            {
-                m_sArmyWavesGuids[m_uiCurrentArmyWave - 1].erase(pCreature->GetObjectGuid());
 
-                // If all the soldiers from the current wave are dead, then send the next one
-                if (m_sArmyWavesGuids[m_uiCurrentArmyWave - 1].empty())
-                    DoSendNextArmyWave();
-            }
             break;
         }
     }
@@ -178,25 +180,37 @@ void instance_ruins_of_ahnqiraj::OnCreatureRespawn(Creature* creature)
     }
 }
 
-void instance_ruins_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
+void instance_ruins_of_ahnqiraj::OnCreatureGroupDespawn(CreatureGroup* group, Creature* creature)
 {
-    switch (uiType)
+    // last wave makes rajaxx attack immediately
+    if (group->GetGroupEntry().StringId == instance->GetMapDataContainer().GetStringId("AQ20_ZERRAN"))
+    {
+        if (GetData(TYPE_RAJAXX) != IN_PROGRESS)
+            return;
+
+        m_armyDelayTimer = 1;
+    }
+}
+
+void instance_ruins_of_ahnqiraj::SetData(uint32 type, uint32 data)
+{
+    switch (type)
     {
         case TYPE_KURINNAXX:
-            if (uiData == DONE)
+            if (data == DONE)
             {
                 DoSpawnAndorovIfCan();
                 // Yell after kurinnaxx
                 if (Creature* ossirian = GetSingleCreatureFromStorage(NPC_OSSIRIAN))
                     DoScriptText(SAY_OSSIRIAN_INTRO, ossirian); // targets kurinnaxx in sniff
             }
-            m_auiEncounter[uiType] = uiData;
+            m_encounter[type] = data;
             break;
         case TYPE_RAJAXX:
-            m_auiEncounter[uiType] = uiData;
-            if (uiData == IN_PROGRESS)
+            m_encounter[type] = data;
+            if (data == IN_PROGRESS)
                 DoSortArmyWaves();
-            if (uiData == DONE)
+            if (data == DONE)
             {
                 if (Creature* andorov = GetSingleCreatureFromStorage(NPC_GENERAL_ANDOROV))
                     if (andorov->IsAlive())
@@ -207,7 +221,7 @@ void instance_ruins_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
         case TYPE_BURU:
         case TYPE_AYAMISS:
         case TYPE_OSSIRIAN:
-            if (uiType == FAIL)
+            if (type == FAIL)
             {
                 GuidVector crystals;
                 GetGameObjectGuidVectorFromStorage(GO_OSSIRIAN_CRYSTAL, crystals);
@@ -221,17 +235,17 @@ void instance_ruins_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
                 }
                 m_goEntryGuidCollection[GO_OSSIRIAN_CRYSTAL].resize(1); // keeps first
             }
-            m_auiEncounter[uiType] = uiData;
+            m_encounter[type] = data;
             break;
     }
 
-    if (uiData == DONE)
+    if (data == DONE)
     {
         OUT_SAVE_INST_DATA;
 
         std::ostringstream saveStream;
-        saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2]
-                   << " " << m_auiEncounter[3] << " " << m_auiEncounter[4] << " " << m_auiEncounter[5];
+        saveStream << m_encounter[0] << " " << m_encounter[1] << " " << m_encounter[2]
+                   << " " << m_encounter[3] << " " << m_encounter[4] << " " << m_encounter[5];
 
         m_strInstData = saveStream.str();
 
@@ -240,10 +254,10 @@ void instance_ruins_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
     }
 }
 
-uint32 instance_ruins_of_ahnqiraj::GetData(uint32 uiType) const
+uint32 instance_ruins_of_ahnqiraj::GetData(uint32 type) const
 {
-    if (uiType < MAX_ENCOUNTER)
-        return m_auiEncounter[uiType];
+    if (type < MAX_ENCOUNTER)
+        return m_encounter[type];
 
     return 0;
 }
@@ -253,12 +267,12 @@ void instance_ruins_of_ahnqiraj::DoSpawnAndorovIfCan()
     if (GetSingleCreatureFromStorage(NPC_GENERAL_ANDOROV))
         return;
 
-    Player* pPlayer = GetPlayerInMap();
-    if (!pPlayer)
+    Player* player = GetPlayerInMap();
+    if (!player)
         return;
 
     for (const auto& aAndorovSpawnLoc : aAndorovSpawnLocs)
-        pPlayer->SummonCreature(aAndorovSpawnLoc.m_uiEntry, aAndorovSpawnLoc.m_fX, aAndorovSpawnLoc.m_fY, aAndorovSpawnLoc.m_fZ, aAndorovSpawnLoc.m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
+        player->SummonCreature(aAndorovSpawnLoc.m_uiEntry, aAndorovSpawnLoc.m_fX, aAndorovSpawnLoc.m_fY, aAndorovSpawnLoc.m_fZ, aAndorovSpawnLoc.m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
 }
 
 void instance_ruins_of_ahnqiraj::Load(const char* chrIn)
@@ -273,10 +287,10 @@ void instance_ruins_of_ahnqiraj::Load(const char* chrIn)
 
     std::istringstream loadStream(chrIn);
 
-    loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2]
-               >> m_auiEncounter[3] >> m_auiEncounter[4] >> m_auiEncounter[5];
+    loadStream >> m_encounter[0] >> m_encounter[1] >> m_encounter[2]
+               >> m_encounter[3] >> m_encounter[4] >> m_encounter[5];
 
-    for (uint32& i : m_auiEncounter)
+    for (uint32& i : m_encounter)
     {
         if (i == IN_PROGRESS)
             i = NOT_STARTED;
@@ -285,53 +299,27 @@ void instance_ruins_of_ahnqiraj::Load(const char* chrIn)
     OUT_LOAD_INST_DATA_COMPLETE;
 }
 
-void instance_ruins_of_ahnqiraj::Update(uint32 uiDiff)
+void instance_ruins_of_ahnqiraj::Update(uint32 diff)
 {
     if (GetData(TYPE_RAJAXX) == IN_PROGRESS)
     {
-        if (m_uiArmyDelayTimer)
+        if (m_armyDelayTimer)
         {
-            if (m_uiArmyDelayTimer <= uiDiff)
+            if (m_armyDelayTimer <= diff)
             {
                 DoSendNextArmyWave();
-                m_uiArmyDelayTimer = 2 * MINUTE * IN_MILLISECONDS;
+                m_armyDelayTimer = 3 * MINUTE * IN_MILLISECONDS;
             }
             else
-                m_uiArmyDelayTimer -= uiDiff;
+                m_armyDelayTimer -= diff;
         }
     }
 }
 
 void instance_ruins_of_ahnqiraj::DoSortArmyWaves()
 {
-    CreatureList lCreatureList;
-
-    // Sort the 7 army waves
-    // We need to use gridsearcher for this, because coords search is too complicated here
-    for (uint8 i = 0; i < MAX_ARMY_WAVES; ++i)
-    {
-        // Clear all the army waves
-        m_sArmyWavesGuids[i].clear();
-        lCreatureList.clear();
-
-        if (Creature* pTemp = GetSingleCreatureFromStorage(aArmySortingParameters[i].m_uiEntry))
-        {
-            GetCreatureListWithEntryInGrid(lCreatureList, pTemp, NPC_QIRAJI_WARRIOR, aArmySortingParameters[i].m_fSearchDist);
-            GetCreatureListWithEntryInGrid(lCreatureList, pTemp, NPC_SWARMGUARD_NEEDLER, aArmySortingParameters[i].m_fSearchDist);
-
-            for (CreatureList::const_iterator itr = lCreatureList.begin(); itr != lCreatureList.end(); ++itr)
-            {
-                if ((*itr)->IsAlive())
-                    m_sArmyWavesGuids[i].insert((*itr)->GetObjectGuid());
-            }
-
-            if (pTemp->IsAlive())
-                m_sArmyWavesGuids[i].insert(pTemp->GetObjectGuid());
-        }
-    }
-
     // send the first wave
-    m_uiCurrentArmyWave = 0;
+    m_currentArmyWave = 0;
     DoSendNextArmyWave();
 }
 
@@ -342,64 +330,53 @@ void instance_ruins_of_ahnqiraj::DoSendNextArmyWave()
         return;
 
     // The last wave is General Rajaxx itself
-    if (m_uiCurrentArmyWave == MAX_ARMY_WAVES)
+    if (m_currentArmyWave == MAX_ARMY_WAVES)
     {
-        if (Creature* pRajaxx = GetSingleCreatureFromStorage(NPC_RAJAXX))
+        if (Creature* rajaxx = GetSingleCreatureFromStorage(NPC_RAJAXX))
         {
-            DoScriptText(SAY_INTRO, pRajaxx);
-            pRajaxx->SetInCombatWithZone();
-            pRajaxx->AI()->AttackClosestEnemy();
+            DoScriptText(SAY_INTRO, rajaxx);
+            rajaxx->SetInCombatWithZone();
+            rajaxx->AI()->AttackClosestEnemy();
         }
-        m_uiArmyDelayTimer = 0;
+        m_armyDelayTimer = 0;
     }
     else
     {
-        // Increase the wave id if some are already dead
-        while (m_uiCurrentArmyWave < MAX_ARMY_WAVES && m_sArmyWavesGuids[m_uiCurrentArmyWave].empty())
-            ++m_uiCurrentArmyWave;
-
-        if (m_uiCurrentArmyWave == MAX_ARMY_WAVES)
+        if (m_currentArmyWave == MAX_ARMY_WAVES)
         {
             script_error_log("Instance Ruins of Ahn'Qiraj: ERROR Something unexpected happened. Please report to SD2 team.");
             return;
         }
 
-        float fX, fY, fZ;
-        for (auto itr : m_sArmyWavesGuids[m_uiCurrentArmyWave])
+        auto waveInfo = aArmySortingParameters[m_currentArmyWave];
+        auto waveMobs = instance->GetCreatures(waveInfo.m_stringId);
+        if (waveMobs)
         {
-            if (Creature* pTemp = instance->GetCreature(itr))
+            for (Creature* member : *waveMobs)
             {
-                if (!pTemp->IsAlive())
-                    continue;
-
-                pTemp->SetWalk(false);
-                pTemp->GetRandomPoint(aAndorovMoveLocs[4].m_fX, aAndorovMoveLocs[4].m_fY, aAndorovMoveLocs[4].m_fZ, 10.0f, fX, fY, fZ);
-                pTemp->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
+                member->SetWalk(false);
+                member->SetInCombatWithZone();
+                member->AI()->AttackClosestEnemy();
             }
         }
 
         // Yell on each wave (except the first 2)
-        if (aArmySortingParameters[m_uiCurrentArmyWave].m_uiYellEntry)
+        if (aArmySortingParameters[m_currentArmyWave].m_uiYellEntry)
         {
             if (Creature* pRajaxx = GetSingleCreatureFromStorage(NPC_RAJAXX))
-                DoScriptText(aArmySortingParameters[m_uiCurrentArmyWave].m_uiYellEntry, pRajaxx);
+                DoScriptText(aArmySortingParameters[m_currentArmyWave].m_uiYellEntry, pRajaxx);
         }
         // on wowwiki it states that there were 3 min between the waves, but this was reduced in later patches
-        m_uiArmyDelayTimer = 2 * MINUTE * IN_MILLISECONDS;
+        m_armyDelayTimer = 3 * MINUTE * IN_MILLISECONDS;
     }
 
-    ++m_uiCurrentArmyWave;
-}
-
-InstanceData* GetInstanceData_instance_ruins_of_ahnqiraj(Map* pMap)
-{
-    return new instance_ruins_of_ahnqiraj(pMap);
+    ++m_currentArmyWave;
 }
 
 void AddSC_instance_ruins_of_ahnqiraj()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_ruins_of_ahnqiraj";
-    pNewScript->GetInstanceData = &GetInstanceData_instance_ruins_of_ahnqiraj;
+    pNewScript->GetInstanceData = &GetNewInstanceScript<instance_ruins_of_ahnqiraj>;
     pNewScript->RegisterSelf();
 }
