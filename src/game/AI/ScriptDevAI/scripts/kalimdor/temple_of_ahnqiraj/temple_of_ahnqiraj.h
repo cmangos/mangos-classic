@@ -97,7 +97,7 @@ static const uint32 qiraji_mount_auras[] = { 25953, 26054, 26055, 26056 };
 class instance_temple_of_ahnqiraj : public ScriptedInstance, private DialogueHelper
 {
     public:
-        instance_temple_of_ahnqiraj(Map* pMap);
+        instance_temple_of_ahnqiraj(Map* map);
         ~instance_temple_of_ahnqiraj() {}
 
         void Initialize() override;
@@ -106,23 +106,23 @@ class instance_temple_of_ahnqiraj : public ScriptedInstance, private DialogueHel
 
         void OnCreatureCreate(Creature* creature) override;
         void OnCreatureDeath(Creature* creature) override;
-        void OnObjectCreate(GameObject* pGo) override;
+        void OnObjectCreate(GameObject* go) override;
         void OnCreatureRespawn(Creature* creature) override;
 
         void OnPlayerLeave(Player* pPlayer) override;
 
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
+        void SetData(uint32 type, uint32 data) override;
+        uint32 GetData(uint32 type) const override;
 
         void DoHandleTempleAreaTrigger(uint32 triggerId, Player* player);
 
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
 
-        void Update(uint32 uiDiff) override;
+        void Update(uint32 diff) override;
 
     private:
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
+        uint32 m_encounter[MAX_ENCOUNTER];
         std::string m_strInstData;
 
         uint8 m_uiBugTrioDeathCount;

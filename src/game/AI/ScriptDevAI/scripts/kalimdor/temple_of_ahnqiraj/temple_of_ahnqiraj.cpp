@@ -39,25 +39,24 @@ static const DialogueEntry aIntroDialogue[] =
     {0, 0, 0}
 };
 
-instance_temple_of_ahnqiraj::instance_temple_of_ahnqiraj(Map* pMap) : ScriptedInstance(pMap),
+instance_temple_of_ahnqiraj::instance_temple_of_ahnqiraj(Map* map) : ScriptedInstance(map), DialogueHelper(aIntroDialogue),
     m_uiBugTrioDeathCount(0),
     m_uiCthunWhisperTimer(90000),
-    m_uiSkeramProphecyTimer(5 * MINUTE * IN_MILLISECONDS),
-    DialogueHelper(aIntroDialogue)
+    m_uiSkeramProphecyTimer(5 * MINUTE * IN_MILLISECONDS)
 {
     Initialize();
 };
 
 void instance_temple_of_ahnqiraj::Initialize()
 {
-    memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+    memset(&m_encounter, 0, sizeof(m_encounter));
 
     InitializeDialogueHelper(this);
 }
 
 bool instance_temple_of_ahnqiraj::IsEncounterInProgress() const
 {
-    for (uint32 i : m_auiEncounter)
+    for (uint32 i : m_encounter)
     {
         if (i == IN_PROGRESS)
             return true;
@@ -66,13 +65,14 @@ bool instance_temple_of_ahnqiraj::IsEncounterInProgress() const
     return false;
 }
 
-void instance_temple_of_ahnqiraj::OnPlayerLeave(Player* pPlayer) {
+void instance_temple_of_ahnqiraj::OnPlayerLeave(Player* player)
+{
     // Remove any aura related to Temple of Ahn'Qiraj specific mounts
     for (uint32 aura : qiraji_mount_auras)
     {
-        if (pPlayer->HasAura(aura))
+        if (player->HasAura(aura))
         {
-            pPlayer->RemoveAurasDueToSpell(aura);
+            player->RemoveAurasDueToSpell(aura);
             return;
         }
     }
@@ -195,21 +195,21 @@ void instance_temple_of_ahnqiraj::OnCreatureCreate(Creature* creature)
     }
 }
 
-void instance_temple_of_ahnqiraj::OnObjectCreate(GameObject* pGo)
+void instance_temple_of_ahnqiraj::OnObjectCreate(GameObject* go)
 {
-    switch (pGo->GetEntry())
+    switch (go->GetEntry())
     {
         case GO_SKERAM_GATE:
-            if (m_auiEncounter[TYPE_SKERAM] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+            if (m_encounter[TYPE_SKERAM] == DONE)
+                go->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_TWINS_ENTER_DOOR:
-            if (m_auiEncounter[TYPE_HUHURAN] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+            if (m_encounter[TYPE_HUHURAN] == DONE)
+                go->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_TWINS_EXIT_DOOR:
-            if (m_auiEncounter[TYPE_TWINS] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+            if (m_encounter[TYPE_TWINS] == DONE)
+                go->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_SANDWORM_BASE:
             break;
@@ -218,7 +218,7 @@ void instance_temple_of_ahnqiraj::OnObjectCreate(GameObject* pGo)
             return;
     }
 
-    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[go->GetEntry()] = go->GetObjectGuid();
 }
 
 void instance_temple_of_ahnqiraj::OnCreatureRespawn(Creature* creature)
@@ -237,20 +237,20 @@ void instance_temple_of_ahnqiraj::OnCreatureRespawn(Creature* creature)
     }   
 }
 
-void instance_temple_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
+void instance_temple_of_ahnqiraj::SetData(uint32 type, uint32 data)
 {
-    switch (uiType)
+    switch (type)
     {
         case TYPE_SKERAM:
-            m_auiEncounter[uiType] = uiData;
-            if (uiData == DONE)
+            m_encounter[type] = data;
+            if (data == DONE)
                 DoUseDoorOrButton(GO_SKERAM_GATE);
             break;
         case TYPE_BUG_TRIO:
-            if (uiData > SPECIAL)
+            if (data > SPECIAL)
             {
                 ++m_uiBugTrioDeathCount;
-                Creature* deadGuy = GetSingleCreatureFromStorage(uiData);
+                Creature* deadGuy = GetSingleCreatureFromStorage(data);
                 // notify bugs on death to heal / remove invul
                 if (Creature* vem = GetSingleCreatureFromStorage(NPC_VEM))
                     if (vem->IsAlive())
@@ -265,7 +265,7 @@ void instance_temple_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
                 // don't store any special data
                 break;
             }
-            if (uiData == FAIL)
+            if (data == FAIL)
             {
                 // Do not reset again the encounter if already set to failed
                 if (GetData(TYPE_BUG_TRIO) == FAIL)
@@ -289,32 +289,32 @@ void instance_temple_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
                         spawn->ForcedDespawn();
                 m_bugTrioSpawns.clear();
             }
-            if (uiData == IN_PROGRESS)
+            if (data == IN_PROGRESS)
                 m_uiBugTrioDeathCount = 0;
-            m_auiEncounter[uiType] = uiData;
+            m_encounter[type] = data;
             break;
         case TYPE_SARTURA:
         case TYPE_FANKRISS:
         case TYPE_VISCIDUS:
-            m_auiEncounter[uiType] = uiData;
+            m_encounter[type] = data;
             break;
         case TYPE_HUHURAN:
-            m_auiEncounter[uiType] = uiData;
-            if (uiData == DONE)
+            m_encounter[type] = data;
+            if (data == DONE)
                 DoUseDoorOrButton(GO_TWINS_ENTER_DOOR);
             break;
         case TYPE_TWINS:
             // Either of the twins can set data, so return to avoid double changing
-            if (m_auiEncounter[uiType] ==  uiData)
+            if (m_encounter[type] ==  data)
                 return;
 
-            m_auiEncounter[uiType] = uiData;
+            m_encounter[type] = data;
             DoUseDoorOrButton(GO_TWINS_ENTER_DOOR);
-            if (uiData == DONE)
+            if (data == DONE)
                 DoUseDoorOrButton(GO_TWINS_EXIT_DOOR);
             break;
         case TYPE_OURO:
-            switch (uiData)
+            switch (data)
             {
                 case FAIL:
                     // Respawn the Ouro spawner on fail
@@ -327,10 +327,10 @@ void instance_temple_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
                         pBase->SetLootState(GO_JUST_DEACTIVATED);
                     break;
             }
-            m_auiEncounter[uiType] = uiData;
+            m_encounter[type] = data;
             break;
         case TYPE_CTHUN:
-            if (uiData == FAIL)
+            if (data == FAIL)
             {
                 // Respawn the Eye of C'Thun when failing in phase 2
                 if (Creature* eyeOfCthun = GetSingleCreatureFromStorage(NPC_EYE_OF_CTHUN))
@@ -348,21 +348,21 @@ void instance_temple_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
                         cthun->AI()->EnterEvadeMode();
                 }
             }
-            m_auiEncounter[uiType] = uiData;
+            m_encounter[type] = data;
             break;
         case TYPE_TWINS_INTRO:
-            m_auiEncounter[uiType] = uiData;
+            m_encounter[type] = data;
             break;
     }
 
-    if (uiData == DONE)
+    if (data == DONE)
     {
         OUT_SAVE_INST_DATA;
 
         std::ostringstream saveStream;
-        saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " " << m_auiEncounter[3] << " "
-                   << m_auiEncounter[4] << " " << m_auiEncounter[5] << " " << m_auiEncounter[6] << " " << m_auiEncounter[7] << " "
-                   << m_auiEncounter[8] << " " << m_auiEncounter[9];
+        saveStream << m_encounter[0] << " " << m_encounter[1] << " " << m_encounter[2] << " " << m_encounter[3] << " "
+                   << m_encounter[4] << " " << m_encounter[5] << " " << m_encounter[6] << " " << m_encounter[7] << " "
+                   << m_encounter[8] << " " << m_encounter[9];
 
         m_strInstData = saveStream.str();
 
@@ -382,11 +382,11 @@ void instance_temple_of_ahnqiraj::Load(const char* chrIn)
     OUT_LOAD_INST_DATA(chrIn);
 
     std::istringstream loadStream(chrIn);
-    loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
-               >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
-               >> m_auiEncounter[8] >> m_auiEncounter[9];
+    loadStream >> m_encounter[0] >> m_encounter[1] >> m_encounter[2] >> m_encounter[3]
+               >> m_encounter[4] >> m_encounter[5] >> m_encounter[6] >> m_encounter[7]
+               >> m_encounter[8] >> m_encounter[9];
 
-    for (uint32& i : m_auiEncounter)
+    for (uint32& i : m_encounter)
     {
         if (i == IN_PROGRESS)
             i = NOT_STARTED;
@@ -395,34 +395,34 @@ void instance_temple_of_ahnqiraj::Load(const char* chrIn)
     OUT_LOAD_INST_DATA_COMPLETE;
 }
 
-uint32 instance_temple_of_ahnqiraj::GetData(uint32 uiType) const
+uint32 instance_temple_of_ahnqiraj::GetData(uint32 type) const
 {
-    if (uiType < MAX_ENCOUNTER)
-        return m_auiEncounter[uiType];
+    if (type < MAX_ENCOUNTER)
+        return m_encounter[type];
 
     return 0;
 }
 
-void instance_temple_of_ahnqiraj::Update(uint32 uiDiff)
+void instance_temple_of_ahnqiraj::Update(uint32 diff)
 {
-    DialogueUpdate(uiDiff);
+    DialogueUpdate(diff);
 
     if (GetData(TYPE_SKERAM) == NOT_STARTED)
     {
-        if (m_uiSkeramProphecyTimer < uiDiff)
+        if (m_uiSkeramProphecyTimer < diff)
         {
             if (Player* player = GetPlayerInMap())
                 player->GetMap()->PlayDirectSoundToMap(sound_skeram_prophecy[urand(0, 4)]);
             m_uiSkeramProphecyTimer = urand(3, 4) * MINUTE * IN_MILLISECONDS;   // Timer is guesswork
         }
         else
-            m_uiSkeramProphecyTimer -= uiDiff;
+            m_uiSkeramProphecyTimer -= diff;
     }
 
     if (GetData(TYPE_CTHUN) == IN_PROGRESS || GetData(TYPE_CTHUN) == DONE)
         return;
 
-    if (m_uiCthunWhisperTimer < uiDiff)
+    if (m_uiCthunWhisperTimer < diff)
     {
         if (Player* pPlayer = GetPlayerInMap())
         {
@@ -445,12 +445,7 @@ void instance_temple_of_ahnqiraj::Update(uint32 uiDiff)
         m_uiCthunWhisperTimer = urand(1.5 * MINUTE * IN_MILLISECONDS, 5 * MINUTE * IN_MILLISECONDS);
     }
     else
-        m_uiCthunWhisperTimer -= uiDiff;
-}
-
-InstanceData* GetInstanceData_instance_temple_of_ahnqiraj(Map* pMap)
-{
-    return new instance_temple_of_ahnqiraj(pMap);
+        m_uiCthunWhisperTimer -= diff;
 }
 
 bool AreaTrigger_at_temple_ahnqiraj(Player* player, AreaTriggerEntry const* at)
@@ -460,8 +455,8 @@ bool AreaTrigger_at_temple_ahnqiraj(Player* player, AreaTriggerEntry const* at)
         if (player->IsGameMaster() || !player->IsAlive())
             return false;
 
-        if (instance_temple_of_ahnqiraj* pInstance = (instance_temple_of_ahnqiraj*)player->GetInstanceData())
-            pInstance->DoHandleTempleAreaTrigger(at->id, player);
+        if (instance_temple_of_ahnqiraj* instance = dynamic_cast<instance_temple_of_ahnqiraj*>(player->GetInstanceData()))
+            instance->DoHandleTempleAreaTrigger(at->id, player);
     }
 
     return false;
@@ -469,9 +464,9 @@ bool AreaTrigger_at_temple_ahnqiraj(Player* player, AreaTriggerEntry const* at)
 
 bool ProcessEventId_event_reset_cthun(uint32 /*eventId*/, Object* source, Object* /*target*/, bool /*isStart*/)
 {
-    if (source->GetTypeId() == TYPEID_UNIT)
+    if (source->IsCreature())
     {
-        if (instance_temple_of_ahnqiraj* instance = (instance_temple_of_ahnqiraj*)((Creature*)source)->GetInstanceData())
+        if (instance_temple_of_ahnqiraj* instance = dynamic_cast<instance_temple_of_ahnqiraj*>(static_cast<Creature*>(source)->GetInstanceData()))
         {
             instance->SetData(TYPE_CTHUN, FAIL);
             return true;
@@ -484,7 +479,7 @@ void AddSC_instance_temple_of_ahnqiraj()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_temple_of_ahnqiraj";
-    pNewScript->GetInstanceData = &GetInstanceData_instance_temple_of_ahnqiraj;
+    pNewScript->GetInstanceData = &GetNewInstanceScript<instance_temple_of_ahnqiraj>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
