@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Boss_Mekgineer_Thermaplugg
 SD%Complete: 90 - Timer
-SDComment: Timer need improvement, especially for bomb-spawning
+SDComment: Timer need improvement, especially for bomb-spawning, s.9204
 SDCategory: Gnomeregan
 EndScriptData
 
@@ -34,7 +34,19 @@ enum
     SAY_SLAY                            = -1090027,
 
     SPELL_ACTIVATE_BOMB_A               = 11511,            // Target Dest = -530.754 670.571 -313.784
+    //SPELL_ACTIVATE_BOMB_01              = 11518,            // Activate Bomb 01
+    //SPELL_ACTIVATE_BOMB_02              = 11521,            // Activate Bomb 02
+    //SPELL_ACTIVATE_BOMB_03              = 11523,            // Activate Bomb 03
+    //SPELL_ACTIVATE_BOMB_04              = 11524,            // Activate Bomb 04
+    //SPELL_ACTIVATE_BOMB_05              = 11526,            // Activate Bomb 05
+    //SPELL_ACTIVATE_BOMB_06              = 11527,            // Activate Bomb 06
     SPELL_ACTIVATE_BOMB_B               = 11795,            // Target Dest = -530.754 670.571 -313.784
+    //SPELL_ACTIVATE_BOMB_01B              = 11796,            // Activate Bomb 01B
+    //SPELL_ACTIVATE_BOMB_02B              = 11797,            // Activate Bomb 02B
+    //SPELL_ACTIVATE_BOMB_03B              = 11798,            // Activate Bomb 03B
+    //SPELL_ACTIVATE_BOMB_04B              = 11799,            // Activate Bomb 04B
+    //SPELL_ACTIVATE_BOMB_05B              = 11800,            // Activate Bomb 05B
+    //SPELL_ACTIVATE_BOMB_06B              = 11801,            // Activate Bomb 06B
     SPELL_KNOCK_AWAY                    = 10101,
     SPELL_KNOCK_AWAY_AOE                = 11130,
     SPELL_WALKING_BOMB_EFFECT           = 11504,
@@ -66,7 +78,7 @@ struct boss_thermapluggAI : public ScriptedAI
 
     void Reset() override
     {
-        m_uiKnockAwayTimer = urand(17000, 20000);
+        m_uiKnockAwayTimer = urand(12000, 20000);
         m_uiActivateBombTimer = urand(10000, 15000);
         m_bIsPhaseTwo = false;
         m_asBombFaces = nullptr;
