@@ -12683,6 +12683,9 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(0);
     for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
         itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, false);
+
+    // resend quests status directly
+    UpdateForQuestWorldObjects();
 }
 
 bool Player::IsQuestExplored(uint32 quest_id) const
@@ -18450,7 +18453,8 @@ void Player::UpdateForQuestWorldObjects()
         if (m_clientGUID.IsGameObject())
         {
             if (GameObject* obj = GetMap()->GetGameObject(m_clientGUID))
-                obj->BuildValuesUpdateBlockForPlayerWithFlags(updateData, this, UF_FLAG_DYNAMIC);
+                if (sObjectMgr.IsGameObjectForQuests(obj->GetEntry()))
+                    obj->BuildValuesUpdateBlockForPlayerWithFlags(updateData, this, UF_FLAG_DYNAMIC);
         }
     }
     for (size_t i = 0; i < updateData.GetPacketCount(); ++i)
