@@ -7260,7 +7260,7 @@ void Player::ApplyEquipSpell(SpellEntry const* spellInfo, Item* item, bool apply
 
         DEBUG_LOG("WORLD: cast %s Equip spellId - %i", (item ? "item" : "itemset"), spellInfo->Id);
 
-        CastSpell(this, spellInfo, TRIGGERED_OLD_TRIGGERED, item);
+        CastSpell(nullptr, spellInfo, TRIGGERED_OLD_TRIGGERED, item);
     }
     else
     {
