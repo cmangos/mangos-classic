@@ -53,7 +53,7 @@ jobs:
 
       # install dependencies
       - name: Install Boost
-        uses: MarkusJx/install-boost@v2.4.5
+        uses: MarkusJx/install-boost@v2.5.0
         id: install-boost
         with:
           # REQUIRED: Specify the required boost version
