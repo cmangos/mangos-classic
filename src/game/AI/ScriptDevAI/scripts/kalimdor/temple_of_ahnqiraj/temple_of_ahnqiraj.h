@@ -48,7 +48,7 @@ enum
     GO_TWINS_EXIT_DOOR          = 180635,
     GO_SANDWORM_BASE            = 180795,
 
-    EMOTE_EYE_INTRO             = -1531012,
+    EMOTE_EYE_INTRO             = 11700,
     STAND_EMPERORS_INTRO        = 1,
     SAY_EMPERORS_INTRO_1        = -1531013,
     SAY_EMPERORS_INTRO_2        = -1531014,
@@ -81,6 +81,7 @@ enum
 
     SPELL_SUMMON_PORTAL         = 26396,
     SPELL_SUMMON_GIANT_PORTAL   = 26477,
+    SPELL_BIRTH_TENTACLE        = 26586,
 
     NPC_POISON_CLOUD            = 15933,
 

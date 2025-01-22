@@ -102,6 +102,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (26275,'spell_wondervolt_trap'),
 (26332,'spell_cthun_mouth_tentacle'),
 (26398,'spell_cthun_tentacles_summon'),
+(26399,'spell_despawn_tentacles'),
+(26404,'spell_despawn_tent_port'),
 (26476,'spell_cthun_digestive_acid_periodic'),
 (26584,'spell_summon_toxic_slime'),
 (26585,'spell_viscidus_despawn_adds'),

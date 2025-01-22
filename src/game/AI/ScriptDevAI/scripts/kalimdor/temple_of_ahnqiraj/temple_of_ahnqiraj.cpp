@@ -171,18 +171,6 @@ void instance_temple_of_ahnqiraj::OnCreatureCreate(Creature* creature)
         case NPC_POISON_CLOUD:
             m_bugTrioSpawns.push_back(creature->GetObjectGuid());
             break;
-        case NPC_CLAW_TENTACLE:
-        case NPC_EYE_TENTACLE:
-            if (creature->AI())
-                creature->AI()->SetCombatMovement(false);
-            creature->CastSpell(creature, SPELL_SUMMON_PORTAL, TRIGGERED_OLD_TRIGGERED);
-            break;
-        case NPC_GIANT_CLAW_TENTACLE:
-        case NPC_GIANT_EYE_TENTACLE:
-            if (creature->AI())
-                creature->AI()->SetCombatMovement(false);
-            creature->CastSpell(creature, SPELL_SUMMON_GIANT_PORTAL, TRIGGERED_OLD_TRIGGERED);
-            break;
         case NPC_EYE_OF_CTHUN:
             // Safeguard for C'Thun encounter in case of fight abruptly ended during phase 2
             if (GetData(TYPE_CTHUN) != DONE)
@@ -335,18 +323,20 @@ void instance_temple_of_ahnqiraj::SetData(uint32 type, uint32 data)
                 // Respawn the Eye of C'Thun when failing in phase 2
                 if (Creature* eyeOfCthun = GetSingleCreatureFromStorage(NPC_EYE_OF_CTHUN))
                 {
-                    if (!eyeOfCthun->IsAlive())
-                        eyeOfCthun->Respawn();
-                    // Reset combat
                     if (eyeOfCthun->AI() && eyeOfCthun->IsInCombat())
                         eyeOfCthun->AI()->EnterEvadeMode();
                 }
-                if (Creature* cthun = GetSingleCreatureFromStorage(NPC_CTHUN))
+                else
                 {
+                    auto iter = m_npcEntryGuidStore.find(NPC_EYE_OF_CTHUN);
+                    if (iter != m_npcEntryGuidStore.end())
+                        instance->GetSpawnManager().RespawnCreature(iter->second.GetCounter(), 60);
+                }
+                    
+                if (Creature* cthun = GetSingleCreatureFromStorage(NPC_CTHUN))
                     // Reset combat
                     if (cthun->AI() && cthun->IsInCombat())
                         cthun->AI()->EnterEvadeMode();
-                }
             }
             m_encounter[type] = data;
             break;
