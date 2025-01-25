@@ -7870,7 +7870,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
                     controller->AddThreat(enemy);
                     enemy->AddThreat(controller);
                     enemy->SetInCombatWith(controller);
-                    if (PvP || creatureNotInCombat)
+                    if (PvP)
                         enemy->GetCombatManager().TriggerCombatTimer(controller);
                 }
                 else
