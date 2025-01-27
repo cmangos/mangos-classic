@@ -3393,14 +3393,6 @@ void Spell::_handle_finish_phase()
     // spell log
     if (m_needSpellLog)
         m_spellLog.SendToSet();
-
-    if (m_caster && m_caster->m_extraAttacks && IsSpellHaveEffect(m_spellInfo, SPELL_EFFECT_ADD_EXTRA_ATTACKS))
-    {
-        if (Unit* target = m_caster->GetVictim())
-            m_caster->DoExtraAttacks(target);
-        else
-            m_caster->m_extraAttacks = 0;
-    }
 }
 
 void Spell::SetCastItem(Item* item)

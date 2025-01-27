@@ -1211,7 +1211,8 @@ class Unit : public WorldObject
          */
         bool CanReachWithMeleeAttack(Unit const* pVictim, float flat_mod = 0.0f) const;
         uint32 m_extraAttacks;
-        void DoExtraAttacks(Unit* pVictim);
+        ObjectGuid m_extraAttackGuid;
+        void DoExtraAttacks(Unit* victim);
 
         bool IsAttackedBy(Unit* attacker) const
         {

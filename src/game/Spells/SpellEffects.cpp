@@ -5093,10 +5093,10 @@ void Spell::EffectAddExtraAttacks(SpellEffectIndex /*eff_idx*/)
     if (!unitTarget || !unitTarget->IsAlive())
         return;
 
-    if (unitTarget->m_extraAttacks)
-        return;
-
-    unitTarget->m_extraAttacks = damage;
+    unitTarget->m_extraAttacks += damage;
+    if (unitTarget->m_extraAttacks > 5)
+        unitTarget->m_extraAttacks = 5;
+    unitTarget->m_extraAttackGuid = unitTarget->GetVictim() ? unitTarget->GetVictim()->GetObjectGuid() : ObjectGuid();
     m_spellLog.AddLog(uint32(SPELL_EFFECT_ADD_EXTRA_ATTACKS), unitTarget->GetObjectGuid(), damage);
 }
 

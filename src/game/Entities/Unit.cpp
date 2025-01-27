@@ -649,6 +649,11 @@ bool Unit::UpdateMeleeAttackingState()
     if (GetTypeId() != TYPEID_PLAYER && (!static_cast<Creature*>(this)->CanInitiateAttack()))
         return false;
 
+    if (m_extraAttacks)
+    {
+        DoExtraAttacks(victim);
+    }
+
     if (!isAttackReady(BASE_ATTACK) && !(isAttackReady(OFF_ATTACK) && hasOffhandWeaponForAttack()))
         return false;
 
@@ -2654,15 +2659,32 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
                          GetGUIDLow(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), meleeDamageInfo.totalDamage, totalAbsorb, meleeDamageInfo.blocked_amount, totalResist);
 }
 
-void Unit::DoExtraAttacks(Unit* pVictim)
+void Unit::DoExtraAttacks(Unit* victim)
 {
+    Unit* attackTarget = nullptr;
+    if (m_extraAttackGuid)
+    {
+        Unit* target = GetMap()->GetUnit(m_extraAttackGuid);
+        if (target && CanReachWithMeleeAttack(target) && target->IsAlive() && CanAttackInCombat(target, false, false))
+            attackTarget = target;
+    }
+    if (!attackTarget && GetVictim())
+    {
+        Unit* target = GetVictim();
+        if (CanReachWithMeleeAttack(target) && target->IsAlive() && CanAttackInCombat(target, false, false))
+            attackTarget = target;
+    }
+    if (!attackTarget)
+        return;
+
     m_extraAttacksExecuting = true;
     while (m_extraAttacks)
     {
-        AttackerStateUpdate(pVictim, BASE_ATTACK, true);
+        AttackerStateUpdate(attackTarget, BASE_ATTACK, true);
         if (m_extraAttacks > 0)
             --m_extraAttacks;
     }
+    m_extraAttackGuid = ObjectGuid();
     m_extraAttacksExecuting = false;
 }
 
