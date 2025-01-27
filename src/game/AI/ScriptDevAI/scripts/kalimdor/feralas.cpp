@@ -591,7 +591,7 @@ struct SpecificTargetScript : public SpellScript
 
 struct CaptureWildkin : public SpecificTargetScript // 11886
 {
-    std::set<uint32> m_targets = { 2927, 2928, 7808 };
+    std::set<uint32> m_targets = { 2927, 2928, 2929, 7808 };
 
     std::set<uint32> const& GetRequiredTargets() const override { return m_targets; }
 };
