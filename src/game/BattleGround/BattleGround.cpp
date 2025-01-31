@@ -1486,6 +1486,53 @@ void BattleGround::OnObjectDBLoad(Creature* creature)
         ChangeBgCreatureSpawnState(creature->GetDbGuid(), RESPAWN_ONE_DAY);
 }
 
+#ifdef ENABLE_PLAYERBOTS
+/**
+  Retrieves a creature from the event map based on the specified event pair and creature entry.
+
+  @param    event1
+  @param    event2
+  @param    entry    The creature entry ID to search for.
+  @return            A pointer to the Creature object if found, otherwise nullptr.
+*/
+Creature* BattleGround::GetCreature(uint8 event1, uint8 event2, uint32 entry)
+{
+    auto itr = m_eventObjects[MAKE_PAIR32(event1, event2)].creatures.begin();
+    auto end = m_eventObjects[MAKE_PAIR32(event1, event2)].creatures.end();
+    for (; itr != end; ++itr)
+    {
+        Creature* obj = GetBgMap()->GetCreature(*itr);
+        if (obj && obj->GetEntry() == entry)
+        {
+            return obj;
+        }
+    }
+    return nullptr;
+}
+
+/**
+  Retrieves a game object from the event map based on the specified event pair and game object entry.
+
+  @param    event1
+  @param    event2
+  @param    entry    The game object entry ID to search for.
+  @return            A pointer to the GameObject object if found, otherwise nullptr.
+*/
+GameObject* BattleGround::GetGameObject(uint8 event1, uint8 event2, uint32 entry)
+{
+    auto itr = m_eventObjects[MAKE_PAIR32(event1, event2)].gameobjects.begin();
+    auto end = m_eventObjects[MAKE_PAIR32(event1, event2)].gameobjects.end();
+    for (; itr != end; ++itr)
+    {
+        GameObject* obj = GetBgMap()->GetGameObject(*itr);
+        if (obj && obj->GetEntry() == entry)
+        {
+            return obj;
+        }
+    }
+    return nullptr;
+}
+
 /**
   Function returns a creature guid from event map
 
@@ -1517,6 +1564,7 @@ uint32 BattleGround::GetSingleGameObjectGuid(uint8 event1, uint8 event2)
 
     return ObjectGuid();
 }
+#endif
 
 /**
   Method that handles gameobject load from DB event map

@@ -505,11 +505,19 @@ class BattleGround
             return m_activeEvents[event1] == event2;
         }
 
+#ifdef ENABLE_PLAYERBOTS
+        // Get a creature from the event map based on the specified event pair and creature entry
+        Creature* GetCreature(uint8 /*event1*/, uint8 /*event2*/, uint32 /*entry*/);
+
+        // Get a game object from the event map based on the specified event pair and game object entry
+        GameObject* GetGameObject(uint8 /*event1*/, uint8 /*event2*/, uint32 /*entry*/);
+
         // Get creature guid from event
         uint32 GetSingleCreatureGuid(uint8 /*event1*/, uint8 /*event2*/);
 
         // Get gameobject guid from event
         uint32 GetSingleGameObjectGuid(uint8 /*event1*/, uint8 /*event2*/);
+#endif
 
         // Handle door events
         void OpenDoorEvent(uint8 /*event1*/, uint8 event2 = 0);
