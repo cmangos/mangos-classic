@@ -161,8 +161,10 @@ World::~World()
     VMAP::VMapFactory::clear();
     MMAP::MMapFactory::clear();
 
-    m_lfgQueueThread.join();
-    m_bgQueueThread.join();
+    if (m_lfgQueueThread.joinable())
+        m_lfgQueueThread.join();
+    if (m_bgQueueThread.joinable())
+        m_bgQueueThread.join();
 }
 
 /// Cleanups before world stop
