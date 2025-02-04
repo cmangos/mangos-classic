@@ -674,6 +674,7 @@ UPDATE creature_template SET ScriptName='npc_foreman_klaven_mortwake' WHERE entr
 /* WETLANDS */
 UPDATE creature_template SET ScriptName='npc_tapoke_slim_jahn' WHERE entry=4962;
 UPDATE creature_template SET ScriptName='npc_mikhail' WHERE entry=4963;
+UPDATE gameobject_template SET ScriptName = 'go_flagongut_fossil' WHERE entry=9630;
 
 /* WINTERSPRING */
 UPDATE creature_template SET ScriptName='npc_ranshalla' WHERE entry=10300;

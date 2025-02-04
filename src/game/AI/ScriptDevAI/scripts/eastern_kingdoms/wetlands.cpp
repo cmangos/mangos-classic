@@ -222,6 +222,37 @@ bool QuestAccept_npc_mikhail(Player* pPlayer, Creature* pCreature, const Quest* 
     return false;
 }
 
+enum
+{
+    NPC_PROSPECTOR_WHELGAR  = 1077,
+    SAY_ITEM_LOOTED         = 1235
+};
+
+// Flagongut's Fossil ID: 9630
+
+struct go_flagongut_fossil : public GameObjectAI
+{
+    go_flagongut_fossil(GameObject* go) : GameObjectAI(go) {}
+
+    void OnLootStateChange(Unit* /*user*/)
+    {
+        if (m_go->GetLootState() == GO_JUST_DEACTIVATED)
+        {
+            if (Creature* whelgar = GetClosestCreatureWithEntry(m_go, NPC_PROSPECTOR_WHELGAR, 10.0f))
+            {
+                whelgar->HandleEmote(EMOTE_ONESHOT_TALK);
+                DoBroadcastText(SAY_ITEM_LOOTED, whelgar);
+            }
+        }
+    }
+};
+
+GameObjectAI* GetAI_go_flagongut_fossil(GameObject* go)
+{
+    return new go_flagongut_fossil(go);
+}
+
+
 /*######
 ## AddSC
 ######*/
@@ -236,5 +267,10 @@ void AddSC_wetlands()
     pNewScript = new Script;
     pNewScript->Name = "npc_mikhail";
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_mikhail;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_flagongut_fossil";
+    pNewScript->GetGameObjectAI = &GetAI_go_flagongut_fossil;
     pNewScript->RegisterSelf();
 }
