@@ -1832,7 +1832,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 if (m_script->textId[0] == 1 || m_script->textId[0] == 2 && !creature->GetCreatureGroup())
                 {
                     Position const& respPos = creature->GetRespawnPosition();
-                    creature->GetMotionMaster()->MovePoint(0, respPos, ForcedMovement(m_script->moveTo.forcedMovement), 0.f, true);
+                    creature->GetMotionMaster()->MovePoint(0, respPos, ForcedMovement(m_script->moveTo.forcedMovement), 0.f, true, creature->GetObjectGuid(), m_script->moveTo.relayId);
                 }
                 else if (m_script->textId[0] == 2)
                 {
