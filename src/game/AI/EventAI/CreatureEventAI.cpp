@@ -1143,7 +1143,7 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             if (!target)
             {
                 if (failedTargetSelection)
-                    sLog.outErrorEventAI("Event %d attempt to start relay script but Target == nullptr. Creature %d", eventId, m_creature->GetEntry());
+                    sLog.outErrorEventAI("Event %d attempt to throw ai event but Target == nullptr. Creature %d", eventId, m_creature->GetEntry());
                 return false;
             }
             SendAIEventAround(AIEventType(action.throwEvent.eventType), target, 0, action.throwEvent.radius);
