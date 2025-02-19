@@ -170,19 +170,19 @@ typedef struct XFER_INIT
     uint8 md5[MD5_DIGEST_LENGTH];                           // MD5
 } XFER_INIT;
 
-typedef struct AuthHandler
-{
-    eAuthCmd cmd;
-    uint32 status;
-    bool (AuthSocket::*handler)(void);
-} AuthHandler;
-
 // GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some paltform
 #if defined( __GNUC__ )
 #pragma pack()
 #else
 #pragma pack(pop)
 #endif
+
+typedef struct AuthHandler
+{
+    eAuthCmd cmd;
+    uint32 status;
+    bool (AuthSocket::*handler)(void);
+} AuthHandler;
 
 std::array<uint8, 16> VersionChallenge = { { 0xBA, 0xA3, 0x1E, 0x99, 0xA0, 0x0B, 0x21, 0x57, 0xFC, 0x37, 0x3F, 0xB3, 0x69, 0xCD, 0xD2, 0xF1 } };
 const char logonProofUnknownAccount[4] = { CMD_AUTH_LOGON_PROOF, AUTH_LOGON_FAILED_UNKNOWN_ACCOUNT, 0, 0 };
