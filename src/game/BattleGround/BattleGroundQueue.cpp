@@ -224,7 +224,7 @@ GroupQueueInfo* BattleGroundQueueItem::AddGroup(ObjectGuid leader, AddGroupToQue
                     if (!(*itr)->isInvitedToBgInstanceGuid)
                         qHorde += (*itr)->players.size();
 
-                sWorld.GetMessager().AddMessage([playerGuid = leader, bgName, q_min_level, qMaxLevel, qAlliance, minPlayers, qHorde](World* world)
+                sWorld.GetMessager().AddMessage([playerGuid = leader, bgName, q_min_level, qMaxLevel, qAlliance, minPlayers, qHorde](World* /*world*/)
                 {
                     // Show queue status to player only (when joining queue)
                     if (sWorld.getConfig(CONFIG_UINT32_BATTLEGROUND_QUEUE_ANNOUNCER_JOIN) == 1)
@@ -442,7 +442,7 @@ bool BattleGroundQueueItem::InviteGroupToBg(GroupQueueInfo* groupInfo, BattleGro
         // loop through the players
         for (auto itr = groupInfo->players.begin(); itr != groupInfo->players.end(); ++itr)
         {
-            sWorld.GetMessager().AddMessage([playerGuid = itr->first, bgQueueTypeId, bgTypeId, isInvited = groupInfo->isInvitedToBgInstanceGuid, clientInstanceId = queueInfo.GetClientInstanceId(), mapId = queueInfo.GetMapId(), removeInviteTime = groupInfo->removeInviteTime, instanceId = queueInfo.GetInstanceId(), isBg = queueInfo.IsBattleGround()](World* world)
+            sWorld.GetMessager().AddMessage([playerGuid = itr->first, bgQueueTypeId, bgTypeId, isInvited = groupInfo->isInvitedToBgInstanceGuid, clientInstanceId = queueInfo.GetClientInstanceId(), mapId = queueInfo.GetMapId(), removeInviteTime = groupInfo->removeInviteTime, instanceId = queueInfo.GetInstanceId(), isBg = queueInfo.IsBattleGround()](World* /*world*/)
             {
                 Player* plr = sObjectMgr.GetPlayer(playerGuid);
                 // if offline, skip him, can happen due to asynchronicity now
@@ -815,7 +815,7 @@ void BattleGroundQueueItem::Update(BattleGroundQueue& queue, BattleGroundTypeId 
             {
                 // remove BG from BGFreeSlotQueue
                 queueItems.erase(itr);
-                sWorld.GetMessager().AddMessage([instanceId = queueInfo.instanceId, typeId = queueInfo.bgTypeId](World* world)
+                sWorld.GetMessager().AddMessage([instanceId = queueInfo.instanceId, typeId = queueInfo.bgTypeId](World* /*world*/)
                 {
                     if (BattleGround* bg = sBattleGroundMgr.GetBattleGround(instanceId, typeId))
                     {
@@ -1227,7 +1227,7 @@ void BattleGroundQueue::RemovePlayer(BattleGroundQueueTypeId bgQueueTypeId, Obje
 void BattleGroundInQueueInfo::DecreaseInvitedCount(Team team)
 {
     uint32 count = (team == ALLIANCE) ? --m_invitedAlliance : --m_invitedHorde;
-    sWorld.GetMessager().AddMessage([bgTypeId = GetTypeId(), instanceId = GetInstanceId(), team, count](World* world)
+    sWorld.GetMessager().AddMessage([bgTypeId = GetTypeId(), instanceId = GetInstanceId(), team, count](World* /*world*/)
     {
         if (BattleGround* bg = sBattleGroundMgr.GetBattleGround(instanceId, bgTypeId))
             bg->SetInvitedCount(team, count);
@@ -1237,7 +1237,7 @@ void BattleGroundInQueueInfo::DecreaseInvitedCount(Team team)
 void BattleGroundInQueueInfo::IncreaseInvitedCount(Team team)
 {
     uint32 count = (team == ALLIANCE) ? ++m_invitedAlliance : ++m_invitedHorde;
-    sWorld.GetMessager().AddMessage([bgTypeId = GetTypeId(), instanceId = GetInstanceId(), team, count](World* world)
+    sWorld.GetMessager().AddMessage([bgTypeId = GetTypeId(), instanceId = GetInstanceId(), team, count](World* /*world*/)
     {
         if (BattleGround* bg = sBattleGroundMgr.GetBattleGround(instanceId, bgTypeId))
             bg->SetInvitedCount(team, count);

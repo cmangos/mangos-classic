@@ -232,7 +232,7 @@ bool AuthSocket::ProcessIncomingData()
     const int tableLength = sizeof(table) / sizeof(AuthHandler);
 
     std::shared_ptr<eAuthCmd> cmd = std::make_shared<eAuthCmd>();
-    Read((char*)cmd.get(), sizeof(eAuthCmd), [self = shared_from_this(), cmd, tableLength](const boost::system::error_code& error, std::size_t read)
+    Read((char*)cmd.get(), sizeof(eAuthCmd), [self = shared_from_this(), cmd, tableLength](const boost::system::error_code& error, std::size_t /*read*/)
     {
         if (error)
         {
@@ -295,7 +295,7 @@ void AuthSocket::SendProof(Sha1Hash sha)
             proof->error = 0;
             proof->LoginFlags = 0x00;
 
-            Write((const char*)proof.get(), sizeof(sAuthLogonProof_S_BUILD_6005), [self = shared_from_this(), proof](const boost::system::error_code& error, std::size_t read) {});
+            Write((const char*)proof.get(), sizeof(sAuthLogonProof_S_BUILD_6005), [self = shared_from_this(), proof](const boost::system::error_code& /*error*/, std::size_t /*written*/) {});
             break;
         }
         case 8606:                                          // 2.4.3
@@ -314,7 +314,7 @@ void AuthSocket::SendProof(Sha1Hash sha)
             proof->surveyId = 0x00000000;
             proof->unkFlags = 0x0000;
 
-            Write((const char*)proof.get(), sizeof(sAuthLogonProof_S), [self = shared_from_this(), proof](const boost::system::error_code& error, std::size_t read) {});
+            Write((const char*)proof.get(), sizeof(sAuthLogonProof_S), [self = shared_from_this(), proof](const boost::system::error_code& /*error*/, std::size_t /*written*/) {});
             break;
         }
     }
@@ -326,7 +326,7 @@ bool AuthSocket::_HandleLogonChallenge()
     DEBUG_LOG("Entering _HandleLogonChallenge");
     std::shared_ptr<sAuthLogonChallengeHeader> header = std::make_shared<sAuthLogonChallengeHeader>();
 
-    Read((char*)header.get(), sizeof(sAuthLogonChallengeHeader), [self = shared_from_this(), header](const boost::system::error_code& error, std::size_t read)
+    Read((char*)header.get(), sizeof(sAuthLogonChallengeHeader), [self = shared_from_this(), header](const boost::system::error_code& error, std::size_t /*read*/)
     {
         if (error)
         {
@@ -348,7 +348,7 @@ bool AuthSocket::_HandleLogonChallenge()
 
         std::shared_ptr<sAuthLogonChallengeBody> body = std::make_shared<sAuthLogonChallengeBody>();
         ///- Read the remaining of the packet
-        self->Read((char*)body.get(), remaining, [self, header, body](const boost::system::error_code& error, std::size_t read)
+        self->Read((char*)body.get(), remaining, [self, header, body](const boost::system::error_code& error, std::size_t /*read*/)
         {
             if (error)
             {
@@ -537,7 +537,7 @@ bool AuthSocket::_HandleLogonChallenge()
                     *pkt << uint8(AUTH_LOGON_FAILED_UNKNOWN_ACCOUNT);
             }
 
-            self->Write((const char*)pkt->contents(), pkt->size(), [self, pkt](const boost::system::error_code& error, std::size_t read) {});
+            self->Write((const char*)pkt->contents(), pkt->size(), [self, pkt](const boost::system::error_code& /*error*/, std::size_t /*written*/) {});
             self->ProcessIncomingData();
         });
     });
@@ -552,7 +552,7 @@ bool AuthSocket::_HandleLogonProof()
     ///- Read the packet
     std::shared_ptr<sAuthLogonProof_C> lp = std::make_shared<sAuthLogonProof_C>();
     auto size = sAuthLogonProof_C::getSize(m_promptPin);
-    Read((char*)lp.get(), size, [self = shared_from_this(), lp](const boost::system::error_code& error, std::size_t read)
+    Read((char*)lp.get(), size, [self = shared_from_this(), lp](const boost::system::error_code& error, std::size_t /*read*/)
     {
         if (error)
         {
@@ -573,7 +573,7 @@ bool AuthSocket::_HandleLogonProof()
             *pkt << uint8(AUTH_LOGON_FAILED_VERSION_INVALID);
 
             BASIC_LOG("[AuthChallenge] Account %s tried to login with invalid client version %u!", self->_login.c_str(), self->_build);
-            self->Write((const char*)pkt->contents(), pkt->size(), [self, pkt](const boost::system::error_code& error, std::size_t read) { self->Close();});
+            self->Write((const char*)pkt->contents(), pkt->size(), [self, pkt](const boost::system::error_code& /*error*/, std::size_t /*written*/) { self->Close();});
             return;
         }
         /// </ul>
@@ -594,20 +594,20 @@ bool AuthSocket::_HandleLogonProof()
             if (self->_build > 6141 && (lp->securityFlags & SECURITY_FLAG_AUTHENTICATOR || !self->_token.empty()))
             {
                 std::shared_ptr<uint8> pinCount = std::make_shared<uint8>();
-                self->Read((char*)pinCount.get(), sizeof(uint8), [self, pinCount, lp](const boost::system::error_code& error, std::size_t read)
+                self->Read((char*)pinCount.get(), sizeof(uint8), [self, pinCount, lp](const boost::system::error_code& error, std::size_t /*read*/)
                 {
                     if (error || *pinCount > 16)
                     {
-                        self->Write(logonProofUnknownAccountPinInvalid, sizeof(logonProofUnknownAccountPinInvalid), [self](const boost::system::error_code& error, std::size_t read) { self->Close();});
+                        self->Write(logonProofUnknownAccountPinInvalid, sizeof(logonProofUnknownAccountPinInvalid), [self](const boost::system::error_code& /*error*/, std::size_t /*written*/) { self->Close();});
                         return;
                     }
 
                     std::shared_ptr<std::vector<uint8>> keys = std::make_shared<std::vector<uint8>>(*pinCount + 1);
-                    self->Read((char*)keys->data(), sizeof(uint8) * *pinCount, [self, pinCount, keys, lp](const boost::system::error_code& error, std::size_t read)
+                    self->Read((char*)keys->data(), sizeof(uint8) * *pinCount, [self, pinCount, keys, lp](const boost::system::error_code& error, std::size_t /*read*/)
                     {
                         if (error)
                         {
-                            self->Write(logonProofUnknownAccountPinInvalid, sizeof(logonProofUnknownAccountPinInvalid), [self](const boost::system::error_code& error, std::size_t read) { self->Close();});
+                            self->Write(logonProofUnknownAccountPinInvalid, sizeof(logonProofUnknownAccountPinInvalid), [self](const boost::system::error_code& /*error*/, std::size_t /*written*/) { self->Close();});
                             return;
                         }
 
@@ -617,7 +617,7 @@ bool AuthSocket::_HandleLogonProof()
                         if (ServerToken != clientToken)
                         {
                             BASIC_LOG("[AuthChallenge] Account %s tried to login with wrong pincode! Given %u Expected %u Pin Count: %u", self->_login.c_str(), clientToken, ServerToken, *pinCount);
-                            self->Write(logonProofUnknownAccount, sizeof(logonProofUnknownAccount), [self](const boost::system::error_code& error, std::size_t read) {});
+                            self->Write(logonProofUnknownAccount, sizeof(logonProofUnknownAccount), [self](const boost::system::error_code& /*error*/, std::size_t /*written*/) {});
                             return;
                         }
 
@@ -633,7 +633,7 @@ bool AuthSocket::_HandleLogonProof()
                 if (!self->VerifyPinData(serverToken, lp->pinData))
                 {
                     BASIC_LOG("[AuthChallenge] Account %s tried to login with wrong pincode!", self->_login.c_str());
-                    self->Write(logonProofUnknownAccount, sizeof(logonProofUnknownAccount), [self](const boost::system::error_code& error, std::size_t read) {});
+                    self->Write(logonProofUnknownAccount, sizeof(logonProofUnknownAccount), [self](const boost::system::error_code& /*error*/, std::size_t /*written*/) {});
                     return;
                 }
             }
@@ -644,12 +644,12 @@ bool AuthSocket::_HandleLogonProof()
         {
             if (self->_build > 6005)                                  // > 1.12.2
             {
-                self->Write(logonProofUnknownAccount, sizeof(logonProofUnknownAccount), [self](const boost::system::error_code& error, std::size_t read) {});
+                self->Write(logonProofUnknownAccount, sizeof(logonProofUnknownAccount), [self](const boost::system::error_code& /*error*/, std::size_t /*written*/) {});
             }
             else
             {
                 // 1.x not react incorrectly at 4-byte message use 3 as real error
-                self->Write(logonProofUnknownAccountVanilla, sizeof(logonProofUnknownAccountVanilla), [self](const boost::system::error_code& error, std::size_t read) {});
+                self->Write(logonProofUnknownAccountVanilla, sizeof(logonProofUnknownAccountVanilla), [self](const boost::system::error_code& /*error*/, std::size_t /*written*/) {});
             }
 
             BASIC_LOG("[AuthChallenge] account %s tried to login with wrong password!", self->_login.c_str());
@@ -706,7 +706,7 @@ bool AuthSocket::_HandleReconnectChallenge()
 
     // Read the first 4 bytes (header) to get the length of the remaining of the packet
 
-    Read((char*)header.get(), sizeof(sAuthLogonChallengeHeader), [self = shared_from_this(), header](const boost::system::error_code& error, std::size_t read)
+    Read((char*)header.get(), sizeof(sAuthLogonChallengeHeader), [self = shared_from_this(), header](const boost::system::error_code& error, std::size_t /*read*/)
     {
         if (error)
         {
@@ -727,7 +727,7 @@ bool AuthSocket::_HandleReconnectChallenge()
 
         std::shared_ptr<sAuthLogonChallengeBody> body = std::make_shared<sAuthLogonChallengeBody>();
         // Read the remaining of the packet
-        self->Read((char*)body.get(), remaining, [self, header, body](const boost::system::error_code& error, std::size_t read) -> void
+        self->Read((char*)body.get(), remaining, [self, header, body](const boost::system::error_code& error, std::size_t /*read*/) -> void
         {
             if (error)
             {
@@ -773,7 +773,7 @@ bool AuthSocket::_HandleReconnectChallenge()
             self->_reconnectProof.SetRand(16 * 8);
             pkt->append(self->_reconnectProof.AsByteArray(16));        // 16 bytes random
             pkt->append(VersionChallenge.data(), VersionChallenge.size());
-            self->Write((const char*)pkt->contents(), pkt->size(), [self, pkt](const boost::system::error_code& error, std::size_t read) {});
+            self->Write((const char*)pkt->contents(), pkt->size(), [self, pkt](const boost::system::error_code& /*error*/, std::size_t /*written*/) {});
 
             self->ProcessIncomingData();
         });
@@ -788,7 +788,7 @@ bool AuthSocket::_HandleReconnectProof()
     DEBUG_LOG("Entering _HandleReconnectProof");
     ///- Read the packet
     std::shared_ptr<sAuthReconnectProof_C> lp = std::make_shared<sAuthReconnectProof_C>();
-    Read((char*)lp.get(), sizeof(sAuthReconnectProof_C), [self = shared_from_this(), lp](const boost::system::error_code& error, std::size_t read)
+    Read((char*)lp.get(), sizeof(sAuthReconnectProof_C), [self = shared_from_this(), lp](const boost::system::error_code& error, std::size_t /*read*/)
     {
         if (error)
         {
@@ -819,14 +819,14 @@ bool AuthSocket::_HandleReconnectProof()
             {
                 *pkt << uint8(CMD_AUTH_RECONNECT_PROOF);
                 *pkt << uint8(AUTH_LOGON_FAILED_VERSION_INVALID);
-                self->Write((const char*)pkt->contents(), pkt->size(), [self, pkt](const boost::system::error_code& error, std::size_t read) {});
+                self->Write((const char*)pkt->contents(), pkt->size(), [self, pkt](const boost::system::error_code& /*error*/, std::size_t /*written*/) {});
                 return;
             }
             // Sending response
             *pkt << uint8(CMD_AUTH_RECONNECT_PROOF);
             *pkt << uint8(AUTH_LOGON_SUCCESS);
             *pkt << uint16(0x00);                                // 2 bytes zeros
-            self->Write((const char*)pkt->contents(), pkt->size(), [self, pkt](const boost::system::error_code& error, std::size_t read) {});
+            self->Write((const char*)pkt->contents(), pkt->size(), [self, pkt](const boost::system::error_code& /*error*/, std::size_t /*written*/) {});
 
             // Set _status to authed!
             self->_status = STATUS_AUTHED;
@@ -844,7 +844,7 @@ bool AuthSocket::_HandleReconnectProof()
 bool AuthSocket::_HandleRealmList()
 {
     DEBUG_LOG("Entering _HandleRealmList");
-    ReadSkip(4, [self = shared_from_this()](const boost::system::error_code& error, std::size_t read) -> void
+    ReadSkip(4, [self = shared_from_this()](const boost::system::error_code& error, std::size_t /*read*/) -> void
     {
         if (error)
         {
@@ -878,7 +878,7 @@ bool AuthSocket::_HandleRealmList()
         *hdr << (uint16)pkt.size();
         hdr->append(pkt);
 
-        self->Write((const char*)hdr->contents(), hdr->size(), [self, hdr](const boost::system::error_code& error, std::size_t read) {});
+        self->Write((const char*)hdr->contents(), hdr->size(), [self, hdr](const boost::system::error_code& /*error*/, std::size_t /*written*/) {});
         self->ProcessIncomingData();
     });
 
@@ -1039,7 +1039,7 @@ bool AuthSocket::_HandleXferResume()
 {
     DEBUG_LOG("Entering _HandleXferResume");
 
-    ReadSkip(8, [self = shared_from_this()](const boost::system::error_code& error, std::size_t read) { if (!error) self->ProcessIncomingData(); });
+    ReadSkip(8, [self = shared_from_this()](const boost::system::error_code& error, std::size_t /*read*/) { if (!error) self->ProcessIncomingData(); });
 
     return true;
 }
@@ -1141,7 +1141,7 @@ void AuthSocket::verifyVersionAndFinalizeAuthentication(std::shared_ptr<sAuthLog
     if (!VerifyVersion(lp->A, sizeof(lp->A), lp->crc_hash, false))
     {
         BASIC_LOG("[AuthChallenge] Account %s tried to login with modified client!", _login.c_str());
-        Write(logonProofVersionInvalid, sizeof(logonProofVersionInvalid), [self = shared_from_this()](const boost::system::error_code& error, std::size_t read) {});
+        Write(logonProofVersionInvalid, sizeof(logonProofVersionInvalid), [self = shared_from_this()](const boost::system::error_code& /*error*/, std::size_t /*written*/) {});
         return;
     }
 

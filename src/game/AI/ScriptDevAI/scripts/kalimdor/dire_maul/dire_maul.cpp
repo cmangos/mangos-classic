@@ -130,7 +130,7 @@ struct npc_warlock_mount_ritualAI : public  Scripted_NoMovementAI
         pSummoned->SetRespawnCoord(pedestalCords[0], pedestalCords[1], pedestalCords[2], 0.0f);
     }
 
-    void SummonedMovementInform(Creature* pSummoned, uint32 pMotionType, uint32 pData) override 
+    void SummonedMovementInform(Creature* pSummoned, uint32 /*pMotionType*/, uint32 pData) override
     {
         switch (pData)
         {

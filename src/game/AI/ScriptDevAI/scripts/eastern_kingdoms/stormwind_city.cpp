@@ -327,7 +327,7 @@ struct npc_dashel_stonefistAI : public CombatAI
                 ResetTimer(DASHEL_END_EVENT, timer);
         }
     }
-    void JustDied(Unit* pUnit) override
+    void JustDied(Unit* /*pUnit*/) override
     {
         // case: something weird happened, killed by GM command, etc.
         if (m_dialogStarted || m_questFightStarted)

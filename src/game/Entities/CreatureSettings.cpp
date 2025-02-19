@@ -137,14 +137,14 @@ void CreatureSettings::updateFlag(CreatureStaticFlags flag, bool apply)
     }
 }
 
-void CreatureSettings::updateFlag(CreatureStaticFlags2 flag, bool apply)
+void CreatureSettings::updateFlag(CreatureStaticFlags2 /*flag*/, bool /*apply*/)
 {
 }
 
-void CreatureSettings::updateFlag(CreatureStaticFlags3 flag, bool apply)
+void CreatureSettings::updateFlag(CreatureStaticFlags3 /*flag*/, bool /*apply*/)
 {
 }
 
-void CreatureSettings::updateFlag(CreatureStaticFlags4 flag, bool apply)
+void CreatureSettings::updateFlag(CreatureStaticFlags4 /*flag*/, bool /*apply*/)
 {
 }

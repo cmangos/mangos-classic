@@ -1735,7 +1735,7 @@ SpellAuraProcResult Unit::HandleInvisibilityAuraProc(ProcExecutionData& data)
     return SPELL_AURA_PROC_OK;
 }
 
-SpellAuraProcResult Unit::HandleSpellModProc(ProcExecutionData& data)
+SpellAuraProcResult Unit::HandleSpellModProc(ProcExecutionData& /*data*/)
 {
     // one day if figured out - remove charges through proc system but currently not reliable enough for edge cases
     return SPELL_AURA_PROC_CANT_TRIGGER;

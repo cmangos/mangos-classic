@@ -1253,7 +1253,7 @@ void UnitAI::UpdateSpellLists()
     if (eligibleSpells.size() > 1 && sum != 0) // sum == 0 is meant to be priority based (lower position, higher priority)
         std::shuffle(eligibleSpells.begin(), eligibleSpells.end(), *GetRandomGenerator());
 
-    auto executeSpell = [&](uint32 spellId, uint32 probability, uint32 scriptId, Unit* target) -> bool
+    auto executeSpell = [&](uint32 spellId, uint32 scriptId, Unit* target) -> bool
     {
         CanCastResult castResult = DoCastSpellIfCan(target, spellId);
         if (castResult == CAST_OK)
@@ -1270,7 +1270,7 @@ void UnitAI::UpdateSpellLists()
     {
         uint32 spellId; uint32 probability; uint32 scriptId; Unit* target;
         std::tie(spellId, probability, scriptId, target) = data;
-        executeSpell(spellId, probability, scriptId, target);
+        executeSpell(spellId, scriptId, target);
     }
 
     // will hit first eligible spell when sum is 0 because roll -1 < probability 0
@@ -1285,7 +1285,7 @@ void UnitAI::UpdateSpellLists()
             std::tie(spellId, probability, scriptId, target) = *itr;
             if (spellRoll < int32(probability))
             {
-                success = executeSpell(spellId, probability, scriptId, target);
+                success = executeSpell(spellId, scriptId, target);
                 itr = eligibleSpells.erase(itr);
             }
             else

@@ -2430,8 +2430,8 @@ class Unit : public WorldObject
         virtual bool IsPreventingDeath() const { return false; }
 
         virtual CreatureInfo const* GetMountInfo() const { return nullptr; } // TODO: Meant to be used by players during taxi
-        virtual void SetMountInfo(CreatureInfo const* info) {} // does nothing for base unit
-        virtual void SetModelRunSpeed(float runSpeed) {} // does nothing for base unit
+        virtual void SetMountInfo(CreatureInfo const* /*info*/) {} // does nothing for base unit
+        virtual void SetModelRunSpeed(float /*runSpeed*/) {} // does nothing for base unit
 
     protected:
         bool MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spellInfo, uint32 selectFlags, SelectAttackingTargetParams params, int32 unitConditionId) const;
