@@ -332,8 +332,6 @@ HostileReference* ThreatContainer::selectNextVictim(Unit* attacker, HostileRefer
 {
     HostileReference* currentRef = nullptr;
     bool found = false;
-    bool onlySecondChoiceTargetsFound = false;
-    bool checkedCurrentVictim = false;
     bool suppressRanged = attacker->IsIgnoringRangedTargets();
     bool currentVictimInMelee = true;
     if (suppressRanged && currentVictim)

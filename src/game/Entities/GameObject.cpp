@@ -1556,8 +1556,6 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
             if (user->GetTypeId() != TYPEID_PLAYER)
                 return;
 
-            Player* player = (Player*)user;
-
             // a chair may have n slots. we have to calculate their positions and teleport the player to the nearest one
             float slotX, slotY;
             std::tie(slotX, slotY) = GetClosestChairSlotPosition(user);

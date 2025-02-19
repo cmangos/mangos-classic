@@ -3106,8 +3106,6 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
     if (!Real)
         return;
 
-    Unit* target = GetTarget();
-
     switch (GetId())
     {
         // some spell have charges by functionality not have its in spell data

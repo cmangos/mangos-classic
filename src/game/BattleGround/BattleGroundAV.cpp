@@ -667,7 +667,6 @@ void BattleGroundAV::ProcessPlayerDefendsPoint(Player* player, AVNodeIds node)
     uint32 scoreType = isTower ? SCORE_TOWERS_DEFENDED : SCORE_GRAVEYARDS_DEFENDED;
     int32 yellId     = isTower ? LANG_BG_AV_TOWER_DEFENDED : LANG_BG_AV_GRAVE_DEFENDED;
     uint32 soundId   = isTower ? BG_AV_SOUND_BOTH_TOWER_DEFEND : (teamIdx == TEAM_INDEX_ALLIANCE) ? BG_AV_SOUND_ALLIANCE_GOOD : BG_AV_SOUND_HORDE_GOOD;
-    uint32 objId     = isTower ? 64 : 65;
 
     // process world state
 
@@ -700,7 +699,6 @@ void BattleGroundAV::ProcessPlayerAssaultsPoint(Player* player, AVNodeIds node)
     uint32 scoreType    = isTower ? SCORE_TOWERS_ASSAULTED : SCORE_GRAVEYARDS_ASSAULTED;
     uint32 kreditMarker = isTower ? BG_AV_NPC_PVP_TOWER_CREDIT : BG_AV_NPC_PVP_GRAVEYARD_CREDIT;
     int32 yellId        = isTower ? LANG_BG_AV_TOWER_ASSAULTED : LANG_BG_AV_GRAVE_ASSAULTED;
-    uint32 objId        = isTower ? 61 : 63;
 
     // process new world state
     if (!isTower)

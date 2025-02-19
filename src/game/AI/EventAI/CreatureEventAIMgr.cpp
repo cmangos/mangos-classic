@@ -1085,9 +1085,9 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     for (uint32 j = 0; j < MAX_ACTIONS; ++j)
                     {
                         CreatureEventAI_Action& action = temp.action[j];
-                        if (temp.action[j].type == ACTION_T_CAST && temp.action[j].cast.target == TARGET_T_EVENT_SPECIFIC)
+                        if (action.type == ACTION_T_CAST && action.cast.target == TARGET_T_EVENT_SPECIFIC)
                         {
-                            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(temp.action[j].cast.spellId);
+                            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(action.cast.spellId);
                             if (spellInfo->HasAttribute(SPELL_ATTR_EX_EXCLUDE_CASTER))
                                 data.friendlyHp.targetSelf = false;
                         }

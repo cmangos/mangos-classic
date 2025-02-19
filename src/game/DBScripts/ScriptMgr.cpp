@@ -2031,7 +2031,6 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
             float z = m_script->z;
             float o = m_script->o;
             bool run = m_script->textId[0] == 1;
-            uint32 relayId = m_script->textId[1];
 
             TempSpawnSettings settings(pSource, m_script->summonCreature.creatureEntry, x, y, z, o, m_script->summonCreature.despawnDelay ? TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN : TEMPSPAWN_DEAD_DESPAWN, m_script->summonCreature.despawnDelay, (m_script->data_flags& SCRIPT_FLAG_COMMAND_ADDITIONAL) != 0, run, m_script->summonCreature.pathId);
             settings.spawnDataEntry = m_script->textId[3];
@@ -2256,7 +2255,6 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 break;
             }
 
-            uint32 movementType = m_script->movement.movementType;
             uint32 wanderORpathId = m_script->movement.wanderORpathId;
 
             WaypointPathOrigin wp_origin = PATH_NO_PATH;
@@ -3134,7 +3132,6 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
 
                     Creature* leader = static_cast<Creature*>(pTarget);
 
-                    CreatureGroup* leaderGroup = leader->GetCreatureGroup();
                     FormationSlotDataSPtr leaderSlot = leader->GetFormationSlot();
                     FormationData* leaderFormation = nullptr;
                     if (leaderSlot)
@@ -3168,7 +3165,6 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
 
                     Creature* leader = static_cast<Creature*>(pTarget);
 
-                    CreatureGroup* leaderGroup = leader->GetCreatureGroup();
                     FormationSlotDataSPtr leaderSlot = leader->GetFormationSlot();
                     FormationData* leaderFormation = nullptr;
                     if (leaderSlot)
@@ -3200,7 +3196,6 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
 
                     Creature* leader = static_cast<Creature*>(pTarget);
 
-                    CreatureGroup* leaderGroup = leader->GetCreatureGroup();
                     FormationSlotDataSPtr leaderSlot = leader->GetFormationSlot();
                     FormationData* leaderFormation = nullptr;
                     if (leaderSlot)
