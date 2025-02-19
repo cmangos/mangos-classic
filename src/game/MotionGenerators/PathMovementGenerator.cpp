@@ -27,7 +27,7 @@
 #include <algorithm>
 
 AbstractPathMovementGenerator::AbstractPathMovementGenerator(const Movement::PointsArray& path, float orientation, int32 offset/* = 0*/, bool cyclic/* = true*/) :
-    m_pathIndex(offset), m_orientation(orientation), m_firstCycle(false), m_startPoint(0), m_speedChanged(false), m_cyclic(cyclic)
+    m_pathIndex(offset), m_orientation(orientation), m_cyclic(cyclic), m_firstCycle(false), m_startPoint(0), m_speedChanged(false)
 {
     for (size_t i = 0; i < path.size(); ++i)
         m_path[i] = { path[i].x, path[i].y, path[i].z, ((i + 1) == path.size() ? orientation : 0), 0, 0 };
