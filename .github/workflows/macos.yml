@@ -8,14 +8,14 @@ env:
   REPO_DIR : ${{github.workspace}}
   BUILD_DIR: ${{github.workspace}}/bin/builddir
   BOOST_VERSION: "1.83.0"
-  BOOST_PLATFORM_VERSION: "12"
+  BOOST_PLATFORM_VERSION: "13"
 
 permissions:
   contents: read
 
 jobs:
   build:
-    runs-on: macos-12
+    runs-on: macos-13
     permissions:
       contents: read
 
