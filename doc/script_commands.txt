@@ -237,6 +237,8 @@ Defining a buddy could be done in several way:
 
 14 SCRIPT_COMMAND_REMOVE_AURA               resultingSource = Unit
                                             * datalong = spell_id
+                                            * datalong2 = 0 - remove whole, 1 - remove charge, 2 remove stack
+                                            * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: remove aura by caster spell from script target
                                             warning - if used with a channeled spell will not interrupt channel
 
 15 SCRIPT_COMMAND_CAST_SPELL                resultingSource = Unit, cast spell at resultingTarget = Unit
