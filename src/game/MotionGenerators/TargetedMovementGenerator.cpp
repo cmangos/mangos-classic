@@ -28,6 +28,7 @@
 #include "Grids/GridNotifiersImpl.h"
 #include "Entities/Transports.h"
 #include "Maps/SpawnGroup.h"
+#include "Grids/CellImpl.h"
 
 #define IGNORE_M2 true // simple define for avoiding bugs due to different setting across movechase
 
