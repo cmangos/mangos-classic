@@ -126,7 +126,7 @@ class WorldSocket : public MaNGOS::AsyncSocket<WorldSocket>
         bool m_loggingPackets;
 
     public:
-        WorldSocket(boost::asio::io_service& service);
+        WorldSocket(boost::asio::io_context& context);
 
         // send a packet \o/
         void SendPacket(const WorldPacket& pct, bool immediate = false);

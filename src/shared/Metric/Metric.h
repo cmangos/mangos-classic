@@ -120,12 +120,12 @@ namespace metric
             void report(std::string measurement, std::map<std::string, boost::any> fields, std::map<std::string, std::string> tags = {});
 
         private:
-            boost::asio::io_service m_queueService;
-            boost::asio::io_service m_writeService;
+            boost::asio::io_context m_queueContext;
+            boost::asio::io_context m_writeContext;
 
             std::unique_ptr<boost::asio::deadline_timer> m_sendTimer;
-            std::unique_ptr<boost::asio::io_service::work> m_queueServiceWork;
-            std::unique_ptr<boost::asio::io_service::work> m_writeServiceWork;
+            std::unique_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type>> m_queueContextWork;
+            std::unique_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type>> m_writeContextWork;
             std::thread m_queueServiceThread;
             std::thread m_writeServiceThread;
 

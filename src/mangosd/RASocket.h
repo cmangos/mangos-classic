@@ -56,7 +56,7 @@ class RASocket : public MaNGOS::AsyncSocket<RASocket>
         void Send(const std::string& message);
 
     public:
-        RASocket(boost::asio::io_service& service);
+        RASocket(boost::asio::io_context& context);
         virtual ~RASocket();
 
         bool OnOpen() override;

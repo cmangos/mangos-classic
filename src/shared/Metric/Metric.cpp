@@ -84,12 +84,15 @@ metric::metric::~metric()
     if (!m_enabled)
         return;
 
-    m_writeService.post([&] {
+    boost::asio::post(m_writeContext, [&] {
         m_sendTimer->cancel();
     });
 
-    m_queueServiceWork.reset();
-    m_writeServiceWork.reset();
+    m_queueContextWork.get()->reset();
+    m_writeContextWork.get()->reset();
+
+    m_queueContextWork.reset();
+    m_writeContextWork.reset();
 
     m_queueServiceThread.join();
     m_writeServiceThread.join();
@@ -108,17 +111,17 @@ void metric::metric::initialize()
         sConfig.GetStringDefault("Metric.Password", "")
     };
 
-    m_sendTimer.reset(new boost::asio::deadline_timer(m_writeService));
-    m_queueServiceWork.reset(new boost::asio::io_service::work(m_queueService));
-    m_writeServiceWork.reset(new boost::asio::io_service::work(m_writeService));
+    m_sendTimer.reset(new boost::asio::deadline_timer(m_writeContext));
+    m_queueContextWork = std::make_unique<boost::asio::executor_work_guard<boost::asio::io_context::executor_type>>(boost::asio::make_work_guard(m_queueContext));
+    m_writeContextWork = std::make_unique<boost::asio::executor_work_guard<boost::asio::io_context::executor_type>>(boost::asio::make_work_guard(m_writeContext));
 
     // Start up service thread that will process all queued tasks
     m_queueServiceThread = std::thread([&] {
-        m_queueService.run();
+        m_queueContext.run();
     });
 
     m_writeServiceThread = std::thread([&] {
-        m_writeService.run();
+        m_writeContext.run();
     });
 
     schedule_timer();
@@ -137,8 +140,7 @@ void metric::metric::reload_config()
         initialize();
         return;
     }
-
-    m_writeService.post([&]
+    boost::asio::post(m_writeContext, [&]
     {
         m_connectionInfo = {
             sConfig.GetStringDefault("Metric.Address", "127.0.0.1"),
@@ -160,7 +162,7 @@ void metric::metric::report(std::string measurement, std::map<std::string, boost
     if (!m_enabled)
         return;
 
-    m_queueService.post([&, measurement, fields, tags]
+    boost::asio::post(m_queueContext, [&, measurement, fields, tags]
     {
         std::lock_guard<std::mutex> guard(m_queueWriteLock);
         m_measurementQueue.push_back(std::make_unique<Measurement>(measurement, tags, fields));
@@ -209,9 +211,9 @@ void metric::metric::send()
     boost::system::error_code error;
 
     // Hostname resolution
-    tcp::resolver resolver(m_writeService);
-    tcp::resolver::query query(m_connectionInfo.hostname, std::to_string(m_connectionInfo.port));
-    tcp::resolver::iterator endpoint_iterator = resolver.resolve(query, error);
+    tcp::resolver resolver(m_writeContext);
+    auto endpoints = resolver.resolve(m_connectionInfo.hostname, std::to_string(m_connectionInfo.port), error);
+    auto endpoint_iterator = endpoints.begin();
 
     if (error)
     {
@@ -221,9 +223,9 @@ void metric::metric::send()
 
     error = boost::asio::error::host_not_found;
 
-    tcp::resolver::iterator end;
+    auto end = endpoints.end();
 
-    tcp::socket socket(m_writeService);
+    tcp::socket socket(m_writeContext);
     while (error && endpoint_iterator != end)
     {
         socket.close();

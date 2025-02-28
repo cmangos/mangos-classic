@@ -92,7 +92,7 @@ std::deque<uint32> WorldSocket::GetIncOpcodeHistory()
     return m_opcodeHistoryInc;
 }
 
-WorldSocket::WorldSocket(boost::asio::io_service& service) : AsyncSocket(service), m_lastPingTime(std::chrono::system_clock::time_point::min()), m_overSpeedPings(0),
+WorldSocket::WorldSocket(boost::asio::io_context& context) : AsyncSocket(context), m_lastPingTime(std::chrono::system_clock::time_point::min()), m_overSpeedPings(0),
     m_session(nullptr), m_seed(urand()), m_loggingPackets(false)
 {
 }

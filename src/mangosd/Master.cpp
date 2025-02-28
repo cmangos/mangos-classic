@@ -227,11 +227,11 @@ int Master::Run()
         }
         std::string bindIp = sConfig.GetStringDefault("BindIP", "0.0.0.0");
         int32 port = int32(sWorld.getConfig(CONFIG_UINT32_PORT_WORLD));
-        MaNGOS::AsyncListener<WorldSocket> listener(m_service, bindIp, port);
+        MaNGOS::AsyncListener<WorldSocket> listener(m_context, bindIp, port);
 
         std::vector<std::thread> threads;
         for (int32 i = 0; i < networkThreadCount; ++i)
-            threads.emplace_back([&]() { m_service.run(); });
+            threads.emplace_back([&]() { m_context.run(); });
 
         std::unique_ptr<MaNGOS::AsyncListener<RASocket>> raListener;
         std::string raBindIp = sConfig.GetStringDefault("Ra.IP", "0.0.0.0");
@@ -240,8 +240,8 @@ int Master::Run()
         bool raEnable = sConfig.GetBoolDefault("Ra.Enable", false);
         if (raEnable)
         {
-            raListener.reset(new MaNGOS::AsyncListener<RASocket>(m_raService, raBindIp, raPort));
-            m_raThread = std::thread([this]() { m_raService.run(); });
+            raListener.reset(new MaNGOS::AsyncListener<RASocket>(m_raContext, raBindIp, raPort));
+            m_raThread = std::thread([this]() { m_raContext.run(); });
         }
 
         std::unique_ptr<SOAPThread> soapThread;
@@ -254,11 +254,11 @@ int Master::Run()
 
         world_thread.wait();
 
-        m_service.stop();
+        m_context.stop();
 
         if (raEnable)
         {
-            m_raService.stop();
+            m_raContext.stop();
             m_raThread.join();
         }
 

@@ -73,7 +73,7 @@ bool restart = false;
 
 DatabaseType LoginDatabase;                                 // Accessor to the realm server database
 
-boost::asio::io_service service;
+boost::asio::io_context context;
 
 // Launch the realm server
 int main(int argc, char* argv[])
@@ -239,14 +239,14 @@ int main(int argc, char* argv[])
     LoginDatabase.CommitTransaction();
 
     uint32 networkThreadCount = sConfig.GetIntDefault("ListenerThreads", 1);
-    MaNGOS::AsyncListener<AuthSocket> listener(service,
+    MaNGOS::AsyncListener<AuthSocket> listener(context,
             sConfig.GetStringDefault("BindIP", "0.0.0.0"),
             sConfig.GetIntDefault("RealmServerPort", DEFAULT_REALMSERVER_PORT)
     );
 
     std::vector<std::thread> threads;
     for (uint32 i = 0; i < networkThreadCount; ++i)
-        threads.emplace_back([&]() { service.run(); });
+        threads.emplace_back([&]() { context.run(); });
 
     // Catch termination signals
     HookSignals();
@@ -320,7 +320,7 @@ int main(int argc, char* argv[])
 #endif
     }
 
-    service.stop();
+    context.stop();
 
     for (uint32 i = 0; i < networkThreadCount; ++i)
         threads[i].join();

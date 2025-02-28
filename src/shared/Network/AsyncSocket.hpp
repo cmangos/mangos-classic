@@ -32,7 +32,7 @@ namespace MaNGOS
     class AsyncSocket : public std::enable_shared_from_this<SocketType>
     {
         public:
-            AsyncSocket(boost::asio::io_service& io_service);
+            AsyncSocket(boost::asio::io_context& io_context);
             virtual ~AsyncSocket();
 
             void Read(char* buffer, size_t length, std::function<void(const boost::system::error_code&, std::size_t)>&& callback);
@@ -74,7 +74,7 @@ namespace MaNGOS
     };
 
     template <typename SocketType>
-    MaNGOS::AsyncSocket<SocketType>::AsyncSocket(boost::asio::io_service& io_service) : m_socket(io_service), m_address("0.0.0.0"),
+    MaNGOS::AsyncSocket<SocketType>::AsyncSocket(boost::asio::io_context& io_context) : m_socket(io_context), m_address("0.0.0.0"),
         m_remoteAddress(boost::asio::ip::address()), m_remotePort(0)
     {
 
