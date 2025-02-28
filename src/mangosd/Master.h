@@ -44,8 +44,8 @@ class Master
 
         void clearOnlineAccounts();
 
-        boost::asio::io_service m_service;
-        boost::asio::io_service m_raService;
+        boost::asio::io_context m_context;
+        boost::asio::io_context m_raContext;
 };
 
 #define sMaster MaNGOS::Singleton<Master>::Instance()

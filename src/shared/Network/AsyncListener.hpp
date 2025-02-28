@@ -31,7 +31,7 @@ namespace MaNGOS
     {
         public:
             // constructor for accepting connection from client
-            AsyncListener(boost::asio::io_service& io_service, std::string const& bindIp, unsigned short port) : m_service(io_service), m_acceptor(io_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(bindIp), port))
+            AsyncListener(boost::asio::io_context& io_context, std::string const& bindIp, unsigned short port) : m_context(io_context), m_acceptor(io_context, boost::asio::ip::tcp::endpoint(boost::asio::ip::make_address(bindIp), port))
             {
                 startAccept();
             }
@@ -43,12 +43,12 @@ namespace MaNGOS
                 startAccept();
             }
         private:
-            boost::asio::io_service& m_service;
+            boost::asio::io_context& m_context;
             boost::asio::ip::tcp::acceptor m_acceptor;
             void startAccept()
             {
                 // socket
-                std::shared_ptr<SocketType> connection = std::make_shared<SocketType>(m_service);
+                std::shared_ptr<SocketType> connection = std::make_shared<SocketType>(m_context);
 
                 // asynchronous accept operation and wait for a new connection.
                 m_acceptor.async_accept(connection->GetAsioSocket(), boost::bind(&AsyncListener::HandleAccept, this, connection, boost::asio::placeholders::error));

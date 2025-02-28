@@ -37,8 +37,8 @@
 #include <string>
 
 /// RASocket constructor
-RASocket::RASocket(boost::asio::io_service& service) :
-    MaNGOS::AsyncSocket<RASocket>(service), m_secure(sConfig.GetBoolDefault("RA.Secure", true)),
+RASocket::RASocket(boost::asio::io_context& context) :
+    MaNGOS::AsyncSocket<RASocket>(context), m_secure(sConfig.GetBoolDefault("RA.Secure", true)),
     m_authLevel(AuthLevel::None), m_accountLevel(AccountTypes::SEC_PLAYER), m_accountId(0)
 {
     if (sConfig.IsSet("RA.Stricted"))
