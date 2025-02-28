@@ -303,7 +303,7 @@ bool IsIPAddress(char const* ipaddress)
     // Let the big boys do it.
     // Drawback: all valid ip address formats are recognized e.g.: 12.23,121234,0xABCD)
     boost::system::error_code ec;
-    boost::asio::ip::address::from_string(ipaddress, ec);
+    boost::asio::ip::make_address(ipaddress, ec);
     return ec.value() == 0;
 }
 

@@ -45,7 +45,7 @@ class AuthSocket : public MaNGOS::AsyncSocket<AuthSocket>
     public:
         const static int s_BYTE_SIZE = 32;
 
-        AuthSocket(boost::asio::io_service& service);
+        AuthSocket(boost::asio::io_context& context);
 
         bool OnOpen() override;
 
