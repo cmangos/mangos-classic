@@ -280,6 +280,9 @@ namespace MMAP
 
     void MMapManager::loadAllGameObjectModels(std::string const& basePath, std::vector<uint32> const& displayIds)
     {
+        if (!IsEnabled())
+            return;
+
         for (uint32 displayId : displayIds)
             loadGameObject(basePath, displayId);
     }

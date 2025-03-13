@@ -200,9 +200,13 @@ void Map::Initialize(bool loadInstanceData /*= true*/)
 
     m_spawnManager.Initialize();
 
-    MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), GetId(), GetInstanceId());
-    if (sWorld.getConfig(CONFIG_BOOL_PRELOAD_MMAP_TILES))
-        MMAP::MMapFactory::createOrGetMMapManager()->loadAllMapTiles(sWorld.GetDataPath(), GetId());
+    auto mmap = MMAP::MMapFactory::createOrGetMMapManager();
+    if (mmap->IsEnabled())
+    {
+        MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), GetId(), GetInstanceId());
+        if (sWorld.getConfig(CONFIG_BOOL_PRELOAD_MMAP_TILES))
+            MMAP::MMapFactory::createOrGetMMapManager()->loadAllMapTiles(sWorld.GetDataPath(), GetId());
+    }
 
     sObjectMgr.LoadActiveEntities(this);
 
