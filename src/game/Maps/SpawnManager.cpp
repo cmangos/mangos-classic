@@ -73,7 +73,7 @@ void SpawnManager::Initialize()
             if (m_map.GetPersistentState()->GetGORespawnTime(dbGuid) < now)
             {
                 auto data = sObjectMgr.GetGOData(dbGuid);
-                if ((data->spawnMask & (1 << m_map.GetDifficulty())) != 0) // copy of Map::CanSpawn
+                if (data->spawnMask != 0) // copy of Map::CanSpawn
                     m_map.GetPersistentState()->AddGameobjectToGrid(dbGuid, data);
             }
             else
