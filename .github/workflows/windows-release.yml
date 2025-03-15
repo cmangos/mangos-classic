@@ -1,6 +1,5 @@
 name: Windows Release Build
 
-#
 on:
   schedule:
     # every day at 6am
@@ -136,7 +135,7 @@ jobs:
 
   notify-success:
     name: Send Notification to Discord on Success
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     permissions:
       contents: none
     needs:
@@ -179,7 +178,7 @@ jobs:
 
   notify:
     name: Send Notification to Discord on Failure
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     permissions:
       contents: none
     needs: # make sure the notification is sent AFTER the jobs you want included have completed

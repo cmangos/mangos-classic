@@ -23,6 +23,8 @@ if( UNIX )
     /usr/local/bin/
     /usr/bin/
     /usr/local/opt/mysql/bin/
+    /opt/homebrew/opt/mysql-client/bin
+    /opt/homebrew/opt/mysql-client@8.4/bin
     /opt/mysql/mysql/bin/
   )
 
@@ -77,6 +79,10 @@ find_path(MYSQL_INCLUDE_DIR
     /usr/local/opt/mysql/include
     /usr/local/opt/mysql-client/include
     /usr/local/opt/mysql-client/include/mysql
+    /opt/homebrew/opt/mysql-client
+    /opt/homebrew/opt/mysql-client/include
+    /opt/homebrew/opt/mysql-client@8.4
+    /opt/homebrew/opt/mysql-client@8.4/include
     /opt/mysql/mysql/include
     /opt/mysql/mysql/include/mysql
     "C:/Program Files/MySQL/include"
@@ -107,6 +113,10 @@ foreach(LIB ${MYSQL_ADD_LIBRARIES})
       /usr/local/mysql/lib/mysql
       /usr/local/opt/mysql/lib
       /usr/local/opt/mysql-client/lib
+      /opt/homebrew/opt/mysql-client
+      /opt/homebrew/opt/mysql-client/lib
+      /opt/homebrew/opt/mysql-client@8.4
+      /opt/homebrew/opt/mysql-client@8.4/lib
       /opt/mysql/mysql/lib
       /opt/mysql/mysql/lib/mysql
     DOC "Specify the location of the mysql library here."
