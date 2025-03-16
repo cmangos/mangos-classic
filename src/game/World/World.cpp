@@ -836,6 +836,8 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_PATH_FIND_OPTIMIZE, "PathFinder.OptimizePath", true);
     setConfig(CONFIG_BOOL_PATH_FIND_NORMALIZE_Z, "PathFinder.NormalizeZ", false);
 
+    setConfig(CONFIG_BOOL_REGEN_ZONE_AREA_ON_STARTUP, "Spawns.ZoneArea", false);
+
     sLog.outString();
 }
 
@@ -1064,6 +1066,12 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Gameobject Data...");
     sObjectMgr.LoadGameObjects();
+
+    if (getConfig(CONFIG_BOOL_REGEN_ZONE_AREA_ON_STARTUP))
+    {
+        sLog.outString("Generating zone and area ids for creatures and gameobjects...");
+        sObjectMgr.GenerateZoneAndAreaIds();
+    }
 
     sLog.outString("Loading SpellsScriptTarget...");
     sSpellMgr.LoadSpellScriptTarget();                      // must be after LoadCreatureTemplates, LoadCreatures and LoadGameobjectInfo

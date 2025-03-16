@@ -72,6 +72,10 @@ ConfVersion=2024020101
 #    SD2ErrorLogFile
 #        Log File for SD2-Errors
 #
+#    Spawns.ZoneArea
+#        Regenerates table creature_zone and gameobject_zone
+#        Default: 0 - turned off
+#
 ###################################################################################################################
 
 RealmID = 1
@@ -89,6 +93,7 @@ MaxPingTime = 30
 WorldServerPort = 8085
 BindIP = "0.0.0.0"
 SD2ErrorLogFile = "SD2Errors.log"
+Spawns.ZoneArea = 0
 
 ###################################################################################################################
 # PERFORMANCE SETTINGS

@@ -710,6 +710,8 @@ class ObjectMgr
         void LoadConditions();
         void LoadAreatriggerLocales();
 
+        void GenerateZoneAndAreaIds();
+
         void LoadGossipText();
 
         void LoadAreaTriggerTeleports();

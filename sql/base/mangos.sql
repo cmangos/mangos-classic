@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2826_01_mangos_spawn_group_squad` bit(1) DEFAULT NULL
+  `required_z2827_01_mangos_spawn_zone` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -766,6 +766,14 @@ LOCK TABLES `creature_addon` WRITE;
 /*!40000 ALTER TABLE `creature_addon` DISABLE KEYS */;
 /*!40000 ALTER TABLE `creature_addon` ENABLE KEYS */;
 UNLOCK TABLES;
+
+DROP TABLE IF EXISTS `creature_zone`;
+CREATE TABLE `creature_zone` (
+  `Guid` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Global Unique Identifier',
+  `ZoneId` mediumint unsigned NOT NULL DEFAULT '0' COMMENT 'Zone Identifier',
+  `AreaId` mediumint unsigned NOT NULL DEFAULT '0' COMMENT 'Area Identifier',
+  PRIMARY KEY(`Guid`)
+);
 
 --
 -- Table structure for table `creature_ai_scripts`
@@ -1953,6 +1961,14 @@ CREATE TABLE `gameobject_addon` (
   `state` TINYINT(3) NOT NULL DEFAULT -1,
   `StringId` INT(11) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY(`guid`)
+);
+
+DROP TABLE IF EXISTS `gameobject_zone`;
+CREATE TABLE `gameobject_zone` (
+  `Guid` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Global Unique Identifier',
+  `ZoneId` mediumint unsigned NOT NULL DEFAULT '0' COMMENT 'Zone Identifier',
+  `AreaId` mediumint unsigned NOT NULL DEFAULT '0' COMMENT 'Area Identifier',
+  PRIMARY KEY(`Guid`)
 );
 
 DROP TABLE IF EXISTS `gameobject_spawn_entry`;
