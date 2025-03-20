@@ -1,3 +1,5 @@
+ALTER TABLE db_version CHANGE COLUMN required_z2825_01_mangos_reputation_spillover required_z2826_01_mangos_spawn_group_squad bit;
+
 DROP TABLE IF EXISTS spawn_group_squad;
 CREATE TABLE spawn_group_squad(
 Id INT NOT NULL COMMENT 'Spawn Group ID',
