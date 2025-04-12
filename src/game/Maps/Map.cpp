@@ -110,10 +110,9 @@ GenericTransport* Map::GetTransport(ObjectGuid guid)
             return transport;
         }
     }
-    if (guid.GetEntry())
-        if (GameObject* go = GetGameObject(guid))
-            if (go->IsTransport())
-                return static_cast<GenericTransport*>(go);
+    if (GameObject* go = GetGameObject(guid))
+        if (go->IsTransport())
+            return static_cast<GenericTransport*>(go);
     return nullptr;
 }
 
