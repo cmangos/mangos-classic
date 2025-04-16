@@ -1416,8 +1416,20 @@ void PathFinder::ComputePathToRandomPoint(Vector3 const& startPoint, float maxRa
         }
     }
 
+    bool canShortcut = false;
+    if (m_sourceUnit->IsInWater())
+    {
+        if (m_sourceUnit->CanSwim())
+            canShortcut = true;
+    }
+    else if (m_sourceUnit->IsAboveGround())
+    {
+        if (m_sourceUnit->IsLevitating() || m_sourceUnit->IsHovering())
+            canShortcut = true;
+    }
+
     // navmesh queries do not work in water - need to supplement with los check and just build a shortcut
-    if (fail && m_sourceUnit->IsInWater() && m_sourceUnit->CanSwim() && m_sourceUnit->GetMap()->IsInLineOfSight(currPos.x, currPos.y, currPos.z + m_sourceUnit->GetCollisionHeight(), endPoint.x, endPoint.y, endPoint.z + m_sourceUnit->GetCollisionHeight(), false))
+    if (fail && canShortcut && m_sourceUnit->GetMap()->IsInLineOfSight(currPos.x, currPos.y, currPos.z + m_sourceUnit->GetCollisionHeight(), endPoint.x, endPoint.y, endPoint.z + m_sourceUnit->GetCollisionHeight(), false))
     {
         BuildShortcut();
     }
