@@ -232,8 +232,9 @@ struct EquipmentInfoRaw
 
 enum SpawnFlags
 {
-    SPAWN_FLAG_RUN_ON_SPAWN = 0x01,
-    SPAWN_FLAG_HOVER        = 0x02,
+    SPAWN_FLAG_RUN_ON_SPAWN     = 0x01,
+    SPAWN_FLAG_HOVER            = 0x02,
+    SPAWN_FLAG_DISABLE_GRAVITY  = 0x04,
 };
 
 struct CreatureSpawnTemplate
@@ -252,6 +253,7 @@ struct CreatureSpawnTemplate
 
     bool IsRunning() const { return (spawnFlags & SPAWN_FLAG_RUN_ON_SPAWN) != 0; }
     bool IsHovering() const { return (spawnFlags & SPAWN_FLAG_HOVER) != 0; }
+    bool IsGravityDisabled() const { return (spawnFlags & SPAWN_FLAG_DISABLE_GRAVITY) != 0; }
 };
 
 // from `creature` table

@@ -2120,6 +2120,8 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map)
                 //make hover stuff dont fall @killerwife probably dont need all those flags
                 //creature->m_movementInfo.AddMovementFlag(MovementFlags(MOVEFLAG_FLYING | MOVEFLAG_SWIMMING | MOVEFLAG_CAN_FLY | MOVEFLAG_ROOT));
             }
+            if (templateData->IsGravityDisabled())
+                creature->SetLevitate(true);
             relayId = templateData->relayId;
             if (templateData->stringId)
                 creature->SetStringId(templateData->stringId, true);

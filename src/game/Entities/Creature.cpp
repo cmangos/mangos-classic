@@ -448,6 +448,8 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
             SetWalk(false);
         if (data->spawnTemplate->IsHovering())
             SetHover(true);
+        if (data->spawnTemplate->IsGravityDisabled())
+            SetLevitate(true);
         m_defaultMovementType = MovementGeneratorType(data->movementType);
     }
     else
