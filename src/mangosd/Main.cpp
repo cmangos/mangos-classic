@@ -68,7 +68,7 @@ uint32 realmID;                                             ///< Id of the realm
 /// Launch the mangos server
 int main(int argc, char* argv[])
 {
-    std::string auctionBotConfig, configFile, playerBotConfig, serviceParameter;
+    std::string auctionBotConfig, configFile, playerBotConfig, serviceParameter, playerbotsConfig;
 
     boost::program_options::options_description desc("Allowed options");
     desc.add_options()
@@ -76,6 +76,9 @@ int main(int argc, char* argv[])
     ("config,c", boost::program_options::value<std::string>(&configFile)->default_value(_MANGOSD_CONFIG), "configuration file")
 #ifdef BUILD_DEPRECATED_PLAYERBOT
     ("playerbot,p", boost::program_options::value<std::string>(&playerBotConfig)->default_value(_D_PLAYERBOT_CONFIG), "playerbot configuration file")
+#endif
+#ifdef BUILD_PLAYERBOT
+    ("playerbots,b", boost::program_options::value<std::string>(&playerbotsConfig), "Playerbots configuration file")
 #endif
     ("help,h", "prints usage")
     ("version,v", "print version and exit")
@@ -119,6 +122,11 @@ int main(int argc, char* argv[])
 #ifdef BUILD_DEPRECATED_PLAYERBOT
     if (vm.count("playerbot"))
         _PLAYERBOT_CONFIG = playerBotConfig;
+#endif
+
+#ifdef BUILD_PLAYERBOT
+    if (vm.count("playerbots"))
+        #define _PLAYERBOTS_CONFIG = playerbotsConfig;
 #endif
 
 #ifdef _WIN32                                                // windows service command need execute before config read
