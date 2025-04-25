@@ -17846,7 +17846,7 @@ void Player::BeforeVisibilityDestroy(Creature* creature)
 {
     if (creature->IsInCombat() && IsInCombat())
     {
-        if (!creature->GetMap()->IsDungeon() && creature->getThreatManager().HasThreat(this, true))
+        if (!creature->GetMap()->IsDungeon() && !creature->IsCombatOnlyStealth() && creature->getThreatManager().HasThreat(this, true))
             getHostileRefManager().deleteReference(creature);
         if (Pet* pet = GetPet())
             if (pet->GetVictim() == creature)
