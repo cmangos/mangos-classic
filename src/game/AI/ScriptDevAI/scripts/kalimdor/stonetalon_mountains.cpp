@@ -212,6 +212,15 @@ GameObjectAI* GetAIgo_covertops(GameObject* pGo)
     return new go_covertopsAI(pGo);
 }
 
+// Venture Co. Machine Smith - summon Compact Harvest Reaper
+struct CompactHarvestReaper : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SetLevel(spell->GetCaster()->GetLevel());
+    }
+};
+
 /*######
 ## AddSC
 ######*/
@@ -228,4 +237,6 @@ void AddSC_stonetalon_mountains()
     pNewScript->Name = "go_covert_ops";
     pNewScript->GetGameObjectAI = &GetAIgo_covertops;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<CompactHarvestReaper>("spell_compact_harvest_reaper");
 }
