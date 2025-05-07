@@ -228,123 +228,71 @@ bool EffectDummyCreature_awaken_kerlonian(Unit* pCaster, uint32 uiSpellId, Spell
 
 enum
 {
-    SAY_REM_START               = -1000327,
-    SAY_REM_AGGRO               = -1000339,
-    SAY_REM_RAMP1_1             = -1000328,
-    SAY_REM_RAMP1_2             = -1000329,
-    SAY_REM_BOOK                = -1000330,
-    SAY_REM_TENT1_1             = -1000331,
-    SAY_REM_TENT1_2             = -1000332,
-    SAY_REM_MOSS                = -1000333,
-    EMOTE_REM_MOSS              = -1000334,
-    SAY_REM_MOSS_PROGRESS       = -1000335,
-    SAY_REM_PROGRESS            = -1000336,
-    SAY_REM_REMEMBER            = -1000337,
-    EMOTE_REM_END               = -1000338,
-
     QUEST_ABSENT_MINDED_PT2     = 731,
-    NPC_GRAVEL_SCOUT            = 2158,
-    NPC_GRAVEL_BONE             = 2159,
-    NPC_GRAVEL_GEO              = 2160
+    REMTRAVEL_ESCORT_PATH       = 2917,
+
+    SAY_REM_AGGRO_1             = 938,
+    SAY_REM_AGGRO_2             = 939,
+    SAY_REM_AGGRO_3             = 940,
+    SAY_REM_AGGRO_4             = 941,
+    SAY_REM_AGGRO_5             = 942,
+    SAY_REM_AGGRO_6             = 943,
 };
 
 struct npc_prospector_remtravelAI : public npc_escortAI
 {
-    npc_prospector_remtravelAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
-
-    void WaypointReached(uint32 uiPointId) override
+    npc_prospector_remtravelAI(Creature* creature) : npc_escortAI(creature)
     {
-        Player* pPlayer = GetPlayerForEscort();
+        Reset();
+    }
 
-        if (!pPlayer)
-            return;
-
-        switch (uiPointId)
+    void Aggro(Unit* who) override
+    {
+        switch (urand(0, 5))
         {
-            case 1:
-                DoScriptText(SAY_REM_START, m_creature, pPlayer);
-                break;
-            case 6:
-                DoScriptText(SAY_REM_RAMP1_1, m_creature, pPlayer);
-                break;
-            case 7:
-                m_creature->SummonCreature(NPC_GRAVEL_SCOUT, -10.0f, 5.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_GRAVEL_BONE, -10.0f, 7.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
-                break;
-            case 10:
-                DoScriptText(SAY_REM_RAMP1_2, m_creature, pPlayer);
-                break;
-            case 15:
-                // depend quest rewarded?
-                DoScriptText(SAY_REM_BOOK, m_creature, pPlayer);
-                break;
-            case 16:
-                DoScriptText(SAY_REM_TENT1_1, m_creature, pPlayer);
-                break;
-            case 17:
-                m_creature->SummonCreature(NPC_GRAVEL_SCOUT, -10.0f, 5.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_GRAVEL_BONE, -10.0f, 7.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
-                break;
-            case 18:
-                DoScriptText(SAY_REM_TENT1_2, m_creature, pPlayer);
-                break;
-            case 27:
-                DoScriptText(SAY_REM_MOSS, m_creature, pPlayer);
-                break;
-            case 28:
-                DoScriptText(EMOTE_REM_MOSS, m_creature, pPlayer);
-                break;
-            case 29:
-                DoScriptText(SAY_REM_MOSS_PROGRESS, m_creature, pPlayer);
-                break;
-            case 30:
-                m_creature->SummonCreature(NPC_GRAVEL_SCOUT, -15.0f, 3.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_GRAVEL_BONE, -15.0f, 5.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_GRAVEL_GEO, -15.0f, 7.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
-                break;
-            case 32:
-                DoScriptText(SAY_REM_PROGRESS, m_creature, pPlayer);
-                break;
-            case 42:
-                DoScriptText(SAY_REM_REMEMBER, m_creature, pPlayer);
-                break;
-            case 43:
-                DoScriptText(EMOTE_REM_END, m_creature, pPlayer);
-                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ABSENT_MINDED_PT2, m_creature);
-                break;
+            case 0: DoBroadcastText(SAY_REM_AGGRO_1, m_creature); break;
+            case 1: DoBroadcastText(SAY_REM_AGGRO_2, m_creature, who); break;
+            case 2: DoBroadcastText(SAY_REM_AGGRO_3, m_creature, who); break;
+            case 3: DoBroadcastText(SAY_REM_AGGRO_4, m_creature, who); break;
+            case 4: DoBroadcastText(SAY_REM_AGGRO_5, m_creature, who); break;
+            case 5: DoBroadcastText(SAY_REM_AGGRO_6, m_creature, who); break;
         }
     }
 
-    void Reset() override { }
-
-    void Aggro(Unit* pWho) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {
-        if (urand(0, 1))
-            DoScriptText(SAY_REM_AGGRO, m_creature, pWho);
+        if (eventType == AI_EVENT_CUSTOM_EVENTAI_A)
+            if(m_creature->IsAlive())
+                sender->AI()->AttackStart(m_creature);        
     }
 
-    void JustSummoned(Creature* /*pSummoned*/) override
+    void WaypointReached(uint32 uiPointId) override
     {
-        // unsure if it should be any
-        // pSummoned->AI()->AttackStart(m_creature);
+        switch (uiPointId)
+        {
+            case 38:
+                if (Player* player = GetPlayerForEscort())
+                    player->RewardPlayerAndGroupAtEventExplored(QUEST_ABSENT_MINDED_PT2, m_creature);
+                break;
+            case 39:
+                m_creature->GetMotionMaster()->Clear(false, true);
+                m_creature->GetMotionMaster()->MoveIdle();
+                End();
+                break;
+        }
     }
 };
 
-UnitAI* GetAI_npc_prospector_remtravel(Creature* pCreature)
+bool QuestAccept_npc_prospector_remtravel(Player* player, Creature* creature, const Quest* quest)
 {
-    return new npc_prospector_remtravelAI(pCreature);
-}
-
-bool QuestAccept_npc_prospector_remtravel(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_ABSENT_MINDED_PT2)
+    if (quest->GetQuestId() == QUEST_ABSENT_MINDED_PT2)
     {
-        pCreature->SetFactionTemporary(FACTION_ESCORT_A_PASSIVE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
-
-        if (npc_prospector_remtravelAI* pEscortAI = dynamic_cast<npc_prospector_remtravelAI*>(pCreature->AI()))
-            pEscortAI->Start(false, pPlayer, pQuest, true);
+        if (npc_prospector_remtravelAI* pEscortAI = dynamic_cast<npc_prospector_remtravelAI*>(creature->AI()))
+        {
+            creature->SetFactionTemporary(FACTION_ESCORT_A_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
+            pEscortAI->Start(false, player, quest, false, false, REMTRAVEL_ESCORT_PATH);
+        }
     }
-
     return true;
 }
 
@@ -940,9 +888,8 @@ void AddSC_darkshore()
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_awaken_kerlonian;
     pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
     pNewScript->Name = "npc_prospector_remtravel";
-    pNewScript->GetAI = &GetAI_npc_prospector_remtravel;
+    pNewScript->GetAI = &GetNewAIInstance<npc_prospector_remtravelAI>;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_prospector_remtravel;
     pNewScript->RegisterSelf();
 
