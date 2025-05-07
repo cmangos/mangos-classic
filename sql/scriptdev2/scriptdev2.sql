@@ -363,6 +363,7 @@ INSERT INTO scripted_areatrigger VALUES
 UPDATE creature_template SET ScriptName='npc_eris_havenfire' WHERE entry=14494;
 
 /* ELWYNN FOREST */
+UPDATE gameobject_template SET ScriptName = 'go_marshal_haggards_chest' WHERE entry=1562;
 
 /* FELWOOD */
 UPDATE creature_template SET ScriptName='npc_kitten' WHERE entry=9937;
