@@ -52,6 +52,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (11889,'spell_capture_mountain_giant'),
 (11610,'spell_gammerita_turtle_camera'),
 (12479,'spell_hex_of_jammalan'),
+(20786,'spell_destroy_karangs_banner'),
 (13258,'spell_summon_goblin_bomb'),
 (16380,'spell_greater_invisibility_mob'),
 (17016,'spell_placing_beacon_torch'),

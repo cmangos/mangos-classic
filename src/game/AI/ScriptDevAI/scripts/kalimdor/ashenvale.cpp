@@ -32,6 +32,7 @@ EndContentData */
 
 
 #include "AI/ScriptDevAI/base/escort_ai.h"
+#include "World/WorldStateDefines.h"
 
 /*####
 # npc_muglash
@@ -637,6 +638,39 @@ bool QuestAccept_npc_feero_ironhand(Player* pPlayer, Creature* pCreature, const 
     return true;
 }
 
+// Destroy Karang's Banner used by Enraged Foulwealds during quest King of the Foulweald (6621)
+enum 
+{
+    GO_KARANGS_BANNER = 178205,
+};
+
+struct DestroyKarangsBanner : public SpellScript
+{
+    void OnSuccessfulFinish(Spell* spell) const override
+    {
+        if (!spell->GetCaster()->IsCreature())
+            return;
+
+        Creature* caster = static_cast<Creature*>(spell->GetCaster());
+        if (!caster || !caster->IsAlive())
+            return;
+
+        // Tested on Classic, spell should despawn ALL Gameobjects
+        GameObjectList bannerList;
+        GetGameObjectListWithEntryInGrid(bannerList, caster, GO_KARANGS_BANNER, 50.f);
+        for (const auto gobanner : bannerList)
+        {
+            gobanner->ForcedDespawn();
+        }
+
+        // Change Worldstate so NPCs stop respawning
+        caster->GetMap()->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_FOULWEALD, 0);
+
+        // SendAIEvent to handle Despawning after leaving Combat
+        caster->AI()->SendAIEventAround(AI_EVENT_CUSTOM_EVENTAI_A, caster, 0, 50);
+    }
+};
+
 void AddSC_ashenvale()
 {
     Script* pNewScript = new Script;
@@ -667,4 +701,6 @@ void AddSC_ashenvale()
     pNewScript->GetAI = &GetAI_npc_feero_ironhand;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_feero_ironhand;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<DestroyKarangsBanner>("spell_destroy_karangs_banner");
 }
