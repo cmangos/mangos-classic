@@ -23,11 +23,13 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
+#include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
+
+/* ContentData
 mob_yenniku
+mob_colonel_kurzen
 EndContentData */
-
-
 
 /*######
 ## mob_yenniku
@@ -105,6 +107,55 @@ UnitAI* GetAI_mob_yenniku(Creature* _Creature)
     return new mob_yennikuAI(_Creature);
 }
 
+enum
+{
+    SPELL_SMOKE_BOMB = 8817,
+    SPELL_GARROTE = 8818,
+    SPELL_STEALTH = 8822 // spell that get applied to npc after using smoke bomb
+};
+
+enum KurzenActions
+{
+    KURZEN_ACTION_VANISH,
+    KURZEN_ACTION_GAROTTE,
+    KURZEN_ACTION_MAX,
+};
+
+struct mob_colonel_kurzenAI : public CombatAI
+{
+    mob_colonel_kurzenAI(Creature* creature) : CombatAI(creature, KURZEN_ACTION_MAX)
+    {
+        AddCombatAction(KURZEN_ACTION_VANISH, urand(6000, 12000));
+        AddCombatAction(KURZEN_ACTION_GAROTTE, true);
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case KURZEN_ACTION_VANISH:
+            {
+                m_creature->SetCombatOnlyStealth(true); // must be before smoke bomb
+                DoCastSpellIfCan(nullptr, SPELL_SMOKE_BOMB);
+                ResetCombatAction(KURZEN_ACTION_GAROTTE, urand(2000, 6000));
+                DisableCombatAction(action);
+                break;
+            }
+            case KURZEN_ACTION_GAROTTE:
+            {
+                // Safety check if we still have Stealth Aura
+                if (m_creature->HasAura(SPELL_STEALTH))
+                    DoCastSpellIfCan(m_creature->GetVictim(), SPELL_GARROTE);
+
+                m_creature->SetCombatOnlyStealth(false);
+                ResetCombatAction(KURZEN_ACTION_VANISH, urand(6000, 12000));
+                DisableCombatAction(action);
+                break;
+            }
+        }
+    }
+};
+
 /*######
 ##
 ######*/
@@ -114,5 +165,9 @@ void AddSC_stranglethorn_vale()
     Script* pNewScript = new Script;
     pNewScript->Name = "mob_yenniku";
     pNewScript->GetAI = &GetAI_mob_yenniku;
+    pNewScript->RegisterSelf();
+
+    pNewScript->Name = "mob_colonel_kurzen";
+    pNewScript->GetAI = &GetNewAIInstance<mob_colonel_kurzenAI>;
     pNewScript->RegisterSelf();
 }

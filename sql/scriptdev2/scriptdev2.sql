@@ -557,6 +557,7 @@ UPDATE creature_template SET ScriptName='npc_field_marshal_afrasiabi' WHERE entr
 /* STRANGLETHORN VALE */
 UPDATE creature_template SET ScriptName='mob_yenniku' WHERE entry=2530;
 UPDATE gameobject_template SET ScriptName='go_transpolyporter_bb' WHERE entry IN(142172);
+UPDATE creature_template SET ScriptName='mob_colonel_kurzen' WHERE entry=813;
 
 /* STRATHOLME */
 UPDATE instance_template SET ScriptName='instance_stratholme' WHERE map=329;
