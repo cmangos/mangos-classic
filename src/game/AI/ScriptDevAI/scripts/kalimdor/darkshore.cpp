@@ -437,41 +437,16 @@ bool GossipSelect_npc_threshwackonator(Player* pPlayer, Creature* pCreature, uin
 
 enum
 {
-    SAY_START                       = -1000789,
-    SAY_END                         = -1000790,
-    SAY_FIRST_AMBUSH                = -1000791,
-    SAY_AGGRO_1                     = -1000792,
-    SAY_AGGRO_2                     = -1000793,
-    SAY_AGGRO_3                     = -1000794,
+    SAY_AGGRO_1                     = 1250,
+    SAY_AGGRO_2                     = 1251,
+    SAY_AGGRO_3                     = 1252,
+    SAY_AGGRO_4                     = 1253,
 
-    SAY_ESCAPE                      = -1000195,
-
-    NPC_BLACKWOOD_SHAMAN            = 2171,
-    NPC_BLACKWOOD_URSA              = 2170,
-
-    SPELL_MOONSTALKER_FORM          = 10849,
-
-    WAYPOINT_ID_QUEST_STEALTH       = 16,
-    FACTION_FRIENDLY                = 35,
+    VOLCOR_PATH_01                  = 3692, // Escape through stealth path
+    VOLCOR_PATH_02                  = 3693, // Escape through force path
 
     QUEST_ESCAPE_THROUGH_FORCE      = 994,
     QUEST_ESCAPE_THROUGH_STEALTH    = 995,
-};
-
-struct SummonLocation
-{
-    float m_fX, m_fY, m_fZ, m_fO;
-};
-
-// Spawn locations
-static const SummonLocation aVolcorSpawnLocs[] =
-{
-    {4630.2f, 22.6f, 70.1f, 2.4f},
-    {4603.8f, 53.5f, 70.4f, 5.4f},
-    {4627.5f, 100.4f, 62.7f, 5.8f},
-    {4692.8f, 75.8f, 56.7f, 3.1f},
-    {4747.8f, 152.8f, 54.6f, 2.4f},
-    {4711.7f, 109.1f, 53.5f, 2.4f},
 };
 
 struct npc_volcorAI : public npc_escortAI
@@ -489,107 +464,60 @@ struct npc_volcorAI : public npc_escortAI
     void Aggro(Unit* /*pWho*/) override
     {
         // shouldn't always use text on agro
-        switch (urand(0, 4))
+        switch (urand(0, 5))
         {
-            case 0: DoScriptText(SAY_AGGRO_1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO_2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
+            case 0: DoBroadcastText(SAY_AGGRO_1, m_creature); break;
+            case 1: DoBroadcastText(SAY_AGGRO_2, m_creature); break;
+            case 2: DoBroadcastText(SAY_AGGRO_3, m_creature); break;
+            case 3: DoBroadcastText(SAY_AGGRO_4, m_creature); break;
         }
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        // No combat for this quest
-        if (m_uiQuestId == QUEST_ESCAPE_THROUGH_STEALTH)
-            return;
-
-        npc_escortAI::MoveInLineOfSight(pWho);
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        pSummoned->AI()->AttackStart(m_creature);
     }
 
     // Wrapper to handle start function for both quests
-    void StartEscort(Player* pPlayer, const Quest* pQuest)
+    void StartEscort(Player* player, const Quest* quest)
     {
-        m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-        m_creature->SetFacingToObject(pPlayer);
-        m_uiQuestId = pQuest->GetQuestId();
+        m_uiQuestId = quest->GetQuestId();
 
-        if (pQuest->GetQuestId() == QUEST_ESCAPE_THROUGH_STEALTH)
+        if (m_uiQuestId == QUEST_ESCAPE_THROUGH_STEALTH)
         {
-            // Note: faction may not be correct, but only this way works fine
-            m_creature->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
-
-            Start(true, pPlayer, pQuest);
-            SetEscortPaused(true);
-            SetCurrentWaypoint(WAYPOINT_ID_QUEST_STEALTH);
-            SetEscortPaused(false);
+            Start(true, player, quest, false, false, VOLCOR_PATH_01);
         }
         else
-            Start(false, pPlayer, pQuest);
+            Start(false, player, quest, false, false, VOLCOR_PATH_02);
     }
 
     void WaypointReached(uint32 uiPointId) override
     {
         switch (uiPointId)
         {
-            case 2:
-                DoScriptText(SAY_START, m_creature);
-                break;
-            case 5:
-                m_creature->SummonCreature(NPC_BLACKWOOD_SHAMAN, aVolcorSpawnLocs[0].m_fX, aVolcorSpawnLocs[0].m_fY, aVolcorSpawnLocs[0].m_fZ, aVolcorSpawnLocs[0].m_fO, TEMPSPAWN_TIMED_OOC_DESPAWN, 20000);
-                m_creature->SummonCreature(NPC_BLACKWOOD_URSA, aVolcorSpawnLocs[1].m_fX, aVolcorSpawnLocs[1].m_fY, aVolcorSpawnLocs[1].m_fZ, aVolcorSpawnLocs[1].m_fO, TEMPSPAWN_TIMED_OOC_DESPAWN, 20000);
-                break;
-            case 6:
-                DoScriptText(SAY_FIRST_AMBUSH, m_creature);
-                break;
-            case 11:
-                m_creature->SummonCreature(NPC_BLACKWOOD_SHAMAN, aVolcorSpawnLocs[2].m_fX, aVolcorSpawnLocs[2].m_fY, aVolcorSpawnLocs[2].m_fZ, aVolcorSpawnLocs[2].m_fO, TEMPSPAWN_TIMED_OOC_DESPAWN, 20000);
-                m_creature->SummonCreature(NPC_BLACKWOOD_URSA, aVolcorSpawnLocs[3].m_fX, aVolcorSpawnLocs[3].m_fY, aVolcorSpawnLocs[3].m_fZ, aVolcorSpawnLocs[3].m_fO, TEMPSPAWN_TIMED_OOC_DESPAWN, 20000);
-            case 13:
-                m_creature->SummonCreature(NPC_BLACKWOOD_URSA, aVolcorSpawnLocs[4].m_fX, aVolcorSpawnLocs[4].m_fY, aVolcorSpawnLocs[4].m_fZ, aVolcorSpawnLocs[4].m_fO, TEMPSPAWN_TIMED_OOC_DESPAWN, 20000);
-                m_creature->SummonCreature(NPC_BLACKWOOD_URSA, aVolcorSpawnLocs[5].m_fX, aVolcorSpawnLocs[5].m_fY, aVolcorSpawnLocs[5].m_fZ, aVolcorSpawnLocs[5].m_fO, TEMPSPAWN_TIMED_OOC_DESPAWN, 20000);
+            case 3:
+                if (m_uiQuestId == QUEST_ESCAPE_THROUGH_STEALTH)
+                {
+                    // Reward Player
+                    if (Player* pPlayer = GetPlayerForEscort())
+                        pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ESCAPE_THROUGH_STEALTH, m_creature);
+                    m_creature->GetMotionMaster()->Clear(false, true);
+                    End();
+                    m_creature->ForcedDespawn(1000);
+                }
                 break;
             case 15:
-                DoScriptText(SAY_END, m_creature);
-                if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ESCAPE_THROUGH_FORCE, m_creature);
-                SetEscortPaused(true);
-                m_creature->ForcedDespawn(10000);
-                break;
-            // Quest 995 waypoints
-            case 16:
-                m_creature->HandleEmote(EMOTE_ONESHOT_BOW);
-                break;
-            case 17:
-                if (Player* pPlayer = GetPlayerForEscort())
-                    DoScriptText(SAY_ESCAPE, m_creature, pPlayer);
-                break;
-            case 18:
-                DoCastSpellIfCan(m_creature, SPELL_MOONSTALKER_FORM);
-                break;
-            case 24:
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ESCAPE_THROUGH_STEALTH, m_creature);
+                m_creature->GetMotionMaster()->Clear(false, true);
+                m_creature->GetMotionMaster()->MoveIdle();
+                End();
                 break;
         }
     }
 };
 
-UnitAI* GetAI_npc_volcor(Creature* pCreature)
+bool QuestAccept_npc_volcor(Player* player, Creature* creature, const Quest* quest)
 {
-    return new npc_volcorAI(pCreature);
-}
-
-bool QuestAccept_npc_volcor(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_ESCAPE_THROUGH_FORCE || pQuest->GetQuestId() == QUEST_ESCAPE_THROUGH_STEALTH)
+    if (quest->GetQuestId() == QUEST_ESCAPE_THROUGH_FORCE || quest->GetQuestId() == QUEST_ESCAPE_THROUGH_STEALTH)
     {
-        if (npc_volcorAI* pEscortAI = dynamic_cast<npc_volcorAI*>(pCreature->AI()))
-            pEscortAI->StartEscort(pPlayer, pQuest);
+        if (npc_volcorAI* pEscortAI = dynamic_cast<npc_volcorAI*>(creature->AI()))
+            pEscortAI->StartEscort(player, quest);
     }
 
     return true;
@@ -1027,7 +955,7 @@ void AddSC_darkshore()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_volcor";
-    pNewScript->GetAI = &GetAI_npc_volcor;
+    pNewScript->GetAI = &GetNewAIInstance<npc_volcorAI>;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_volcor;
     pNewScript->RegisterSelf();
 
