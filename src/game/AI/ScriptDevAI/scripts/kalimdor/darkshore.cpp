@@ -451,7 +451,7 @@ struct npc_volcorAI : public npc_escortAI
                 break;
             case 15:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ESCAPE_THROUGH_STEALTH, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ESCAPE_THROUGH_FORCE, m_creature);
                 m_creature->GetMotionMaster()->Clear(false, true);
                 m_creature->GetMotionMaster()->MoveIdle();
                 End();
