@@ -68,6 +68,7 @@
 #include "Maps/TransportMgr.h"
 #include "Anticheat/Anticheat.hpp"
 #include "LFG/LFGMgr.h"
+#include "Spells/SpellStacking.h"
 
 #ifdef BUILD_AHBOT
  #include "AuctionHouseBot/AuctionHouseBot.h"
@@ -891,6 +892,9 @@ void World::SetInitialWorldSettings()
     /// load spell_dbc first! dbc's need them
     sLog.outString("Loading spell_template...");
     sObjectMgr.LoadSpellTemplate();
+
+    sLog.outString("Loading spell groups...");
+    sSpellStacker.LoadSpellGroups();
 
     // Load before npc_text, gossip_menu_option, script_texts
     sLog.outString("Loading broadcast_text...");

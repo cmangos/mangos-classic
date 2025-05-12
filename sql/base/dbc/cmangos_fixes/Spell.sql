@@ -371,3 +371,8 @@ UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.03 WHERE Id IN (9007,9
 -- UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.02 WHERE Id IN (13797,14298,14299,14300,14301); -- Immolation Trap Effect
 -- UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.1, EffectBonusCoefficientFromAP2=0.1 WHERE Id IN (13812,14314,14315); -- Explosive Trap Effect
 UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.08 WHERE Id IN (779,780,769,9754,9908); -- Swipe
+
+-- uniqueness aura stacking rules
+UPDATE spell_template SET AttributesEx=AttributesEx|0x00000800 WHERE Id IN(8733); -- Blessing of Blackfathom
+UPDATE spell_template SET AttributesEx=AttributesEx|0x00000800 WHERE Id IN(24425); -- Spirit of Zandalar
+UPDATE spell_template SET AttributesEx=AttributesEx|0x00000800 WHERE Id IN(26522); -- Lunar Fortune

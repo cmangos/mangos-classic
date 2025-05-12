@@ -46,6 +46,7 @@
 #include "MotionGenerators/PathFinder.h"
 #include "Spells/Scripts/SpellScript.h"
 #include "Entities/ObjectGuid.h"
+#include "Spells/SpellStacking.h"
 
 #ifdef ENABLE_PLAYERBOTS
 #include "playerbot/PlayerbotAI.h"
@@ -4851,10 +4852,10 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                     if (m_trueCaster->GetObjectGuid() != existing->GetCasterGuid())
                     {
-                        if (sSpellMgr.IsSpellStackableWithSpellForDifferentCasters(m_spellInfo, existingSpell))
+                        if (sSpellStacker.IsSpellStackableWithSpellForDifferentCasters(m_spellInfo, existingSpell, sSpellMgr.IsSpellAnotherRankOfSpell(m_spellInfo->Id, existingSpell->Id), nullptr))
                             continue;
                     }
-                    else if (sSpellMgr.IsSpellStackableWithSpell(m_spellInfo, existingSpell))
+                    else if (sSpellStacker.IsSpellStackableWithSpell(m_spellInfo, existingSpell, nullptr))
                         continue;
 
                     if (!computed)
