@@ -110,24 +110,24 @@ enum BellHourlyObjects
 
 struct go_ai_bell : public GameObjectAI
 {
-    go_ai_bell(GameObject* go) : GameObjectAI(go), m_uiBellTolls(0), m_uiBellSound(GetBellSound(go)), m_uiBellTimer(0), m_playTo(GetBellZoneOrArea(go))
+    go_ai_bell(GameObject* go) : GameObjectAI(go), m_bellTolls(0), m_bellSound(GetBellSound(go)), m_bellTimer(0), m_playTo(GetBellZoneOrArea(go))
     {
         m_go->SetNotifyOnEventState(true);
         m_go->SetActiveObjectState(true);
     }
 
-    uint32 m_uiBellTolls;
-    uint32 m_uiBellSound;
-    uint32 m_uiBellTimer;
+    uint32 m_bellTolls;
+    uint32 m_bellSound;
+    uint32 m_bellTimer;
     PlayPacketSettings m_playTo;
 
-    uint32 GetBellSound(GameObject* pGo) const
+    uint32 GetBellSound(GameObject* go) const
     {
         uint32 soundId = 0;
-        switch (pGo->GetEntry())
+        switch (go->GetEntry())
         {
             case GO_HORDE_BELL:
-                switch (pGo->GetAreaId())
+                switch (go->GetAreaId())
                 {
                     case UNDERCITY_AREA:
                     case BRILL_AREA:
@@ -141,7 +141,7 @@ struct go_ai_bell : public GameObjectAI
                 break;
             case GO_ALLIANCE_BELL:
             {
-                switch (pGo->GetAreaId())
+                switch (go->GetAreaId())
                 {
                     case IRONFORGE_1_AREA:
                     case IRONFORGE_2_AREA:
@@ -160,13 +160,13 @@ struct go_ai_bell : public GameObjectAI
         return soundId;
     }
 
-    PlayPacketSettings GetBellZoneOrArea(GameObject* pGo) const
+    PlayPacketSettings GetBellZoneOrArea(GameObject* go) const
     {
         PlayPacketSettings playTo = PLAY_AREA;
-        switch (pGo->GetEntry())
+        switch (go->GetEntry())
         {
             case GO_HORDE_BELL:
-                switch (pGo->GetAreaId())
+                switch (go->GetAreaId())
                 {
                     case UNDERCITY_AREA:
                         playTo = PLAY_ZONE;
@@ -175,7 +175,7 @@ struct go_ai_bell : public GameObjectAI
                 break;
             case GO_ALLIANCE_BELL:
             {
-                switch (pGo->GetAreaId())
+                switch (go->GetAreaId())
                 {
                     case DARNASSUS_AREA:
                     case IRONFORGE_2_AREA:
@@ -194,39 +194,34 @@ struct go_ai_bell : public GameObjectAI
         {
             time_t curTime = time(nullptr);
             tm localTm = *localtime(&curTime);
-            m_uiBellTolls = (localTm.tm_hour + 11) % 12;
+            m_bellTolls = (localTm.tm_hour + 11) % 12;
 
-            if (m_uiBellTolls)
-                m_uiBellTimer = 3000;
+            if (m_bellTolls)
+                m_bellTimer = 3000;
 
-            m_go->GetMap()->PlayDirectSoundToMap(m_uiBellSound, m_go->GetAreaId());
+            m_go->PlayDistanceSound(m_bellSound, PlayPacketParameters(m_playTo, m_playTo == PLAY_ZONE ? m_go->GetZoneId() : m_go->GetAreaId()));
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 diff) override
     {
-        if (m_uiBellTimer)
+        if (m_bellTimer)
         {
-            if (m_uiBellTimer <= uiDiff)
+            if (m_bellTimer <= diff)
             {
-                m_go->PlayDirectSound(m_uiBellSound, PlayPacketParameters(PLAY_AREA, m_go->GetAreaId()));
+                m_go->PlayDistanceSound(m_bellSound, PlayPacketParameters(m_playTo, m_playTo == PLAY_ZONE ? m_go->GetZoneId() : m_go->GetAreaId()));
 
-                m_uiBellTolls--;
-                if (m_uiBellTolls)
-                    m_uiBellTimer = 3000;
+                m_bellTolls--;
+                if (m_bellTolls)
+                    m_bellTimer = 3000;
                 else
-                    m_uiBellTimer = 0;
+                    m_bellTimer = 0;
             }
             else
-                m_uiBellTimer -= uiDiff;
+                m_bellTimer -= diff;
         }
     }
 };
-
-GameObjectAI* GetAI_go_bells(GameObject* go)
-{
-    return new go_ai_bell(go);
-}
 
 /*####
 ## go_darkmoon_faire_music
@@ -524,7 +519,7 @@ void AddSC_go_scripts()
 
     pNewScript = new Script;
     pNewScript->Name = "go_bells";
-    pNewScript->GetGameObjectAI = &GetAI_go_bells;
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<go_ai_bell>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
