@@ -2441,22 +2441,22 @@ void WorldObject::HandlePlayPacketSettings(WorldPacket& msg, PlayPacketParameter
 {
     switch (parameters.setting)
     {
-        case PLAY_SET:
+        case PlayPacketSettings::SET:
             SendMessageToSet(msg, true);
             break;
-        case PLAY_TARGET:
+        case PlayPacketSettings::TARGET:
             if (Player const* target = parameters.target.target)
                 target->SendDirectMessage(msg);
             break;
-        case PLAY_MAP:
+        case PlayPacketSettings::MAP:
             if (IsInWorld())
                 GetMap()->MessageMapBroadcast(this, msg);
             break;
-        case PLAY_ZONE:
+        case PlayPacketSettings::ZONE:
             if (IsInWorld())
                 GetMap()->MessageMapBroadcastZone(this, msg, parameters.areaOrZone.id);
             break;
-        case PLAY_AREA:
+        case PlayPacketSettings::AREA:
             if (IsInWorld())
                 GetMap()->MessageMapBroadcastArea(this, msg, parameters.areaOrZone.id);
             break;

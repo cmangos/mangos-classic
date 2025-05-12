@@ -2196,13 +2196,13 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                     break;
             }
 
-            PlayPacketParameters params(PLAY_SET);
+            PlayPacketParameters params(PlayPacketSettings::SET);
             if (pSoundTarget)
-                params = PlayPacketParameters(PLAY_TARGET, pSoundTarget);
+                params = PlayPacketParameters(PlayPacketSettings::TARGET, pSoundTarget);
             if (m_script->playSound.flags & 8) // playParameter is zoneId
-                params = PlayPacketParameters(PLAY_ZONE, m_script->playSound.playParameter ? m_script->playSound.playParameter : pSource->GetZoneId());
+                params = PlayPacketParameters(PlayPacketSettings::ZONE, m_script->playSound.playParameter ? m_script->playSound.playParameter : pSource->GetZoneId());
             if (m_script->playSound.flags & 16) // playParameter is areaId
-                params = PlayPacketParameters(PLAY_AREA, m_script->playSound.playParameter ? m_script->playSound.playParameter : pSource->GetAreaId());
+                params = PlayPacketParameters(PlayPacketSettings::AREA, m_script->playSound.playParameter ? m_script->playSound.playParameter : pSource->GetAreaId());
 
             if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
                 pSource->PlayMusic(m_script->playSound.soundId, params);

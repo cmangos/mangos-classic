@@ -162,14 +162,14 @@ struct go_ai_bell : public GameObjectAI
 
     PlayPacketSettings GetBellZoneOrArea(GameObject* go) const
     {
-        PlayPacketSettings playTo = PLAY_AREA;
+        PlayPacketSettings playTo = PlayPacketSettings::AREA;
         switch (go->GetEntry())
         {
             case GO_HORDE_BELL:
                 switch (go->GetAreaId())
                 {
                     case UNDERCITY_AREA:
-                        playTo = PLAY_ZONE;
+                        playTo = PlayPacketSettings::ZONE;
                         break;
                 }
                 break;
@@ -179,7 +179,7 @@ struct go_ai_bell : public GameObjectAI
                 {
                     case DARNASSUS_AREA:
                     case IRONFORGE_2_AREA:
-                        playTo = PLAY_ZONE;
+                        playTo = PlayPacketSettings::ZONE;
                         break;
                 }
                 break;
@@ -199,7 +199,7 @@ struct go_ai_bell : public GameObjectAI
             if (m_bellTolls)
                 m_bellTimer = 3000;
 
-            m_go->PlayDistanceSound(m_bellSound, PlayPacketParameters(m_playTo, m_playTo == PLAY_ZONE ? m_go->GetZoneId() : m_go->GetAreaId()));
+            m_go->PlayDistanceSound(m_bellSound, PlayPacketParameters(m_playTo, m_playTo == PlayPacketSettings::ZONE ? m_go->GetZoneId() : m_go->GetAreaId()));
         }
     }
 
@@ -209,7 +209,7 @@ struct go_ai_bell : public GameObjectAI
         {
             if (m_bellTimer <= diff)
             {
-                m_go->PlayDistanceSound(m_bellSound, PlayPacketParameters(m_playTo, m_playTo == PLAY_ZONE ? m_go->GetZoneId() : m_go->GetAreaId()));
+                m_go->PlayDistanceSound(m_bellSound, PlayPacketParameters(m_playTo, m_playTo == PlayPacketSettings::ZONE ? m_go->GetZoneId() : m_go->GetAreaId()));
 
                 m_bellTolls--;
                 if (m_bellTolls)

@@ -57,13 +57,13 @@ enum TempSpawnLinkedAura
     TEMPSPAWN_LINKED_AURA_REMOVE_OWNER = 0x00000002
 };
 
-enum PlayPacketSettings
+enum class PlayPacketSettings
 {
-    PLAY_SET,
-    PLAY_TARGET,
-    PLAY_MAP,
-    PLAY_ZONE,
-    PLAY_AREA,
+    SET,
+    TARGET,
+    MAP,
+    ZONE,
+    AREA,
 };
 
 enum DistanceCalculation
@@ -1051,10 +1051,10 @@ class WorldObject : public Object
         void MonsterWhisper(const char* text, Unit const* target, bool IsBossWhisper = false) const;
         void MonsterText(std::vector<std::string> content, uint32 type, Language lang, Unit const* target) const;
 
-        void PlayDistanceSound(uint32 sound_id, PlayPacketParameters parameters = PlayPacketParameters(PLAY_SET)) const;
-        void PlayDirectSound(uint32 sound_id, PlayPacketParameters parameters = PlayPacketParameters(PLAY_SET)) const;
-        void PlayMusic(uint32 sound_id, PlayPacketParameters parameters = PlayPacketParameters(PLAY_SET)) const;
-        void PlaySpellVisual(uint32 artKitId, PlayPacketParameters parameters = PlayPacketParameters(PLAY_SET)) const;
+        void PlayDistanceSound(uint32 sound_id, PlayPacketParameters parameters = PlayPacketParameters(PlayPacketSettings::SET)) const;
+        void PlayDirectSound(uint32 sound_id, PlayPacketParameters parameters = PlayPacketParameters(PlayPacketSettings::SET)) const;
+        void PlayMusic(uint32 sound_id, PlayPacketParameters parameters = PlayPacketParameters(PlayPacketSettings::SET)) const;
+        void PlaySpellVisual(uint32 artKitId, PlayPacketParameters parameters = PlayPacketParameters(PlayPacketSettings::SET)) const;
         void HandlePlayPacketSettings(WorldPacket& msg, PlayPacketParameters& parameters) const;
 
         void SendObjectDeSpawnAnim(ObjectGuid guid) const;
