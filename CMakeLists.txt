@@ -420,7 +420,7 @@ if(BUILD_RECASTDEMOMOD)
     endif()
     add_subdirectory(contrib/recastdemomod)
   else()
-    message(STATUS "BUILD_RECASTDEMOMOD forced to OFF. Not supported on non windows system.")
+    add_subdirectory(contrib/recastdemomod)
   endif()
 endif()
 

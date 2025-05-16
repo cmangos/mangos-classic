@@ -5,7 +5,7 @@
 #include "DetourNavMesh.h"
 #include "SampleInterfaces.h"
 #include "DetourNavMeshQuery.h"
-#include "..\..\..\..\contrib\mmap\src\TerrainBuilder.h"
+#include "../../../../contrib/mmap/src/TerrainBuilder.h"
 #include "GeomData.h"
 #include "RecastDemoSharedDefines.h"
 

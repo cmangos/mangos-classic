@@ -28,7 +28,7 @@
 #include "Recast.h"
 #include "ChunkyTriMesh.h"
 #include "Filelist.h"
-#include "G3D\Set.h"
+#include "G3D/Set.h"
 #include "RecastDemoSharedDefines.h"
 
 #ifdef WIN32

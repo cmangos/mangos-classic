@@ -26,6 +26,53 @@
 #	include <dirent.h>
 #endif
 
+int is_match(char* line, char* pattern)
+{
+  int wildcard = 0;
+
+  do
+  {
+    if ((*pattern == *line) || (*pattern == '?'))
+    {
+      line++;
+      pattern++;
+    }
+    else if (*pattern == '*')
+    {
+      if (*(++pattern) == '\0')
+      {
+        return 1;
+      }
+      wildcard = 1;
+    }
+    else if (wildcard)
+    {
+      if (*line == *pattern)
+      {
+        wildcard = 0;
+        line++;
+        pattern++;
+      }
+      else
+      {
+        line++;
+      }
+    }
+    else
+    {
+      return 0;
+    }
+  } while (*line);
+
+  if (*pattern == '\0')
+  {
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
+}
 void scanDirectory(const char* path, const char* ext, FileList& list)
 {
     list.clear();
@@ -55,9 +102,14 @@ void scanDirectory(const char* path, const char* ext, FileList& list)
 	while ((current = readdir(dp)) != 0)
 	{
 		int len = strlen(current->d_name);
-		if (len > 4 && strncmp(current->d_name+len-4, ext, 4) == 0) // TODO:: may not work due to joker(*) added
+		if (len > 4 && strncmp(current->d_name+len-4, ext+1, 4) == 0) // TODO:: may not work due to joker(*) added
 		{
             list.push_back(current->d_name);
+		}
+		else
+		{
+			if (is_match(current->d_name, const_cast<char*>(ext)))
+				list.push_back(current->d_name);
 		}
 	}
 	closedir(dp);

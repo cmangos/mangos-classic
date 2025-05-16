@@ -22,19 +22,19 @@ FILE(GLOB_RECURSE HEADERS "${CMAKE_CURRENT_SOURCE_DIR}" "Include/*.h")
 add_executable(RecastDemoMod ${SRCS} ${HEADERS})
 #add_definitions(-DDT_POLYREF64)
 target_compile_definitions(RecastDemoMod PRIVATE -DDT_POLYREF64)
-target_link_libraries(RecastDemoMod
-    PUBLIC fastlz
-    PUBLIC Detour
-    PUBLIC Recast
-    PUBLIC g3dlite
-    PUBLIC DetourCrowd
-    PUBLIC DetourTileCache
-    PUBLIC DebugUtils
-    PUBLIC vmaplib
-    PUBLIC mmaplib
-)
 
 if (WIN32)
+  target_link_libraries(RecastDemoMod
+      PUBLIC fastlz
+      PUBLIC Detour
+      PUBLIC Recast
+      PUBLIC g3dlite
+      PUBLIC DetourCrowd
+      PUBLIC DetourTileCache
+      PUBLIC DebugUtils
+      PUBLIC vmaplib
+      PUBLIC mmaplib
+  )
   if(PLATFORM MATCHES X86) # 32-bit
     set(FOLDER_ARCH x86)
   else() # 64-bit
@@ -46,6 +46,21 @@ if (WIN32)
     PRIVATE "opengl32.lib"
     PRIVATE "glu32.lib"
   )
+else()
+find_package(OpenGL REQUIRED)
+find_package(SDL REQUIRED)
+target_link_libraries(RecastDemoMod
+    PUBLIC fastlz
+    PUBLIC Detour
+    PUBLIC Recast
+    PUBLIC g3dlite
+    PUBLIC DetourCrowd
+    PUBLIC DetourTileCache
+    PUBLIC DebugUtils
+    PUBLIC vmaplib
+    PUBLIC mmaplib
+    PRIVATE ${OPENGL_LIBRARIES}
+    PRIVATE ${SDL_LIBRARIES})
 endif()
 
 add_subdirectory(dep/fastlz)

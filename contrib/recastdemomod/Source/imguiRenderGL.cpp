@@ -17,6 +17,7 @@
 //
 
 #define _USE_MATH_DEFINES
+#include <cstdio>
 #include <math.h>
 #include "imgui.h"
 #include "SDL.h"

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "memory.h"
-#include "Vmap/MapTree.h"
+#include "vmap/MapTree.h"
 #include "MMapData.h"
 #include "../../../../contrib/mmap/src/MMapCommon.h"
 #include "MotionGenerators/MoveMapSharedDefines.h"
@@ -94,7 +94,7 @@ bool MMapData::LoadNavmesh(const char* fileName, TileInfos& tInfos)
     if (header.mmapVersion != MMAP_VERSION)
     {
         fclose(fp);
-        m_Ctx->log(RC_LOG_ERROR, "LoadMMapTile: Mmap version is not correct! Found(%u), expected(%u)!", header.mmapVersion, unsigned int(MMAP_VERSION));
+        m_Ctx->log(RC_LOG_ERROR, "LoadMMapTile: Mmap version is not correct! Found(%u), expected(%u)!", header.mmapVersion, MMAP_VERSION);
         return false;
     }
 
