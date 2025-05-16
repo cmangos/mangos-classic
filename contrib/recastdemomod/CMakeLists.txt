@@ -93,4 +93,10 @@ if (WIN32 AND MSVC)
     \"${CMAKE_CURRENT_SOURCE_DIR}/dep/font/DroidSans.ttf\")
   add_custom_command(TARGET RecastDemoMod POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FILES_LIST_TO_COPY} \"$<TARGET_FILE_DIR:RecastDemoMod>\")
+else()
+  set(FILES_LIST_TO_COPY
+    \"${CMAKE_CURRENT_SOURCE_DIR}/dep/font/DroidSans.ttf\")
+  add_custom_command(TARGET RecastDemoMod POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FILES_LIST_TO_COPY} \"${BIN_DIR}/tools\")
+  install(TARGETS RecastDemoMod DESTINATION ${BIN_DIR}/tools)
 endif()
