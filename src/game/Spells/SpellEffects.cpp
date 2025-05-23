@@ -2321,13 +2321,13 @@ void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
 
 void Spell::EffectOpenLock(SpellEffectIndex eff_idx)
 {
-    if (!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
+    if (!m_caster || !m_caster->IsPlayer())
     {
         DEBUG_LOG("WORLD: Open Lock - No Player Caster!");
         return;
     }
 
-    Player* player = (Player*)m_caster;
+    Player* player = static_cast<Player*>(m_caster);
 
     uint32 lockId = 0;
 
@@ -2383,6 +2383,9 @@ void Spell::EffectOpenLock(SpellEffectIndex eff_idx)
     }
     else
     {
+        if (Unit* owner = gameObjTarget->GetOwner())
+            player->SetOutOfCombatWithVictim(owner);
+
         SendLoot(gameObjTarget->GetObjectGuid(), LOOT_SKINNING, LockType(m_spellInfo->EffectMiscValue[eff_idx]));
         m_spellLog.AddLog(uint32(SPELL_EFFECT_OPEN_LOCK), gameObjTarget->GetObjectGuid());
     }
