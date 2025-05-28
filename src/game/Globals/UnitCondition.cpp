@@ -182,30 +182,10 @@ int32 UnitConditionMgr::getConditionValue(Unit const* source, Unit const* target
         case UnitCondition::IS_CHANNELING: return source->GetCurrentSpell(CURRENT_GENERIC_SPELL) != nullptr;
         case UnitCondition::IS_CHANNELING_SPELL: return source->GetCurrentSpell(CURRENT_GENERIC_SPELL) != nullptr/* && !source->GetCurrentSpell(CURRENT_GENERIC_SPELL)->m_spellInfo->HasAttribute(SPELL_ATTR_IS_ABILITY)*/;
         case UnitCondition::NUMBER_OF_MELEE_ATTACKERS:
-            if (source->IsCreature())
+            return std::count_if(source->getAttackers().begin(), source->getAttackers().end(), [source](Unit* attacker)
             {
-                if (!source->getThreatManager().isThreatListEmpty())
-                {
-                    return std::count_if(source->getThreatManager().getThreatList().begin(), source->getThreatManager().getThreatList().end(), [source](HostileReference* ref)
-                    {
-                        return source->CanReachWithMeleeAttack(ref->getTarget());
-                    });
-                }
-                else
-                {
-                    return std::count_if(source->getHostileRefManager().begin(), source->getHostileRefManager().end(), [source](const Reference<Unit, ThreatManager>& ref)
-                    {
-                        return source->CanReachWithMeleeAttack(ref.getTarget());
-                    }); 
-                }
-            }
-            else // Experimental: This else block is the only official code from client, but client does not have the above
-            {
-                return std::count_if(source->getAttackers().begin(), source->getAttackers().end(), [source](Unit* attacker)
-                {
-                    return source->CanReachWithMeleeAttack(attacker);
-                });
-            }
+                return source->CanReachWithMeleeAttack(attacker);
+            });
         case UnitCondition::IS_ATTACKING_ME: return source->GetTarget() == target;
         case UnitCondition::RANGE: return sqrt(source->GetDistance(target, true, DIST_CALC_NONE));
         case UnitCondition::IN_MELEE_RANGE: return source->CanReachWithMeleeAttack(target);
