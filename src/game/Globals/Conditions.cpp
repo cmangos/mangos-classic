@@ -98,7 +98,8 @@ uint8 const ConditionTargetsInternal[] =
     CONDITION_REQ_MAP_OR_WORLDOBJECT, //  39
     CONDITION_REQ_NONE,               //  40
     CONDITION_REQ_NONE,               //  41
-    CONDITION_REQ_NONE                //  42
+    CONDITION_REQ_NONE,               //  42
+    CONDITION_REQ_TARGET_UNIT,        //  43
 };
 
 // Starts from 4th element so that -3 will return first element.
@@ -494,6 +495,16 @@ bool inline ConditionEntry::Evaluate(WorldObject const* target, Map const* map, 
         {
             int32 value = map->GetVariableManager().GetVariable(m_value1);
             return CheckOp(ConditionOperation(m_value2), value, m_value3);
+        }
+        case CONDITION_IS_IN_COMBAT:
+        {
+            if (!target->IsUnit())
+            {
+                sLog.outErrorDb("CONDITION_PVP_SCRIPT (entry %u) is used on non unit target. Target is %s", m_entry, target->GetGuidStr().c_str());
+                return false;
+            }
+
+            return static_cast<Unit const*>(target)->IsInCombat() != m_value1;
         }
         default:
             break;
@@ -971,6 +982,13 @@ bool ConditionEntry::IsValid() const
             if (!sObjectMgr.HasWorldStateName(m_value1))
             {
                 sLog.outErrorDb("Worldstate condition (entry %u, type %u) has has no worldstate name assigned for worldstate %u. Skipping.", m_entry, m_condition, m_value1);
+                return false;
+            }
+            break;
+        case CONDITION_IS_IN_COMBAT:
+            if (m_value1 > 1)
+            {
+                sLog.outErrorDb("Worldstate condition (entry %u, type %u) has invalid is in combat state %u. Skipping.", m_entry, m_condition, m_value1);
                 return false;
             }
             break;

@@ -79,6 +79,7 @@ enum ConditionType
     CONDITION_WORLD_SCRIPT          = 40,
     CONDITION_UNUSED_7              = 41,
     CONDITION_WORLDSTATE            = 42,                   // value1: worldstateId; value2: sign; value3: otherOperand - example, 10000; =; 0 - true when 10000 is zero
+    CONDITION_IS_IN_COMBAT          = 43,                   // value1: 0 - in combat, 1 - out of combat, target unit
 };
 
 enum ConditionFlags
