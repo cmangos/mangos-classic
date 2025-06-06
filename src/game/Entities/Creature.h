@@ -682,6 +682,7 @@ class Creature : public Unit
         bool UpdateAllStats() override;
         void UpdateResistances(uint32 school) override;
         void UpdateArmor() override;
+        void UpdateMaxHealth() override;
         void UpdateAttackPowerAndDamage(bool ranged = false) override;
         void UpdateDamagePhysical(WeaponAttackType attType) override;
         virtual float GetConditionalTotalPhysicalDamageModifier(WeaponAttackType type) const;
@@ -983,6 +984,8 @@ class Creature : public Unit
         ObjectGuid m_killer;
 
         bool m_imposedCooldown;
+
+        float m_healthMultiplier;
 
     private:
         GridReference<Creature> m_gridRef;
