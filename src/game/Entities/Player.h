@@ -1706,7 +1706,7 @@ class Player : public Unit
         void UpdateSpellTrainedSkills(uint32 spellId, bool apply);                                  // learns/unlearns skills dependent on a spell
         void LearnDefaultSkills();
 
-        virtual uint32 GetSpellRank(SpellEntry const* spellInfo) override;
+        virtual uint32 GetSpellRank(SpellEntry const* spellInfo) const override;
 
         bool IsLaunched() const { return m_launched; }
         void SetLaunched(bool apply) { m_launched = apply; }
