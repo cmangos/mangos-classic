@@ -2237,6 +2237,11 @@ class Player : public Unit
 
         std::pair<uint32, bool> GetLastData() { return std::make_pair(m_lastDbGuid, m_lastGameObject); }
         void SetLastData(uint32 dbGuid, bool gameobject) { m_lastDbGuid = dbGuid; m_lastGameObject = gameobject; }
+
+        int32 GetHighestAmmoMod() const { return m_highestAmmoMod; }
+        void SetHighestAmmoMod(int32 amount) { m_highestAmmoMod = amount; }
+
+        void UpdateRangedWeaponDependantAmmoHasteAura();
     protected:
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
@@ -2415,6 +2420,7 @@ class Player : public Unit
         uint8 m_swingErrorMsg;
         float m_ammoDPSMin;
         float m_ammoDPSMax;
+        int32 m_highestAmmoMod;
 
         //////////////////// Rest System/////////////////////
         time_t time_inn_enter;

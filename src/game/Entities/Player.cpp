@@ -581,6 +581,7 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
     m_canBlock = false;
     m_ammoDPSMin = 0.0f;
     m_ammoDPSMax = 0.0f;
+    m_highestAmmoMod = 0;
 
     m_temporaryUnsummonedPetNumber = 0;
     m_BGPetSpell = 0;
@@ -20464,4 +20465,21 @@ uint32 Player::LookupHighestLearnedRank(uint32 spellId)
             break;
     } while ((higherRank = sSpellMgr.GetNextSpellInChain(ownedRank)));
     return ownedRank;
+}
+
+void Player::UpdateRangedWeaponDependantAmmoHasteAura()
+{
+    int32 highest = 0;
+    Item* weapon = GetWeaponForAttack(RANGED_ATTACK);
+    if (weapon)
+        highest = GetMaxPositiveAuraModifierByItemClass(SPELL_AURA_MOD_RANGED_AMMO_HASTE, weapon);
+
+    if (highest != GetHighestAmmoMod())
+    {
+        if (GetHighestAmmoMod() > 0)
+            ApplyAttackTimePercentMod(RANGED_ATTACK, float(GetHighestAmmoMod()), false);
+        if (highest > 0)
+            ApplyAttackTimePercentMod(RANGED_ATTACK, float(highest), true);
+        SetHighestAmmoMod(highest);
+    }
 }

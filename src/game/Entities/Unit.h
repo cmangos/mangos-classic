@@ -2112,6 +2112,8 @@ class Unit : public WorldObject
         int32 GetMaxPositiveAuraModifierByMiscValue(AuraType auratype, int32 misc_value) const;
         int32 GetMaxNegativeAuraModifierByMiscValue(AuraType auratype, int32 misc_value) const;
 
+        int32 GetMaxPositiveAuraModifierByItemClass(AuraType auratype, Item* weapon) const;
+
         Aura* GetDummyAura(uint32 spell_id) const;
 
         uint32 m_AuraFlags;

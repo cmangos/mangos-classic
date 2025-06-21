@@ -3992,12 +3992,40 @@ void Aura::HandleAuraModRangedHaste(bool apply, bool /*Real*/)
 
 void Aura::HandleRangedAmmoHaste(bool apply, bool /*Real*/)
 {
-    if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
+    if (!GetTarget()->IsPlayer())
         return;
 
-    float amount = m_modifier.m_amount;
+    Player* player = static_cast<Player*>(GetTarget());
+    if (apply)
+    {
+        if (player->GetHighestAmmoMod() >= m_modifier.m_amount) // only take highest
+            return;
+    }
 
-    GetTarget()->ApplyAttackTimePercentMod(RANGED_ATTACK, amount, apply);
+    Item* weapon = player->GetWeaponForAttack(RANGED_ATTACK);
+    if (GetSpellProto()->EquippedItemClass != -1 && (!weapon || !weapon->IsFitToSpellRequirements(GetSpellProto())))
+        return;
+
+    // mirrors UpdateRangedWeaponDependantAmmoHasteAura
+
+    int32 oldHighest, newHighest;
+    if (apply)
+    {
+        oldHighest = player->GetHighestAmmoMod();
+        newHighest = m_modifier.m_amount;
+    }
+    else
+    {
+        oldHighest = m_modifier.m_amount;
+        newHighest = weapon ? GetTarget()->GetMaxPositiveAuraModifierByItemClass(SPELL_AURA_MOD_RANGED_AMMO_HASTE, weapon) : 0;
+    }
+
+    if (oldHighest > 0)
+        GetTarget()->ApplyAttackTimePercentMod(RANGED_ATTACK, float(oldHighest), false);
+    if (newHighest > 0)
+        GetTarget()->ApplyAttackTimePercentMod(RANGED_ATTACK, float(newHighest), true);
+
+    player->SetHighestAmmoMod(newHighest);
 }
 
 /********************************/
