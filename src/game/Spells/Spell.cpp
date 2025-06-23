@@ -497,6 +497,8 @@ Spell::Spell(WorldObject* caster, SpellEntry const* info, uint32 triggeredFlags,
 
     m_overrideSpeed = false;
 
+    m_helpfulThreatCoeff = 1.f;
+
     m_ignoreRoot = IsIgnoreRootSpell(m_spellInfo);
 
     OnInit();
@@ -4429,7 +4431,7 @@ void Spell::HandleThreatSpells()
         // positive spells distribute threat among all units that are in combat with target, like healing
         if (positive)
         {
-            target->getHostileRefManager().threatAssist(affectiveCaster, threat, m_spellInfo, false, true);
+            target->getHostileRefManager().threatAssist(affectiveCaster, threat * m_helpfulThreatCoeff, m_spellInfo, false, true);
         }
         // for negative spells threat gets distributed among affected targets
         else
