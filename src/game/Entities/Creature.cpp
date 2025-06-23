@@ -2935,7 +2935,7 @@ bool Creature::IsNoWoundedSlowdown() const
 
 bool Creature::IsSlowedInCombat() const
 {
-    return !IsNoWoundedSlowdown() && HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT);
+    return !IsNoWoundedSlowdown() && GetHealthPercent() < 30.f;
 }
 
 void Creature::SetNoWeaponSkillGain(bool state)
