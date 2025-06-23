@@ -1967,7 +1967,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
     targets.setUnitTarget(user);
 
     SpellCastResult result = spell->SpellStart(&targets);
-    if (result == SPELL_CAST_OK)
+    if (result == SPELL_CAST_OK && onSuccess)
         onSuccess();
 }
 
