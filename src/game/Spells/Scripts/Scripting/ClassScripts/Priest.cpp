@@ -77,10 +77,20 @@ struct Shadowguard : public SpellScript
     }
 };
 
+// 527, 988 - Dispel Magic
+struct DispelMagicPriest : public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        spell->SetHelpfulThreatCoefficient(0.5f); // halves db defined threat
+    }
+};
+
 void LoadPriestScripts()
 {
     RegisterSpellScript<PowerInfusion>("spell_power_infusion");
     RegisterSpellScript<SpiritOfRedemptionHeal>("spell_spirit_of_redemption_heal");
     RegisterSpellScript<Blackout>("spell_blackout");
     RegisterSpellScript<Shadowguard>("spell_shadowguard");
+    RegisterSpellScript<DispelMagicPriest>("spell_dispel_magic_priest");
 }

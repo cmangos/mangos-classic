@@ -214,6 +214,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Priest
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(527,'spell_dispel_magic_priest'),
+(988 ,'spell_dispel_magic_priest'),
 (10060,'spell_power_infusion'),
 (15268,'spell_blackout'),
 (15323,'spell_blackout'),
