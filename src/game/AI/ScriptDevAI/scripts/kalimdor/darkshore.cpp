@@ -888,6 +888,7 @@ void AddSC_darkshore()
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_awaken_kerlonian;
     pNewScript->RegisterSelf();
 
+    pNewScript = new Script;
     pNewScript->Name = "npc_prospector_remtravel";
     pNewScript->GetAI = &GetNewAIInstance<npc_prospector_remtravelAI>;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_prospector_remtravel;

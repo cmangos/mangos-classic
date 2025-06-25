@@ -189,7 +189,7 @@ struct RandomAggro : public SpellScript
 
 void AddSC_zulgurub()
 {
-    Script* pNewScript = new Script();
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_soulflayer";
     pNewScript->GetAI = &GetAI_npc_soulflayer;
     pNewScript->RegisterSelf();
