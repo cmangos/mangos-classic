@@ -62,6 +62,7 @@ if(WIN32)
   if(MSVC)
     target_link_libraries(${EXECUTABLE_NAME}
       dbghelp
+      winmm.lib
     )
   endif()
   if(MINGW)

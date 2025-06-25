@@ -33,12 +33,42 @@
 
 #ifdef _WIN32
 #include "Platform/ServiceWin32.h"
+#include "timeapi.h"
 extern int m_ServiceStatus;
 #endif
+
+struct TimeBeginRAII
+{
+    TimeBeginRAII()
+    {
+#ifdef _WIN32
+        TIMECAPS timeResolutionLimits;
+        if (timeGetDevCaps(&timeResolutionLimits, sizeof(TIMECAPS)) == TIMERR_NOERROR)
+        {
+            newTimerResolution = std::min(std::max(timeResolutionLimits.wPeriodMin, 1u), timeResolutionLimits.wPeriodMax);
+            timeBeginPeriod(*newTimerResolution);
+        }
+#endif
+    }
+
+    ~TimeBeginRAII()
+    {
+#ifdef _WIN32
+        if (newTimerResolution)
+            timeEndPeriod(*newTimerResolution);
+#endif
+    }
+
+#ifdef _WIN32
+    std::optional<UINT> newTimerResolution;
+#endif
+};
 
 /// Heartbeat for the World
 void WorldRunnable::run()
 {
+    TimeBeginRAII raii;
+
     ///- Init new SQL thread for the world database
     WorldDatabase.ThreadStart();                            // let thread do safe mySQL requests (one connection call enough)
     sWorld.InitResultQueue();
