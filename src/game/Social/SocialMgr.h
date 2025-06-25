@@ -21,6 +21,7 @@
 
 #include "Database/DatabaseEnv.h"
 #include "Entities/ObjectGuid.h"
+#include "Globals/EnumFlag.h"
 
 class SocialMgr;
 class PlayerSocial;
@@ -105,15 +106,6 @@ enum FriendsResult
 
 #define SOCIALMGR_FRIEND_LIMIT  50
 #define SOCIALMGR_IGNORE_LIMIT  25                          // checked max for 1.12.1, list tail not show if more
-
-enum class SocialListFlags
-{
-    FRIEND_LIST = 0x1,
-    IGNORE_LIST = 0x2,
-    MUTE_LIST   = 0x4,
-};
-
-DEFINE_ENUM_FLAG(SocialListFlags);
 
 class PlayerSocial
 {
