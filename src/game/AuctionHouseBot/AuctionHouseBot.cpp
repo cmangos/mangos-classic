@@ -17,6 +17,7 @@
  */
 
 #include "AuctionHouseBot.h"
+#include "Common.h"
 #include "Globals/ObjectMgr.h"
 #include "Log/Log.h"
 #include "Policies/Singleton.h"
@@ -164,6 +165,17 @@ void AuctionHouseBot::Update()
     AuctionHouseObject* auctionHouse = sAuctionMgr.GetAuctionsMap(houseType);
     if (m_houseAction < MAX_AUCTION_HOUSE_TYPE && urand(0, 99) < m_chanceSell)
     {
+	// Lazy-refresh dynamic level
+	if (m_useDynamicMaxLevel)
+	{
+	    uint32 now = time(nullptr);
+	    if (now - m_lastLevelUpdateTime >= m_levelRefreshInterval)
+	    {
+		UpdateDynamicMaxLevel();
+		CalculateItemLevelCap();
+		m_lastLevelUpdateTime = now;
+	    }
+	}
         // Sell items
         std::unordered_map<uint32, uint32> itemMap;
 
@@ -459,29 +471,91 @@ void AuctionHouseBot::ParseLevelConstraints()
 {
     // Get settings from config
     m_useDynamicMaxLevel = m_ahBotCfg.GetBoolDefault("AuctionHouseBot.Level.DynamicMaxRequired", false);
+    m_ignoreGm = m_ahBotCfg.GetBoolDefault("AuctionHouseBot.Level.IgnoreGmAccounts", false);
+    m_levelRefreshInterval = m_ahBotCfg.GetIntDefault("AuctionHouseBot.Level.DynamicRefreshInterval", 10) * MINUTE;
+    m_lastLevelUpdateTime = time(nullptr);
     m_maxRequiredLevel = GetMinMaxConfig("AuctionHouseBot.Level.MaxRequired", 1, STRONG_MAX_LEVEL, DEFAULT_MAX_LEVEL);
 
-    // Override with dynamic value if enabled
     if (m_useDynamicMaxLevel)
     {
-        if (auto result = CharacterDatabase.PQuery("SELECT MAX(level) FROM characters"))
-        {
-            Field* field = result->Fetch();
-            m_maxRequiredLevel = field[0].GetUInt32();
-            sLog.outString("AHBot Dynamic max required level set to %u", m_maxRequiredLevel);
-        }
-        else
-        {
-            sLog.outError("AHBot Failed to retrieve max character level. Falling back to default value %u.", DEFAULT_MAX_LEVEL);
-            m_maxRequiredLevel = DEFAULT_MAX_LEVEL;
-        }
+	UpdateDynamicMaxLevel();
     }
     else
     {
-        sLog.outString("AHBot Static max required level set to %u", m_maxRequiredLevel);
+	sLog.outString("AHBot Static max required level set to %u", m_maxRequiredLevel);
     }
 
-    // Set item level cap based on required level
+    CalculateItemLevelCap();
+
+    m_lastLevelUpdateTime = time(nullptr); // So we don't instantly recalc after startup
+}
+
+void AuctionHouseBot::UpdateDynamicMaxLevel()
+{
+    // Attempt to query all online characters ordered by level
+    if (auto result = CharacterDatabase.PQuery("SELECT account, level FROM characters WHERE online = 1 ORDER BY level DESC"))
+    {
+	// Always grab the first result as fallback (highest overall)
+	Field* firstRow = result->Fetch();
+	uint32 firstAcct = firstRow[0].GetUInt32();
+	uint32 fallbackLevel = firstRow[1].GetUInt32();
+	m_maxRequiredLevel = fallbackLevel;
+
+	if (m_ignoreGm)
+	{
+	    std::set<uint32> gmAccounts;
+	    // Collect GM accounts
+	    if (auto gmResult = LoginDatabase.PQuery("SELECT id FROM account WHERE gmlevel > 0"))
+	    {
+		do
+		{
+		    Field* field = gmResult->Fetch();
+		    gmAccounts.insert(field[0].GetUInt32());
+		} while (gmResult->NextRow());
+	    }
+
+            // Look for highest non-GM character
+	    if (gmAccounts.count(firstAcct) == 0)
+	    {
+		sLog.outString("AHBot Dynamic max required level (excluding GMs) set to %u", fallbackLevel);
+	    }
+	    else
+	    {
+		bool foundNonGm = false;
+		while (result->NextRow())
+		{
+		    Field* row = result->Fetch();
+		    uint32 accId = row[0].GetUInt32();
+		    uint32 level = row[1].GetUInt32();
+
+		    if (gmAccounts.count(accId) == 0)
+		    {
+			m_maxRequiredLevel = level;
+			foundNonGm = true;
+			sLog.outString("AHBot Dynamic max required level (excluding GMs) set to %u", m_maxRequiredLevel);
+			break;
+		    }
+		}
+
+		if (!foundNonGm)
+		{
+		    sLog.outString("AHBot Notice: No non-GM players online. Fallback max required level (including GMs) set to %u", fallbackLevel);
+		}
+	    }
+	}
+	else
+	{
+	    sLog.outString("AHBot Dynamic max required level set to %u", m_maxRequiredLevel);
+	}
+    }
+    else
+    {
+	sLog.outError("AHBot Error: No online characters found. Retaining static max required level %u", m_maxRequiredLevel);
+    }
+}
+
+void AuctionHouseBot::CalculateItemLevelCap()
+{
     if (m_maxRequiredLevel >= DEFAULT_MAX_LEVEL)
     {
         m_maxItemLevel = STRONG_MAX_LEVEL;
@@ -492,6 +566,7 @@ void AuctionHouseBot::ParseLevelConstraints()
         m_maxItemLevel = m_maxRequiredLevel;
     }
 }
+
 
 void AuctionHouseBot::ParseItemValueConfig(char const* fieldname, std::vector<uint32>& itemValues)
 {

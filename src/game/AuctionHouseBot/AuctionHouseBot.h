@@ -64,6 +64,8 @@ class AuctionHouseBot
         void ParseLootConfig(char const* fieldname, std::vector<int32>& lootConfig);
         void FillUintVectorFromQuery(char const* query, std::vector<uint32>& lootTemplates);
 	void ParseLevelConstraints();
+	void UpdateDynamicMaxLevel();
+        void CalculateItemLevelCap();
         void ParseItemValueConfig(char const* fieldname, std::vector<uint32>& itemValues);
         void AddLootToItemMap(LootStore* store, std::vector<int32>& lootConfig, std::vector<uint32>& lootTemplates, std::unordered_map<uint32, uint32>& itemMap);
         uint32 CalculateBuyoutPrice(ItemPrototype const* prototype);
@@ -88,9 +90,12 @@ class AuctionHouseBot
         std::vector<int32> m_skinningLootConfig;
         std::vector<int32> m_professionItemsConfig;
 
+	bool m_useDynamicMaxLevel;
+	bool m_ignoreGm;
+	uint32 m_lastLevelUpdateTime = 0;
+	uint32 m_levelRefreshInterval = 0;
 	uint32 m_maxRequiredLevel;
 	uint32 m_maxItemLevel;
-	bool m_useDynamicMaxLevel;
 
         std::vector<std::vector<uint32>> m_itemValue = std::vector<std::vector<uint32>>(MAX_ITEM_QUALITY, std::vector<uint32>(MAX_ITEM_CLASS));
         bool m_vendorValue;
