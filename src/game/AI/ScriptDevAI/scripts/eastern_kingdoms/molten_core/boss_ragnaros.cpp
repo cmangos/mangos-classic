@@ -220,6 +220,8 @@ struct boss_ragnarosAI : public CombatAI
             {
                 // Submerge and attack again after 90 secs
                 DoCastSpellIfCan(m_creature, SPELL_RAGNA_SUBMERGE_VISUAL, CAST_TRIGGERED);
+                DoCastSpellIfCan(nullptr, SPELL_SUBMERGE_EFFECT, CAST_TRIGGERED);
+                m_creature->SetStandState(UNIT_STAND_STATE_CUSTOM);
                 m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
                 // Say dependend if first time or not
@@ -230,7 +232,7 @@ struct boss_ragnarosAI : public CombatAI
                 if (DoCastSpellIfCan(nullptr, SPELL_SUMMON_SONS_FLAME) == CAST_OK)
                     m_uiAddCount = NB_ADDS_IN_SUBMERGE;
 
-                ResetCombatAction(RAGNAROS_PHASE_TRANSITION, 1000);
+                ResetCombatAction(RAGNAROS_PHASE_TRANSITION, 3000);
                 m_phase = PHASE_SUBMERGING;
                 DisableCombatAction(RAGNAROS_WRATH_OF_RAGNAROS);
                 DisableCombatAction(RAGNAROS_MIGHT_OF_RAGNAROS);
@@ -241,9 +243,7 @@ struct boss_ragnarosAI : public CombatAI
             }
             case PHASE_SUBMERGING:
             {
-                m_creature->HandleEmote(EMOTE_STATE_SUBMERGED);
                 DoCastSpellIfCan(nullptr, SPELL_RAGNA_SUBMERGE, CAST_TRIGGERED);
-                DoCastSpellIfCan(nullptr, SPELL_SUBMERGE_EFFECT, CAST_TRIGGERED);
                 ResetCombatAction(RAGNAROS_PHASE_TRANSITION, 90 * IN_MILLISECONDS);
                 m_phase = PHASE_SUBMERGED;
                 break;
@@ -251,7 +251,6 @@ struct boss_ragnarosAI : public CombatAI
             case PHASE_SUBMERGED:
             {
                 // Become emerged again
-                m_creature->HandleEmote(EMOTE_STATE_STAND);
                 m_creature->RemoveAurasDueToSpell(SPELL_RAGNA_SUBMERGE);
                 m_creature->RemoveAurasDueToSpell(SPELL_SUBMERGE_EFFECT);
                 m_creature->RemoveAurasDueToSpell(SPELL_RAGNA_SUBMERGE_VISUAL);
@@ -261,6 +260,7 @@ struct boss_ragnarosAI : public CombatAI
             }
             case PHASE_EMERGING:
             {
+                m_creature->SetStandState(UNIT_STAND_STATE_STAND);
                 DoCastSpellIfCan(m_creature, SPELL_RAGNA_EMERGE);
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 m_phase = PHASE_EMERGED;
