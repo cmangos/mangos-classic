@@ -158,7 +158,7 @@ jobs:
           echo "PB_AB_ARCH_NAME=${projectNames}-with-playerbot-ahbot-${shortSHA}.zip" >> $GITHUB_ENV
 
       - name: Notify
-        uses: rjstone/discord-webhook-notify@v1.1.1
+        uses: rjstone/discord-webhook-notify@v2.2.1
         with:
           severity: info
           description: |
@@ -193,7 +193,7 @@ jobs:
           echo "GIT_SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
 
       - name: Notify
-        uses: rjstone/discord-webhook-notify@v1.1.1
+        uses: rjstone/discord-webhook-notify@v2.2.1
         with:
           severity: error
           description: |
