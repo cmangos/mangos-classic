@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 # Minimum required cmake version to run the build
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.12)
 cmake_policy(SET CMP0069 NEW)
 
 # Will cache object files if ccache is available
@@ -28,8 +28,8 @@ endif()
 
 project(CMaNGOS_Classic)
 
-# Require C++ 17 support
-set(CMAKE_CXX_STANDARD 17)
+# Require C++ 20 support
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
