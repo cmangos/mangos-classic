@@ -413,8 +413,8 @@ float Transport::CalculateSegmentPos(float now)
     KeyFrame const& frame = *m_currentFrame;
     float const speed = float(m_goInfo->moTransport.moveSpeed);
     float const accel = float(m_goInfo->moTransport.accelRate);
-    float timeSinceStop = frame.TimeFrom + (now - (1.0f / IN_MILLISECONDS) * frame.DepartureTime);
-    float timeUntilStop = frame.TimeTo - (now - (1.0f / IN_MILLISECONDS) * frame.DepartureTime);
+    float timeSinceStop = frame.TimeFrom + (now - (1.0f / float(IN_MILLISECONDS)) * frame.DepartureTime);
+    float timeUntilStop = frame.TimeTo - (now - (1.0f / float(IN_MILLISECONDS)) * frame.DepartureTime);
     float segmentPos, dist;
     float accelTime = m_transportTemplate.accelTime;
     float accelDist = m_transportTemplate.accelDist;

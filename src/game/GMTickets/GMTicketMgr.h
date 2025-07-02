@@ -271,7 +271,7 @@ class GMTicketMgr
         CommandResult Update(GMTicket* ticket, const std::string& text);
         CommandResult Whisper(GMTicket* ticket, const std::string& message, WorldSession* session = nullptr);
 
-        static inline float GetDaysPassed(time_t now, time_t since) { return (now && since ? std::stof(std::to_string((difftime(now, since) / DAY))) : 0); }
+        static inline float GetDaysPassed(time_t now, time_t since) { return (now && since ? std::stof(std::to_string((difftime(now, since) / float(DAY)))) : 0); }
 
         static inline float GetTicketAgeDays(time_t now, time_t created) { return GetDaysPassed(now, created); }
         inline float GetOldestTicketAgeDays() const { return m_statsOldestTicketAgeDays; }

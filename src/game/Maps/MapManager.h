@@ -149,17 +149,9 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         // get list of all maps
         const MapMapType& Maps() const { return i_maps; }
 
-        template<typename Do> void DoForAllMaps(Do& _do)
-        {
-            for (auto& mapData : i_maps)
-            {
-                _do(mapData.second.get());
-            }
-        }
-        template<typename Do> void DoForAllMapsWithMapId(uint32 mapId, Do& _do);
         template<typename Check> inline WorldObject* SearchOnAllLoadedMap(Check& check);
         void DoForAllMaps(const std::function<void(Map*)>& worker);
-        void DoForAllMapsWithMapId(uint32 mapId, std::function<void(Map*)> worker);
+        void DoForAllMapsWithMapId(uint32 mapId, const std::function<void(Map*)> worker);
 
     private:
 
@@ -190,15 +182,6 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         std::atomic<uint32> i_MaxInstanceId;
         MapUpdater m_updater;
 };
-
-template<typename Do>
-inline void MapManager::DoForAllMapsWithMapId(uint32 mapId, Do& _do)
-{
-    MapMapType::const_iterator start = i_maps.lower_bound(MapID(mapId, 0));
-    MapMapType::const_iterator end   = i_maps.lower_bound(MapID(mapId + 1, 0));
-    for (MapMapType::const_iterator itr = start; itr != end; ++itr)
-        _do(itr->second.get());
-}
 
 template<typename Check>
 inline WorldObject* MapManager::SearchOnAllLoadedMap(Check& check)

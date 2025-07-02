@@ -277,7 +277,7 @@ struct DungeonResetEvent
     DungeonResetEvent(ResetEventType t, uint32 _mapid, uint32 _instanceid)
         : type(t), mapid(_mapid), instanceId(_instanceid) {}
 
-    bool operator == (const DungeonResetEvent& e) { return e.mapid == mapid && e.instanceId == instanceId; }
+    bool operator == (const DungeonResetEvent& e) const { return e.mapid == mapid && e.instanceId == instanceId; }
 };
 
 class DungeonResetScheduler

@@ -392,7 +392,7 @@ BattleGroundMap* MapManager::CreateBattleGroundMap(uint32 id, uint32 InstanceId,
     return map;
 }
 
-void MapManager::DoForAllMapsWithMapId(uint32 mapId, std::function<void(Map*)> worker)
+void MapManager::DoForAllMapsWithMapId(uint32 mapId, const std::function<void(Map*)> worker)
 {
     MapMapType::const_iterator start = i_maps.lower_bound(MapID(mapId, 0));
     MapMapType::const_iterator end = i_maps.lower_bound(MapID(mapId + 1, 0));

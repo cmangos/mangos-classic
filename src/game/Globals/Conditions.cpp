@@ -504,7 +504,7 @@ bool inline ConditionEntry::Evaluate(WorldObject const* target, Map const* map, 
                 return false;
             }
 
-            return static_cast<Unit const*>(target)->IsInCombat() != m_value1;
+            return static_cast<Unit const*>(target)->IsInCombat() != bool(m_value1);
         }
         default:
             break;

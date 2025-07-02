@@ -48,9 +48,9 @@ void printUsage()
     printf("                        Please not that folder with space or special characters are not supported.\n");
 }
 
-bool handleArgs(int argc, char** argv, char*& dataDir)
+bool handleArgs(int argc, char** argv, const char*& dataDir)
 {
-    char* param = NULL;
+    const char* param = NULL;
     dataDir = "./";
 
     for (int i = 1; i < argc; ++i)
@@ -80,7 +80,7 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    char* dataDir = nullptr;
+    const char* dataDir = nullptr;
 
     if (!handleArgs(argc, argv, dataDir))
         return -1;

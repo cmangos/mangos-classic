@@ -722,7 +722,7 @@ void GMTicketMgr::ShowMOTD(Player &gm) const
     ch.PSendSysMessage(LANG_TICKET_MOTD_SYSTEM_STATUS, ch.GetMangosString(GetSystemStatus() ? LANG_ON : LANG_OFF));
 
     if (m_currentTicketCountClosed)
-        ch.PSendSysMessage(LANG_TICKET_MOTD_SYSTEM_STATS_CLOSED, m_currentTicketCountClosed, secsToTimeString(uint32(GetAverageResolutionDays() * DAY)).c_str());
+        ch.PSendSysMessage(LANG_TICKET_MOTD_SYSTEM_STATS_CLOSED, m_currentTicketCountClosed, secsToTimeString(uint32(GetAverageResolutionDays() * float(DAY))).c_str());
 
     if (m_currentTicketCountOpen)
     {
