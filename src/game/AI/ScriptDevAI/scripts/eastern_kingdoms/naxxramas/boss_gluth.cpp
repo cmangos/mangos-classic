@@ -66,7 +66,7 @@ struct boss_gluthAI : public CombatAI
         AddCombatAction(GLUTH_DECIMATE, 105u * IN_MILLISECONDS);
         AddCombatAction(GLUTH_ENRAGE, 10u * IN_MILLISECONDS);
         AddCombatAction(GLUTH_ROAR, 20u * IN_MILLISECONDS);
-        AddCombatAction(GLUTH_BERSERK, (uint32)(6.5 * MINUTE * IN_MILLISECONDS)); // ~15 seconds after the third Decimate
+        AddCombatAction(GLUTH_BERSERK, uint32(390 * IN_MILLISECONDS)); // ~15 seconds after the third Decimate
     }
 
     ScriptedInstance* m_instance;

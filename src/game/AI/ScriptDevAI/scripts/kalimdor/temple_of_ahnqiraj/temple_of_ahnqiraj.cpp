@@ -432,7 +432,7 @@ void instance_temple_of_ahnqiraj::Update(uint32 diff)
                 }
             }
         }
-        m_uiCthunWhisperTimer = urand(1.5 * MINUTE * IN_MILLISECONDS, 5 * MINUTE * IN_MILLISECONDS);
+        m_uiCthunWhisperTimer = urand(90 * IN_MILLISECONDS, 5 * MINUTE * IN_MILLISECONDS);
     }
     else
         m_uiCthunWhisperTimer -= diff;

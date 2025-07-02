@@ -400,7 +400,7 @@ uint32 Antispam::RepetitionScore() const
     if (auto const timeScale = sAnticheatConfig.GetAntispamRepetitionTimeScale())
     {
         auto const milliseconds = WorldTimer::getMSTime() - _creationTime;
-        auto const lifetime = static_cast<float>(milliseconds) / IN_MILLISECONDS;
+        auto const lifetime = static_cast<float>(milliseconds) / float(IN_MILLISECONDS);
 
         if (lifetime > 0)
             score *= lifetime * timeScale;

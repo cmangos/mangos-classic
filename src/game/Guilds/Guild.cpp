@@ -745,7 +745,7 @@ void Guild::Roster(WorldSession* session /*= nullptr*/)
             data << uint8(itr->second.Level);
             data << uint8(itr->second.Class);
             data << uint32(itr->second.ZoneId);
-            data << float(float(time(nullptr) - itr->second.LogoutTime) / DAY);
+            data << float(float(time(nullptr) - itr->second.LogoutTime) / float(DAY));
             data << itr->second.Pnote;
             data << ((session && HasRankRight(session->GetPlayer()->GetRank(), GR_RIGHT_VIEWOFFNOTE)) ? itr->second.OFFnote : "");
         }

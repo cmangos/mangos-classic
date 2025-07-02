@@ -116,7 +116,7 @@ struct boss_patchwerkAI : public CombatAI
             case PATCHWERK_HATEFUL_STRIKE:
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_HATEFULSTRIKE_PRIMER) == CAST_OK)
-                    ResetCombatAction(action, 1.2 * IN_MILLISECONDS);
+                    ResetCombatAction(action, 12000);
                 break;
             }
             case PATCHWERK_BERSERK:

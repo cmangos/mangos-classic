@@ -428,7 +428,7 @@ struct boss_mawsAI : public ScriptedAI
         uiFrenzyTimer           = 25 * IN_MILLISECONDS;
         uiDarkWaterTimer        = 15 * IN_MILLISECONDS;
         uiRampageTimer          = urand(20, 120) * IN_MILLISECONDS;
-        uiDespawnTimer          = 2.5 * HOUR * IN_MILLISECONDS;
+        uiDespawnTimer          = 150 * MINUTE * IN_MILLISECONDS;
 
         DoCastSpellIfCan(nullptr, SPELL_THRASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
