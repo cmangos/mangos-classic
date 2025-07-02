@@ -102,10 +102,10 @@ bool handleArgs(int argc, char** argv,
                 bool& debugOutput,
                 bool& silent,
                 bool& buildGameObjects,
-                char*& offMeshInputPath,
-                char*& configInputPath,
+                const char*& offMeshInputPath,
+                const char*& configInputPath,
                 int& threads,
-                char*& workdir)
+                const char*& workdir)
 {
     char* param = NULL;
     workdir = "./";
@@ -247,9 +247,9 @@ int main(int argc, char** argv)
     bool silent = false;
     bool buildGameObjects = false;
 
-    char* offMeshInputPath = "offmesh.txt";
-    char* configInputPath = "config.json";
-    char* workdir = NULL;
+    const char* offMeshInputPath = "offmesh.txt";
+    const char* configInputPath = "config.json";
+    const char* workdir = NULL;
 
     bool validParam = handleArgs(argc, argv, mapIds, tileX, tileY, skipLiquid,
                                  skipContinents, skipJunkMaps, skipBattlegrounds,
