@@ -29,9 +29,8 @@ template <typename T>
 class ProducerConsumerQueue
 {
     public:
-
-        ProducerConsumerQueue<T>() : m_shutdown(false) { }
-        ProducerConsumerQueue<T>(const ProducerConsumerQueue<T>&) = delete;
+        ProducerConsumerQueue() : m_shutdown(false) { }
+        ProducerConsumerQueue(const ProducerConsumerQueue<T>&) = delete;
 
         void Push(const T&& value)
         {

@@ -22,6 +22,7 @@
 #
 bin
 build
+build_linux
 tags
 TAGS
 win
