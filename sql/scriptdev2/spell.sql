@@ -73,6 +73,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (23226,'spell_ritual_candle_aura'),
 (24228,'spell_arlokk_vanish'),
 (24314,'spell_threatening_gaze'),
+(24335,'spell_wyvern_sting_aura'),
 (24342,'spell_despawn_chained_spirits'),
 (24306,'spell_delusions_of_jindo'),
 (24308,'spell_summon_shade_of_jindo'),

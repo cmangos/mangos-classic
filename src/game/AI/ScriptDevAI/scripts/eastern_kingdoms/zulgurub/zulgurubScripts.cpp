@@ -187,6 +187,16 @@ struct RandomAggro : public SpellScript
     }
 };
 
+// 24335 - Wyvern Sting
+struct WyvernStingAura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply && aura->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+            aura->GetCaster()->CastSpell(aura->GetTarget(), 24336, TRIGGERED_OLD_TRIGGERED); // Wyvern Sting Dot
+    }
+};
+
 void AddSC_zulgurub()
 {
     Script* pNewScript = new Script;
@@ -198,4 +208,5 @@ void AddSC_zulgurub()
     RegisterSpellScript<DelusionsOfJindo>("spell_delusions_of_jindo");
     RegisterSpellScript<SummonShadeOfJindo>("spell_summon_shade_of_jindo");
     RegisterSpellScript<RandomAggro>("spell_random_aggro");
+    RegisterSpellScript<WyvernStingAura>("spell_wyvern_sting_aura");
 }
