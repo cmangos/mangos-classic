@@ -134,7 +134,7 @@ int32 AbstractRandomMovementGenerator::_setLocation(Unit& owner)
     init.SetWalk(i_walk);
 
     if (owner.IsSlowedInCombat())
-        init.SetCombatSlowed(1.f - (30.f - std::min(owner.GetHealthPercent(), 30.f)) * 1.67);
+        init.SetCombatSlowed(1.f - ((30.f - std::min(owner.GetHealthPercent(), 30.f)) * 1.67) / 100);
 
     int32 duration = init.Launch();
 

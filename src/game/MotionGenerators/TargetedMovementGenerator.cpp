@@ -570,7 +570,7 @@ bool ChaseMovementGenerator::DispatchSplineToPosition(Unit& owner, float x, floa
     init.MovebyPath(path);
     init.SetWalk(walk);
     if (owner.IsSlowedInCombat() && !walk)
-        init.SetCombatSlowed(1.f - (30.f - std::min(owner.GetHealthPercent(), 30.f)) * 1.67);
+        init.SetCombatSlowed(1.f - ((30.f - std::min(owner.GetHealthPercent(), 30.f)) * 1.67) / 100);
     if (target)
         init.SetFacing(i_target.getTarget());
     init.Launch();
