@@ -291,9 +291,9 @@ class LootTemplate
         void Process(Loot& loot, Player const* lootOwner, bool rate, LootStatsData* lootStatsData = nullptr) const;
 
         // True if template includes at least 1 quest drop entry
-        bool HasQuestDrop(LootTemplateMap const& store, uint8 groupId = 0) const;
+        bool HasQuestDrop(uint8 groupId = 0) const;
         // True if template includes at least 1 quest drop for an active quest of the player
-        bool HasQuestDropForPlayer(LootTemplateMap const& store, Player const* player, uint8 groupId = 0) const;
+        bool HasQuestDropForPlayer(Player const* player, uint8 groupId = 0) const;
         // True if at least one player fulfills loot condition
         static bool PlayerOrGroupFulfilsCondition(const Loot& loot, Player const* lootOwner, uint16 conditionId);
 
