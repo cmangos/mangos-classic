@@ -563,7 +563,7 @@ void AuctionHouseBot::CalculateItemLevelCap()
     }
     else
     {
-        m_maxItemLevel = m_maxRequiredLevel;
+        m_maxItemLevel = m_maxRequiredLevel + 5; // Typical item level is required level + 5
     }
 }
 
