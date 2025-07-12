@@ -58,7 +58,7 @@ struct boss_patchwerkAI : public CombatAI
     boss_patchwerkAI(Creature* creature) : CombatAI(creature, PATCHWER_ACTIONS_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
         AddTimerlessCombatAction(PATCHWERK_BERSERK_HP_CHECK, true);         // Soft enrage à 5%
-        AddCombatAction(PATCHWERK_HATEFUL_STRIKE, 12000u);
+        AddCombatAction(PATCHWERK_HATEFUL_STRIKE, 1200u);
         AddCombatAction(PATCHWERK_BERSERK, 7u * MINUTE * IN_MILLISECONDS);  // Basic berserk
         AddCombatAction(PATCHWERK_BERSERK_SILMEBOLT, true);                 // Slimebolt - casted only 30 seconds after berserking to prevent kiting
     }
@@ -116,7 +116,7 @@ struct boss_patchwerkAI : public CombatAI
             case PATCHWERK_HATEFUL_STRIKE:
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_HATEFULSTRIKE_PRIMER) == CAST_OK)
-                    ResetCombatAction(action, 12000);
+                    ResetCombatAction(action, 1200);
                 break;
             }
             case PATCHWERK_BERSERK:
