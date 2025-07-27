@@ -24,18 +24,19 @@ EndScriptData
 */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/BossAI.h"
 #include "naxxramas.h"
 
 enum
 {
-    SAY_SPEECH_1                = -1533040,
-    SAY_SPEECH_2                = -1533140,
-    SAY_SPEECH_3                = -1533141,
-    SAY_SPEECH_4                = -1533142,
+    SAY_SPEECH_1                = 13030,
+    SAY_SPEECH_2                = 13031,
+    SAY_SPEECH_3                = 13032,
+    SAY_SPEECH_4                = 13033,
 
-    SAY_KILL                    = -1533041,
-    SAY_DEATH                   = -1533042,
-    SAY_TELEPORT                = -1533043,
+    SAY_KILL                    = 13027,
+    SAY_DEATH                   = 13026,
+    SAY_TELEPORT                = 13028,
 
     PHASE_SPEECH                = 0,
     PHASE_BALCONY               = 1,
@@ -63,61 +64,131 @@ enum
     SPELL_CHECK_UNRELENTING_SIDE    = 29875,
 };
 
-struct boss_gothikAI : public ScriptedAI
+enum GothikActions
 {
-    boss_gothikAI(Creature* creature) : ScriptedAI(creature)
+    GOTHIK_TELEPORT,
+    GOTHIK_STOP_TELE,
+    GOTHIK_ACTIONS_MAX,
+    GOTHIK_GROUND_PHASE,
+    GOTHIK_SUMMON_TRAINEE,
+    GOTHIK_SUMMON_DEATH_KNIGHT,
+    GOTHIK_SUMMON_RIDER,
+    GOTHIK_SPEECH,
+};
+
+struct boss_gothikAI : public BossAI
+{
+    boss_gothikAI(Creature* creature) : BossAI(creature, GOTHIK_ACTIONS_MAX), m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData())), m_phase(PHASE_SPEECH),
+        m_speechStep(0), m_teleportCount(0)
     {
-        m_instance = (instance_naxxramas*)creature->GetInstanceData();
-        Reset();
+        SetDataType(TYPE_GOTHIK);
+        AddOnKillText(SAY_KILL);
+        AddOnDeathText(SAY_DEATH);
+        AddTimerlessCombatAction(GOTHIK_STOP_TELE, true);
+        AddCustomAction(GOTHIK_SUMMON_TRAINEE, true, [&]() { StartTraineeSummons(); });
+        AddCustomAction(GOTHIK_SUMMON_DEATH_KNIGHT, true, [&]() { StartKnightSummons(); });
+        AddCustomAction(GOTHIK_SUMMON_RIDER, true, [&]() { StartRiderSummons(); });
+        AddCombatAction(GOTHIK_TELEPORT, true);
+        AddCustomAction(GOTHIK_GROUND_PHASE, true, [&]() { HandleGroundPhase(); });
+        AddCustomAction(GOTHIK_SPEECH, true, [&]()
+        {
+            switch (m_speechStep)
+            {
+                case 0: DoBroadcastText(SAY_SPEECH_1, m_creature); DoPlaySoundToSet(m_creature, 8807); ResetTimer(GOTHIK_SPEECH, 4s); break;
+                case 1: DoBroadcastText(SAY_SPEECH_2, m_creature); ResetTimer(GOTHIK_SPEECH, 6s); break;
+                case 2: DoBroadcastText(SAY_SPEECH_3, m_creature); ResetTimer(GOTHIK_SPEECH, 5s); break;
+                case 3:
+                {
+                    DoBroadcastText(SAY_SPEECH_4, m_creature);
+                    m_phase = PHASE_BALCONY;
+                    break;
+                }
+            }
+            ++m_speechStep;
+        });
     }
 
     instance_naxxramas* m_instance;
 
-    uint8 m_phase;
-    uint8 m_speech;
-    uint8 m_teleportCount;
-    uint8 m_summonStep;
+    GuidVector m_summonedAddGuids;
 
-    uint32 m_summonTimer;
-    uint32 m_teleportTimer;
-    uint32 m_shadowboltTimer;
-    uint32 m_harvestSoulTimer;
-    uint32 m_phaseTimer;
-    uint32 m_speechTimer;
+    uint8 m_phase;
+    uint8 m_speechStep;
+    uint8 m_teleportCount;
 
     void Reset() override
     {
+        BossAI::Reset();
+        m_creature->RemoveAurasDueToSpell(SPELL_IMMUNE_ALL);
         // Remove immunity
         m_phase = PHASE_SPEECH;
-        m_speech = 1;
+        m_speechStep = 0;
 
-        m_teleportTimer = urand(30, 45) * IN_MILLISECONDS; // Teleport every 30-45 seconds.
-        m_shadowboltTimer = 2 * IN_MILLISECONDS;
-        m_harvestSoulTimer = 2500;
-        m_phaseTimer = (4 * MINUTE + 34) * IN_MILLISECONDS; // Teleport down at 4:34
-        m_speechTimer = 1 * IN_MILLISECONDS;
-        m_summonTimer = 0;
         m_teleportCount = 0;
-        m_summonStep = STEP_TRAINEE;
 
         // Only attack and be attackable while on ground
         SetMeleeEnabled(false);
         SetCombatMovement(false);
-        DoCastSpellIfCan(m_creature, SPELL_IMMUNE_ALL, TRIGGERED_OLD_TRIGGERED);
+        SetReactState(REACT_PASSIVE);
+        SetCombatScriptStatus(false);
+
+        // Despawn Adds
+        DespawnGuids(m_summonedAddGuids);
+    }
+
+    void HandleGroundPhase()
+    {
+        m_creature->CastSpell(nullptr, SPELL_TELEPORT_RIGHT, TRIGGERED_OLD_TRIGGERED);
+        m_phase = m_instance ? PHASE_TELEPORTING : PHASE_STOP_TELEPORTING;
+
+        DoBroadcastText(SAY_TELEPORT, m_creature);
+
+        // Remove Immunity
+        m_creature->RemoveAurasDueToSpell(SPELL_IMMUNE_ALL);
+        SetMeleeEnabled(true);
+        SetCombatMovement(true);
+        SetReactState(REACT_AGGRESSIVE);
+
+        DoResetThreat();
+        m_creature->SetInCombatWithZone();
+        SetRangedMode(true, 100.f, TYPE_FULL_CASTER);
+        AttackClosestEnemy();
+        ResetCombatAction(GOTHIK_TELEPORT, 20s);
+        AddInitialCooldowns();
     }
 
     void Aggro(Unit* /*who*/) override
     {
-        if (!m_instance)
-            return;
-
-        m_instance->SetData(TYPE_GOTHIK, IN_PROGRESS);
+        BossAI::Aggro();
+        m_creature->SetInCombatWithZone();
+        m_creature->SetTarget(nullptr);
+        SetCombatScriptStatus(true);
+        SetCombatMovement(false);
+        SetMeleeEnabled(false);
         // Make immune if not already
         if (!m_creature->HasAura(SPELL_IMMUNE_ALL))
-            DoCastSpellIfCan(m_creature, SPELL_IMMUNE_ALL, TRIGGERED_OLD_TRIGGERED);
+            DoCastSpellIfCan(nullptr, SPELL_IMMUNE_ALL, TRIGGERED_OLD_TRIGGERED);
 
         // Start timer before summoning
-        m_summonTimer = 4 * IN_MILLISECONDS;    // First spawn of trainees 24 secs after engage, but the periodic summoning aura already has an internal 20 secs timer
+        ResetTimer(GOTHIK_SPEECH, 1s);
+
+        ResetTimer(GOTHIK_SUMMON_TRAINEE, 4s);
+        ResetTimer(GOTHIK_SUMMON_DEATH_KNIGHT, 49s);
+        ResetTimer(GOTHIK_SUMMON_RIDER, 104s);
+        ResetTimer(GOTHIK_GROUND_PHASE, 4min + 34s);
+    }
+
+    bool IsCentralDoorClosed() const
+    {
+        return m_instance && m_instance->GetData(TYPE_GOTHIK) != SPECIAL;
+    }
+
+    void ProcessCentralDoor()
+    {
+        if (IsCentralDoorClosed())
+        {
+            m_instance->SetData(TYPE_GOTHIK, SPECIAL);
+        }
     }
 
     bool HasPlayersInLeftSide() const
@@ -139,304 +210,224 @@ struct boss_gothikAI : public ScriptedAI
         return false;
     }
 
-    void KilledUnit(Unit* victim) override
-    {
-        if (victim->GetTypeId() == TYPEID_PLAYER)
-            DoScriptText(SAY_KILL, m_creature);
-    }
-
-    void JustDied(Unit* /*killer*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_instance)
-            m_instance->SetData(TYPE_GOTHIK, DONE);
-    }
-
     void EnterEvadeMode() override
     {
-        DoCastSpellIfCan(m_creature, SPELL_RESET_GOTHIK_EVENT, CAST_TRIGGERED); // Prevent more adds from spawing
-
-        // Remove summoning and immune auras
-        m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_TRAINEE);
-        m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_KNIGHT);
-        m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_MOUNTED_KNIGHT);
-        m_creature->RemoveAurasDueToSpell(SPELL_IMMUNE_ALL);
-
-        if (m_instance)
-            m_instance->SetData(TYPE_GOTHIK, FAIL);
+        BossAI::EnterEvadeMode();
+        DoCastSpellIfCan(nullptr, SPELL_RESET_GOTHIK_EVENT, CAST_TRIGGERED); // Prevent more adds from spawing
 
         m_creature->SetRespawnDelay(30, true);
         m_creature->ForcedDespawn();
     }
 
-    void UpdateAI(const uint32 diff) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
+        if (HasPlayersInLeftSide())
+            summoned->SetInCombatWithZone();
+        m_summonedAddGuids.push_back(summoned->GetObjectGuid());
+    }
 
-        // Summoning auras handling
-        if (m_summonTimer)
+    void SummonedCreatureJustDied(Creature* summoned) override
+    {
+        switch (summoned->GetEntry())
         {
-            if (m_summonTimer < diff)
-            {
-                switch (m_summonStep) {
-                    case STEP_TRAINEE:
+            // Wrong caster, it expected to be pSummoned.
+            // Mangos deletes the spell event at caster death, so for delayed spell like this
+            // it's just a workaround. Does not affect other than the visual though (+ spell takes longer to "travel")
+            case NPC_UNREL_TRAINEE:         summoned->CastSpell(nullptr, SPELL_A_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED); break;
+            case NPC_UNREL_DEATH_KNIGHT:    summoned->CastSpell(nullptr, SPELL_B_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED); break;
+            case NPC_UNREL_RIDER:           summoned->CastSpell(nullptr, SPELL_C_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED); break;
+        }
+    }
 
-                        if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_TRAINEE, CAST_TRIGGERED) == CAST_OK)
+    void StartTraineeSummons()
+    {
+        m_creature->CastSpell(nullptr, SPELL_SUMMON_TRAINEE_PERIODIC, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
+    }
+
+    void StartKnightSummons()
+    {
+        m_creature->CastSpell(nullptr, SPELL_SUMMON_KNIGHT_PERIODIC, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
+    }
+
+    void StartRiderSummons()
+    {
+        m_creature->CastSpell(nullptr, SPELL_SUMMON_MOUNTED_KNIGHT_PERIODIC, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
+    }
+
+    void HandleOpenGates()
+    {
+        ProcessCentralDoor();
+        Map::PlayerList const& players = m_instance->instance->GetPlayers();
+        for (const auto& playerRef : players)
+        {
+            if (Player* player = playerRef.getSource())
+            {
+                for (ObjectGuid guid : m_summonedAddGuids)
+                {
+                    if (Creature* add = m_creature->GetMap()->GetCreature(guid))
+                    {
+                        // attack other side
+                        if (add->IsAlive() && m_instance->IsInRightSideGothikArea(player) != m_instance->IsInRightSideGothikArea(add))
                         {
-                            m_summonTimer = 45 * IN_MILLISECONDS;
-                            ++m_summonStep;
+                            add->AddThreat(player);
                         }
-                        break;
-                    case STEP_KNIGHT:
-                        if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_KNIGHT, CAST_TRIGGERED) == CAST_OK)
-                        {
-                            m_summonTimer = 55 * IN_MILLISECONDS;
-                            ++m_summonStep;
-                        }
-                        break;
-                    case STEP_RIDER:
-                        if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_MOUNTED_KNIGHT, CAST_TRIGGERED) == CAST_OK)
-                        {
-                            m_summonTimer = 0;
-                            m_summonStep = 0;
-                        }
-                        break;
-                    default:
-                        break;
+                    }
                 }
             }
-            else
-                m_summonTimer -= diff;
         }
 
-        switch (m_phase)
+        for (ObjectGuid guid : m_summonedAddGuids)
         {
-            case PHASE_SPEECH:
-                if (m_speechTimer < diff)
-                {
-                    switch (m_speech)
-                    {
-                        case 1: DoScriptText(SAY_SPEECH_1, m_creature); m_speechTimer = 4 * IN_MILLISECONDS; break;
-                        case 2: DoScriptText(SAY_SPEECH_2, m_creature); m_speechTimer = 6 * IN_MILLISECONDS; break;
-                        case 3: DoScriptText(SAY_SPEECH_3, m_creature); m_speechTimer = 5 * IN_MILLISECONDS; break;
-                        case 4: DoScriptText(SAY_SPEECH_4, m_creature); m_phase = PHASE_BALCONY; break;
-                    }
-                    m_speech++;
-                }
-                else
-                    m_speechTimer -= diff;
+            if (Creature* add = m_creature->GetMap()->GetCreature(guid))
+            {
+                if (add->IsAlive() && !add->GetVictim()) // spawn that doesnt have target - attack closest
+                    add->AI()->AttackClosestEnemy();
+            }
+        }
+    }
 
-            // No break here
+    std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
+    {
+        switch (action)
+        {
+            case GOTHIK_TELEPORT: return 20s;
+        }
+        return 0s;
+    }
 
-            case PHASE_BALCONY:                            // Do nothing but wait to teleport down: summoning is handled by instance script
-                if (m_phaseTimer < diff)
-                {
-                    m_phase = PHASE_TELEPORT_DOWN;
-                    m_phaseTimer = 0;
-                }
-                else
-                    m_phaseTimer -= diff;
-
-                break;
-
-            case PHASE_TELEPORT_DOWN:
-                if (m_phaseTimer < diff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT_RIGHT, CAST_TRIGGERED) == CAST_OK)
-                    {
-                        m_phase = m_instance ? PHASE_TELEPORTING : PHASE_STOP_TELEPORTING;
-
-                        DoScriptText(SAY_TELEPORT, m_creature);
-
-                        // Remove Immunity
-                        m_creature->RemoveAurasDueToSpell(SPELL_IMMUNE_ALL);
-                        SetMeleeEnabled(true);
-                        SetCombatMovement(true);
-                        DoResetThreat();
-                        m_creature->SetInCombatWithZone();
-                    }
-                }
-                else
-                    m_phaseTimer -= diff;
-
-                break;
-
-            case PHASE_TELEPORTING:                         // Phase is only reached if m_instance is valid
-                if (m_teleportTimer < diff)
-                {
-                    uint32 teleportSpellId = m_instance->IsInRightSideGothikArea(m_creature) ? SPELL_TELEPORT_LEFT : SPELL_TELEPORT_RIGHT;
-                    if (DoCastSpellIfCan(m_creature, teleportSpellId) == CAST_OK)
-                    {
-                        m_teleportTimer = urand(30, 45) * IN_MILLISECONDS; // Teleports between 30 seconds and 45 seconds.
-                        m_shadowboltTimer = 2 * IN_MILLISECONDS;
-                        ++m_teleportCount;
-                    }
-                }
-                else
-                    m_teleportTimer -= diff;
-
-                // Second time that Gothik teleports back from dead side to living side or less than 30% HP: open the central gate
-                if (m_teleportCount >= 4 ||  m_creature->GetHealthPercent() <= 30.0f)
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case GOTHIK_STOP_TELE:
+            {
+                if (m_teleportCount >= 4 || m_creature->GetHealthPercent() <= 30.0f)
                 {
                     m_phase = PHASE_STOP_TELEPORTING;
-                    m_instance->SetData(TYPE_GOTHIK, SPECIAL);
+                    HandleOpenGates();
+                    DisableCombatAction(action);
                 }
-            // no break here
-
-            case PHASE_STOP_TELEPORTING:
-                if (m_harvestSoulTimer < diff)
+                return;
+            }
+            case GOTHIK_TELEPORT:
+            {
+                uint32 teleportSpell = m_instance->IsInRightSideGothikArea(m_creature) ? SPELL_TELEPORT_LEFT : SPELL_TELEPORT_RIGHT;
+                if (DoCastSpellIfCan(nullptr, teleportSpell) == CAST_OK)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_HARVESTSOUL) == CAST_OK)
-                        m_harvestSoulTimer = 15 * IN_MILLISECONDS;
+                    ++m_teleportCount;
+                    break;
                 }
-                else
-                    m_harvestSoulTimer -= diff;
-
-                if (m_shadowboltTimer)
-                {
-                    if (m_shadowboltTimer <= diff)
-                        m_shadowboltTimer = 0;
-                    else
-                        m_shadowboltTimer -= diff;
-                }
-                // Shadowbolt cooldown finished, cast when ready
-                else if (!m_creature->IsNonMeleeSpellCasted(true))
-                {
-                    // Select valid target
-                    if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SHADOWBOLT, SELECT_FLAG_IN_LOS))
-                        DoCastSpellIfCan(target, SPELL_SHADOWBOLT);
-                }
-                break;
+                return;
+            }
         }
+        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
 };
 
-UnitAI* GetAI_boss_gothik(Creature* creature)
+// 27892, 27928, 27935 - To Anchor 1
+struct ToAnchorOne : public SpellScript
 {
-    return new boss_gothikAI(creature);
-}
-
-bool EffectDummyCreature_spell_anchor(Unit* /*caster*/, uint32 spellId, SpellEffectIndex effIndex, Creature* creatureTarget, ObjectGuid /*originalCasterGuid*/)
-{
-    if (effIndex != EFFECT_INDEX_0 || creatureTarget->GetEntry() != NPC_SUB_BOSS_TRIGGER)
-        return true;
-
-    instance_naxxramas* instance = (instance_naxxramas*)creatureTarget->GetInstanceData();
-
-    if (!instance)
-        return true;
-
-    switch (spellId)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        case SPELL_A_TO_ANCHOR_1:                           // trigger mobs at high right side
-        case SPELL_B_TO_ANCHOR_1:
-        case SPELL_C_TO_ANCHOR_1:
+        if (effIdx != EFFECT_INDEX_0 || !spell->GetUnitTarget())
+            return;
+
+        instance_naxxramas* instance = dynamic_cast<instance_naxxramas*>(spell->GetCaster()->GetInstanceData());
+        if (!instance)
+            return;
+
+        uint32 nextAnchor = 0;
+        switch (spell->m_spellInfo->Id)
         {
-            if (Creature* pAnchor2 = instance->GetClosestAnchorForGothik(creatureTarget, false))
-            {
-                uint32 triggered = SPELL_A_TO_ANCHOR_2;
-
-                if (spellId == SPELL_B_TO_ANCHOR_1)
-                    triggered = SPELL_B_TO_ANCHOR_2;
-                else if (spellId == SPELL_C_TO_ANCHOR_1)
-                    triggered = SPELL_C_TO_ANCHOR_2;
-
-                creatureTarget->CastSpell(pAnchor2, triggered, TRIGGERED_OLD_TRIGGERED);
-            }
-
-            return true;
-        }
-        case SPELL_A_TO_ANCHOR_2:                           // trigger mobs at high left side
-        case SPELL_B_TO_ANCHOR_2:
-        case SPELL_C_TO_ANCHOR_2:
-        {
-            CreatureList listTargets;
-            instance->GetGothikSummonPoints(listTargets, false);
-
-            if (!listTargets.empty())
-            {
-                CreatureList::iterator itr = listTargets.begin();
-                uint32 position = urand(0, listTargets.size() - 1);
-                advance(itr, position);
-
-                if (Creature* target = (*itr))
-                {
-                    uint32 triggered = SPELL_A_TO_SKULL;
-
-                    if (spellId == SPELL_B_TO_ANCHOR_2)
-                        triggered = SPELL_B_TO_SKULL;
-                    else if (spellId == SPELL_C_TO_ANCHOR_2)
-                        triggered = SPELL_C_TO_SKULL;
-
-                    creatureTarget->CastSpell(target, triggered, TRIGGERED_OLD_TRIGGERED);
-                }
-            }
-            return true;
-        }
-        case SPELL_A_TO_SKULL:                              // final destination trigger mob
-        case SPELL_B_TO_SKULL:
-        case SPELL_C_TO_SKULL:
-        {
-            uint32 summonSpellId = SPELL_SUMMON_SPECTRAL_TRAINEE;
-
-            if (spellId == SPELL_B_TO_SKULL)
-                summonSpellId = SPELL_SUMMON_SPECTRAL_KNIGHT;
-            else if (spellId == SPELL_C_TO_SKULL)
-                summonSpellId = SPELL_SUMMON_SPECTRAL_RIVENDARE;
-
-            creatureTarget->CastSpell(creatureTarget, summonSpellId, TRIGGERED_OLD_TRIGGERED);
-
-            return true;
-        }
-        case SPELL_RESET_GOTHIK_EVENT:
-        {
-            creatureTarget->RemoveAurasDueToSpell(SPELL_SUMMON_TRAINEE);
-            creatureTarget->RemoveAurasDueToSpell(SPELL_SUMMON_KNIGHT);
-            creatureTarget->RemoveAurasDueToSpell(SPELL_SUMMON_MOUNTED_KNIGHT);
-            return true;
+            case SPELL_A_TO_ANCHOR_1: nextAnchor = SPELL_A_TO_ANCHOR_2; break;
+            case SPELL_B_TO_ANCHOR_1: nextAnchor = SPELL_B_TO_ANCHOR_2; break;
+            case SPELL_C_TO_ANCHOR_1: nextAnchor = SPELL_C_TO_ANCHOR_2; break;
         }
 
+        if (nextAnchor)
+            spell->GetUnitTarget()->CastSpell(nullptr, nextAnchor, TRIGGERED_OLD_TRIGGERED);
     }
-
-    return true;
 };
 
-struct SummonUnrelenting : public AuraScript
+// 27893, 27929, 27936 - To Anchor 2
+struct ToAnchorTwo : public SpellScript
 {
-    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    void OnInit(Spell* spell) const override
     {
-        if (Unit* unitTarget =  aura->GetTarget())
+        spell->SetMaxAffectedTargets(1);
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0 || !spell->GetUnitTarget())
+            return;
+
+        instance_naxxramas* instance = dynamic_cast<instance_naxxramas*>(spell->GetCaster()->GetInstanceData());
+        if (!instance)
+            return;
+
+        uint32 choiceId = 0;
+        switch (spell->m_spellInfo->Id)
         {
-            if (instance_naxxramas* instance = (instance_naxxramas*)unitTarget->GetInstanceData())
-            {
-                if (unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->GetEntry() == NPC_SUB_BOSS_TRIGGER)
-                {
-                    uint8 summonMask = 0;
-                    switch (aura->GetId())
-                    {
-                        case SPELL_SUMMON_TRAINEE:
-                            summonMask = SUMMON_FLAG_TRAINEE;
-                            break;
-                        case SPELL_SUMMON_KNIGHT:
-                            summonMask = SUMMON_FLAG_KNIGHT;
-                            break;
-                        case SPELL_SUMMON_MOUNTED_KNIGHT:
-                            summonMask = SUMMON_FLAG_RIDER;
-                            break;
-                        default:
-                            break;
-                    }
-                    if (instance->IsSuitableTriggerForSummon(unitTarget, summonMask))
-                        return;
-                }
-            }
+            case SPELL_A_TO_ANCHOR_2: choiceId = SPELL_CHOOSE_RANDOM_SKULL_PILE_A; break;
+            case SPELL_B_TO_ANCHOR_2: choiceId = SPELL_CHOOSE_RANDOM_SKULL_PILE_B; break;
+            case SPELL_C_TO_ANCHOR_2: choiceId = SPELL_CHOOSE_RANDOM_SKULL_PILE_C; break;
         }
-        data.spellInfo = nullptr;
+
+        if (choiceId)
+            spell->GetUnitTarget()->CastSpell(nullptr, choiceId, TRIGGERED_OLD_TRIGGERED);
     }
 };
 
+// 27896, 27930, 27938 - Choose Random Skull Pile
+struct ChooseRandomSkullPile : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0 || !spell->GetUnitTarget())
+            return;
+
+        uint32 nextAnchor = 0;
+        switch (spell->m_spellInfo->Id)
+        {
+            case SPELL_CHOOSE_RANDOM_SKULL_PILE_A: nextAnchor = SPELL_A_TO_SKULL; break;
+            case SPELL_CHOOSE_RANDOM_SKULL_PILE_B: nextAnchor = SPELL_B_TO_SKULL; break;
+            case SPELL_CHOOSE_RANDOM_SKULL_PILE_C: nextAnchor = SPELL_C_TO_SKULL; break;
+        }
+
+        if (nextAnchor)
+            spell->GetCaster()->CastSpell(spell->GetUnitTarget(), nextAnchor, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+// 27915, 27931, 27937 - Anchor to Skulls
+struct AnchorToSkull : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0 || !spell->GetUnitTarget())
+            return;
+
+        instance_naxxramas* instance = dynamic_cast<instance_naxxramas*>(spell->GetCaster()->GetInstanceData());
+        if (!instance)
+            return;
+
+        uint32 summonSpellId = 0;
+        uint32 summonSpellId2 = 0;
+        switch (spell->m_spellInfo->Id)
+        {
+            case SPELL_A_TO_SKULL: summonSpellId = SPELL_SUMMON_SPECTRAL_TRAINEE; break;
+            case SPELL_B_TO_SKULL: summonSpellId = SPELL_SUMMON_SPECTRAL_KNIGHT; break;
+            case SPELL_C_TO_SKULL: summonSpellId = SPELL_SUMMON_SPECTRAL_RIVENDARE; break;
+        }
+
+        if (summonSpellId)
+            spell->GetUnitTarget()->CastSpell(nullptr, summonSpellId, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+// 28749 - Check Spectral Side
+// 29875 - Check Unrelenting Side
 struct CheckGothikSide : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /* effIdx */) const override
@@ -448,7 +439,7 @@ struct CheckGothikSide : public SpellScript
                 // If central gate is open, attack any one (central gate is only closed during IN_PROGRESS)
                 if (instance->GetData(TYPE_GOTHIK) != IN_PROGRESS)
                 {
-                    ((Creature*)caster)->SetInCombatWithZone();
+                    static_cast<Creature*>(caster)->SetInCombatWithZone();
                     caster->AI()->AttackClosestEnemy();
                 }
                 // Else look for a target in the side the summoned NPC is
@@ -479,6 +470,8 @@ struct CheckGothikSide : public SpellScript
     }
 };
 
+// 28781 - Spectral Side Assault
+// 29874 - Unrelenting Side Assault
 struct GothikSideAssault : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /* effIdx */) const override
@@ -489,11 +482,47 @@ struct GothikSideAssault : public SpellScript
             {
                 // If for some reason one ore more creatures are not in combat when the central gates open
                 // Set them in combat with zone
-                if (!unitTarget->IsInCombat())
+                if (!unitTarget->IsInCombat() && unitTarget->IsCreature())
                 {
-                    ((Creature*)unitTarget)->SetInCombatWithZone();
+                    static_cast<Creature*>(unitTarget)->SetInCombatWithZone();
                     unitTarget->AI()->AttackClosestEnemy();
                 }
+            }
+        }
+    }
+};
+
+// 28035 - Reset Gothik Event
+struct ResetGothikEvent : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (!target->IsCreature())
+            return;
+        target->RemoveAurasDueToSpell(SPELL_SUMMON_TRAINEE_PERIODIC);
+        target->RemoveAurasDueToSpell(SPELL_SUMMON_KNIGHT_PERIODIC);
+        target->RemoveAurasDueToSpell(SPELL_SUMMON_MOUNTED_KNIGHT_PERIODIC);
+    }
+};
+
+// 29317 - Shadowbolt
+struct ShadowboltGothik : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_1 && spell->GetScriptValue() != 1)
+        {
+            if (urand(0, 1) == 0) // not always
+                return;
+            Unit* caster = spell->GetCaster();
+            Unit* target = caster->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, 29317, SELECT_FLAG_PLAYER);
+            if (target)
+            {
+                SpellCastArgs args;
+                args.SetTarget(target);
+                args.SetScriptValue(1);
+                caster->CastSpell(args, spell->m_spellInfo, TRIGGERED_IGNORE_COOLDOWNS | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD, nullptr, nullptr, ObjectGuid(), spell->m_spellInfo);
             }
         }
     }
@@ -503,15 +532,15 @@ void AddSC_boss_gothik()
 {
     Script* newScript = new Script;
     newScript->Name = "boss_gothik";
-    newScript->GetAI = &GetAI_boss_gothik;
+    newScript->GetAI = &GetNewAIInstance<boss_gothikAI>;
     newScript->RegisterSelf();
 
-    newScript = new Script;
-    newScript->Name = "spell_anchor";
-    newScript->pEffectDummyNPC = &EffectDummyCreature_spell_anchor;
-    newScript->RegisterSelf();
-
-    RegisterSpellScript<SummonUnrelenting>("spell_summon_unrelenting");
+    RegisterSpellScript<ToAnchorOne>("spell_to_anchor_one");
+    RegisterSpellScript<ToAnchorTwo>("spell_to_anchor_two");
+    RegisterSpellScript<ChooseRandomSkullPile>("spell_choose_random_skull_pile");
+    RegisterSpellScript<AnchorToSkull>("spell_anchor_to_skull");
     RegisterSpellScript<CheckGothikSide>("spell_check_gothik_side");
     RegisterSpellScript<GothikSideAssault>("spell_gothik_side_assault");
+    RegisterSpellScript<ResetGothikEvent>("spell_reset_gothik_event");
+    RegisterSpellScript<ShadowboltGothik>("spell_shadowbolt_gothik");
 }

@@ -211,6 +211,17 @@ void Map::Initialize(bool loadInstanceData /*= true*/)
     sObjectMgr.LoadActiveEntities(this);
 
     LoadTransports();
+
+    switch (GetId())
+    {
+        case 533: // naxxramas
+        {
+            // TODO: Make this into a flag for creature on map init
+            ForceLoadGrid(3746.41f, -5113.35f); // KT
+            ForceLoadGrid(2520.50f, -2955.38f); // Four horsemen
+            break;
+        }
+    }
 }
 
 void Map::InitVisibilityDistance()

@@ -16,36 +16,36 @@ enum
     SOUND_SCREAM1               = 8873,
 
     // Kel'Thuzad
-    SAY_KELTHUZAD_CAT_DIED      = -1533089,
-    SAY_KELTHUZAD_SHACKLES_1    = -1533106,
-    SAY_KELTHUZAD_SHACKLES_2    = -1533108,
+    SAY_KELTHUZAD_CAT_DIED      = 13150,
+    SAY_KELTHUZAD_SHACKLES_1    = 13492,
+    // SOUND_KELTHUZAD_SHACKLES_2    = 9089, // not used officially
     // Kel'Thuzad's taunts after killing Wing Bosses
-    SAY_KELTHUZAD_TAUNT1        = -1533090,
-    SAY_KELTHUZAD_TAUNT2        = -1533091,
-    SAY_KELTHUZAD_TAUNT3        = -1533092,
-    SAY_KELTHUZAD_TAUNT4        = -1533093,
-    EMOTE_FLEE                  = -1533159,
+    SAY_KELTHUZAD_TAUNT1        = 12984,
+    SAY_KELTHUZAD_TAUNT2        = 12985,
+    SAY_KELTHUZAD_TAUNT3        = 12986,
+    SAY_KELTHUZAD_TAUNT4        = 12987,
+    EMOTE_FLEE                  = 12391,
     // Dialogues with Lich King
-    SAY_SAPP_DIALOG1            = -1533084,
-    SAY_SAPP_DIALOG2_LICH       = -1533085,
-    SAY_SAPP_DIALOG3            = -1533086,
-    SAY_SAPP_DIALOG4_LICH       = -1533087,
-    SAY_SAPP_DIALOG5            = -1533088,
+    SAY_SAPP_DIALOG1            = 12990,
+    SAY_SAPP_DIALOG2_LICH       = 12988,
+    SAY_SAPP_DIALOG3            = 12991,
+    SAY_SAPP_DIALOG4_LICH       = 12989,
+    SAY_SAPP_DIALOG5            = 12992,
     // Horsemen dialogue texts
-    SAY_BLAU_TAUNT1             = -1533045,
-    SAY_BLAU_TAUNT2             = -1533046,
-    SAY_BLAU_TAUNT3             = -1533047,
-    SAY_MORG_TAUNT1             = -1533071,
-    SAY_MORG_TAUNT2             = -1533072,
-    SAY_MORG_TAUNT3             = -1533073,
-    SAY_KORT_TAUNT1             = -1533052,
-    SAY_KORT_TAUNT2             = -1533053,
-    SAY_KORT_TAUNT3             = -1533054,
-    SAY_ZELI_TAUNT1             = -1533059,
-    SAY_ZELI_TAUNT2             = -1533060,
-    SAY_ZELI_TAUNT3             = -1533061,
+    SAY_BLAU_TAUNT1             = 13014,
+    SAY_BLAU_TAUNT2             = 13015,
+    SAY_BLAU_TAUNT3             = 13016,
+    SAY_MORG_TAUNT1             = 13058,
+    SAY_MORG_TAUNT2             = 13059,
+    SAY_MORG_TAUNT3             = 13060,
+    SAY_KORT_TAUNT1             = 13038,
+    SAY_KORT_TAUNT2             = 13039,
+    SAY_KORT_TAUNT3             = 13040,
+    SAY_ZELI_TAUNT1             = 13101,
+    SAY_ZELI_TAUNT2             = 13102,
+    SAY_ZELI_TAUNT3             = 13103,
     // Grand Widow Faerlina intro
-    SAY_FAERLINA_INTRO          = -1533009,
+    SAY_FAERLINA_INTRO          = 12852,
     FOLLOWERS_STAND             = 1,
     FOLLOWERS_AURA              = 2,
     FOLLOWERS_KNEEL             = 3,
@@ -188,9 +188,9 @@ enum
     STEP_TRAINEE                = 0,
     STEP_KNIGHT                 = 1,
     STEP_RIDER                  = 2,
-    SPELL_SUMMON_TRAINEE        = 28007,                    // Triggers 27884 every 20s
-    SPELL_SUMMON_KNIGHT         = 28009,                    // Triggers 28008 every 25s
-    SPELL_SUMMON_MOUNTED_KNIGHT = 28011,                    // Triggers 28010 every 30s
+    SPELL_SUMMON_TRAINEE_PERIODIC        = 28007,                    // Triggers 27884 every 20s
+    SPELL_SUMMON_KNIGHT_PERIODIC         = 28009,                    // Triggers 28008 every 25s
+    SPELL_SUMMON_MOUNTED_KNIGHT_PERIODIC = 28011,                    // Triggers 28010 every 30s
     
     SPELL_SPECTRAL_ASSAULT      = 28781,
     SPELL_UNRELENTING_ASSAULT   = 29874,
@@ -220,7 +220,11 @@ enum GothikSpellDummy
 
     SPELL_A_TO_SKULL            = 27915,
     SPELL_B_TO_SKULL            = 27931,
-    SPELL_C_TO_SKULL            = 27937
+    SPELL_C_TO_SKULL            = 27937,
+
+    SPELL_CHOOSE_RANDOM_SKULL_PILE_A = 27896,
+    SPELL_CHOOSE_RANDOM_SKULL_PILE_B = 27930,
+    SPELL_CHOOSE_RANDOM_SKULL_PILE_C = 27938,
 };
 
 enum GothikSummonFlag {
@@ -257,7 +261,7 @@ static const SpawnLocation livingPoisonPositions[6] =
 class instance_naxxramas : public ScriptedInstance, private DialogueHelper
 {
     public:
-        instance_naxxramas(Map* pMap);
+        instance_naxxramas(Map* map);
         ~instance_naxxramas() {}
 
         void Initialize() override;
@@ -281,11 +285,7 @@ class instance_naxxramas : public ScriptedInstance, private DialogueHelper
         void Update(const uint32 diff) override;
 
         // Gothik
-        void InitializeGothikTriggers();
-        bool IsSuitableTriggerForSummon(Unit* trigger, uint8 flag);
-        Creature* GetClosestAnchorForGothik(Creature* source, bool rightSide);
-        void GetGothikSummonPoints(CreatureList& lList, bool rightSide);
-        bool IsInRightSideGothikArea(Unit* pUnit);
+        bool IsInRightSideGothikArea(Unit* unit);
 
         // Kel'Thuzad
         void DoTaunt();
@@ -305,8 +305,6 @@ class instance_naxxramas : public ScriptedInstance, private DialogueHelper
         GuidList m_unrelentingSideList;
         GuidList m_spectralSideList;
         GuidList m_icrecrownGuardianList;
-
-        std::unordered_map<ObjectGuid, GothTrigger> m_gothikTriggerMap;
 
         uint32 m_sapphironSpawnTimer;
         uint32 m_tauntTimer;

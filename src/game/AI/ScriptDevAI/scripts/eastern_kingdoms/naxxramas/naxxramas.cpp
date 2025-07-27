@@ -50,7 +50,7 @@ static const DialogueEntry naxxDialogue[] =
     {0,                     0,                0}
 };
 
-instance_naxxramas::instance_naxxramas(Map* pMap) : ScriptedInstance(pMap),
+instance_naxxramas::instance_naxxramas(Map* map) : ScriptedInstance(map), DialogueHelper(naxxDialogue),
     m_sapphironSpawnTimer(0),
     m_tauntTimer(0),
     m_horsemenKilled(0),
@@ -60,8 +60,7 @@ instance_naxxramas::instance_naxxramas(Map* pMap) : ScriptedInstance(pMap),
     m_screamsTimer(2 * MINUTE * IN_MILLISECONDS),
     isFaerlinaIntroDone(false),
     m_shackledGuardians(0),
-    m_checkGuardiansTimer(0),
-    DialogueHelper(naxxDialogue)
+    m_checkGuardiansTimer(0)
 {
     Initialize();
 }
@@ -352,27 +351,25 @@ void instance_naxxramas::OnCreatureDeath(Creature* creature)
     {
         case NPC_MR_BIGGLESWORTH:
             if (m_auiEncounter[TYPE_KELTHUZAD] != DONE)
-                DoOrSimulateScriptTextForThisInstance(SAY_KELTHUZAD_CAT_DIED, NPC_KELTHUZAD);
+                if (Creature* kt = GetSingleCreatureFromStorage(NPC_KELTHUZAD, true))
+                    DoBroadcastText(SAY_KELTHUZAD_CAT_DIED, kt);
             break;
         case NPC_ZOMBIE_CHOW:
             creature->ForcedDespawn(2000);
             m_zombieChowList.remove(creature->GetObjectGuid());
             break;
         case NPC_UNREL_TRAINEE:
-            if (Creature* anchor = GetClosestAnchorForGothik(creature, true))
-                creature->CastSpell(anchor, SPELL_A_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, creature->GetObjectGuid());
+            creature->CastSpell(nullptr, SPELL_A_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, creature->GetObjectGuid());
             m_unrelentingSideList.remove(creature->GetObjectGuid());
             creature->ForcedDespawn(4000);
             break;
         case NPC_UNREL_DEATH_KNIGHT:
-            if (Creature* anchor = GetClosestAnchorForGothik(creature, true))
-                creature->CastSpell(anchor, SPELL_B_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, creature->GetObjectGuid());
+            creature->CastSpell(nullptr, SPELL_B_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, creature->GetObjectGuid());
             m_unrelentingSideList.remove(creature->GetObjectGuid());
             creature->ForcedDespawn(4000);
             break;
         case NPC_UNREL_RIDER:
-            if (Creature* anchor = GetClosestAnchorForGothik(creature, true))
-                creature->CastSpell(anchor, SPELL_C_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, creature->GetObjectGuid());
+            creature->CastSpell(nullptr, SPELL_C_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, creature->GetObjectGuid());
             m_unrelentingSideList.remove(creature->GetObjectGuid());
             creature->ForcedDespawn(4000);
             break;
@@ -497,19 +494,18 @@ void instance_naxxramas::SetData(uint32 type, uint32 data)
                     // Encounter begins: close the gate and start timer to summon unrelenting trainees
                     DoUseDoorOrButton(GO_MILI_GOTH_ENTRY_GATE);
                     DoUseDoorOrButton(GO_MILI_GOTH_COMBAT_GATE);
-                    InitializeGothikTriggers();
                     break;
                 case SPECIAL:
                     DoUseDoorOrButton(GO_MILI_GOTH_COMBAT_GATE);
                     for (auto& spectralGuid : m_spectralSideList)
                     {
                         if (Creature* spectral = instance->GetCreature(spectralGuid))
-                            spectral->CastSpell(spectral, SPELL_SPECTRAL_ASSAULT, TRIGGERED_OLD_TRIGGERED);
+                            spectral->CastSpell(nullptr, SPELL_SPECTRAL_ASSAULT, TRIGGERED_OLD_TRIGGERED);
                     }
                     for (auto& unrelentingGuid : m_unrelentingSideList)
                     {
                         if (Creature* unrelenting = instance->GetCreature(unrelentingGuid))
-                            unrelenting->CastSpell(unrelenting, SPELL_UNRELENTING_ASSAULT, TRIGGERED_OLD_TRIGGERED);
+                            unrelenting->CastSpell(nullptr, SPELL_UNRELENTING_ASSAULT, TRIGGERED_OLD_TRIGGERED);
                     }
                     break;
                 case FAIL:
@@ -533,15 +529,12 @@ void instance_naxxramas::SetData(uint32 type, uint32 data)
             // Skip if already set
             if (m_auiEncounter[type] == data)
                 return;
-            if (data == SPECIAL)
+            if (data == DONE)
             {
                 ++m_horsemenKilled;
 
-                if (m_horsemenKilled == 4)
-                    SetData(TYPE_FOUR_HORSEMEN, DONE);
-
-                // Don't store special data
-                break;
+                if (m_horsemenKilled != 4)
+                    break;
             }
             if (data == FAIL)
             {
@@ -604,22 +597,22 @@ void instance_naxxramas::SetData(uint32 type, uint32 data)
                 // Respawn: Stalagg, Feugen, their respective Tesla Coil NPCs and Tesla GOs
                 if (Creature* stalagg = GetSingleCreatureFromStorage(NPC_STALAGG))
                 {
+                    stalagg->SetRespawnDelay(30s, true);
                     stalagg->ForcedDespawn();
-                    stalagg->Respawn();
                 }
 
                 if (Creature* feugen = GetSingleCreatureFromStorage(NPC_FEUGEN))
                 {
+                    feugen->SetRespawnDelay(30s, true);
                     feugen->ForcedDespawn();
-                    feugen->Respawn();
                 }
 
                 for (auto& teslaGuid : m_thaddiusTeslaCoilList)
                 {
                     if (Creature* teslaCoil = instance->GetCreature(teslaGuid))
                     {
+                        teslaCoil->SetRespawnDelay(30s, true);
                         teslaCoil->ForcedDespawn();
-                        teslaCoil->Respawn();
                     }
                 }
                 if (GameObject* stalaggTesla = GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_STALAGG))
@@ -654,13 +647,10 @@ void instance_naxxramas::SetData(uint32 type, uint32 data)
             DoUseDoorOrButton(GO_KELTHUZAD_EXIT_DOOR);
             if (data == IN_PROGRESS)
             {
-                if (Creature* kelthuzad = GetSingleCreatureFromStorage(NPC_KELTHUZAD))
-                {
-                    if (kelthuzad->IsAlive())
-                        kelthuzad->CastSpell(kelthuzad, SPELL_CHANNEL_VISUAL, TRIGGERED_OLD_TRIGGERED);
-                }
                 DoUseDoorOrButton(GO_KELTHUZAD_TRIGGER);
                 m_despawnKTTriggerTimer = 5 * IN_MILLISECONDS;
+                if (Creature* kelthuzad = GetSingleCreatureFromStorage(NPC_KELTHUZAD))
+                    kelthuzad->AI()->DoCastSpellIfCan(nullptr, SPELL_CHANNEL_VISUAL);
             }
             if (data == FAIL)
             {
@@ -690,7 +680,7 @@ void instance_naxxramas::SetData(uint32 type, uint32 data)
                     {
                         if (guardian->AI())
                             guardian->AI()->EnterEvadeMode();
-                        DoScriptText(EMOTE_FLEE, guardian);
+                        DoBroadcastText(EMOTE_FLEE, guardian);
                     }
                 }
             }
@@ -818,7 +808,7 @@ void instance_naxxramas::Update(uint32 diff)
             {
                 if (Creature* kelthuzad = GetSingleCreatureFromStorage(NPC_KELTHUZAD))
                 {
-                    DoScriptText((urand(0, 1) ? SAY_KELTHUZAD_SHACKLES_1: SAY_KELTHUZAD_SHACKLES_2), kelthuzad);
+                    DoBroadcastText(SAY_KELTHUZAD_SHACKLES_1, kelthuzad);
                     kelthuzad->CastSpell(nullptr, SPELL_CLEAR_ALL_SHACKLES, TRIGGERED_OLD_TRIGGERED);
                 }
             }
@@ -854,7 +844,8 @@ void instance_naxxramas::Update(uint32 diff)
                     textId = SAY_ZELI_TAUNT3;
                     break;
             }
-            DoOrSimulateScriptTextForThisInstance(textId, horsemenEntry);
+            if (Creature* horseman = GetSingleCreatureFromStorage(horsemenEntry, true))
+                DoBroadcastText(textId, horseman);
             m_horsemenTauntTimer = urand(30, 40) * MINUTE * IN_MILLISECONDS;
         }
         else
@@ -877,105 +868,6 @@ void instance_naxxramas::Update(uint32 diff)
     DialogueUpdate(diff);
 }
 
-// Initialize all triggers used in Gothik the Harvester encounter by flagging them with their position in the room and what kind of NPC they will summon
-void instance_naxxramas::InitializeGothikTriggers()
-{
-    Creature* gothik = GetSingleCreatureFromStorage(NPC_GOTHIK);
-
-    if (!gothik)
-        return;
-
-    CreatureList summonList;
-
-    for (auto triggerGuid : m_gothikTriggerList)
-    {
-        if (Creature* trigger = instance->GetCreature(triggerGuid))
-        {
-            GothTrigger gt;
-            gt.isAnchorHigh = (trigger->GetPositionZ() >= (gothik->GetPositionZ() - 5.0f));
-            gt.isRightSide = IsInRightSideGothikArea(trigger);
-            gt.summonTypeFlag = 0x00;
-            m_gothikTriggerMap[trigger->GetObjectGuid()] = gt;
-
-            // Keep track of triggers that will be used as summon point
-            if (!gt.isAnchorHigh && gt.isRightSide)
-                summonList.push_back(trigger);
-        }
-    }
-
-    if (!summonList.empty())
-    {
-        // Sort summoning trigger NPCS by distance from Gothik
-        // and flag them regarding of what they will summon
-        summonList.sort(ObjectDistanceOrder(gothik));
-        uint8 index = 0;
-        for (auto trigger : summonList)
-        {
-            switch (index)
-            {
-                // Closest and furthest: Unrelenting Knights and Trainees
-                case 0:
-                case 3:
-                    m_gothikTriggerMap[trigger->GetObjectGuid()].summonTypeFlag = SUMMON_FLAG_TRAINEE | SUMMON_FLAG_KNIGHT;
-                    break;
-                // Middle: only Unrelenting Trainee
-                case 1:
-                    m_gothikTriggerMap[trigger->GetObjectGuid()].summonTypeFlag = SUMMON_FLAG_TRAINEE;
-                    break;
-                // Other middle: Unrelenting Rider
-                case 2:
-                    m_gothikTriggerMap[trigger->GetObjectGuid()].summonTypeFlag = SUMMON_FLAG_RIDER;
-                    break;
-                default:
-                    break;
-            }
-            ++index;
-        }
-    }
-    else
-        script_error_log("No suitable summon trigger found for Gothik combat area. Set up failed.");
-}
-
-Creature* instance_naxxramas::GetClosestAnchorForGothik(Creature* source, bool rightSide)
-{
-    std::list<Creature*> outputList;
-
-    for (auto& itr : m_gothikTriggerMap)
-    {
-        if (!itr.second.isAnchorHigh)
-            continue;
-
-        if (itr.second.isRightSide != rightSide)
-            continue;
-
-        if (Creature* pCreature = instance->GetCreature(itr.first))
-            outputList.push_back(pCreature);
-    }
-
-    if (!outputList.empty())
-    {
-        outputList.sort(ObjectDistanceOrder(source));
-        return outputList.front();
-    }
-
-    return nullptr;
-}
-
-void instance_naxxramas::GetGothikSummonPoints(CreatureList& outputList, bool rightSide)
-{
-    for (auto& itr : m_gothikTriggerMap)
-    {
-        if (itr.second.isAnchorHigh)
-            continue;
-
-        if (itr.second.isRightSide != rightSide)
-            continue;
-
-        if (Creature* pCreature = instance->GetCreature(itr.first))
-            outputList.push_back(pCreature);
-    }
-}
-
 // Right is right side from gothik (eastern), i.e. right is living and left is spectral
 bool instance_naxxramas::IsInRightSideGothikArea(Unit* unit)
 {
@@ -984,11 +876,6 @@ bool instance_naxxramas::IsInRightSideGothikArea(Unit* unit)
 
     script_error_log("left/right side check, Gothik combat area failed.");
     return true;
-}
-
-bool instance_naxxramas::IsSuitableTriggerForSummon(Unit* trigger, uint8 flag)
-{
-    return m_gothikTriggerMap[trigger->GetObjectGuid()].summonTypeFlag & flag;
 }
 
 void instance_naxxramas::DoTaunt()
@@ -1009,15 +896,19 @@ void instance_naxxramas::DoTaunt()
         if (m_auiEncounter[TYPE_THADDIUS] == DONE)
             ++wingsCleared;
 
+        int32 textId = 0;;
         switch (wingsCleared)
         {
-            case 1: DoOrSimulateScriptTextForThisInstance(SAY_KELTHUZAD_TAUNT1, NPC_KELTHUZAD); break;
-            case 2: DoOrSimulateScriptTextForThisInstance(SAY_KELTHUZAD_TAUNT2, NPC_KELTHUZAD); break;
-            case 3: DoOrSimulateScriptTextForThisInstance(SAY_KELTHUZAD_TAUNT3, NPC_KELTHUZAD); break;
-            case 4: DoOrSimulateScriptTextForThisInstance(SAY_KELTHUZAD_TAUNT4, NPC_KELTHUZAD); break;
+            case 1: textId = SAY_KELTHUZAD_TAUNT1; break;
+            case 2: textId = SAY_KELTHUZAD_TAUNT2; break;
+            case 3: textId = SAY_KELTHUZAD_TAUNT3; break;
+            case 4: textId = SAY_KELTHUZAD_TAUNT4; break;
             default:
                 break;
         }
+        if (textId)
+            if (Creature* kt = GetSingleCreatureFromStorage(NPC_KELTHUZAD, true))
+                DoBroadcastText(textId, kt);
     }
 }
 
@@ -1059,11 +950,6 @@ bool instance_naxxramas::DoHandleEvent(uint32 eventId)
     return false;
 }
 
-InstanceData* GetInstanceData_instance_naxxramas(Map* pMap)
-{
-    return new instance_naxxramas(pMap);
-}
-
 struct Location3DPoint
 {
     float x, y, z;
@@ -1073,7 +959,7 @@ static const Location3DPoint gargoyleResetCoords = {2963.f, -3476.f, 297.6f};
 
 enum
 {
-    SAY_GARGOYLE_NOISE      = -1533160, // %s emits a strange noise.
+    SAY_GARGOYLE_NOISE      = 10755, // %s emits a strange noise.
 
     SPELL_STONEFORM         = 29154,
     SPELL_STEALTH_DETECTION = 18950,
@@ -1083,7 +969,7 @@ enum
 
 struct npc_stoneskin_gargoyleAI : public ScriptedAI
 {
-    npc_stoneskin_gargoyleAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_stoneskin_gargoyleAI(Creature* creature) : ScriptedAI(creature)
     {
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
         {
@@ -1101,14 +987,14 @@ struct npc_stoneskin_gargoyleAI : public ScriptedAI
         canCastVolley = false;
         TryStoneForm();
 
-        DoCastSpellIfCan(m_creature, SPELL_STEALTH_DETECTION, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(nullptr, SPELL_STEALTH_DETECTION, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void TryStoneForm()
     {
         if (m_creature->GetDefaultMovementType() == IDLE_MOTION_TYPE)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_STONEFORM, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT) == CAST_OK)
+            if (DoCastSpellIfCan(nullptr, SPELL_STONEFORM, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT) == CAST_OK)
             {
                 m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 m_creature->SetImmuneToPlayer(true);
@@ -1121,21 +1007,21 @@ struct npc_stoneskin_gargoyleAI : public ScriptedAI
         TryStoneForm();
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
+    void MoveInLineOfSight(Unit* who) override
     {
         if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
         {
-            if (pWho->GetTypeId() == TYPEID_PLAYER
+            if (who->IsPlayer()
                 && !m_creature->IsInCombat()
-                && m_creature->IsWithinDistInMap(pWho, 17.0f)
-                && !pWho->HasAuraType(SPELL_AURA_FEIGN_DEATH)
-                && m_creature->IsWithinLOSInMap(pWho))
+                && m_creature->IsWithinDistInMap(who, 17.0f)
+                && !who->HasAuraType(SPELL_AURA_FEIGN_DEATH)
+                && m_creature->IsWithinLOSInMap(who))
             {
-                AttackStart(pWho);
+                AttackStart(who);
             }
         }
         else
-            ScriptedAI::MoveInLineOfSight(pWho);
+            ScriptedAI::MoveInLineOfSight(who);
     }
 
     void Aggro(Unit*) override
@@ -1162,7 +1048,7 @@ struct npc_stoneskin_gargoyleAI : public ScriptedAI
         if (m_creature->GetHealthPercent() < 30.0f && !m_creature->HasAura(SPELL_STONESKIN))
         {
             if (DoCastSpellIfCan(m_creature, SPELL_STONESKIN) == CAST_OK)
-                DoScriptText(SAY_GARGOYLE_NOISE, m_creature);
+                DoBroadcastText(SAY_GARGOYLE_NOISE, m_creature);
         }
 
         // Acid Volley
@@ -1229,7 +1115,7 @@ bool instance_naxxramas::DoHandleAreaTrigger(AreaTriggerEntry const* areaTrigger
             if (Creature* thaddius = GetSingleCreatureFromStorage(NPC_THADDIUS))
             {
                 SetData(TYPE_THADDIUS, SPECIAL);
-                DoScriptText(SAY_THADDIUS_GREET, thaddius);
+                DoBroadcastText(SAY_THADDIUS_GREET, thaddius);
             }
         }
     }
@@ -1268,7 +1154,7 @@ void AddSC_instance_naxxramas()
 {
     Script* newScript = new Script;
     newScript->Name = "instance_naxxramas";
-    newScript->GetInstanceData = &GetInstanceData_instance_naxxramas;
+    newScript->GetInstanceData = &GetNewInstanceScript<instance_naxxramas>;
     newScript->RegisterSelf();
 
     newScript = new Script;

@@ -23,29 +23,29 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/BossAI.h"
 #include "naxxramas.h"
 
 enum
 {
-    SAY_AGGRO_1                 = -1533010,
-    SAY_ENRAGE_1                = -1533011,
-    SAY_ENRAGE_2                = -1533012,
-    SAY_ENRAGE_3                = -1533013,
-    SAY_SLAY_1                  = -1533014,
-    SAY_SLAY_2                  = -1533015,
-    SAY_DEATH                   = -1533016,
+    SAY_AGGRO_1                 = 12856, // TODO: Check texts
+    SAY_ENRAGE_1                = 12857,
+    SAY_ENRAGE_2                = 12858,
+    SAY_ENRAGE_3                = 12859,
+    SAY_SLAY_1                  = 12854,
+    SAY_SLAY_2                  = 12855,
+    SAY_DEATH                   = 12853,
 
-    EMOTE_BOSS_GENERIC_FRENZY   = -1000005,
+    EMOTE_BOSS_GENERIC_FRENZY   = 1191,
 
     // SOUND_RANDOM_AGGRO       = 8955,                     // soundId containing the 4 aggro sounds, we not using this
 
     SPELL_POISONBOLT_VOLLEY     = 28796,
     SPELL_ENRAGE                = 28798,
     SPELL_RAIN_OF_FIRE          = 28794,
-    SPELL_WIDOWS_EMBRACE_1      = 28732,                    // Cast onto Faerlina by Mind Controlled adds
-    SPELL_WIDOWS_EMBRACE_2      = 28797,                    // Cast onto herself by Faerlina and handle all the cooldown and enrage debuff
+    SPELL_WIDOWS_EMBRACE        = 28732,                    // Cast onto Faerlina by Mind Controlled adds
+    SPELL_WIDOWS_EMBRACE_CD     = 28797,                    // Cast onto herself by Faerlina and handle all the cooldown and enrage debuff
     SPELL_INSTAKILL_SELF        = 28748,
 };
 
@@ -53,19 +53,17 @@ static const float resetZ = 266.0f;                         // Above this altitu
 
 enum FaerlinaActions
 {
-    FAERLINA_POISON_VOLLEY,
-    FAERLINA_RAIN_FIRE,
-    FAERLINA_ENRAGE,
     FAERLINA_ACTION_MAX,
 };
 
-struct boss_faerlinaAI : public CombatAI
+struct boss_faerlinaAI : public BossAI
 {
-    boss_faerlinaAI(Creature* creature) : CombatAI(creature, FAERLINA_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    boss_faerlinaAI(Creature* creature) : BossAI(creature, FAERLINA_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        AddCombatAction(FAERLINA_POISON_VOLLEY, 8000u);
-        AddCombatAction(FAERLINA_RAIN_FIRE, 16000u);
-        AddCombatAction(FAERLINA_ENRAGE, 60000u);
+        SetDataType(TYPE_FAERLINA);
+        AddOnAggroText(SAY_AGGRO_1);
+        AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
+        AddOnDeathText(SAY_DEATH);
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float, float, float z)
         {
             return z > resetZ;
@@ -74,94 +72,22 @@ struct boss_faerlinaAI : public CombatAI
 
     ScriptedInstance* m_instance;
 
-    void Aggro(Unit* /*who*/) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
     {
-        DoScriptText(SAY_AGGRO_1, m_creature);
-
-        if (m_instance)
-            m_instance->SetData(TYPE_FAERLINA, IN_PROGRESS);
-    }
-
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
-    void JustDied(Unit* /*killer*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_instance)
-            m_instance->SetData(TYPE_FAERLINA, DONE);
-    }
-
-    void EnterEvadeMode() override
-    {
-        CombatAI::EnterEvadeMode();
-
-        if (m_instance)
-            m_instance->SetData(TYPE_FAERLINA, FAIL);
-    }
-
-    // Widow's Embrace prevents Frenzy and Poison bolt by activating 30 sec spell cooldown
-    // If target also has Frenzy, it will remove it and delay next one by 60s
-    void SpellHit(Unit* /*caster*/, const SpellEntry* spellEntry) override
-    {
-        if (spellEntry->Id == SPELL_WIDOWS_EMBRACE_1)
+        if (spellInfo->Id == SPELL_ENRAGE)
         {
-            DoCastSpellIfCan(m_creature, SPELL_WIDOWS_EMBRACE_2);   // Start spell category cooldown, delaying next Poison Bolt and Frenzy by 30 secs
-
-            if (m_creature->HasAura(SPELL_ENRAGE))
+            switch (urand(0, 2))
             {
-                m_creature->RemoveAurasDueToSpell(SPELL_ENRAGE);
-                ResetCombatAction(FAERLINA_ENRAGE, 60 * IN_MILLISECONDS);   // Delay next enrage by 60 sec if Faerlina was already enraged
+                case 0: DoBroadcastText(SAY_ENRAGE_1, m_creature); break;
+                case 1: DoBroadcastText(SAY_ENRAGE_2, m_creature); break;
+                case 2: DoBroadcastText(SAY_ENRAGE_3, m_creature); break;
             }
-        }
-    }
-
-    void ExecuteAction(uint32 action) override
-    {
-        switch (action)
-        {
-            case FAERLINA_POISON_VOLLEY:
-            {
-                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_POISONBOLT_VOLLEY) == CAST_OK)
-                    ResetCombatAction(action, 11 * IN_MILLISECONDS);
-                break;
-            }
-            case FAERLINA_RAIN_FIRE:
-            {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                {
-                    if (DoCastSpellIfCan(target, SPELL_RAIN_OF_FIRE) == CAST_OK)
-                        ResetCombatAction(action, 16 * IN_MILLISECONDS);
-                }
-                break;
-            }
-            case FAERLINA_ENRAGE:
-            {
-                if (!m_creature->HasAura(SPELL_ENRAGE))
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
-                    {
-                        switch (urand(0, 2))
-                        {
-                            case 0: DoScriptText(SAY_ENRAGE_1, m_creature); break;
-                            case 1: DoScriptText(SAY_ENRAGE_2, m_creature); break;
-                            case 2: DoScriptText(SAY_ENRAGE_3, m_creature); break;
-                        }
-                        ResetCombatAction(action, 60 * IN_MILLISECONDS);
-                    }
-                }
-                break;
-            }
-            default:
-                break;
         }
     }
 };
 
-struct WidowEmbrace : public SpellScript
+// 28732 - Widow's Embrace
+struct WidowEmbrace : public SpellScript, public AuraScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
@@ -170,6 +96,15 @@ struct WidowEmbrace : public SpellScript
             if (Unit* caster = spell->GetCaster())
                 caster->CastSpell(nullptr, SPELL_INSTAKILL_SELF, TRIGGERED_OLD_TRIGGERED);       // Self suicide
         }
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+            return;
+        Unit* target = aura->GetTarget();
+        target->RemoveAurasDueToSpell(SPELL_ENRAGE);
+        target->CastSpell(nullptr, SPELL_WIDOWS_EMBRACE_CD, TRIGGERED_OLD_TRIGGERED);
     }
 };
 

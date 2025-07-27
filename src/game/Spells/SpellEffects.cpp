@@ -1256,36 +1256,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     static_cast<Creature*>(m_caster)->ForcedDespawn(2000);
                     return;
                 }
-                case 28098:                                 // Stalagg Tesla Effect
-                case 28110:                                 // Feugen Tesla Effect
-                {
-                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->IsAlive())
-                    {
-                        if (!m_caster->hasUnitState(UNIT_STAT_ROOT))    // This state is found in sniffs and is probably caused by another aura like 23973
-                            m_caster->addUnitState(UNIT_STAT_ROOT);     // but as we are not sure (the aura does not show up in sniffs), we handle the state here
-
-                        // Cast chain (Stalagg Chain or Feugen Chain)
-                        uint32 chainSpellId = m_spellInfo->Id == 28098 ? 28096 : 28111;
-                        // Only cast if not already present and in range
-                        if (!unitTarget->HasAura(chainSpellId) && m_caster->IsWithinDistInMap(unitTarget, 60.0f))
-                        {
-                            if (!m_caster->IsImmuneToPlayer())
-                                m_caster->SetImmuneToPlayer(true);
-                            m_caster->CastSpell(unitTarget, chainSpellId, TRIGGERED_OLD_TRIGGERED);
-                        }
-                        // Not in range and fight in progress: remove aura and cast Shock onto players
-                        else if (!m_caster->IsWithinDistInMap(unitTarget, 60.0f) && m_caster)
-                        {
-                            unitTarget->RemoveAurasDueToSpell(chainSpellId);
-                            m_caster->SetImmuneToPlayer(false);
-
-                            if (Unit* target = ((Creature*)m_caster)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                                m_caster->CastSpell(target, 28099, TRIGGERED_NONE);
-                        }
-                        // else: in range and already have aura: do nothing
-                    }
-                    return;
-                }
                 case 27749:                                 // Initialize Tank
                 {
                     if (!unitTarget)
@@ -1293,16 +1263,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     unitTarget->CastSpell(nullptr, 24936, TRIGGERED_OLD_TRIGGERED);  // RC Tank Control
                     unitTarget->CastSpell(nullptr, 27747, TRIGGERED_OLD_TRIGGERED);  // Steam Tank Passive
-                    return;
-                }
-                case 28359:                                 // Trigger Teslas
-                {
-                    if (unitTarget)
-                    {
-                        DoScriptText(-1533150, unitTarget, unitTarget);
-                        unitTarget->RemoveAllAuras();
-                        unitTarget->CastSpell(unitTarget, 28159, TRIGGERED_NONE);   // Shock
-                    }
                     return;
                 }
                 case 28414:                                 // Call of the Ashbringer
@@ -1316,16 +1276,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 case 28697:                                 // Forgiveness
                 {
                     unitTarget->CastSpell(nullptr, 29266, TRIGGERED_OLD_TRIGGERED); // guessed permanent feign death spell
-                    return;
-                }
-                case 28961:                                 // Summon Corpse Scarabs (10)
-                {
-                    if (unitTarget->IsAlive())
-                        return;
-
-                    unitTarget->CastSpell(unitTarget, 28864, TRIGGERED_OLD_TRIGGERED);  // Actual summoning spell
-                    ((Creature*)unitTarget)->ForcedDespawn(2000);
-
                     return;
                 }
             }
@@ -4299,31 +4249,12 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 27699, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 28338:                                 // Magnetic Pull
-                case 28339:                                 // Magnetic Pull
-                {
-                    if (unitTarget && m_caster->GetVictim())
-                        unitTarget->CastSpell(m_caster->GetVictim(), 28337, TRIGGERED_OLD_TRIGGERED);   // target cast actual Magnetic Pull on caster's victim
-                        // ToDo research if target should also get the threat of the caster for caster's victim.
-                        // This is the case in WotLK version but we have no proof of this in Classic/TBC
-                        // and it was common at these times to let players manage threat and tank transitions by themselves
-                    return;
-                }
                 case 28352:                                 // Breath of Sargeras
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
 
                     unitTarget->CastSpell(unitTarget, 28342, TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
-                case 29336:                                 // Despawn Buffet
-                case 29379:                                 // Despawn Crypt Guards
-                case 30134:                                 // Despawn Boss Adds
-                case 30228:                                 // Despawn Summons
-                {
-                    if (unitTarget)
-                        ((Creature*)unitTarget)->ForcedDespawn();
                     return;
                 }
                 case 30918:                                 // Improved Sprint

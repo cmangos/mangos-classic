@@ -1050,15 +1050,6 @@ void Aura::TriggerSpell()
                         }
                         return;
                     }
-                    // Detonate Mana
-                    case 27819:
-                    {
-                        // 50% Mana Burn
-                        int32 bpDamage = (int32)triggerTarget->GetPower(POWER_MANA) / 2;
-                        triggerTarget->ModifyPower(POWER_MANA, -bpDamage);
-                        triggerTarget->CastCustomSpell(triggerTarget, 27820, &bpDamage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this, triggerTarget->GetObjectGuid());
-                        return;
-                    }
                     // Stalagg Chain and Feugen Chain
                     case 28096:
                     case 28111:
@@ -1336,28 +1327,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                             if (target->HasAura(26681))
                                 target->RemoveAurasDueToSpell(26681);
                         }
-                        return;
-                    }
-                    case 28832:                             // Mark of Korth'azz
-                    case 28833:                             // Mark of Blaumeux
-                    case 28834:                             // Mark of Rivendare
-                    case 28835:                             // Mark of Zeliek
-                    {
-                        int32 damage;
-                        switch (GetStackAmount())
-                        {
-                            case 1:
-                                return;
-                            case 2: damage =   250; break;
-                            case 3: damage =  1000; break;
-                            case 4: damage =  3000; break;
-                            default:
-                                damage = 1000 * GetStackAmount();
-                                break;
-                        }
-
-                        if (Unit* caster = GetCaster())
-                            caster->CastCustomSpell(target, 28836, &damage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                         return;
                     }
                 }
@@ -3147,11 +3116,6 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                 // On aura removal, the target deals AoE damage to friendlies and kills himself/herself (prevent durability loss)
                 target->CastSpell(target, 23478, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 target->CastSpell(target, 23644, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-                return;
-            case 29213:                                     // Curse of the Plaguebringer
-                if (m_removeMode != AURA_REMOVE_BY_DISPEL)
-                    // Cast Wrath of the Plaguebringer if not dispelled
-                    target->CastSpell(target, 29214, TRIGGERED_OLD_TRIGGERED, 0, this);
                 return;
             default:
                 break;

@@ -23,78 +23,55 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/BossAI.h"
 #include "naxxramas.h"
 
 enum
 {
-    SAY_AGGRO1                  = -1533017,
-    SAY_AGGRO2                  = -1533018,
-    SAY_SLAY                    = -1533019,
-    SAY_DEATH                   = -1533020,
+    SAY_AGGRO1                  = 13068,
+    SAY_AGGRO2                  = 13069,
+    SAY_SLAY                    = 13071,
+    SAY_DEATH                   = 13070,
 
-    EMOTE_GENERIC_BERSERK       = -1000004,
-    EMOTE_GENERIC_ENRAGED       = -1000003,
+    EMOTE_GENERIC_BERSERK       = 4428,
+    EMOTE_GENERIC_ENRAGED       = 2384,
 
     SPELL_HATEFULSTRIKE_PRIMER  = 28307,
     SPELL_HATEFULSTRIKE         = 28308,
     SPELL_ENRAGE                = 28131,
     SPELL_BERSERK               = 26662,
-    SPELL_SLIMEBOLT             = 32309
+    SPELL_SLIMEBOLT             = 32309,
+
+    SPELLSET_NORMAL             = 1602801,
+    SPELLSET_BERSERK            = 1602802,
 };
 
 enum PatchwerkActions
 {
-    PATCHWERK_HATEFUL_STRIKE,
     PATCHWERK_BERSERK_HP_CHECK,
     PATCHWERK_BERSERK,
-    PATCHWERK_BERSERK_SILMEBOLT,
     PATCHWER_ACTIONS_MAX,
 };
 
-struct boss_patchwerkAI : public CombatAI
+struct boss_patchwerkAI : public BossAI
 {
-    boss_patchwerkAI(Creature* creature) : CombatAI(creature, PATCHWER_ACTIONS_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    boss_patchwerkAI(Creature* creature) : BossAI(creature, PATCHWER_ACTIONS_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        AddTimerlessCombatAction(PATCHWERK_BERSERK_HP_CHECK, true);         // Soft enrage à 5%
-        AddCombatAction(PATCHWERK_HATEFUL_STRIKE, 1200u);
+        SetDataType(TYPE_PATCHWERK);
+        AddOnKillText(SAY_SLAY);
+        AddOnDeathText(SAY_DEATH);
+        AddOnAggroText(SAY_AGGRO1, SAY_AGGRO2);
+        AddTimerlessCombatAction(PATCHWERK_BERSERK_HP_CHECK, true);         // Soft enrage at 5%
         AddCombatAction(PATCHWERK_BERSERK, 7u * MINUTE * IN_MILLISECONDS);  // Basic berserk
-        AddCombatAction(PATCHWERK_BERSERK_SILMEBOLT, true);                 // Slimebolt - casted only 30 seconds after berserking to prevent kiting
     }
 
     ScriptedInstance* m_instance;
 
-    void KilledUnit(Unit* /*victim*/) override
+    void Reset() override
     {
-        if (urand(0, 4))
-            return;
-
-        DoScriptText(SAY_SLAY, m_creature);
-    }
-
-    void JustDied(Unit* /*killer*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_instance)
-            m_instance->SetData(TYPE_PATCHWERK, DONE);
-    }
-
-    void Aggro(Unit* /*who*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_AGGRO1 : SAY_AGGRO2, m_creature);
-
-        if (m_instance)
-            m_instance->SetData(TYPE_PATCHWERK, IN_PROGRESS);
-    }
-
-    void EnterEvadeMode() override
-    {
-        CombatAI::EnterEvadeMode();
-
-        if (m_instance)
-            m_instance->SetData(TYPE_PATCHWERK, FAIL);
+        BossAI::Reset();
+        m_creature->SetSpellList(SPELLSET_NORMAL);
     }
 
     void ExecuteAction(uint32 action) override
@@ -105,34 +82,22 @@ struct boss_patchwerkAI : public CombatAI
             {
                 if (m_creature->GetHealthPercent() < 5.0f)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+                    if (DoCastSpellIfCan(nullptr, SPELL_ENRAGE) == CAST_OK)
                     {
-                        DoScriptText(EMOTE_GENERIC_ENRAGED, m_creature);
+                        DoBroadcastText(EMOTE_GENERIC_ENRAGED, m_creature);
                         DisableCombatAction(action);
                     }
                 }
                 break;
             }
-            case PATCHWERK_HATEFUL_STRIKE:
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_HATEFULSTRIKE_PRIMER) == CAST_OK)
-                    ResetCombatAction(action, 1200);
-                break;
-            }
             case PATCHWERK_BERSERK:
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                if (DoCastSpellIfCan(nullptr, SPELL_BERSERK) == CAST_OK)
                 {
-                    DoScriptText(EMOTE_GENERIC_BERSERK, m_creature);
+                    DoBroadcastText(EMOTE_GENERIC_BERSERK, m_creature);
                     DisableCombatAction(action);
-                    ResetCombatAction(PATCHWERK_BERSERK_SILMEBOLT, 30 * IN_MILLISECONDS);
+                    m_creature->SetSpellList(SPELLSET_BERSERK);
                 }
-                break;
-            }
-            case PATCHWERK_BERSERK_SILMEBOLT:
-            {
-                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SLIMEBOLT) == CAST_OK)
-                    ResetCombatAction(PATCHWERK_BERSERK_SILMEBOLT, 1 * IN_MILLISECONDS);
                 break;
             }
             default:
@@ -141,6 +106,7 @@ struct boss_patchwerkAI : public CombatAI
     }
 };
 
+// 28307 - Hateful Strike Primer
 struct HatefulStrikePrimer : public SpellScript
 {
     void OnInit(Spell* spell) const override

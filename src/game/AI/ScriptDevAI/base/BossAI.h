@@ -106,6 +106,11 @@ class BossAI : public CombatAI
         {
             return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - m_combatStartTimestamp);
         }
+
+        static std::chrono::milliseconds RandomTimer(std::chrono::milliseconds min, std::chrono::milliseconds max)
+        {
+            return std::chrono::milliseconds(urand(min.count(), max.count()));
+        }
     private:
         std::vector<uint32> m_onKilledTexts;
         std::vector<uint32> m_onAggroTexts;
