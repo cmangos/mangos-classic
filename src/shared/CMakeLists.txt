@@ -223,6 +223,8 @@ target_include_directories(${LIBRARY_NAME}
   PUBLIC "${CMAKE_SOURCE_DIR}/src/game"
 )
 
+target_link_libraries(${LIBRARY_NAME} PUBLIC cmangos-compile-option-interface)
+
 if(UNIX)
   target_link_libraries(${LIBRARY_NAME}
     PUBLIC framework

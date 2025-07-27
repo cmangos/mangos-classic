@@ -92,6 +92,7 @@ target_link_libraries(${LIBRARY_NAME}
   PRIVATE g3dlite
   PRIVATE Detour
   PRIVATE zlib
+  cmangos-compile-option-interface
 )
 
 # include additionals headers

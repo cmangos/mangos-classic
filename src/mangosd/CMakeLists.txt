@@ -56,6 +56,7 @@ target_link_libraries(${EXECUTABLE_NAME}
   shared
   game
   gsoap
+  cmangos-compile-option-interface
 )
 
 if(WIN32)

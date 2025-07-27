@@ -4,12 +4,32 @@
 add_definitions("-D_WIN64")
 message(STATUS "MSVC: 64-bit platform, enforced -D_WIN64 parameter")
 
-#Enable extended object support for debug compiles on X64 (not required on X86)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+add_library(cmangos-compile-option-interface INTERFACE)
+
+# Enable extended object support for debug compiles on X64 (not required on X86)
+target_compile_options(cmangos-compile-option-interface
+  INTERFACE
+    /bigobj)
 message(STATUS "MSVC: Enabled increased number of sections in object files")
 
 # multithreaded compiling on VS
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+target_compile_options(cmangos-compile-option-interface
+  INTERFACE
+    /MP)
+
+# disable permissive mode to make msvc more eager to reject code that other compilers don't already accept
+target_compile_options(cmangos-compile-option-interface
+  INTERFACE
+    /permissive-)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  target_compile_options(cmangos-compile-option-interface
+    INTERFACE
+      /Zc:__cplusplus   # Enable updated __cplusplus macro value
+      /Zc:preprocessor  # Enable preprocessor conformance mode
+      /Zc:templateScope # Check template parameter shadowing
+      /Zc:throwingNew)  # Assume operator new throws
+endif()
 
 # Define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES - eliminates the warning by changing the strcpy call to strcpy_s, which prevents buffer overruns
 add_definitions(-D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES)

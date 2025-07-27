@@ -1,6 +1,8 @@
 # Set build-directive (used in core to tell which buildtype we used)
 add_definitions(-D_BUILD_DIRECTIVE='"${CMAKE_BUILD_TYPE}"')
 
+add_library(cmangos-compile-option-interface INTERFACE)
+
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "^arm")
   set(ARM_FLAGS "-latomic")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ARM_FLAGS}")

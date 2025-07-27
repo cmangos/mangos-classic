@@ -1,6 +1,8 @@
 # Set build-directive (used in core to tell which buildtype we used)
 add_definitions(-D_BUILD_DIRECTIVE='"${CMAKE_BUILD_TYPE}"')
 
+add_library(cmangos-compile-option-interface INTERFACE)
+
 # Additional compatibility checks and flags for commonly found LTS Clang versions
 if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0)
   # Set minimum C++17 compliant Clang version target to 7.0

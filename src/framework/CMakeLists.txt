@@ -94,6 +94,7 @@ add_library(${LIBRARY_NAME} STATIC
 
 target_link_libraries(${LIBRARY_NAME}
   PUBLIC shared
+  cmangos-compile-option-interface
 )
 
 target_include_directories(${LIBRARY_NAME}

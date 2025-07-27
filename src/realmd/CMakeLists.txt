@@ -45,6 +45,7 @@ add_executable(${EXECUTABLE_NAME}
 
 target_link_libraries(${EXECUTABLE_NAME}
   shared
+  cmangos-compile-option-interface
 )
 
 if(WIN32)
