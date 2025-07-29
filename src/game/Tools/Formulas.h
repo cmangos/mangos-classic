@@ -345,7 +345,7 @@ namespace MaNGOS
 
         inline float BaseGain(uint32 unit_level, uint32 mob_level)
         {
-            const uint32 nBaseExp = unit_level * 5 + 45;
+            const float nBaseExp = unit_level * 5 + 45;
             if (mob_level >= unit_level)
             {
                 uint32 nLevelDiff = mob_level - unit_level;
@@ -360,7 +360,7 @@ namespace MaNGOS
                 uint32 nLevelDiff = unit_level - mob_level;
                 return nBaseExp * (1.0f - (float(nLevelDiff) / ZD));
             }
-            return 0;
+            return 0.f;
         }
 
         inline uint32 Gain(Unit const* unit, Creature* target)
