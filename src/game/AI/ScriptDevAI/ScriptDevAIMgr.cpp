@@ -410,16 +410,6 @@ bool ScriptDevAIMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectInd
     return pTempScript->pEffectDummyNPC(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 }
 
-bool ScriptDevAIMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, GameObject* pTarget, ObjectGuid originalCasterGuid)
-{
-    Script* pTempScript = GetScript(pTarget->GetGOInfo()->ScriptId);
-
-    if (!pTempScript || !pTempScript->pEffectDummyGO)
-        return false;
-
-    return pTempScript->pEffectDummyGO(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
-}
-
 bool ScriptDevAIMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Item* pTarget, ObjectGuid originalCasterGuid)
 {
     Script* pTempScript = GetScript(pTarget->GetProto()->ScriptId);
