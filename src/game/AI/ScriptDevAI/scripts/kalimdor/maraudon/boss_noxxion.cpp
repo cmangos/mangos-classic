@@ -92,29 +92,28 @@ UnitAI* GetAI_boss_noxxion(Creature* pCreature)
     return new boss_noxxionAI(pCreature);
 }
 
-bool EffectAuraDummy_spell_aura_dummy_noxxion_spawns(const Aura* pAura, bool bApply)
+// 21708 - Summon Noxxion's Spawns
+struct SummonNoxxionsSpawns : public AuraScript
 {
-    if (pAura->GetId() == SPELL_NOXXION_SPAWNS_AURA && pAura->GetEffIndex() == EFFECT_INDEX_0)
+    void OnApply(Aura* aura, bool apply) const override
     {
-        if (Creature* pTarget = (Creature*)pAura->GetTarget())
+        Unit* target =aura->GetTarget();
+        if (apply)
         {
-            if (bApply)
-            {
-                pTarget->CastSpell(pTarget, SPELL_NOXXION_SPAWNS_SUMMON, TRIGGERED_OLD_TRIGGERED);
-                pTarget->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
-            }
-            else
-                pTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+            target->CastSpell(nullptr, SPELL_NOXXION_SPAWNS_SUMMON, TRIGGERED_OLD_TRIGGERED);
+            target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         }
+        else
+            target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
     }
-    return true;
-}
+};
 
 void AddSC_boss_noxxion()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_noxxion";
     pNewScript->GetAI = &GetAI_boss_noxxion;
-    pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_noxxion_spawns;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<SummonNoxxionsSpawns>("spell_summon_noxxions_spawns");
 }

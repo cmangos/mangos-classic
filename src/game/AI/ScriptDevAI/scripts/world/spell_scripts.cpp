@@ -55,30 +55,6 @@ enum
     NPC_ENTHRALLED_DEEPRUN_RAT          = 13017,
 };
 
-bool EffectAuraDummy_spell_aura_dummy_npc(const Aura* pAura, bool bApply)
-{
-    switch (pAura->GetId())
-    {
-        case SPELL_SHROUD_OF_DEATH:
-        case SPELL_SPIRIT_PARTICLES:
-        {
-            Creature* pCreature = (Creature*)pAura->GetTarget();
-
-            if (!pCreature || (pCreature->GetEntry() != NPC_FRANCLORN_FORGEWRIGHT && pCreature->GetEntry() != NPC_GAERIYAN))
-                return false;
-
-            if (bApply)
-                pCreature->m_AuraFlags |= UNIT_AURAFLAG_ALIVE_INVISIBLE;
-            else
-                pCreature->m_AuraFlags &= ~UNIT_AURAFLAG_ALIVE_INVISIBLE;
-
-            return false;
-        }
-    }
-
-    return false;
-}
-
 bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
     switch (uiSpellId)
@@ -409,7 +385,6 @@ void AddSC_spell_scripts()
     Script* pNewScript = new Script;
     pNewScript->Name = "spell_dummy_npc";
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_dummy_npc;
-    pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_npc;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<WondervoltTrap>("spell_wondervolt_trap");

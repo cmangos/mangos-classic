@@ -40,6 +40,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (26569,'spell_hate_to_zero'),
 (26637,'spell_hate_to_zero'),
 (10255,'spell_stoned'),
+(10252,'spell_awaken_earthen_archaedas'),
+(10259,'spell_awaken_earthen_archaedas'),
 (11920,'spell_net_guard'),
 (12639,'spell_summon_hakkar'),
 (12948,'spell_hakkar_summoned'),
@@ -214,6 +216,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28857,'spell_increased_spell_damage_done_dummy'),
 (21056,'spell_mark_of_lord_kazzak'),
 (21063,'spell_twisted_reflection'),
+(21708,'spell_summon_noxxions_spawns'),
 (491,'spell_gameobject_call_for_help_on_usage'), -- Khadgar's Unlocking
 (857,'spell_gameobject_call_for_help_on_usage'), -- Khadgar's Unlocking
 (1804,'spell_gameobject_call_for_help_on_usage'), -- Pick Lock

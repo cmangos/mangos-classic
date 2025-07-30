@@ -210,28 +210,26 @@ bool EffectDummyCreature_npc_vault_warder(Unit* /*pCaster*/, uint32 uiSpellId, S
     return false;
 }
 
-bool EffectAuraDummy_spell_aura_dummy_awaken_dwarf(const Aura* pAura, bool bApply)
+// 10252 - Awaken Earthen Guardians
+// 10259 - Awaken Earthen Dwarf
+struct AwakenEarthenArchaedas : public AuraScript
 {
-    if (bApply)
-        return true;
-
-    if ((pAura->GetId() == SPELL_AWAKEN_EARTHEN_DWARF || pAura->GetId() == SPELL_AWAKEN_EARTHEN_GUARDIAN) && pAura->GetEffIndex() == EFFECT_INDEX_0)
+    void OnApply(Aura* aura, bool apply) const override
     {
-        if (Creature* pTarget = (Creature*)pAura->GetTarget())
-        {
-            pTarget->RemoveAurasDueToSpell(SPELL_STONED);
+        if (aura->GetEffIndex() != EFFECT_INDEX_0)
+            return;
 
-            ScriptedInstance* pInstance = (ScriptedInstance*)pTarget->GetInstanceData();
-            if (!pInstance)
-                return true;
+        Unit* target = aura->GetTarget();
+        target->RemoveAurasDueToSpell(SPELL_STONED);
 
-            if (Creature* pArchaedas = pInstance->GetSingleCreatureFromStorage(NPC_ARCHAEDAS))
-                pTarget->AI()->AttackStart(pArchaedas->GetVictim());
-        }
+        ScriptedInstance* pInstance = static_cast<ScriptedInstance*>(target->GetInstanceData());
+        if (!pInstance)
+            return;
+
+        if (Creature* archaedas = pInstance->GetSingleCreatureFromStorage(NPC_ARCHAEDAS))
+            target->AI()->AttackStart(archaedas->GetVictim());
     }
-
-    return true;
-}
+};
 
 void AddSC_boss_archaedas()
 {
@@ -243,6 +241,7 @@ void AddSC_boss_archaedas()
     pNewScript = new Script;
     pNewScript->Name = "mob_archaeras_add";
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_vault_warder;
-    pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_awaken_dwarf;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<AwakenEarthenArchaedas>("spell_awaken_earthen_archaedas");
 }

@@ -410,16 +410,6 @@ bool ScriptDevAIMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectInd
     return pTempScript->pEffectDummyNPC(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 }
 
-bool ScriptDevAIMgr::OnAuraDummy(Aura const* pAura, bool bApply)
-{
-    Script* pTempScript = GetScript(((Creature*)pAura->GetTarget())->GetScriptId());
-
-    if (!pTempScript || !pTempScript->pEffectAuraDummy)
-        return false;
-
-    return pTempScript->pEffectAuraDummy(pAura, bApply);
-}
-
 InstanceData* ScriptDevAIMgr::CreateInstanceData(Map* pMap)
 {
     Script* pTempScript = GetScript(pMap->GetScriptId());
