@@ -1062,6 +1062,11 @@ bool Creature::CanTrainAndResetTalentsOf(Player* pPlayer) const
            && pPlayer->getClass() == GetCreatureInfo()->TrainerClass;
 }
 
+bool Creature::isInvisibleForAlive() const
+{
+    return GetSettings().HasFlag(CreatureStaticFlags::VISIBLE_TO_GHOSTS);
+}
+
 void Creature::PrepareBodyLootState(Unit* killer)
 {
     // if can weild loot - already generated on spawn
