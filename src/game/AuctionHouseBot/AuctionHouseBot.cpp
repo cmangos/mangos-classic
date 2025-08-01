@@ -17,10 +17,12 @@
  */
 
 #include "AuctionHouseBot.h"
+#include "Common.h"
 #include "Globals/ObjectMgr.h"
 #include "Log/Log.h"
 #include "Policies/Singleton.h"
 #include "Util/ProgressBar.h"
+#include "Server/DBCEnums.h"
 #include "SystemConfig.h"
 #include "World/World.h"
 
@@ -89,6 +91,9 @@ void AuctionHouseBot::Initialize()
         // profession items (different than the loot above, but use similar config)
         ParseLootConfig("AuctionHouseBot.Items.Profession", m_professionItemsConfig);
         FillUintVectorFromQuery("SELECT entry FROM item_template WHERE entry IN (SELECT EffectItemType1 FROM spell_template WHERE attributes & 32 AND attributes & 65536)", m_professionItems);
+
+        // item level constraints (sets RequiredLevel and ItemLevel caps for items listed on the AH)
+        ParseLevelConstraints();
 
         // vendor items (used to prevent items being bought from vendor and sold at ah for profit)
         std::vector<uint32> tmpVector;
@@ -160,6 +165,17 @@ void AuctionHouseBot::Update()
     AuctionHouseObject* auctionHouse = sAuctionMgr.GetAuctionsMap(houseType);
     if (m_houseAction < MAX_AUCTION_HOUSE_TYPE && urand(0, 99) < m_chanceSell)
     {
+	// Lazy-refresh dynamic level
+	if (m_useDynamicMaxLevel)
+	{
+	    uint32 now = time(nullptr);
+	    if (now - m_lastLevelUpdateTime >= m_levelRefreshInterval)
+	    {
+		UpdateDynamicMaxLevel();
+		CalculateItemLevelCap();
+		m_lastLevelUpdateTime = now;
+	    }
+	}
         // Sell items
         std::unordered_map<uint32, uint32> itemMap;
 
@@ -184,6 +200,10 @@ void AuctionHouseBot::Update()
                 {
                     uint32 item = m_professionItems[urand(0, m_professionItems.size() - 1)];
                     ItemPrototype const* prototype = ObjectMgr::GetItemPrototype(item);
+		    if (prototype &&
+			(prototype->RequiredLevel > m_maxRequiredLevel ||
+			 prototype->ItemLevel > m_maxItemLevel))
+		        continue; // skip items too high level
                     if (!prototype || prototype->Quality == 0 || urand(0, (1 << (prototype->Quality - 1)) - 1) > 0)
                         continue; // make it decreasingly likely that crafted items of higher quality is added to the auction house (white: 100%, green: 50%, blue: 25%, purple: 12.5%, ...)
                     uint32 count = (uint32) round((uint64)prototype->GetMaxStackSize() * urand(m_professionItemsConfig[2], m_professionItemsConfig[3]) / 100.0);
@@ -447,6 +467,107 @@ void AuctionHouseBot::FillUintVectorFromQuery(char const* query, std::vector<uin
     }
 }
 
+void AuctionHouseBot::ParseLevelConstraints()
+{
+    // Get settings from config
+    m_useDynamicMaxLevel = m_ahBotCfg.GetBoolDefault("AuctionHouseBot.Level.DynamicMaxRequired", false);
+    m_ignoreGm = m_ahBotCfg.GetBoolDefault("AuctionHouseBot.Level.IgnoreGmAccounts", false);
+    m_levelRefreshInterval = m_ahBotCfg.GetIntDefault("AuctionHouseBot.Level.DynamicRefreshInterval", 10) * MINUTE;
+    m_lastLevelUpdateTime = time(nullptr);
+    m_maxRequiredLevel = GetMinMaxConfig("AuctionHouseBot.Level.MaxRequired", 1, STRONG_MAX_LEVEL, DEFAULT_MAX_LEVEL);
+
+    if (m_useDynamicMaxLevel)
+    {
+	UpdateDynamicMaxLevel();
+    }
+    else
+    {
+	sLog.outString("AHBot Static max required level set to %u", m_maxRequiredLevel);
+    }
+
+    CalculateItemLevelCap();
+
+    m_lastLevelUpdateTime = time(nullptr); // So we don't instantly recalc after startup
+}
+
+void AuctionHouseBot::UpdateDynamicMaxLevel()
+{
+    // Attempt to query all online characters ordered by level
+    if (auto result = CharacterDatabase.PQuery("SELECT account, level FROM characters WHERE online = 1 ORDER BY level DESC"))
+    {
+	// Always grab the first result as fallback (highest overall)
+	Field* firstRow = result->Fetch();
+	uint32 firstAcct = firstRow[0].GetUInt32();
+	uint32 fallbackLevel = firstRow[1].GetUInt32();
+	m_maxRequiredLevel = fallbackLevel;
+
+	if (m_ignoreGm)
+	{
+	    std::set<uint32> gmAccounts;
+	    // Collect GM accounts
+	    if (auto gmResult = LoginDatabase.PQuery("SELECT id FROM account WHERE gmlevel > 0"))
+	    {
+		do
+		{
+		    Field* field = gmResult->Fetch();
+		    gmAccounts.insert(field[0].GetUInt32());
+		} while (gmResult->NextRow());
+	    }
+
+            // Look for highest non-GM character
+	    if (gmAccounts.count(firstAcct) == 0)
+	    {
+		sLog.outString("AHBot Dynamic max required level (excluding GMs) set to %u", fallbackLevel);
+	    }
+	    else
+	    {
+		bool foundNonGm = false;
+		while (result->NextRow())
+		{
+		    Field* row = result->Fetch();
+		    uint32 accId = row[0].GetUInt32();
+		    uint32 level = row[1].GetUInt32();
+
+		    if (gmAccounts.count(accId) == 0)
+		    {
+			m_maxRequiredLevel = level;
+			foundNonGm = true;
+			sLog.outString("AHBot Dynamic max required level (excluding GMs) set to %u", m_maxRequiredLevel);
+			break;
+		    }
+		}
+
+		if (!foundNonGm)
+		{
+		    sLog.outString("AHBot Notice: No non-GM players online. Fallback max required level (including GMs) set to %u", fallbackLevel);
+		}
+	    }
+	}
+	else
+	{
+	    sLog.outString("AHBot Dynamic max required level set to %u", m_maxRequiredLevel);
+	}
+    }
+    else
+    {
+	sLog.outError("AHBot Error: No online characters found. Retaining static max required level %u", m_maxRequiredLevel);
+    }
+}
+
+void AuctionHouseBot::CalculateItemLevelCap()
+{
+    if (m_maxRequiredLevel >= DEFAULT_MAX_LEVEL)
+    {
+        m_maxItemLevel = STRONG_MAX_LEVEL;
+        sLog.outString("AHBot ItemLevel cap removed (set to %u) because max required level is >= %u.", STRONG_MAX_LEVEL, DEFAULT_MAX_LEVEL);
+    }
+    else
+    {
+        m_maxItemLevel = m_maxRequiredLevel + 5; // Typical item level is required level + 5
+    }
+}
+
+
 void AuctionHouseBot::ParseItemValueConfig(char const* fieldname, std::vector<uint32>& itemValues)
 {
     std::stringstream includeStream(m_ahBotCfg.GetStringDefault(fieldname));
@@ -477,7 +598,15 @@ void AuctionHouseBot::AddLootToItemMap(LootStore* store, std::vector<int32>& loo
 
         LootItem* lootItem;
         for (uint32 slot = 0; (lootItem = loot->GetLootItemInSlot(slot)); ++slot)
-            itemMap[lootItem->itemId] += lootItem->count;
+	{
+	    ItemPrototype const* prototype = sItemStorage.LookupEntry<ItemPrototype>(lootItem->itemId);
+	    if (prototype && 
+		(prototype->RequiredLevel > m_maxRequiredLevel ||
+		 prototype->ItemLevel > m_maxItemLevel))
+	        continue;
+
+	    itemMap[lootItem->itemId] += lootItem->count;
+	}
     }
 }
 

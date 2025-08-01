@@ -70,6 +70,46 @@ AuctionHouseBot.Loot.Skinning   =    3,  5, 50, 50
 AuctionHouseBot.Items.Profession = 80, 90, 0, 50
 
 ###################################################################################################################
+# Enable dynamic max required level filtering
+#
+# If enabled, AHBot checks the database for the highest-level character currently online
+# and uses that level to restrict the required level of items it lists.
+# If disabled, the bot will use the static value below (AuctionHouseBot.Level.MaxRequired).
+# Value must be 0 (disabled) or 1 (enabled). Default: 0
+###################################################################################################################
+AuctionHouseBot.Level.DynamicMaxRequired = 0
+
+###################################################################################################################
+# Ignore GM accounts when determining dynamic max required level
+#
+# Only applies if AuctionHouseBot.Level.DynamicMaxRequired is enabled.
+# If enabled, characters belonging to GM accounts (gmlevel > 0) will be excluded from the level check.
+# If no valid non-GM characters are online, the bot will fallback to the highest-level online GM character.
+# If no characters are online at all, the static value below will be used.
+# Value must be 0 (disabled) or 1 (enabled). Default: 0
+###################################################################################################################
+AuctionHouseBot.Level.IgnoreGmAccounts = 0
+
+###################################################################################################################
+# Interval in minutes to refresh the dynamic max required level
+#
+# Only applies if AuctionHouseBot.Level.DynamicMaxRequired is enabled.
+# AHBot will refresh the required level only after this amount of time has passed.
+# Value must be 1 or higher. Default: 10
+###################################################################################################################
+AuctionHouseBot.Level.DynamicRefreshInterval = 10
+
+###################################################################################################################
+# Max required level for items listed by AHBot
+#
+# This static value is used when:
+# - AuctionHouseBot.Level.DynamicMaxRequired is disabled, OR
+# - No characters are online to determine a dynamic value
+# Value must be between 1 and 255. Default: 60
+###################################################################################################################
+AuctionHouseBot.Level.MaxRequired = 60
+
+###################################################################################################################
 # Item value
 #
 # This determines the item value, as a percentage of item sell value (what a vendor would charge for the item).
