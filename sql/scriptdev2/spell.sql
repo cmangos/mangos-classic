@@ -123,7 +123,6 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (27360,'spell_instill_lord_valthalaks_spirit'),
 (27673,'spell_five_fat_finger_exploding_heart_technique'),
 (28006,'spell_arcane_cloaking'),
-(28282,'spell_ashbringer_item'),
 (27808,'spell_kel_thuzad_frost_blast'),
 (27819,'spell_detonate_mana_kt'),
 (27934,'spell_viscidus_shrinks'),
