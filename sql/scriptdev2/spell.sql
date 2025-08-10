@@ -42,6 +42,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (10255,'spell_stoned'),
 (10252,'spell_awaken_earthen_archaedas'),
 (10259,'spell_awaken_earthen_archaedas'),
+(10848,'spell_shroud_of_death'),
+(27978,'spell_shroud_of_death'),
 (11920,'spell_net_guard'),
 (12639,'spell_summon_hakkar'),
 (12948,'spell_hakkar_summoned'),

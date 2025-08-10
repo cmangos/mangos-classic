@@ -414,6 +414,18 @@ struct RandomAggro1000000 : public SpellScript
     }
 };
 
+// 10848, 27978 - Shroud of Death
+struct InvisibleForAlive : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            aura->GetTarget()->m_AuraFlags |= UNIT_AURAFLAG_ALIVE_INVISIBLE;
+        else
+            aura->GetTarget()->m_AuraFlags &= ~UNIT_AURAFLAG_ALIVE_INVISIBLE;
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -441,4 +453,5 @@ void AddSC_spell_scripts()
     RegisterSpellScript<IllusionPassive>("spell_illusion_passive");
     RegisterSpellScript<RandomAggro>("spell_random_aggro");
     RegisterSpellScript<RandomAggro1000000>("spell_random_aggro_1000000");
+    RegisterSpellScript<InvisibleForAlive>("spell_shroud_of_death");
 }
