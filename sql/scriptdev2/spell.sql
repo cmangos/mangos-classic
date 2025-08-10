@@ -85,6 +85,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (24324,'spell_hakkar_blood_siphon'),
 (24693,'spell_hakkar_power_down'),
 (24728,'spell_summon_nightmare_illusion_hazzarah'),
+(25680,'spell_random_aggro'),
 (25684,'spell_summon_mana_fiends_moam'),
 (25813,'spell_conjure_dream_rift'),
 (25885,'spell_viscidus_summon_globs'),
