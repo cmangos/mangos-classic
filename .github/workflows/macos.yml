@@ -7,15 +7,13 @@ env:
   BUILD_TYPE: Release
   REPO_DIR : ${{github.workspace}}
   BUILD_DIR: ${{github.workspace}}/bin/builddir
-  BOOST_VERSION: "1.83.0"
-  BOOST_PLATFORM_VERSION: "13"
 
 permissions:
   contents: read
 
 jobs:
   build:
-    runs-on: macos-13
+    runs-on: macos-14
     permissions:
       contents: read
 
@@ -27,29 +25,15 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          brew install mysql-client
+          brew install mysql-client@8.4
           brew install openssl
+          brew install boost
           echo "OPENSSL_ROOT_DIR=$(brew --prefix --installed openssl)" >> $GITHUB_ENV
-
-      - name: Install Boost
-        uses: MarkusJx/install-boost@v2.5.0
-        id: install-boost
-        with:
-          # REQUIRED: Specify the required boost version
-          # A list of supported versions can be found here:
-          # https://github.com/MarkusJx/prebuilt-boost/blob/main/versions-manifest.json
-          boost_version: ${{env.BOOST_VERSION}}
-          # OPTIONAL: Specify a platform version
-          platform_version: ${{env.BOOST_PLATFORM_VERSION}}
-          # OPTIONAL: Specify a toolset
-          toolset: clang
-          # NOTE: If a boost version matching all requirements cannot be found,
-          # this build step will fail
 
       - name: Configure
         env:
-          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
-        run: cmake -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}} -DBoost_ARCHITECTURE=-x64
+          BOOST_ROOT: /opt/homebrew/opt/boost
+        run: cmake -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}} -DBoost_ARCHITECTURE=-arm64
 
       - name: Build
         env:
@@ -60,7 +44,7 @@ jobs:
     permissions:
       contents: none
     name: Send Notification to Discord on Failure
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs: # make sure the notification is sent AFTER the jobs you want included have completed
       - build
     if: failure()
