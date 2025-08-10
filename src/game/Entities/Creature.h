@@ -615,7 +615,6 @@ class Creature : public Unit
         bool IsTrainerOf(Player* pPlayer, bool msg) const;
         bool CanInteractWithBattleMaster(Player* pPlayer, bool msg) const;
         bool CanTrainAndResetTalentsOf(Player* pPlayer) const;
-        bool isInvisibleForAlive() const override;
 
         void FillGuidsListFromThreatList(GuidVector& guids, uint32 maxamount = 0);
 
