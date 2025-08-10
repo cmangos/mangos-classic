@@ -380,6 +380,40 @@ struct IllusionPassive : public AuraScript
     }
 };
 
+// 25680, 27628 - Random Aggro
+struct RandomAggro : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        // 27628 - unknown if it should cause some high threat
+        Unit* caster = spell->GetCaster();
+        spell->GetCaster()->AddThreat(spell->GetUnitTarget());
+    }
+};
+
+// 22913 - Random Aggro 
+struct RandomAggro1000000 : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        Spell::TargetList const& list = spell->GetTargetList();
+        if (!list.empty())
+        {
+            auto itr = list.begin();
+            std::advance(itr, urand(0, list.size() - 1));
+            Unit* target = spell->GetCaster()->GetMap()->GetPlayer((*itr).targetGUID);
+            if (target)
+                spell->GetCaster()->AddThreat(target, 1000000.f);
+        }
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        spell->GetCaster()->AddThreat(spell->GetUnitTarget());
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -405,4 +439,6 @@ void AddSC_spell_scripts()
     RegisterSpellScript<Stoned>("spell_stoned");
     RegisterSpellScript<GameobjectCallForHelpOnUsage>("spell_gameobject_call_for_help_on_usage");
     RegisterSpellScript<IllusionPassive>("spell_illusion_passive");
+    RegisterSpellScript<RandomAggro>("spell_random_aggro");
+    RegisterSpellScript<RandomAggro1000000>("spell_random_aggro_1000000");
 }

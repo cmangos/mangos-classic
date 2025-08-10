@@ -1150,15 +1150,6 @@ bool ProcessEventId_naxxramas(uint32 eventId, Object* source, Object* /*target*/
     return false;
 }
 
-// 25680 - Random Aggro
-struct RandomAggro : public SpellScript
-{
-    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
-    {
-        spell->GetCaster()->AddThreat(spell->GetUnitTarget());
-    }
-};
-
 void AddSC_instance_naxxramas()
 {
     Script* newScript = new Script;
@@ -1185,6 +1176,4 @@ void AddSC_instance_naxxramas()
     newScript->Name = "event_naxxramas";
     newScript->pProcessEventId = &ProcessEventId_naxxramas;
     newScript->RegisterSelf();
-
-    RegisterSpellScript<RandomAggro>("spell_random_aggro");
 }

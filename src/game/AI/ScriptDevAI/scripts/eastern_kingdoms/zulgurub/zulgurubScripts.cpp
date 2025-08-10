@@ -175,18 +175,6 @@ struct SummonShadeOfJindo : public SpellScript
     }
 };
 
-struct RandomAggro : public SpellScript
-{
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
-    {
-        Unit* caster = spell->GetCaster();
-        if (effIdx != EFFECT_INDEX_0 || !caster->AI())
-            return;
-
-        spell->GetCaster()->AI()->AttackStart(spell->GetUnitTarget());
-    }
-};
-
 // 24335 - Wyvern Sting
 struct WyvernStingAura : public AuraScript
 {
@@ -207,6 +195,5 @@ void AddSC_zulgurub()
     RegisterSpellScript<SummonNightmareIllusion>("spell_summon_nightmare_illusion_hazzarah");
     RegisterSpellScript<DelusionsOfJindo>("spell_delusions_of_jindo");
     RegisterSpellScript<SummonShadeOfJindo>("spell_summon_shade_of_jindo");
-    RegisterSpellScript<RandomAggro>("spell_random_aggro");
     RegisterSpellScript<WyvernStingAura>("spell_wyvern_sting_aura");
 }
