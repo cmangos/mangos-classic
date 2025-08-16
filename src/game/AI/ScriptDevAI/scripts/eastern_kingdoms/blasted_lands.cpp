@@ -43,10 +43,21 @@ bool TrapTargetSearchRuneOfTheDefiler(Unit* unit)
 
 std::function<bool(Unit*)> functionRuneOfTheDefiler = &TrapTargetSearchRuneOfTheDefiler;
 
+// 12938 - Fel Curse
+struct FelCurse : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        spell->GetUnitTarget()->CastSpell(nullptr, 12941, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_blasted_lands()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "go_rune_of_the_defiler";
     pNewScript->pTrapSearching = &functionRuneOfTheDefiler;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<FelCurse>("spell_fel_curse");
 }
