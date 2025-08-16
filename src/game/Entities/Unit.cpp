@@ -12375,7 +12375,16 @@ void Unit::SetSwim(bool enable)
 
 void Unit::SetCanFly(bool enable)
 {
-    // TBC+
+    if (enable)
+    {
+        m_movementInfo.AddMovementFlag(MOVEFLAG_CAN_FLY);
+        m_movementInfo.AddMovementFlag(MOVEFLAG_FLYING_OLD);
+    }
+    else
+    {
+        m_movementInfo.RemoveMovementFlag(MOVEFLAG_CAN_FLY);
+        m_movementInfo.RemoveMovementFlag(MOVEFLAG_FLYING_OLD);
+    }
 }
 
 void Unit::SetFeatherFall(bool enable)
