@@ -37,6 +37,8 @@ class PlayerAI : public UnitAI
         void EnterEvadeMode() override;
         void AttackClosestEnemy() override;
 
+        void RequestFollow(Unit* followee) override;
+
         CreatureSpellList const& GetSpellList() const override { return m_spellList; }
     protected:
         void AddPlayerSpellAction(uint32 spellId, std::function<Unit*()> selector = nullptr);

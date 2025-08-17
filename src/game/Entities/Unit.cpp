@@ -598,7 +598,7 @@ void Unit::TriggerHomeEvents()
     if (!hasUnitState(UNIT_STAT_NO_FOLLOW_MOVEMENT))
     {
         if (Unit* target = GetMaster())
-            GetMotionMaster()->MoveFollow(target, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE, false, IsPlayer() && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED));
+            AI()->RequestFollow(target);
         else if (IsLinkingEventTrigger())
             GetMap()->GetCreatureLinkingHolder()->TryFollowMaster((Creature*)this);
     }

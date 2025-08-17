@@ -266,7 +266,7 @@ void CreatureAI::RequestFollow(Unit* followee)
         m_followDist = data.second;
         m_requestedFollower = followee->GetObjectGuid();
     }
-    m_creature->GetMotionMaster()->MoveFollow(followee, m_followDist, m_followAngle);
+    m_creature->GetMotionMaster()->MoveFollow(followee, m_followDist, m_followAngle, m_creature->GetDefaultMovementType() == FOLLOW_MOTION_TYPE, false);
 }
 
 void CreatureAI::RelinquishFollow(ObjectGuid follower)

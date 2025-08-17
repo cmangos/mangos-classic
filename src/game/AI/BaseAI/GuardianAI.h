@@ -39,7 +39,6 @@ class GuardianAI : public CreatureEventAI
         virtual void JustRespawned() override;
         virtual void EnterEvadeMode() override;
         virtual void UpdateAI(const uint32 diff) override;
-        virtual void CombatStop() override;
 
         void JustDied(Unit* killer) override;
 

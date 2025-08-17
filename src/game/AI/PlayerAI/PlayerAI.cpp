@@ -123,3 +123,8 @@ void PlayerAI::AttackClosestEnemy()
         }
     });
 }
+
+void PlayerAI::RequestFollow(Unit* followee)
+{
+    m_unit->GetMotionMaster()->MoveFollow(followee, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE, false, !m_unit->IsPlayerControlled());
+}

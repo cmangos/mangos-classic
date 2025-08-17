@@ -938,6 +938,8 @@ bool FollowMovementGenerator::Move(Unit& owner, float x, float y, float z)
     init.MovebyPath(path);
     init.SetWalk(EnableWalking());
     init.SetVelocity(GetSpeed(owner));
+    if (!i_target->IsMoving())
+        init.SetFacing(i_target->GetOrientation());
     init.Launch();
 
     return true;
