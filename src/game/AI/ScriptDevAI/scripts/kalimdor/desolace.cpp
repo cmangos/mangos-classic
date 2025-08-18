@@ -129,35 +129,36 @@ UnitAI* GetAI_npc_aged_dying_ancient_kodo(Creature* pCreature)
     return new npc_aged_dying_ancient_kodoAI(pCreature);
 }
 
-bool EffectDummyCreature_npc_aged_dying_ancient_kodo(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 18153 - Kodo Kombobulator
+struct KodoKombobulator : public SpellScript
 {
-    // always check spellid and effectindex
-    if (spellId == SPELL_KODO_KOMBO_ITEM && effIndex == EFFECT_INDEX_0)
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
     {
-        // no effect if player/creature already have aura from spells
-        if (pCaster->HasAura(SPELL_KODO_KOMBO_PLAYER_BUFF) || pCreatureTarget->HasAura(SPELL_KODO_KOMBO_DESPAWN_BUFF))
-            return true;
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || (target->GetEntry() != NPC_AGED_KODO && target->GetEntry() != NPC_DYING_KODO && target->GetEntry() != NPC_ANCIENT_KODO))
+            return SPELL_FAILED_BAD_TARGETS;
 
-        if (pCreatureTarget->GetEntry() == NPC_AGED_KODO ||
-                pCreatureTarget->GetEntry() == NPC_DYING_KODO ||
-                pCreatureTarget->GetEntry() == NPC_ANCIENT_KODO)
-        {
-            pCaster->CastSpell(pCaster, SPELL_KODO_KOMBO_PLAYER_BUFF, TRIGGERED_OLD_TRIGGERED);
+        if (spell->GetCaster()->HasAura(SPELL_KODO_KOMBO_PLAYER_BUFF) || target->HasAura(SPELL_KODO_KOMBO_DESPAWN_BUFF))
+            return SPELL_FAILED_CASTER_AURASTATE;
 
-            pCreatureTarget->UpdateEntry(NPC_TAMED_KODO);
-            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_KODO_KOMBO_DESPAWN_BUFF, TRIGGERED_NONE);
-
-            if (pCreatureTarget->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
-                pCreatureTarget->GetMotionMaster()->MoveIdle();
-
-            pCreatureTarget->GetMotionMaster()->MoveFollow(pCaster, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
-        }
-
-        // always return true when we are handling this spell and effect
-        return true;
+        return SPELL_CAST_OK;
     }
-    return false;
-}
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        target->CastSpell(caster, SPELL_KODO_KOMBO_PLAYER_BUFF, TRIGGERED_OLD_TRIGGERED);
+
+        static_cast<Creature*>(target)->UpdateEntry(NPC_TAMED_KODO);
+        target->CastSpell(nullptr, SPELL_KODO_KOMBO_DESPAWN_BUFF, TRIGGERED_NONE);
+
+        if (target->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+            target->GetMotionMaster()->MoveIdle();
+
+        target->GetMotionMaster()->MoveFollow(caster, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE, true);
+    }
+};
 
 bool GossipHello_npc_aged_dying_ancient_kodo(Player* pPlayer, Creature* pCreature)
 {
@@ -676,7 +677,6 @@ void AddSC_desolace()
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_aged_dying_ancient_kodo";
     pNewScript->GetAI = &GetAI_npc_aged_dying_ancient_kodo;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_aged_dying_ancient_kodo;
     pNewScript->pGossipHello = &GossipHello_npc_aged_dying_ancient_kodo;
     pNewScript->RegisterSelf();
 
@@ -708,4 +708,6 @@ void AddSC_desolace()
     pNewScript->Name = "npc_magrami_spectre";
     pNewScript->GetAI = &GetAI_npc_magrami_spectre;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<KodoKombobulator>("spell_kodo_kombobulator");
 }

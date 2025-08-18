@@ -526,18 +526,20 @@ UnitAI* GetAI_npc_grimstone(Creature* pCreature)
     return new npc_grimstoneAI(pCreature);
 }
 
-bool EffectDummyCreature_spell_banner_of_provocation(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 27517 - Summon Thelrin DND
+struct SummonThelrinDnd : public SpellScript
 {
-    if (uiSpellId == SPELL_SUMMON_THELRIN_DND && uiEffIndex != EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        instance_blackrock_depths* pInstance = (instance_blackrock_depths*)pCreatureTarget->GetInstanceData();
-        if (pInstance && pInstance->GetData(TYPE_RING_OF_LAW) != DONE && pInstance->GetData(TYPE_RING_OF_LAW) != SPECIAL)
-            pInstance->SetData(TYPE_RING_OF_LAW, pInstance->GetData(TYPE_RING_OF_LAW) == IN_PROGRESS ? uint32(SPECIAL) : uint32(DATA_BANNER_BEFORE_EVENT));
+        if (effIdx != EFFECT_INDEX_1)
+            return;
 
-        return true;
+        Unit* target = spell->GetUnitTarget();
+        instance_blackrock_depths* instance = dynamic_cast<instance_blackrock_depths*>(target->GetInstanceData());
+        if (instance && instance->GetData(TYPE_RING_OF_LAW) != DONE && instance->GetData(TYPE_RING_OF_LAW) != SPECIAL)
+            instance->SetData(TYPE_RING_OF_LAW, instance->GetData(TYPE_RING_OF_LAW) == IN_PROGRESS ? uint32(SPECIAL) : uint32(DATA_BANNER_BEFORE_EVENT));
     }
-    return false;
-}
+};
 
 /*######
 +## npc_phalanx
@@ -1967,11 +1969,6 @@ void AddSC_blackrock_depths()
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
-    pNewScript->Name = "npc_theldren_trigger";
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_banner_of_provocation;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
     pNewScript->Name = "npc_phalanx";
     pNewScript->GetAI = &GetAI_npc_phalanx;
     pNewScript->RegisterSelf();
@@ -2034,5 +2031,6 @@ void AddSC_blackrock_depths()
     pNewScript->GetAI = &GetAI_npc_ironhand_guardian;
     pNewScript->RegisterSelf();
 
+    RegisterSpellScript<SummonThelrinDnd>("spell_summon_thelrin_dnd");
     RegisterSpellScript<FiveFatFingerExplodingHeartTechnique>("spell_five_fat_finger_exploding_heart_technique");
 }

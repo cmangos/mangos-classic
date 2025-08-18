@@ -86,7 +86,6 @@ struct Script
         pQuestAcceptNPC(nullptr), pQuestAcceptGO(nullptr), pQuestAcceptItem(nullptr),
         pQuestRewardedNPC(nullptr), pQuestRewardedGO(nullptr),
         pGOUse(nullptr), pItemUse(nullptr), pItemLoot(nullptr), pAreaTrigger(nullptr), pProcessEventId(nullptr),
-        pEffectDummyNPC(nullptr),
         pTrapSearching(nullptr), GetGameObjectAI(nullptr), GetAI(nullptr), GetInstanceData(nullptr)
     {}
 
@@ -110,7 +109,6 @@ struct Script
     bool (*pItemLoot)(Player*, Item*, bool);
     bool (*pAreaTrigger)(Player*, AreaTriggerEntry const*);
     bool (*pProcessEventId)(uint32, Object*, Object*, bool);
-    bool (*pEffectDummyNPC)(Unit*, uint32, SpellEffectIndex, Creature*, ObjectGuid);
     std::function<bool(Unit*)>* pTrapSearching;
 
     GameObjectAI* (*GetGameObjectAI)(GameObject*);
@@ -149,7 +147,6 @@ class ScriptDevAIMgr
         bool OnItemLoot(Player* pPlayer, Item* pItem, bool apply);
         bool OnAreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry);
         bool OnProcessEvent(uint32 uiEventId, Object* pSource, Object* pTarget, bool bIsStart);
-        bool OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid);
 
         void AddScript(uint32 id, Script* script);
         Script* GetScript(uint32 id) const;

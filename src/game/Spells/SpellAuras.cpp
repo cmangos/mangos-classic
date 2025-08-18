@@ -1220,14 +1220,6 @@ void Aura::TriggerSpell()
     {
         CastTriggeredSpell(data);
     }
-    else if (!GetAuraScript()) // if scripter scripted spell, it is handled somehow
-    {
-        if (Unit* caster = GetCaster())
-        {
-            if (triggerTarget->GetTypeId() != TYPEID_UNIT || !sScriptDevAIMgr.OnEffectDummy(caster, GetId(), GetEffIndex(), (Creature*)triggerTarget, ObjectGuid()))
-                sLog.outError("Aura::TriggerSpell: Spell %u have 0 in EffectTriggered[%d], not handled custom case?", GetId(), GetEffIndex());
-        }
-    }
 }
 
 /*********************************************************/
@@ -5042,12 +5034,6 @@ void Aura::PeriodicDummyTick()
     }
 
     OnPeriodicDummy();
-
-    if (Unit* caster = GetCaster())
-    {
-        if (target && target->GetTypeId() == TYPEID_UNIT)
-            sScriptDevAIMgr.OnEffectDummy(caster, GetId(), GetEffIndex(), (Creature*)target, ObjectGuid());
-    }
 }
 
 void Aura::HandlePreventFleeing(bool apply, bool Real)

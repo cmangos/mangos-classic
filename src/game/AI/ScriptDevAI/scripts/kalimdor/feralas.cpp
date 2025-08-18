@@ -303,19 +303,18 @@ bool QuestAccept_npc_shay_leafrunner(Player* pPlayer, Creature* pCreature, const
     return true;
 }
 
-bool EffectDummyCreature_npc_shay_leafrunner(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 11402 - Shay's Bell
+struct ShaysBell : public SpellScript
 {
-    if (uiSpellId == SPELL_SHAYS_BELL && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
-        if (pCaster->GetTypeId() != TYPEID_PLAYER)
-            return true;
+        Unit* caster = spell->GetCaster();
+        if (!caster->IsPlayer())
+            return;
 
-        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
-        return true;
+        spell->GetUnitTarget()->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, caster, spell->GetUnitTarget());
     }
-
-    return false;
-}
+};
 
 /*######
 ## Quest Freedom for all creatures
@@ -636,7 +635,6 @@ void AddSC_feralas()
     pNewScript->Name = "npc_shay_leafrunner";
     pNewScript->GetAI = &GetAI_npc_shay_leafrunner;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_shay_leafrunner;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_shay_leafrunner;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -655,6 +653,7 @@ void AddSC_feralas()
     pNewScript->pGOUse = &GOUse_go_cage_door;
     pNewScript->RegisterSelf();
 
+    RegisterSpellScript<ShaysBell>("spell_shays_bell");
     RegisterSpellScript<CaptureWildkin>("spell_capture_wildkin");
     RegisterSpellScript<CaptureHippogryph>("spell_capture_hippogryph");
     RegisterSpellScript<CaptureFaerieDragon>("spell_capture_faerie_dragon");

@@ -666,20 +666,20 @@ bool QuestRewarded_npc_taelan_fordring(Player* player, Creature* creature, const
     return true;
 }
 
-bool EffectDummyCreature_npc_taelan_fordring(Unit* caster, uint32 spellId, SpellEffectIndex effIndex, Creature* creatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 18969 - Taelan Death
+struct TaelanDeath : public SpellScript
 {
-    // always check spellid and effectindex
-    if (spellId == SPELL_TAELAN_DEATH && effIndex == EFFECT_INDEX_0 && caster->GetEntry() == NPC_ISILLIEN)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
-        creatureTarget->AI()->EnterEvadeMode();
-        caster->SetFacingToObject(creatureTarget);
-        ((Creature*)caster)->AI()->EnterEvadeMode();
-
-        return true;
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (target->AI())
+            target->AI()->EnterEvadeMode();
+        caster->SetFacingToObject(target);
+        if (caster->AI())
+            caster->AI()->EnterEvadeMode();
     }
-
-    return false;
-}
+};
 
 /*######
 ## npc_isillien
@@ -1008,7 +1008,6 @@ void AddSC_western_plaguelands()
     pNewScript->GetAI = &GetAI_npc_taelan_fordring;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_taelan_fordring;
     pNewScript->pQuestRewardedNPC = &QuestRewarded_npc_taelan_fordring;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_taelan_fordring;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -1021,5 +1020,6 @@ void AddSC_western_plaguelands()
     pNewScript->GetAI = &GetAI_npc_tirion_fordring;
     pNewScript->RegisterSelf();
 
+    RegisterSpellScript<TaelanDeath>("spell_taelan_death");
     RegisterSpellScript<spell_placing_beacon_torch>("spell_placing_beacon_torch");
 }

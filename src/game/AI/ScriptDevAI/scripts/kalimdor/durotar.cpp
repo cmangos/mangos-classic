@@ -230,26 +230,31 @@ UnitAI* GetAI_npc_lazy_peon(Creature* pCreature)
     return new npc_lazy_peonAI(pCreature);
 }
 
-bool EffectDummyCreature_lazy_peon_spell(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 19938 - Awaken Peon
+struct AwakenPeon : public SpellScript
 {
-    //make sure it's the right spell
-    if (uiSpellId == SPELL_AWAKEN_PEON && uiEffIndex == EFFECT_INDEX_0)
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
     {
-        //awaken peon
-        if (npc_lazy_peonAI* pPeonAI = dynamic_cast<npc_lazy_peonAI*>(pCreatureTarget->AI()))
-            pPeonAI->Awaken(pCaster);
-        //right spell, return true
-        return true;
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || !target->HasAura(SPELL_PEON_SLEEP))
+            return SPELL_FAILED_BAD_TARGETS;
+
+        return SPELL_CAST_OK;
     }
-    //wrong spell, return false
-    return false;
-}
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        if (npc_lazy_peonAI* peonAI = dynamic_cast<npc_lazy_peonAI*>(spell->GetUnitTarget()->AI()))
+            peonAI->Awaken(spell->GetCaster());
+    }
+};
 
 void AddSC_durotar()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_lazy_peon";
     pNewScript->GetAI = &GetAI_npc_lazy_peon;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_lazy_peon_spell;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<AwakenPeon>("spell_awaken_peon");
 }

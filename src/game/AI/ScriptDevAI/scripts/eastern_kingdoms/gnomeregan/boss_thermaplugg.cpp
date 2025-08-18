@@ -246,17 +246,19 @@ UnitAI* GetAI_boss_thermaplugg(Creature* pCreature)
     return new boss_thermapluggAI(pCreature);
 }
 
-bool EffectDummyCreature_spell_boss_thermaplugg(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 11511 - Activate Bomb A
+// 11795 - Activate Bomb B
+struct ActivateBombThermaplugg : public SpellScript
 {
-    if ((uiSpellId != SPELL_ACTIVATE_BOMB_A && uiSpellId != SPELL_ACTIVATE_BOMB_B) || uiEffIndex != EFFECT_INDEX_0)
-        return false;
-
-    // This spell should select a random Bomb-Face and activate it if needed
-    if (instance_gnomeregan* pInstance = (instance_gnomeregan*)pCreatureTarget->GetInstanceData())
-        pInstance->DoActivateBombFace(urand(0, MAX_GNOME_FACES - 1));
-
-    return true;
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        // This spell should select a random Bomb-Face and activate it if needed
+        // meant to cast commented out spells at random
+        if (instance_gnomeregan* instance = dynamic_cast<instance_gnomeregan*>(target->GetInstanceData()))
+            instance->DoActivateBombFace(urand(0, MAX_GNOME_FACES - 1));
+    }
+};
 
 bool GOUse_go_gnomeface_button(Player* pPlayer, GameObject* pGo)
 {
@@ -283,11 +285,12 @@ void AddSC_boss_thermaplugg()
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_thermaplugg";
     pNewScript->GetAI = &GetAI_boss_thermaplugg;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_boss_thermaplugg;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "go_gnomeface_button";
     pNewScript->pGOUse = &GOUse_go_gnomeface_button;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<ActivateBombThermaplugg>("spell_activate_bomb_thermaplugg");
 }

@@ -1533,13 +1533,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
         return;
     }
 
-    // Script based implementation. Must be used only for not good for implementation in core spell effects
-    // So called only for not processed cases
-    bool libraryResult = false;
-    if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)
-        libraryResult = sScriptDevAIMgr.OnEffectDummy(m_caster, m_spellInfo->Id, eff_idx, (Creature*)unitTarget, m_originalCasterGUID);
-
-    if (libraryResult || (!unitTarget && !gameObjTarget))
+    if (!unitTarget && !gameObjTarget)
         return;
 
     // Previous effect might have started script

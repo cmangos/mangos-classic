@@ -135,11 +135,6 @@ UPDATE creature_template SET ScriptName='npc_aoe_damage_trigger' WHERE entry IN 
 UPDATE creature_template SET ScriptName='npc_advanced_target_dummy' WHERE entry IN (2674); -- Advanced Target Dummy
 
 /* SPELL */
-UPDATE creature_template SET ScriptName='spell_dummy_npc' WHERE entry IN (
--- eastern kingdoms
-8888,13016,
--- kalimdor
-9299);
 
 /* WORLD MAP SCRIPTS */
 DELETE FROM world_template WHERE map IN (0, 1, 530);
@@ -229,7 +224,6 @@ UPDATE creature_template SET ScriptName='boss_doomrel' WHERE entry=9039;
 UPDATE creature_template SET ScriptName='boss_general_angerforge' WHERE entry=9033;
 UPDATE creature_template SET ScriptName='boss_high_interrogator_gerstahn' WHERE entry=9018;
 UPDATE creature_template SET ScriptName='npc_grimstone' WHERE entry=10096;
-UPDATE creature_template SET ScriptName='npc_theldren_trigger' WHERE entry=16079;
 UPDATE creature_template SET ScriptName='npc_phalanx' WHERE entry=9502;
 UPDATE creature_template SET ScriptName='npc_mistress_nagmara' WHERE entry=9500;
 UPDATE creature_template SET ScriptName='npc_rocknot' WHERE entry=9503;
@@ -335,7 +329,6 @@ UPDATE creature_template SET ScriptName='npc_magrami_spectre' WHERE entry=11560;
 /* DIRE MAUL */
 UPDATE instance_template SET ScriptName='instance_dire_maul' WHERE map=429;
 UPDATE gameobject_template SET ScriptName='go_fixed_trap' WHERE entry=179512;
-UPDATE creature_template SET ScriptName='npc_mizzle_crafty' WHERE entry=14353;
 UPDATE creature_template SET ScriptName='npc_warlock_mount_ritual' WHERE entry=14501;
 UPDATE gameobject_template SET ScriptName='go_dreadsteed_quest_objects' WHERE entry IN(179672,179673,179674);
 INSERT INTO scripted_event_id VALUES
@@ -645,7 +638,6 @@ INSERT INTO scripted_event_id VALUES
 (2228,'event_spell_altar_boss_aggro'),
 (2268,'event_spell_altar_boss_aggro');
 UPDATE creature_template SET ScriptName='boss_archaedas' WHERE entry=2748;
-UPDATE creature_template SET ScriptName='mob_archaeras_add' WHERE entry IN (7309,7076,7077,10120);
 UPDATE instance_template SET ScriptName='instance_uldaman' WHERE map=70;
 
 /* UN'GORO CRATER */

@@ -67,7 +67,7 @@ enum
     NPC_HIGH_EXECUTIONER_NUZARK     = 9538,
     NPC_SHADOW_OF_LEXLORT           = 9539,
 
-    FACTION_FRIENDLY                = 35,
+    FACTION_GRARK_FRIENDLY          = 29,
 
     QUEST_ID_PRECARIOUS_PREDICAMENT = 4121
 };
@@ -87,8 +87,7 @@ static const DialogueEntry aOutroDialogue[] =
 
 struct npc_grark_lorkrubAI : public npc_escortAI, private DialogueHelper
 {
-    npc_grark_lorkrubAI(Creature* pCreature) : npc_escortAI(pCreature),
-        DialogueHelper(aOutroDialogue)
+    npc_grark_lorkrubAI(Creature* pCreature) : npc_escortAI(pCreature), DialogueHelper(aOutroDialogue), m_shackled(false)
     {
         Reset();
     }
@@ -100,6 +99,7 @@ struct npc_grark_lorkrubAI : public npc_escortAI, private DialogueHelper
 
     uint8 m_uiKilledCreatures;
     bool m_bIsFirstSearScale;
+    bool m_shackled;
 
     void Reset() override
     {
@@ -112,6 +112,7 @@ struct npc_grark_lorkrubAI : public npc_escortAI, private DialogueHelper
 
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         }
+        SetDeathPrevention(false);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -127,6 +128,25 @@ struct npc_grark_lorkrubAI : public npc_escortAI, private DialogueHelper
             return;
 
         npc_escortAI::MoveInLineOfSight(pWho);
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    {
+        // rejoin head on request
+        if (eventType == AI_EVENT_CUSTOM_A)
+        {
+            m_shackled = true;
+            SetDeathPrevention(true);
+        }
+    }
+
+    void HandleLowHp()
+    {
+        DoScriptText(EMOTE_SUBMIT, m_creature);
+        static_cast<Creature*>(m_creature)->SetFactionTemporary(FACTION_GRARK_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN);
+        EnterEvadeMode();
+        SetDeathPrevention(false);
+        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
     }
 
     void WaypointReached(uint32 uiPointId) override
@@ -287,14 +307,12 @@ struct npc_grark_lorkrubAI : public npc_escortAI, private DialogueHelper
         }
     }
 
-    void UpdateEscortAI(const uint32 uiDiff) override
+    void UpdateEscortAI(const uint32 diff) override
     {
-        DialogueUpdate(uiDiff);
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        DoMeleeAttackIfReady();
+        DialogueUpdate(diff);
+        CreatureAI::UpdateAI(diff);
+        if (m_shackled && m_creature->GetHealthPercent() <= 25.f)
+            HandleLowHp();
     }
 };
 
@@ -316,26 +334,15 @@ bool QuestAccept_npc_grark_lorkrub(Player* pPlayer, Creature* pCreature, const Q
     return false;
 }
 
-bool EffectDummyCreature_spell_capture_grark(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 14250 - Capture Grark
+struct CaptureGrark : public SpellScript
 {
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_CAPTURE_GRARK && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
-        // Note: this implementation needs additional research! There is a lot of guesswork involved in this!
-        if (pCreatureTarget->GetHealthPercent() > 25.0f)
-            return false;
-
-        // The faction is guesswork - needs more research
-        DoScriptText(EMOTE_SUBMIT, pCreatureTarget);
-        pCreatureTarget->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN);
-        pCreatureTarget->AI()->EnterEvadeMode();
-
-        // always return true when we are handling this spell and effect
-        return true;
+        Unit* target = spell->GetUnitTarget();
+        target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, spell->GetCaster(), target);
     }
-
-    return false;
-}
+};
 
 enum
 {
@@ -567,7 +574,6 @@ void AddSC_burning_steppes()
     pNewScript->Name = "npc_grark_lorkrub";
     pNewScript->GetAI = &GetAI_npc_grark_lorkrub;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_grark_lorkrub;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_capture_grark;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -576,4 +582,6 @@ void AddSC_burning_steppes()
     pNewScript->pGossipHello = &GossipHello_npc_klinfran;
     pNewScript->pGossipSelect = &GossipSelect_npc_klinfran;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<CaptureGrark>("spell_capture_grark");
 }

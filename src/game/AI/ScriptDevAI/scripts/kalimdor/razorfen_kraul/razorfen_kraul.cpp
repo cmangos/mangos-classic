@@ -236,25 +236,19 @@ UnitAI* GetAI_npc_snufflenose_gopher(Creature* pCreature)
     return new npc_snufflenose_gopherAI(pCreature);
 }
 
-bool EffectDummyCreature_npc_snufflenose_gopher(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 8283 - Snufflenose Command
+struct SnufflenoseCommand : public SpellScript
 {
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_SNUFFLENOSE_COMMAND && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
-        if (pCreatureTarget->GetEntry() == NPC_SNUFFLENOSE_GOPHER)
-        {
-            if (npc_snufflenose_gopherAI* pGopherAI = dynamic_cast<npc_snufflenose_gopherAI*>(pCreatureTarget->AI()))
-                pGopherAI->DoFindNewTubber();
-        }
-
-        // always return true when we are handling this spell and effect
-        return true;
+        Unit* target = spell->GetUnitTarget();
+        if (npc_snufflenose_gopherAI* gopherAI = dynamic_cast<npc_snufflenose_gopherAI*>(target->AI()))
+            gopherAI->DoFindNewTubber();
     }
+};
 
-    return false;
-}
-
-struct LeftForDead : public SpellScript // s.8555
+// 8555 - Left for Dead
+struct LeftForDead : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
@@ -277,8 +271,8 @@ void AddSC_razorfen_kraul()
     pNewScript = new Script;
     pNewScript->Name = "npc_snufflenose_gopher";
     pNewScript->GetAI = &GetAI_npc_snufflenose_gopher;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_snufflenose_gopher;
     pNewScript->RegisterSelf();
 
+    RegisterSpellScript<SnufflenoseCommand>("spell_snufflenose_command");
     RegisterSpellScript<LeftForDead>("spell_left_for_dead");
 }

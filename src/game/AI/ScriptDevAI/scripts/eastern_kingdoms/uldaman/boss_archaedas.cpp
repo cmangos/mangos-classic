@@ -187,28 +187,22 @@ UnitAI* GetAI_boss_archaedas(Creature* pCreature)
     return new boss_archaedasAI(pCreature);
 }
 
-bool EffectDummyCreature_npc_vault_warder(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 10258 - Awaken Vault Warder
+struct AwakenVaultWarder : public SpellScript
 {
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_AWAKEN_VAULT_WARDER && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
-        if (pCreatureTarget->GetEntry() == NPC_VAULT_WARDER)
-        {
-            pCreatureTarget->RemoveAurasDueToSpell(SPELL_STONED);
+        Unit* target = spell->GetUnitTarget();
+        target->RemoveAurasDueToSpell(SPELL_STONED);
 
-            ScriptedInstance* pInstance = (ScriptedInstance*)pCreatureTarget->GetInstanceData();
-            if (!pInstance)
-                return true;
+        ScriptedInstance* instance = static_cast<ScriptedInstance*>(target->GetInstanceData());
+        if (!instance)
+            return;
 
-            if (Creature* pArchaedas = pInstance->GetSingleCreatureFromStorage(NPC_ARCHAEDAS))
-                pCreatureTarget->AI()->AttackStart(pArchaedas->GetVictim());
-
-            return true;
-        }
+        if (Creature* archaedas = instance->GetSingleCreatureFromStorage(NPC_ARCHAEDAS))
+            target->AI()->AttackStart(archaedas->GetVictim());
     }
-
-    return false;
-}
+};
 
 // 10252 - Awaken Earthen Guardians
 // 10259 - Awaken Earthen Dwarf
@@ -238,10 +232,6 @@ void AddSC_boss_archaedas()
     pNewScript->GetAI = &GetAI_boss_archaedas;
     pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "mob_archaeras_add";
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_vault_warder;
-    pNewScript->RegisterSelf();
-
+    RegisterSpellScript<AwakenVaultWarder>("spell_awaken_vault_warder");
     RegisterSpellScript<AwakenEarthenArchaedas>("spell_awaken_earthen_archaedas");
 }

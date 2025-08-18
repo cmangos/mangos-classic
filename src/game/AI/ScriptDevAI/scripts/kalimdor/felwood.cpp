@@ -114,28 +114,25 @@ UnitAI* GetAI_npc_kitten(Creature* pCreature)
     return new npc_kittenAI(pCreature);
 }
 
-bool EffectDummyCreature_npc_kitten(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 16510 - Corrupted Saber Visual (DND)
+struct CorruptedSaberVisual : public SpellScript
 {
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_CORRUPT_SABER_VISUAL && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
+        Unit* caster = spell->GetCaster();
         // Not nice way, however using UpdateEntry will not be correct.
-        if (const CreatureInfo* pTemp = GetCreatureTemplateStore(NPC_CORRUPT_SABER))
+        if (const CreatureInfo* temp = GetCreatureTemplateStore(NPC_CORRUPT_SABER))
         {
-            pCreatureTarget->SetEntry(pTemp->Entry);
-            pCreatureTarget->SetDisplayId(Creature::ChooseDisplayId(pTemp));
-            pCreatureTarget->SetName(pTemp->Name);
-            pCreatureTarget->SetFloatValue(OBJECT_FIELD_SCALE_X, pTemp->Scale);
+            caster->SetEntry(temp->Entry);
+            caster->SetDisplayId(Creature::ChooseDisplayId(temp));
+            caster->SetName(temp->Name);
+            caster->SetFloatValue(OBJECT_FIELD_SCALE_X, temp->Scale);
         }
 
-        if (Unit* pOwner = pCreatureTarget->GetOwner())
-            DoScriptText(EMOTE_SAB_FOLLOW, pCreatureTarget, pOwner);
-
-        // always return true when we are handling this spell and effect
-        return true;
+        if (Unit* owner = caster->GetOwner())
+            DoScriptText(EMOTE_SAB_FOLLOW, caster, owner);
     }
-    return false;
-}
+};
 
 bool GossipHello_npc_corrupt_saber(Player* pPlayer, Creature* pCreature)
 {
@@ -498,7 +495,6 @@ void AddSC_felwood()
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_kitten";
     pNewScript->GetAI = &GetAI_npc_kitten;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_kitten;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -518,4 +514,6 @@ void AddSC_felwood()
     pNewScript->GetAI = &GetAI_npc_arei;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_arei;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<CorruptedSaberVisual>("spell_corrupted_saber_visual");
 }

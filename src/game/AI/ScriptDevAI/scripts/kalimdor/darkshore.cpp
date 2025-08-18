@@ -211,16 +211,18 @@ bool QuestAccept_npc_kerlonian(Player* pPlayer, Creature* pCreature, const Quest
     return true;
 }
 
-bool EffectDummyCreature_awaken_kerlonian(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 17536 - Awaken Kerlonian
+struct AwakenKerlonian : public SpellScript
 {
-    if (uiSpellId == SPELL_AWAKEN && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
-        return true;
-    }
+        Unit* unitTarget = spell->GetUnitTarget();
+        if (!unitTarget->IsCreature() || effIdx != EFFECT_INDEX_0)
+            return;
 
-    return false;
-}
+        unitTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, spell->GetCaster(), unitTarget);
+    }
+};
 
 /*####
 # npc_prospector_remtravel
@@ -888,7 +890,6 @@ void AddSC_darkshore()
     pNewScript->Name = "npc_kerlonian";
     pNewScript->GetAI = &GetAI_npc_kerlonian;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_kerlonian;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_awaken_kerlonian;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -940,4 +941,6 @@ void AddSC_darkshore()
     pNewScript->Name = "go_furbolg_food";
     pNewScript->pGOUse = &GOUse_go_furbolg_food;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<AwakenKerlonian>("spell_awaken_kerlonian");
 }
