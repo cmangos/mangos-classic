@@ -134,7 +134,7 @@ int32 UnitConditionMgr::getConditionValue(Unit const* source, Unit const* target
         case UnitCondition::ENERGY_PERCENT: return source->GetPowerPercent(POWER_ENERGY);
         case UnitCondition::COMBO_POINTS: return source->GetComboPoints();
         case UnitCondition::HAS_HELPFUL_AURA_SPELL:
-            return source->HasAuraHolder([](SpellAuraHolder* holder)
+            return source->HasAuraHolder(value, [](SpellAuraHolder* holder)
             {
                 return holder->IsPositive();
             }) ? value : 0;
@@ -149,7 +149,7 @@ int32 UnitConditionMgr::getConditionValue(Unit const* source, Unit const* target
                 return holder->IsPositive() && holder->HasMechanic(value);
             }) ? value : 0;
         case UnitCondition::HAS_HARMFUL_AURA_SPELL:
-            return source->HasAuraHolder([](SpellAuraHolder* holder)
+            return source->HasAuraHolder(value, [](SpellAuraHolder* holder)
             {
                 return !holder->IsPositive();
             }) ? value : 0;

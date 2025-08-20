@@ -1665,6 +1665,17 @@ class Unit : public WorldObject
             return false;
         }
 
+        template <typename Func>
+        bool HasAuraHolder(uint32 spellId, Func func) const
+        {
+            SpellAuraHolderConstBounds spair = GetSpellAuraHolderBounds(spellId);
+            for (SpellAuraHolderMap::const_iterator i_holder = spair.first; i_holder != spair.second; ++i_holder)
+                if (func(i_holder->second))
+                    return true;
+
+            return false;
+        }
+
         template<typename Func>
         bool HasAura(Func func, AuraType type) const
         {
