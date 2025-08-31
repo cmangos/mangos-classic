@@ -697,7 +697,7 @@ void Map::Update(const uint32& t_diff)
 
     m_curTime = time(nullptr);
 
-#ifdef _MSC_VER
+#ifdef _WIN32
     localtime_s(&m_curTimeTm, &m_curTime);
 #else
     localtime_r(&m_curTime, &m_curTimeTm);

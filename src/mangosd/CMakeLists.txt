@@ -60,10 +60,12 @@ target_link_libraries(${EXECUTABLE_NAME}
 )
 
 if(WIN32)
+  target_link_libraries(${EXECUTABLE_NAME}
+    winmm
+  )
   if(MSVC)
     target_link_libraries(${EXECUTABLE_NAME}
       dbghelp
-      winmm.lib
     )
   endif()
   if(MINGW)
