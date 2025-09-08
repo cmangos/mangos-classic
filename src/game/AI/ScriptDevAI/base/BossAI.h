@@ -27,13 +27,6 @@ enum InstanceActions
     INSTANCE_CLOSE_ENTRANCE_DOOR = 250,
 };
 
-struct QueuedCast
-{
-    ObjectGuid target;
-    uint32 spellId;
-    uint32 flags;
-};
-
 class BossAI : public CombatAI
 {
     public:
@@ -112,14 +105,6 @@ class BossAI : public CombatAI
         void SetGateDelay(std::chrono::milliseconds delay) { m_gateDelay = delay; }
         void EnterEvadeMode() override;
 
-        void AddCastOnDeath(QueuedCast cast);
-        template <typename... Targs>
-        void AddCastOnDeath(QueuedCast cast, Targs... fargs)
-        {
-            AddCastOnDeath(cast);
-            AddCastOnDeath(fargs...);
-        }
-
         void AddRespawnOnEvade(std::chrono::seconds delay);
 
         std::chrono::seconds TimeSinceEncounterStart()
@@ -138,7 +123,6 @@ class BossAI : public CombatAI
         std::vector<uint32> m_entranceObjects;
         std::vector<uint32> m_exitObjects;
         std::chrono::milliseconds m_gateDelay = 3s;
-        std::vector<QueuedCast> m_castOnDeath;
 
         uint32 m_instanceDataType = -1;
 
