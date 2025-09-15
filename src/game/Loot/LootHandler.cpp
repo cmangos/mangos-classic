@@ -70,11 +70,6 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
         if (Item* item = _player->GetItemByGuid(lguid))
             item->SetLootState(ITEM_LOOT_CHANGED);
     }
-
-    if (loot->IsLootedFor(_player))
-    {
-        loot->Release(_player);
-    }
 }
 
 void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
