@@ -209,12 +209,14 @@ void CreatureAI::OnCallForHelp(Unit* enemy)
 {
     if (FactionTemplateEntry const* factionTemplate = m_creature->GetFactionTemplateEntry())
     {
-        if (factionTemplate->factionFlags & FACTION_TEMPLATE_FLEE_FROM_CALL_FOR_HELP)
+        if (factionTemplate->IsFleeFromCallForHelp())
         {
             if (m_creature->SetInPanic(10000))
                 SetAIOrder(ORDER_FLEE_FROM_CALL_FOR_HELP);
             return;
         }
+        if (!factionTemplate->IsRespondToCallForHelp())
+            return;
     }
     AttackStart(enemy);
 }
@@ -226,7 +228,7 @@ void CreatureAI::HandleAssistanceCall(Unit* sender, Unit* invoker)
     if (m_creature->CanAssist(sender) && m_creature->CanAttackOnSight(invoker) && invoker->IsVisibleForOrDetect(m_creature, m_creature, false))
     {
         m_creature->SetNoCallAssistance(true);
-        AttackStart(invoker);
+        OnCallForHelp(invoker);
     }
 }
 
@@ -246,7 +248,7 @@ void CreatureAI::TimedFleeingEnded()
     if (GetAIOrder() == ORDER_FLEE_FROM_CALL_FOR_HELP && m_creature->IsAlive())
     {
         if (FactionTemplateEntry const* factionTemplate = m_creature->GetFactionTemplateEntry())
-            if (factionTemplate->factionFlags & FACTION_TEMPLATE_FLEE_FROM_CALL_FOR_HELP)
+            if (factionTemplate->IsFleeFromCallForHelp())
                 EnterEvadeMode();
     }
     if (GetAIOrder() == ORDER_CRITTER_FLEE && m_creature->IsAlive())
