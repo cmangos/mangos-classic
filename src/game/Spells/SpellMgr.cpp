@@ -394,7 +394,7 @@ SpellCastResult GetErrorAtShapeshiftedCast(SpellEntry const* spellInfo, uint32 f
             (spellInfo->Effect[EFFECT_INDEX_0] == SPELL_EFFECT_LEARN_SPELL || spellInfo->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_LEARN_SPELL || spellInfo->Effect[EFFECT_INDEX_2] == SPELL_EFFECT_LEARN_SPELL))
         return SPELL_CAST_OK;
 
-    uint32 stanceMask = (form ? 1 << (form - 1) : 0);
+    uint32 stanceMask = (form ? convertEnumToFlag(form) : 0);
 
     if (stanceMask & spellInfo->StancesNot)                 // can explicitly not be casted in this stance
         return SPELL_FAILED_NOT_SHAPESHIFT;
@@ -2681,29 +2681,29 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
     if (!mechanic)
         return DIMINISHING_NONE;
 
-    if (mechanic & (1 << (MECHANIC_STUN - 1)))
+    if (mechanic & convertEnumToFlag(MECHANIC_STUN))
         return triggered ? DIMINISHING_TRIGGER_STUN : DIMINISHING_CONTROL_STUN;
-    if (mechanic & (1 << (MECHANIC_SLEEP - 1)))
+    if (mechanic & convertEnumToFlag(MECHANIC_SLEEP))
         return DIMINISHING_SLEEP;
-    if (mechanic & (1 << (MECHANIC_POLYMORPH - 1)))
+    if (mechanic & convertEnumToFlag(MECHANIC_POLYMORPH))
         return DIMINISHING_POLYMORPH;
-    if (mechanic & (1 << (MECHANIC_ROOT - 1)))
+    if (mechanic & convertEnumToFlag(MECHANIC_ROOT))
         return triggered ? DIMINISHING_TRIGGER_ROOT : DIMINISHING_CONTROL_ROOT;
-    if (mechanic & (1 << (MECHANIC_FEAR - 1)))
+    if (mechanic & convertEnumToFlag(MECHANIC_FEAR))
         return DIMINISHING_FEAR;
-    if (mechanic & (1 << (MECHANIC_CHARM - 1)))
+    if (mechanic & convertEnumToFlag(MECHANIC_CHARM))
         return DIMINISHING_CHARM;
-    if (mechanic & (1 << (MECHANIC_SILENCE - 1)))
+    if (mechanic & convertEnumToFlag(MECHANIC_SILENCE))
         return DIMINISHING_SILENCE;
-    if (mechanic & (1 << (MECHANIC_DISARM - 1)))
+    if (mechanic & convertEnumToFlag(MECHANIC_DISARM))
         return DIMINISHING_DISARM;
-    if (mechanic & (1 << (MECHANIC_FREEZE - 1)))
+    if (mechanic & convertEnumToFlag(MECHANIC_FREEZE))
         return DIMINISHING_FREEZE;
-    if (mechanic & ((1 << (MECHANIC_KNOCKOUT - 1)) | (1 << (MECHANIC_SAPPED - 1))))
+    if (mechanic & convertEnumToFlag(MECHANIC_KNOCKOUT, MECHANIC_SAPPED))
         return DIMINISHING_KNOCKOUT;
-    if (mechanic & (1 << (MECHANIC_BANISH - 1)))
+    if (mechanic & convertEnumToFlag(MECHANIC_BANISH))
         return DIMINISHING_BANISH;
-    if (mechanic & (1 << (MECHANIC_HORROR - 1)))
+    if (mechanic & convertEnumToFlag(MECHANIC_HORROR))
         return DIMINISHING_DEATHCOIL;
 
     return DIMINISHING_NONE;

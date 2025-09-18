@@ -1976,7 +1976,7 @@ bool Creature::IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf, uin
 
     if (!castOnSelf)
     {
-        if (GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->Mechanic - 1)))
+        if (GetCreatureInfo()->MechanicImmuneMask & convertEnumToFlag(spellInfo->Mechanic))
             return true;
 
         if (GetCreatureInfo()->SchoolImmuneMask & (1 << spellInfo->School))
@@ -1996,7 +1996,7 @@ bool Creature::IsImmuneToDamage(SpellSchoolMask meleeSchoolMask)
 
 bool Creature::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const
 {
-    if (!castOnSelf && GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->EffectMechanic[index] - 1)))
+    if (!castOnSelf && GetCreatureInfo()->MechanicImmuneMask & convertEnumToFlag(spellInfo->EffectMechanic[index]))
         return true;
 
     return Unit::IsImmuneToSpellEffect(spellInfo, index, castOnSelf);

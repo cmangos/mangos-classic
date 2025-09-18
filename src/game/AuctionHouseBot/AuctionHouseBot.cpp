@@ -204,7 +204,7 @@ void AuctionHouseBot::Update()
 			(prototype->RequiredLevel > m_maxRequiredLevel ||
 			 prototype->ItemLevel > m_maxItemLevel))
 		        continue; // skip items too high level
-                    if (!prototype || prototype->Quality == 0 || urand(0, (1 << (prototype->Quality - 1)) - 1) > 0)
+                    if (!prototype || prototype->Quality == 0 || urand(0, (convertEnumToFlag(prototype->Quality)) - 1) > 0)
                         continue; // make it decreasingly likely that crafted items of higher quality is added to the auction house (white: 100%, green: 50%, blue: 25%, purple: 12.5%, ...)
                     uint32 count = (uint32) round((uint64)prototype->GetMaxStackSize() * urand(m_professionItemsConfig[2], m_professionItemsConfig[3]) / 100.0);
                     if (count <= 0)

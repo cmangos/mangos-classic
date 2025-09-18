@@ -103,11 +103,11 @@ SpellEntry const* ScriptedAI::SelectSpell(Unit* target, int32 school, int32 mech
 
         // Targets and Effects checked first as most used restrictions
         // Check the spell targets if specified
-        if (selectTargets && !(SpellSummary[spells[i]].Targets & (1 << (selectTargets - 1))))
+        if (selectTargets && !(SpellSummary[spells[i]].Targets & convertEnumToFlag(selectTargets)))
             continue;
 
         // Check the type of spell if we are looking for a specific spell type
-        if (selectEffects && !(SpellSummary[spells[i]].Effects & (1 << (selectEffects - 1))))
+        if (selectEffects && !(SpellSummary[spells[i]].Effects & convertEnumToFlag(selectEffects)))
             continue;
 
         // Check for school if specified
@@ -204,19 +204,19 @@ void FillSpellSummary()
         {
             // Spell targets self
             if (tempSpell->EffectImplicitTargetA[j] == TARGET_UNIT_CASTER)
-                SpellSummary[i].Targets |= 1 << (SELECT_TARGET_SELF - 1);
+                SpellSummary[i].Targets |= convertEnumToFlag(SELECT_TARGET_SELF);
 
             // Spell targets a single enemy
             if (tempSpell->EffectImplicitTargetA[j] == TARGET_UNIT_ENEMY ||
                     tempSpell->EffectImplicitTargetA[j] == TARGET_LOCATION_CASTER_TARGET_POSITION)
-                SpellSummary[i].Targets |= 1 << (SELECT_TARGET_SINGLE_ENEMY - 1);
+                SpellSummary[i].Targets |= convertEnumToFlag(SELECT_TARGET_SINGLE_ENEMY);
 
             // Spell targets AoE at enemy
             if (tempSpell->EffectImplicitTargetA[j] == TARGET_ENUM_UNITS_ENEMY_AOE_AT_SRC_LOC ||
                     tempSpell->EffectImplicitTargetA[j] == TARGET_ENUM_UNITS_ENEMY_AOE_AT_DEST_LOC ||
                     tempSpell->EffectImplicitTargetA[j] == TARGET_LOCATION_CASTER_SRC ||
                     tempSpell->EffectImplicitTargetA[j] == TARGET_ENUM_UNITS_ENEMY_AOE_AT_DYNOBJ_LOC)
-                SpellSummary[i].Targets |= 1 << (SELECT_TARGET_AOE_ENEMY - 1);
+                SpellSummary[i].Targets |= convertEnumToFlag(SELECT_TARGET_AOE_ENEMY);
 
             // Spell targets an enemy
             if (tempSpell->EffectImplicitTargetA[j] == TARGET_UNIT_ENEMY ||
@@ -225,19 +225,19 @@ void FillSpellSummary()
                     tempSpell->EffectImplicitTargetA[j] == TARGET_ENUM_UNITS_ENEMY_AOE_AT_DEST_LOC ||
                     tempSpell->EffectImplicitTargetA[j] == TARGET_LOCATION_CASTER_SRC ||
                     tempSpell->EffectImplicitTargetA[j] == TARGET_ENUM_UNITS_ENEMY_AOE_AT_DYNOBJ_LOC)
-                SpellSummary[i].Targets |= 1 << (SELECT_TARGET_ANY_ENEMY - 1);
+                SpellSummary[i].Targets |= convertEnumToFlag(SELECT_TARGET_ANY_ENEMY);
 
             // Spell targets a single friend(or self)
             if (tempSpell->EffectImplicitTargetA[j] == TARGET_UNIT_CASTER ||
                     tempSpell->EffectImplicitTargetA[j] == TARGET_UNIT_FRIEND ||
                     tempSpell->EffectImplicitTargetA[j] == TARGET_UNIT_PARTY)
-                SpellSummary[i].Targets |= 1 << (SELECT_TARGET_SINGLE_FRIEND - 1);
+                SpellSummary[i].Targets |= convertEnumToFlag(SELECT_TARGET_SINGLE_FRIEND);
 
             // Spell targets aoe friends
             if (tempSpell->EffectImplicitTargetA[j] == TARGET_ENUM_UNITS_PARTY_WITHIN_CASTER_RANGE ||
                     tempSpell->EffectImplicitTargetA[j] == TARGET_UNIT_FRIEND_AND_PARTY ||
                     tempSpell->EffectImplicitTargetA[j] == TARGET_LOCATION_CASTER_SRC)
-                SpellSummary[i].Targets |= 1 << (SELECT_TARGET_AOE_FRIEND - 1);
+                SpellSummary[i].Targets |= convertEnumToFlag(SELECT_TARGET_AOE_FRIEND);
 
             // Spell targets any friend(or self)
             if (tempSpell->EffectImplicitTargetA[j] == TARGET_UNIT_CASTER ||
@@ -246,25 +246,25 @@ void FillSpellSummary()
                     tempSpell->EffectImplicitTargetA[j] == TARGET_ENUM_UNITS_PARTY_WITHIN_CASTER_RANGE ||
                     tempSpell->EffectImplicitTargetA[j] == TARGET_UNIT_FRIEND_AND_PARTY ||
                     tempSpell->EffectImplicitTargetA[j] == TARGET_LOCATION_CASTER_SRC)
-                SpellSummary[i].Targets |= 1 << (SELECT_TARGET_ANY_FRIEND - 1);
+                SpellSummary[i].Targets |= convertEnumToFlag(SELECT_TARGET_ANY_FRIEND);
 
             // Make sure that this spell includes a damage effect
             if (tempSpell->Effect[j] == SPELL_EFFECT_SCHOOL_DAMAGE ||
                     tempSpell->Effect[j] == SPELL_EFFECT_INSTAKILL ||
                     tempSpell->Effect[j] == SPELL_EFFECT_ENVIRONMENTAL_DAMAGE ||
                     tempSpell->Effect[j] == SPELL_EFFECT_HEALTH_LEECH)
-                SpellSummary[i].Effects |= 1 << (SELECT_EFFECT_DAMAGE - 1);
+                SpellSummary[i].Effects |= convertEnumToFlag(SELECT_EFFECT_DAMAGE);
 
             // Make sure that this spell includes a healing effect (or an apply aura with a periodic heal)
             if (tempSpell->Effect[j] == SPELL_EFFECT_HEAL ||
                     tempSpell->Effect[j] == SPELL_EFFECT_HEAL_MAX_HEALTH ||
                     tempSpell->Effect[j] == SPELL_EFFECT_HEAL_MECHANICAL ||
                     (tempSpell->Effect[j] == SPELL_EFFECT_APPLY_AURA  && tempSpell->EffectApplyAuraName[j] == 8))
-                SpellSummary[i].Effects |= 1 << (SELECT_EFFECT_HEALING - 1);
+                SpellSummary[i].Effects |= convertEnumToFlag(SELECT_EFFECT_HEALING);
 
             // Make sure that this spell applies an aura
             if (tempSpell->Effect[j] == SPELL_EFFECT_APPLY_AURA)
-                SpellSummary[i].Effects |= 1 << (SELECT_EFFECT_AURA - 1);
+                SpellSummary[i].Effects |= convertEnumToFlag(SELECT_EFFECT_AURA);
         }
     }
 }

@@ -1313,9 +1313,9 @@ class Unit : public WorldObject
 
         uint32 GetLevel() const override { return GetUInt32Value(UNIT_FIELD_LEVEL); }
         uint8 getRace() const { return GetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_RACE); }
-        uint32 getRaceMask() const { return 1 << (getRace() - 1); }
+        uint32 getRaceMask() const { return convertEnumToFlag(getRace()); }
         uint8 getClass() const { return GetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_CLASS); }
-        uint32 getClassMask() const { return 1 << (getClass() - 1); }
+        uint32 getClassMask() const { return convertEnumToFlag(getClass()); }
         uint8 getGender() const { return GetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_GENDER); }
 
         float GetStat(Stats stat) const { return float(GetUInt32Value(UNIT_FIELD_STAT0 + stat)); }
@@ -1432,7 +1432,7 @@ class Unit : public WorldObject
         uint32 GetCreatureTypeMask() const
         {
             uint32 creatureType = GetCreatureType();
-            return (creatureType >= 1) ? (1 << (creatureType - 1)) : 0;
+            return (creatureType >= 1) ? convertEnumToFlag(creatureType) : 0;
         }
 
         uint8 getStandState() const { return GetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_STAND_STATE); }
@@ -2160,7 +2160,7 @@ class Unit : public WorldObject
         uint32 CalculateDamage(WeaponAttackType attType, bool normalized, uint8 index = 0);
         float GetAPMultiplier(WeaponAttackType attType, bool normalized);
         void ModifyAuraState(AuraState flag, bool apply);
-        bool HasAuraState(AuraState flag) const { return HasFlag(UNIT_FIELD_AURASTATE, 1 << (flag - 1)); }
+        bool HasAuraState(AuraState flag) const { return HasFlag(UNIT_FIELD_AURASTATE, convertEnumToFlag(flag)); }
         void UnsummonAllTotems() const;
         Unit* SelectMagnetTarget(Unit* victim, Spell* spell = nullptr);
 

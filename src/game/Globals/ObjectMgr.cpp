@@ -474,8 +474,7 @@ void ObjectMgr::LoadCreatureTemplates()
             const_cast<CreatureInfo*>(cInfo)->MaxLevel = uint32(DEFAULT_MAX_CREATURE_LEVEL);
         }
 
-        // use below code for 0-checks for unit_class
-        if (!cInfo->UnitClass || (((1 << (cInfo->UnitClass - 1)) & CLASSMASK_ALL_CREATURES) == 0))
+        if (!cInfo->UnitClass || ((convertEnumToFlag(cInfo->UnitClass) & CLASSMASK_ALL_CREATURES) == 0))
         {
             sLog.outErrorDb("Creature (Entry: %u) does not have proper `UnitClass(%u)` in creature_template", cInfo->Entry, cInfo->UnitClass);
             const_cast<CreatureInfo*>(cInfo)->UnitClass = uint32(CLASS_WARRIOR);
@@ -753,7 +752,7 @@ void ObjectMgr::LoadCreatureClassLvlStats()
             continue;
         }
 
-        if (((1 << (creatureClass - 1)) & CLASSMASK_ALL_CREATURES) == 0)
+        if ((convertEnumToFlag(creatureClass) & CLASSMASK_ALL_CREATURES) == 0)
         {
             sLog.outErrorDb("Found stats for creature class [%u], incorrect class for this core. Skip!", creatureClass);
             continue;
@@ -1687,7 +1686,7 @@ void ObjectMgr::LoadCreatureModelInfo()
         if (!raceEntry)
             continue;
 
-        if (!((1 << (race - 1)) & RACEMASK_ALL_PLAYABLE))
+        if (!(convertEnumToFlag(race) & RACEMASK_ALL_PLAYABLE))
             continue;
 
         if (CreatureModelInfo const* minfo = GetCreatureModelInfo(raceEntry->model_f))
@@ -3103,14 +3102,14 @@ void ObjectMgr::LoadPlayerInfo()
             float  orientation   = fields[7].GetFloat();
 
             ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(current_race);
-            if (!rEntry || !((1 << (current_race - 1)) & RACEMASK_ALL_PLAYABLE))
+            if (!rEntry || !(convertEnumToFlag(current_race) & RACEMASK_ALL_PLAYABLE))
             {
                 sLog.outErrorDb("Wrong race %u in `playercreateinfo` table, ignoring.", current_race);
                 continue;
             }
 
             ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(current_class);
-            if (!cEntry || !((1 << (current_class - 1)) & CLASSMASK_ALL_PLAYABLE))
+            if (!cEntry || !(convertEnumToFlag(current_class) & CLASSMASK_ALL_PLAYABLE))
             {
                 sLog.outErrorDb("Wrong class %u in `playercreateinfo` table, ignoring.", current_class);
                 continue;
@@ -3178,14 +3177,14 @@ void ObjectMgr::LoadPlayerInfo()
                 uint32 current_class = fields[1].GetUInt32();
 
                 ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(current_race);
-                if (!rEntry || !((1 << (current_race - 1)) & RACEMASK_ALL_PLAYABLE))
+                if (!rEntry || !(convertEnumToFlag(current_race) & RACEMASK_ALL_PLAYABLE))
                 {
                     sLog.outErrorDb("Wrong race %u in `playercreateinfo_item` table, ignoring.", current_race);
                     continue;
                 }
 
                 ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(current_class);
-                if (!cEntry || !((1 << (current_class - 1)) & CLASSMASK_ALL_PLAYABLE))
+                if (!cEntry || !(convertEnumToFlag(current_class) & CLASSMASK_ALL_PLAYABLE))
                 {
                     sLog.outErrorDb("Wrong class %u in `playercreateinfo_item` table, ignoring.", current_class);
                     continue;
@@ -3277,12 +3276,12 @@ void ObjectMgr::LoadPlayerInfo()
 
                 for (uint32 raceIndex = RACE_HUMAN; raceIndex < MAX_RACES; ++raceIndex)
                 {
-                    const uint32 raceIndexMask = (1 << (raceIndex - 1));
+                    const uint32 raceIndexMask = convertEnumToFlag(raceIndex);
                     if (!raceMask || (raceMask & raceIndexMask))
                     {
                         for (uint32 classIndex = CLASS_WARRIOR; classIndex < MAX_CLASSES; ++classIndex)
                         {
-                            const uint32 classIndexMask = (1 << (classIndex - 1));
+                            const uint32 classIndexMask = convertEnumToFlag(classIndex);
                             if (!classMask || (classMask & classIndexMask))
                             {
                                 bool obtainable = false;
@@ -3356,14 +3355,14 @@ void ObjectMgr::LoadPlayerInfo()
                 uint32 current_class = fields[1].GetUInt32();
 
                 ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(current_race);
-                if (!rEntry || !((1 << (current_race - 1)) & RACEMASK_ALL_PLAYABLE))
+                if (!rEntry || !(convertEnumToFlag(current_race) & RACEMASK_ALL_PLAYABLE))
                 {
                     sLog.outErrorDb("Wrong race %u in `playercreateinfo_spell` table, ignoring.", current_race);
                     continue;
                 }
 
                 ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(current_class);
-                if (!cEntry || !((1 << (current_class - 1)) & CLASSMASK_ALL_PLAYABLE))
+                if (!cEntry || !(convertEnumToFlag(current_class) & CLASSMASK_ALL_PLAYABLE))
                 {
                     sLog.outErrorDb("Wrong class %u in `playercreateinfo_spell` table, ignoring.", current_class);
                     continue;
@@ -3416,14 +3415,14 @@ void ObjectMgr::LoadPlayerInfo()
                 uint32 current_class = fields[1].GetUInt32();
 
                 ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(current_race);
-                if (!rEntry || !((1 << (current_race - 1)) & RACEMASK_ALL_PLAYABLE))
+                if (!rEntry || !(convertEnumToFlag(current_race) & RACEMASK_ALL_PLAYABLE))
                 {
                     sLog.outErrorDb("Wrong race %u in `playercreateinfo_action` table, ignoring.", current_race);
                     continue;
                 }
 
                 ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(current_class);
-                if (!cEntry || !((1 << (current_class - 1)) & CLASSMASK_ALL_PLAYABLE))
+                if (!cEntry || !convertEnumToFlag((current_class) & CLASSMASK_ALL_PLAYABLE))
                 {
                     sLog.outErrorDb("Wrong class %u in `playercreateinfo_action` table, ignoring.", current_class);
                     continue;
@@ -3573,14 +3572,14 @@ void ObjectMgr::LoadPlayerInfo()
             uint32 current_class = fields[1].GetUInt32();
 
             ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(current_race);
-            if (!rEntry || !((1 << (current_race - 1)) & RACEMASK_ALL_PLAYABLE))
+            if (!rEntry || !(convertEnumToFlag(current_race) & RACEMASK_ALL_PLAYABLE))
             {
                 sLog.outErrorDb("Wrong race %u in `player_levelstats` table, ignoring.", current_race);
                 continue;
             }
 
             ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(current_class);
-            if (!cEntry || !((1 << (current_class - 1)) & CLASSMASK_ALL_PLAYABLE))
+            if (!cEntry || !(convertEnumToFlag(current_class) & CLASSMASK_ALL_PLAYABLE))
             {
                 sLog.outErrorDb("Wrong class %u in `player_levelstats` table, ignoring.", current_class);
                 continue;
@@ -3622,13 +3621,13 @@ void ObjectMgr::LoadPlayerInfo()
     for (int race = 1; race < MAX_RACES; ++race)
     {
         // skip nonexistent races
-        if (!((1 << (race - 1)) & RACEMASK_ALL_PLAYABLE) || !sChrRacesStore.LookupEntry(race))
+        if (!(convertEnumToFlag(race) & RACEMASK_ALL_PLAYABLE) || !sChrRacesStore.LookupEntry(race))
             continue;
 
         for (int class_ = 1; class_ < MAX_CLASSES; ++class_)
         {
             // skip nonexistent classes
-            if (!((1 << (class_ - 1)) & CLASSMASK_ALL_PLAYABLE) || !sChrClassesStore.LookupEntry(class_))
+            if (!(convertEnumToFlag(class_) & CLASSMASK_ALL_PLAYABLE) || !sChrClassesStore.LookupEntry(class_))
                 continue;
 
             PlayerInfo* pInfo = &playerInfo[race][class_];
