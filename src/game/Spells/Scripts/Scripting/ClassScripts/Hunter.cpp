@@ -40,6 +40,8 @@ struct TameBeastDummy : public SpellScript
     }
 };
 
+// TODO: some evidence tbc pet growl scales with hunter AP
+
 void LoadHunterScripts()
 {
     RegisterSpellScript<TameBeastChannel>("spell_tame_beast_channel");

@@ -353,6 +353,24 @@ bool QuestAccept_npc_eris_havenfire(Player* pPlayer, Creature* pCreature, const 
     return true;
 }
 
+// 23209 - Terrordale Haunting Spirit #2 (Terrordale Haunting Spirit #2)
+struct TerrordaleHauntingSpirit2 : public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        spell->SetEffectChance(55, EFFECT_INDEX_1);
+    }
+};
+
+// 23253 - Terrordale Haunting Spirit #3 (Terrordale Haunting Spirit #3)
+struct TerrordaleHauntingSpirit3 : public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        spell->SetEffectChance(35, EFFECT_INDEX_1);
+    }
+};
+
 void AddSC_eastern_plaguelands()
 {
     Script* pNewScript = new Script;
@@ -360,4 +378,7 @@ void AddSC_eastern_plaguelands()
     pNewScript->GetAI = &GetAI_npc_eris_havenfire;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_eris_havenfire;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<TerrordaleHauntingSpirit2>("spell_terrordale_haunting_spirit2");
+    RegisterSpellScript<TerrordaleHauntingSpirit3>("spell_terrordale_haunting_spirit3");
 }

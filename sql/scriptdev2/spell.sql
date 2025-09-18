@@ -31,6 +31,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (7131,'spell_illusion_passive'),
 (7979,'spell_compact_harvest_reaper'),
 (8283,'spell_snufflenose_command'),
+(8342,'spell_goblin_jumper_cables'),
+(22999,'spell_goblin_jumper_cables'),
 (8555,'spell_left_for_dead'),
 (8593,'spell_paladin_quest_revive_self'),
 (8603,'spell_tribal_death'),
@@ -87,7 +89,11 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (22858,'spell_retaliation_creature'),
 (22876,'spell_summon_netherwalker'),
 (23134,'spell_goblin_bomb'),
+(23209,'spell_terrordale_haunting_spirit2'),
 (23226,'spell_ritual_candle_aura'),
+(23253,'spell_terrordale_haunting_spirit3'),
+(23441,'spell_gadgetzan_transporter'),
+(23442,'spell_everlook_transporter'),
 (24228,'spell_arlokk_vanish'),
 (24314,'spell_threatening_gaze'),
 (24335,'spell_wyvern_sting_aura'),
@@ -314,6 +320,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (603,'spell_curse_of_doom'),
 (18662,'spell_curse_of_doom_effect'),
+(1122,'spell_inferno_warlock_summon'),
 (980,'spell_curse_of_agony'),
 (1014,'spell_curse_of_agony'),
 (6217,'spell_curse_of_agony'),
@@ -331,6 +338,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (5699,'spell_create_health_stone_warlock'),
 (11729,'spell_create_health_stone_warlock'),
 (11730,'spell_create_health_stone_warlock'),
+(18788,'spell_demonic_sacrifice'),
 (19505,'spell_devour_magic'),
 (19731,'spell_devour_magic'),
 (19734,'spell_devour_magic'),
@@ -423,7 +431,14 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 -- Hunter
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (1515,'spell_tame_beast_channel'),
-(13535,'spell_tame_beast_dummy');
+(13535,'spell_tame_beast_dummy'),
+(8017,'spell_rockbiter_weapon_selector'),
+(8018,'spell_rockbiter_weapon_selector'),
+(8019,'spell_rockbiter_weapon_selector'),
+(10399,'spell_rockbiter_weapon_selector'),
+(16314,'spell_rockbiter_weapon_selector'),
+(16315,'spell_rockbiter_weapon_selector'),
+(16316,'spell_rockbiter_weapon_selector');
 
 -- Food and Drink
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

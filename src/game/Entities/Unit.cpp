@@ -1752,6 +1752,9 @@ SpellCastResult Unit::CastSpell(SpellCastArgs& args, SpellEntry const* spellInfo
     if (args.IsDestinationSet())
         targets.setDestination(args.GetDestination());
 
+    if (args.IsItemTargetSet())
+        targets.setItemTarget(args.GetItemTarget());
+
     spell->SetCastItem(castItem);
     return spell->SpellStart(&targets, triggeredByAura);
 }

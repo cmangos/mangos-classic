@@ -1382,7 +1382,7 @@ inline bool IsNeedCastSpellAtFormApply(SpellEntry const* spellInfo, ShapeshiftFo
 
     // passive spells with SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT are already active without shapeshift, do no recast!
     // Feline Swiftness Passive 2a not have 0x1 mask in Stance field in spell data as expected
-    return (((spellInfo->Stances & (1 << (form - 1)) || (spellInfo->Id == 24864 && form == FORM_CAT))) &&
+    return (((spellInfo->CanBeUsedInForm(form) || (spellInfo->Id == 24864 && form == FORM_CAT))) &&
             !spellInfo->HasAttribute(SPELL_ATTR_EX2_ALLOW_WHILE_NOT_SHAPESHIFTED));
 }
 

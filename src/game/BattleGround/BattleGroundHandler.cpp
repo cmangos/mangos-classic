@@ -504,8 +504,6 @@ void WorldSession::HandleBattlefieldPortOpcode(WorldPacket& recv_data)
 void WorldSession::HandleLeaveBattlefieldOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_LEAVE_BATTLEFIELD");
-    uint64 guid;
-
     uint32 mapId;
     recv_data >> mapId;
     if (_player->GetMapId() != mapId)               // cheating? but not important in this case

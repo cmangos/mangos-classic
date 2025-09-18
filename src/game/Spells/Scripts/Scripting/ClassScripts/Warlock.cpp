@@ -34,6 +34,21 @@ struct CurseOfAgony : public AuraScript
     }
 };
 
+// 1122 - Inferno (Summon)
+struct InfernoWarlockSummon : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        // Enslave demon effect, without mana cost and cooldown
+        summon->CastSpell(nullptr, 22707, TRIGGERED_OLD_TRIGGERED); // short root spell on infernal from sniffs
+        spell->GetCaster()->CastSpell(summon, 20882, TRIGGERED_OLD_TRIGGERED);
+        summon->CastSpell(nullptr, 22703, TRIGGERED_NONE); // Inferno effect - in wotlk cast automatically
+        summon->AI()->DoCastSpellIfCan(nullptr, 19483, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        summon->CastSpell(nullptr, 22764, TRIGGERED_NONE); // aggro spell
+    }
+};
+
+// 1454 - Life Tap
 struct LifeTap : public SpellScript
 {
     void OnInit(Spell* spell) const override
@@ -84,13 +99,7 @@ struct LifeTap : public SpellScript
             }
         }
 
-        caster->CastCustomSpell(nullptr, 31818, &mana, nullptr, nullptr, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
-
-        // Mana Feed
-        int32 manaFeedVal = caster->CalculateSpellEffectValue(caster, spell->m_spellInfo, EFFECT_INDEX_1);
-        manaFeedVal = manaFeedVal * mana / 100;
-        if (manaFeedVal > 0 && caster->GetPet())
-            caster->CastCustomSpell(nullptr, 32553, &manaFeedVal, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr);            
+        caster->CastCustomSpell(nullptr, 31818, &mana, nullptr, nullptr, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);         
     }
 };
 
@@ -202,6 +211,29 @@ struct CurseOfDoomEffect : public SpellScript
     }
 };
 
+// 18788 - Demonic Sacrifice
+struct DemonicSacrifice : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        uint32 entry = target->GetEntry();
+        uint32 spellId;
+        switch (entry)
+        {
+            case 416: spellId = 18789; break;   // imp
+            case 417: spellId = 18792; break;   // fellhunter
+            case 1860: spellId = 18790; break;  // void
+            case 1863: spellId = 18791; break;  // succubus
+            default: sLog.outError("EffectInstaKill: Unhandled creature entry (%u) case.", entry); return;
+        }
+
+        caster->CastSpell(nullptr, spellId, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+// 19505 - Devour Magic
 struct DevourMagic : public SpellScript
 {
     SpellCastResult OnCheckCast(Spell* spell, bool strict) const override
@@ -225,10 +257,12 @@ struct DevourMagic : public SpellScript
 void LoadWarlockScripts()
 {
     RegisterSpellScript<CurseOfAgony>("spell_curse_of_agony");
+    RegisterSpellScript<InfernoWarlockSummon>("spell_inferno_warlock_summon");
     RegisterSpellScript<LifeTap>("spell_life_tap");
     RegisterSpellScript<CreateHealthStoneWarlock>("spell_create_health_stone_warlock");
     RegisterSpellScript<SoulLink>("spell_soul_link");
     RegisterSpellScript<DevourMagic>("spell_devour_magic");
     RegisterSpellScript<CurseOfDoom>("spell_curse_of_doom");
     RegisterSpellScript<CurseOfDoomEffect>("spell_curse_of_doom_effect");
+    RegisterSpellScript<DemonicSacrifice>("spell_demonic_sacrifice");
 }

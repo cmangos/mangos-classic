@@ -345,6 +345,15 @@ class SpellCastArgs
         }
         bool IsDestinationSet() const { return m_destinationSet; }
         Position GetDestination() const { return m_destination; }
+
+        SpellCastArgs& SetItemTarget(Item* itemTarget)
+        {
+            m_itemSet = true;
+            m_itemTarget = itemTarget;
+            return *this;
+        }
+        bool IsItemTargetSet() const { return m_itemSet; }
+        Item* GetItemTarget() const { return m_itemTarget; }
     private:
         Unit* m_target;
         uint64 m_scriptValue;
@@ -352,6 +361,8 @@ class SpellCastArgs
         int32* m_basePoints[3];
         bool m_destinationSet;
         Position m_destination;
+        bool m_itemSet;
+        Item* m_itemTarget;
 };
 
 class Spell

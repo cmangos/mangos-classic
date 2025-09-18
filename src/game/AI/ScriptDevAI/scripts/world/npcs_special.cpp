@@ -1060,6 +1060,7 @@ struct npc_aoe_damage_triggerAI : public ScriptedAI
     void Reset() override {}
 };
 
+// 5166 - Harvest Silithid Egg
 struct HarvestSilithidEgg : public SpellScript
 {
     void OnInit(Spell* spell) const override

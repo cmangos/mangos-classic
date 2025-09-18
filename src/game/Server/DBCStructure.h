@@ -861,6 +861,12 @@ struct SpellEntry
             return 1 << School;
         }
 
+        bool CanBeUsedInForm(ShapeshiftForm form) const
+        {
+            uint32 mask = (1 << (form - 1));
+            return Stances & mask && (StancesNot & mask) == 0;
+        }
+
     private:
         // prevent creating custom entries (copy data from original in fact)
         SpellEntry(SpellEntry const&);                      // DON'T must have implementation
