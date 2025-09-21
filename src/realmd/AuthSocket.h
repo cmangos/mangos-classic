@@ -100,7 +100,7 @@ class AuthSocket : public MaNGOS::AsyncSocket<AuthSocket>
         uint32 m_gridSeed = 0;
         bool m_promptPin = false;
 
-        boost::asio::deadline_timer m_timeoutTimer;
+        boost::asio::system_timer m_timeoutTimer;
 
         virtual bool ProcessIncomingData() override;
 };

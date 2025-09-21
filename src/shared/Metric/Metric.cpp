@@ -111,7 +111,7 @@ void metric::metric::initialize()
         sConfig.GetStringDefault("Metric.Password", "")
     };
 
-    m_sendTimer.reset(new boost::asio::deadline_timer(m_writeContext));
+    m_sendTimer.reset(new boost::asio::system_timer(m_writeContext));
     m_queueContextWork = std::make_unique<boost::asio::executor_work_guard<boost::asio::io_context::executor_type>>(boost::asio::make_work_guard(m_queueContext));
     m_writeContextWork = std::make_unique<boost::asio::executor_work_guard<boost::asio::io_context::executor_type>>(boost::asio::make_work_guard(m_writeContext));
 
@@ -176,7 +176,7 @@ void metric::metric::schedule_timer()
     if (!m_sendTimer)
         return;
 
-    m_sendTimer->expires_from_now(boost::posix_time::seconds(1));
+    m_sendTimer->expires_after(std::chrono::seconds(1));
     m_sendTimer->async_wait(std::bind(&metric::metric::prepare_send, this, _1));
 }
 

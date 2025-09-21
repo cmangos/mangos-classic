@@ -198,7 +198,7 @@ AuthSocket::AuthSocket(boost::asio::io_context& context)
 
 bool AuthSocket::OnOpen()
 {
-    m_timeoutTimer.expires_from_now(boost::posix_time::seconds(30));
+    m_timeoutTimer.expires_after(std::chrono::seconds(30));
     m_timeoutTimer.async_wait([&] (const boost::system::error_code& error)
     {
         // Timer was not cancelled, take necessary action.

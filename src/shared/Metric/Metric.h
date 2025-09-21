@@ -123,7 +123,7 @@ namespace metric
             boost::asio::io_context m_queueContext;
             boost::asio::io_context m_writeContext;
 
-            std::unique_ptr<boost::asio::deadline_timer> m_sendTimer;
+            std::unique_ptr<boost::asio::system_timer> m_sendTimer;
             std::unique_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type>> m_queueContextWork;
             std::unique_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type>> m_writeContextWork;
             std::thread m_queueServiceThread;
