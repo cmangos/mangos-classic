@@ -27,13 +27,15 @@ jobs:
         run: |
           brew install mysql-client@8.4
           brew install openssl
-          brew install boost
+          brew install boost@1.85
+          brew link boost@1.85
           echo "OPENSSL_ROOT_DIR=$(brew --prefix --installed openssl)" >> $GITHUB_ENV
 
       - name: Configure
         env:
           BOOST_ROOT: /opt/homebrew/opt/boost
-        run: cmake -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}} -DBoost_ARCHITECTURE=-arm64
+          CMAKE_PREFIX_PATH: /opt/homebrew
+        run: cmake -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}} -DBoost_ARCHITECTURE=-arm64 -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build
         env:
