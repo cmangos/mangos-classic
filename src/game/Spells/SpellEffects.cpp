@@ -2671,66 +2671,38 @@ void Spell::EffectPickPocket(SpellEffectIndex /*eff_idx*/)
     Creature* creatureTarget = static_cast<Creature*>(unitTarget);
     Player* playerCaster = static_cast<Player*>(m_caster);
 
-    int chance = 5; //base failure chance is 5%
+    // Failure is handled through normal spell resist
 
-    //TODO investigate if font pickpocketing has higher failure chance then from behind
-    //if (m_caster->IsFacingTargetsFront(unitTarget))
-    //    chance *= 4; //base chance is 20% from the front
-
-    int casterLevel = int32(m_caster->GetLevel());
-    int targetLevel = int32(unitTarget->GetLevel());
-
-    //we need to increase the base chance for failure if target is higher level then caster
-    //incremental chance to fail based on level. maximum is 97% chance if level difference is dramatic (give it 3% chance to succeed?).
-    if (targetLevel > casterLevel)
-        chance = int32(std::min(int32(std::floor(((targetLevel - casterLevel) * 2.0) + 0.5) * chance), 97));
-
-    int result = urand() % 100;
-
-    if (result >= chance)
+    Loot*& loot = unitTarget->m_loot;
+    if (!loot)
+        loot = new Loot(playerCaster, creatureTarget, LOOT_PICKPOCKETING);
+    else
     {
-        // Stealing successful
-        //BASIC_LOG("Successfull pickpocket result %i for chance %i", result, chance);
-
-        Loot*& loot = unitTarget->m_loot;
-        if (!loot)
-            loot = new Loot(playerCaster, creatureTarget, LOOT_PICKPOCKETING);
+        if (loot->GetLootType() == LOOT_PICKPOCKETING)
+        {
+            if (creatureTarget->GetLootStatus() == CREATURE_LOOT_STATUS_PICKPOCKETED)
+            {
+                if (creatureTarget->CanRestockPickpocketLoot())
+                {
+                    // refill pickpocket
+                    delete loot;
+                    loot = new Loot(playerCaster, creatureTarget, LOOT_PICKPOCKETING);
+                    creatureTarget->SetLootStatus(CREATURE_LOOT_STATUS_NONE, true);
+                }
+                else
+                {
+                    playerCaster->SendLootError(unitTarget->GetObjectGuid(), LOOT_ERROR_ALREADY_PICKPOCKETED);
+                    return;
+                }
+            } // else not fully taken
+        }
         else
         {
-            if (loot->GetLootType() == LOOT_PICKPOCKETING)
-            {
-                if (creatureTarget->GetLootStatus() == CREATURE_LOOT_STATUS_PICKPOCKETED)
-                {
-                    if (creatureTarget->CanRestockPickpocketLoot())
-                    {
-                        // refill pickpocket
-                        delete loot;
-                        loot = new Loot(playerCaster, creatureTarget, LOOT_PICKPOCKETING);
-                        creatureTarget->SetLootStatus(CREATURE_LOOT_STATUS_NONE, true);
-                    }
-                    else
-                    {
-                        playerCaster->SendLootError(unitTarget->GetObjectGuid(), LOOT_ERROR_ALREADY_PICKPOCKETED);
-                        return;
-                    }
-                } // else not fully taken
-            }
-            else
-            {
-                delete loot;
-                loot = new Loot(playerCaster, creatureTarget, LOOT_PICKPOCKETING);
-            }
+            delete loot;
+            loot = new Loot(playerCaster, creatureTarget, LOOT_PICKPOCKETING);
         }
-        loot->ShowContentTo(playerCaster);
     }
-    else // current implementation of SPELL_ATTR_EX_FAILURE_BREAKS_STEALTH
-    {
-        //BASIC_LOG("Failed pickpocket result %i for chance %i", result, chance);
-
-        // Reveal action + get attack
-        m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_LOOTING);
-        unitTarget->AttackedBy(m_caster);
-    }
+    loot->ShowContentTo(playerCaster);
 }
 
 void Spell::EffectAddFarsight(SpellEffectIndex eff_idx)
