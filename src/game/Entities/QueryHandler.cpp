@@ -204,6 +204,7 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recv_data)
     if (info)
     {
         std::string Name = info->name;
+        std::string IconName = info->IconName;
 
         int loc_idx = GetSessionDbLocaleIndex();
         if (loc_idx >= 0)
@@ -222,7 +223,7 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recv_data)
         data << uint32(info->displayId);
         data << Name;
         data << uint8(0) << uint8(0) << uint8(0);           // name2, name3, name4
-        data << uint8(0);                                   // unknown
+        data << IconName;                                   // 1.12.0, string. Icon name to use instead of default icon for go's (ex: "Attack" makes sword)
         data.append(info->raw.data, 24);
         SendPacket(data);
         DEBUG_LOG("WORLD: Sent SMSG_GAMEOBJECT_QUERY_RESPONSE");
