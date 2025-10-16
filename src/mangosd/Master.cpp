@@ -81,10 +81,10 @@ class FreezeDetectorRunnable : public MaNGOS::Runnable
                 uint32 curtime = WorldTimer::getMSTime();
 
                 // normal work
-                if (w_loops != World::m_worldLoopCounter)
+                if (w_loops != static_cast<uint32>(World::m_worldLoopCounter))
                 {
                     w_lastchange = curtime;
-                    w_loops = World::m_worldLoopCounter;
+                    w_loops = static_cast<uint32>(World::m_worldLoopCounter);
                 }
                 // possible freeze
                 else if (WorldTimer::getMSTimeDiff(w_lastchange, curtime) > _delaytime)
