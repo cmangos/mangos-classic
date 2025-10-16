@@ -54,7 +54,8 @@ void SpellStacker::LoadSpellGroups()
 
             if (SpellGroupRule::MAX <= group.rule)
             {
-                sLog.outErrorDb("spell_group (Id: %u) has invalid rule %u.", group.Id, group.rule);
+                sLog.outErrorDb("spell_group (Id: %u) has invalid rule %u.", group.Id, static_cast<uint32>(group.rule));
+
                 continue;
             }
 
