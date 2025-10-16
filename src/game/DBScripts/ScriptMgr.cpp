@@ -2269,10 +2269,10 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 break;
             }
 
-            uint32 wanderORpathId = m_script->movement.wanderORpathId;
+            uint32 wanderORpathId = m_script->movement.wanderORpathIdORRelayId;
 
             WaypointPathOrigin wp_origin = PATH_NO_PATH;
-            if (m_script->movement.timerOrPassTarget & 0x2)
+            if (m_script->movement.timerOrPassTargetOrCyclic & 0x2)
                 wp_origin = PATH_FROM_WAYPOINT_PATH;
 
             ObjectGuid targetGuid;
@@ -2288,7 +2288,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                     break;
                 }
 
-                fSlot->GetFormationData()->SetMovementInfo(MovementGeneratorType(m_script->movement.movementType), m_script->movement.wanderORpathId);
+                fSlot->GetFormationData()->SetMovementInfo(MovementGeneratorType(m_script->movement.movementType), m_script->movement.wanderORpathIdORRelayId);
             }
 
             if (m_script->movement.movementType == WAYPOINT_MOTION_TYPE || m_script->movement.movementType == PATH_MOTION_TYPE)
@@ -2297,7 +2297,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                     targetGuid = pTarget->GetObjectGuid();
                 else
                 {
-                    if ((m_script->movement.timerOrPassTarget & 0x1) != 0)
+                    if ((m_script->movement.timerOrPassTargetOrCyclic & 0x1) != 0)
                     {
                         DETAIL_FILTER_LOG(LOG_FILTER_DB_SCRIPT, " DB-SCRIPTS: Process table `%s` id %u, SCRIPT_COMMAND_MOVEMENT called for movement change to %u with source guid %s, pass target true and target nullptr: skipping.", m_table, m_script->id, m_script->movement.movementType, pSource->GetGuidStr().c_str());
                         break;
@@ -2314,13 +2314,13 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                     break;
                 case RANDOM_MOTION_TYPE:
                     if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
-                        source->GetMotionMaster()->MoveRandomAroundPoint(pSource->GetPositionX(), pSource->GetPositionY(), pSource->GetPositionZ(), float(m_script->movement.wanderORpathId), 0.f, m_script->movement.timerOrPassTarget);
+                        source->GetMotionMaster()->MoveRandomAroundPoint(pSource->GetPositionX(), pSource->GetPositionY(), pSource->GetPositionZ(), float(m_script->movement.wanderORpathIdORRelayId), 0.f, m_script->movement.timerOrPassTargetOrCyclic);
                     else
                     {
                         float respX, respY, respZ, respO, wander_distance;
                         source->GetRespawnCoord(respX, respY, respZ, &respO, &wander_distance);
                         wander_distance = wanderORpathId ? wanderORpathId : wander_distance;
-                        source->GetMotionMaster()->MoveRandomAroundPoint(respX, respY, respZ, wander_distance, 0.f, m_script->movement.timerOrPassTarget);
+                        source->GetMotionMaster()->MoveRandomAroundPoint(respX, respY, respZ, wander_distance, 0.f, m_script->movement.timerOrPassTargetOrCyclic);
                     }
                     break;
                 case WAYPOINT_MOTION_TYPE:
@@ -2333,7 +2333,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 case PATH_MOTION_TYPE:
                 {
                     source->StopMoving();
-                    source->GetMotionMaster()->MovePath(wanderORpathId, wp_origin, forcedMovement, false, 0.f, false, targetGuid);
+                    source->GetMotionMaster()->MovePath(wanderORpathId, wp_origin, forcedMovement, m_script->movement.timerOrPassTargetOrCyclic & 0x4, m_script->speed, m_script->movement.timerOrPassTargetOrCyclic & 0x8, targetGuid);
                     break;
                 }
                 case LINEAR_WP_MOTION_TYPE:

@@ -270,6 +270,8 @@ Defining a buddy could be done in several way:
                                             * datalong2 = wanderDistance (for random movement), pathId (for waypoint movement), relayId (for fall movement)
                                             * datalong3 = 0x1 - timer for timed random movement or pass target to waypoint and path movegen (by default, source targets self)
                                             *             0x2 - for waypoint, path and linear path - uses pathId from waypoint_path table
+                                            *             0x4 - for path - flying specifier
+                                            *             0x8 - for path - cyclic specifier
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: RandomMovement around current position
                                             * dataint = enum ForcedMovement
 
