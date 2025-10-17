@@ -404,7 +404,7 @@ struct boss_kelthuzadAI : public BossAI
             summoned->SetInCombatWithZone();
     }
 
-    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
     {
         switch (spellInfo->Id)
         {

@@ -208,7 +208,7 @@ struct AwakenVaultWarder : public SpellScript
 // 10259 - Awaken Earthen Dwarf
 struct AwakenEarthenArchaedas : public AuraScript
 {
-    void OnApply(Aura* aura, bool apply) const override
+    void OnApply(Aura* aura, bool /*apply*/) const override
     {
         if (aura->GetEffIndex() != EFFECT_INDEX_0)
             return;

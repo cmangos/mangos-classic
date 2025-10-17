@@ -207,7 +207,7 @@ struct boss_nothAI : public BossAI
             DoCastSpellIfCan(nullptr, SPELL_CRIPPLE);
     }
 
-    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
     {
         if (spellInfo->Id == SPELL_SUMMON_SKELETONS)
             DoBroadcastText(SAY_SUMMON, m_creature);

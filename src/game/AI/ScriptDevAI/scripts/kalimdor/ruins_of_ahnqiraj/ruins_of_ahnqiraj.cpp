@@ -180,7 +180,7 @@ void instance_ruins_of_ahnqiraj::OnCreatureRespawn(Creature* creature)
     }
 }
 
-void instance_ruins_of_ahnqiraj::OnCreatureGroupDespawn(CreatureGroup* group, Creature* creature)
+void instance_ruins_of_ahnqiraj::OnCreatureGroupDespawn(CreatureGroup* group, Creature* /*creature*/)
 {
     // last wave makes rajaxx attack immediately
     if (group->GetGroupEntry().StringId == instance->GetMapDataContainer().GetStringId("AQ20_ZERRAN"))

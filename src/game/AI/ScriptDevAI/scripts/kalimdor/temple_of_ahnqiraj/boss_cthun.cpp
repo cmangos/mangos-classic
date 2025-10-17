@@ -770,7 +770,7 @@ struct DigestiveAcidPeriodic : public AuraScript
 // 26399 - Despawn Tentacles
 struct DespawnTentacles : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         Unit* target = spell->GetUnitTarget();
         if (target->IsCreature())
@@ -781,7 +781,7 @@ struct DespawnTentacles : public SpellScript
 // 26404 - Despawn Tent Port
 struct DespawnTentPort : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         if (Unit* target = spell->GetUnitTarget())
             if (target->IsCreature())
