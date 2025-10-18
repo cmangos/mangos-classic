@@ -75,8 +75,8 @@ void MemoryMonitor::LogCount(std::string filename)
     //       MM     minutes (2 digits 00-59)
     //       SS     seconds (2 digits 00-59)
     char buf[20];
-    snprintf(buf, 20, "%04d-%02d-%02d %02d:%02d:%02d", aTm->tm_year + 1900, aTm->tm_mon + 1, aTm->tm_mday, aTm->tm_hour, aTm->tm_min, aTm->tm_sec);
-    std::string timestamp = std::string(buf);
+    std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", aTm);
+    std::string timestamp = buf;
 
     std::map<std::string, int> nums;
 
