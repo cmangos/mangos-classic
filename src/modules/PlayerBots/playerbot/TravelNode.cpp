@@ -3154,7 +3154,7 @@ void TravelNodeMap::saveNodeStore(bool force)
         std::string name = node->getName();
         name.erase(remove(name.begin(), name.end(), '\''), name.end());
 
-        WorldDatabase.PExecute("INSERT INTO `ai_playerbot_travelnode` (`id`, `name`, `map_id`, `x`, `y`, `z`, `linked`) VALUES ('%lu', '%s', '%d', '%f', '%f', '%f', '%d')"
+        WorldDatabase.PExecute("INSERT INTO `ai_playerbot_travelnode` (`id`, `name`, `map_id`, `x`, `y`, `z`, `linked`) VALUES ('%u', '%s', '%d', '%f', '%f', '%f', '%d')"
             , i, name.c_str(), node->getMapId(), node->getX(), node->getY(), node->getZ(), (node->isLinked() ? 1 : 0));
 
         saveNodes.insert(std::make_pair(node, i));
