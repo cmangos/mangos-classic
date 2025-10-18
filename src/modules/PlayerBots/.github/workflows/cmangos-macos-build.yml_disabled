@@ -1,0 +1,83 @@
+name: macOS Build
+
+on: [push]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+  REPO_DIR : ${{github.workspace}}
+  BUILD_DIR: ${{github.workspace}}/bin/builddir
+  CORE_REPO_OWNER: ${{github.repository_owner}}
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+
+    strategy:
+      matrix:
+        version: [classic, tbc, wotlk]
+        include:
+          - os: macos-12
+            EXTRA_BUILD: "-DBUILD_PLAYERBOTS=ON"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: ${{github.repository_owner}}/mangos-${{matrix.version}}
+          ref: master
+          path: ${{env.REPO_DIR}}
+          submodules: true
+
+      - name: Install Dependencies
+        run: |
+          brew install mysql-client@8.4
+          brew install openssl
+          brew install boost
+          echo "OPENSSL_ROOT_DIR=$(brew --prefix --installed openssl)" >> $GITHUB_ENV
+          echo "MYSQL_HOME=$(brew --prefix --installed mysql-client@8.4)" >> $GITHUB_ENV      
+      - name: Configure
+        env:
+          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+          Boost_DIR: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+        run: cmake -DBoost_ARCHITECTURE=-x64 ${{matrix.EXTRA_BUILD}} -DCMAKE_INSTALL_PREFIX=/home/runner/work -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
+
+      - name: Build
+        env:
+          MAKEFLAGS: "-j8"
+        run: cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}}
+
+  notify:
+    permissions:
+      contents: none
+    name: Send Notification to Discord on Failure
+    runs-on: ubuntu-20.04
+    needs: # make sure the notification is sent AFTER the jobs you want included have completed
+      - build
+    if: failure()
+
+    steps:
+      - name: Setup Environmental Variables
+        run: |
+          echo "GIT_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+          echo "GIT_SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
+
+      - name: Notify
+        uses: rjstone/discord-webhook-notify@v1.1.1
+        with:
+          severity: error
+          description: |
+            **macOS Build Failed**
+          details: |
+            - **Branch:** ${{env.GIT_BRANCH}}
+            - **Pusher:** ${{github.event.pusher.name}}
+            - **Author:** ${{github.event.head_commit.author.name}}
+            - **Commit:** [${{github.repository}}/${{env.GIT_SHORT_SHA}}](${{github.server_url}}/${{ github.repository }}/commit/${{github.sha}})
+            - **Build Log:** [actions/runs/${{github.run_id}}](${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}})
+          footer: CMaNGOS Developers Notified!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}

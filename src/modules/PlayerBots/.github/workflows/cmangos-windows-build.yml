@@ -1,0 +1,106 @@
+name: Windows Build
+
+on: [push]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+  REPO_DIR : ${{github.workspace}}
+  BUILD_DIR: ${{github.workspace}}/bin/builddir
+  BOOST_TOOLSET: "msvc"
+  BOOST_VERSION: "1.83.0"
+  BOOST_PLATFORM_VERSION: "2022"
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+
+    strategy:
+      matrix:
+        version: [classic, tbc, wotlk]
+        include:
+          - os: windows-2022
+            EXTRA_BUILD: "-DBUILD_PLAYERBOTS=ON"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: ${{github.repository_owner}}/mangos-${{matrix.version}}
+          ref: master
+          path: ${{env.REPO_DIR}}
+
+      - name: Create Build Environment
+        run: |
+          echo "GITHUB_SHORT_REV=$(git rev-parse --short HEAD)" >> $env:GITHUB_ENV
+          echo "ARCHIVE_FILENAME=${{ github.event.repository.name }}-$(git rev-parse --short HEAD).zip" >> $env:GITHUB_ENV
+          cmake -E make_directory ${{ env.BUILD_DIR }}
+
+      # install dependencies
+      - name: Install Boost
+        uses: MarkusJx/install-boost@v2.4.5
+        id: install-boost
+        with:
+          # REQUIRED: Specify the required boost version
+          # A list of supported versions can be found here:
+          # https://github.com/MarkusJx/prebuilt-boost/blob/main/versions-manifest.json
+          boost_version: ${{env.BOOST_VERSION}}
+          # OPTIONAL: Specify a platform version
+          platform_version: ${{env.BOOST_PLATFORM_VERSION}}
+          # OPTIONAL: Specify a toolset
+          toolset: ${{env.BOOST_TOOLSET}}
+          # NOTE: If a boost version matching all requirements cannot be found,
+          # this build step will fail
+
+      - name: Configure
+        env:
+          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+        run: cmake ${{matrix.EXTRA_BUILD}} -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
+
+      - name: Build
+        env:
+          MAKEFLAGS: "-j8"
+        run: cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}}
+
+      - name: Archive Files
+        run: |
+          cd ${{env.BUILD_DIR}}/bin
+          7z a -tzip ${{env.ARCHIVE_FILENAME}} x64_Release
+
+      - name: Archive The Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{matrix.version}}-snapshot
+          path: "${{env.BUILD_DIR}}/bin/${{env.ARCHIVE_FILENAME}}"
+
+  notify:
+    name: Send Notification to Discord on Failure
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: none
+    needs: # make sure the notification is sent AFTER the jobs you want included have completed
+      - build
+    if: failure()
+
+    steps:
+      - name: Setup Environmental Variables
+        run: |
+          echo "GIT_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+          echo "GIT_SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
+
+      - name: Notify
+        uses: rjstone/discord-webhook-notify@v1.1.1
+        with:
+          severity: error
+          description: |
+            **Windows Build Failed**
+          details: |
+            - **Branch:** ${{env.GIT_BRANCH}}
+            - **Pusher:** ${{github.event.pusher.name}}
+            - **Author:** ${{github.event.head_commit.author.name}}
+            - **Commit:** [${{github.repository}}/${{env.GIT_SHORT_SHA}}](${{github.server_url}}/${{ github.repository }}/commit/${{github.sha}})
+            - **Build Log:** [actions/runs/${{github.run_id}}](${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}})
+          footer: CMaNGOS Developers Notified!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}

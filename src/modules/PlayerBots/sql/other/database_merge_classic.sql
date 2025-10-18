@@ -1,0 +1,93 @@
+DROP TABLE IF EXISTS classiccharacters.ahbot_history;
+CREATE TABLE classiccharacters.ahbot_history LIKE classicplayerbots.ahbot_history;
+INSERT INTO classiccharacters.ahbot_history SELECT * FROM classicplayerbots.ahbot_history;
+
+DROP TABLE IF EXISTS classiccharacters.ahbot_category;
+CREATE TABLE classiccharacters.ahbot_category LIKE classicplayerbots.ahbot_category;
+INSERT INTO classiccharacters.ahbot_category SELECT * FROM classicplayerbots.ahbot_category;
+
+DROP TABLE IF EXISTS classiccharacters.ahbot_price;
+CREATE TABLE classiccharacters.ahbot_price LIKE classicplayerbots.ahbot_price;
+INSERT INTO classiccharacters.ahbot_price SELECT * FROM classicplayerbots.ahbot_price;
+
+DROP TABLE IF EXISTS classiccharacters.ai_playerbot_custom_strategy;
+CREATE TABLE classiccharacters.ai_playerbot_custom_strategy LIKE classicplayerbots.ai_playerbot_custom_strategy;
+INSERT INTO classiccharacters.ai_playerbot_custom_strategy SELECT * FROM classicplayerbots.ai_playerbot_custom_strategy;
+
+DROP TABLE IF EXISTS classiccharacters.ai_playerbot_db_store;
+CREATE TABLE classiccharacters.ai_playerbot_db_store LIKE classicplayerbots.ai_playerbot_db_store;
+INSERT INTO classiccharacters.ai_playerbot_db_store SELECT * FROM classicplayerbots.ai_playerbot_db_store;
+
+DROP TABLE IF EXISTS classicmangos.ai_playerbot_enchants;
+CREATE TABLE classicmangos.ai_playerbot_enchants LIKE classicplayerbots.ai_playerbot_enchants;
+INSERT INTO classicmangos.ai_playerbot_enchants SELECT * FROM classicplayerbots.ai_playerbot_enchants;
+
+DROP TABLE IF EXISTS classicmangos.ai_playerbot_enchants;
+CREATE TABLE classicmangos.ai_playerbot_enchants LIKE classicplayerbots.ai_playerbot_enchants;
+INSERT INTO classicmangos.ai_playerbot_enchants SELECT * FROM classicplayerbots.ai_playerbot_enchants;
+
+DROP TABLE IF EXISTS classiccharacters.ai_playerbot_equip_cache;
+CREATE TABLE classiccharacters.ai_playerbot_equip_cache LIKE classicplayerbots.ai_playerbot_equip_cache;
+INSERT INTO classiccharacters.ai_playerbot_equip_cache SELECT * FROM classicplayerbots.ai_playerbot_equip_cache;
+
+DROP TABLE IF EXISTS classicmangos.ai_playerbot_help_texts;
+CREATE TABLE classicmangos.ai_playerbot_help_texts LIKE classicplayerbots.ai_playerbot_help_texts;
+INSERT INTO classicmangos.ai_playerbot_help_texts SELECT * FROM classicplayerbots.ai_playerbot_help_texts;
+
+DROP TABLE IF EXISTS classiccharacters.ai_playerbot_item_info_cache;
+CREATE TABLE classiccharacters.ai_playerbot_item_info_cache LIKE classicplayerbots.ai_playerbot_item_info_cache;
+INSERT INTO classiccharacters.ai_playerbot_item_info_cache SELECT * FROM classicplayerbots.ai_playerbot_item_info_cache;
+
+DROP TABLE IF EXISTS classiccharacters.ai_playerbot_random_bots;
+CREATE TABLE classiccharacters.ai_playerbot_random_bots LIKE classicplayerbots.ai_playerbot_random_bots;
+INSERT INTO classiccharacters.ai_playerbot_random_bots SELECT * FROM classicplayerbots.ai_playerbot_random_bots;
+
+DROP TABLE IF EXISTS classiccharacters.ai_playerbot_rarity_cache;
+CREATE TABLE classiccharacters.ai_playerbot_rarity_cache LIKE classicplayerbots.ai_playerbot_rarity_cache;
+INSERT INTO classiccharacters.ai_playerbot_rarity_cache SELECT * FROM classicplayerbots.ai_playerbot_rarity_cache;
+
+DROP TABLE IF EXISTS classiccharacters.ai_playerbot_rnditem_cache;
+CREATE TABLE classiccharacters.ai_playerbot_rnditem_cache LIKE classicplayerbots.ai_playerbot_rnditem_cache;
+INSERT INTO classiccharacters.ai_playerbot_rnditem_cache SELECT * FROM classicplayerbots.ai_playerbot_rnditem_cache;
+
+DROP TABLE IF EXISTS classiccharacters.ai_playerbot_tele_cache;
+CREATE TABLE classiccharacters.ai_playerbot_tele_cache LIKE classicplayerbots.ai_playerbot_tele_cache;
+INSERT INTO classiccharacters.ai_playerbot_tele_cache SELECT * FROM classicplayerbots.ai_playerbot_tele_cache;
+
+DROP TABLE IF EXISTS classiccharacters.ai_playerbot_tele_cache;
+CREATE TABLE classiccharacters.ai_playerbot_tele_cache LIKE classicplayerbots.ai_playerbot_tele_cache;
+INSERT INTO classiccharacters.ai_playerbot_tele_cache SELECT * FROM classicplayerbots.ai_playerbot_tele_cache;
+
+DROP TABLE IF EXISTS classicmangos.ai_playerbot_texts;
+CREATE TABLE classicmangos.ai_playerbot_texts LIKE classicplayerbots.ai_playerbot_texts;
+INSERT INTO classicmangos.ai_playerbot_texts SELECT * FROM classicplayerbots.ai_playerbot_texts;
+
+DROP TABLE IF EXISTS classicmangos.ai_playerbot_texts_chance;
+CREATE TABLE classicmangos.ai_playerbot_texts_chance LIKE classicplayerbots.ai_playerbot_texts_chance;
+INSERT INTO classicmangos.ai_playerbot_texts_chance SELECT * FROM classicplayerbots.ai_playerbot_texts_chance;
+
+DROP TABLE IF EXISTS classicmangos.ai_playerbot_travelnode;
+CREATE TABLE classicmangos.ai_playerbot_travelnode LIKE classicplayerbots.ai_playerbot_travelnode;
+INSERT INTO classicmangos.ai_playerbot_travelnode SELECT * FROM classicplayerbots.ai_playerbot_travelnode;
+
+DROP TABLE IF EXISTS classicmangos.ai_playerbot_travelnode_link;
+CREATE TABLE classicmangos.ai_playerbot_travelnode_link LIKE classicplayerbots.ai_playerbot_travelnode_link;
+INSERT INTO classicmangos.ai_playerbot_travelnode_link SELECT * FROM classicplayerbots.ai_playerbot_travelnode_link;
+
+DROP TABLE IF EXISTS classicmangos.ai_playerbot_travelnode_path;
+CREATE TABLE classicmangos.ai_playerbot_travelnode_path LIKE classicplayerbots.ai_playerbot_travelnode_path;
+INSERT INTO classicmangos.ai_playerbot_travelnode_path SELECT * FROM classicplayerbots.ai_playerbot_travelnode_path;
+
+DROP TABLE IF EXISTS classicmangos.ai_playerbot_weightscales;
+CREATE TABLE classicmangos.ai_playerbot_weightscales LIKE classicplayerbots.ai_playerbot_weightscales;
+INSERT INTO classicmangos.ai_playerbot_weightscales SELECT * FROM classicplayerbots.ai_playerbot_weightscales;
+
+DROP TABLE IF EXISTS classicmangos.ai_playerbot_weightscale_data;
+CREATE TABLE classicmangos.ai_playerbot_weightscale_data LIKE classicplayerbots.ai_playerbot_weightscale_data;
+INSERT INTO classicmangos.ai_playerbot_weightscale_data SELECT * FROM classicplayerbots.ai_playerbot_weightscale_data;
+
+DROP TABLE IF EXISTS classicmangos.ai_playerbot_zone_level;
+CREATE TABLE classicmangos.ai_playerbot_zone_level LIKE classicplayerbots.ai_playerbot_zone_level;
+INSERT INTO classicmangos.ai_playerbot_zone_level SELECT * FROM classicplayerbots.ai_playerbot_zone_level;
+
+DROP DATABASE IF EXISTS classicplayerbots;

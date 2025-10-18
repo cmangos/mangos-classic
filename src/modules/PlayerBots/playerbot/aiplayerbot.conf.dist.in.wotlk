@@ -1,0 +1,1100 @@
+##########################################
+# MANGOS Ai Playerbot Configuration file #
+##########################################
+
+[AiPlayerbotConf]
+ConfVersion=2020072501
+
+# Enable or disable AI Playerbot
+AiPlayerbot.Enabled = 1
+
+# Enable random bot system
+AiPlayerbot.RandomBotAutologin = 1
+
+# Log on all random bots on start
+AiPlayerbot.RandomBotLoginAtStartup = 1
+
+# Disable automatic DBStore save
+AiPlayerbot.ExplicitDbStoreSave = 0
+
+# Log out random bots after BotInWorldTime interval
+# AiPlayerbot.RandomBotTimedLogout = 1
+
+# Keep random bots logged out for an BotInWorldTime interval
+# AiPlayerbot.RandomBotTimedOffline = 0
+
+# Login Bots when real players login
+# AiPlayerbot.RandomBotLoginWithPlayer = 0
+
+# Delete all random bot accounts (reset randombots)
+AiPlayerbot.DeleteRandomBotAccounts = 0
+
+# auto-login all player alts as bots on player login
+AiPlayerbot.BotAutologin = 0
+
+# Enable LFG for random bots (NYI)
+AiPlayerbot.RandomBotJoinLfg = 1
+
+# Enable BG/Arena for random Bots
+AiPlayerbot.RandomBotJoinBG = 1
+
+# Enable Auto join BG - bots randomly join WSG and 2v2 Arena if server is not lagging
+AiPlayerbot.RandomBotAutoJoinBG = 0
+
+# Mark many quests <= Bot level as complete (slows down bot creation)
+AiPlayerbot.PreQuests = 0
+
+# Create random bot accounts and characters automatically
+AiPlayerbot.RandomBotAutoCreate = 1
+
+# Random bot count
+AiPlayerbot.MinRandomBots = 1000
+AiPlayerbot.MaxRandomBots = 1000
+AiPlayerbot.RandomBotMinLevel = 1
+AiPlayerbot.RandomBotMaxLevel = 80
+
+# Accounts to create for random bots
+AiPlayerbot.RandomBotAccountPrefix = RNDBOT
+AiPlayerbot.RandomBotAccountCount = 200
+
+# Disable core mangos map/bot optimizations which hinders bot activity
+# Works best together with AiPlayerbot.DisableActivityPriorities = 1
+# (0-1), default 0
+# AiPlayerbot.DisableBotOptimizations = 0
+
+# Disable bot activity priorities, to make all bots ACTUALLY active without player in the zones or server (unless AiPlayerbot.DisableBotOptimizations = 0)
+# This setting is added for the sake of having all bots always active regardless of anything
+# With this enabled, if you get lags - then you need to reduce amount of online bots, rather than relying on optimizations
+# This will ingore the AiPlayerbot.botActiveAlone setting, all bots will be active regardless
+# Works best together with AiPlayerbot.DisableBotOptimizations = 1
+# (0-1), default 0
+# AiPlayerbot.DisableActivityPriorities = 0
+
+# Percentage of fully active bots. Default is 10, higher numbers may affect performance
+# AiPlayerbot.botActiveAlone = 10
+
+# Limit random bot max level to online players max level + 5 and uses reference level 1 without a player.
+# AiPlayerbot.SyncLevelWithPlayers = 0
+# AiPlayerbot.SyncLevelMaxAbove = 5
+# AiPlayerbot.SyncLevelNoPlayer = 1
+
+# Random bot guild count
+AiPlayerbot.RandomBotGuildCount = 20
+
+# Delete all random bot guilds
+AiPlayerbot.DeleteRandomBotGuilds = 0
+
+# Random bot arena team count
+AiPlayerbot.RandomBotArenaTeamCount = 20
+
+# Delete all random bot arena teams
+AiPlayerbot.DeleteRandomBotArenaTeams = 0
+
+# Maps to teleport random bots
+AiPlayerbot.RandomBotMaps = 0,1,530,571
+
+# Min and max intervals for random teleports, in seconds (default: 2hrs and 48hrs)
+AiPlayerbot.RandomBotTeleportTeleportMinInterval = 7200
+AiPlayerbot.RandomBotTeleportTeleportMaxInterval = 172800
+
+# Change random bot has lower gear
+AiPlayerbot.RandomGearLoweringChance = 0.15
+
+# Max item level of random equipment
+# Classic
+# Max iLVL Tier 1 = 66 | Tier 2 = 76 | Tier 2.5 = 81 | Tier 3 = 99
+# Max iLVL Phase 1 = 71(MC, ONY, ZG) | Phase 2(BWL) = 77 | Phase 2.5(AQ) = 88 | Phase 3(NAXX) = 100 (NOT RECOMMENDED SINCE ILVL OVERLAPS BETWEEN TIERS)
+# TBC
+# Max iLVL Tier 4 = 120 | Tier 5 = 133 | Tier 6 = 164
+# Max iLVL Phase 1(Kara, Gruul, Mag) = 125 | Phase 1.5(ZA) = 138 | Phase 2(SC, TK) = 141 | Phase 3(Hyjal, BT) = 156 | Phase 4(Sunwell) = 164
+# Wotlk
+# Max iLVL Tier 7(10/25) = 200/213 | Tier 8(10/25) = 225/232 | Tier 9(10/25) = 232/245 | Tier 10(10/25/HC) = 251/264/290
+# Max iLVL Phase 1(Naxx) = 224 | Phase 2(Ulduar) = 245 | Phase 3(ToC) = 258 | Phase 4(ICC) = 290 
+
+AiPlayerbot.RandomGearMaxLevel = 500
+
+# Max difference between bot level and item's required level to be used in randomisation
+# Default = 11, means bots level 80 can use items that require (themselves or via quests) level 69 and above
+AiPlayerbot.RandomGearMaxDiff = 11
+
+# Regularly upgrade bots equipment for their level
+AiPlayerbot.RandomGearUpgradeEnabled = 0
+
+# Enable random tabards on randomisation
+AiPlayerbot.RandomGearTabards = 0
+
+# Chance to get a random tabard
+AiPlayerbot.RandomGearTabardsChance = 0.1
+
+# Replace guild tabard with random one
+AiPlayerbot.RandomGearTabardsReplaceGuild = 0
+
+# Allow use tabards that have no vendors, quests or loot related to it
+AiPlayerbot.RandomGearTabardsUnobtainable = 0
+
+# List of item IDs to exclude from random gear, separated by comma
+AiPlayerbot.RandomGearBlacklist = 0
+
+# Chance random bot has max level on first randomize (default 0.15)
+AiPlayerbot.RandomBotMaxLevelChance = 0.15
+
+# Chance bot chooses RPG (Teleport to random camp for their level) instead of grinding
+AiPlayerbot.RandomBotRpgChance = 0.20
+
+# Chance for bot to use potions
+#AiPlayerbot.UsePotionChance = 1.0
+
+# Bots will speed up when following to stay close.
+# AiPlayerbot.BoostFollow = 1
+
+# Bots and npcs turn to eachother during an rpg interaction
+AiPlayerbot.TurnInRpg = 0
+
+# Bots will make sounds when repairing, selling items ect.
+AiPlayerbot.GlobalSoundEffects = 0
+
+# Show progress bars for random bots (disabled by default)
+AiPlayerbot.ShowProgressBars = 1
+
+# Set randombots movement speed to walking anywhere
+AiPlayerbot.RandombotsWalkingRPG = 0
+
+# Set randombots movement speed to walking only inside buildings
+AiPlayerbot.RandombotsWalkingRPG.InDoors = 0
+
+# Bots greet to the players
+AiPlayerbot.EnableGreet = 1
+
+# Show helmet and cloak on randombots (reset required)
+AiPlayerbot.RandomBotShowHelmet = 1
+AiPlayerbot.RandomBotShowCloak = 1
+
+# Disable random levels for randombots
+# Every bots started on the specified level and level up by killing mobs.
+AiPlayerbot.DisableRandomLevels = 0
+
+# Set randombots starting level here if "AiPlayerbot.DisableRandomLevels" enabled
+# Recommended: 5+
+#AiPlayerbot.randombotStartingLevel = 5
+
+# Set XP rate for bots (default: 1)
+# Server XP Rate * AiPlayerbot.XPRate
+# AiPlayerbot.XPRate = 1
+
+# Set minimum level of randombots where gets enchants on items (Maxlevel + 1 to disable)
+# Default: 60
+AiPlayerbot.minEnchantingBotLevel = 81
+
+# Randombots checking players gear score level and deny the group invite if it's too low
+# Default: 1 (enabled)
+AiPlayerbot.GearScoreCheck = 0
+
+# Quest that will be completed and rewarded to all random bots
+AiPlayerbot.RandomBotQuestIds = 7848,3802,5505,6502,7761
+
+# Randombots will invite players to groups/raids/guilds. (This can also be disabled by turning on DnD on your character)
+# AiPlayerbot.RandomBotInvitePlayer = 1 
+
+# Randombots will invite nearby bots to groups/raids/guilds
+# AiPlayerbot.RandomBotGroupNearby = 1
+# AiPlayerbot.RandomBotRaidNearby = 1
+# AiPlayerbot.RandomBotGuildNearby = 1
+
+# Randombots will form guilds by buying a charter, getting signatures and handing it in.
+# AiPlayerbot.RandomBotFormGuild = 1
+
+# Bots will chat in say/guild when they invite other bots to groups/raids/guilds
+# AiPlayerbot.InviteChat = 1
+
+#max limit of members in a guild (bots will leave guild if there are more members than this number)
+# AiPlayerbot.guildMaxBotLimit = 1000
+
+##################################################################################
+#
+# Broadcast rates
+#
+# 1 - to enable broadcasts globally, 0 - to disable (default 1)
+# AiPlayerbot.EnableBroadcasts = 1
+#
+# all broadcast chances should be in range 0-30000
+#
+# value of 0 will disable this particular broadcast
+# setting value to 30000 does not guarantee the broadcast, as there are some internal randoms as well
+#
+# setting channel broadcast chance to 0, will re-route most broadcasts to other available channels
+# setting all channel broadcasts to 0 will disable most broadcasts
+# AiPlayerbot.BroadcastToGuildGlobalChance = 30000
+# AiPlayerbot.BroadcastToWorldGlobalChance = 30000
+# AiPlayerbot.BroadcastToGeneralGlobalChance = 30000
+# AiPlayerbot.BroadcastToTradeGlobalChance = 30000
+# AiPlayerbot.BroadcastToLFGGlobalChance = 30000
+# AiPlayerbot.BroadcastToLocalDefenseGlobalChance = 30000
+# AiPlayerbot.BroadcastToWorldDefenseGlobalChance = 30000
+# AiPlayerbot.BroadcastToGuildRecruitmentGlobalChance = 30000
+# AiPlayerbot.BroadcastToSayGlobalChance = 30000
+# AiPlayerbot.BroadcastToYellGlobalChance = 30000
+#
+# individual settings
+# setting one of these to 0 will disable the particular broadcast
+# AiPlayerbot.BroadcastChanceLootingItemPoor = 30
+# AiPlayerbot.BroadcastChanceLootingItemNormal = 150
+# AiPlayerbot.BroadcastChanceLootingItemUncommon = 10000
+# AiPlayerbot.BroadcastChanceLootingItemRare = 20000
+# AiPlayerbot.BroadcastChanceLootingItemEpic = 30000
+# AiPlayerbot.BroadcastChanceLootingItemLegendary = 30000
+# AiPlayerbot.BroadcastChanceLootingItemArtifact = 30000
+#
+# AiPlayerbot.BroadcastChanceQuestAccepted = 6000
+# AiPlayerbot.BroadcastChanceQuestUpdateObjectiveCompleted = 300
+# AiPlayerbot.BroadcastChanceQuestUpdateObjectiveProgress = 300
+# AiPlayerbot.BroadcastChanceQuestUpdateFailedTimer = 300
+# AiPlayerbot.BroadcastChanceQuestUpdateComplete = 1000
+# AiPlayerbot.BroadcastChanceQuestTurnedIn = 10000
+#
+# AiPlayerbot.BroadcastChanceKillNormal = 30
+# AiPlayerbot.BroadcastChanceKillElite = 300
+# AiPlayerbot.BroadcastChanceKillRareelite = 3000
+# AiPlayerbot.BroadcastChanceKillWorldboss = 20000
+# AiPlayerbot.BroadcastChanceKillRare = 10000
+# AiPlayerbot.BroadcastChanceKillUnknown = 100
+# AiPlayerbot.BroadcastChanceKillPet = 10
+# AiPlayerbot.BroadcastChanceKillPlayer = 30
+#
+# AiPlayerbot.BroadcastChanceLevelupGeneric = 20000
+# AiPlayerbot.BroadcastChanceLevelupTenX = 30000
+# AiPlayerbot.BroadcastChanceLevelupMaxLevel = 30000
+#
+# AiPlayerbot.BroadcastChanceSuggestInstance = 5000
+# AiPlayerbot.BroadcastChanceSuggestQuest = 10000
+# AiPlayerbot.BroadcastChanceSuggestGrindMaterials = 5000
+# AiPlayerbot.BroadcastChanceSuggestGrindReputation = 5000
+# AiPlayerbot.BroadcastChanceSuggestSell = 300
+# AiPlayerbot.BroadcastChanceSuggestSomething = 30000
+#
+# Very rude speeches
+# AiPlayerbot.BroadcastChanceSuggestSomethingToxic = 0
+#
+# Specifically for "<word> [item link]"
+# AiPlayerbot.BroadcastChanceSuggestToxicLinks = 0
+#
+# prefix is used as a word in "<word> [item link]"
+# AiPlayerbot.ToxicLinksPrefix = gnomes
+#
+# chance to suggest thunderfury
+# AiPlayerbot.BroadcastChanceSuggestThunderfury = 1
+#
+# does not depend on global chance
+# AiPlayerbot.BroadcastChanceGuildManagement = 30000
+#
+##################################################################################
+
+# Chance to reply to toxic links with toxic links (0-100)
+# AiPlayerbot.ToxicLinksRepliesChance = 30
+# Chance to reply to thunderfury with thunderfury (0-100)
+# AiPlayerbot.ThunderfuryRepliesChance = 40
+# Bots will chat in guild about certain events (int) (0-100)
+# AiPlayerbot.GuildRepliesRate = 100         # Reply someone saying something.
+
+# Bots will chat in guild about certain events
+# AIPlayerbot.GuildFeedback = 1
+
+# Bots without a master will say things they normally tell their master.
+# AiPlayerbot.RandomBotSayWithoutMaster = 0
+
+# Minimum level at which bots will start accepting duels
+# AiPlayerbot.BotAcceptDuelMinimumLevel = 10
+
+# Speeds up respawn of mobs after being killed by a bot. This only affects the delays after being fully looted.
+# AiPlayerbot.RespawnModNeutral = 10.0    # Each nearby player will decrease the respawn time by 10% for neutral mobs.
+# AiPlayerbot.RespawnModHostile = 5.0     # Each nearby player will decrease the respawn time by 5% for hostile mobs.
+# AiPlayerbot.RespawnModThreshold = 10    # Atleast 10 players (including the bot) needs to be near the bot before respawns are modified.
+# AiPlayerbot.RespawnModMax = 18          # After the threshold it will decrease the respawn for up to 18 nearby players max.
+# AiPlayerbot.RespawnModForPlayerBots = 0 # Bots with a player master are not affected.
+# AiPlayerbot.RespawnModForInstances = 0  # Mobs inside instances are not affected.
+
+# Automation
+
+# Bots pick their quest reward (yes = picks first useful item, no = list all rewards, ask = pick useful item and lists if multiple)
+AiPlayerbot.AutoPickReward = yes
+
+# Bots equip upgrades (Bots will equip any item obtained from looting or a quest if they are upgrades)
+# Default: 0 (disabled)
+AiPlayerbot.AutoEquipUpgradeLoot = 1
+
+# Sync quests with player (Bots will complete quests the moment you hand them in. Bots will ignore looting quest items.)
+# Default: 0 (disabled)
+AiPlayerbot.SyncQuestWithPlayer = 0
+
+# Bot automatically trains spells when talking to trainer (yes = train all available spells as long as the bot has the money, free = auto trains with no money cost, no = only list spells)
+AiPlayerbot.AutoTrainSpells = yes
+
+# Bot automatically picks talent points based on current spec (full = pick spec based on probability if multiple are like current spec, semi = only apply points if 1 spec looks like current spec, no = no auto talent points)
+AiPlayerbot.AutoPickTalents = full
+
+# Bots automatically learn trainable spells on levelup
+# Default: 0 (disabled)
+AiPlayerbot.AutoLearnTrainerSpells = 0
+
+# Bots automatically learn classquest reward spells on levelup
+# Default: 0 (disabled)
+AiPlayerbot.AutoLearnQuestSpells = 0
+
+# Alt Bots automatically learn class spells from books dropped from dungeons and raids when leveled and they reached the required level of the book. Classic Only.
+# Default: 0 (disabled)
+AiPlayerbot.AutoLearnDroppedSpells = 0
+
+# Random Bots will pick quests on their own and try to complete
+# Default: 1 (enabled)
+# AiPlayerbot.AutoDoQuests = 1
+
+##################################################################################
+#                                                                                #
+# All other parameters are optional but can be changed by uncommenting them here #
+#                                                                                #
+##################################################################################
+
+##################################################################################
+#                                                                                #
+# Bot probabilities                                                              #
+#                                                                                #
+##################################################################################
+#
+# AiPlayerbot.ClassRaceProb.<class>.<race> = <number>         #Probability Randombots will be allowed to login with this class and race. (default 100)
+# All probabilities are relative setting all values to 200 is the same as setting all values to 5.
+# For logging in bots the amount a race/class combo allowed is (<race/class probability>*totalBots/<total probability of all race/classes>)+1 (if not 0)
+#
+# These are overrides. The order of reading is default -> race -> class -> race+class.
+# So if you set human to 50 and warrior to 75, human mage to 65 and orc warrior to 55:
+# All humans except mage and warrior will have a 50% lower chance to be generated.
+# All non-orc warriors will have a 75% lower chance to be generated.
+# Human mages have a 65% lower chance to generate. 
+# Orc warriors have a 55% lower chance to generate.
+#
+# Source https://web.archive.org/web/20090508173437/http://www.warcraftrealms.com/census.php
+
+# As an alternative to probability-based generation, you can enable:
+# AiPlayerbot.ClassRace.UseFixedClassRaceCounts
+# This will generate random bots based on a fixed total count per class/race combo as defined by:
+# AiPlayerbot.ClassRaceProb.<class>.<race> = <number>
+#
+# AiPlayerbot.ClassRace.UseFixedClassRaceCounts = 0
+
+# AiPlayerbot.ClassRaceProb.0.1 =  115  # Human chance
+# AiPlayerbot.ClassRaceProb.0.2 =   36  # Orc chance
+# AiPlayerbot.ClassRaceProb.0.3 =   32  # Dwarf chance
+# AiPlayerbot.ClassRaceProb.0.4 =  100  # NightElf chance
+# AiPlayerbot.ClassRaceProb.0.5 =   36  # Undead chance
+# AiPlayerbot.ClassRaceProb.0.6 =   52  # Tauren chance
+# AiPlayerbot.ClassRaceProb.0.7 =   32  # Gnome chance
+# AiPlayerbot.ClassRaceProb.0.8 =   26  # Troll chance
+# AiPlayerbot.ClassRaceProb.0.10 = 100  # BloodElf chance
+# AiPlayerbot.ClassRaceProb.0.11 =  59  # Draenei chance
+
+# AiPlayerbot.ClassRaceProb.1 =  66    # Warrior chance
+AiPlayerbot.ClassRaceProb.1.1 =  17    # Human warrior chance
+AiPlayerbot.ClassRaceProb.1.2 =   9    # Orc warrior chance
+AiPlayerbot.ClassRaceProb.1.3 =   5    # Dwarf warrior chance
+AiPlayerbot.ClassRaceProb.1.4 =   9    # NightElf warrior chance
+AiPlayerbot.ClassRaceProb.1.5 =   6    # Undead warrior chance
+AiPlayerbot.ClassRaceProb.1.6 =   9    # Tauren warrior chance
+AiPlayerbot.ClassRaceProb.1.7 =   3    # Gnome warrior chance
+AiPlayerbot.ClassRaceProb.1.8 =   2    # Troll warrior chance
+AiPlayerbot.ClassRaceProb.1.11 =  4    # Draenei warrior chance
+
+# AiPlayerbot.ClassRaceProb.2 =  80    # Paladin chance
+AiPlayerbot.ClassRaceProb.2.1 =  29    # Human paladin chance
+AiPlayerbot.ClassRaceProb.2.3 =   8    # Dwarf paladin chance
+AiPlayerbot.ClassRaceProb.2.10 = 34    # BloodElf paladin chance
+AiPlayerbot.ClassRaceProb.2.11 =  8    # Draenei paladin chance
+
+# AiPlayerbot.ClassRaceProb.3 =  74    # Hunter chance
+AiPlayerbot.ClassRaceProb.3.2 =   9    # Orc hunter chance
+AiPlayerbot.ClassRaceProb.3.3 =  11    # Dwarf hunter chance
+AiPlayerbot.ClassRaceProb.3.4 =  25    # NightElf hunter chance
+AiPlayerbot.ClassRaceProb.3.6 =   5    # Tauren hunter chance
+AiPlayerbot.ClassRaceProb.3.8 =   7    # Troll hunter chance
+AiPlayerbot.ClassRaceProb.3.10 = 12    # BloodElf hunter chance
+AiPlayerbot.ClassRaceProb.3.11 =  6    # Draenei hunter chance
+
+# AiPlayerbot.ClassRaceProb.4 =  49    # Rogue chance
+AiPlayerbot.ClassRaceProb.4.1 =   9    # Human rogue chance
+AiPlayerbot.ClassRaceProb.4.2 =   2    # Orc rogue chance
+AiPlayerbot.ClassRaceProb.4.3 =   1    # Dwarf rogue chance
+AiPlayerbot.ClassRaceProb.4.4 =  11    # NightElf rogue chance
+AiPlayerbot.ClassRaceProb.4.5 =  11    # Undead rogue chance
+AiPlayerbot.ClassRaceProb.4.7 =   5    # Gnome rogue chance
+AiPlayerbot.ClassRaceProb.4.8 =   3    # Troll rogue chance
+AiPlayerbot.ClassRaceProb.4.10 =  8    # BloodElf rogue chance
+
+# AiPlayerbot.ClassRaceProb.5 =  55    # Priest chance
+AiPlayerbot.ClassRaceProb.5.1 =  13    # Human priest chance
+AiPlayerbot.ClassRaceProb.5.3 =   4    # Dwarf priest chance
+AiPlayerbot.ClassRaceProb.5.4 =   9    # NightElf priest chance
+AiPlayerbot.ClassRaceProb.5.5 =  11    # Undead priest chance
+AiPlayerbot.ClassRaceProb.5.8 =   3    # Troll priest chance
+AiPlayerbot.ClassRaceProb.5.10 = 10    # BloodElf priest chance
+AiPlayerbot.ClassRaceProb.5.11 =  5    # Draenei priest chance
+
+# AiPlayerbot.ClassRaceProb.6 = 140    # DeathKnight chance
+AiPlayerbot.ClassRaceProb.6.1 =  28    # Human deathknight chance
+AiPlayerbot.ClassRaceProb.6.2 =  13    # Orc deathknight chance
+AiPlayerbot.ClassRaceProb.6.3 =   5    # Dwarf deathknight chance
+AiPlayerbot.ClassRaceProb.6.4 =  17    # NightElf deathknight chance
+AiPlayerbot.ClassRaceProb.6.5 =  13    # Undead deathknight chance
+AiPlayerbot.ClassRaceProb.6.6 =  10    # Tauren deathknight chance
+AiPlayerbot.ClassRaceProb.6.7 =   8    # Gnome deathknight chance
+AiPlayerbot.ClassRaceProb.6.8 =   4    # Troll deathknight chance
+AiPlayerbot.ClassRaceProb.6.10 = 27    # BloodElf deathknight chance
+AiPlayerbot.ClassRaceProb.6.11 = 14    # Draenei deathknight chance
+
+# AiPlayerbot.ClassRaceProb.7 =  49    # Shaman chance
+AiPlayerbot.ClassRaceProb.7.2 =   8    # Orc shaman chance
+AiPlayerbot.ClassRaceProb.7.6 =   9    # Tauren shaman chance
+AiPlayerbot.ClassRaceProb.7.8 =   6    # Troll shaman chance
+AiPlayerbot.ClassRaceProb.7.11 = 25    # Draenei shaman chance
+
+# AiPlayerbot.ClassRaceProb.8 =  55    # Mage chance
+AiPlayerbot.ClassRaceProb.8.1 =  15    # Human mage chance
+AiPlayerbot.ClassRaceProb.8.5 =  10    # Undead mage chance
+AiPlayerbot.ClassRaceProb.8.7 =  10    # Gnome mage chance
+AiPlayerbot.ClassRaceProb.8.8 =   3    # Troll mage chance
+AiPlayerbot.ClassRaceProb.8.10 = 11    # BloodElf mage chance
+AiPlayerbot.ClassRaceProb.8.11 =  5    # Draenei mage chance
+
+# AiPlayerbot.ClassRaceProb.1 =  48    # Warlock chance
+AiPlayerbot.ClassRaceProb.9.1 =  15    # Human warlock chance
+AiPlayerbot.ClassRaceProb.9.2 =   3    # Orc warlock chance
+AiPlayerbot.ClassRaceProb.9.5 =  12    # Undead warlock chance
+AiPlayerbot.ClassRaceProb.9.7 =   9    # Gnome warrior chance
+AiPlayerbot.ClassRaceProb.9.10 =  9    # BloodElf warlock chance
+
+# AiPlayerbot.ClassRaceProb.11 = 65    # Druid chance
+AiPlayerbot.ClassRaceProb.11.4 = 38    # NightElf druid chance
+AiPlayerbot.ClassRaceProb.11.6 = 27    # Tauren druid chance
+
+##################################################################################
+#                                                                                #
+# Premade builds                                                                 #
+#                                                                                #
+##################################################################################
+#
+# AiPlayerbot.PremadeSpecName.<class>.<specno> = <name>         #Name of the talent specialisation
+# AiPlayerbot.PremadeSpecProb.<class>.<specno> = <number>       #Probability Randombots will pick this spec. (default 100)
+# AiPlayerbot.PremadeSpecLink.<class>.<specno>.<level> = <link> #Wowhead style link the bot should work towards at given level.
+# AiPlayerbot.PremadeSpecLink.<class>.<specno>.<level> = <link> #Wowhead style link the bot should work towards at given level.
+# 
+# AiPlayerbot.PremadeSpecGlyp.<class>.<specno>.<level> = lists of glyphs. Glyphs bots should equip up to <level> in increasing order of importance.
+# Glyph name can have a |talent spell id behind it to only allow this glyph is the bot has this specific talent.
+#
+# Preset talents supplied by Lidocain, preset glyphs by Ile. Do you have more/improved specs? Let us know!
+# Warrior
+AiPlayerbot.PremadeSpecName.1.0 = pve arms
+AiPlayerbot.PremadeSpecLink.1.0.80 = 3022032123335100202012013031251-32505010002
+AiPlayerbot.PremadeSpecGlyp.1.0.80 = Battle,Bloodrage,Charge,Thunder Clap,Taunt,Blocking|2565,Sunder Armor,Spell Reflection|23920,Shield Wall,Vigilance,Enraged Regeneration|55694,Resonating Power|58387,Sweeping Strikes|12328,Last Stand|12975,Mortal Strike|12294,Hamstring|1715,Overpower,Rending,Revenge,Intervene,Cleaving,Command|47436,Heroic Strike|29707,Rapid Charge|100,Execution|20658,Devastate|20243,Victory Rush|34428,Whirlwind|1680,Bladestorm|46924,Shockwave|46968
+AiPlayerbot.PremadeSpecName.1.1 = pve fury
+AiPlayerbot.PremadeSpecLink.1.1.80 = 30202300233-305053000500310153120511351
+AiPlayerbot.PremadeSpecGlyp.1.1.80 = Battle,Bloodrage,Charge,Mocking Blow,Thunder Clap,Enduring Victory,Rapid Charge,Intervene,Barbaric Insults,Mortal Strike,Overpower,Rending,Revenge,Blocking,Last Stand,Sunder Armor,Sweeping Strikes,Taunt,Victory Rush,Bladestorm,Shockwave,Vigilance,Enraged Regeneration,Spell Reflection,Shield Wall,Command,Devastate,Hamstring,Cleaving,Execution,Heroic Strike,Resonating Power|64962,Bloodthirst,Whirlwind  
+AiPlayerbot.PremadeSpecName.1.2 = pve prot
+AiPlayerbot.PremadeSpecLink.1.2.80 = 05-3025-053351225000210521030113321
+AiPlayerbot.PremadeSpecGlyp.1.2.80 = Bloodthirst|23881,Mortal Strike|12294,Overpower|7384,Whirlwind|1680,Execution|20647,Rapid Charge,Charge,Mocking Blow|694,Hamstring|1715,Intervene|3411,Cleaving|12723,Rending|772,Barbaric Insults,Resonating Power,Blocking|2565,Battle|23458,Heroic Strike|78,Command|47436,Revenge|6572,Thunder Clap|6343,Sunder Armor|7386,Devastate|20243,Taunt|355,Last Stand|12975,Shield Wall,Spell Reflection,Vigilance|50720,Shockwave|46968,Bladestorm|46924,Victory Rush|34428,Enduring Victory,Enraged Regeneration|55694,Bloodrage|2687
+
+AiPlayerbot.PremadeSpecName.1.3 = pvp arms
+AiPlayerbot.PremadeSpecLink.1.3.80 = 3020232023335100222212013221251-32500013
+AiPlayerbot.PremadeSpecGlyp.1.3.80 = Barbaric Insults,Intervene,Taunt,Mocking Blow,Battle,Command,Vigilance|50720,Bloodrage,Enduring Victory,Charge,Thunder Clap,Resonating Power,Sunder Armor,Spell Reflection,Hamstring,Sweeping Strikes|12328,Shockwave|46968,Bladestorm|46924,Cleaving,Heroic Strike,Overpower,Revenge,Rapid Charge,Victory Rush,Blocking,Devastate,Enraged Regeneration|55694,Execution,Whirlwind,Rending,Mortal Strike|12294,Bloodthirst|23881,Last Stand|12975
+AiPlayerbot.PremadeSpecName.1.4 = pvp fury
+AiPlayerbot.PremadeSpecLink.1.4.80 = 32003200233-325000131504012050122511351
+AiPlayerbot.PremadeSpecGlyp.1.4.80 = Barbaric Insults,Intervene,Taunt,Mocking Blow,Vigilance|50720,Enduring Victory,Battle,Command,Bloodrage,Charge,Thunder Clap,Resonating Power,Sunder Armor,Spell Reflection,Hamstring,Sweeping Strikes|12328,Shockwave|46968,Bladestorm|46924,Cleaving,Heroic Strike,Overpower,Revenge,Rapid Charge,Victory Rush,Blocking,Devastate,Enraged Regeneration|55694,Execution,Whirlwind,Rending,Mortal Strike|12294,Bloodthirst|23881,Last Stand|12975
+AiPlayerbot.PremadeSpecName.1.5 = pvp prot
+AiPlayerbot.PremadeSpecLink.1.5.80 = 32003200233-325000131504012050122511351
+AiPlayerbot.PremadeSpecGlyp.1.5.80 = Barbaric Insults,Bladestorm|46924,Bloodthirst|23881,Mortal Strike|12294,Overpower,Hamstring,Sweeping Strikes|12328,Shockwave|46968,Cleaving,Heroic Strike,Rapid Charge,Victory Rush,Whirlwind,Rending,Intervene,Taunt,Mocking Blow,Battle,Command,Vigilance|50720,Bloodrage,Enduring Victory,Charge,Thunder Clap,Resonating Power,Sunder Armor,Spell Reflection,Revenge,Blocking,Devastate,Enraged Regeneration|55694,Last Stand|12975,Shield Wall
+
+# Paladin
+AiPlayerbot.PremadeSpecName.2.1 = Ret Pvp 
+AiPlayerbot.PremadeSpecLink.2.1.80 = 05002-053201-05222150203331322133201331
+AiPlayerbot.PremadeSpecGlyp.2.1.80 = Turn Evil|10326,Cleansing|4987,Blessing of Kings|20217,Blessing of Might|19740,Blessing of Wisdom|19742,Sense Undead|5502,the Wise|31801,Hammer of Justice|853,Lay on Hands|633,Spiritual Attunement|31786,Divine Plea|54428,Avenger's Shield|31935,Shield of Righteousness|53600,Righteous Defense|31789,Seal of Light|20165,Seal of Wisdom|20166,Holy Light|635,Flash of Light|19750,Holy Shock|20473,Holy Wrath|2812,Salvation|1038,Divinity|63646,Consecration|26573,Exorcism|879,Seal of Command|20375,Hammer of Wrath|24275,Divine Storm|53385,Crusader Strike|35395,Judgement|20271,Seal of Vengeance|31801,Hammer of the Righteous
+
+AiPlayerbot.PremadeSpecName.2.2 = Prot Pvp
+AiPlayerbot.PremadeSpecLink.2.2.80 = -15320130223122321333312321052300500002
+AiPlayerbot.PremadeSpecGlyp.2.2.80 = Turn Evil|10326,Exorcism|879,Seal of Command|20375,Seal of Righteousness|20154,Seal of Light|20165,Seal of Wisdom|20166,Blessing of Kings|20217,Blessing of Might|19740,Blessing of Wisdom|19742,Cleansing|4987,Flash of Light|19750,Holy Light|635,Holy Shock|20473,Divinity|63646,Avenging Wrath|31884,Holy Wrath|2812,Lay on Hands|633,Sense Undead|5502,the Wise|31801,Hammer of Justice|853,Salvation|1038,Spiritual Attunement|31786,Consecration|26573,Crusader Strike|35395,Divine Storm|53385,Hammer of Wrath|24275,Righteous Defense|31789,Shield of Righteousness|53600,Avenger's Shield|31935,Seal of Vengeance|31801,Divine Plea|54428,Hammer of the Righteous
+
+AiPlayerbot.PremadeSpecName.2.3 = Holy Pvp 
+AiPlayerbot.PremadeSpecLink.2.3.80 = 503521503000131501034142215032013122
+AiPlayerbot.PremadeSpecGlyp.2.3.80 = Seal of Command|20375,Seal of Righteousness|20154,Seal of Vengeance|31801,Exorcism|879,Turn Evil|10326,Hammer of Wrath|24275,Divine Storm|53385,Crusader Strike|35395,Avenger's Shield|31935,Holy Wrath|2812,Righteous Defense|31789,Shield of Righteousness|53600,Salvation|1038,Spiritual Attunement|31786,Cleansing|4987,Blessing of Might|19740,Blessing of Wisdom|19742,Blessing of Kings|20217,Sense Undead|5502,the Wise|31801,Hammer of Justice|853,Flash of Light|19750,Holy Shock|20473,Holy Light|635,Seal of Light|20165,Seal of Wisdom|20166,Beacon of Light|53563,Lay on Hands|633,Divinity|63646,Hammer of the Righteous
+
+AiPlayerbot.PremadeSpecName.2.4 = Ret Pve 
+AiPlayerbot.PremadeSpecLink.2.4.80 = 050501-05-05232051203331302133231331
+AiPlayerbot.PremadeSpecGlyp.2.4.80 = Turn Evil|10326,Cleansing|4987,Blessing of Kings|20217,Blessing of Might|19740,Blessing of Wisdom|19742,Sense Undead|5502,the Wise|31801,Hammer of Justice|853,Lay on Hands|633,Spiritual Attunement|31786,Divine Plea|54428,Avenger's Shield|31935,Shield of Righteousness|53600,Righteous Defense|31789,Seal of Light|20165,Seal of Wisdom|20166,Holy Light|635,Flash of Light|19750,Holy Shock|20473,Holy Wrath|2812,Salvation|1038,Divinity|63646,Consecration|26573,Exorcism|879,Seal of Command|20375,Hammer of Wrath|24275,Divine Storm|53385,Crusader Strike|35395,Judgement|20271,Seal of Vengeance|31801,Hammer of the Righteous
+
+AiPlayerbot.PremadeSpecName.2.5 = Prot Pve
+AiPlayerbot.PremadeSpecLink.2.5.80 = -050051352031323113333123215023005
+AiPlayerbot.PremadeSpecGlyp.2.5.80 = Turn Evil|10326,Exorcism|879,Seal of Command|20375,Seal of Righteousness|20154,Seal of Light|20165,Seal of Wisdom|20166,Blessing of Kings|20217,Blessing of Might|19740,Blessing of Wisdom|19742,Cleansing|4987,Flash of Light|19750,Holy Light|635,Holy Shock|20473,Divinity|63646,Avenging Wrath|31884,Holy Wrath|2812,Lay on Hands|633,Sense Undead|5502,the Wise|31801,Hammer of Justice|853,Salvation|1038,Spiritual Attunement|31786,Consecration|26573,Crusader Strike|35395,Divine Storm|53385,Hammer of Wrath|24275,Righteous Defense|31789,Shield of Righteousness|53600,Avenger's Shield|31935,Seal of Vengeance|31801,Divine Plea|54428,Hammer of the Righteous
+
+AiPlayerbot.PremadeSpecName.2.6 = Holy Pve 
+AiPlayerbot.PremadeSpecLink.2.6.80 = 503501510200130531005152215-503205
+AiPlayerbot.PremadeSpecGlyp.2.6.80 = Seal of Command|20375,Seal of Righteousness|20154,Seal of Vengeance|31801,Exorcism|879,Turn Evil|10326,Hammer of Wrath|24275,Divine Storm|53385,Crusader Strike|35395,Avenger's Shield|31935,Holy Wrath|2812,Righteous Defense|31789,Shield of Righteousness|53600,Salvation|1038,Spiritual Attunement|31786,Cleansing|4987,Blessing of Might|19740,Blessing of Wisdom|19742,Blessing of Kings|20217,Sense Undead|5502,the Wise|31801,Hammer of Justice|853,Flash of Light|19750,Holy Shock|20473,Holy Light|635,Seal of Light|20165,Seal of Wisdom|20166,Beacon of Light|53563,Lay on Hands|633,Divinity|63646,Hammer of the Righteous
+
+
+# Hunter
+AiPlayerbot.PremadeSpecName.3.1 = BM Pvp 
+AiPlayerbot.PremadeSpecLink.3.1.80 = 05203001505212233100531351005305131
+AiPlayerbot.PremadeSpecGlyp.3.1.80 = Aspect of the Viper,Chimera Shot|53209,Explosive Shot|53301,Explosive Trap,Freezing Trap,Frost Trap,Hunter's Mark,Immolation Trap,Multi-Shot,Raptor Strike,Scatter Shot|19503,Snake Trap,Trueshot Aura|19506,Volley,Wyvern Sting|19386,Arcane Shot,Serpent Sting,Kill Shot,Steady Shot,Bestial Wrath|19574,Aimed Shot,the Pack,Feign Death,Mend Pet,Possessed Strength,Revive Pet,Scare Beast,Mending,Disengage,Deterrence,the Hawk
+
+AiPlayerbot.PremadeSpecName.3.2 = MM Pvp 
+AiPlayerbot.PremadeSpecLink.3.2.80 = 052-025305101030213233115031051530020201
+AiPlayerbot.PremadeSpecGlyp.3.2.80 = Aspect of the Viper,the Beast,Bestial Wrath|19574,Explosive Shot|53301,Explosive Trap,Freezing Trap,Frost Trap,Immolation Trap,Raptor Strike,Scatter Shot|19503,Snake Trap,Volley,Wyvern Sting|19386,Arcane Shot,Aimed Shot,Chimera Shot|53209,Hunter's Mark,Kill Shot,Serpent Sting,Steady Shot,Trueshot Aura|19506,Multi-Shot,Rapid Fire,the Pack,Feign Death,Mend Pet,Possessed Strength,Revive Pet,Scare Beast,Disengage,Deterrence,Mending,the Hawk
+
+AiPlayerbot.PremadeSpecName.3.3 = Surv Pvp 
+AiPlayerbot.PremadeSpecLink.3.3.80 = -005305101-3300132510233330532135001031
+AiPlayerbot.PremadeSpecGlyp.3.3.80 = Aspect of the Viper,the Beast,Bestial Wrath|19574,Chimera Shot|53209,Freezing Trap,Frost Trap,Immolation Trap,Raptor Strike,Scatter Shot|19503,Snake Trap,Trueshot Aura|19506,Volley,Wyvern Sting|19386,Arcane Shot,Aimed Shot,Multi-Shot,Rapid Fire,Hunter's Mark,Steady Shot,Serpent Sting,Explosive Shot|53301,Explosive Trap,Kill Shot,the Pack,Feign Death,Mend Pet,Possessed Strength,Revive Pet,Scare Beast,Disengage,Deterrence,Mending,the Hawk
+
+AiPlayerbot.PremadeSpecName.3.4 = BM Pve 
+AiPlayerbot.PremadeSpecLink.3.4.80 = 51200201505112253100531351015305021
+AiPlayerbot.PremadeSpecGlyp.3.4.80 = Aspect of the Viper,Chimera Shot|53209,Explosive Shot|53301,Explosive Trap,Freezing Trap,Frost Trap,Hunter's Mark,Immolation Trap,Multi-Shot,Raptor Strike,Scatter Shot|19503,Snake Trap,Trueshot Aura|19506,Volley,Wyvern Sting|19386,Arcane Shot,Serpent Sting,Kill Shot,Steady Shot,Bestial Wrath|19574,Aimed Shot,the Pack,Feign Death,Mend Pet,Possessed Strength,Revive Pet,Scare Beast,Mending,the Hawk,Disengage,Deterrence
+
+AiPlayerbot.PremadeSpecName.3.5 = MM Pve
+AiPlayerbot.PremadeSpecLink.3.5.80 = 502-0353051012300132331350313515000002
+AiPlayerbot.PremadeSpecGlyp.3.5.80 = Aspect of the Viper,the Beast,Bestial Wrath|19574,Explosive Shot|53301,Explosive Trap,Freezing Trap,Frost Trap,Immolation Trap,Raptor Strike,Scatter Shot|19503,Snake Trap,Volley,Wyvern Sting|19386,Arcane Shot,Aimed Shot,Chimera Shot|53209,Hunter's Mark,Kill Shot,Serpent Sting,Steady Shot,Trueshot Aura|19506,Multi-Shot,Rapid Fire,the Pack,Feign Death,Mend Pet,Possessed Strength,Revive Pet,Scare Beast,the Hawk,Disengage,Deterrence,Mending
+
+AiPlayerbot.PremadeSpecName.3.6 = Surv Pve 
+AiPlayerbot.PremadeSpecLink.3.6.80 = -0053041-5000032500033330523134321331
+AiPlayerbot.PremadeSpecGlyp.3.6.80 = Aspect of the Viper,the Beast,Bestial Wrath|19574,Chimera Shot|53209,Freezing Trap,Frost Trap,Immolation Trap,Raptor Strike,Scatter Shot|19503,Snake Trap,Trueshot Aura|19506,Volley,Wyvern Sting|19386,Arcane Shot,Aimed Shot,Multi-Shot,Rapid Fire,Hunter's Mark,Steady Shot,Serpent Sting,Explosive Shot|53301,Explosive Trap,Kill Shot,the Pack,Feign Death,Mend Pet,Possessed Strength,Revive Pet,Scare Beast,the Hawk,Disengage,Deterrence,Mending
+
+
+# Rogue
+AiPlayerbot.PremadeSpecName.4.1 = Assassination Pvp 
+AiPlayerbot.PremadeSpecLink.4.1.80 = 005303103342102522103031000004-532023203000012
+AiPlayerbot.PremadeSpecGlyp.4.1.80 = Safe Fall,Vanish,Distract,Pick Lock,Pick Pocket,Blurred Speed,Cloak of Shadows,Gouge,Deadly Throw,Eviscerate,Slice and Dice,Sprint,Adrenaline Rush|13750,Killing Spree|38272,Vigor|14983,Hemorrhage|16511,Preparation|14185,Shadow Dance|51713,Hunger for Blood|51662,Mutilate|48666,Expose Armor,Garrote,Rupture,Feint,Tricks of the Trade,Crippling Poison,Evasion,Ambush,Backstab,Fan of Knives,Blade Flurry
+
+AiPlayerbot.PremadeSpecName.4.2 = Combat Pvp 
+AiPlayerbot.PremadeSpecLink.4.2.80 = 005-3250302102205015023122021251230023013
+AiPlayerbot.PremadeSpecGlyp.4.2.80 = Sap,Distract,Pick Lock,Pick Pocket,Safe Fall,Blurred Speed,Vanish,Deadly Throw,Gouge,Ghostly Strike|14278,Hunger for Blood|51662,Mutilate|48666,Hemorrhage|16511,Shadow Dance|51713,Preparation|14185,Backstab,Expose Armor,Garrote,Rupture,Feint,Vigor|14983,Cloak of Shadows,Eviscerate,Slice and Dice,Sprint,Tricks of the Trade,Adrenaline Rush|13750,Blade Flurry|13877,Killing Spree|38272,Sinister Strike,Evasion,Crippling Poison,Fan of Knives
+
+AiPlayerbot.PremadeSpecName.4.3 = Subtlety Pvp 
+AiPlayerbot.PremadeSpecLink.4.3.80 = 0053031-1-5020232033322121350105131251
+AiPlayerbot.PremadeSpecGlyp.4.3.80 = Safe Fall,Vanish,Distract,Pick Lock,Pick Pocket,Blurred Speed,Cloak of Shadows,Gouge,Deadly Throw,Eviscerate,Slice and Dice,Sprint,Adrenaline Rush|13750,Killing Spree|38272,Vigor|14983,Hemorrhage|16511,Preparation|14185,Shadow Dance|51713,Hunger for Blood|51662,Mutilate|48666,Expose Armor,Garrote,Rupture,Feint,Tricks of the Trade,Ambush,Evasion,Backstab,Crippling Poison,Blade Flurry,Fan of Knives
+
+AiPlayerbot.PremadeSpecName.4.4 = Assassination Pve 
+AiPlayerbot.PremadeSpecLink.4.4.80 = 005323005350100520103331051005005003-502
+AiPlayerbot.PremadeSpecGlyp.4.4.80 = Safe Fall,Vanish,Distract,Pick Lock,Pick Pocket,Blurred Speed,Cloak of Shadows,Gouge,Deadly Throw,Eviscerate,Slice and Dice,Sprint,Adrenaline Rush|13750,Killing Spree|38272,Vigor|14983,Hemorrhage|16511,Preparation|14185,Shadow Dance|51713,Hunger for Blood|51662,Mutilate|48666,Expose Armor,Garrote,Rupture,Feint,Tricks of the Trade,Crippling Poison,Evasion,Ambush,Backstab,Fan of Knives,Blade Flurry
+
+AiPlayerbot.PremadeSpecName.4.5 = Combat Pve
+AiPlayerbot.PremadeSpecLink.4.5.80 = 30530000522-0252051000035015223100501251
+AiPlayerbot.PremadeSpecGlyp.4.5.80 = Safe Fall,Distract,Pick Lock,Blurred Speed,Vigor,Evasion,Gouge,Hemorrhage,Sap,Expose Armor,Ghostly Strike,Feint,Garrote,Preparation,Rupture|51713,Sinister Strike,Pick Pocket,Sprint,Vanish|51713,Killing Spree|51690,Shadow Dance|51713,Tricks of the Trade|57934,Mutilate|51713,Fan of Knives|51723,Cloak of Shadows|52770,Adrenaline Rush,Ambush,Backstab,Blade Flurry,Crippling Poison,Deadly Throw,Eviscerate,Hunger for Blood|51662,Slice and Dice
+
+AiPlayerbot.PremadeSpecName.4.6 = Subtlety Pve 
+AiPlayerbot.PremadeSpecLink.4.6.80 = 0053231-2-5120222030321121050135231251
+AiPlayerbot.PremadeSpecGlyp.4.6.80 = Safe Fall,Vanish,Distract,Pick Lock,Pick Pocket,Blurred Speed,Cloak of Shadows,Gouge,Deadly Throw,Eviscerate,Slice and Dice,Sprint,Adrenaline Rush|13750,Killing Spree|38272,Vigor|14983,Hemorrhage|16511,Preparation|14185,Shadow Dance|51713,Hunger for Blood|51662,Mutilate|48666,Expose Armor,Garrote,Rupture,Feint,Tricks of the Trade,Ambush,Evasion,Backstab,Crippling Poison,Blade Flurry,Fan of Knives
+
+
+# Priest
+AiPlayerbot.PremadeSpecName.5.1 = Shadow PvE
+AiPlayerbot.PremadeSpecLink.5.1.80 = 0503203--325023051223010323152301351
+AiPlayerbot.PremadeSpecGlyp.5.1.80 = Circle of Healing|34861,Dispersion|47585,Fade|586,Fear Ward|6346,Flash Heal|2061,Guardian Spirit|47788,Holy Nova|15237,Hymn of Hope|64901,Inner Fire|588,Lightwell|724,Mass Dispel|32375,Mind Control|605,Mind Flay|15407,Mind Sear|48045,Pain Suppression|33206,Penance|47540,Power Word: Shield|17,Prayer of Healing|596,Psychic Scream|8122,Renew|139,Scourge Imprisonment|9484,Shadow|15473,Shadow Word: Death|32379,Shadow Word: Pain|589,Smite|585,Spirit of Redemption|20711,Fading|586,Fortitude|1243,Levitate|1706,Shackle Undead|9484,Shadow Protection|976,Shadowfiend|34433,Dispel Magic
+
+AiPlayerbot.PremadeSpecName.5.2 = Shadow PvP
+AiPlayerbot.PremadeSpecLink.5.2.80 = 502320013--005023251023112123152311351
+AiPlayerbot.PremadeSpecGlyp.5.2.80 = Circle of Healing|34861,Dispersion|47585,Fade|586,Fear Ward|6346,Flash Heal|2061,Guardian Spirit|47788,Holy Nova|15237,Hymn of Hope|64901,Inner Fire|588,Lightwell|724,Mass Dispel|32375,Mind Control|605,Mind Flay|15407,Mind Sear|48045,Pain Suppression|33206,Penance|47540,Power Word: Shield|17,Prayer of Healing|596,Psychic Scream|8122,Renew|139,Scourge Imprisonment|9484,Shadow|15473,Shadow Word: Death|32379,Shadow Word: Pain|589,Smite|585,Spirit of Redemption|20711,Fading|586,Fortitude|1243,Levitate|1706,Shackle Undead|9484,Shadow Protection|976,Shadowfiend|34433,Dispel Magic
+
+AiPlayerbot.PremadeSpecName.5.3 = Disc PvE
+AiPlayerbot.PremadeSpecLink.5.3.80 = 050320313030051233132323125100550103
+AiPlayerbot.PremadeSpecGlyp.5.3.80 = Circle of Healing|34861,Dispersion|47585,Fade|586,Fear Ward|6346,Flash Heal|2061,Guardian Spirit|47788,Holy Nova|15237,Hymn of Hope|64901,Inner Fire|588,Lightwell|724,Mass Dispel|32375,Mind Control|605,Mind Flay|15407,Mind Sear|48045,Pain Suppression|33206,Penance|47540,Power Word: Shield|17,Prayer of Healing|596,Psychic Scream|8122,Renew|139,Scourge Imprisonment|9484,Shadow|15473,Shadow Word: Death|32379,Shadow Word: Pain|589,Smite|585,Spirit of Redemption|20711,Fading|586,Fortitude|1243,Levitate|1706,Shackle Undead|9484,Shadow Protection|976,Shadowfiend|34433,Dispel Magic
+
+AiPlayerbot.PremadeSpecName.5.4 = Disc PvE renew build
+AiPlayerbot.PremadeSpecLink.5.4.80 = 050320313030051233132323125103530003
+AiPlayerbot.PremadeSpecGlyp.5.4.80 = Circle of Healing|34861,Dispersion|47585,Fade|586,Fear Ward|6346,Flash Heal|2061,Guardian Spirit|47788,Holy Nova|15237,Hymn of Hope|64901,Inner Fire|588,Lightwell|724,Mass Dispel|32375,Mind Control|605,Mind Flay|15407,Mind Sear|48045,Pain Suppression|33206,Penance|47540,Power Word: Shield|17,Prayer of Healing|596,Psychic Scream|8122,Renew|139,Scourge Imprisonment|9484,Shadow|15473,Shadow Word: Death|32379,Shadow Word: Pain|589,Smite|585,Spirit of Redemption|20711,Fading|586,Fortitude|1243,Levitate|1706,Shackle Undead|9484,Shadow Protection|976,Shadowfiend|34433,Dispel Magic
+
+AiPlayerbot.PremadeSpecName.5.5 = Holy PvE 
+AiPlayerbot.PremadeSpecLink.5.5.80 = 05032031-235050032302152530000331351
+AiPlayerbot.PremadeSpecGlyp.5.5.80 = Power Word: Shield|17,Circle of Healing|34861,Prayer of Healing|596,Flash Heal|2061,Guardian Spirit|47788,Renew|139,Spirit of Redemption|20711,Inner Fire|588,Hymn of Hope|64901,Mass Dispel|32375,Fear Ward|6346,Holy Nova|15237,Psychic Scream|8122,Fade|586,Shadowfiend|34433,Levitate|1706,Fortitude|1243,Shadow Protection|976,Lightwell|724,Penance|47540,Pain Suppression|33206,Dispersion|47585,Mind Flay|15407,Mind Sear|48045,Shadow|15473,Shadow Word: Death|32379,Shadow Word: Pain|589,Smite|585,Mind Control|605,Scourge Imprisonment|9484,Shackle Undead|9484,Dispel Magic
+
+AiPlayerbot.PremadeSpecName.5.6 = Holy PvP 
+AiPlayerbot.PremadeSpecLink.5.6.80 = 500320313030251233102323115120350123
+AiPlayerbot.PremadeSpecGlyp.5.6.80 = Power Word: Shield|17,Circle of Healing|34861,Prayer of Healing|596,Flash Heal|2061,Guardian Spirit|47788,Renew|139,Spirit of Redemption|20711,Inner Fire|588,Hymn of Hope|64901,Mass Dispel|32375,Fear Ward|6346,Holy Nova|15237,Psychic Scream|8122,Fade|586,Shadowfiend|34433,Levitate|1706,Fortitude|1243,Shadow Protection|976,Lightwell|724,Penance|47540,Pain Suppression|33206,Dispersion|47585,Mind Flay|15407,Mind Sear|48045,Shadow|15473,Shadow Word: Death|32379,Shadow Word: Pain|589,Smite|585,Mind Control|605,Scourge Imprisonment|9484,Shackle Undead|9484,Dispel Magic
+
+
+# Death Knight
+AiPlayerbot.PremadeSpecName.6.1 = Blood Pvp 
+AiPlayerbot.PremadeSpecLink.6.1.80 = 20450215333033132002231313513232
+AiPlayerbot.PremadeSpecGlyp.6.1.80 = Anti-Magic Shell,Chains of Ice,Howling Blast|49184,Hungering Cold|49203,Scourge Strike|55090,Unholy Blight|49194,Unbreakable Armor|51271,Frost Strike,Icy Touch,Obliterate,Plague Strike,Blood Strike,Death Grip,the Ghoul,Strangulate,Death and Decay,Pestilence,Raise Dead,Death's Embrace,Horn of Winter,Rune Strike,Bone Shield,Dancing Rune Weapon|49028,Dark Command,Disease,Vampiric Blood|55233,Death Strike,Heart Strike,Icebound Fortitude|49206,Blood Tap,Rune Tap,Dark Death,Corpse Explosion
+
+AiPlayerbot.PremadeSpecName.6.2 = Unholy Pvp 
+AiPlayerbot.PremadeSpecLink.6.2.80 = -320050410002-2301323301002152233101203103151
+AiPlayerbot.PremadeSpecGlyp.6.2.80 = Anti-Magic Shell,Chains of Ice,Unbreakable Armor|51271,Frost Strike,Icy Touch,Obliterate,Plague Strike,Blood Strike,Death Grip,Dark Command,Strangulate,Death and Decay,Pestilence,Raise Dead,Death's Embrace,Horn of Winter,Rune Strike,Bone Shield,Dancing Rune Weapon|49028,Howling Blast|49184,Hungering Cold|49203,Vampiric Blood|55233,Death Strike,Scourge Strike|55090,Unholy Blight|49194,the Ghoul,Dark Death,Corpse Explosion,Icebound Fortitude|49206,Blood Tap,Rune Tap,Heart Strike
+
+AiPlayerbot.PremadeSpecName.6.3 = Frost Pvp
+AiPlayerbot.PremadeSpecLink.6.3.80 = 0325101303-32025351052203012001033101341
+AiPlayerbot.PremadeSpecGlyp.6.3.80 = Anti-Magic Shell,Chains of Ice,Hungering Cold|49203,Scourge Strike|55090,Unholy Blight|49194,Vampiric Blood|55233,Bone Shield,Blood Strike,Death Grip,Dark Command,the Ghoul,Strangulate,Death and Decay,Pestilence,Raise Dead,Death's Embrace,Horn of Winter,Rune Strike,Death Strike,Obliterate,Plague Strike,Frost Strike,Icy Touch,Howling Blast|49184,Unbreakable Armor|51271,Dancing Rune Weapon|49028,Icebound Fortitude|49206,Blood Tap,Rune Tap,Heart Strike,Dark Death,Corpse Explosion
+
+AiPlayerbot.PremadeSpecName.6.4 = Blood Pve
+AiPlayerbot.PremadeSpecLink.6.4.80 = 0355220530003313221020131351305-0052
+AiPlayerbot.PremadeSpecGlyp.6.4.80 = Anti-Magic Shell,Chains of Ice,Howling Blast|49184,Hungering Cold|49203,Scourge Strike|55090,Unholy Blight|49194,Unbreakable Armor|51271,Frost Strike,Icy Touch,Obliterate,Plague Strike,Blood Strike,Death Grip,the Ghoul,Strangulate,Death and Decay,Pestilence,Raise Dead,Death's Embrace,Horn of Winter,Rune Strike,Bone Shield,Dancing Rune Weapon|49028,Dark Command,Disease,Vampiric Blood|55233,Death Strike,Heart Strike,Icebound Fortitude|49206,Blood Tap,Rune Tap,Dark Death,Corpse Explosion
+
+AiPlayerbot.PremadeSpecName.6.5 = Unholy Pve
+AiPlayerbot.PremadeSpecLink.6.5.80 = 23050202--2302003350032152003150003133151
+AiPlayerbot.PremadeSpecGlyp.6.5.80 = Anti-Magic Shell,Chains of Ice,Unbreakable Armor|51271,Frost Strike,Icy Touch,Obliterate,Plague Strike,Blood Strike,Death Grip,Dark Command,Strangulate,Death and Decay,Pestilence,Raise Dead,Death's Embrace,Horn of Winter,Rune Strike,Bone Shield,Dancing Rune Weapon|49028,Howling Blast|49184,Hungering Cold|49203,Vampiric Blood|55233,Death Strike,Scourge Strike|55090,Unholy Blight|49194,the Ghoul,Dark Death,Corpse Explosion,Icebound Fortitude|49206,Blood Tap,Rune Tap,Heart Strike
+
+AiPlayerbot.PremadeSpecName.6.6 = Frost Pve
+AiPlayerbot.PremadeSpecLink.6.6.80 = 03-32002350352203012300033101351230200305
+AiPlayerbot.PremadeSpecGlyp.6.6.80 = Anti-Magic Shell,Chains of Ice,Hungering Cold|49203,Scourge Strike|55090,Unholy Blight|49194,Vampiric Blood|55233,Bone Shield,Blood Strike,Death Grip,Dark Command,the Ghoul,Strangulate,Death and Decay,Pestilence,Raise Dead,Death's Embrace,Horn of Winter,Rune Strike,Death Strike,Obliterate,Plague Strike,Frost Strike,Icy Touch,Howling Blast|49184,Unbreakable Armor|51271,Dancing Rune Weapon|49028,Icebound Fortitude|49206,Blood Tap,Rune Tap,Heart Strike,Dark Death,Corpse Explosion
+
+
+# Shaman
+AiPlayerbot.PremadeSpecName.7.1 = Enh Pvp 
+AiPlayerbot.PremadeSpecLink.7.1.80 = 05032005-02305233105001333201131231251
+AiPlayerbot.PremadeSpecGlyp.7.1.80 = Chain Heal,Chain Lightning,Earth Shield,Earthliving Weapon,Elemental Mastery|16166,Feral Spirit|51533,Fire Elemental Totem|2894,Fire Nova,Flame Shock,Flametongue Weapon,Frost Shock,Ghost Wolf,Healing Stream Totem,Healing Wave,Hex|51514,Lava,Lava Lash|60103,Lesser Healing Wave,Lightning Bolt,Lightning Shield,Mana Tide Totem|16190,Riptide|61295,Stoneclaw Totem,Stormstrike,Thunder,Thunderstorm|51490,Totem of Wrath|30706,Water Mastery,Windfury Weapon,Astral Recall,Renewed Life,Water Breathing,Water Shield,Water Walking,Shocking
+
+AiPlayerbot.PremadeSpecName.7.2 = Ele Pvp
+AiPlayerbot.PremadeSpecLink.7.2.80 = 0533001503213051322331351-024252001
+AiPlayerbot.PremadeSpecGlyp.7.2.80 = Water Walking,Water Breathing,Renewed Life,Astral Recall,Ghost Wolf,Water Shield,Healing Wave,Lesser Healing Wave,Earthliving Weapon,Healing Stream Totem,Mana Tide Totem|16190,Stoneclaw Totem,Frost Shock,Lava Lash|60103,Stormstrike,Chain Heal,Riptide|61295,Fire Nova,Lightning Shield,Thunder,Thunderstorm|51490,Fire Elemental Totem|2894,Totem of Wrath|30706,Elemental Mastery|16166,Chain Lightning,Flame Shock,Lava,Lightning Bolt,Flametongue Weapon,Windfury Weapon,Shocking
+
+AiPlayerbot.PremadeSpecName.7.3 = Resto Pvp
+AiPlayerbot.PremadeSpecLink.7.3.80 = -023202301-50032331330313551120321251
+AiPlayerbot.PremadeSpecGlyp.7.3.80 = Chain Heal,Chain Lightning,Earth Shield,Earthliving Weapon,Elemental Mastery|16166,Feral Spirit|51533,Fire Elemental Totem|2894,Fire Nova,Flame Shock,Flametongue Weapon,Frost Shock,Ghost Wolf,Healing Stream Totem,Healing Wave,Hex|51514,Lava,Lava Lash|60103,Lesser Healing Wave,Lightning Bolt,Lightning Shield,Mana Tide Totem|16190,Riptide|61295,Stoneclaw Totem,Stormstrike,Thunder,Thunderstorm|51490,Totem of Wrath|30706,Water Mastery,Windfury Weapon,Astral Recall,Renewed Life,Water Breathing,Water Shield,Water Walking,Shocking
+
+AiPlayerbot.PremadeSpecName.7.4 = Enh Pve 
+AiPlayerbot.PremadeSpecLink.7.4.80 = 053030052-30205033005021333031131131051
+AiPlayerbot.PremadeSpecGlyp.7.4.80 = Chain Heal,Chain Lightning,Earth Shield,Earthliving Weapon,Elemental Mastery|16166,Feral Spirit|51533,Fire Elemental Totem|2894,Fire Nova,Flame Shock,Flametongue Weapon,Frost Shock,Ghost Wolf,Healing Stream Totem,Healing Wave,Hex|51514,Lava,Lava Lash|60103,Lesser Healing Wave,Lightning Bolt,Lightning Shield,Mana Tide Totem|16190,Riptide|61295,Stoneclaw Totem,Stormstrike,Thunder,Thunderstorm|51490,Totem of Wrath|30706,Water Mastery,Windfury Weapon,Astral Recall,Renewed Life,Water Breathing,Water Shield,Water Walking,Shocking
+
+AiPlayerbot.PremadeSpecName.7.5 = Ele Pve
+AiPlayerbot.PremadeSpecLink.7.5.80 = 3530001523213351322301351005050031
+AiPlayerbot.PremadeSpecGlyp.7.5.80 = Water Walking,Water Breathing,Renewed Life,Astral Recall,Ghost Wolf,Water Shield,Healing Wave,Lesser Healing Wave,Earthliving Weapon,Healing Stream Totem,Mana Tide Totem|16190,Stoneclaw Totem,Frost Shock,Lava Lash|60103,Stormstrike,Chain Heal,Riptide|61295,Fire Nova,Lightning Shield,Thunder,Thunderstorm|51490,Fire Elemental Totem|2894,Totem of Wrath|30706,Elemental Mastery|16166,Chain Lightning,Flame Shock,Lava,Lightning Bolt,Flametongue Weapon,Windfury Weapon,Shocking
+
+AiPlayerbot.PremadeSpecName.7.6 = Resto Pve
+AiPlayerbot.PremadeSpecLink.7.6.80 = -00505031-50005331335310501022331251
+AiPlayerbot.PremadeSpecGlyp.7.6.80 = Chain Heal,Chain Lightning,Earth Shield,Earthliving Weapon,Elemental Mastery|16166,Feral Spirit|51533,Fire Elemental Totem|2894,Fire Nova,Flame Shock,Flametongue Weapon,Frost Shock,Ghost Wolf,Healing Stream Totem,Healing Wave,Hex|51514,Lava,Lava Lash|60103,Lesser Healing Wave,Lightning Bolt,Lightning Shield,Mana Tide Totem|16190,Riptide|61295,Stoneclaw Totem,Stormstrike,Thunder,Thunderstorm|51490,Totem of Wrath|30706,Water Mastery,Windfury Weapon,Astral Recall,Renewed Life,Water Breathing,Water Shield,Water Walking,Shocking
+
+
+# Mage
+AiPlayerbot.PremadeSpecName.8.1 = Arcane Pvp 
+AiPlayerbot.PremadeSpecLink.8.1.80 = 205025220122032103323102515321--203023001
+AiPlayerbot.PremadeSpecGlyp.8.1.80 = Frost Nova,Fire Blast,Scorch,Ice Armor,Blast Wave|11113,Living Bomb|44457,Frostbolt,Fireball,Ice Lance|30455,Polymorph,Remove Curse,Slow Fall,Ice Block|45438,Mirror Image|55342,Molten Armor|30482,Blink,Evocation|12051,Arcane Intellect,Arcane Missiles,Arcane Explosion,Invisibility|66,Arcane Barrage|44425,Arcane Blast|30451,Water Elemental|31687,Deep Freeze|44572,Eternal Water,the Penguin
+
+AiPlayerbot.PremadeSpecName.8.2 = Fire Pvp
+AiPlayerbot.PremadeSpecLink.8.2.80 = 230320220122-2305022310220031243122201351
+AiPlayerbot.PremadeSpecGlyp.8.2.80 = Frost Ward,Frost Armor,Ice Armor,Frost Nova|122,Arcane Intellect,Slow Fall|130,Polymorph|118,Remove Curse|475,Fire Ward|543,Blast Wave|11113,Arcane Explosion,Arcane Missiles|5143,Arcane Power|12042,Blink|1953,Evocation|12051,Mana Gem,Mage Armor|6117,Scorch|2948,Molten Armor|30482,Icy Veins|12472,Ice Block|45438,Invisibility|66,Ice Barrier|11426,Ice Lance|30455,Arcane Barrage|44425,Arcane Blast|30451,Frostfire|44614,Frostbolt|116,Fire Blast|2136,Living Bomb|44457,Fireball|133,Water Elemental|31687,Deep Freeze|44572,Eternal Water,the Penguin
+
+AiPlayerbot.PremadeSpecName.8.3 = Frost Pvp
+AiPlayerbot.PremadeSpecLink.8.3.80 = 23002322010203--3533103310203100232102231151
+AiPlayerbot.PremadeSpecGlyp.8.3.80 = Frost Ward,Fire Ward,Arcane Explosion,Arcane Power|12042,Blast Wave|11113,Fireball|133,Scorch|2948,Frostfire|44614,Fire Blast|2136,Arcane Barrage|44425,Arcane Blast|30451,Polymorph|118,Remove Curse|475,Slow Fall|130,Ice Lance|30455,Ice Block|45438,Invisibility|66,Ice Barrier|11426,Frost Nova|122,Arcane Missiles|5143,Arcane Intellect,Blink|1953,Evocation|12051,Mana Gem,Mage Armor|6117,Frost Armor,Ice Armor,Molten Armor|30482,Icy Veins|12472,Frostbolt|116,Deep Freeze|44572,Water Elemental|31687,Eternal Water,the Penguin
+
+AiPlayerbot.PremadeSpecName.8.4 = Arcane Pve 
+AiPlayerbot.PremadeSpecLink.8.4.80 = 23500503010023015032310250532103-203023001
+AiPlayerbot.PremadeSpecGlyp.8.4.80 = Frost Nova,Fire Blast,Scorch,Ice Armor,Blast Wave|11113,Living Bomb|44457,Frostbolt,Fireball,Ice Lance|30455,Polymorph,Remove Curse,Slow Fall,Ice Block|45438,Mirror Image|55342,Molten Armor|30482,Blink,Evocation|12051,Arcane Intellect,Arcane Missiles,Arcane Explosion,Invisibility|66,Arcane Barrage|44425,Arcane Blast|30451,Water Elemental|31687,Deep Freeze|44572,Eternal Water,the Penguin
+
+AiPlayerbot.PremadeSpecName.8.5 = Fire Pve
+AiPlayerbot.PremadeSpecLink.8.5.80 = 23000503310003-0055030012303330053120300351
+AiPlayerbot.PremadeSpecGlyp.8.5.80 = Frost Ward,Frost Armor,Ice Armor,Frost Nova|122,Arcane Intellect,Slow Fall|130,Polymorph|118,Remove Curse|475,Fire Ward|543,Blast Wave|11113,Arcane Explosion,Arcane Missiles|5143,Arcane Power|12042,Blink|1953,Evocation|12051,Mana Gem,Mage Armor|6117,Scorch|2948,Molten Armor|30482,Icy Veins|12472,Ice Block|45438,Invisibility|66,Ice Barrier|11426,Ice Lance|30455,Arcane Barrage|44425,Arcane Blast|30451,Frostfire|44614,Frostbolt|116,Fire Blast|2136,Living Bomb|44457,Fireball|133,Water Elemental|31687,Deep Freeze|44572,Eternal Water,the Penguin
+
+AiPlayerbot.PremadeSpecName.8.6 = Frost Arcane Pve
+AiPlayerbot.PremadeSpecLink.8.6.80 = 23500503110023015032310250532003-203023001
+AiPlayerbot.PremadeSpecGlyp.8.6.80 = Frost Ward,Fire Ward,Arcane Explosion,Arcane Power|12042,Blast Wave|11113,Fireball|133,Scorch|2948,Frostfire|44614,Fire Blast|2136,Arcane Barrage|44425,Arcane Blast|30451,Polymorph|118,Remove Curse|475,Slow Fall|130,Ice Lance|30455,Ice Block|45438,Invisibility|66,Ice Barrier|11426,Frost Nova|122,Arcane Missiles|5143,Arcane Intellect,Blink|1953,Evocation|12051,Mana Gem,Mage Armor|6117,Frost Armor,Ice Armor,Molten Armor|30482,Icy Veins|12472,Frostbolt|116,Deep Freeze|44572,Water Elemental|31687,Eternal Water,the Penguin
+
+
+# Warlock
+AiPlayerbot.PremadeSpecName.9.1 = Affli CoE Pvp 
+AiPlayerbot.PremadeSpecLink.9.1.80 = 03500022312233110535023011510032203011302
+AiPlayerbot.PremadeSpecGlyp.9.1.80 = Life Tap,Felguard,Quick Decay,Haunt|51514,Curse of Agony,Corruption,Shadow Bolt,Unstable Affliction,Demonic Circle,Fear,Death Coil,Conflagrate,Howl of Terror,Siphon Life,Curse of Exhaustion,Drain Soul,Unending Breath,Souls,Health Funnel,Healthstone,Felhunter,Imp,Succubus,Voidwalker,Enslave Demon,Kilrogg,Soulstone,Shadowflame,Soul Link,Chaos Bolt,Immolate,Incinerate,Metamorphosis,Searing Pain,Shadowburn
+
+AiPlayerbot.PremadeSpecName.9.2 = Affli CoA Pvp
+AiPlayerbot.PremadeSpecLink.9.2.80 = 23500022312231110535023011510032203011302
+AiPlayerbot.PremadeSpecGlyp.9.2.80 = Life Tap,Felguard,Quick Decay,Haunt|51514,Curse of Agony,Corruption,Shadow Bolt,Unstable Affliction,Demonic Circle,Fear,Death Coil,Conflagrate,Howl of Terror,Siphon Life,Curse of Exhaustion,Drain Soul,Unending Breath,Souls,Health Funnel,Healthstone,Felhunter,Imp,Succubus,Voidwalker,Enslave Demon,Kilrogg,Soulstone,Shadowflame,Soul Link,Chaos Bolt,Immolate,Incinerate,Metamorphosis,Searing Pain,Shadowburn
+
+AiPlayerbot.PremadeSpecName.9.3 = Destro Pvp
+AiPlayerbot.PremadeSpecLink.9.3.80 = 03-0032203011302-05230015220331351005031051
+AiPlayerbot.PremadeSpecGlyp.9.3.80 = Life Tap,Felguard,Quick Decay,Haunt|51514,Curse of Agony,Corruption,Shadow Bolt,Unstable Affliction,Demonic Circle,Fear,Death Coil,Conflagrate,Howl of Terror,Chaos Bolt,Immolate,Incinerate,Searing Pain,Shadowburn,Shadowflame,Soul Link,Metamorphosis,Siphon Life,Curse of Exhaustion,Drain Soul,Unending Breath,Souls,Health Funnel,Healthstone,Felhunter,Imp,Succubus,Voidwalker,Enslave Demon,Kilrogg,Soulstone
+
+AiPlayerbot.PremadeSpecName.9.4 = Demo Pve 
+AiPlayerbot.PremadeSpecLink.9.4.80 = -00320330113520253013523134155000005
+AiPlayerbot.PremadeSpecGlyp.9.4.80 = Life Tap,Felguard,Quick Decay,Haunt|51514,Curse of Agony,Corruption,Shadow Bolt,Unstable Affliction,Demonic Circle,Fear,Death Coil,Conflagrate,Howl of Terror,Metamorphosis,Soul Link,Felhunter,Imp,Succubus,Voidwalker,Health Funnel,Healthstone,Chaos Bolt,Immolate,Incinerate,Searing Pain,Shadowburn,Shadowflame,Siphon Life,Curse of Exhaustion,Drain Soul,Unending Breath,Souls,Enslave Demon,Kilrogg,Soulstone
+
+AiPlayerbot.PremadeSpecName.9.5 = Affli Pve
+AiPlayerbot.PremadeSpecLink.9.5.80 = 2350002030023510253500331151--550000051
+AiPlayerbot.PremadeSpecGlyp.9.5.80 = Life Tap,Felguard,Quick Decay,Haunt|51514,Curse of Agony,Corruption,Shadow Bolt,Unstable Affliction,Demonic Circle,Fear,Death Coil,Conflagrate,Howl of Terror,Siphon Life,Curse of Exhaustion,Drain Soul,Unending Breath,Souls,Health Funnel,Healthstone,Felhunter,Imp,Succubus,Voidwalker,Enslave Demon,Kilrogg,Soulstone,Shadowflame,Soul Link,Chaos Bolt,Immolate,Incinerate,Metamorphosis,Searing Pain,Shadowburn
+
+AiPlayerbot.PremadeSpecName.9.6 = Destro Pve
+AiPlayerbot.PremadeSpecLink.9.6.80 = -03310030003-05203205210331051335230351
+AiPlayerbot.PremadeSpecGlyp.9.6.80 = Life Tap,Felguard,Quick Decay,Haunt|51514,Curse of Agony,Corruption,Shadow Bolt,Unstable Affliction,Demonic Circle,Fear,Death Coil,Conflagrate,Howl of Terror,Chaos Bolt,Immolate,Incinerate,Searing Pain,Shadowburn,Shadowflame,Soul Link,Metamorphosis,Siphon Life,Curse of Exhaustion,Drain Soul,Unending Breath,Souls,Health Funnel,Healthstone,Felhunter,Imp,Succubus,Voidwalker,Enslave Demon,Kilrogg,Soulstone
+
+AiPlayerbot.PremadeSpecName.9.7 = Demo Pve
+AiPlayerbot.PremadeSpecLink.9.7.80 = -00320330113520253013523134155-5
+AiPlayerbot.PremadeSpecGlyp.9.7.80 = Life Tap,Felguard,Quick Decay,Haunt|51514,Curse of Agony,Corruption,Shadow Bolt,Unstable Affliction,Demonic Circle,Fear,Death Coil,Conflagrate,Howl of Terror,Metamorphosis,Soul Link,Felhunter,Imp,Succubus,Voidwalker,Health Funnel,Healthstone,Chaos Bolt,Immolate,Incinerate,Searing Pain,Shadowburn,Shadowflame,Siphon Life,Curse of Exhaustion,Drain Soul,Unending Breath,Souls,Enslave Demon,Kilrogg,Soulstone
+
+
+# Druid
+AiPlayerbot.PremadeSpecName.11.1 = Feral shred Pvp 
+AiPlayerbot.PremadeSpecLink.11.1.80 = -55020213232021205312301331051100550101
+AiPlayerbot.PremadeSpecGlyp.11.1.80 = Aquatic Form,Challenging Roar,Hurricane,Healing Touch,Lifebloom,Monsoon,Nourish,Regrowth,Rejuvenation,Wild Growth,Barkskin,Entangling Roots,Focus,Innervate|29166,Starfire|2912,Starfall|48505,Wrath|5176,Claw|1082,Rip|1079,Maul|6807,Mangle|33876,Berserk|50334,Savage Roar|52610,Shred|5221,Rebirth
+
+AiPlayerbot.PremadeSpecName.11.2 = Feral 1v1 Pvp
+AiPlayerbot.PremadeSpecLink.11.2.80 = -53020213032021205312303331351100550001
+AiPlayerbot.PremadeSpecGlyp.11.2.80 = Aquatic Form,Challenging Roar,Hurricane,Healing Touch,Lifebloom,Monsoon,Nourish,Regrowth,Rejuvenation,Wild Growth,Barkskin,Entangling Roots,Focus,Innervate|29166,Starfire|2912,Starfall|48505,Wrath|5176,Claw|1082,Rip|1079,Maul|6807,Mangle|33876,Berserk|50334,Savage Roar|52610,Shred|5221,Rebirth
+
+AiPlayerbot.PremadeSpecName.11.3 = Balance Pvp
+AiPlayerbot.PremadeSpecLink.11.3.80 = 5022203125331003213035311231--230033012
+AiPlayerbot.PremadeSpecGlyp.11.3.80 = Aquatic Form,Challenging Roar,Frenzied Regeneration,Growl,Healing Touch,Lifebloom,Mangle|33876,Maul,Monsoon,Nourish,Rapid Rejuvenation,Regrowth,Rejuvenation,Rip|1079,Savage Roar|52610,Shred|5221,Swiftmend|18562,Survival Instincts|61336,Wild Growth|48438,Barkskin|22812,Berserk|50334,Claw|1082,Entangling Roots,Focus,Innervate|29166,Moonfire|8921,Starfire|2912,Starfall|48505,Wrath|5176,Dash,the Wild,Thorns,Typhoon|50516,Unburdened Rebirth,Insect Swarm,Rebirth
+
+AiPlayerbot.PremadeSpecName.11.4 = Resto Pvp
+AiPlayerbot.PremadeSpecLink.11.4.80 = 5532000120321--230033312031502221350013200
+AiPlayerbot.PremadeSpecGlyp.11.4.80 = Aquatic Form,Challenging Roar,Claw|1082,Dash,Entangling Roots,Focus,Growl,Hurricane,Mangle|33876,Maul,Moonfire|8921,Rip|1079,Savage Roar|52610,Shred|5221,Starfire|2912,Starfall|48505,Wrath|5176,Berserk|50334,Barkskin|22812,Innervate|29166,Rejuvenation|774,Regrowth|8936,Lifebloom|33763,Wild Growth|48438,Swiftmend|18562,Nourish|50464,Healing Touch|5185,Frenzied Regeneration|22842,Monsoon|42231,Rapid Rejuvenation|53251,the Wild,Thorns,Typhoon|50516,Unburdened Rebirth,Rebirth
+
+AiPlayerbot.PremadeSpecName.11.5 = Feral dps Pve
+AiPlayerbot.PremadeSpecLink.11.5.80 = -550202132322010053120030312511005503012
+AiPlayerbot.PremadeSpecGlyp.11.5.80 = Aquatic Form,Challenging Roar,Hurricane,Healing Touch,Lifebloom,Monsoon,Nourish,Regrowth,Rejuvenation,Wild Growth,Barkskin,Entangling Roots,Focus,Innervate|29166,Starfire|2912,Starfall|48505,Wrath|5176,Claw|1082,Rip|1079,Maul|6807,Mangle|33876,Berserk|50334,Savage Roar|52610,Shred|5221,Rebirth
+
+AiPlayerbot.PremadeSpecName.11.6 = Feral Tank Pve
+AiPlayerbot.PremadeSpecLink.11.6.80 = -50123213032211035312030331351120350001
+AiPlayerbot.PremadeSpecGlyp.11.6.80 = Aquatic Form,Challenging Roar,Hurricane,Healing Touch,Lifebloom,Monsoon,Nourish,Regrowth,Rejuvenation,Wild Growth,Barkskin,Entangling Roots,Focus,Innervate|29166,Starfire|2912,Starfall|48505,Wrath|5176,Claw|1082,Rip|1079,Maul|6807,Mangle|33876,Berserk|50334,Savage Roar|52610,Shred|5221
+
+AiPlayerbot.PremadeSpecName.11.7 = Balance Pve
+AiPlayerbot.PremadeSpecLink.11.7.80 = 5012203125331103213305301231--205003212
+AiPlayerbot.PremadeSpecGlyp.11.7.80 = Aquatic Form,Challenging Roar,Frenzied Regeneration,Growl,Healing Touch,Lifebloom,Mangle|33876,Maul,Monsoon,Nourish,Rapid Rejuvenation,Regrowth,Rejuvenation,Rip|1079,Savage Roar|52610,Shred|5221,Swiftmend|18562,Survival Instincts|61336,Wild Growth|48438,Barkskin|22812,Berserk|50334,Claw|1082,Entangling Roots,Focus,Innervate|29166,Moonfire|8921,Starfire|2912,Starfall|48505,Wrath|5176,Dash,the Wild,Thorns,Typhoon|50516,Unburdened Rebirth 
+
+AiPlayerbot.PremadeSpecName.11.8 = Restro Pve
+AiPlayerbot.PremadeSpecLink.11.8.80 = 05320001--230033312031512531153313051
+AiPlayerbot.PremadeSpecGlyp.11.8.80 = Aquatic Form,Challenging Roar,Claw|1082,Dash,Entangling Roots,Focus,Growl,Hurricane,Mangle|33876,Maul,Moonfire|8921,Rip|1079,Savage Roar|52610,Shred|5221,Starfire|2912,Starfall|48505,Wrath|5176,Berserk|50334,Barkskin|22812,Innervate|29166,Rejuvenation|774,Regrowth|8936,Lifebloom|33763,Wild Growth|48438,Swiftmend|18562,Nourish|50464,Healing Touch|5185,Frenzied Regeneration|22842,Monsoon|42231,Rapid Rejuvenation|53251,the Wild,Thorns,Typhoon|50516,Unburdened Rebirth
+
+# Applies a permanent buff to all bots.
+# WorldBuff.Faction.Class.MinLevel.MaxLevel = spellId
+# All bots:               Rallying Cry of the Dragonslayer for all bots
+# AiPlayerbot.WorldBuff = 22888 
+# All horde                 Warchief's Blessing for all horde
+# AiPlayerbot.WorldBuff.2 = 16609
+# All level 40 bots         Spirit of Zandalar     
+# AiPlayerbot.WorldBuff.0.0.40 = 24425
+# All warlocks between lvl1 and 10 volatile-infection & wandering-plague
+# AiPlayerbot.WorldBuff.0.9.1.10 = 18149,3436
+# All alliance lvl60 rogues      Plainsrunning & Sprint & Speed
+# AiPlayerbot.WorldBuff.1.4.60 = 12566,11305,2379
+# Darkmoon Faire - Elwynn Forest	Sayge's Dark Fortune of Damage
+# AiPlayerbot.WorldBuff.0.0.0.0.0.4 = 23768
+
+# Prefix for bot chat commands (e.g. follow, stay)
+#AiPlayerbot.CommandPrefix =
+
+# Max AI iterations per tick
+#AiPlayerbot.IterationsPerTick = 10
+
+# Allow/deny bots from your guild
+AiPlayerbot.AllowGuildBots = 1
+
+# Allow/deny bots from other player accounts (must have AiPlayerbot.AllowGuildBots activated and character on same guild)
+AiPlayerbot.AllowMultiAccountAltBots = 1
+
+# Delay between two short-time spells cast (Default 500)
+AiPlayerbot.GlobalCooldown = 1500
+
+# Max wait time when moving
+#AiPlayerbot.MaxWaitForMove = 5000
+
+# Delay between two bot actions (default 100)
+AiPlayerbot.ReactDelay = 500
+
+# Inactivity delay
+AiPlayerbot.PassiveDelay = 10000
+
+# Minimum delay between repeating actions (chat messages, emotes etc)
+AiPlayerbot.RepeatDelay = 5000
+
+AiPlayerbot.RpgDelay = 10000
+
+AiPlayerbot.SitDelay = 20000
+
+AiPlayerbot.LootDelayDelay = 1000
+
+# Distances
+AiPlayerbot.SightDistance = 60.0
+AiPlayerbot.SpellDistance = 26.0
+AiPlayerbot.ShootDistance = 26.0
+#AiPlayerbot.ReactDistance = 150.0
+#AiPlayerbot.GrindDistance = 75.0
+#overall loot distance
+#AiPlayerbot.LootDistance = 25.0
+#loot distance when bot is a group member (not leader)
+#AiPlayerbot.GroupMemberLootDistance = 15.0
+#loot distance when bot is a group member (not leader) and has active player master (if player is group leader)
+#AiPlayerbot.GroupMemberLootDistanceWithActiveMaster = 10.0
+#overall gathering distance
+#AiPlayerbot.GatheringDistance = 15.0
+#gathering distance when bot is a group member (not leader)
+#AiPlayerbot.GroupMemberGatheringDistance = 10.0
+#gathering distance when bot is a group member (not leader) and has active player master (if player is group leader)
+#AiPlayerbot.GroupMemberGatheringDistanceWithActiveMaster = 5.0
+#AiPlayerbot.FleeDistance = 15.0
+#AiPlayerbot.TooCloseDistance = 5.0
+#AiPlayerbot.MeleeDistance = 1.5
+#AiPlayerbot.FollowDistance = 1.5
+#AiPlayerbot.RaidFollowDistance = 5.0
+#AiPlayerbot.WhisperDistance = 6000.0
+#AiPlayerbot.ContactDistance = 0.5
+#AiPlayerbot.AoeRadius = 10
+AiPlayerbot.RpgDistance = 200
+#AiPlayerbot.ProximityDistance = 20.0
+#Distances to limit bots eating/drinking while following a master.
+#Inside this range eating/drinking is cut short or prevented to stay near master.
+#AiPlayerbot.EatDrinkMinDistance = 5.0
+#AiPlayerbot.EatDrinkMaxDistance = 1000.0
+
+
+# Max distance bot allowed to roam freely around master
+#AiPlayerbot.MaxFreeMoveDistance = 150.0
+
+# Delay (in seconds) after master inactivity after which bots will start roaming freely around master
+# Set to 0 to disable (bots will not be going places on their own when you are idle)
+#AiPlayerbot.FreeMoveDelay = 30.0
+
+# Bot can flee for enemy
+AiPlayerbot.FleeingEnabled = 1
+
+# Health/Mana levels
+#AiPlayerbot.CriticalHealth = 25
+#AiPlayerbot.LowHealth = 45
+#AiPlayerbot.MediumHealth = 65
+#AiPlayerbot.AlmostFullHealth = 85
+#AiPlayerbot.LowMana = 15
+#AiPlayerbot.MediumMana = 40
+
+# Random bot default strategies (applied after defaults)
+#AiPlayerbot.RandomBotCombatStrategies = +dps,+dps assist,-threat
+#AiPlayerbot.RandomBotNonCombatStrategies = +grind,+loot,+rpg,+custom::say
+#AiPlayerbot.RandomBotReactStrategies = 
+#AiPlayerbot.RandomBotDeadStrategies = 
+#AiPlayerbot.CombatStrategies = +custom::say
+#AiPlayerbot.NonCombatStrategies = +custom::say,+return,+delayed roll
+#AiPlayerbot.ReactStrategies = 
+#AiPlayerbot.DeadStrategies = 
+
+# Quest items to leave (do not destroy)
+#AiPlayerbot.RandomBotQuestItems = 6948,5175,5176,5177,5178,16309,12382,13704,11000
+
+# PvP Restricted Zones (bots don't pvp)
+#AiPlayerbot.PvpProhibitedZoneIds = 2255,656,2361,2362,2363,976,35,2268,3425,392,541,1446,3828,3712,3738,3565,3539,3623,4152,3988,4658,4284,4418,4436,4275,4323
+
+# Spells every random bot will learn on randomize (54197 - cold weather flying)
+#AiPlayerbot.RandomBotSpellIds = 1
+
+# Level diff between random bots and nearby creatures for random teleports
+#AiPlayerbot.RandomBotTeleLevel = 3
+
+#AiPlayerbot.OpenGoSpell = 6477
+
+# Intervals
+AiPlayerbot.RandomBotUpdateInterval = 60
+AiPlayerbot.RandomBotCountChangeMinInterval = 1800
+AiPlayerbot.RandomBotCountChangeMaxInterval = 7200
+#AiPlayerbot.MinRandomBotInWorldTime = 3600
+#AiPlayerbot.MaxRandomBotInWorldTime = 1209600
+#AiPlayerbot.MinRandomBotRandomizeTime = 7200
+#AiPlayerbot.MaxRandomRandomizeTime = 1209600
+#AiPlayerbot.RandomBotsPerInterval = 60
+#AiPlayerbot.RandomBotsMaxLoginsPerInterval = 30
+#AiPlayerbot.MinRandomBotsPriceChangeInterval = 7200
+#AiPlayerbot.MaxRandomBotsPriceChangeInterval = 172800
+
+#######################################
+#
+# Auction house settings
+#
+# (0-1) If bot should query current AH listings outside of AH when determining whether the item is worth posting to AH
+# Disabled by default for performance concerns, but you REALLY want to enable it for nicer logic
+# AiPlayerbot.ShouldQueryAHListingsOutsideOfAH = 1
+#
+# List of item ids which bot will prefer to put to AH rather than selling to vendor (these are overrides)
+# For example if you want bots to put certain gray/white armor pieces to AH rather than selling to vendor
+# this list has priority over AiPlayerbot.VendorOverAHItemIds
+# AiPlayerbot.AhOverVendorItemIds = 1,2,3
+#
+# List of item ids which bot will prefer to sell to vendor rather than selling to AH (these are overrides)
+# (Bot will never buy these items from vendor to resell at AH as well)
+# For example if you do not want to see certain items on AH
+# AiPlayerbot.VendorOverAHItemIds = 1,2,3
+#
+# (0-1) Whether bot should check ALL auction house listings when browsing (by default only checks a small amount)
+# AiPlayerbot.BotCheckAllAuctionListings = 0
+#
+#######################################
+
+#(0-1) enable or disable random teleports
+# AiPlayerbot.EnableRandomTeleports = 1
+
+# How far random bots are teleported after death
+AiPlayerbot.RandomBotTeleportDistance = 100
+
+# Debug switches
+#AiPlayerbot.SpellDump = 0
+#AiPlayerbot.LogInGroupOnly = 1
+#AiPlayerbot.LogValuesPerTick = 0
+#AiPlayerbot.RandomChangeMultiplier = 1
+
+# Command server port, 0 - disabled
+#AiPlayerbot.CommandServerPort = 8888
+
+AiPlayerbot.PerfMonEnabled = 0
+
+##################################################################################
+#                                                                                #
+#                                 !!EXPERIMENTAL!!                               #
+#                                                                                #
+##################################################################################
+
+# Instant randomize: Force randombots to randomize on initial login.
+# AiPlayerbot.InstantRandomize = 0
+
+# Percentage of (min) bots online that speeds up login speed by 2x.
+# AiPlayerbot.LoginBoostPercentage = 90
+
+# Bot cheats. Same as "/w <bot> cheat (+/-/?) <cheatcode>" but only globally for all bots.
+# Values: taxi            (all nodes learned)
+#         item            (unlimited items for spells)
+#         gold            (free repair, vendor, ect.)
+#         health          (fast regen)
+#         mana            (fast regen)
+#         power           (fast regen)
+#         cooldown        (no cooldowns)
+#         repair          (no durability of ress sickness)
+#         movespeed       (very fast movespeed)
+#         attackspeed     (very fast attackspeed)
+#         breath          (underwater breathing)
+# AiPlayerbot.BotCheats = taxi,item,breath
+
+# The summon command can be used without restriction by non-gms.
+# AiPlayerbot.NonGmFreeSummon = 0
+
+# Bots will put their talentspec in guild notes when they change/tell their talents if they have the rights.
+# AiPlayerbot.TalentsInPublicNote = 0
+
+# Self bot turns your current character into a bot with the command ".bot self"
+# !!DISCLAMER!! Selfbots will work and act like randombots based on their enabled strategies. Your epic mount will be sold to a vendor!
+# Self bot level. Values: 0 (disabled), 1 (Game masters only), 2 (Any player), 3 (Allow .bot always command for all players), 4 (Enabled on login), 4 (Enabled even when offline)
+# AiPlayerbot.SelfBotLevel = 1
+
+# Account/character names that are either, always online as bot (SelfBotLevel < 4) or prevented from being always online as bot (SelfBotLevel = 4) 
+# When AiPlayerbot.BotAutologin is set to 2 these characters only log in on player (on the same account) logs in.
+# AiPlayerbot.ToggleAlwaysOnlineAccounts =
+# AiPlayerbot.ToggleAlwaysOnlineChars =
+
+
+# Allowed log files. See SPP_MAP for more information
+# https://github.com/mostlikely4r/spp-map
+# AiPlayerbot.AllowedLogFiles = 
+
+# Filters certain actions from showing up in 'nc +debug' and 'nc +debug action'
+# AiPlayerbot.DebugFilter = add gathering loot,check values,emote,check mount state,jump
+
+# Random password: Randombot accounts get created with a randompassword instead of equal to their account name.
+# AiPlayerbot.RandomBotRandomPassword = 1
+
+
+# Diff with/without player in server. The server will tune bot activity to reach the desired server tick speed (in ms).
+# AiPlayerbot.DiffWithPlayer = 100
+# AiPlayerbot.DiffEmpty = 200
+
+# LLM values. These values are for noncombat strategy 'ai chat' which allows bots to reply using a LLM api.
+# For a quickstart download koboldcpp, a 7b model from huggingface and start kobold.
+# (Default) KoboldCPP examples:
+
+# Enables/disables LLM globaly: 0 = disabled, 1 = enabled with ai chat strategy, 2 = ai chat strategy default for all bots, 3 = enabled without ai chat strategy.
+# AiPlayerbot.LLMEnabled = 1
+# The api endpoint that should be called for chat generation.
+# AiPlayerbot.LLMApiEndpoint = http://127.0.0.1:5001/api/v1/generate
+# The api key needed to access the endpoint.
+# AiPlayerbot.LLMApiKey =
+# The default json to send to the endpoint.
+# AiPlayerbot.LLMApiJson = {"max_length": 100, "prompt": "[<pre prompt>]<context> <prompt> <post prompt>"}
+
+# The max context length allowed for the model. 0 to disable. This will shrink the context (all previous conversations) to make the entire prompt <pre prompt><context><prompt><post prompt> fit.
+# AiPlayerbot.LLMContextLength = 4096
+# Time in seconds the server will wait for the generation to finish. This includes waiting in queue.
+# AiPlayerbot.LLMGenerationTimeout = 600
+# Maximum generation requests allowed at the same time. This includes waiting in queue.
+# AiPlayerbot.LLMMaxSimultaniousGenerations = 100
+
+# The default prompt to send at the beginning of each conversation.
+# AiPlayerbot.LLMPrePrompt = You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The <other type> <other name> is speaking to you <channel name> and is an <other gender> <other race> <other class> of level <other level>. You are level <bot level> and play as a <bot gender> <bot race> <bot class> that is currently in <bot subzone> <bot zone>. Answer as a roleplaying character. Limit responses to 100 characters.
+# The prompt part containing the last message from the player the bot is responding to.
+# AiPlayerbot.LLMPrompt = <receiver name>:<initial message>
+# The default prompt to send at the end of each conversation.
+# AiPlayerbot.LLMPostPrompt = <bot name>:
+
+# The prompt used for rpg chat with npc's
+# AiPlayerbot.LLMRpgPrompt = In World of Warcraft: <expansion name> in <bot zone> <bot subzone> stands <bot type> <bot name> a level <bot level> <bot gender> <bot race> <bot class>. Standing nearby is <unit type> <unit name> <unit subname> a level <unit level> <unit gender> <unit race> <unit faction> <unit class>. Answer as a roleplaying character. Limit responses to 100 characters.
+
+# Response parse method. The (json) response that the llm will output needs to be cut and split to result in a number of plain lines the bot can give as feedback.
+# Step1: What pattern the server should look for to find the start of the repsonse the llm gave.
+# AiPlayerbot.LLMResponseStartPattern = ("text":\s*")
+# Step2: What pattern the server should look for that the response has ended.
+# AiPlayerbot.LLMResponseEndPattern = ("|\b(?!<sender name>\b)(\w+):)
+# Step3: What pattern the server should look for to remove from the response.
+# AiPlayerbot.LLMResponseDeletePattern = (\\n|<sender name>:|\\[^ ]+)
+# Step4: What pattern the server should look for to split the repsonse in multiple lines. Note only lines that follow this pattern will be extracted.
+# AiPlayerbot.LLMResponseSplitPattern = (\*.*?\*)|(\[.*?\])|(\'.*\')|([^\*\[\] ][^\*\[\]]+?[.?!])
+
+# Should previous conversations from all channels be mixed?
+# AiPlayerbot.LLMGlobalContext = 0
+
+# The chance (0-100) bots will use ai chat to respond to other bots 
+# AiPlayerbot.LLMBotToBotChatChance = 0
+
+# The chance (0-100) bots will use ai chat talk to npcs during rpg
+# AiPlayerbot.LLMRpgAIChatChance = 100
+
+# Channels that bots are not allowed to use ai-chat to reply on. Channels: guild,world,general,trade,lfg,ldefence,wdefence,grecruitement,say,whisper,emote,temote,yell,party,raid
+# AiPlayerbot.LLMBlockedReplyChannels = 
+
+# OPEN-AI (chat completions) example:
+# AiPlayerbot.LLMApiEndpoint = http://IP/URL:PORT/v1/chat/completions
+# AiPlayerbot.LLMApiKey = YOUR_API_KEY
+# AiPlayerbot.LLMApiJson = {"model": "gpt-4o-mini", "messages": [{"role": "system", "content": "<pre prompt> <context>"},{"role": "user", "content": "<prompt>"}],"max_tokens": 60}
+# AiPlayerbot.LLMResponseStartPattern = ("content":\s*")
+
+# Enable the alternative asynchronous login system.
+# AiPlayerbot.AsyncBotLogin = 0
+
+# Dramatically speeds up initial and future bot logins but takes 2gb/1000 accounts and might prevent player login during the initial bot login period.
+# !!warning heavy db usage at start!!
+# AiPlayerbot.PreloadHolders = 0
+
+# The login criteria to apply when trying to log in/keep online bots. options: 
+# maxbots: Keep the total number of bots below the maxium (between max/min).
+# spareroom: Keep some spare room below the max to login better bots.
+# bg: Bots online inside battlegrounds should not log off.
+# arena: Bots online inside arenas should not log off.
+# instance: Bots online inside instances should not log off.
+# online: Bots currently online stay online.
+# logoff: Bots slated to logoff should log off. (Needs RandomBotTimedLogout)
+# offline: Bots slated to stay offline should stay offline. (Needs RandomBotTimedOffline)
+# classrace: Match the online bots to the configured class/race probabilities.
+# level: Match the online bots to the configured level probabilities.
+# range: Prefer bots near an online player.
+# map: Prefer bots on the same map of an online player.
+# group: Prefer bots in the same group as an online player.
+# guild: Prefer bots in the same guild as an online player.
+# 
+# How it works: All bots are evaluated based on configurd criteria wether they should be online of offline.
+# The default criteria must all be true or the bot will be logged off and can not log in.
+# Each line works as an AND construction where all criteria must be met. Note they are alphabetically sorted so use 01,02 for more than 9 lines.
+# Example logoff,classrace,level,online means a bot needs to have room in available level and classrace brackets, be online and not be slated to log off.
+# The multiple lines work as an OR construction where the top lines are used first and as more bots are needed it moves down.
+# Example 1 = group, 2 = bg. First it tries to login all bots in player groups, then as more bots are needed it looks for bots that might be online inside battlegrounds.
+# 
+# AiPlayerbot.DefaultLoginCriteria1 = maxbots,spareroom,offline
+# AiPlayerbot.LoginCriteria.1 = group
+# AiPlayerbot.LoginCriteria.2 = bg
+# AiPlayerbot.LoginCriteria.3 = arena
+# AiPlayerbot.LoginCriteria.4 = guild
+# AiPlayerbot.LoginCriteria.5 = logoff,classrace,level,online
+# AiPlayerbot.LoginCriteria.6 = logoff,classrace,level
+# AiPlayerbot.LoginCriteria.7 = logoff,classrace
+
+# When bots are logged in that do not fully match all criteria selected it will do so up to xxx spaces below the maximum. Bots that suddenly match all the criteria will then have room to use this to log in.
+# AiPlayerbot.FreeRoomForNonSpareBots = 0
+
+# Only log in bots within this distance from a real player.
+# AiPlayerbot.LoginBotsNearPlayerRange = 1000
+
+# AiPlayerbot.LevelProbability.<level> = <number>         #Probability Randombots will be allowed to login with this level. (default 100)
+# AiPlayerbot.LevelProbability.1 = 100
+# AiPlayerbot.LevelProbability.10 = 100
+# AiPlayerbot.LevelProbability.60 = 100
+
+# Mystery config value. Currently enables async bot pathfinding. Rarely crashes the server.
+# AiPlayerbot.TweakValue = 0
