@@ -148,6 +148,7 @@ struct boss_gothikAI : public BossAI
         SetMeleeEnabled(true);
         SetCombatMovement(true);
         SetReactState(REACT_AGGRESSIVE);
+        SetCombatScriptStatus(false);
 
         DoResetThreat();
         m_creature->SetInCombatWithZone();
@@ -382,6 +383,11 @@ struct ToAnchorTwo : public SpellScript
 // 27896, 27930, 27938 - Choose Random Skull Pile
 struct ChooseRandomSkullPile : public SpellScript
 {
+    void OnInit(Spell* spell) const override
+    {
+        spell->SetMaxAffectedTargets(1);
+    }
+
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         if (effIdx != EFFECT_INDEX_0 || !spell->GetUnitTarget())
