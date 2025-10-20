@@ -129,7 +129,7 @@ class WorldSocket : public MaNGOS::AsyncSocket<WorldSocket>
         WorldSocket(boost::asio::io_context& context);
 
         // send a packet \o/
-        void SendPacket(const WorldPacket& pct, bool immediate = false);
+        void SendPacket(const WorldPacket& pct);
 
         void FinalizeSession() { m_session = nullptr; }
 
