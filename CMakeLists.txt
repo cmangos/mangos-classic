@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 # Minimum required cmake version to run the build
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.16)
 cmake_policy(SET CMP0069 NEW)
 
 # Will cache object files if ccache is available
@@ -134,11 +134,6 @@ endif()
 
 # find Git: used to get the revision number
 find_package(Git)
-
-if(NOT MSVC AND PCH)
-  # Include cotire to manage PCH support
-  include(cotire)
-endif()
 
 set(BIN_FOLDER_NAME bin)
 set(CONF_FOLDER_NAME etc)
