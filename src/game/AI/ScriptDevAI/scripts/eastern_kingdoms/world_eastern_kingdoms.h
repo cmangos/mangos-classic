@@ -21,6 +21,4 @@ enum
     STV_FEVER_GROUP_03          = 18013,
 };
 
-const std::string WITCH_DOCTOR_UNBAGWA = "STV_WITCH_DOCTOR_UNBAGWA";
-
 #endif
