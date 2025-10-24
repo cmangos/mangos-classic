@@ -14,6 +14,13 @@ enum
     NPC_FALSTAD_WILDHAMMER      = 5635,
 
     NPC_SHORT_JOHN_MITHRIL      = 14508,
+
+    // Quest: Stranglethorn Fever Waves
+    STV_FEVER_GROUP_01          = 18011,
+    STV_FEVER_GROUP_02          = 18012,
+    STV_FEVER_GROUP_03          = 18013,
 };
+
+const std::string WITCH_DOCTOR_UNBAGWA = "STV_WITCH_DOCTOR_UNBAGWA";
 
 #endif

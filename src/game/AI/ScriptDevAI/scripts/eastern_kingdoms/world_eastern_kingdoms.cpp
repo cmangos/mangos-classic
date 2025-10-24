@@ -49,6 +49,21 @@ struct world_map_eastern_kingdoms : public ScriptedMap
                 instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_STV_GRP_02, urand(0, 1));
                 break;
         }
+
+        // Quest: Stranglethorn Fever Wave Died
+        switch (creatureGroup->GetGroupId())
+        {
+            case STV_FEVER_GROUP_01: 
+                HandleSTVFeverEvent(AI_EVENT_CUSTOM_EVENTAI_A);
+                break;
+            case STV_FEVER_GROUP_02: 
+                HandleSTVFeverEvent(AI_EVENT_CUSTOM_EVENTAI_B); 
+                break;
+            case STV_FEVER_GROUP_03: 
+                HandleSTVFeverEvent(AI_EVENT_CUSTOM_EVENTAI_C); 
+                break;             
+        }
+        
     }
 
     void OnCreatureCreate(Creature* pCreature) override
@@ -102,6 +117,19 @@ struct world_map_eastern_kingdoms : public ScriptedMap
     }
 
     void SetData(uint32 /*uiType*/, uint32 /*uiData*/) override {}
+
+    // Quest: Stranglethorn Fever Wave Died
+    // Inform Quest Handler to spawn next group if still alive
+    void HandleSTVFeverEvent(AIEventType eventType)
+    {
+        std::vector<Creature*> const* witchDoctor = instance->GetCreatures(WITCH_DOCTOR_UNBAGWA);
+        if (witchDoctor)
+        {
+            for (Creature* creature : *witchDoctor)
+                if (creature->IsAlive())
+                    creature->AI()->SendAIEvent(eventType, creature, creature);
+        }
+    }
 };
 
 InstanceData* GetInstanceData_world_map_eastern_kingdoms(Map* pMap)
