@@ -273,7 +273,10 @@ Defining a buddy could be done in several way:
                                             *             0x4 - for path - flying specifier
                                             *             0x8 - for path - cyclic specifier
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: RandomMovement around current position
-                                            * dataint = enum ForcedMovement
+                                            * dataint = enum ForcedMovement for non random, for random 0 walk, 1 run
+                                            * dataFloat = vertical Speed - used by special case of Path
+                                            * speed = override of speed for Path
+                                            * Path when Vertical Speed is set - Uses exclusively waypoint_path, supports forcedMovement, pathId, speed, verticalSpeed
 
 21 SCRIPT_COMMAND_SET_ACTIVEOBJECT          resultingSource = WorldObject
                                             * datalong=bool 0=off, 1=on

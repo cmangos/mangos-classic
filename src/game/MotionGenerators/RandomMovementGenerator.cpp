@@ -158,8 +158,8 @@ ConfusedMovementGenerator::ConfusedMovementGenerator(const Unit& owner) :
 {
 }
 
-WanderMovementGenerator::WanderMovementGenerator(float x, float y, float z, float radius, float verticalZ) :
-    AbstractRandomMovementGenerator(UNIT_STAT_ROAMING, UNIT_STAT_ROAMING_MOVE, 3000, 10000, 3)
+WanderMovementGenerator::WanderMovementGenerator(float x, float y, float z, float radius, float verticalZ, bool walk) :
+    AbstractRandomMovementGenerator(UNIT_STAT_ROAMING, UNIT_STAT_ROAMING_MOVE, 3000, 10000, 3, walk)
 {
     i_x = x;
     i_y = y;
