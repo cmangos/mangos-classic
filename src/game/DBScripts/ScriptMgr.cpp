@@ -2278,6 +2278,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
             ObjectGuid targetGuid;
 
             ForcedMovement forcedMovement = ForcedMovement(m_script->textId[0]);
+            uint32 movementFlags = (uint32)m_script->textId[1];
 
             auto fSlot = source->GetFormationSlot();
             if (fSlot)
@@ -2313,16 +2314,27 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                     source->GetMotionMaster()->MoveIdle();
                     break;
                 case RANDOM_MOTION_TYPE:
+                {
+                    if (movementFlags & 0x1) // make it main movegen
+                    {
+                        source->StopMoving();
+                        source->GetMotionMaster()->Clear(false, true);
+                    }
+
                     if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
-                        source->GetMotionMaster()->MoveRandomAroundPoint(pSource->GetPositionX(), pSource->GetPositionY(), pSource->GetPositionZ(), float(m_script->movement.wanderORpathIdORRelayId), 0.f, m_script->movement.timerOrPassTargetOrCyclic, m_script->textId[0] == 0);
+                        source->GetMotionMaster()->MoveRandomAroundPoint(pSource->GetPositionX(), pSource->GetPositionY(), pSource->GetPositionZ(),
+                                                                         float(m_script->movement.wanderORpathIdORRelayId), 0.f, m_script->movement.timerOrPassTargetOrCyclic,
+                                                                         m_script->textId[0] == 0);
                     else
                     {
                         float respX, respY, respZ, respO, wander_distance;
                         source->GetRespawnCoord(respX, respY, respZ, &respO, &wander_distance);
                         wander_distance = wanderORpathId ? wanderORpathId : wander_distance;
-                        source->GetMotionMaster()->MoveRandomAroundPoint(respX, respY, respZ, wander_distance, 0.f, m_script->movement.timerOrPassTargetOrCyclic, m_script->textId[0] == 0);
+                        source->GetMotionMaster()->MoveRandomAroundPoint(respX, respY, respZ, wander_distance, 0.f, m_script->movement.timerOrPassTargetOrCyclic,
+                                                                         m_script->textId[0] == 0);
                     }
                     break;
+                }
                 case WAYPOINT_MOTION_TYPE:
                 {
                     source->StopMoving();

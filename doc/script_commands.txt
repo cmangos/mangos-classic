@@ -274,6 +274,7 @@ Defining a buddy could be done in several way:
                                             *             0x8 - for path - cyclic specifier
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: RandomMovement around current position
                                             * dataint = enum ForcedMovement for non random, for random 0 walk, 1 run
+                                            * dataint2 - flags - for random: 0x1 make main movegen (will stay on evade)
                                             * dataFloat = vertical Speed - used by special case of Path
                                             * speed = override of speed for Path
                                             * Path when Vertical Speed is set - Uses exclusively waypoint_path, supports forcedMovement, pathId, speed, verticalSpeed
