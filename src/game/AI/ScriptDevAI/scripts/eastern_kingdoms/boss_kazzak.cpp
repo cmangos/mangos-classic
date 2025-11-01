@@ -61,6 +61,7 @@ struct boss_kazzakAI : public ScriptedAI
     uint32 m_uiMarkOfKazzakTimer;
     uint32 m_uiTwistedReflectionTimer;
     uint32 m_uiSupremeTimer;
+    bool m_bIsInBerserk;
 
     void Reset() override
     {
@@ -71,6 +72,7 @@ struct boss_kazzakAI : public ScriptedAI
         m_uiMarkOfKazzakTimer       = 25000;
         m_uiTwistedReflectionTimer  = 33000;
         m_uiSupremeTimer            = 3 * MINUTE * IN_MILLISECONDS;
+        m_bIsInBerserk              = false;
     }
 
     void JustRespawned() override
@@ -107,29 +109,29 @@ struct boss_kazzakAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
-        if (m_uiSupremeTimer)
+        // Berserk
+        if (m_uiSupremeTimer && m_uiSupremeTimer <= uiDiff)
         {
-            // Enrage - cast shadowbolt volley every second
-            if (m_uiSupremeTimer <= uiDiff)
+            if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                {
-                    DoScriptText(urand(0, 1) ? SAY_SURPREME1 : SAY_SURPREME2, m_creature);
-                    m_uiSupremeTimer = 0;
-                }
+                DoScriptText(urand(0, 1) ? SAY_SURPREME1 : SAY_SURPREME2, m_creature);
+                m_bIsInBerserk = true;
+                m_uiShadowVolleyTimer = 1000;
             }
-            else
-                m_uiSupremeTimer -= uiDiff;
-
-            // Cast shadowbolt volley on timer before Berserk
-            if (m_uiShadowVolleyTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_VOLLEY) == CAST_OK)
-                    m_uiShadowVolleyTimer = urand(5000, 30000);
-            }
-            else
-                m_uiShadowVolleyTimer -= uiDiff;
+            // a small amount of time will be lost, but this is acceptable.
+            m_uiSupremeTimer = 0;
         }
+        else
+            m_uiSupremeTimer -= uiDiff;
+
+        // Shadow Volley
+        if (m_uiShadowVolleyTimer <= uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_VOLLEY) == CAST_OK)
+                m_uiShadowVolleyTimer = urand(m_bIsInBerserk ? 1000 : 5000, m_bIsInBerserk ? 3000 : 30000);
+        }
+        else
+            m_uiShadowVolleyTimer -= uiDiff;
 
         if (m_uiCleaveTimer < uiDiff)
         {
