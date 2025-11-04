@@ -24,7 +24,16 @@ param(
     [string]$BuildType = 'Release',
 
     [Parameter(Mandatory=$false)]
-    [switch]$Clean = $false
+    [switch]$Clean = $false,
+
+    [Parameter(Mandatory=$false)]
+    [switch]$EnablePlayerbots = $true,
+
+    [Parameter(Mandatory=$false)]
+    [switch]$EnableAHBot = $false,
+
+    [Parameter(Mandatory=$false)]
+    [switch]$EnableExtractors = $false
 )
 
 $ErrorActionPreference = "Stop"
@@ -55,9 +64,20 @@ if (-not (Test-Path $buildDir)) {
 
 # Configurar
 Write-Info "Configurando proyecto ($BuildType)..."
+Write-Host "Playerbots: $(if ($EnablePlayerbots) { 'ON' } else { 'OFF' }) | AHBot: $(if ($EnableAHBot) { 'ON' } else { 'OFF' }) | Extractors: $(if ($EnableExtractors) { 'ON' } else { 'OFF' })" -ForegroundColor Cyan
+
 Push-Location $buildDir
 try {
-    cmake .. -DCMAKE_BUILD_TYPE=$BuildType
+    $cmakeArgs = @(
+        "..",
+        "-DCMAKE_BUILD_TYPE=$BuildType"
+    )
+
+    if ($EnablePlayerbots) { $cmakeArgs += "-DBUILD_PLAYERBOTS=ON" }
+    if ($EnableAHBot) { $cmakeArgs += "-DBUILD_AHBOT=ON" }
+    if ($EnableExtractors) { $cmakeArgs += "-DBUILD_EXTRACTORS=ON" }
+
+    & cmake $cmakeArgs
     if ($LASTEXITCODE -ne 0) {
         Write-Err "Error en configuración CMake"
         exit 1

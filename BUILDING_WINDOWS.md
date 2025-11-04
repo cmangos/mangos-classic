@@ -81,11 +81,13 @@ Eso es todo! El script:
 
 ## 📝 Uso del Script
 
-### Compilación básica (Release)
+### Compilación básica (Release con Playerbots)
 
 ```powershell
 .\build-windows.ps1
 ```
+
+**Por defecto, Playerbots está HABILITADO**. Los bots te permiten jugar con personajes controlados por IA.
 
 ### Compilación Debug
 
@@ -105,6 +107,34 @@ Eso es todo! El script:
 .\build-windows.ps1 -BuildType MinSizeRel
 ```
 
+### Compilación sin Playerbots
+
+```powershell
+.\build-windows.ps1 -EnablePlayerbots:$false
+```
+
+### Compilación con Auction House Bot
+
+```powershell
+.\build-windows.ps1 -EnableAHBot
+```
+
+El AHBot puebla automáticamente las casas de subastas con ítems.
+
+### Compilación con Extractores
+
+```powershell
+.\build-windows.ps1 -EnableExtractors
+```
+
+Los extractores generan datos de mapas, DBCs, VMaps y MMaps del cliente.
+
+### Compilación completa (todos los módulos)
+
+```powershell
+.\build-windows.ps1 -EnablePlayerbots -EnableAHBot -EnableExtractors
+```
+
 ### Omitir verificación de dependencias (si ya están instaladas)
 
 ```powershell
@@ -120,7 +150,7 @@ Eso es todo! El script:
 ### Combinar opciones
 
 ```powershell
-.\build-windows.ps1 -BuildType Debug -BuildDir "build-debug" -SkipDependencyCheck
+.\build-windows.ps1 -BuildType Debug -BuildDir "build-debug" -EnablePlayerbots -EnableAHBot -SkipDependencyCheck
 ```
 
 ## 🔨 Instalación Manual (Si el script falla)
@@ -246,10 +276,17 @@ choco upgrade cmake -y
 
 ### Compilar solo componentes específicos
 
-Puedes editar el CMakeLists.txt o usar opciones de CMake:
+El script `build-windows.ps1` soporta estas opciones:
+
+**Módulos Opcionales:**
+- `-EnablePlayerbots` (Habilitado por defecto) - Soporte para bots IA
+- `-EnableAHBot` (Deshabilitado por defecto) - Auction House Bot
+- `-EnableExtractors` (Deshabilitado por defecto) - Herramientas de extracción
+
+**Uso avanzado con CMake directo:**
 
 ```powershell
-cmake .. -DBUILD_EXTRACTORS=OFF -DBUILD_PLAYERBOTS=ON
+cmake .. -DBUILD_EXTRACTORS=ON -DBUILD_PLAYERBOTS=ON -DBUILD_AHBOT=ON
 ```
 
 ### Usar un compilador específico

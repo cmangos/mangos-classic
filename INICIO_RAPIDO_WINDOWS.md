@@ -30,7 +30,15 @@ El script instalará automáticamente:
 - CMake
 - Boost
 
-Y compilará el proyecto. Los binarios estarán en `build\bin\x64_Release\`
+Y compilará el proyecto **con soporte para Playerbots** (bots IA). Los binarios estarán en `build\bin\x64_Release\`
+
+### 4️⃣ Configurar Base de Datos
+
+```powershell
+.\setup-database.ps1 -MySQLRootPassword "tu_password"
+```
+
+Esto creará todas las bases de datos necesarias incluyendo soporte para bots.
 
 ---
 
@@ -41,6 +49,16 @@ Y compilará el proyecto. Los binarios estarán en `build\bin\x64_Release\`
 .\build-windows.ps1 -BuildType Debug
 ```
 
+### Con AHBot (Auction House Bot)
+```powershell
+.\build-windows.ps1 -EnableAHBot
+```
+
+### Sin Playerbots
+```powershell
+.\build-windows.ps1 -EnablePlayerbots:$false
+```
+
 ### Compilación rápida (si ya tienes todo instalado)
 ```powershell
 .\quick-build.ps1
@@ -49,6 +67,11 @@ Y compilará el proyecto. Los binarios estarán en `build\bin\x64_Release\`
 ### Limpiar y recompilar
 ```powershell
 .\quick-build.ps1 -Clean
+```
+
+### Configurar solo actualizaciones de base de datos
+```powershell
+.\setup-database.ps1 -MySQLRootPassword "tu_password" -OnlyUpdates
 ```
 
 ---

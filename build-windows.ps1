@@ -30,7 +30,16 @@ param(
     [switch]$SkipDependencyCheck = $false,
 
     [Parameter(Mandatory=$false)]
-    [string]$BuildDir = "build"
+    [string]$BuildDir = "build",
+
+    [Parameter(Mandatory=$false)]
+    [switch]$EnablePlayerbots = $true,
+
+    [Parameter(Mandatory=$false)]
+    [switch]$EnableAHBot = $false,
+
+    [Parameter(Mandatory=$false)]
+    [switch]$EnableExtractors = $false
 )
 
 # Colores para la salida
@@ -315,7 +324,13 @@ function Test-Dependencies {
 
 # Configurar el proyecto con CMake
 function Invoke-CMakeConfigure {
-    param([string]$buildDir, [string]$buildType)
+    param(
+        [string]$buildDir,
+        [string]$buildType,
+        [bool]$enablePlayerbots,
+        [bool]$enableAHBot,
+        [bool]$enableExtractors
+    )
 
     Write-Header "CONFIGURANDO PROYECTO CON CMAKE"
 
@@ -327,6 +342,29 @@ function Invoke-CMakeConfigure {
         Write-Info "Directorio de compilación creado: $buildDir"
     }
 
+    # Construir argumentos de CMake
+    $cmakeArgs = @(
+        "-S", $sourceDir,
+        "-B", ".",
+        "-DCMAKE_BUILD_TYPE=$buildType"
+    )
+
+    # Agregar opciones de módulos
+    if ($enablePlayerbots) {
+        $cmakeArgs += "-DBUILD_PLAYERBOTS=ON"
+        Write-Info "Módulo Playerbots: HABILITADO"
+    }
+
+    if ($enableAHBot) {
+        $cmakeArgs += "-DBUILD_AHBOT=ON"
+        Write-Info "Módulo Auction House Bot: HABILITADO"
+    }
+
+    if ($enableExtractors) {
+        $cmakeArgs += "-DBUILD_EXTRACTORS=ON"
+        Write-Info "Extractores (map/dbc/vmap/mmap): HABILITADOS"
+    }
+
     # Ejecutar CMake
     Write-Info "Ejecutando CMake..."
     Write-Info "Directorio fuente: $sourceDir"
@@ -335,7 +373,7 @@ function Invoke-CMakeConfigure {
 
     Push-Location $buildDir
     try {
-        cmake -S $sourceDir -B . -DCMAKE_BUILD_TYPE=$buildType
+        & cmake $cmakeArgs
 
         if ($LASTEXITCODE -eq 0) {
             Write-Success "Configuración de CMake completada exitosamente"
@@ -428,8 +466,16 @@ if (-not $SkipDependencyCheck) {
 # Obtener la ruta completa del directorio de compilación
 $buildDirFull = Join-Path $PSScriptRoot $BuildDir
 
+# Mostrar configuración de módulos
+Write-Host ""
+Write-ColorOutput Cyan "MÓDULOS OPCIONALES:"
+Write-Host "  Playerbots: $(if ($EnablePlayerbots) { 'HABILITADO' } else { 'DESHABILITADO' })" -ForegroundColor $(if ($EnablePlayerbots) { 'Green' } else { 'Yellow' })
+Write-Host "  AHBot: $(if ($EnableAHBot) { 'HABILITADO' } else { 'DESHABILITADO' })" -ForegroundColor $(if ($EnableAHBot) { 'Green' } else { 'Yellow' })
+Write-Host "  Extractores: $(if ($EnableExtractors) { 'HABILITADO' } else { 'DESHABILITADO' })" -ForegroundColor $(if ($EnableExtractors) { 'Green' } else { 'Yellow' })
+Write-Host ""
+
 # Configurar con CMake
-if (-not (Invoke-CMakeConfigure -buildDir $buildDirFull -buildType $BuildType)) {
+if (-not (Invoke-CMakeConfigure -buildDir $buildDirFull -buildType $BuildType -enablePlayerbots $EnablePlayerbots -enableAHBot $EnableAHBot -enableExtractors $EnableExtractors)) {
     Write-Error-Custom "Error en la configuración. Abortando."
     exit 1
 }
