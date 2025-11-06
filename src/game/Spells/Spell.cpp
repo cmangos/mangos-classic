@@ -4331,13 +4331,19 @@ void Spell::TakeAmmo() const
 
 void Spell::TakeReagents()
 {
-    if (!m_trueCaster->IsPlayer())
-        return;
-
-    if (IgnoreItemRequirements())                           // reagents used in triggered spell removed by original spell or don't must be removed.
-        return;
-
     Player* p_caster = static_cast<Player*>(m_caster);
+    Item* itemTarget = m_targets.getItemTarget();
+    Player* item_owner = itemTarget ? itemTarget->GetOwner() : nullptr;
+
+    // Early exit if caster is not a player or no item target
+    if (!m_trueCaster->IsPlayer() || !itemTarget)
+        return;
+
+    // Only override IgnoreItemRequirements for permanent enchant on traded item
+    if (IgnoreItemRequirements() && 
+        !(m_spellInfo->Effect[0] == SPELL_EFFECT_ENCHANT_ITEM && item_owner && item_owner != p_caster))
+        return;
+
     if (p_caster->CanNoReagentCast(m_spellInfo))
         return;
 
