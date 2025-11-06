@@ -21,6 +21,8 @@
 
 #include "Common.h"
 
+#include <optional>
+
 enum WaypointPathOrigin
 {
     PATH_NO_PATH                = 0,
@@ -35,11 +37,11 @@ struct WaypointNode
     float x;
     float y;
     float z;
-    float orientation;
+    std::optional<float> orientation;
     uint32 delay;
-    uint32 script_id;                                       // Added may 2010. WaypointBehavior w/DB data should in time be removed.
-    WaypointNode() : x(0.0f), y(0.0f), z(0.0f), orientation(0.0f), delay(0), script_id(0) {}
-    WaypointNode(float _x, float _y, float _z, float _o, uint32 _delay, uint32 _script_id)
+    uint32 script_id;
+    WaypointNode() : x(0.0f), y(0.0f), z(0.0f), delay(0), script_id(0) {}
+    WaypointNode(float _x, float _y, float _z, std::optional<float> _o, uint32 _delay, uint32 _script_id)
         : x(_x), y(_y), z(_z), orientation(_o), delay(_delay), script_id(_script_id) {}
 };
 

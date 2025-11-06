@@ -395,8 +395,8 @@ void WaypointMovementGenerator<Creature>::SendNextWayPointPath(Creature& creatur
 
     Movement::MoveSplineInit init(creature);
     init.MovebyPath(genPath);
-    if (nextNode->orientation != 100 && nextNode->delay != 0)
-        init.SetFacing(nextNode->orientation);
+    if (nextNode->orientation && nextNode->delay != 0)
+        init.SetFacing(*nextNode->orientation);
     if (m_forcedMovement == FORCED_MOVEMENT_WALK)
         init.SetWalk(true);
     else if (m_forcedMovement == FORCED_MOVEMENT_RUN)
@@ -537,8 +537,8 @@ bool WaypointMovementGenerator<Creature>::GetResetPosition(Creature&, float& x, 
     y = curWP->y;
     z = curWP->z;
 
-    if (curWP->orientation != 100)
-        o = curWP->orientation;
+    if (curWP->orientation)
+        o = *curWP->orientation;
     else                                                    // Calculate the resulting angle based on positions between previous and current waypoint
     {
         WaypointNode const* prevWP;

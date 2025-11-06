@@ -2800,7 +2800,7 @@ inline Creature* Helper_CreateWaypointFor(Creature* wpOwner, WaypointPathOrigin 
     TempSpawnSettings settings;
     settings.spawner = wpOwner;
     settings.entry = VISUAL_WAYPOINT;
-    settings.x = wpNode->x; settings.y = wpNode->y; settings.z = wpNode->z; settings.ori = wpNode->orientation;
+    settings.x = wpNode->x; settings.y = wpNode->y; settings.z = wpNode->z; settings.ori = wpNode->orientation ? *wpNode->orientation : 0.f;
     settings.activeObject = true;
     settings.spawnDataEntry = 2;
     settings.spawnType = TEMPSPAWN_TIMED_DESPAWN;
@@ -3597,7 +3597,7 @@ bool ChatHandler::HandleWpExportCommand(char* args)
         outfile << itr->second.x << ",";
         outfile << itr->second.y << ",";
         outfile << itr->second.z << ",";
-        outfile << itr->second.orientation << ",";
+        outfile << (itr->second.orientation ? *itr->second.orientation : 100.f) << ",";
         outfile << itr->second.delay << ",";
         if (wpOrigin != PATH_FROM_EXTERNAL)                 // Only for normal waypoints
             outfile << itr->second.script_id << ")";

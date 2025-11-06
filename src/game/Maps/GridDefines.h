@@ -22,6 +22,7 @@
 #include "Common.h"
 #include "GameSystem/NGrid.h"
 #include <cmath>
+#include <optional>
 
 // Forward class definitions
 class Corpse;
@@ -191,6 +192,11 @@ namespace MaNGOS
     inline bool IsValidMapCoord(float x, float y, float z, float o)
     {
         return IsValidMapCoord(x, y, z) && std::isfinite(o);
+    }
+
+    inline bool IsValidMapCoord(float x, float y, float z, std::optional<float> o)
+    {
+        return IsValidMapCoord(x, y, z) && (!o || std::isfinite(*o));
     }
 }
 #endif

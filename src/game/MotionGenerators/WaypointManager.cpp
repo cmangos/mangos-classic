@@ -235,7 +235,8 @@ void WaypointManager::Load()
             node.x              = fields[2].GetFloat();
             node.y              = fields[3].GetFloat();
             node.z              = fields[4].GetFloat();
-            node.orientation    = fields[5].GetFloat();
+            float ori = fields[5].GetFloat();
+            node.orientation    = ori == 100.f ? std::nullopt : std::make_optional(ori);
             node.delay          = fields[6].GetUInt32();
             node.script_id      = fields[7].GetUInt32();
 
@@ -359,7 +360,8 @@ void WaypointManager::Load()
             node.x              = fields[3].GetFloat();
             node.y              = fields[4].GetFloat();
             node.z              = fields[5].GetFloat();
-            node.orientation    = fields[6].GetFloat();
+            float ori           = fields[6].GetFloat();
+            node.orientation    = ori == 100.f ? std::nullopt : std::make_optional(ori);
             node.delay          = fields[7].GetUInt32();
             node.script_id      = fields[8].GetUInt32();
 
@@ -464,12 +466,13 @@ void WaypointManager::Load()
             WaypointPath& path = m_pathMovementTemplateMap[pathId];
             WaypointNode& node = path[point];
 
-            node.x = fields[2].GetFloat();
-            node.y = fields[3].GetFloat();
-            node.z = fields[4].GetFloat();
-            node.orientation = fields[5].GetFloat();
-            node.delay = fields[6].GetUInt32();
-            node.script_id = fields[7].GetUInt32();
+            node.x          = fields[2].GetFloat();
+            node.y          = fields[3].GetFloat();
+            node.z          = fields[4].GetFloat();
+            float ori       = fields[5].GetFloat();
+            node.orientation = ori == 100.f ? std::nullopt : std::make_optional(ori);
+            node.delay      = fields[6].GetUInt32();
+            node.script_id  = fields[7].GetUInt32();
 
             // prevent using invalid coordinates
             if (!MaNGOS::IsValidMapCoord(node.x, node.y, node.z, node.orientation))
