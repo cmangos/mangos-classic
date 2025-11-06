@@ -47,7 +47,6 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (10252,'spell_awaken_earthen_archaedas'),
 (10258,'spell_awaken_vault_warder'),
 (10259,'spell_awaken_earthen_archaedas'),
-(10848,'spell_shroud_of_death'),
 (27978,'spell_shroud_of_death'),
 (11402,'spell_shays_bell'),
 (11403,'spell_dream_vision'),

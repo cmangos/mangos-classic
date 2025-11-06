@@ -417,7 +417,7 @@ struct RandomAggro1000000 : public SpellScript
     }
 };
 
-// 10848, 27978, 40131 - Shroud of Death
+// 27978, 40131 - Shroud of Death
 struct InvisibleForAlive : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
