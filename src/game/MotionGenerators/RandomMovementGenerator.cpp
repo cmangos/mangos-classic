@@ -131,7 +131,11 @@ int32 AbstractRandomMovementGenerator::_setLocation(Unit& owner)
 
     Movement::MoveSplineInit init(owner);
     init.MovebyPath(m_pathFinder->getPath());
-    init.SetWalk(i_walk);
+
+    if (i_randomRunWander)
+        init.SetWalk(urand(0, 99) >= 15);
+    else
+        init.SetWalk(i_walk);
 
     if (owner.IsSlowedInCombat())
         init.SetCombatSlowed(1.f - ((30.f - std::min(owner.GetHealthPercent(), 30.f)) * 1.67) / 100);
@@ -171,6 +175,7 @@ WanderMovementGenerator::WanderMovementGenerator(float x, float y, float z, floa
 WanderMovementGenerator::WanderMovementGenerator(const Creature& npc) :
     AbstractRandomMovementGenerator(UNIT_STAT_ROAMING, UNIT_STAT_ROAMING_MOVE, 3000, 10000, 3)
 {
+    i_randomRunWander = npc.GetCreatureInfo()->HasFlag(CREATURE_EXTRA_FLAG_RUN_DURING_WANDER);
     npc.GetRespawnCoord(i_x, i_y, i_z, nullptr, &i_radius);
 }
 
@@ -206,6 +211,7 @@ void WanderMovementGenerator::AddToRandomPauseTime(int32 waitTimeDiff, bool forc
 TimedWanderMovementGenerator::TimedWanderMovementGenerator(Creature const& npc, uint32 timer, float radius, float verticalZ)
     : TimedWanderMovementGenerator(timer, npc.GetPositionX(), npc.GetPositionY(), npc.GetPositionZ(), radius, verticalZ)
 {
+    i_randomRunWander = npc.GetCreatureInfo()->HasFlag(CREATURE_EXTRA_FLAG_RUN_DURING_WANDER);
 }
 
 bool TimedWanderMovementGenerator::Update(Unit& owner, const uint32& diff)
