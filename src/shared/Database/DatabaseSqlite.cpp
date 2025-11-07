@@ -288,38 +288,40 @@ void SqlitePreparedStatement::addParam(unsigned int nIndex, const SqlStmtFieldDa
 
     switch (data.type()) {
         case FIELD_BOOL:
+            result = sqlite3_bind_int(*m_stmt, nIndex + 1, data.toBool());
+            break;
         case FIELD_UI8:
-            result = sqlite3_bind_int(*m_stmt, nIndex + 1, *static_cast<const uint8*>(data.buff()));
+            result = sqlite3_bind_int(*m_stmt, nIndex + 1, data.toUint8());
             break;
         case FIELD_UI16:
-            result = sqlite3_bind_int(*m_stmt, nIndex + 1, *static_cast<const uint16*>(data.buff()));
+            result = sqlite3_bind_int(*m_stmt, nIndex + 1, data.toUint16());
             break;
         case FIELD_UI32:
-            result = sqlite3_bind_int(*m_stmt, nIndex + 1, *static_cast<const uint32*>(data.buff()));
+            result = sqlite3_bind_int(*m_stmt, nIndex + 1, data.toUint32());
             break;
         case FIELD_UI64:
-            result = sqlite3_bind_int64(*m_stmt, nIndex + 1, *static_cast<const uint64*>(data.buff()));
+            result = sqlite3_bind_int64(*m_stmt, nIndex + 1, data.toUint64());
             break;
         case FIELD_I8:
-            result = sqlite3_bind_int(*m_stmt, nIndex + 1, *static_cast<const int8*>(data.buff()));
+            result = sqlite3_bind_int(*m_stmt, nIndex + 1, data.toInt8());
             break;
         case FIELD_I16:
-            result = sqlite3_bind_int(*m_stmt, nIndex + 1, *static_cast<const int16*>(data.buff()));
+            result = sqlite3_bind_int(*m_stmt, nIndex + 1, data.toInt16());
             break;
         case FIELD_I32:
-            result = sqlite3_bind_int(*m_stmt, nIndex + 1, *static_cast<const int32*>(data.buff()));
+            result = sqlite3_bind_int(*m_stmt, nIndex + 1, data.toInt32());
             break;
         case FIELD_I64:
-            result = sqlite3_bind_int64(*m_stmt, nIndex + 1, *static_cast<const int64*>(data.buff()));
+            result = sqlite3_bind_int64(*m_stmt, nIndex + 1, data.toInt64());
             break;
         case FIELD_FLOAT:
-            result = sqlite3_bind_double(*m_stmt, nIndex + 1, *static_cast<const float*>(data.buff()));
+            result = sqlite3_bind_double(*m_stmt, nIndex + 1, data.toFloat());
             break;
         case FIELD_DOUBLE:
-            result = sqlite3_bind_double(*m_stmt, nIndex + 1, *static_cast<const double*>(data.buff()));
+            result = sqlite3_bind_double(*m_stmt, nIndex + 1, data.toDouble());
             break;
         case FIELD_STRING:
-            result = sqlite3_bind_text(*m_stmt, nIndex + 1, static_cast<const char*>(data.buff()), -1, SQLITE_STATIC);
+            result = sqlite3_bind_text(*m_stmt, nIndex + 1, data.toStr(), -1, SQLITE_STATIC);
             break;
         case FIELD_NONE:
             result = sqlite3_bind_null(*m_stmt, nIndex + 1);
@@ -359,11 +361,14 @@ bool SqlitePreparedStatement::execute()
     {
         sLog.outErrorDb("SQL: cannot execute '%s'", m_szFmt.c_str());
         sLog.outErrorDb("SQL ERROR: %s", sqlite3_errmsg(m_pSqliteConn));
+        sqlite3_reset(*m_stmt);
+        sqlite3_clear_bindings(*m_stmt);
         return false;
     }
 
     // Reset the prepared statement to be executed again if needed
     sqlite3_reset(*m_stmt);
+    sqlite3_clear_bindings(*m_stmt);
 
     return true;
 }
