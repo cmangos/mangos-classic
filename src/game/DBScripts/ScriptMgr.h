@@ -192,7 +192,7 @@ struct ScriptInfo
         struct                                              // SCRIPT_COMMAND_MOVE_TO (3)
         {
             uint32 relayId;                                 // datalong
-            uint32 travelSpeed;                             // datalong2
+            uint32 flags;                                   // datalong2
             uint32 forcedMovement;                          // datalong3
         } moveTo;
 

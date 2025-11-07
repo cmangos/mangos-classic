@@ -182,7 +182,7 @@ Defining a buddy could be done in several way:
  3 SCRIPT_COMMAND_MOVE_TO                   resultingSource = Creature
                                             If position is very near to current position, or x=y=z=0, then only orientation is changed
                                             * datalong = dbscripts_on_relay id - executed for source and target same as this script
-                                            * datalong2 = travel_speed*100 (use 0 for creature default movement)
+                                            * datalong2
                                             * datalong3 = enum ForcedMovement
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: teleport unit to position
                                             * x/y/z/o

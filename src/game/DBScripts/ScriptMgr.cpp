@@ -1831,6 +1831,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
             if (LogIfNotUnit(pSource))
                 break;
 
+            Unit* unit = static_cast<Unit*>(pSource);
             Creature* creature = static_cast<Creature*>(pSource);
 
             if (m_script->textId[0])
@@ -1838,7 +1839,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 if (m_script->textId[0] == 1 || m_script->textId[0] == 2 && !creature->GetCreatureGroup())
                 {
                     Position const& respPos = creature->GetRespawnPosition();
-                    creature->GetMotionMaster()->MovePoint(0, respPos, ForcedMovement(m_script->moveTo.forcedMovement), 0.f, true, creature->GetObjectGuid(), m_script->moveTo.relayId);
+                    creature->GetMotionMaster()->MovePoint(0, respPos, ForcedMovement(m_script->moveTo.forcedMovement), m_script->speed, true, creature->GetObjectGuid(), m_script->moveTo.relayId);
                 }
                 else if (m_script->textId[0] == 2)
                 {
@@ -1849,28 +1850,30 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
 
             // Just turn around
             if ((m_script->x == 0.0f && m_script->y == 0.0f && m_script->z == 0.0f) ||
-                    // Check point-to-point distance, hence revert effect of bounding radius
-                    ((Unit*)pSource)->IsWithinDist3d(m_script->x, m_script->y, m_script->z, 0.01f - ((Unit*)pSource)->GetObjectBoundingRadius()))
+                // Check point-to-point distance, hence revert effect of bounding radius
+                unit->IsWithinDist3d(m_script->x, m_script->y, m_script->z, 0.01f - unit->GetObjectBoundingRadius()))
             {
-                ((Unit*)pSource)->SetFacingTo(m_script->o);
+                unit->SetFacingTo(m_script->o);
+                break;
+            }
+
+            // Change Z cord only
+            if (m_script->x == 0.0f && m_script->y == 0.0f && m_script->z != 0.0f)
+            {
+                unit->GetMotionMaster()->MovePoint(0, Position(pSource->GetPositionX(), pSource->GetPositionY(), pSource->GetPositionZ() + m_script->z, 0.f), ForcedMovement(m_script->moveTo.forcedMovement), m_script->speed, true, creature->GetObjectGuid(), m_script->moveTo.relayId);
                 break;
             }
 
             // For command additional teleport the unit
             if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
             {
-                ((Unit*)pSource)->NearTeleportTo(m_script->x, m_script->y, m_script->z, m_script->o != 0.0f ? m_script->o : ((Unit*)pSource)->GetOrientation());
+                unit->NearTeleportTo(m_script->x, m_script->y, m_script->z, m_script->o != 0.0f ? m_script->o : unit->GetOrientation());
                 break;
             }
 
             // Normal Movement
-            if (m_script->moveTo.travelSpeed)
-                ((Unit*)pSource)->GetMotionMaster()->MoveCharge(m_script->x, m_script->y, m_script->z, m_script->moveTo.travelSpeed * 0.01f, 0);
-            else
-            {
-                ((Unit*)pSource)->GetMotionMaster()->Clear();
-                ((Unit*)pSource)->GetMotionMaster()->MovePoint(0, Position(m_script->x, m_script->y, m_script->z, m_script->o), ForcedMovement(m_script->moveTo.forcedMovement), 0.f, true, pTarget ? pTarget->GetObjectGuid() : ObjectGuid(), m_script->moveTo.relayId);
-            }
+            unit->GetMotionMaster()->Clear();
+            unit->GetMotionMaster()->MovePoint(0, Position(m_script->x, m_script->y, m_script->z, m_script->o), ForcedMovement(m_script->moveTo.forcedMovement), m_script->speed, true, pTarget ? pTarget->GetObjectGuid() : ObjectGuid(), m_script->moveTo.relayId);
             break;
         }
         case SCRIPT_COMMAND_FLAG_SET:                       // 4
