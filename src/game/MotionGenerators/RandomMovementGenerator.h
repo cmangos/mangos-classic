@@ -71,7 +71,7 @@ class WanderMovementGenerator : public AbstractRandomMovementGenerator
 {
     public:
         explicit WanderMovementGenerator(Creature const& npc);
-        WanderMovementGenerator(float x, float y, float z, float radius, float verticalZ = 0.0f, bool walk = true);
+        WanderMovementGenerator(Unit const& unit, float x, float y, float z, float radius, float verticalZ = 0.0f, bool walk = true);
 
         void Finalize(Unit& owner) override;
         void Interrupt(Unit& owner) override;
@@ -84,12 +84,8 @@ class WanderMovementGenerator : public AbstractRandomMovementGenerator
 class TimedWanderMovementGenerator : public WanderMovementGenerator
 {
     public:
-        explicit TimedWanderMovementGenerator(Creature const& npc, uint32 timer, float radius, float verticalZ = 0.0f);
-        TimedWanderMovementGenerator(uint32 timer, float x, float y, float z, float radius, float verticalZ = 0.0f, bool walk = true)
-            : WanderMovementGenerator(x, y, z, radius, verticalZ, walk), m_durationTimer(timer)
-        {
-
-        }
+        explicit TimedWanderMovementGenerator(Unit const& npc, uint32 timer, float radius, float verticalZ = 0.0f);
+        TimedWanderMovementGenerator(Unit const& unit, uint32 timer, float x, float y, float z, float radius, float verticalZ = 0.0f, bool walk = true);
 
         bool Update(Unit& owner, const uint32& diff) override;
 

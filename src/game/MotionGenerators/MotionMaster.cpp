@@ -286,9 +286,9 @@ void MotionMaster::MoveRandomAroundPoint(float x, float y, float z, float radius
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s move random.", m_owner->GetGuidStr().c_str());
         if (timer)
-            Mutate(new TimedWanderMovementGenerator(timer, x, y, z, radius, verticalZ, walk));
+            Mutate(new TimedWanderMovementGenerator(*m_owner, timer, x, y, z, radius, verticalZ, walk));
         else
-            Mutate(new WanderMovementGenerator(x, y, z, radius, verticalZ, walk));
+            Mutate(new WanderMovementGenerator(*m_owner, x, y, z, radius, verticalZ, walk));
     }
 }
 

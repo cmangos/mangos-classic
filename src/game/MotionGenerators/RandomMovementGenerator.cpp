@@ -162,7 +162,7 @@ ConfusedMovementGenerator::ConfusedMovementGenerator(const Unit& owner) :
 {
 }
 
-WanderMovementGenerator::WanderMovementGenerator(float x, float y, float z, float radius, float verticalZ, bool walk) :
+WanderMovementGenerator::WanderMovementGenerator(Unit const& unit, float x, float y, float z, float radius, float verticalZ, bool walk) :
     AbstractRandomMovementGenerator(UNIT_STAT_ROAMING, UNIT_STAT_ROAMING_MOVE, 3000, 10000, 3, walk)
 {
     i_x = x;
@@ -170,6 +170,8 @@ WanderMovementGenerator::WanderMovementGenerator(float x, float y, float z, floa
     i_z = z;
     i_radius = radius;
     i_verticalZ = verticalZ;
+    if (unit.IsCreature())
+        i_randomRunWander = static_cast<Creature const&>(unit).GetCreatureInfo()->HasFlag(CREATURE_EXTRA_FLAG_RUN_DURING_WANDER);
 }
 
 WanderMovementGenerator::WanderMovementGenerator(const Creature& npc) :
@@ -208,10 +210,16 @@ void WanderMovementGenerator::AddToRandomPauseTime(int32 waitTimeDiff, bool forc
     }
 }
 
-TimedWanderMovementGenerator::TimedWanderMovementGenerator(Creature const& npc, uint32 timer, float radius, float verticalZ)
-    : TimedWanderMovementGenerator(timer, npc.GetPositionX(), npc.GetPositionY(), npc.GetPositionZ(), radius, verticalZ)
+TimedWanderMovementGenerator::TimedWanderMovementGenerator(Unit const& npc, uint32 timer, float radius, float verticalZ)
+    : TimedWanderMovementGenerator(npc, timer, npc.GetPositionX(), npc.GetPositionY(), npc.GetPositionZ(), radius, verticalZ)
 {
-    i_randomRunWander = npc.GetCreatureInfo()->HasFlag(CREATURE_EXTRA_FLAG_RUN_DURING_WANDER);
+
+}
+
+TimedWanderMovementGenerator::TimedWanderMovementGenerator(Unit const& unit, uint32 timer, float x, float y, float z, float radius, float verticalZ, bool walk)
+    : WanderMovementGenerator(unit, x, y, z, radius, verticalZ, walk), m_durationTimer(timer)
+{
+
 }
 
 bool TimedWanderMovementGenerator::Update(Unit& owner, const uint32& diff)
