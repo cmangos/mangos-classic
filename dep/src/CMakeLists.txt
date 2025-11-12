@@ -26,16 +26,16 @@ endif()
 
 # zlib
 find_package(ZLIB)
-if (NOT ZLIB_FOUND OR ZLIB_VERSION_STRING VERSION_LESS 1.2.13)
+if (NOT ZLIB_FOUND OR ZLIB_VERSION_STRING VERSION_LESS 1.3.1)
   FetchContent_Declare(
     zlib
     GIT_REPOSITORY "https://github.com/madler/zlib.git"
-    GIT_TAG "v1.2.13"
+    GIT_TAG "v1.3.1"
   )
   FetchContent_GetProperties(zlib)
   if(NOT zlib_POPULATED)
     message(STATUS "Setting up zlib ...")
-    FetchContent_Populate(zlib)
+    FetchContent_MakeAvailable(zlib)
     set(SKIP_INSTALL_ALL true)
     set(BUILD_SHARED false)
     # patch provided cmake to avoid unneeded target install and deprecation warning.
@@ -43,7 +43,6 @@ if (NOT ZLIB_FOUND OR ZLIB_VERSION_STRING VERSION_LESS 1.2.13)
     file(COPY "patch-zlib-CMakeLists.txt" DESTINATION "${zlib_SOURCE_DIR}")
     file(REMOVE "${zlib_SOURCE_DIR}/CMakeLists.txt")
     file(RENAME "${zlib_SOURCE_DIR}/patch-zlib-CMakeLists.txt" "${zlib_SOURCE_DIR}/CMakeLists.txt")
-    add_subdirectory(${zlib_SOURCE_DIR} ${zlib_BINARY_DIR})
     target_include_directories(zlib PUBLIC ${zlib_SOURCE_DIR} ${zlib_BINARY_DIR})
     message(STATUS "zlib ${ZLIB_FULL_VERSION} successfully installed!")
   endif()
