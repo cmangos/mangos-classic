@@ -270,7 +270,7 @@ void WorldSession::HandleDestroyItemOpcode(WorldPacket& recv_data)
     if (count)
     {
         uint32 i_count = count;
-        _player->DestroyItemCount(pItem, i_count, true);
+        _player->DestroyItemCount(*pItem, i_count, true);
     }
     else
         _player->DestroyItem(bag, slot, true);
@@ -1158,5 +1158,5 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
     CharacterDatabase.CommitTransaction();
 
     uint32 count = 1;
-    _player->DestroyItemCount(gift, count, true);
+    _player->DestroyItemCount(*gift, count, true);
 }

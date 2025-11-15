@@ -1353,7 +1353,7 @@ void Loot::Release(Player* player)
                     // reset loot for allow repeat looting if stack > 5
                     Clear();
                     m_itemTarget->SetLootState(ITEM_LOOT_REMOVED);
-                    player->DestroyItemCount(m_itemTarget, count, true);
+                    player->DestroyItemCount(*m_itemTarget, count, true);
                     break;
                 }
                 // temporary loot, auto loot move

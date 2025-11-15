@@ -4705,7 +4705,7 @@ void Spell::EffectFeedPet(SpellEffectIndex eff_idx)
     m_spellLog.SendToSet();
 
     uint32 count = 1;
-    player->DestroyItemCount(foodItem, count, true);
+    player->DestroyItemCount(*foodItem, count, true);
     // TODO: fix crash when a spell has two effects, both pointed at the same item target
 
     m_caster->CastCustomSpell(nullptr, m_spellInfo->EffectTriggerSpell[eff_idx], &benefit, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);

@@ -4264,7 +4264,7 @@ void Spell::TakeCastItem()
         if (m_CastItem)
             m_CastItem->SetUsedInSpell(false);
         uint32 count = 1;
-        static_cast<Player*>(m_caster)->DestroyItemCount(m_CastItem, count, true);
+        static_cast<Player*>(m_caster)->DestroyItemCount(*m_CastItem, count, true);
 
         // prevent crash at access to deleted m_targets.getItemTarget
         ClearCastItem();
@@ -4320,7 +4320,7 @@ void Spell::TakeAmmo() const
             {
                 // decrease items amount for stackable throw weapon
                 uint32 count = 1;
-                player->DestroyItemCount(pItem, count, true);
+                player->DestroyItemCount(*pItem, count, true);
             }
         }
         else if (uint32 ammo = player->GetUInt32Value(PLAYER_AMMO_ID))
