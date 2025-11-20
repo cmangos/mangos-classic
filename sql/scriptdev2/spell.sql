@@ -62,7 +62,6 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (12639,'spell_summon_hakkar'),
 (12948,'spell_hakkar_summoned'),
 (12479,'spell_hex_of_jammalan'),
-(20786,'spell_destroy_karangs_banner'),
 (12938,'spell_fel_curse'),
 (13258,'spell_summon_goblin_bomb'),
 (13278,'spell_gdr_channel'),
