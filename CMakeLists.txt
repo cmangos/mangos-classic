@@ -191,22 +191,21 @@ set(Boost_USE_STATIC_LIBS ON)
 set(Boost_NO_BOOST_CMAKE ON)   # should fix build for boost 1.71
 #set(Boost_DEBUG ON)
 
-if(MSVC)
-  # Use at least verion 3.8.1 of FindBoost to fix some issues. Especialy in MSVC with fixed Toolset issues.
-  # This is a workaround while VisualStudio does not embed higher cmake version than 3.7.2
-  if(${CMAKE_VERSION} VERSION_LESS "3.11.3")
-    list(APPEND CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/macros/FindBoost")
-    message(STATUS "FindBoost: included version 3.11.3 of FindBoost is used.")
-  endif()
-endif()
-
 # In our case use new way to treat BOOST_ROOT environement variable
 if (POLICY CMP0074)
   cmake_policy(SET CMP0074 NEW)
 endif()
 
+if(POLICY CMP0144)
+  cmake_policy(SET CMP0144 NEW) # find_package() uses upper-case <PACKAGENAME>_ROOT variables
+endif()
+
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+endif()
+
 # Find needed packages and if necessery abort if something important is missing
-find_package(Boost 1.69.0 REQUIRED COMPONENTS program_options thread regex serialization filesystem)
+find_package(Boost 1.70.0 REQUIRED COMPONENTS program_options thread regex serialization filesystem)
 
 if(NOT Boost_FOUND AND (BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER))
   message(STATUS "BOOST_ROOT = $ENV{BOOST_ROOT}")
