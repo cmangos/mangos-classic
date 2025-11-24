@@ -1,0 +1,5 @@
+subdir('framework')
+subdir('shared')
+subdir('game')
+subdir('mangosd')
+subdir('realmd')
