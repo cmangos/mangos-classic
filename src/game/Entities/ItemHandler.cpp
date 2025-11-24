@@ -897,6 +897,8 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
     ++slot;
 
     DETAIL_LOG("PLAYER: Buy bank bag slot, slot number = %u", slot);
+    if (slot > (BANK_SLOT_BAG_END - BANK_SLOT_BAG_START))
+        return;
 
     BankBagSlotPricesEntry const* slotEntry = sBankBagSlotPricesStore.LookupEntry(slot);
 
