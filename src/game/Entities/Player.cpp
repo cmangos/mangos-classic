@@ -11087,6 +11087,13 @@ void Player::SendSellError(SellResult msg, Creature* pCreature, ObjectGuid itemG
     GetSession()->SendPacket(data);
 }
 
+void Player::SendOpenContainer(ObjectGuid itemGuid)
+{
+    WorldPacket data(SMSG_OPEN_CONTAINER, 8);
+    data << ObjectGuid(itemGuid);
+    GetSession()->SendPacket(data);
+}
+
 void Player::TradeCancel(bool sendback, TradeStatus status /*= TRADE_STATUS_TRADE_CANCELED*/)
 {
     if (m_trade)
