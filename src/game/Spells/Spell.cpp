@@ -4272,27 +4272,13 @@ void Spell::SendChannelStart(uint32 duration)
 
     if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_IS_CHANNELED))
     {
-        WorldPacket data(SMSG_SPELL_UPDATE_CHAIN_TARGETS);
-        data << m_caster->GetObjectGuid();
-        data << uint32(m_spellInfo->Id);
-        size_t count_pos = data.wpos();
-        data << uint32(0);
-        uint32 hit = 0;
-        for (TargetList::const_iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
+        if (target)
         {
-            if (((itr->effectHitMask & (1 << EFFECT_INDEX_0)) && itr->reflectResult == SPELL_MISS_NONE &&
-                m_CastItem) || itr->targetGUID != m_caster->GetObjectGuid())
-            {
-                if (Unit* target = ObjectAccessor::GetUnit(*m_caster, itr->targetGUID))
-                {
-                    ++hit;
-                    data << target->GetObjectGuid();
-                }
-            }
-        }
-        if (hit)
-        {
-            data.put<uint32>(count_pos, hit);
+            WorldPacket data(SMSG_SPELL_UPDATE_CHAIN_TARGETS);
+            data << m_caster->GetObjectGuid();
+            data << uint32(m_spellInfo->Id);
+            data << uint32(1);
+            data << target->GetObjectGuid();
             m_caster->SendMessageToSet(data, true);
         }
     }
