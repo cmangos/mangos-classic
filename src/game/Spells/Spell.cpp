@@ -4277,8 +4277,26 @@ void Spell::SendChannelStart(uint32 duration)
             WorldPacket data(SMSG_SPELL_UPDATE_CHAIN_TARGETS);
             data << m_caster->GetObjectGuid();
             data << uint32(m_spellInfo->Id);
-            data << uint32(1);
-            data << target->GetObjectGuid();
+            size_t count_pos = data.wpos();
+            data << uint32(0);
+            uint32 hit = 1;
+            data << target->GetObjectGuid(); // must be first
+
+            for (TargetList::const_iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
+            {
+                if (itr->targetGUID == target->GetObjectGuid()) // already set as first
+                    continue;
+
+                if (((itr->effectHitMask & (1 << EFFECT_INDEX_0)) && itr->reflectResult == SPELL_MISS_NONE) || itr->targetGUID != m_caster->GetObjectGuid())
+                {
+                    ++hit;
+                    data << itr->targetGUID;
+                    if (hit >= 32)
+                        break;
+                }
+            }
+
+            data.put<uint32>(count_pos, hit);
             m_caster->SendMessageToSet(data, true);
         }
     }
