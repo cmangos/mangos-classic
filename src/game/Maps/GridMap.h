@@ -156,12 +156,12 @@ class TerrainInfo : public Referencable<std::atomic_long>
 
         GridMapLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data = nullptr, float collisionHeight = 2.03128f) const;
 
-        uint16 GetAreaFlag(float x, float y, float z, bool* isOutdoors = nullptr) const;
+        uint16 GetAreaFlag(float x, float y, float z, bool* isOutdoors = nullptr, int32* wmoGroupId = nullptr) const;
         uint8 GetTerrainType(float x, float y) const;
 
         uint32 GetAreaId(float x, float y, float z) const;
         uint32 GetZoneId(float x, float y, float z) const;
-        void GetZoneAndAreaId(uint32& zoneid, uint32& areaid, float x, float y, float z) const;
+        void GetZoneAndAreaId(uint32& zoneid, uint32& areaid, float x, float y, float z, int32* wmoGroupId = nullptr) const;
 
         bool GetAreaInfo(float x, float y, float z, uint32& flags, int32& adtId, int32& rootId, int32& groupId) const;
         AreaNameInfo GetAreaName(float x, float y, float z, uint32 langIndex) const;

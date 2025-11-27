@@ -978,11 +978,12 @@ AreaNameInfo TerrainInfo::GetAreaName(float x, float y, float z, uint32 langInde
     return nameInfo;
 }
 
-uint16 TerrainInfo::GetAreaFlag(float x, float y, float z, bool* isOutdoors) const
+uint16 TerrainInfo::GetAreaFlag(float x, float y, float z, bool* isOutdoors, int32* wmoGroupId) const
 {
     uint32 mogpFlags = 0;
     int32 adtId, rootId, groupId;
     AreaTableEntry const* atEntry = nullptr;
+    WMOAreaTableEntry const* foundWmoEntry = nullptr;
     bool haveAreaInfo = false;
 
     if (GetAreaInfo(x, y, z, mogpFlags, adtId, rootId, groupId))
@@ -994,8 +995,11 @@ uint16 TerrainInfo::GetAreaFlag(float x, float y, float z, bool* isOutdoors) con
             auto areaEntry = GetAreaEntryByAreaID(wmoEntry->areaId);
             if (areaEntry && areaEntry->mapid == GetMapId())
             {
+                foundWmoEntry = wmoEntry;
                 atEntry = areaEntry;
             }
+            if (!wmoEntry->areaId)
+                foundWmoEntry = wmoEntry;
         }
     }
 
@@ -1018,6 +1022,10 @@ uint16 TerrainInfo::GetAreaFlag(float x, float y, float z, bool* isOutdoors) con
         else
             *isOutdoors = true;
     }
+
+    if (foundWmoEntry && wmoGroupId)
+        *wmoGroupId = foundWmoEntry->groupId;
+
     return areaflag;
 }
 
@@ -1038,9 +1046,9 @@ uint32 TerrainInfo::GetZoneId(float x, float y, float z) const
     return TerrainManager::GetZoneIdByAreaFlag(GetAreaFlag(x, y, z), m_mapId);
 }
 
-void TerrainInfo::GetZoneAndAreaId(uint32& zoneid, uint32& areaid, float x, float y, float z) const
+void TerrainInfo::GetZoneAndAreaId(uint32& zoneid, uint32& areaid, float x, float y, float z, int32* wmoGroupId) const
 {
-    TerrainManager::GetZoneAndAreaIdByAreaFlag(zoneid, areaid, GetAreaFlag(x, y, z), m_mapId);
+    TerrainManager::GetZoneAndAreaIdByAreaFlag(zoneid, areaid, GetAreaFlag(x, y, z, nullptr, wmoGroupId), m_mapId);
 }
 
 GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data, float collisionHeight) const

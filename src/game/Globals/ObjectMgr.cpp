@@ -6055,7 +6055,7 @@ void ObjectMgr::GenerateZoneAndAreaIds()
     WorldDatabase.DirectExecute("TRUNCATE creature_zone");
     WorldDatabase.DirectExecute("TRUNCATE gameobject_zone");
 
-    std::string baseCreature = "INSERT INTO creature_zone(Guid, ZoneId, AreaId) VALUES";
+    std::string baseCreature = "INSERT INTO creature_zone(Guid, ZoneId, AreaId, WmoGroupId) VALUES";
     int i = 0;
     int total = 0;
     std::string query = "";
@@ -6063,6 +6063,7 @@ void ObjectMgr::GenerateZoneAndAreaIds()
     {
         CreatureData const& creature = data.second;
         uint32 zoneId, areaId;
+        int32 wmoGroupId = 0;
         TerrainInfo* info = sTerrainMgr.LoadTerrain(creature.mapid);
         MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), creature.mapid, 0);
         CellPair p = MaNGOS::ComputeCellPair(creature.posX, creature.posY);
@@ -6071,9 +6072,9 @@ void ObjectMgr::GenerateZoneAndAreaIds()
         int gx = (MAX_NUMBER_OF_GRIDS - 1) - gp.x_coord;
         int gy = (MAX_NUMBER_OF_GRIDS - 1) - gp.y_coord;
         info->LoadMapAndVMap(gx, gy);
-        info->GetZoneAndAreaId(zoneId, areaId, creature.posX, creature.posY, creature.posZ);
+        info->GetZoneAndAreaId(zoneId, areaId, creature.posX, creature.posY, creature.posZ, &wmoGroupId);
 
-        query += "(" + std::to_string(data.first) + "," + std::to_string(zoneId) + "," + std::to_string(areaId) + "),";
+        query += "(" + std::to_string(data.first) + "," + std::to_string(zoneId) + "," + std::to_string(areaId) + "," + std::to_string(wmoGroupId) + "),";
         ++i; ++total;
         if (i >= 100)
         {
@@ -6085,11 +6086,12 @@ void ObjectMgr::GenerateZoneAndAreaIds()
         }
     }
 
-    std::string baseGo = "INSERT INTO gameobject_zone(Guid, ZoneId, AreaId) VALUES";
+    std::string baseGo = "INSERT INTO gameobject_zone(Guid, ZoneId, AreaId, WmoGroupId) VALUES";
     for (auto& data : mGameObjectDataMap)
     {
         GameObjectData const& go = data.second;
         uint32 zoneId, areaId;
+        int32 wmoGroupId = 0;
         TerrainInfo* info = sTerrainMgr.LoadTerrain(go.mapid);
         MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), go.mapid, 0);
         CellPair p = MaNGOS::ComputeCellPair(go.posX, go.posY);
@@ -6098,9 +6100,9 @@ void ObjectMgr::GenerateZoneAndAreaIds()
         int gx = (MAX_NUMBER_OF_GRIDS - 1) - gp.x_coord;
         int gy = (MAX_NUMBER_OF_GRIDS - 1) - gp.y_coord;
         info->LoadMapAndVMap(gx, gy);
-        info->GetZoneAndAreaId(zoneId, areaId, go.posX, go.posY, go.posZ + 1);
+        info->GetZoneAndAreaId(zoneId, areaId, go.posX, go.posY, go.posZ + 1, &wmoGroupId);
 
-        query += "(" + std::to_string(data.first) + "," + std::to_string(zoneId) + "," + std::to_string(areaId) + "),";
+        query += "(" + std::to_string(data.first) + "," + std::to_string(zoneId) + "," + std::to_string(areaId) + "," + std::to_string(wmoGroupId) + "),";
         ++i; ++total;
         if (i >= 100)
         {
