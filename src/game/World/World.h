@@ -41,6 +41,7 @@
 #include <utility>
 #include <vector>
 #include <array>
+#include <atomic>
 
 class Object;
 class ObjectGuid;
@@ -392,7 +393,7 @@ struct CliCommandHolder
 class World
 {
     public:
-        static volatile uint32 m_worldLoopCounter;
+        static std::atomic<uint32> m_worldLoopCounter;
 
         World();
         ~World();
