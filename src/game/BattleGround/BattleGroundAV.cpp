@@ -512,7 +512,7 @@ void BattleGroundAV::ProcessPlayerDestroyedPoint(AVNodeIds node)
         SpawnEvent(BG_AV_MARSHAL_A_SOUTH + tmp, 0, false);
 
         UpdateScore(GetOtherTeamIndex(ownerTeamIdx), (-1) * BG_AV_RES_TOWER);
-        RewardReputationToTeam((ownerTeam == ALLIANCE) ? BG_AV_FACTION_ID_STORMPIKE : BG_AV_FACTION_ID_STORMPIKE, m_repTowerDestruction, ownerTeam);
+        RewardReputationToTeam((ownerTeam == ALLIANCE) ? BG_AV_FACTION_ID_STORMPIKE : BG_AV_FACTION_ID_FROSTWOLF, m_repTowerDestruction, ownerTeam);
         RewardHonorToTeam(GetBonusHonorFromKill(BG_AV_KILL_TOWER), ownerTeam);
 
         DoSendYellToTeam(ownerTeamIdx, LANG_BG_AV_TOWER_TAKEN, node);
