@@ -409,6 +409,18 @@ struct Area52Transporter : public SpellScript
     }
 };
 
+// 15712 - Linken's Boomerang
+struct LinkensBoomerang : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        spell->GetUnitTarget()->CastSpell(spell->GetCaster(), 15713, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_item_scripts()
 {
     Script* pNewScript = new Script;
@@ -431,4 +443,5 @@ void AddSC_item_scripts()
     RegisterSpellScript<EverlookTransporter>("spell_everlook_transporter");
     RegisterSpellScript<ToshleysStationTransporter>("spell_toshleys_station_transporter");
     RegisterSpellScript<Area52Transporter>("spell_area52_transporter");
+    RegisterSpellScript<LinkensBoomerang>("spell_linkens_boomerang");
 }
