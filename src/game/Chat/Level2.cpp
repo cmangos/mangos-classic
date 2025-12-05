@@ -1348,7 +1348,7 @@ bool ChatHandler::HandleGameObjectNearSpawnedCommand(char* args)
         uint32 spawnGroupId = 0;
         if (SpawnGroupEntry* groupEntry = player->GetMap()->GetMapDataContainer().GetSpawnGroupByGuid(guid, TYPEID_GAMEOBJECT))
             spawnGroupId = groupEntry->Id;
-        PSendSysMessage(LANG_GO_MIXED_LIST_CHAT, guid.GetCounter(), PrepareStringNpcOrGoSpawnInformation<GameObject>(guid).c_str(), entry, guid, goInfo->name, x, y, z, go->GetMapId(), spawnGroupId);
+        PSendSysMessage(LANG_GO_MIXED_LIST_CHAT, guid.GetCounter(), PrepareStringNpcOrGoSpawnInformation<GameObject>(guid).c_str(), entry, guid, entry, goInfo->name, x, y, z, go->GetMapId(), spawnGroupId);
     }
 
     PSendSysMessage(LANG_COMMAND_NEAROBJMESSAGE, distance, gameobjects.size());
