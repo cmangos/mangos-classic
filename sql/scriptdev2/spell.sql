@@ -72,6 +72,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (16510,'spell_corrupted_saber_visual'),
 (16739,'spell_orb_of_deception'),
 (17016,'spell_placing_beacon_torch'),
+(17162,'spell_summon_water_elemental'),
 (17244,'spell_anastari_possess'),
 (17536,'spell_awaken_kerlonian'),
 (18153,'spell_kodo_kombobulator'),
