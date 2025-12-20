@@ -308,7 +308,7 @@ class SpellModRAII
 class SpellCastArgs
 {
     public:
-        SpellCastArgs() : m_target(nullptr), m_scriptValue(0), m_scriptValueSet(false), m_destinationSet(false)
+        SpellCastArgs() : m_target(nullptr), m_scriptValue(0), m_scriptValueSet(false), m_destinationSet(false), m_itemSet(false), m_itemTarget(nullptr)
         {
             memset(m_basePoints, 0, sizeof(m_basePoints));
         }
