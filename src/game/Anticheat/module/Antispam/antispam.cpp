@@ -132,6 +132,7 @@ void Antispam::Notify(const char *format, ...)
 
     // GM NOTIFICATION
     sWorld.SendGMTextFlags(ACCOUNT_FLAG_SHOW_ANTISPAM, LANG_GM_ANNOUNCE_COLOR, "AntiSpam", message.str().c_str());
+    va_end(args);
 }
 
 void Antispam::Silence(const char *format, ...)
@@ -205,6 +206,7 @@ void Antispam::Silence(const char *format, ...)
     
     // GM NOTIFICATION
     sWorld.SendGMTextFlags(ACCOUNT_FLAG_SHOW_ANTISPAM, LANG_GM_ANNOUNCE_COLOR, "AntiSpam", message.str().c_str());
+    va_end(args);
 }
 
 Antispam::Antispam(uint32 account) :
