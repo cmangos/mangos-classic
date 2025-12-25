@@ -105,6 +105,7 @@ class SpellCastTargets
             m_unitTarget = target.m_unitTarget;
             m_itemTarget = target.m_itemTarget;
             m_GOTarget   = target.m_GOTarget;
+            m_CorpseTarget = target.m_CorpseTarget;
 
             m_unitTargetGUID    = target.m_unitTargetGUID;
             m_GOTargetGUID      = target.m_GOTargetGUID;

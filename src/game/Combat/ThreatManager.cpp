@@ -314,7 +314,7 @@ void ThreatContainer::update(bool force, bool isPlayer)
                 bool first = owner->CanReachWithMeleeAttack(lhs->getTarget());
                 bool second = owner->CanReachWithMeleeAttack(rhs->getTarget());
                 if (first != second)
-                    return first > second;
+                    return first;
             }
             if (lhs->GetHostileState() != rhs->GetHostileState())
                 return lhs->GetHostileState() > rhs->GetHostileState();

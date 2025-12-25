@@ -581,7 +581,7 @@ void AuctionHouseBot::ParseItemValueConfig(char const* fieldname, std::vector<ui
 
 void AuctionHouseBot::AddLootToItemMap(LootStore* store, std::vector<int32>& lootConfig, std::vector<uint32>& lootTemplates, std::unordered_map<uint32, uint32>& itemMap)
 {
-    if (lootConfig[1] <= 0 || lootConfig[3] <= 0 || lootTemplates.size() <= 0)
+    if (lootConfig[1] <= 0 || lootConfig[3] <= 0 || lootTemplates.empty())
         return;
     int32 maxTemplates = lootConfig[0] < 0 ? urand(0, lootConfig[1] - lootConfig[0]) + lootConfig[0] : urand(lootConfig[0], lootConfig[1]);
     if (maxTemplates <= 0)

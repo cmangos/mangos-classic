@@ -1132,12 +1132,9 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         // Handle Group invites (auto accept if master is in group, otherwise decline & send message
         case SMSG_GROUP_INVITE:
         {
-            if (m_bot->GetGroupInvite())
+            const Group* const grp = m_bot->GetGroupInvite();
+            if (grp)
             {
-                const Group* const grp = m_bot->GetGroupInvite();
-                if (!grp)
-                    return;
-
                 Player* const inviter = sObjectMgr.GetPlayer(grp->GetLeaderGuid());
                 if (!inviter)
                     return;
@@ -1276,8 +1273,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 // calculate how much money bot has and send the message
                 uint32 copper = m_bot->GetMoney();
                 out.str("");
-                out << "I have " << Cash(copper);
-                SendWhisper(out.str().c_str(), *(m_bot->GetTrader()));
+                out << "I have |cff00ff00" << Cash(copper) << "|r";
+                SendWhisper(out.str(), *(m_bot->GetTrader()));
             }
             return;
         }
@@ -7766,7 +7763,7 @@ void PlayerbotAI::_HandleCommandSurvey(std::string& /*text*/, Player& fromPlayer
         while (queryResult->NextRow());
 
     }
-    SendWhisper(detectout.str().c_str(), fromPlayer);
+    SendWhisper(detectout.str(), fromPlayer);
 }
 
 // _HandleCommandSkill: Handle class & professions training:

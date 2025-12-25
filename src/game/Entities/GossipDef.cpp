@@ -458,7 +458,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
     uint32 EmoteCount = 0;
     for (unsigned int i : pQuest->OfferRewardEmote)
     {
-        if (i <= 0)
+        if (i == 0)
             break;
         ++EmoteCount;
     }

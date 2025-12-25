@@ -139,11 +139,8 @@ struct generic_creatureAI : public ScriptedAI
             // Found a spell, check if we arn't on cooldown
             if (info && !GlobalCooldown)
             {
-                // If we are currently moving stop us and set the movement generator
-                if (!IsSelfRooted)
-                {
-                    IsSelfRooted = true;
-                }
+                // Stop us and set the movement generator
+                IsSelfRooted = true;
 
                 // Cast spell
                 if (Healing)
