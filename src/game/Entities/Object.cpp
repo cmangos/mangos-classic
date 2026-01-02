@@ -2706,6 +2706,9 @@ bool WorldObject::IsSpellReady(SpellEntry const& spellEntry, ItemPrototype const
     else
         now = World::GetCurrentClockTime();
 
+    if (!m_cooldownMap.IsGlobalCooldownExpired(now))
+        return false;
+
     // overwrite category by provided category in item prototype during item cast if need
     if (itemProto)
     {
@@ -3091,4 +3094,42 @@ bool WorldObject::CheckAndIncreaseCastCounter()
 
     ++m_castCounter;
     return true;
+}
+
+bool CooldownContainer::AddCooldown(TimePoint clockNow, uint32 spellId, uint32 duration, uint32 spellCategory, uint32 categoryDuration, uint32 itemId, bool onHold)
+{
+    RemoveBySpellId(spellId);
+    auto resultItr = m_spellIdMap.emplace(spellId, std::make_unique<CooldownData>(clockNow, spellId, duration, spellCategory, categoryDuration, itemId, onHold));
+    // do not overwrite one permanent category cooldown with another permanent category cooldown
+    if (resultItr.second && spellCategory && categoryDuration)
+    {
+        SpellCategoryEntry const* spellCategoryEntry = sSpellCategory.LookupEntry(spellCategory);
+        if (spellCategoryEntry->flags & uint32(SpellCategoryFlags::CooldownIsGlobal))
+        {
+            m_globalCooldown = std::chrono::milliseconds(categoryDuration) + clockNow;
+            return resultItr.second;
+        }
+
+        auto catItr = FindByCategory(spellCategory);
+        if (!onHold || catItr == m_spellIdMap.end() || !catItr->second->IsPermanent())
+        {
+            // we must keep original category cd owner for sake of client sync
+            if (catItr != m_spellIdMap.end())
+            {
+                catItr->second->SetCatCDExpireTime(std::chrono::milliseconds(categoryDuration) + clockNow);
+                catItr->second->m_typePermanent = false;
+                resultItr.first->second->m_category = 0;
+            }
+            else
+                m_categoryMap.emplace(spellCategory, resultItr.first);
+        }
+        else
+            resultItr.first->second->m_category = 0;
+    }
+
+    return resultItr.second;
+}
+bool CooldownContainer::IsGlobalCooldownExpired(TimePoint& now) const
+{
+    return m_globalCooldown <= now;
 }

@@ -474,6 +474,13 @@ enum ShapeshiftForm
     FORM_SPIRITOFREDEMPTION = 0x20
 };
 
+enum class SpellCategoryFlags
+{
+    CooldownModifiesItem        = 0x1,    // Cooldown modifies item - unused
+    CooldownIsGlobal            = 0x2,    // Cooldown is global
+    CooldownEventOnLeaveCombat  = 0x4,    // Cooldown event on leave combat - used in wotlk
+};
+
 const char* GetSpellCastResultString(SpellCastResult result);
 
 #endif

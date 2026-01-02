@@ -220,32 +220,7 @@ class CooldownContainer
             }
         }
 
-        bool AddCooldown(TimePoint clockNow, uint32 spellId, uint32 duration, uint32 spellCategory = 0, uint32 categoryDuration = 0, uint32 itemId = 0, bool onHold = false)
-        {
-            RemoveBySpellId(spellId);
-            auto resultItr = m_spellIdMap.emplace(spellId, std::make_unique<CooldownData>(clockNow, spellId, duration, spellCategory, categoryDuration, itemId, onHold));
-            // do not overwrite one permanent category cooldown with another permanent category cooldown
-            if (resultItr.second && spellCategory && categoryDuration)
-            {
-                auto catItr = FindByCategory(spellCategory);
-                if (!onHold || catItr == m_spellIdMap.end() || !catItr->second->IsPermanent())
-                {
-                    // we must keep original category cd owner for sake of client sync
-                    if (catItr != m_spellIdMap.end())
-                    {
-                        catItr->second->SetCatCDExpireTime(std::chrono::milliseconds(categoryDuration) + clockNow);
-                        catItr->second->m_typePermanent = false;
-                        resultItr.first->second->m_category = 0;
-                    }
-                    else
-                        m_categoryMap.emplace(spellCategory, resultItr.first);
-                }
-                else
-                    resultItr.first->second->m_category = 0;
-            }
-
-            return resultItr.second;
-        }
+        bool AddCooldown(TimePoint clockNow, uint32 spellId, uint32 duration, uint32 spellCategory = 0, uint32 categoryDuration = 0, uint32 itemId = 0, bool onHold = false);
 
         void RemoveBySpellId(uint32 spellId)
         {
@@ -300,9 +275,12 @@ class CooldownContainer
         bool IsEmpty() const { return m_spellIdMap.empty(); }
         size_t size() const { return m_spellIdMap.size(); }
 
+        bool IsGlobalCooldownExpired(TimePoint& now) const;
+
     private:
         spellIdMap m_spellIdMap;
         categoryMap m_categoryMap;
+        TimePoint m_globalCooldown;
 };
 
 struct Position

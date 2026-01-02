@@ -880,6 +880,12 @@ struct SpellCastTimesEntry
     int32     MinCastTime;                                  // 3        m_minimum
 };
 
+struct SpellCategoryEntry
+{
+    uint32 ID;
+    uint32 flags;
+};
+
 struct SpellFocusObjectEntry
 {
     uint32    ID;                                           // 0        m_ID
