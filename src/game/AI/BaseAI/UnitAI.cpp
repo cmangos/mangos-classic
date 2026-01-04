@@ -1097,6 +1097,9 @@ void UnitAI::UpdateAI(const uint32 diff)
     if (!combat)
         return;
 
+    if (!m_unit || !m_unit->IsInWorld())
+        return;
+
     Unit* victim = m_unit->GetVictim();
     if (m_rangedMode && victim && CanExecuteCombatAction())
     {
