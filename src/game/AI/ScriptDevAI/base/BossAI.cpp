@@ -32,15 +32,21 @@ void BossAI::AddOnAggroText(uint32 text)
     m_onAggroTexts.push_back(text);
 }
 
+void BossAI::Reset()
+{
+    CombatAI::Reset();
+    m_creature->SetSpellList(m_creature->GetCreatureInfo()->SpellList);
+}
+
 void BossAI::JustDied(Unit* killer)
 {
+    CombatAI::JustDied(killer);
     if (!m_onKilledTexts.empty())
         DoBroadcastText(m_onKilledTexts[urand(0, m_onKilledTexts.size() - 1)], m_creature, killer);
     if (m_instanceDataType == -1)
         return;
     if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
         instance->SetData(m_instanceDataType, DONE);
-    CombatAI::JustDied(killer);
     OpenEntrances();
     OpenExits();
 }
@@ -78,4 +84,25 @@ void BossAI::AddEntranceObject(uint32 value)
 void BossAI::AddExitObject(uint32 value)
 {
     m_exitObjects.push_back(value);
+}
+
+void BossAI::EnterEvadeMode()
+{
+    if (m_instanceDataType == -1)
+        return;
+    if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
+        instance->SetData(m_instanceDataType, FAIL);
+    OpenEntrances();
+    if (m_respawnDelay == -1)
+    {
+        CombatAI::EnterEvadeMode();
+        return;
+    }
+    m_creature->SetRespawnDelay(m_respawnDelay, true);
+    m_creature->ForcedDespawn();
+}
+
+void BossAI::AddRespawnOnEvade(std::chrono::seconds delay)
+{
+    m_respawnDelay = delay.count();
 }

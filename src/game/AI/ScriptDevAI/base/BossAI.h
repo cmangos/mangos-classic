@@ -56,6 +56,7 @@ class BossAI : public CombatAI
             for (auto& id : m_exitObjects)
                 instance->DoUseOpenableObject(id, true);
         }
+
         /**
         * Adds one or more Broadcast Texts to possibly emit when Unit dies
         * This function is not called if JustDied is overridden. Add CombatAI::JustDied(); to your overriding function.
@@ -83,6 +84,7 @@ class BossAI : public CombatAI
 
         void SetDataType(uint32 type) { m_instanceDataType = type; }
 
+        void Reset() override;
         void JustDied(Unit* killer = nullptr) override;
         void JustReachedHome() override;
         void Aggro(Unit* who = nullptr) override;
@@ -101,6 +103,9 @@ class BossAI : public CombatAI
             AddExitObject(fargs...);
         }
         void SetGateDelay(std::chrono::milliseconds delay) { m_gateDelay = delay; }
+        void EnterEvadeMode() override;
+
+        void AddRespawnOnEvade(std::chrono::seconds delay);
 
         std::chrono::seconds TimeSinceEncounterStart()
         {
@@ -120,6 +125,8 @@ class BossAI : public CombatAI
         std::chrono::milliseconds m_gateDelay = 3s;
 
         uint32 m_instanceDataType = -1;
+
+        uint32 m_respawnDelay = -1;
 
         std::chrono::steady_clock::time_point m_combatStartTimestamp;
 };
