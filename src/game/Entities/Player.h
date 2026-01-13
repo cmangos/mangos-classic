@@ -815,7 +815,7 @@ struct TradeStatusInfo
     ObjectGuid TraderGuid;
     InventoryResult Result;
     bool IsTargetResult;
-    uint32 ItemLimitCategoryId;
+    uint32 ItemLimitCategoryId; // sent as 0 but not used in client in tbc
     uint8 Slot;
 };
 

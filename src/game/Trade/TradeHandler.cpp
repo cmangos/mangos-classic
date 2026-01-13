@@ -45,7 +45,6 @@ void WorldSession::SendTradeStatus(TradeStatusInfo const& info) const
             data << uint32(info.ItemLimitCategoryId);       // ItemLimitCategory.dbc entry
             break;
         case TRADE_STATUS_WRONG_REALM:
-        case TRADE_STATUS_NOT_ON_TAPLIST:
             data << uint8(info.Slot);                       // Trade slot; -1 here clears CGTradeInfo::m_tradeMoney
             break;
         default:
