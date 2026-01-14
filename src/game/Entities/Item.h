@@ -187,7 +187,7 @@ enum ItemLootUpdateState
 enum ItemDynFlags
 {
     ITEM_DYNFLAG_BINDED                       = 0x00000001, // set in game at binding
-    ITEM_DYNFLAG_UNK1                         = 0x00000002,
+    ITEM_DYNFLAG_TRANSLATED                   = 0x00000002, // translated to lang id in query
     ITEM_DYNFLAG_UNLOCKED                     = 0x00000004, // have meaning only for item with proto->LockId, if not set show as "Locked, req. lockpicking N"
     ITEM_DYNFLAG_WRAPPED                      = 0x00000008, // mark item as wrapped into wrapper container
     ITEM_DYNFLAG_UNK4                         = 0x00000010, // can't repeat old note: appears red icon (like when item durability==0)

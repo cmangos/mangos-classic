@@ -439,6 +439,8 @@ void WorldSession::HandleReadItemOpcode(WorldPacket& recv_data)
         else
         {
             data.Initialize(SMSG_READ_ITEM_FAILED, 8);
+            // data << uint8(0); // hasTranslationProgress
+            // data << uint32(0); // translationProgressDuration
             DETAIL_LOG("STORAGE: Unable to read item");
             _player->SendEquipError(msg, pItem, nullptr);
         }
