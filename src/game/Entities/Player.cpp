@@ -4797,15 +4797,28 @@ void Player::LeaveLFGChannel()
     }
 }
 
-void Player::UpdateDefense()
+void Player::UpdateDefense(Unit* attacker, uint32 procEx)
 {
+    sLog.outString("UpdateDefense called. Running the checks.");
     uint32 defense_skill_gain = sWorld.getConfig(CONFIG_UINT32_SKILL_GAIN_DEFENSE);
 
-    if (UpdateSkill(SKILL_DEFENSE, defense_skill_gain))
+    if (defense_skill_gain == 0)
+        return;
+
+    if (!attacker)
     {
-        // update dependent from defense skill part
-        UpdateDefenseBonusesMod();
+        sLog.outString("if (!attacker) -> true. Exiting before checking for avoidance or updating skill.");
+        return; // I fear this may be the opposite of intent, testing will reveal
     }
+
+    if (procEx & (PROC_EX_DODGE | PROC_EX_PARRY | PROC_EX_BLOCK | PROC_EX_MISS))
+    {
+        sLog.outString("Avoided attack with dodge/parry/block/miss. Exiting before updating skill.");
+        return;
+    }
+
+    UpdateSkill(SKILL_DEFENSE, defense_skill_gain);
+    UpdateDefenseBonusesMod();
 }
 
 void Player::HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, float amount, bool apply)
@@ -5022,18 +5035,21 @@ void Player::SetRegularAttackTime()
     }
 }
 
-bool Player::UpdateSkill(uint16 id, uint16 diff)
+void Player::UpdateSkill(uint16 id, uint16 diff)
 {
     if (!id)
-        return false;
+        return;
+
+    if (diff == 0)
+        return;
 
     SkillStatusMap::iterator itr = mSkillStatus.find(id);
     if (itr == mSkillStatus.end())
-        return false;
+        return;
 
     SkillStatusData& skillStatus = itr->second;
     if (skillStatus.uState == SKILL_DELETED)
-        return false;
+        return;
 
     uint32 valueIndex = PLAYER_SKILL_VALUE_INDEX(skillStatus.pos);
     uint32 data = GetUInt32Value(valueIndex);
@@ -5041,23 +5057,18 @@ bool Player::UpdateSkill(uint16 id, uint16 diff)
     uint32 max = SKILL_MAX(data);
 
     if ((!max) || (!value) || (value >= max))
-        return false;
+        return;
 
-    if (value * 512 < max * urand(0, 512))
-    {
-        uint32 new_value = value + diff;
-        if (new_value > max)
-            new_value = max;
+    uint32 new_value = value + diff;
+    if (new_value > max)
+        new_value = max;
 
-        SetUInt32Value(valueIndex, MAKE_SKILL_VALUE(new_value, max));
+    SetUInt32Value(valueIndex, MAKE_SKILL_VALUE(new_value, max));
 
-        if (skillStatus.uState != SKILL_NEW)
-            skillStatus.uState = SKILL_CHANGED;
+    if (skillStatus.uState != SKILL_NEW)
+        skillStatus.uState = SKILL_CHANGED;
 
-        return true;
-    }
-
-    return false;
+    return;
 }
 
 inline int SkillGainChance(uint32 SkillValue, uint32 GrayLevel, uint32 GreenLevel, uint32 YellowLevel)
@@ -5239,7 +5250,7 @@ void Player::UpdateWeaponSkill(WeaponAttackType attType)
     UpdateAllCritPercentages();
 }
 
-void Player::UpdateCombatSkills(Unit* pVictim, WeaponAttackType attType, bool defence)
+void Player::UpdateCombatSkills(Unit* target, uint32 procEx, WeaponAttackType attType, bool defence)
 {
     const uint16 skillId = (defence ? SKILL_DEFENSE : GetWeaponSkillIdForAttack(attType));
     const uint16 skill = GetSkillValuePure(skillId);
@@ -5260,7 +5271,7 @@ void Player::UpdateCombatSkills(Unit* pVictim, WeaponAttackType attType, bool de
     if (roll_chance_f(chance))
     {
         if (defence)
-            UpdateDefense();
+            UpdateDefense(target, procEx);
         else
             UpdateWeaponSkill(attType);
     }

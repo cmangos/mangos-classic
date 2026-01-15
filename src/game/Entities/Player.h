@@ -1576,7 +1576,7 @@ class Player : public Unit
         void SendPetBar();
         void StartCinematic();
         void StopCinematic();
-        bool UpdateSkill(uint16 id, uint16 diff);
+        void UpdateSkill(uint16 id, uint16 diff);
         bool UpdateSkillPro(uint16 id, int32 Chance, uint16 diff);
 
         bool UpdateCraftSkill(uint32 spellid);
@@ -1680,9 +1680,9 @@ class Player : public Unit
         uint32 GetLFGAreaId() const { return m_LFGAreaId; }
         bool IsInLFG() const { return m_LFGAreaId > 0; }
 
-        void UpdateDefense();
+        void UpdateDefense(Unit* attacker, uint32 procEx);
         void UpdateWeaponSkill(WeaponAttackType attType);
-        void UpdateCombatSkills(Unit* pVictim, WeaponAttackType attType, bool defence);
+        void UpdateCombatSkills(Unit* target, uint32 procEx, WeaponAttackType attType, bool defence);
         uint16 GetWeaponSkillIdForAttack(WeaponAttackType attType) const;
 
         SkillRaceClassInfoEntry const* GetSkillInfo(uint16 id, std::function<bool (SkillRaceClassInfoEntry const&)> filterfunc = nullptr) const;
