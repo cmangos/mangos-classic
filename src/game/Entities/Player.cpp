@@ -4798,23 +4798,16 @@ void Player::LeaveLFGChannel()
     }
 }
 
-void Player::UpdateDefense(Unit* attacker, uint32 procEx)
+void Player::UpdateDefense(uint32 procEx)
 {
-    sLog.outString("UpdateDefense called. Running the checks.");
     uint32 defense_skill_gain = sWorld.getConfig(CONFIG_UINT32_SKILL_GAIN_DEFENSE);
 
     if (defense_skill_gain == 0)
         return;
 
-    if (!attacker)
-    {
-        sLog.outString("if (!attacker) -> true. Exiting before checking for avoidance or updating skill.");
-        return; // I fear this may be the opposite of intent, testing will reveal
-    }
-
+    // Filter out dodge/parry/block/miss so defense can only advance on actual hits.
     if (procEx & (PROC_EX_DODGE | PROC_EX_PARRY | PROC_EX_BLOCK | PROC_EX_MISS))
     {
-        sLog.outString("Avoided attack with dodge/parry/block/miss. Exiting before updating skill.");
         return;
     }
 
@@ -5251,7 +5244,7 @@ void Player::UpdateWeaponSkill(WeaponAttackType attType)
     UpdateAllCritPercentages();
 }
 
-void Player::UpdateCombatSkills(Unit* target, uint32 procEx, WeaponAttackType attType, bool defence)
+void Player::UpdateCombatSkills(uint32 procEx, WeaponAttackType attType, bool defence)
 {
     const uint16 skillId = (defence ? SKILL_DEFENSE : GetWeaponSkillIdForAttack(attType));
     const uint16 skill = GetSkillValuePure(skillId);
@@ -5308,7 +5301,7 @@ void Player::UpdateCombatSkills(Unit* target, uint32 procEx, WeaponAttackType at
     if (roll_chance_f(finalChance))
     {
         if (defence)
-            UpdateDefense(target, procEx);
+            UpdateDefense(procEx);
         else
             UpdateWeaponSkill(attType);
     }

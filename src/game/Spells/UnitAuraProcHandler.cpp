@@ -286,7 +286,7 @@ void Unit::ProcSkillsAndReactives(bool isVictim, Unit* target, uint32 procFlags,
             if (procEx & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT | PROC_EX_MISS | PROC_EX_DODGE | PROC_EX_PARRY | PROC_EX_BLOCK))
             {
                 if (target->GetTypeId() != TYPEID_PLAYER && target->GetCreatureType() != CREATURE_TYPE_CRITTER)
-                    ((Player*)this)->UpdateCombatSkills(target, procEx, attType, isVictim);
+                    ((Player*)this)->UpdateCombatSkills(procEx, attType, isVictim);
             }
         }
         // If exist crit/parry/dodge/block need update aura state (for victim and attacker)

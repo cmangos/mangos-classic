@@ -1680,9 +1680,9 @@ class Player : public Unit
         uint32 GetLFGAreaId() const { return m_LFGAreaId; }
         bool IsInLFG() const { return m_LFGAreaId > 0; }
 
-        void UpdateDefense(Unit* attacker, uint32 procEx);
+        void UpdateDefense(uint32 procEx);
         void UpdateWeaponSkill(WeaponAttackType attType);
-        void UpdateCombatSkills(Unit* target, uint32 procEx, WeaponAttackType attType, bool defence);
+        void UpdateCombatSkills(uint32 procEx, WeaponAttackType attType, bool defence);
         uint16 GetWeaponSkillIdForAttack(WeaponAttackType attType) const;
 
         SkillRaceClassInfoEntry const* GetSkillInfo(uint16 id, std::function<bool (SkillRaceClassInfoEntry const&)> filterfunc = nullptr) const;
