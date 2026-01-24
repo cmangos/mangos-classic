@@ -6002,83 +6002,6 @@ SpellCastResult Spell::CheckCast(bool strict)
     return OnCheckCast(strict);
 }
 
-SpellCastResult Spell::CheckPetCast(Unit* target)
-{
-    if (!m_caster->IsAlive())
-        return SPELL_FAILED_CASTER_DEAD;
-
-    if (m_caster->IsNonMeleeSpellCasted(false) && !m_ignoreConcurrentCasts)             // prevent spellcast interruption by another spellcast
-        return SPELL_FAILED_SPELL_IN_PROGRESS;
-    if (m_caster->IsInCombat() && IsNonCombatSpell(m_spellInfo))
-        return SPELL_FAILED_AFFECTING_COMBAT;
-
-    if (m_caster->IsCreature() && (static_cast<Creature*>(m_caster)->IsPet() || m_caster->HasCharmer()))
-    {
-        // dead owner (pets still alive when owners ressed?)
-        if (m_caster->GetMaster() && !m_caster->GetMaster()->IsAlive())
-            return SPELL_FAILED_CASTER_DEAD;
-
-        if (!target && m_targets.getUnitTarget())
-            target = m_targets.getUnitTarget();
-
-        bool need = false;
-        bool script = false;
-        for (unsigned int i : m_spellInfo->EffectImplicitTargetA)
-        {
-            if (i == TARGET_UNIT_ENEMY ||
-                i == TARGET_UNIT_FRIEND ||
-                i == TARGET_UNIT_RAID ||
-                i == TARGET_UNIT ||
-                i == TARGET_UNIT_PARTY ||
-                i == TARGET_LOCATION_CASTER_TARGET_POSITION)
-            {
-                need = true;
-                if (!target)
-                    return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
-                break;
-            }
-            else if (i == TARGET_LOCATION_SCRIPT_NEAR_CASTER)
-            {
-                script = true;
-            }
-        }
-        if (need)
-            m_targets.setUnitTarget(target);
-        else if (script)
-            return CheckCast(true);
-
-        if (Unit* _target = m_targets.getUnitTarget())      // for target dead/target not valid
-        {
-            if (_target->IsDead() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_ALLOW_DEAD_TARGET))
-                return SPELL_FAILED_BAD_TARGETS;
-
-            if (IsPositiveSpell(m_spellInfo->Id, m_caster, _target))
-            {
-                if (!m_caster->CanAssistSpell(_target, m_spellInfo))
-                    return SPELL_FAILED_BAD_TARGETS;
-            }
-            else
-            {
-                bool duelvsplayertar = false;
-                for (unsigned int j : m_spellInfo->EffectImplicitTargetA)
-                {
-                    // TARGET_UNIT is positive AND negative
-                    duelvsplayertar |= (j == TARGET_UNIT);
-                }
-                if (!m_caster->CanAttack(target) && !duelvsplayertar)
-                {
-                    return SPELL_FAILED_BAD_TARGETS;
-                }
-            }
-        }
-        // cooldown
-        if (!m_caster->IsSpellReady(*m_spellInfo))
-            return SPELL_FAILED_NOT_READY;
-    }
-
-    return CheckCast(true);
-}
-
 SpellCastResult Spell::CheckCasterAuras(uint32& param1) const
 {
     if (m_ignoreCasterAuraState)
@@ -6229,38 +6152,6 @@ bool Spell::CheckSpellCancelsFear(uint32& param1) const
 bool Spell::CheckSpellCancelsConfuse(uint32& param1) const
 {
     return CheckSpellCancelsAuraEffect(SPELL_AURA_MOD_CONFUSE, param1);
-}
-
-bool Spell::CanAutoCast(Unit* target)
-{
-    for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
-    {
-        if (m_spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AURA)
-        {
-            if (m_spellInfo->StackAmount <= 1)
-            {
-                if (target->HasAura(m_spellInfo->Id, SpellEffectIndex(j)))
-                    return false;
-            }
-            else
-            {
-                if (Aura* aura = target->GetAura(m_spellInfo->Id, SpellEffectIndex(j)))
-                    if (aura->GetStackAmount() >= m_spellInfo->StackAmount)
-                        return false;
-            }
-        }
-        else if (IsAreaAuraEffect(m_spellInfo->Effect[j]))
-        {
-            if (target->HasAura(m_spellInfo->Id, SpellEffectIndex(j)))
-                return false;
-        }
-    }
-
-    SpellCastResult result = CheckPetCast(target);
-
-    if (result == SPELL_CAST_OK || result == SPELL_FAILED_UNIT_NOT_INFRONT)
-        return true;
-    return false;                                           // target invalid
 }
 
 std::pair<float, float> Spell::GetMinMaxRange(bool strict)

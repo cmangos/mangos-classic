@@ -26,7 +26,7 @@
 #include "Globals/CombatCondition.h"
 #include "BattleGround/BattleGroundMgr.h"
 
-MapDataContainer::MapDataContainer() : m_spellListContainer(sObjectMgr.GetCreatureSpellListContainer()),
+MapDataContainer::MapDataContainer() : m_spellListContainer(sObjectMgr.GetCreatureSpellListContainer()), m_petAutocastContainer(sObjectMgr.GetPetAutocastContainer()),
     m_spawnGroupContainer(sObjectMgr.GetSpawnGroupContainer()), m_CreatureEventAIEventEntryMap(sEventAIMgr.GetCreatureEventEntryAIMap()),
     m_CreatureEventAIEventGuidMap(sEventAIMgr.GetCreatureEventGuidAIMap()), m_creatureEventAIComputedDataMap(sEventAIMgr.GetEAIComputedDataMap()),
     m_stringIds(sScriptMgr.GetStringIdMap()), m_stringIdsByString(sScriptMgr.GetStringIdByStringMap()),
@@ -47,6 +47,24 @@ CreatureSpellList* MapDataContainer::GetCreatureSpellList(uint32 Id) const
 {
     auto itr = m_spellListContainer->spellLists.find(Id);
     if (itr == m_spellListContainer->spellLists.end())
+        return nullptr;
+
+    return &(*itr).second;
+}
+
+CreatureSpellListTargeting* MapDataContainer::GetCreatureSpellTargeting(uint32 Id) const
+{
+    auto itr = m_spellListContainer->targeting.find(Id);
+    if (itr == m_spellListContainer->targeting.end())
+        return nullptr;
+
+    return &(*itr).second;
+}
+
+PetAutocastSpellList* MapDataContainer::GetPetAutocastSpellList(uint32 creatureEntry, uint32 spellId) const
+{
+    auto itr = m_petAutocastContainer->find(std::make_pair(creatureEntry, spellId));
+    if (itr == m_petAutocastContainer->end())
         return nullptr;
 
     return &(*itr).second;

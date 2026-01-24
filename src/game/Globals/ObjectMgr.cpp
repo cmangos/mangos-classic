@@ -7290,6 +7290,62 @@ void ObjectMgr::LoadPetNumber()
     sLog.outString();
 }
 
+void ObjectMgr::LoadPetAutocastInfo()
+{
+    std::shared_ptr<PetAutocastSpellMap> newContainer = std::make_shared<PetAutocastSpellMap>();
+    uint32 count = 0;
+    auto queryResult = WorldDatabase.Query("SELECT CreatureEntry,SpellId,CombatCondition,TargetId,Comments FROM pet_autocast_spell_list");
+
+    if (queryResult)
+    {
+        BarGoLink bar(queryResult->GetRowCount());
+
+        do
+        {
+            bar.step();
+
+            Field* fields = queryResult->Fetch();
+            uint32 entry = fields[0].GetUInt32();
+            uint32 spellId = fields[1].GetUInt32();
+
+            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
+            if (!spellInfo)
+            {
+                sLog.outErrorDb("LoadPetAutocastInfo: Invalid pet_autocast_spell_list %u spell %u does not exist. Skipping.", entry, spellId);
+                continue;
+            }
+
+            int32 combatCondition = fields[2].GetInt32();
+            int32 targetId = fields[3].GetInt32();
+
+            auto itr = m_spellListContainer->targeting.find(targetId);
+            if (itr == m_spellListContainer->targeting.end())
+            {
+                sLog.outErrorDb("LoadPetAutocastInfo: Invalid pet_autocast_spell_list %u target %u. Skipping.", entry, targetId);
+                continue;
+            }
+
+            std::string comments = fields[4].GetCppString();
+
+            PetAutocastSpellList autocastListEntry;
+            autocastListEntry.creatureEntry = entry;
+            autocastListEntry.spellId = spellId;
+            autocastListEntry.combatCondition = combatCondition;
+            autocastListEntry.targetId = targetId;
+
+            auto pair = std::make_pair(entry, spellId);
+            (*newContainer).emplace(pair, autocastListEntry);
+
+            ++count;
+        } while (queryResult->NextRow());
+    }
+
+    m_petAutocastContainer = newContainer;
+
+    sLog.outString(">> Loaded %u pet autocast infos", count);
+    sLog.outString();
+}
+
 std::string ObjectMgr::GeneratePetName(uint32 entry)
 {
     std::vector<std::string>& list0 = PetHalfName0[entry];

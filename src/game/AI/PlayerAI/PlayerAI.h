@@ -40,10 +40,12 @@ class PlayerAI : public UnitAI
         void RequestFollow(Unit* followee) override;
 
         CreatureSpellList const& GetSpellList() const override { return m_spellList; }
+
+        void ExecuteActions() override;
     protected:
         void AddPlayerSpellAction(uint32 spellId, std::function<Unit*()> selector = nullptr);
         Player* m_player;
-
+        
         CreatureSpellList m_spellList;
     private:
         struct SpellData

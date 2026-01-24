@@ -111,7 +111,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
         {
             pet = static_cast<Pet*>(petUnit);
 
-            if (pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
+            if (pet->HasActionsDisabled())
                 return;
         }
     }
@@ -135,6 +135,9 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     break;
                 case COMMAND_ATTACK:
                 {
+                    if (petUnit->AI()->GetCombatScriptStatus())
+                        break;
+
                     Unit* targetUnit = targetGuid ? _player->GetMap()->GetUnit(targetGuid) : nullptr;
 
                     if (!targetUnit)
@@ -172,7 +175,9 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
             {
                 case COMMAND_STAY:                          // flat=1792  // STAY
                 {
-                    petUnit->AttackStop(true, true);
+                    if (!petUnit->AI()->GetCombatScriptStatus())
+                        petUnit->AttackStop(true, true);
+
                     charmInfo->SetCommandState(COMMAND_STAY);
                     break;
                 }
@@ -181,12 +186,17 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     if (!petUnit->hasUnitState(UNIT_STAT_POSSESSED))
                         charmInfo->SetIsRetreating(true);
 
-                    petUnit->AttackStop(true, true);
+                    if (!petUnit->AI()->GetCombatScriptStatus())
+                        petUnit->AttackStop(true, true);
+
                     charmInfo->SetCommandState(COMMAND_FOLLOW);
                     break;
                 }
                 case COMMAND_ATTACK:                        // spellid=1792  // ATTACK
                 {
+                    if (petUnit->AI()->GetCombatScriptStatus())
+                        break;
+
                     charmInfo->SetIsRetreating();
                     charmInfo->SetSpellOpener();
 
@@ -276,8 +286,11 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
             {
                 case REACT_PASSIVE:                         // passive
                 {
-                    petUnit->AttackStop(true, true);
-                    charmInfo->SetSpellOpener();
+                    if (!petUnit->AI()->GetCombatScriptStatus())
+                    {
+                        petUnit->AttackStop(true, true);
+                        charmInfo->SetSpellOpener();
+                    }
                 }
                 case REACT_DEFENSIVE:                       // recovery
                 case REACT_AGGRESSIVE:                      // activete
@@ -291,6 +304,9 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
         case ACT_PASSIVE:                                   // 0x01
         case ACT_ENABLED:                                   // 0xC1    spell
         {
+            if (petUnit->AI()->GetCombatScriptStatus())
+                break;
+
             charmInfo->SetIsRetreating();
             charmInfo->SetSpellOpener();
 
@@ -313,9 +329,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
 
             for (unsigned int i : spellInfo->EffectImplicitTargetA)
             {
-                if (i == TARGET_ENUM_UNITS_ENEMY_AOE_AT_SRC_LOC
-                        || i == TARGET_ENUM_UNITS_ENEMY_AOE_AT_DEST_LOC
-                        || i == TARGET_ENUM_UNITS_ENEMY_AOE_AT_DYNOBJ_LOC)
+                if (i == TARGET_ENUM_UNITS_ENEMY_AOE_AT_SRC_LOC || i == TARGET_ENUM_UNITS_ENEMY_AOE_AT_DEST_LOC || i == TARGET_ENUM_UNITS_ENEMY_AOE_AT_DYNOBJ_LOC)
                     return;
             }
 
@@ -325,21 +339,14 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
             if (!petUnit->hasUnitState(UNIT_STAT_POSSESSED))
                 flags |= TRIGGERED_PET_CAST;
 
-            Spell* spell = new Spell(petUnit, spellInfo, flags);
-
-            SpellCastResult result = spell->CheckPetCast(unit_target);
-
             const SpellRangeEntry* sRange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
 
             if (!IsSpellRequireTarget(spellInfo))
                 unit_target = nullptr;
 
-            if (unit_target && !(petUnit->IsWithinDistInMap(unit_target, sRange->maxRange) && petUnit->IsWithinLOSInMap(unit_target, true))
-                    && petUnit->CanAttackNow(unit_target))
+            if (unit_target && !(petUnit->IsWithinDistInMap(unit_target, sRange->maxRange) && petUnit->IsWithinLOSInMap(unit_target, true)) && petUnit->CanAttackNow(unit_target))
             {
                 charmInfo->SetSpellOpener(spellid, sRange->minRange, sRange->maxRange);
-                spell->finish(false);
-                delete spell;
 
                 petUnit->AttackStop();
 
@@ -364,22 +371,18 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                 return;
             }
 
+            Spell* spell = new Spell(petUnit, spellInfo, flags);
+            SpellCastTargets targets;
+            targets.setUnitTarget(unit_target);
+            SpellCastResult result = spell->SpellStart(&targets);
+            charmInfo->SetSpellOpener();
             if (result == SPELL_CAST_OK)
             {
-                SpellCastTargets targets;
-                targets.setUnitTarget(unit_target);
-
-                charmInfo->SetSpellOpener();
-                spell->SpellStart(&targets);
-            }
-            else
-            {
-                if (creature && creature->IsSpellReady(*spellInfo))
-                    GetPlayer()->SendClearCooldown(spellid, petUnit);
-
-                charmInfo->SetSpellOpener();
-                spell->finish(false);
-                delete spell;
+                //10% chance to play special pet attack talk, else growl
+                //actually this only seems to happen on special spells, fire shield for imp, torment for voidwalker, but it's stupid to check every spell
+                if (petUnit->GetTypeId() == TYPEID_UNIT)
+                    if (static_cast<Creature*>(petUnit)->IsPet() && (static_cast<Pet*>(petUnit)->getPetType() == SUMMON_PET) && (petUnit != unit_target) && (urand(0, 100) < 10))
+                        petUnit->SendPetTalk((uint32)PET_TALK_SPECIAL_SPELL);
             }
             break;
         }
@@ -480,7 +483,7 @@ void WorldSession::HandlePetSetAction(WorldPacket& recv_data)
     Pet* pet = (petCreature && petCreature->IsPet()) ? static_cast<Pet*>(petUnit) : nullptr;
 
     // pet can have action bar disabled
-    if (pet && (pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS))
+    if (pet && pet->HasActionsDisabled())
         return;
 
     CharmInfo* charmInfo = petUnit->GetCharmInfo();

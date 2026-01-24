@@ -29,6 +29,7 @@
 
 struct CreatureSpellListContainer;
 struct CreatureSpellList;
+struct CreatureSpellListTargeting;
 struct SpawnGroupEntry;
 struct SpawnGroupEntryContainer;
 struct CreatureEventAI_Event;
@@ -38,6 +39,7 @@ struct UnitConditionEntry;
 struct WorldStateExpressionEntry;
 struct CombatConditionEntry;
 struct BattleGroundEventIdx;
+struct PetAutocastSpellList;
 
 // Event_Map
 typedef std::vector<CreatureEventAI_Event> CreatureEventAI_Event_Vec;
@@ -54,12 +56,18 @@ typedef std::unordered_map<uint32, BattleGroundTypeId> BattleMastersMap;
 typedef std::unordered_map<uint32, BattleGroundEventIdx> CreatureBattleEventIndexesMap;
 typedef std::unordered_map<uint32, BattleGroundEventIdx> GameObjectBattleEventIndexesMap;
 
+typedef std::map<std::pair<uint32, uint32>, PetAutocastSpellList> PetAutocastSpellMap;
+
 class MapDataContainer
 {
     public:
         MapDataContainer();
         void SetCreatureSpellListContainer(std::shared_ptr<CreatureSpellListContainer> container);
         CreatureSpellList* GetCreatureSpellList(uint32 Id) const;
+        CreatureSpellListTargeting* GetCreatureSpellTargeting(uint32 Id) const;
+
+        PetAutocastSpellList* GetPetAutocastSpellList(uint32 creatureEntry, uint32 spellId) const;
+
         SpawnGroupEntry* GetSpawnGroup(uint32 Id) const;
         SpawnGroupEntry* GetSpawnGroupByGuid(uint32 dbGuid, uint32 high) const;
         std::shared_ptr<SpawnGroupEntryContainer> GetSpawnGroups() const;
@@ -91,6 +99,7 @@ class MapDataContainer
         void SetBattleMastersMap(std::shared_ptr<BattleMastersMap> battleMasters);
     private:
         std::shared_ptr<CreatureSpellListContainer> m_spellListContainer;
+        std::shared_ptr<PetAutocastSpellMap> m_petAutocastContainer;
         std::shared_ptr<SpawnGroupEntryContainer> m_spawnGroupContainer;
 
         std::shared_ptr<CreatureEventAI_Event_Map>  m_CreatureEventAIEventEntryMap;

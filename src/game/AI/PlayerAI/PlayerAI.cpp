@@ -33,6 +33,11 @@ PlayerAI::PlayerAI(Player* player) : UnitAI(player), m_player(player), m_spellsD
     AddCustomAction(GENERIC_THREAT_CHANGE, true, [&]() { m_executeTargetChange = true; });
 }
 
+void PlayerAI::ExecuteActions()
+{
+    ExecuteSpells();
+}
+
 void PlayerAI::AddPlayerSpellAction(uint32 spellId, std::function<Unit*()> selector)
 {
     bool failureOnNoTarget = false;

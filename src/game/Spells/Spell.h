@@ -482,7 +482,6 @@ class Spell
         void TakeCastItem();
 
         SpellCastResult CheckCast(bool strict);
-        SpellCastResult CheckPetCast(Unit* target);
 
         // handlers
         void handle_immediate();
@@ -526,7 +525,6 @@ class Spell
         template<typename T> WorldObject* FindCorpseUsing();
 
         bool CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, bool neutralFlagFill, CheckException exception = CheckException::EXCEPTION_NONE) const;
-        bool CanAutoCast(Unit* target);
 
         static void SendCastResult(Player const* caster, SpellEntry const* spellInfo, SpellCastResult result, bool isPetCastResult = false, uint32 param1 = 0, uint32 param2 = 0);
         void SendCastResult(SpellCastResult result) const;
