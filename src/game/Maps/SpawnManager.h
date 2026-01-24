@@ -76,6 +76,7 @@ class SpawnManager
         std::string GetRespawnList();
 
         SpawnGroup* GetSpawnGroup(uint32 Id);
+        SpawnGroup* GetSpawnGroup(std::string const& stringId);
 
         void RespawnSpawnGroupsInVicinity(Position pos, float range);
     private:
@@ -84,6 +85,7 @@ class SpawnManager
         std::vector<SpawnInfo> m_deferredSpawns;
         std::vector<SpawnInfo> m_spawns; // must only be erased from in Update
         std::map<uint32, SpawnGroup*> m_spawnGroups;
+        std::map<uint32, SpawnGroup*> m_spawnGroupsPerStringId;
         bool m_updated;
 
         std::set<uint32> m_eventCreatureDbGuids;

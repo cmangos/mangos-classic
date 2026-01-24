@@ -104,6 +104,8 @@ void SpawnManager::Initialize()
         else
             spawnGroup = new GameObjectGroup(entry, m_map);
         m_spawnGroups.emplace(entry.Id, spawnGroup);
+        if (entry.StringId != 0)
+            m_spawnGroupsPerStringId.emplace(entry.StringId, spawnGroup);
     }
 }
 
@@ -311,6 +313,17 @@ SpawnGroup* SpawnManager::GetSpawnGroup(uint32 Id)
 {
     auto itr = m_spawnGroups.find(Id);
     if (itr == m_spawnGroups.end())
+        return nullptr;
+
+    return (*itr).second;
+}
+
+SpawnGroup* SpawnManager::GetSpawnGroup(std::string const& stringId)
+{
+    uint32 id = m_map.GetMapDataContainer().GetStringId(stringId);
+
+    auto itr = m_spawnGroupsPerStringId.find(id);
+    if (itr == m_spawnGroupsPerStringId.end())
         return nullptr;
 
     return (*itr).second;
