@@ -228,7 +228,12 @@ class WorldSession
         void SendOfflineNameQueryResponses();
         void SendNotification(const char* format, ...) const ATTR_PRINTF(2, 3);
         void SendNotification(int32 string_id, ...) const;
+<<<<<<< HEAD
         void SendPetNameInvalid() const;
+=======
+        void SendClientCacheVersion() const;
+        void SendPetNameInvalid(uint32 error, const std::string& name, DeclinedName* declinedName) const;
+>>>>>>> 0f557959c63 (Fix client crashes after a session is reused)
         void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res) const;
         void SendAreaTriggerMessage(const char* Text, ...) const ATTR_PRINTF(2, 3);
         void SendTransferAborted(TransferAbortReason reason) const;
