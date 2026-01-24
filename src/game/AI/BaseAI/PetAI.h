@@ -49,11 +49,13 @@ class PetAI : public CreatureAI
         std::string GetAIName() override { return "PetAI"; }
 
     private:
-        void UpdateAllies();
+        Player* PickGroupMemberForSpell(Player* player, Spell* spell);
+        std::pair<Unit*, Spell*> PickSpellWithTarget(Unit* owner, Unit* victim, CharmInfo* charminfo);
+        void Cast(std::pair<Unit*, Spell*> spellWithTarget);
+        bool ShouldCast(SpellEntry const* spellInfo, Unit* victim);
 
-        bool inCombat;
+        bool m_inCombat;
 
-        GuidSet m_AllySet;
-        uint32 m_updateAlliesTimer;
+        Pet* m_pet;
 };
 #endif

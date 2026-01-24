@@ -111,7 +111,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
         {
             pet = static_cast<Pet*>(petUnit);
 
-            if (pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
+            if (pet->HasActionsDisabled())
                 return;
         }
     }
@@ -135,6 +135,9 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     break;
                 case COMMAND_ATTACK:
                 {
+                    if (petUnit->AI()->GetCombatScriptStatus())
+                        break;
+
                     Unit* targetUnit = targetGuid ? _player->GetMap()->GetUnit(targetGuid) : nullptr;
 
                     if (!targetUnit)
@@ -172,7 +175,9 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
             {
                 case COMMAND_STAY:                          // flat=1792  // STAY
                 {
-                    petUnit->AttackStop(true, true);
+                    if (!petUnit->AI()->GetCombatScriptStatus())
+                        petUnit->AttackStop(true, true);
+
                     charmInfo->SetCommandState(COMMAND_STAY);
                     break;
                 }
@@ -181,12 +186,17 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     if (!petUnit->hasUnitState(UNIT_STAT_POSSESSED))
                         charmInfo->SetIsRetreating(true);
 
-                    petUnit->AttackStop(true, true);
+                    if (!petUnit->AI()->GetCombatScriptStatus())
+                        petUnit->AttackStop(true, true);
+
                     charmInfo->SetCommandState(COMMAND_FOLLOW);
                     break;
                 }
                 case COMMAND_ATTACK:                        // spellid=1792  // ATTACK
                 {
+                    if (petUnit->AI()->GetCombatScriptStatus())
+                        break;
+
                     charmInfo->SetIsRetreating();
                     charmInfo->SetSpellOpener();
 
@@ -276,8 +286,11 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
             {
                 case REACT_PASSIVE:                         // passive
                 {
-                    petUnit->AttackStop(true, true);
-                    charmInfo->SetSpellOpener();
+                    if (!petUnit->AI()->GetCombatScriptStatus())
+                    {
+                        petUnit->AttackStop(true, true);
+                        charmInfo->SetSpellOpener();
+                    }
                 }
                 case REACT_DEFENSIVE:                       // recovery
                 case REACT_AGGRESSIVE:                      // activete
@@ -291,6 +304,9 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
         case ACT_PASSIVE:                                   // 0x01
         case ACT_ENABLED:                                   // 0xC1    spell
         {
+            if (petUnit->AI()->GetCombatScriptStatus())
+                break;
+
             charmInfo->SetIsRetreating();
             charmInfo->SetSpellOpener();
 
@@ -480,7 +496,7 @@ void WorldSession::HandlePetSetAction(WorldPacket& recv_data)
     Pet* pet = (petCreature && petCreature->IsPet()) ? static_cast<Pet*>(petUnit) : nullptr;
 
     // pet can have action bar disabled
-    if (pet && (pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS))
+    if (pet && pet->HasActionsDisabled())
         return;
 
     CharmInfo* charmInfo = petUnit->GetCharmInfo();

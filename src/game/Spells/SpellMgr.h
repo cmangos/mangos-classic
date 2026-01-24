@@ -369,18 +369,6 @@ inline bool IsAutocastable(uint32 spellId)
     return IsAutocastable(spellInfo);
 }
 
-// TODO: Unify with creature_template_spells so that we can set both attack and pet bar visibility
-// If true, only gives access to spellbar, and not states and commands
-// Works in connection with AI-CanHandleCharm
-inline bool IsPossessCharmType(uint32 spellId)
-{
-    switch (spellId)
-    {
-        case 999999: // compilation warning suppression
-        default: return false;
-    }
-}
-
 inline uint32 GetAllowedMechanicMask(SpellEntry const* spellProto)
 {
     uint32 mask = 0;
