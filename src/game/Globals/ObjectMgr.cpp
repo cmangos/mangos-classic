@@ -9019,6 +9019,39 @@ void ObjectMgr::LoadVendorTemplates()
         sLog.outErrorDb("Table `npc_vendor_template` has vendor template %u not used by any vendors ", vendor_id);
 }
 
+void ObjectMgr::LoadVendors()
+{
+    LoadVendors("npc_vendor", false);
+
+    for (uint32 i = 1; i < sCreatureStorage.GetMaxEntry(); ++i)
+    {
+        if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
+        {
+            if (cInfo->VendorTemplateId)
+            {
+                auto itrVendorTemplate = m_mCacheVendorTemplateItemMap.find(cInfo->VendorTemplateId);
+                if (itrVendorTemplate == m_mCacheVendorTemplateItemMap.end())
+                    continue;
+
+                auto itrVendor = m_mCacheVendorItemMap.find(cInfo->Entry);
+                if (itrVendor == m_mCacheVendorItemMap.end())
+                    continue;
+
+                VendorItemData const& dataTemplate = itrVendorTemplate->second;
+                VendorItemData const& dataVendor = itrVendor->second;
+                for (auto& itemTemplate : dataTemplate.m_items)
+                {
+                    for (auto& itemVendor : dataVendor.m_items)
+                    {
+                        if (itemTemplate->item == itemVendor->item)
+                            sLog.outErrorDb("Creature (Entry: %u) has VendorTemplateId = %u that has same item in both npc_vendor and npc_vendor_template.", cInfo->Entry, cInfo->VendorTemplateId);
+                    }
+                }
+            }
+        }
+    }
+}
+
 /* This function is supposed to take care of three things:
  *  1) Load Transports on Map or on Continents
  *  2) Load Active Npcs on Map or Continents
