@@ -3693,6 +3693,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     return;
                 }
                 case 10101:                                 // Knock Away variants
+                case 11902:
                 case 18103:
                 case 18670:
                 case 18813:
@@ -3720,6 +3721,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         case 18103:                                 // Backhand - Doctor Theolen Krastinov 11261
                         case 22920:                                 // Arcane Blast - Prince Tortheldrin 11486
                         case 10101:
+                        case 11902:
                             pct = -100;
                             break;
                     }
