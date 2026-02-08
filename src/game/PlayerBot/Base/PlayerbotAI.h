@@ -56,6 +56,7 @@ enum ProfessionSpells
     FIRST_AID_1                    = 3273,
     FISHING_1                      = 7620,
     HERB_GATHERING_1               = 2366,
+    JEWELCRAFTING_1		   = 25229,	
     MINING_1                       = 2575,
     SKINNING_1                     = 8613,
     TAILORING_1                    = 3908
