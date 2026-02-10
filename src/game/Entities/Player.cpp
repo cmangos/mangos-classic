@@ -4602,9 +4602,9 @@ void Player::SpawnPlayerLootCrate()
     lootCrate->SetSpellId(0);
     lootCrate->SetLootState(GO_READY);
 
-    // Mark this as a player loot crate by setting owner GUID
-    // This will be checked in the loot creation code (LootMgr.cpp)
-    lootCrate->SetOwnerGuid(GetObjectGuid());
+    // Register with owner's GO list so RemoveFromWorld can properly clean up.
+    // AddGameObject sets owner GUID (required for loot checks in LootMgr.cpp).
+    AddGameObject(lootCrate);
 
     // CRITICAL: Pre-create and populate the loot NOW (before adding to map)
     // This ensures items/gold are removed immediately, preventing duplication if player resurrects

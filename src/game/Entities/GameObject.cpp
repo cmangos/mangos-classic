@@ -157,8 +157,16 @@ void GameObject::RemoveFromWorld()
                 owner->RemoveGameObject(this, false);
             else
             {
-                sLog.outError("Delete %s with SpellId %u LinkedGO %u that lost references to owner %s GO list. Crash possible later.",
-                              GetGuidStr().c_str(), m_spellId, GetGOInfo()->GetLinkedGameObjectEntry(), owner_guid.GetString().c_str());
+                // Owner not in world (e.g. player logged out before GO despawned).
+                // Player loot crates (186736) are expected when owner logs out; owner's list was cleared on logout.
+                bool isPlayerLootCrate = (GetEntry() == 186736 && owner_guid.IsPlayer());
+                if (isPlayerLootCrate)
+                    DEBUG_LOG("Delete %s (player loot crate) - owner %s not in world (logged out?)",
+                              GetGuidStr().c_str(), owner_guid.GetString().c_str());
+                else
+                    sLog.outError("Delete %s with SpellId %u LinkedGO %u that lost references to owner %s GO list. Crash possible later.",
+                                  GetGuidStr().c_str(), m_spellId, GetGOInfo()->GetLinkedGameObjectEntry(), owner_guid.GetString().c_str());
+                SetOwnerGuid(ObjectGuid()); // Clear to avoid stale references
             }
         }
 
