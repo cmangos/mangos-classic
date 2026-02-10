@@ -4572,6 +4572,9 @@ Corpse* Player::GetCorpse() const
 
 void Player::SpawnPlayerLootCrate()
 {
+    if (!sWorld.getConfig(CONFIG_BOOL_HARDCORE_MODE_ENABLED))
+        return;
+
     // Hardcore Mode: Spawn a loot crate at player's death location
 
     // Money bag

@@ -131,7 +131,9 @@ void WorldSession::SetOffline()
     {
         // friend status
         sSocialMgr.SendFriendStatus(_player, FRIEND_OFFLINE, _player->GetObjectGuid(), true);
-        LogoutRequest(time(nullptr));
+        // Do not reset logout timer if already in logout process (e.g. client disconnected at T=20)
+        if (!_logoutTime)
+            LogoutRequest(time(nullptr));
     }
 
     // be sure its closed (may occur when second session is opened)
@@ -743,11 +745,11 @@ void WorldSession::LogoutPlayer()
         // a) in group; b) not in raid group; c) logging out normally (not being kicked or disconnected)
         if (_player->GetGroup() && !_player->GetGroup()->IsRaidGroup() && m_socket && !m_socket->IsClosed())
             _player->RemoveFromGroup();
-#endif
 
         ///- Send update to group
         if (Group* group = _player->GetGroup())
             group->UpdatePlayerOnlineStatus(_player, false);
+#endif
 
         ///- Broadcast a logout message to the player's friends
         if (_player->GetSocial()) // might not yet be initialized
