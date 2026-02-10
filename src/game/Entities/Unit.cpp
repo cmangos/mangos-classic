@@ -883,8 +883,16 @@ void Unit::DealDamageMods(Unit* dealer, Unit* victim, uint32& damage, uint32* ab
         victim->AI()->DamageTaken(dealer, damage, damagetype, spellInfo);
 
 #ifdef ENABLE_PLAYERBOTS
-    if (dealer && damage > 0)
+    // Only track actual player-vs-player damage for PvP attacker lists.
+    // Firing on all damage (PvE, aura removal, item teardown) causes
+    // group-member iteration during logout teardown when Player objects
+    // in the same group have already been freed — use-after-free / segfault.
+    if (dealer && damage > 0 && victim->IsPlayer() &&
+        (dealer->IsPlayer() || (dealer->GetOwner() && dealer->GetOwner()->IsPlayer()) ||
+         (dealer->GetCharmer() && dealer->GetCharmer()->IsPlayer())))
+    {
         ai::RecordRecentPvpAttacker(victim, dealer);
+    }
 #endif
 
     if (absorb && originalDamage > damage)

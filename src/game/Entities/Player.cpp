@@ -4577,6 +4577,16 @@ void Player::SpawnPlayerLootCrate()
 
     // Hardcore Mode: Spawn a loot crate at player's death location
 
+    if (!sWorld.getConfig(CONFIG_BOOL_HARDCORE_MODE_ENABLED))
+        return;
+
+    // Don't spawn loot crates during logout teardown (LogoutPlayer → BuildPlayerRepop
+    // → CreateCorpse). DestroyItem inside this function can trigger reactive damage
+    // (thorns/shields) which re-enters DealDamageMods and iterates group members that
+    // may have already been freed earlier in the same LogoutAllBots loop.
+    if (GetSession()->isLogingOut())
+        return;
+
     // Money bag
     const uint32 LOOT_CRATE_ENTRY = 186736;
 
