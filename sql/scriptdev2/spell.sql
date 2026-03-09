@@ -305,9 +305,10 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (5373,'spell_judgement_of_light_intermediate'),
 (1826,'spell_judgement_of_wisdom_intermediate'),
 (19752,'spell_divine_intervention'),
-(19977,'spell_blessing_of_light'),
+(19977,'spell_blessing_of_light'), -- Blessing of Light
 (19978,'spell_blessing_of_light'),
 (19979,'spell_blessing_of_light'),
+(25890,'spell_blessing_of_light'), -- Greater Blessing of Light
 (20271,'spell_judgement'),
 (20467,'spell_judgement_of_command'),
 (20963,'spell_judgement_of_command'),
