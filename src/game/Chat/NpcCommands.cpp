@@ -32,7 +32,7 @@ bool ChatHandler::HandleNpcListSpells(char* args)
     {
         CreatureSpellListSpell const& spell = spellData.second;
         PSendSysMessage("SpellID %u InitialMin %u InitialMax %u RepeatMin %u RepeatMax %u", spell.SpellId, spell.InitialMin, spell.InitialMax, spell.RepeatMin, spell.RepeatMax);
-        PSendSysMessage("Availability %u Probability %u Flags %u TargetId %u TargetComment %s", spell.Availability, spell.Probability, spell.Flags, spell.Target->Id, spell.Target->Comment.c_str());
+        PSendSysMessage("Availability %u Probability %u Flags %u TargetId %u TargetComment %s CombatCondition %d", spell.Availability, spell.Probability, spell.Flags, spell.Target->Id, spell.Target->Comment.c_str(), spell.CombatCondition);
     }
 
     return true;
