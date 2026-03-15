@@ -289,13 +289,13 @@ CreatureList ScriptedAI::DoFindFriendlyMissingBuff(float range, uint32 spellId, 
     
     if (inCombat == false)
     {
-        MaNGOS::FriendlyMissingBuffInRangeInCombatCheck u_check(m_creature, range, spellId);
+        MaNGOS::FriendlyMissingBuffInRangeInCombatCheck u_check(m_creature, range, spellId, 0);
         MaNGOS::CreatureListSearcher<MaNGOS::FriendlyMissingBuffInRangeInCombatCheck> searcher(creatureList, u_check);
         Cell::VisitGridObjects(m_creature, searcher, range);
     }
     else if (inCombat == true)
     {
-        MaNGOS::FriendlyMissingBuffInRangeNotInCombatCheck u_check(m_creature, range, spellId);
+        MaNGOS::FriendlyMissingBuffInRangeNotInCombatCheck u_check(m_creature, range, spellId, 0);
         MaNGOS::CreatureListSearcher<MaNGOS::FriendlyMissingBuffInRangeNotInCombatCheck> searcher(creatureList, u_check);
 
         Cell::VisitGridObjects(m_creature, searcher, range);

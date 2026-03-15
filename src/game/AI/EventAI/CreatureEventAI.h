@@ -55,7 +55,7 @@ enum EventAI_Type
     EVENT_T_TARGET_CASTING          = 13,                   // RepeatMin, RepeatMax
     EVENT_T_FRIENDLY_HP             = 14,                   // HPDeficit, Radius, RepeatMin, RepeatMax, IsPercent
     EVENT_T_FRIENDLY_IS_CC          = 15,                   // DispelType, Radius, RepeatMin, RepeatMax
-    EVENT_T_FRIENDLY_MISSING_BUFF   = 16,                   // SpellId, Radius, RepeatMin, RepeatMax, InCombat
+    EVENT_T_FRIENDLY_MISSING_BUFF   = 16,                   // SpellId, Radius, RepeatMin, RepeatMax, Flags
     EVENT_T_SUMMONED_UNIT           = 17,                   // CreatureId, RepeatMin, RepeatMax
     EVENT_T_TARGET_MANA             = 18,                   // ManaMax%, ManaMin%, RepeatMin, RepeatMax
     EVENT_T_QUEST_ACCEPT            = 19,                   // QuestID
@@ -717,7 +717,7 @@ struct CreatureEventAI_Event
             uint32 radius;
             uint32 repeatMin;
             uint32 repeatMax;
-            uint32 inCombat;
+            uint32 flags;
         } friendly_buff;
         // EVENT_T_SUMMONED_UNIT                            = 17
         // EVENT_T_SUMMONED_JUST_DIED                       = 25
