@@ -121,7 +121,7 @@ class Map : public GridRefManager<NGridType>
             return false;
         }
 
-        virtual void Initialize(bool loadInstanceData = true);
+        virtual void Initialize(std::mutex* mmapMutex, bool loadInstanceData = true);
 
         virtual bool Add(Player*);
         virtual void Remove(Player*, bool);
@@ -570,7 +570,7 @@ class BattleGroundMap : public Map
         BattleGroundMap(uint32 id, time_t, uint32 InstanceId);
         ~BattleGroundMap();
 
-        virtual void Initialize(bool) override;
+        virtual void Initialize(std::mutex* mmapMutex, bool) override;
         void Update(const uint32&) override;
         bool Add(Player*) override;
         void Remove(Player*, bool) override;

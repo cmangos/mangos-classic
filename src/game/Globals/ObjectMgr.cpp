@@ -721,7 +721,7 @@ void ObjectMgr::LoadCreatureClassLvlStats()
     // initialize data array
     memset(&m_creatureClassLvlStats, 0, sizeof(m_creatureClassLvlStats));
 
-    std::string queryStr = "SELECT Class, Level, BaseMana, BaseMeleeAttackPower, BaseRangedAttackPower, BaseArmor, Strength, Agility, Stamina, Intellect, Spirit, BaseHealthExp0, BaseDamageExp0 "
+    std::string queryStr = "SELECT Class, Level, BaseMana, BaseMeleeAttackPower, BaseRangedAttackPower, BaseArmor, Strength, Agility, Stamina, Intellect, Spirit, BaseHealthExp0, BaseDamageExp0, BaseDamageExp0OLD "
                            "FROM creature_template_classlevelstats ORDER BY Class, Level";
 
     auto queryResult = WorldDatabase.Query(queryStr.c_str());
@@ -771,6 +771,7 @@ void ObjectMgr::LoadCreatureClassLvlStats()
         cCLS.Spirit                 = fields[10].GetUInt32();
         cCLS.BaseHealth             = fields[11].GetUInt32();
         cCLS.BaseDamage             = fields[12].GetFloat();
+        cCLS.BaseDamageOLD          = fields[13].GetFloat();
 
         // should ensure old data does not need change (not wanting to recalculate to avoid losing data)
         // if any mistake is made, it will be in these formulae that make asumptions about the new calculations

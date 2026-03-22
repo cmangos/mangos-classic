@@ -753,7 +753,7 @@ void Creature::UpdateDamagePhysical(WeaponAttackType attType)
             break;
     }
 
-    float base_value  = GetModifierValue(unitMod, BASE_VALUE) + (GetTotalAttackPowerValue(attType) * GetAPMultiplier(attType, false) / 14.0f);
+    float base_value  = GetModifierValue(unitMod, BASE_VALUE) + (GetTotalAttackPowerValue(attType) * GetAPMultiplier(attType, false) / 14.0f) * m_damageMultiplier; // damage multiplier confirmed to apply to AP bonus
     float base_pct    = GetModifierValue(unitMod, BASE_PCT);
     float total_value = GetModifierValue(unitMod, TOTAL_VALUE);
     float total_pct   = GetModifierValue(unitMod, TOTAL_PCT);

@@ -167,7 +167,7 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId)
     m_weatherSystem = new WeatherSystem(this);
 }
 
-void Map::Initialize(bool loadInstanceData /*= true*/)
+void Map::Initialize(std::mutex* mmapMutex, bool loadInstanceData /*= true*/)
 {
     m_CreatureGuids.Set(sObjectMgr.GetFirstTemporaryCreatureLowGuid());
     m_GameObjectGuids.Set(sObjectMgr.GetFirstTemporaryGameObjectLowGuid());
@@ -202,9 +202,13 @@ void Map::Initialize(bool loadInstanceData /*= true*/)
     auto mmap = MMAP::MMapFactory::createOrGetMMapManager();
     if (mmap->IsEnabled())
     {
+        if (mmapMutex)
+            mmapMutex->lock();
         MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), GetId(), GetInstanceId());
         if (sWorld.getConfig(CONFIG_BOOL_PRELOAD_MMAP_TILES))
             MMAP::MMapFactory::createOrGetMMapManager()->loadAllMapTiles(sWorld.GetDataPath(), GetId());
+        if (mmapMutex)
+            mmapMutex->unlock();
     }
 
     sObjectMgr.LoadActiveEntities(this);
@@ -2060,9 +2064,9 @@ BattleGroundMap::~BattleGroundMap()
 {
 }
 
-void BattleGroundMap::Initialize(bool)
+void BattleGroundMap::Initialize(std::mutex* mmapMutex, bool)
 {
-    Map::Initialize(false);
+    Map::Initialize(mmapMutex, false);
 }
 
 void BattleGroundMap::Update(const uint32& diff)

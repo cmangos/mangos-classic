@@ -146,7 +146,7 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_isInvisible(false), m_ignoreMMAP(false), m_forceAttackingCapability(false),
     m_settings(this),
     m_countSpawns(false),
-    m_creatureGroup(nullptr), m_imposedCooldown(false), m_healthMultiplier(1.f),
+    m_creatureGroup(nullptr), m_imposedCooldown(false), m_healthMultiplier(1.f), m_damageMultiplier(1.f),
     m_creatureInfo(nullptr), m_mountInfo(nullptr),
     m_combatOnlyStealth(false)
 {
@@ -1307,6 +1307,7 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
 
     float damageMod = _GetDamageMod(rank);
     float damageMulti = cinfo->DamageMultiplier * damageMod;
+    float damageMultiOLD = cinfo->DamageMultiplierOLD * damageMod;
     bool usedDamageMulti = false;
 
     if (CreatureClassLvlStats const* cCLS = sObjectMgr.GetCreatureClassLvlStats(level, cinfo->UnitClass))
@@ -1333,12 +1334,17 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
         if (cinfo->DamageMultiplier >= 0 && cinfo->ArmorMultiplier >= 0)
         {
             usedDamageMulti = true;
-            mainMinDmg = ((cCLS->BaseDamage * cinfo->DamageVariance) + (cCLS->BaseMeleeAttackPower / 14.0f)) * (cinfo->MeleeBaseAttackTime / 1000.0f) * damageMulti;
-            mainMaxDmg = ((cCLS->BaseDamage * cinfo->DamageVariance * 1.5f) + (cCLS->BaseMeleeAttackPower / 14.0f)) * (cinfo->MeleeBaseAttackTime / 1000.0f) * damageMulti;
+            mainMinDmg = ((cCLS->BaseDamage - cCLS->BaseDamage * (cinfo->DamageVariance / 2)) + (cCLS->BaseMeleeAttackPower / 14.0f)) * damageMulti;
+            mainMaxDmg = ((cCLS->BaseDamage + cCLS->BaseDamage * (cinfo->DamageVariance / 2)) + (cCLS->BaseMeleeAttackPower / 14.0f)) * damageMulti;
             offMinDmg = mainMinDmg; // Unitmod handles 50%
             offMaxDmg = mainMaxDmg;
-            minRangedDmg = ((cCLS->BaseDamage * cinfo->DamageVariance) + (cCLS->BaseRangedAttackPower / 14.0f)) * (cinfo->RangedBaseAttackTime / 1000.0f) * damageMulti;
-            maxRangedDmg = ((cCLS->BaseDamage * cinfo->DamageVariance * 1.5f) + (cCLS->BaseRangedAttackPower / 14.0f)) * (cinfo->RangedBaseAttackTime / 1000.0f) * damageMulti;
+            minRangedDmg = ((cCLS->BaseDamage - cCLS->BaseDamage * (cinfo->DamageVariance / 2)) + (cCLS->BaseRangedAttackPower / 14.0f)) * damageMulti;
+            maxRangedDmg = ((cCLS->BaseDamage + cCLS->BaseDamage * (cinfo->DamageVariance / 2)) + (cCLS->BaseRangedAttackPower / 14.0f)) * damageMulti;
+
+            auto oldMainMinDmg = ((cCLS->BaseDamageOLD * cinfo->DamageVarianceOLD) + (cCLS->BaseMeleeAttackPower / 14.0f)) * (cinfo->MeleeBaseAttackTime / 1000.0f) * damageMultiOLD;
+            auto oldMainMaxDmg = ((cCLS->BaseDamageOLD * cinfo->DamageVarianceOLD * 1.5f) + (cCLS->BaseMeleeAttackPower / 14.0f)) * (cinfo->MeleeBaseAttackTime / 1000.0f) * damageMultiOLD;
+
+            // printf("CLS DIFF OLD %f NEW %f\n", (oldMainMinDmg + oldMainMaxDmg) / 2, (mainMinDmg + mainMaxDmg) / 2);
 
             // attack power (not sure about the next line)
             meleeAttackPwr = cCLS->BaseMeleeAttackPower;
@@ -1469,6 +1475,7 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
 
     // multipliers
     m_healthMultiplier = healthMultiplier;
+    m_damageMultiplier = damageMulti;
     SetModifierValue(UnitMods(UNIT_MOD_MANA + (int)GetPowerType()), TOTAL_PCT, powerMultiplier);
 
     UpdateAllStats();
