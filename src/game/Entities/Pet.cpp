@@ -54,7 +54,7 @@ Pet::Pet(PetType type) :
     m_removed(false), m_happinessTimer(7500), m_loyaltyTimer(12000), m_petType(type), m_duration(0),
     m_loyaltyPoints(0), m_bonusdamage(0), m_loading(false),
     m_xpRequiredForNextLoyaltyLevel(0),
-    m_petModeFlags(PET_MODE_DEFAULT), m_originalCharminfo(nullptr)
+    m_petModeFlags(PET_MODE_DEFAULT), m_originalCharminfo(nullptr), m_scaleWithCls(false)
 {
     m_name = "Pet";
 
@@ -1351,6 +1351,7 @@ void Pet::InitStatsForLevel(uint32 petlevel)
         }
         case GUARDIAN_PET:
         {
+            m_scaleWithCls = true;
             SelectLevel(petlevel);  // guardians reuse CLS function SelectLevel, so we stop here
             return;
         }

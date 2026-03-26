@@ -850,7 +850,7 @@ bool Pet::UpdateStats(Stats stat)
 
 void Pet::UpdateMaxHealth()
 {
-    if (getPetType() == GUARDIAN_PET) // handled by regular cls
+    if (m_scaleWithCls) // handled by regular cls
     {
         Creature::UpdateMaxHealth();
         return;
