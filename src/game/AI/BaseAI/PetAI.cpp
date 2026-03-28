@@ -20,7 +20,6 @@
 #include "Util/Errors.h"
 #include "Entities/Pet.h"
 #include "Entities/Player.h"
-#include "Server/DBCStores.h"
 #include "Spells/Spell.h"
 #include "Spells/SpellMgr.h"
 #include "Entities/Creature.h"
