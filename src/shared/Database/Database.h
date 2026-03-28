@@ -141,22 +141,16 @@ class Database
 
         /// Async queries and query holders, implemented in DatabaseImpl.h
 
-        // Query / member
-        template<class Class>
-        bool AsyncQuery(Class* object, void (Class::*method)(QueryResult*), const char* sql);
-        template<class Class, typename ParamType1>
-        bool AsyncQuery(Class* object, void (Class::*method)(QueryResult*, ParamType1), ParamType1 param1, const char* sql);
-        template<class Class, typename ParamType1, typename ParamType2>
-        bool AsyncQuery(Class* object, void (Class::*method)(QueryResult*, ParamType1, ParamType2), ParamType1 param1, ParamType2 param2, const char* sql);
-        template<class Class, typename ParamType1, typename ParamType2, typename ParamType3>
-        bool AsyncQuery(Class* object, void (Class::*method)(QueryResult*, ParamType1, ParamType2, ParamType3), ParamType1 param1, ParamType2 param2, ParamType3 param3, const char* sql);
-        // Query / static
-        template<typename ParamType1>
-        bool AsyncQuery(void (*method)(QueryResult*, ParamType1), ParamType1 param1, const char* sql);
-        template<typename ParamType1, typename ParamType2>
-        bool AsyncQuery(void (*method)(QueryResult*, ParamType1, ParamType2), ParamType1 param1, ParamType2 param2, const char* sql);
-        template<typename ParamType1, typename ParamType2, typename ParamType3>
-        bool AsyncQuery(void (*method)(QueryResult*, ParamType1, ParamType2, ParamType3), ParamType1 param1, ParamType2 param2, ParamType3 param3, const char* sql);
+        // Query
+        /**
+         * Callable needs to be a callable object (function object, pointer to function, reference
+         * to function, pointer to member function, etc) that takes a pointer to QueryResult as
+         * an argument and returns void. The caller can use std::bind to create such a callable
+         * object and bind any other required arguments for the actual callback.
+         */
+        template <typename Callable>
+        bool AsyncQuery(Callable callback, const char* sql);
+
         // PQuery / member
         template<class Class>
         bool AsyncPQuery(Class* object, void (Class::*method)(QueryResult*), const char* format, ...) ATTR_PRINTF(4, 5);
