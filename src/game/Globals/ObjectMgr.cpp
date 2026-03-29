@@ -1089,6 +1089,19 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
             spell.Probability = fields[8].GetUInt32();
             spell.InitialMin = fields[9].GetUInt32();
             spell.InitialMax = fields[10].GetUInt32();
+
+            if (spell.InitialMin > spell.InitialMax)
+            {
+                sLog.outErrorDb("LoadCreatureSpellLists: Invalid creature_spell_list %u list, spell %u has smaller InitialMax than InitialMin.", spell.Id, spell.SpellId);
+                continue;
+            }
+
+            if (spell.RepeatMin > spell.RepeatMax)
+            {
+                sLog.outErrorDb("LoadCreatureSpellLists: Invalid creature_spell_list %u list, spell %u has smaller RepeatMax than RepeatMin.", spell.Id, spell.SpellId);
+                continue;
+            }
+
             spell.RepeatMin = fields[11].GetUInt32();
             spell.RepeatMax = fields[12].GetUInt32();
             spell.DisabledForAI = !spellInfo || spellInfo->HasAttribute(SPELL_ATTR_EX_NO_AUTOCAST_AI);
