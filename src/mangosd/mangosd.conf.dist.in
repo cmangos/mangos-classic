@@ -1648,8 +1648,8 @@ LFG.MatchmakingTimer = 600
 #
 #    Network.TcpNodelay
 #        TCP Nagle algorithm setting
-#        Default: 0 (enable Nagle algorithm, less traffic, more latency)
-#                 1 (TCP_NO_DELAY, disable Nagle algorithm, more traffic but less latency)
+#                 0 (enable Nagle algorithm, less traffic, more latency)
+#        Default: 1 (TCP_NO_DELAY, disable Nagle algorithm, more traffic but less latency)
 #
 #    Network.KickOnBadPacket
 #        Kick player on bad packet format.
