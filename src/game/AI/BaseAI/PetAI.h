@@ -21,9 +21,11 @@
 
 #include "CreatureAI.h"
 #include "Entities/ObjectGuid.h"
+#include "Spells/SpellDefines.h"
 
 class Creature;
 class Spell;
+class CharmInfo;
 
 class PetAI : public CreatureAI
 {
