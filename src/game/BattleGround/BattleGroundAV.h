@@ -627,7 +627,7 @@ class BattleGroundAV : public BattleGround
         void ChangeMineOwner(AVMineIds mineId, PvpTeamIndex newOwnerTeamIdx);
 
         // World state helpers
-        uint8 GetWorldStateType(uint8 state, PvpTeamIndex teamIdx) const { return (uint8 )teamIdx * (uint8 )BG_AV_MAX_STATES + state; }
+        uint8 GetWorldStateType(uint8 state, PvpTeamIndex teamIdx) const { return static_cast<uint8>(teamIdx) * static_cast<uint8>(BG_AV_MAX_STATES) + state; }
         void UpdateNodeWorldState(AVNodeIds node, uint32 newState);
 
         // Herald announcements

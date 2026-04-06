@@ -544,8 +544,8 @@ void BattleGroundAV::ChangeMineOwner(AVMineIds mineId, PvpTeamIndex newOwnerTeam
     m_mineOwner[mineId] = newOwnerTeamIdx;
     GetBgMap()->GetVariableManager().SetVariable(avMineWorldStates[mineId][m_mineOwner[mineId]], WORLD_STATE_ADD);
 
-    SpawnEvent(BG_AV_MINE_EVENT + mineId, newOwnerTeamIdx, true);
-    SpawnEvent(BG_AV_MINE_BOSSES + mineId, newOwnerTeamIdx, true);
+    SpawnEvent(static_cast<uint8>(BG_AV_MINE_EVENT) + static_cast<uint8>(mineId), newOwnerTeamIdx, true);
+    SpawnEvent(static_cast<uint8>(BG_AV_MINE_BOSSES) + static_cast<uint8>(mineId), newOwnerTeamIdx, true);
 
     if (newOwnerTeamIdx == TEAM_INDEX_NEUTRAL)
         return;
@@ -601,11 +601,11 @@ void BattleGroundAV::PopulateNode(AVNodeIds node)
             graveDefenderType = 3;
 
         if (m_nodes[node].state == POINT_CONTROLLED) // we can spawn the current owner event
-            SpawnEvent(BG_AV_MAX_NODES + node, teamIdx * BG_AV_MAX_GRAVETYPES + graveDefenderType, true);
+            SpawnEvent(static_cast<uint8>(BG_AV_MAX_NODES) + static_cast<uint8>(node), static_cast<uint8>(teamIdx) * static_cast<uint8>(BG_AV_MAX_GRAVETYPES) + graveDefenderType, true);
         else // we despawn the event from the prevowner
-            SpawnEvent(BG_AV_MAX_NODES + node, m_nodes[node].prevOwner * BG_AV_MAX_GRAVETYPES + graveDefenderType, false);
+            SpawnEvent(static_cast<uint8>(BG_AV_MAX_NODES) + static_cast<uint8>(node), static_cast<uint8>(m_nodes[node].prevOwner) * static_cast<uint8>(BG_AV_MAX_GRAVETYPES) + graveDefenderType, false);
     }
-    SpawnEvent(node, (teamIdx * BG_AV_MAX_STATES) + m_nodes[node].state, true);
+    SpawnEvent(node, (static_cast<uint8>(teamIdx) * static_cast<uint8>(BG_AV_MAX_STATES)) + static_cast<uint8>(m_nodes[node].state), true);
 }
 
 // Handle banner click
@@ -807,7 +807,7 @@ void BattleGroundAV::InitializeNode(AVNodeIds node)
 
     if (avNodeDefaults[node].graveyardId)                                      // grave-creatures are special cause of a quest
     {
-        m_activeEvents[node + BG_AV_MAX_NODES]  = avNodeDefaults[node].initialOwner * BG_AV_MAX_GRAVETYPES;
+        m_activeEvents[node + BG_AV_MAX_NODES] = static_cast<uint8>(avNodeDefaults[node].initialOwner) * static_cast<uint8>(BG_AV_MAX_GRAVETYPES);
 
         // initialize graveyards
         Team team = TEAM_INVALID;

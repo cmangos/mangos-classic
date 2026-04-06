@@ -71,7 +71,7 @@ void BattleGroundAB::Update(uint32 diff)
                 Team team = GetTeamIdByTeamIndex(PvpTeamIndex(teamIndex));
 
                 m_prevNodeStatus[node] = m_nodeStatus[node];
-                m_nodeStatus[node] = ABNodeStatus(teamIndex + BG_AB_NODE_TYPE_OCCUPIED);
+                m_nodeStatus[node] = ABNodeStatus(static_cast<uint16>(teamIndex) + static_cast<uint16>(BG_AB_NODE_TYPE_OCCUPIED));
 
                 // create new occupied banner
                 DoUpdateBanner(node, m_nodeStatus[node], true);
@@ -283,7 +283,7 @@ void BattleGroundAB::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
         worldState             = abContestedStates[teamIndex][node];
 
         m_prevNodeStatus[node] = m_nodeStatus[node];
-        m_nodeStatus[node]     = ABNodeStatus(teamIndex + BG_AB_NODE_TYPE_CONTESTED);
+        m_nodeStatus[node]     = ABNodeStatus(static_cast<uint16>(teamIndex) + static_cast<uint16>(BG_AB_NODE_TYPE_CONTESTED));
 
         m_nodeTimers[node]     = BG_AB_FLAG_CAPTURING_TIME;
 
@@ -301,7 +301,7 @@ void BattleGroundAB::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
             worldState              = abContestedStates[teamIndex][node];
 
             m_prevNodeStatus[node]  = m_nodeStatus[node];
-            m_nodeStatus[node]      = ABNodeStatus(teamIndex + BG_AB_NODE_TYPE_CONTESTED);
+            m_nodeStatus[node]      = ABNodeStatus(static_cast<uint16>(teamIndex) + static_cast<uint16>(BG_AB_NODE_TYPE_CONTESTED));
 
             m_nodeTimers[node]      = BG_AB_FLAG_CAPTURING_TIME;
 
@@ -314,7 +314,7 @@ void BattleGroundAB::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
             worldState              = abOccupiedStates[teamIndex][node];
 
             m_prevNodeStatus[node]  = m_nodeStatus[node];
-            m_nodeStatus[node]      = ABNodeStatus(teamIndex + BG_AB_NODE_TYPE_OCCUPIED);
+            m_nodeStatus[node]      = ABNodeStatus(static_cast<uint16>(teamIndex) + static_cast<uint16>(BG_AB_NODE_TYPE_OCCUPIED));
 
             m_nodeTimers[node]      = 0;
 
@@ -333,7 +333,7 @@ void BattleGroundAB::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
         worldState              = abContestedStates[teamIndex][node];
 
         m_prevNodeStatus[node]  = m_nodeStatus[node];
-        m_nodeStatus[node]      = ABNodeStatus(teamIndex + BG_AB_NODE_TYPE_CONTESTED);
+        m_nodeStatus[node]      = ABNodeStatus(static_cast<uint16>(teamIndex) + static_cast<uint16>(BG_AB_NODE_TYPE_CONTESTED));
 
         m_nodeTimers[node]      = BG_AB_FLAG_CAPTURING_TIME;
 

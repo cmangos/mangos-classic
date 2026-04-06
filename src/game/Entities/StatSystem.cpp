@@ -185,7 +185,7 @@ void Unit::UpdateMaxHealth()
 
 void Unit::UpdateMaxPower(Powers power)
 {
-    UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + power);
+    UnitMods unitMod = UnitMods(static_cast<uint32>(UNIT_MOD_POWER_START) + static_cast<uint32>(power));
 
     uint32 create_power = GetCreatePowers(power);
 
@@ -876,7 +876,7 @@ void Pet::UpdateMaxPower(Powers power)
         return;
     }
 
-    UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + power);
+    UnitMods unitMod = UnitMods(static_cast<uint32>(UNIT_MOD_POWER_START) + static_cast<uint32>(power));
 
     float addValue = (power == POWER_MANA) ? GetStat(STAT_INTELLECT) - GetCreateStat(STAT_INTELLECT) : 0.0f;
 

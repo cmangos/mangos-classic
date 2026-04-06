@@ -201,7 +201,7 @@ void Log::SetLogLevel(char* level)
 
     m_logLevel = LogLevel(newLevel);
 
-    printf("LogLevel is %u\n", m_logLevel);
+    printf("LogLevel is %u\n", static_cast<uint8>(m_logLevel));
 }
 
 void Log::SetLogFileLevel(char* level)
@@ -215,7 +215,7 @@ void Log::SetLogFileLevel(char* level)
 
     m_logFileLevel = LogLevel(newLevel);
 
-    printf("LogFileLevel is %u\n", m_logFileLevel);
+    printf("LogFileLevel is %u\n", static_cast<uint8>(m_logFileLevel));
 }
 
 void Log::Initialize()
@@ -986,7 +986,7 @@ void Log::WaitBeforeContinueIfNeed()
     }
     else if (mode > 0)
     {
-        printf("\nWait %u secs for continue.\n", mode);
+        printf("\nWait %u secs for continue.\n", static_cast<uint8>(mode));
         BarGoLink bar(mode);
         for (int i = 0; i < mode; ++i)
         {

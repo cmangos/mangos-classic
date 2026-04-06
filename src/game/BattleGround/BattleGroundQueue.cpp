@@ -718,18 +718,18 @@ bool BattleGroundQueueItem::CheckSkirmishForSameFaction(BattleGroundBracketId br
     // store last ginfo pointer
     GroupQueueInfo* ginfo = m_selectionPools[teamIdx].selectedGroups.back();
     // set itr_team to group that was added to selection pool latest
-    GroupsQueueType::iterator itr_team = m_queuedGroups[bracketId][BG_QUEUE_NORMAL_ALLIANCE + teamIdx].begin();
-    for (; itr_team != m_queuedGroups[bracketId][BG_QUEUE_NORMAL_ALLIANCE + teamIdx].end(); ++itr_team)
+    GroupsQueueType::iterator itr_team = m_queuedGroups[bracketId][static_cast<uint8>(BG_QUEUE_NORMAL_ALLIANCE) + static_cast<uint8>(teamIdx)].begin();
+    for (; itr_team != m_queuedGroups[bracketId][static_cast<uint8>(BG_QUEUE_NORMAL_ALLIANCE) + static_cast<uint8>(teamIdx)].end(); ++itr_team)
         if (ginfo == *itr_team)
             break;
 
-    if (itr_team == m_queuedGroups[bracketId][BG_QUEUE_NORMAL_ALLIANCE + teamIdx].end())
+    if (itr_team == m_queuedGroups[bracketId][static_cast<uint8>(BG_QUEUE_NORMAL_ALLIANCE) + static_cast<uint8>(teamIdx)].end())
         return false;
 
     GroupsQueueType::iterator itr_team2 = itr_team;
     ++itr_team2;
     // invite players to other selection pool
-    for (; itr_team2 != m_queuedGroups[bracketId][BG_QUEUE_NORMAL_ALLIANCE + teamIdx].end(); ++itr_team2)
+    for (; itr_team2 != m_queuedGroups[bracketId][static_cast<uint8>(BG_QUEUE_NORMAL_ALLIANCE) + static_cast<uint8>(teamIdx)].end(); ++itr_team2)
     {
         // if selection pool is full then break;
         if (!(*itr_team2)->isInvitedToBgInstanceGuid && !m_selectionPools[otherTeamIdx].AddGroup(*itr_team2, minPlayersPerTeam, 0))
@@ -746,16 +746,16 @@ bool BattleGroundQueueItem::CheckSkirmishForSameFaction(BattleGroundBracketId br
         (*itr)->groupTeam = otherTeamId;
 
         // add team to other queue
-        m_queuedGroups[bracketId][BG_QUEUE_NORMAL_ALLIANCE + otherTeamIdx].push_front(*itr);
+        m_queuedGroups[bracketId][static_cast<uint8>(BG_QUEUE_NORMAL_ALLIANCE) + static_cast<uint8>(otherTeamIdx)].push_front(*itr);
 
         // remove team from old queue
         GroupsQueueType::iterator itr2 = itr_team;
         ++itr2;
-        for (; itr2 != m_queuedGroups[bracketId][BG_QUEUE_NORMAL_ALLIANCE + teamIdx].end(); ++itr2)
+        for (; itr2 != m_queuedGroups[bracketId][static_cast<uint8>(BG_QUEUE_NORMAL_ALLIANCE) + static_cast<uint8>(teamIdx)].end(); ++itr2)
         {
             if (*itr2 == *itr)
             {
-                m_queuedGroups[bracketId][BG_QUEUE_NORMAL_ALLIANCE + teamIdx].erase(itr2);
+                m_queuedGroups[bracketId][static_cast<uint8>(BG_QUEUE_NORMAL_ALLIANCE) + static_cast<uint8>(teamIdx)].erase(itr2);
                 break;
             }
         }
