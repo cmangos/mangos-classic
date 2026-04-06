@@ -76,7 +76,7 @@ class PlayerbotClassAI
         bool EatDrinkBandage(bool bMana = true, unsigned char foodPercent = 50, unsigned char drinkPercent = 50, unsigned char bandagePercent = 70);
 
         // Utilities
-        bool CastHoTOnTank();
+        virtual bool CastHoTOnTank();
         JOB_TYPE GetBotJob(Player* target);
         JOB_TYPE GetTargetJob(Player* target);
         time_t GetWaitUntil() { return m_WaitUntil; }

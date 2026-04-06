@@ -180,7 +180,6 @@ class BattleGroundWGScore : public BattleGroundScore
 {
     public:
         BattleGroundWGScore() : flagCaptures(0), flagReturns(0) {};
-        virtual ~BattleGroundWGScore() {};
 
         uint32 GetAttr1() const override { return flagCaptures; }
         uint32 GetAttr2() const override { return flagReturns; }

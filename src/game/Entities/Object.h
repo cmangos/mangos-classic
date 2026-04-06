@@ -854,7 +854,7 @@ class WorldObject : public Object
         friend struct WorldObjectChangeAccumulator;
 
     public:
-        virtual ~WorldObject() {}
+        virtual ~WorldObject() override {}
 
         virtual void Update(const uint32 /*diff*/);
         virtual void Heartbeat() {}

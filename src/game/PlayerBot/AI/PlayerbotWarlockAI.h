@@ -135,7 +135,7 @@ class PlayerbotWarlockAI : PlayerbotClassAI
 {
     public:
         PlayerbotWarlockAI(Player& master, Player& bot, PlayerbotAI& ai);
-        virtual ~PlayerbotWarlockAI();
+        virtual ~PlayerbotWarlockAI() override;
 
         // all combat actions go here
         CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget) override;

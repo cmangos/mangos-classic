@@ -877,7 +877,7 @@ class Player : public Unit
         friend void Item::RemoveFromUpdateQueueOf(Player* player);
     public:
         explicit Player(WorldSession* session);
-        ~Player();
+        ~Player() override;
 
         void CleanupsBeforeDelete() override;
 

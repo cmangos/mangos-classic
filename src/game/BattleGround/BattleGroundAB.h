@@ -199,7 +199,6 @@ class BattleGroundABScore : public BattleGroundScore
 {
     public:
         BattleGroundABScore(): basesAssaulted(0), basesDefended(0) {};
-        virtual ~BattleGroundABScore() {};
 
         uint32 GetAttr1() const override { return basesAssaulted; }
         uint32 GetAttr2() const override { return basesDefended; }

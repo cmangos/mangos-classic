@@ -92,7 +92,7 @@ class PlayerbotHunterAI : PlayerbotClassAI
 {
     public:
         PlayerbotHunterAI(Player& master, Player& bot, PlayerbotAI& ai);
-        virtual ~PlayerbotHunterAI();
+        virtual ~PlayerbotHunterAI() override;
         static bool HasPet(Player* bot);
 
         // all combat actions go here

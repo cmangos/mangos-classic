@@ -300,17 +300,17 @@ class NullSessionAnticheat : public SessionAnticheatInterface
 class NullAnticheatLib : public AnticheatLibInterface
 {
     public:
-        virtual void Reload() {}
-        virtual void Initialize() {}
+        virtual void Reload() override {}
+        virtual void Initialize() override {}
 
-        virtual std::unique_ptr<SessionAnticheatInterface> NewSession(WorldSession *session, const BigNumber &)
+        virtual std::unique_ptr<SessionAnticheatInterface> NewSession(WorldSession *session, const BigNumber &) override
         {
             return std::make_unique<NullSessionAnticheat>(session);
         }
 
         // anti spam
-        virtual bool ValidateGuildName(const std::string &) const { return false; }
-        virtual std::string NormalizeString(const std::string &message, uint32) { return message; }
+        virtual bool ValidateGuildName(const std::string &) const override { return false; }
+        virtual std::string NormalizeString(const std::string &message, uint32) override { return message; }
         virtual void AddMessage(const std::string &, uint32, Player *, Player *) {}
 
         // GM .anticheat command handler

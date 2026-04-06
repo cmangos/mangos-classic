@@ -75,7 +75,7 @@ class WaypointMovementGenerator<Creature>
             i_nextMoveTime(0), m_scriptTime(0), m_lastReachedWaypoint(0), m_pathId(0),
             m_pathDuration(0), m_PathOrigin(), m_speedChanged(false), m_forcedMovement(FORCED_MOVEMENT_NONE)
         {}
-        ~WaypointMovementGenerator() { i_path = nullptr; }
+        ~WaypointMovementGenerator() override { i_path = nullptr; }
         void Initialize(Creature& creature);
         void Interrupt(Creature&);
         void Finalize(Creature&);

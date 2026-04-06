@@ -107,7 +107,7 @@ class SQLStorage : public SQLStorageBase
 
         SQLStorage(const char* src_fmt, const char* dst_fmt, const char* _entry_field, const char* sqlname);
 
-        ~SQLStorage() { Free(); }
+        ~SQLStorage() override { Free(); }
 
         template<class T>
         T const* LookupEntry(uint32 id) const
@@ -143,7 +143,7 @@ class SQLHashStorage : public SQLStorageBase
         SQLHashStorage(const char* fmt, const char* _entry_field, const char* sqlname);
         SQLHashStorage(const char* src_fmt, const char* dst_fmt, const char* _entry_field, const char* sqlname);
 
-        ~SQLHashStorage() { Free(); }
+        ~SQLHashStorage() override { Free(); }
 
         template<class T>
         T const* LookupEntry(uint32 id) const
@@ -185,7 +185,7 @@ class SQLMultiStorage : public SQLStorageBase
         SQLMultiStorage(const char* fmt, const char* _entry_field, const char* sqlname);
         SQLMultiStorage(const char* src_fmt, const char* dst_fmt, const char* _entry_field, const char* sqlname);
 
-        ~SQLMultiStorage() { Free(); }
+        ~SQLMultiStorage() override { Free(); }
 
         // forward declaration
         template<typename T> class SQLMSIteratorBounds;

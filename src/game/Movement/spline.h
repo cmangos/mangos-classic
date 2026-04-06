@@ -211,6 +211,7 @@ namespace Movement
             length_type length(index_type Idx) const { return lengths[Idx];}
 
             void set_length(index_type i, length_type length) { lengths[i] = length;}
+            using SplineBase::clear;
             void clear();
     };
 }

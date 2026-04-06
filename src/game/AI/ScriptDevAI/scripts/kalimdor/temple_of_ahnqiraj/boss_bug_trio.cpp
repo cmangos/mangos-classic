@@ -194,14 +194,12 @@ enum KriActions
 
 struct boss_kriAI : public boss_silithidRoyaltyAI
 {
-    boss_kriAI(Creature* creature) : boss_silithidRoyaltyAI(creature, KRI_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    boss_kriAI(Creature* creature) : boss_silithidRoyaltyAI(creature, KRI_ACTION_MAX)
     {
         AddCombatAction(KRI_CLEAVE, 4000, 8000);
         AddCombatAction(KRI_TOXIC_VOLLEY, 6000, 30000);
         AddCombatAction(KRI_THRASH, 6u * IN_MILLISECONDS);
     }
-
-    ScriptedInstance* m_instance;
 
     void Reset() override
     {
@@ -247,14 +245,12 @@ enum VemActions
 
 struct boss_vemAI : public boss_silithidRoyaltyAI
 {
-    boss_vemAI(Creature* creature) : boss_silithidRoyaltyAI(creature, VEM_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    boss_vemAI(Creature* creature) : boss_silithidRoyaltyAI(creature, VEM_ACTION_MAX)
     {
         AddCombatAction(VEM_CHARGE, urand(15, 27) * IN_MILLISECONDS);
         AddCombatAction(VEM_KNOCK_AWAY, urand(10, 20) * IN_MILLISECONDS);
         AddCombatAction(VEM_KNOCK_DOWN, urand(5, 8) * IN_MILLISECONDS);
     }
-
-    ScriptedInstance* m_instance;
 
     void Reset() override
     {
@@ -304,15 +300,13 @@ enum YaujActions
 
 struct boss_yaujAI : public boss_silithidRoyaltyAI
 {
-    boss_yaujAI(Creature* creature) : boss_silithidRoyaltyAI(creature, YAUJ_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    boss_yaujAI(Creature* creature) : boss_silithidRoyaltyAI(creature, YAUJ_ACTION_MAX)
     {
         AddCombatAction(YAUJ_HEAL, urand(20, 30) * IN_MILLISECONDS);
         AddCombatAction(YAUJ_DISPEL, urand(10, 30) * IN_MILLISECONDS);
         AddCombatAction(YAUJ_FEAR, urand(12, 24) * IN_MILLISECONDS);
         AddCombatAction(YAUJ_RAVAGE, 12u * IN_MILLISECONDS);
     }
-
-    ScriptedInstance* m_instance;
 
     void Reset() override
     {

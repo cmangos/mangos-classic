@@ -93,7 +93,7 @@ namespace metric
                 set_condition(std::move(condition));
             }
 
-            ~duration()
+            ~duration() override
             {
                 auto endTime = std::chrono::high_resolution_clock::now();
                 auto duration = std::chrono::duration_cast<precision>(endTime - m_startTime).count();

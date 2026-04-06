@@ -84,7 +84,7 @@ class PlayerbotDruidAI : PlayerbotClassAI
 {
     public:
         PlayerbotDruidAI(Player& master, Player& bot, PlayerbotAI& ai);
-        virtual ~PlayerbotDruidAI();
+        virtual ~PlayerbotDruidAI() override;
 
         // all combat actions go here
         CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget) override;
@@ -97,7 +97,7 @@ class PlayerbotDruidAI : PlayerbotClassAI
         void DoNonCombatActions() override;
 
         // Utility Functions
-        bool CastHoTOnTank();
+        bool CastHoTOnTank() override;
 
     private:
         CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget) override;

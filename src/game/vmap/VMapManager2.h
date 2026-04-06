@@ -86,7 +86,7 @@ namespace VMAP
             static std::string getMapFileName(unsigned int pMapId);
 
             VMapManager2();
-            ~VMapManager2();
+            ~VMapManager2() override;
 
             void InitializeThreadUnsafe(const std::vector<uint32>& mapIds) override;
 

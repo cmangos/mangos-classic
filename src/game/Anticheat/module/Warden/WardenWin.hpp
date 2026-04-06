@@ -66,10 +66,10 @@ class WardenWin final : public Warden
 
         void ValidateEndScene(const std::vector<uint8> &code);
 
-        virtual uint32 GetScanFlags() const;
+        virtual uint32 GetScanFlags() const override;
 
         // send module initialization information (function offsets, etc.)
-        virtual void InitializeClient();
+        virtual void InitializeClient() override;
 
         /* 
             (a, b) initialization packet options:
@@ -126,12 +126,12 @@ class WardenWin final : public Warden
 
         WardenWin(WorldSession *session, const BigNumber &K, SessionAnticheatInterface *anticheat);
 
-        void Update(uint32 diff);
+        void Update(uint32 diff) override;
 
         // set pending character enum packet (to be sent once we are satisfied that Warden is loaded)
-        virtual void SetCharEnumPacket(WorldPacket &&packet);
+        virtual void SetCharEnumPacket(WorldPacket &&packet) override;
 
-        virtual void SendPlayerInfo(ChatHandler *handler, bool includeFingerprint) const;
+        virtual void SendPlayerInfo(ChatHandler *handler, bool includeFingerprint) const override;
 };
 
 #endif /*!__WARDENWIN_HPP_*/
