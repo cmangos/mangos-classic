@@ -1,4 +1,7 @@
 {
+"_Info": "Current Default:",
+"_Info": "borderSize: 5, detailSampleDist: BASE_UNIT_DIM * 16.0f, detailSampleMaxError: BASE_UNIT_DIM, maxEdgeLen: VERTEX_PER_TILE + 1, maxSimplificationError: 1.8f",
+"_Info": "mergeRegionArea: 50, minRegionArea: 60, walkableClimb: 4, walkableHeight: 6, walkableRadius: 2, walkableSlopeAngle: 60.0f, liquidFlagMergeThreshold: 0.0f",
 	"0": {
 		"3653": {
 			"maxSimplificationError": 1.0,
@@ -7,6 +10,12 @@
 			"_Info": "walkableClimb <= 8 else .go c 1000403 goes over the edge"
 		}
 	},
+	"429": {
+        "3032": {
+			"_Info": "Dire Maul - .go c id 11496",
+			"walkableClimb": 5.0
+        }
+    },
 	"530": {
 		"2029": {
 			"detailSampleDist": 1,
