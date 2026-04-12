@@ -41,7 +41,7 @@ DEFINE_ENUM_FLAG(FlagConvertibleEnum64);
 template <typename T, typename = std::enable_if_t<IsFlagConvertibleEnum(T {})>>
 constexpr FlagConvertibleEnum const convertEnumToFlag(T item)
 {
-    return FlagConvertibleEnum(1) << static_cast<FlagConvertibleEnum>(static_cast<std::underlying_type_t<T>>(item) - 1);
+    return FlagConvertibleEnum(uint32(1) << static_cast<uint32>(static_cast<std::underlying_type_t<T>>(item) - 1));
 }
 
 template <typename T, typename = std::enable_if_t<IsFlagConvertibleEnum64(T {})>>
