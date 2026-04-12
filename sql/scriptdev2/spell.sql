@@ -283,7 +283,6 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Wotlk
 
-
 -- Priest
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (527,'spell_dispel_magic_priest'),
@@ -424,7 +423,14 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (8516,'spell_windfury_totem_aura'),
 (10608,'spell_windfury_totem_aura'),
 (10610,'spell_windfury_totem_aura'),
-(6495,'spell_sentry_totem');
+(6495,'spell_sentry_totem'),
+(8017,'spell_rockbiter_weapon_selector'),
+(8018,'spell_rockbiter_weapon_selector'),
+(8019,'spell_rockbiter_weapon_selector'),
+(10399,'spell_rockbiter_weapon_selector'),
+(16314,'spell_rockbiter_weapon_selector'),
+(16315,'spell_rockbiter_weapon_selector'),
+(16316,'spell_rockbiter_weapon_selector');
 
 -- Hunter
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
@@ -442,13 +448,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (19684, 'spell_taming_pet_rod'),
 (19685, 'spell_taming_pet_rod'),
 (19686, 'spell_taming_pet_rod'),
-(8017,'spell_rockbiter_weapon_selector'),
-(8018,'spell_rockbiter_weapon_selector'),
-(8019,'spell_rockbiter_weapon_selector'),
-(10399,'spell_rockbiter_weapon_selector'),
-(16314,'spell_rockbiter_weapon_selector'),
-(16315,'spell_rockbiter_weapon_selector'),
-(16316,'spell_rockbiter_weapon_selector');
+(19572,'spell_improved_mend_pet'),
+(19573,'spell_improved_mend_pet');
 
 -- Food and Drink
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

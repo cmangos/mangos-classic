@@ -52,6 +52,20 @@ struct TameBeastDummy : public SpellScript
     }
 };
 
+// 19572, 19573 - Improved Mend Pet
+struct ImprovedMendPet : public AuraScript
+{
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        if (!roll_chance_i(aura->GetModifier()->m_amount))
+            return SPELL_AURA_PROC_FAILED;
+
+        procData.triggeredSpellId = 24406;
+        procData.triggerTarget = procData.target;
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
 // TODO: some evidence tbc pet growl scales with hunter AP
 
 // 19678 - Tame Adult Plainstrider
@@ -84,5 +98,6 @@ void LoadHunterScripts()
 {
     RegisterSpellScript<TameBeastChannel>("spell_tame_beast_channel");
     RegisterSpellScript<TameBeastDummy>("spell_tame_beast_dummy");
+    RegisterSpellScript<ImprovedMendPet>("spell_improved_mend_pet");
     RegisterSpellScript<TamingPetRodAura>("spell_taming_pet_rod");
 }
