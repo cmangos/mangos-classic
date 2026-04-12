@@ -21,6 +21,7 @@
 
 #include "Server/DBCEnums.h"
 #include "Platform/Define.h"
+#include "Globals/FlagConvertibleEnum.h"
 #include <map>
 #include <vector>
 #include <string>
@@ -41,6 +42,8 @@ enum class SpellGroupId
     MAX = 64,
 };
 
+DEFINE_FLAG_CONVERTIBLE_ENUM_64(SpellGroupId);
+
 struct SpellGroup
 {
     uint32 Id;
@@ -53,6 +56,11 @@ struct SpellGroupSpellData
 {
     uint64 mask;
     SpellGroupRule rule;
+
+    bool HasFlag(FlagConvertibleEnum64 flag) const
+    {
+        return bool(FlagConvertibleEnum64(mask) & flag);
+    }
 
     SpellGroupSpellData() : mask(0), rule((SpellGroupRule)0) {}
 };

@@ -20,18 +20,7 @@
 #define MANGOS_SHAREDDEFINES_H
 
 #include "Platform/Define.h"
-
-template <std::convertible_to<uint32> T>
-constexpr uint32 const convertEnumToFlag(T item)
-{
-    return 1 << (item - 1);
-}
-
-template <std::convertible_to<uint32> T, typename... Targs>
-constexpr uint32 const convertEnumToFlag(T item, Targs&&... fargs)
-{
-    return convertEnumToFlag(item) | convertEnumToFlag(std::forward<Targs>(fargs)...);
-}
+#include "Globals/FlagConvertibleEnum.h"
 
 enum Gender
 {

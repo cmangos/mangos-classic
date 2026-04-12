@@ -146,8 +146,8 @@ bool SpellStacker::IsStackableAuraEffect(SpellEntry const* entry, SpellEntry con
     auto secondItr = m_spellGroupSpellData.find(entry2->Id);
     if (firstItr != m_spellGroupSpellData.end() && secondItr != m_spellGroupSpellData.end())
     {
-        int wellFedIndex = convertEnumToFlag(static_cast<uint32>(SpellGroupId::WELL_FED));
-        if ((firstItr->second.mask & wellFedIndex) != 0 && (secondItr->second.mask & wellFedIndex) == 0)
+        auto wellFedFlag = convertEnumToFlag(SpellGroupId::WELL_FED);
+        if (firstItr->second.HasFlag(wellFedFlag) && !secondItr->second.HasFlag(wellFedFlag))
             return true;
     }
 
