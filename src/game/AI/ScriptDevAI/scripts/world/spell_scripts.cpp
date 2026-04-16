@@ -82,7 +82,8 @@ struct MelodiousRapture : public SpellScript
     }
 };
 
-struct GreaterInvisibilityMob : public AuraScript
+// 16380, 32811, 32943 - Invisibility
+struct DetectThroughInvisibilityMob : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
     {
@@ -441,7 +442,7 @@ struct SummonWaterElemental : public SpellScript
 void AddSC_spell_scripts()
 {
     RegisterSpellScript<MelodiousRapture>("spell_melodious_rapture");
-    RegisterSpellScript<GreaterInvisibilityMob>("spell_greater_invisibility_mob");
+    RegisterSpellScript<DetectThroughInvisibilityMob>("spell_detect_through_invisibility_mob");
     RegisterSpellScript<WondervoltTrap>("spell_wondervolt_trap");
     RegisterSpellScript<ArcaneCloaking>("spell_arcane_cloaking");
     RegisterSpellScript<FoodAnimation>("spell_food_animation");

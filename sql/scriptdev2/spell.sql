@@ -67,7 +67,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (13493,'spell_gdr_periodic'),
 (14250,'spell_capture_grark'),
 (15712,'spell_linkens_boomerang'),
-(16380,'spell_greater_invisibility_mob'),
+(16380,'spell_detect_through_invisibility_mob'),
 (16510,'spell_corrupted_saber_visual'),
 (16739,'spell_orb_of_deception'),
 (17016,'spell_placing_beacon_torch'),
