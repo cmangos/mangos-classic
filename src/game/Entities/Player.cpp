@@ -3685,6 +3685,7 @@ void Player::_SaveSpellCooldowns()
 
     static SqlStatementID insertSpellCooldown;
 
+    TimePoint now = GetMap()->GetCurrentClockTime();
     for (auto& cdItr : m_cooldownMap)
     {
         auto& cdData = cdItr.second;
@@ -3694,6 +3695,11 @@ void Player::_SaveSpellCooldowns()
             TimePoint cTime = TimePoint::min();
             cdData->GetSpellCDExpireTime(sTime);
             cdData->GetCatCDExpireTime(cTime);
+
+            // Skip entries where both cooldowns have already expired - no point persisting them
+            if (sTime <= now && cTime <= now)
+                continue;
+
             uint64 spellExpireTime = uint64(Clock::to_time_t(sTime));
             uint64 catExpireTime = uint64(Clock::to_time_t(cTime));
 
@@ -20194,10 +20200,19 @@ void Player::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* item
     }
 
     // blizzlike code for choosing which is recTime > categoryRecTime after spellmod application
+    // We use signed intermediates to prevent uint32 underflow when a flat reduction exceeds the CD value
     if (recTime)
-        ApplySpellMod(spellEntry.Id, SPELLMOD_COOLDOWN, recTime);
-    else if (spellCategory && categoryRecTime)
-        ApplySpellMod(spellEntry.Id, SPELLMOD_COOLDOWN, categoryRecTime);
+    {
+        int32 signedRecTime = static_cast<int32>(recTime);
+        ApplySpellMod(spellEntry.Id, SPELLMOD_COOLDOWN, signedRecTime);
+        recTime = signedRecTime > 0 ? static_cast<uint32>(signedRecTime) : 0;
+    }
+    if (spellCategory && categoryRecTime)
+    {
+        int32 signedCatRecTime = static_cast<int32>(categoryRecTime);
+        ApplySpellMod(spellEntry.Id, SPELLMOD_COOLDOWN, signedCatRecTime);
+        categoryRecTime = signedCatRecTime > 0 ? static_cast<uint32>(signedCatRecTime) : 0;
+    }
 
     if (recTime || categoryRecTime || wasPermanent)
     {
