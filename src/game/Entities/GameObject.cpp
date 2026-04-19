@@ -1395,6 +1395,38 @@ void GameObject::SwitchDoorOrButton(bool activate, bool alternative /* = false *
         SetGoState(GO_STATE_READY);
 }
 
+bool GameObject::CanUseNow(Player const* player) const
+{
+    switch (GetGoType())
+    {
+        case GAMEOBJECT_TYPE_CHAIR:
+        {
+            float x, y;
+            std::tie(x, y) = GetClosestChairSlotPosition(player);
+            if (player->GetDistance(x, y, GetPositionZ(), DIST_CALC_NONE, GetTransport()) > 3.f * 3.f)
+                return false;
+            break;
+        }
+        case GAMEOBJECT_TYPE_SUMMONING_RITUAL:
+        {
+            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(m_goInfo->summoningRitual.spellId);
+            if (spellInfo && spellInfo->HasAttribute(SPELL_ATTR_NOT_IN_COMBAT_ONLY_PEACEFUL) && player->IsInCombat())
+                return false;
+
+            WorldObject const* owner = GetOwner();
+            if (owner->IsPlayer())
+            {
+                Player const* ownerPlayer = static_cast<Player const*>(owner);
+                if (!player->IsInGroup(ownerPlayer, false))
+                    return false;
+            }
+            break;
+        }
+    }
+
+    return true;
+}
+
 void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
 {
     // user must be provided
@@ -2505,7 +2537,7 @@ void GameObject::AIM_Initialize()
         iData->OnObjectSpawn(this);
 }
 
-std::pair<float, float> GameObject::GetClosestChairSlotPosition(Unit* user) const
+std::pair<float, float> GameObject::GetClosestChairSlotPosition(Unit const* user) const
 {
     float outX, outY;
     // check if the db is sane
