@@ -22,6 +22,7 @@
 #include "Platform/Define.h"
 #include "Globals/EnumFlag.h"
 #include <concepts>
+#include <utility>
 
 enum class FlagConvertibleEnum : uint32
 {
