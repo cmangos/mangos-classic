@@ -292,9 +292,6 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if (obj->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED)) // we should not allow use of a locked GO
-        return;
-
     if (obj->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE))
         return;
 
@@ -304,10 +301,6 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
         sLog.outError("HandleGameObjectUseOpcode: CMSG_GAMEOBJ_USE for GameObject (Entry %u) with non intractable flag (Flags %u), didn't expect this to happen.", obj->GetEntry(), obj->GetUInt32Value(GAMEOBJECT_FLAGS));
         return;
     }
-
-    // client checks this but needs recheck
-    if (obj->GetGOInfo()->CannotBeUsedUnderImmunity() && _player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE))
-        return;
 
     if (!obj->CanUseNow(_player))
         return;
