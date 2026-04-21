@@ -1426,20 +1426,17 @@ bool GameObject::CanUseNow(Player const* player) const
 
     if (!GetGOInfo()->GetLockId())
     {
-        // ignore for remote control state
-        if (!player->IsSelfMover())
-        {
-            // check player on vehicle
-            if (!GetGOInfo()->IsUsableMounted())
-                return false;
-        }
+        // mounted and cannot unmount
+        if (player->GetMountID() && !GetGOInfo()->IsUsableMounted() && (player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_TAXI_FLIGHT) || !player->IsClientControlled()))
+            return false;
 
         // We can't interact with anyone while being shapeshifted, unless form flags allow us to do so
         if (player->IsShapeShifted())
         {
             if (SpellShapeshiftFormEntry const* formEntry = sSpellShapeshiftFormStore.LookupEntry(player->GetShapeshiftForm()))
             {
-                if (!(formEntry->flags1 & SHAPESHIFT_FLAG_CAN_NPC_INTERACT) && player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_TAXI_FLIGHT)) // meant to have an can unshift check here
+                // meant to have an can unshift check here
+                if (!(formEntry->flags1 & SHAPESHIFT_FLAG_CAN_NPC_INTERACT) && (player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_TAXI_FLIGHT) || !player->IsClientControlled() || (formEntry->flags1 & SHAPESHIFT_FLAG_DONT_AUTO_UNSHIFT) != 0))
                     return false;
             }
             else
