@@ -1521,9 +1521,10 @@ std::pair<bool, bool> ScriptAction::GetScriptProcessTargets(WorldObject* origina
                     buddies.push_back(closest);
             }
             if (m_script->searchRadiusOrGuid > 0)
-                for (WorldObject* buddy : buddies)
-                    if (!buddy->IsWithinDist(origin, m_script->searchRadiusOrGuid))
-                        buddies.erase(std::remove(buddies.begin(), buddies.end(), buddy), buddies.end());
+                buddies.erase(std::remove_if(buddies.begin(), buddies.end(), [&](WorldObject* buddy)
+                {
+                    return !buddy->IsWithinDist(origin, m_script->searchRadiusOrGuid);
+                }), buddies.end());
 
             if (buddies.empty() && m_script->command != SCRIPT_COMMAND_TERMINATE_SCRIPT)
             {
