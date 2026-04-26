@@ -858,10 +858,11 @@ void Pet::UpdateMaxHealth()
 
     UnitMods unitMod = UNIT_MOD_HEALTH;
     float stamina = GetStat(STAT_STAMINA) - GetCreateStat(STAT_STAMINA); // TODO: Remove create stat usage like this
+    float addedStaminaBonus = std::max((stamina - 20) * 10, 0.f) + std::min(20.f, stamina);
 
     float value = GetModifierValue(unitMod, BASE_VALUE) + GetCreateHealth();
     value *= GetModifierValue(unitMod, BASE_PCT);
-    value += GetModifierValue(unitMod, TOTAL_VALUE) + std::max((stamina - 20) * 10 + 20, 0.f);
+    value += GetModifierValue(unitMod, TOTAL_VALUE) + addedStaminaBonus;
     value *= GetModifierValue(unitMod, TOTAL_PCT);
 
     SetMaxHealth((uint32)value);
