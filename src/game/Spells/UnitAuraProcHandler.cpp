@@ -1513,8 +1513,16 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
             // Need add combopoint AFTER finishing move (or they get dropped in finish phase)
             if (Spell* spell = GetCurrentSpell(CURRENT_GENERIC_SPELL))
             {
-                spell->AddTriggeredSpell(trigger_spell_id);
-                return SPELL_AURA_PROC_OK;
+                // Only trigger if you are not the target (Slice and Dice casts twice,
+                // ignore on you, keep on target)
+                if (pVictim->GetObjectGuid() != GetObjectGuid()) 
+                {
+                    spell->AddTriggeredSpell(trigger_spell_id);
+                    return SPELL_AURA_PROC_OK;
+                }
+                // player is target, ignore
+                else         
+                    return SPELL_AURA_PROC_FAILED;
             }
             return SPELL_AURA_PROC_FAILED;
         }
