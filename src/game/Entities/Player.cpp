@@ -73,6 +73,7 @@
 #include "playerbot/PlayerbotAIConfig.h"
 #endif
 
+#include <algorithm>
 #include <cmath>
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
@@ -4797,15 +4798,15 @@ void Player::LeaveLFGChannel()
     }
 }
 
-void Player::UpdateDefense()
+void Player::UpdateDefense(uint32 procEx)
 {
     uint32 defense_skill_gain = sWorld.getConfig(CONFIG_UINT32_SKILL_GAIN_DEFENSE);
 
-    if (UpdateSkill(SKILL_DEFENSE, defense_skill_gain))
-    {
-        // update dependent from defense skill part
-        UpdateDefenseBonusesMod();
-    }
+    if (defense_skill_gain == 0)
+        return;
+
+    UpdateSkill(SKILL_DEFENSE, defense_skill_gain);
+    UpdateDefenseBonusesMod();
 }
 
 void Player::HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, float amount, bool apply)
@@ -5022,18 +5023,21 @@ void Player::SetRegularAttackTime()
     }
 }
 
-bool Player::UpdateSkill(uint16 id, uint16 diff)
+void Player::UpdateSkill(uint16 id, uint16 diff)
 {
     if (!id)
-        return false;
+        return;
+
+    if (diff == 0)
+        return;
 
     SkillStatusMap::iterator itr = mSkillStatus.find(id);
     if (itr == mSkillStatus.end())
-        return false;
+        return;
 
     SkillStatusData& skillStatus = itr->second;
     if (skillStatus.uState == SKILL_DELETED)
-        return false;
+        return;
 
     uint32 valueIndex = PLAYER_SKILL_VALUE_INDEX(skillStatus.pos);
     uint32 data = GetUInt32Value(valueIndex);
@@ -5041,23 +5045,18 @@ bool Player::UpdateSkill(uint16 id, uint16 diff)
     uint32 max = SKILL_MAX(data);
 
     if ((!max) || (!value) || (value >= max))
-        return false;
+        return;
 
-    if (value * 512 < max * urand(0, 512))
-    {
-        uint32 new_value = value + diff;
-        if (new_value > max)
-            new_value = max;
+    uint32 new_value = value + diff;
+    if (new_value > max)
+        new_value = max;
 
-        SetUInt32Value(valueIndex, MAKE_SKILL_VALUE(new_value, max));
+    SetUInt32Value(valueIndex, MAKE_SKILL_VALUE(new_value, max));
 
-        if (skillStatus.uState != SKILL_NEW)
-            skillStatus.uState = SKILL_CHANGED;
+    if (skillStatus.uState != SKILL_NEW)
+        skillStatus.uState = SKILL_CHANGED;
 
-        return true;
-    }
-
-    return false;
+    return;
 }
 
 inline int SkillGainChance(uint32 SkillValue, uint32 GrayLevel, uint32 GreenLevel, uint32 YellowLevel)
@@ -5239,28 +5238,59 @@ void Player::UpdateWeaponSkill(WeaponAttackType attType)
     UpdateAllCritPercentages();
 }
 
-void Player::UpdateCombatSkills(Unit* pVictim, WeaponAttackType attType, bool defence)
+void Player::UpdateCombatSkills(uint32 procEx, WeaponAttackType attType, bool defence)
 {
     const uint16 skillId = (defence ? SKILL_DEFENSE : GetWeaponSkillIdForAttack(attType));
     const uint16 skill = GetSkillValuePure(skillId);
-    const uint16 cap = GetSkillMaxPure(skillId);
-    const int32 room = int32(cap - skill);
+    const uint16 skillMax = GetSkillMaxPure(skillId);
+    const int32 room = int32(skillMax - skill);
+    const int32 level = GetLevel();
+    const uint32 levelMax = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
 
-    // Max skill reached: nothing to gain
-    if (room <= 0)
+    // Skill already capped or invalid state: nothing to gain
+    if (skillMax == 0 || level == 0 || skill >= skillMax)
         return;
 
-    // The farther player is from the cap, the easier it gets to level up the skill
-    float chance = ((float(std::max(1, (room / 5))) / (cap / 5.f)) * 100);
+    // skillGapLogGrowth controls the slope of the logarithmic catch-up portion
+    const double skillGapLogGrowth = 0.22 * (1.0 + (12.0 / level));
+    // levelCapScale normalizes the curve across realm caps and anchors the seam at room = 7
+    const double levelCapScale = levelMax / 60.0;
 
-    // Weapon skills: increase chance by intellect
+    double baseChance = 0.0;
+
+    // Piecewise curve: logarithmic growth for catch-up, quadratic decay near the cap
+    if (room >= 7)
+        baseChance = (7.0 / skillMax) * levelCapScale
+                   + skillGapLogGrowth * std::log((room + 5.0) / 12.0);
+    else
+        baseChance = (room * room) / (7.0 * skillMax) * levelCapScale;
+
+    baseChance = std::clamp(baseChance, 0.0, 1.0);
+
+    // Weapon skills gain a small bonus from intellect
+    double intellectBonus = 0.0;
     if (!defence)
-        chance += ((chance * 0.02f) * GetStat(STAT_INTELLECT));
+    {
+        const double maxIntellectBonus = 0.10;
+        const double intellect = GetStat(STAT_INTELLECT);
+        const double intellectMax = (levelMax == 60) ? 750 :
+                                    (levelMax == 70) ? 1500 :
+                                    (levelMax == 80) ? 3000 : 750; // default fallback
 
-    if (roll_chance_f(chance))
+        intellectBonus = maxIntellectBonus *
+                         (intellect / intellectMax) *
+                         (static_cast<double>(levelMax) / static_cast<double>(level));
+
+        intellectBonus = std::clamp(intellectBonus, 0.0, maxIntellectBonus);
+    }
+
+    // Final skill-up probability
+    const float finalChance = std::clamp(baseChance + intellectBonus, 0.0, 1.0) * 100.0f;
+
+    if (roll_chance_f(finalChance))
     {
         if (defence)
-            UpdateDefense();
+            UpdateDefense(procEx);
         else
             UpdateWeaponSkill(attType);
     }
