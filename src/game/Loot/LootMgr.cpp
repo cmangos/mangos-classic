@@ -2141,7 +2141,7 @@ bool Loot::AutoStore(Player* player, bool broadcast /*= false*/, uint32 bag /*= 
             msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, lootItem->itemId, lootItem->count);
         if (msg != EQUIP_ERR_OK)
         {
-            player->SendEquipError(msg, nullptr, nullptr, lootItem->itemId);
+            player->SendEquipError(msg, nullptr, nullptr, 0, lootItem->itemId);
             result = false;
             continue;
         }

@@ -2004,7 +2004,7 @@ bool Spell::DoCreateItem(SpellEffectIndex /*eff_idx*/, uint32 itemtype, bool rep
 
         // if not created by another reason from full inventory or unique items amount limitation
         if (reportError)
-            player->SendEquipError(msg, nullptr, nullptr, newitemid);
+            player->SendEquipError(msg, nullptr, nullptr, 0, newitemid);
         return false;
     }
 
