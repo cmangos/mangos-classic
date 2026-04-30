@@ -4272,16 +4272,16 @@ bool ChatHandler::HandleLookupAccountEmailCommand(char* args)
     if (!emailStr)
         return false;
 
-    uint32 limit;
-    if (!ExtractOptUInt32(&args, limit, 100))
+    uint32 p_limit;
+    if (!ExtractOptUInt32(&args, p_limit, 100) )
         return false;
 
     std::string email = emailStr;
     LoginDatabase.escape_string(email);
-    //                                                0   1         2        3        4
-    auto queryResult = LoginDatabase.PQuery("SELECT a.id, username, ip, gmlevel, expansion FROM account a join account_logons b on (a.id=b.accountId) WHERE email " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'  ORDER BY loginTime DESC LIMIT 1"), email.c_str());
+    //                                              0              1         2   3        4
+    auto queryResult = LoginDatabase.PQuery("SELECT distinct a.id, username, ip, gmlevel, expansion FROM account a join account_logons b on (a.id = b.accountId) WHERE a.email " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'") " ORDER BY loginTime DESC LIMIT %u", email.c_str(), p_limit);
 
-    return ShowAccountListHelper(std::move(queryResult), &limit);
+    return ShowAccountListHelper(std::move(queryResult), &p_limit);
 }
 
 bool ChatHandler::HandleLookupAccountIpCommand(char* args)
@@ -4290,17 +4290,17 @@ bool ChatHandler::HandleLookupAccountIpCommand(char* args)
     if (!ipStr)
         return false;
 
-    uint32 limit;
-    if (!ExtractOptUInt32(&args, limit, 100))
+    uint32 p_limit;
+    if (!ExtractOptUInt32(&args, p_limit, 100) )
         return false;
 
     std::string ip = ipStr;
     LoginDatabase.escape_string(ip);
 
-    //                                              0            1         2        3        4
-    auto queryResult = LoginDatabase.PQuery("SELECT distinct id, username, ip, gmlevel, expansion FROM account a join account_logons b on(a.id=b.accountId) WHERE ip " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), ip.c_str());
+    //                                              0              1         2   3        4
+    auto queryResult = LoginDatabase.PQuery("SELECT distinct a.id, username, ip, gmlevel, expansion FROM account a join account_logons b on(a.id = b.accountId) WHERE ip " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'") " ORDER BY loginTime DESC limit %u", ip.c_str(), p_limit);
 
-    return ShowAccountListHelper(std::move(queryResult), &limit);
+    return ShowAccountListHelper(std::move(queryResult), &p_limit);
 }
 
 bool ChatHandler::HandleLookupAccountNameCommand(char* args)
@@ -4309,19 +4309,27 @@ bool ChatHandler::HandleLookupAccountNameCommand(char* args)
     if (!accountStr)
         return false;
 
-    uint32 limit;
-    if (!ExtractOptUInt32(&args, limit, 100))
+    uint32 p_limit;
+    if (!ExtractOptUInt32(&args, p_limit, 100) )
         return false;
 
     std::string account = accountStr;
-    if (!AccountMgr::normalizeString(account))
+    if (!AccountMgr::normalizeString(account) )
         return false;
 
     LoginDatabase.escape_string(account);
-    //                                                0   1         2        3        4
-    auto queryResult = LoginDatabase.PQuery("SELECT a.id, username, ip, gmlevel, expansion FROM account a join account_logons b on (a.id=b.accountId) WHERE username " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%' ORDER BY loginTime DESC LIMIT 1"), account.c_str());
+    //                                              0              1         2   3        4
+    auto queryResult = LoginDatabase.PQuery("SELECT distinct a.id, username, ip, gmlevel, expansion FROM account a join account_logons b on (a.id=b.accountId) WHERE username " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'") " ORDER BY loginTime DESC limit %u", account.c_str(), p_limit);
 
-    return ShowAccountListHelper(std::move(queryResult), &limit);
+    return ShowAccountListHelper(std::move(queryResult), &p_limit);
+}
+
+bool ChatHandler::HandleLookupAccountAllCommand(char *)
+{
+    uint32 p_limit = 1000;
+    auto queryResult = LoginDatabase.PQuery("SELECT distinct a.id, username, ip, gmlevel, expansion FROM account a join account_logons b on (a.id=b.accountId) ORDER BY loginTime DESC limit %u", p_limit);
+
+    return ShowAccountListHelper(std::move(queryResult), &p_limit);
 }
 
 bool ChatHandler::ShowAccountListHelper(std::unique_ptr<QueryResult> queryResult, uint32* limit, bool title, bool error)
@@ -4357,16 +4365,16 @@ bool ChatHandler::ShowAccountListHelper(std::unique_ptr<QueryResult> queryResult
 
         WorldSession* session = sWorld.FindSession(account);
         Player* player = session ? session->GetPlayer() : nullptr;
-        char const* char_name = player ? player->GetName() : " - ";
+        char const* char_name = player ? player->GetName() : "[OFFLINE]";
 
         if (m_session)
             PSendSysMessage(LANG_ACCOUNT_LIST_LINE_CHAT,
-                            account, fields[1].GetString(), char_name, fields[2].GetString(), fields[3].GetUInt32(), fields[4].GetUInt32());
+                            account, fields[1].GetString(), char_name, fields[2].GetString(), fields[3].GetUInt32(), fields[4].GetUInt32() );
         else
             PSendSysMessage(LANG_ACCOUNT_LIST_LINE_CONSOLE,
-                            account, fields[1].GetString(), char_name, fields[2].GetString(), fields[3].GetUInt32(), fields[4].GetUInt32());
+                            account, fields[1].GetString(), char_name, fields[2].GetString(), fields[3].GetUInt32(), fields[4].GetUInt32() );
     }
-    while (queryResult->NextRow());
+    while (queryResult->NextRow() );
 
     if (!m_session)                                         // not output header for online case
         SendSysMessage(LANG_ACCOUNT_LIST_BAR);
@@ -4380,16 +4388,16 @@ bool ChatHandler::HandleLookupPlayerIpCommand(char* args)
     if (!ipStr)
         return false;
 
-    uint32 limit;
-    if (!ExtractOptUInt32(&args, limit, 100))
+    uint32 p_limit;
+    if (!ExtractOptUInt32(&args, p_limit, 100))
         return false;
 
     std::string ip = ipStr;
     LoginDatabase.escape_string(ip);
 
-    auto queryResult = LoginDatabase.PQuery("SELECT a.id, username, distinct ip FROM account a join account_logons b on (a.id=b.accountId) WHERE b.ip " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'  ORDER BY loginTime DESC LIMIT 1"), ip.c_str());
+    auto queryResult = LoginDatabase.PQuery("SELECT distinct a.id, a.username, a.email FROM account a join account_logons b on (a.id = b.accountId) WHERE b.ip " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), ip.c_str() );
 
-    return LookupPlayerSearchCommand(std::move(queryResult), &limit);
+    return LookupPlayerSearchCommand(std::move(queryResult), &p_limit);
 }
 
 bool ChatHandler::HandleLookupPlayerAccountCommand(char* args)
@@ -4408,7 +4416,7 @@ bool ChatHandler::HandleLookupPlayerAccountCommand(char* args)
 
     LoginDatabase.escape_string(account);
 
-    auto queryResult = LoginDatabase.PQuery("SELECT id,username FROM account WHERE username " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), account.c_str());
+    auto queryResult = LoginDatabase.PQuery("SELECT id, username, email FROM account WHERE username " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), account.c_str());
 
     return LookupPlayerSearchCommand(std::move(queryResult), &limit);
 }
@@ -4420,13 +4428,13 @@ bool ChatHandler::HandleLookupPlayerEmailCommand(char* args)
         return false;
 
     uint32 limit;
-    if (!ExtractOptUInt32(&args, limit, 100))
+    if (!ExtractOptUInt32(&args, limit, 100) )
         return false;
 
     std::string email = emailStr;
     LoginDatabase.escape_string(email);
 
-    auto queryResult = LoginDatabase.PQuery("SELECT id,username FROM account WHERE email " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), email.c_str());
+    auto queryResult = LoginDatabase.PQuery("SELECT id, username, email FROM account WHERE email " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), email.c_str() );
 
     return LookupPlayerSearchCommand(std::move(queryResult), &limit);
 }
@@ -4455,6 +4463,7 @@ bool ChatHandler::LookupPlayerSearchCommand(std::unique_ptr<QueryResult> queryRe
         Field* fields = queryResult->Fetch();
         uint32 acc_id = fields[0].GetUInt32();
         std::string acc_name = fields[1].GetCppString();
+        std::string acc_email = fields[2].GetCppString();
 
         ///- Get the characters for account id
         auto chars = CharacterDatabase.PQuery("SELECT guid, name, race, class, level FROM characters WHERE account = %u", acc_id);
@@ -4462,7 +4471,7 @@ bool ChatHandler::LookupPlayerSearchCommand(std::unique_ptr<QueryResult> queryRe
         {
             if (chars->GetRowCount())
             {
-                PSendSysMessage(LANG_LOOKUP_PLAYER_ACCOUNT, acc_name.c_str(), acc_id);
+                PSendSysMessage(LANG_LOOKUP_PLAYER_ACCOUNT, acc_name.c_str(), acc_id, acc_email.c_str() );
                 ShowPlayerListHelper(std::move(chars), limit, true, false);
             }
         }
