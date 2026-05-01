@@ -4273,7 +4273,7 @@ bool ChatHandler::HandleLookupAccountEmailCommand(char* args)
         return false;
 
     uint32 p_limit;
-    if (!ExtractOptUInt32(&args, p_limit, 100) )
+    if (!ExtractOptUInt32(&args, p_limit, 100))
         return false;
 
     std::string email = emailStr;
@@ -4291,7 +4291,7 @@ bool ChatHandler::HandleLookupAccountIpCommand(char* args)
         return false;
 
     uint32 p_limit;
-    if (!ExtractOptUInt32(&args, p_limit, 100) )
+    if (!ExtractOptUInt32(&args, p_limit, 100))
         return false;
 
     std::string ip = ipStr;
@@ -4310,11 +4310,11 @@ bool ChatHandler::HandleLookupAccountNameCommand(char* args)
         return false;
 
     uint32 p_limit;
-    if (!ExtractOptUInt32(&args, p_limit, 100) )
+    if (!ExtractOptUInt32(&args, p_limit, 100))
         return false;
 
     std::string account = accountStr;
-    if (!AccountMgr::normalizeString(account) )
+    if (!AccountMgr::normalizeString(account))
         return false;
 
     LoginDatabase.escape_string(account);
@@ -4369,12 +4369,12 @@ bool ChatHandler::ShowAccountListHelper(std::unique_ptr<QueryResult> queryResult
 
         if (m_session)
             PSendSysMessage(LANG_ACCOUNT_LIST_LINE_CHAT,
-                            account, fields[1].GetString(), char_name, fields[2].GetString(), fields[3].GetUInt32(), fields[4].GetUInt32() );
+                            account, fields[1].GetString(), char_name, fields[2].GetString(), fields[3].GetUInt32(), fields[4].GetUInt32());
         else
             PSendSysMessage(LANG_ACCOUNT_LIST_LINE_CONSOLE,
-                            account, fields[1].GetString(), char_name, fields[2].GetString(), fields[3].GetUInt32(), fields[4].GetUInt32() );
+                            account, fields[1].GetString(), char_name, fields[2].GetString(), fields[3].GetUInt32(), fields[4].GetUInt32());
     }
-    while (queryResult->NextRow() );
+    while (queryResult->NextRow());
 
     if (!m_session)                                         // not output header for online case
         SendSysMessage(LANG_ACCOUNT_LIST_BAR);
@@ -4395,7 +4395,7 @@ bool ChatHandler::HandleLookupPlayerIpCommand(char* args)
     std::string ip = ipStr;
     LoginDatabase.escape_string(ip);
 
-    auto queryResult = LoginDatabase.PQuery("SELECT distinct a.id, a.username, a.email FROM account a join account_logons b on (a.id = b.accountId) WHERE b.ip " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), ip.c_str() );
+    auto queryResult = LoginDatabase.PQuery("SELECT distinct a.id, a.username, a.email FROM account a join account_logons b on (a.id = b.accountId) WHERE b.ip " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), ip.c_str());
 
     return LookupPlayerSearchCommand(std::move(queryResult), &p_limit);
 }
@@ -4428,13 +4428,13 @@ bool ChatHandler::HandleLookupPlayerEmailCommand(char* args)
         return false;
 
     uint32 limit;
-    if (!ExtractOptUInt32(&args, limit, 100) )
+    if (!ExtractOptUInt32(&args, limit, 100))
         return false;
 
     std::string email = emailStr;
     LoginDatabase.escape_string(email);
 
-    auto queryResult = LoginDatabase.PQuery("SELECT id, username, email FROM account WHERE email " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), email.c_str() );
+    auto queryResult = LoginDatabase.PQuery("SELECT id, username, email FROM account WHERE email " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), email.c_str());
 
     return LookupPlayerSearchCommand(std::move(queryResult), &limit);
 }
@@ -4471,7 +4471,7 @@ bool ChatHandler::LookupPlayerSearchCommand(std::unique_ptr<QueryResult> queryRe
         {
             if (chars->GetRowCount())
             {
-                PSendSysMessage(LANG_LOOKUP_PLAYER_ACCOUNT, acc_name.c_str(), acc_id, acc_email.c_str() );
+                PSendSysMessage(LANG_LOOKUP_PLAYER_ACCOUNT, acc_name.c_str(), acc_id, acc_email.c_str());
                 ShowPlayerListHelper(std::move(chars), limit, true, false);
             }
         }
