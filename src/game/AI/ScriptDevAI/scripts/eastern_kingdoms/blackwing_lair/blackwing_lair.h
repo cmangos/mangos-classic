@@ -108,16 +108,11 @@ enum
     EMOTE_REDSHARD_TAUNT_2      = -1469044,
 };
 
-struct SpawnLocation
+static const Position aNefarianLocs[3] =
 {
-    float m_fX, m_fY, m_fZ;
-};
-
-static const SpawnLocation aNefarianLocs[3] =
-{
-    { -7599.32f, -1191.72f, 475.545f},                      // opening where red/blue/black darknid spawner appear (ori 3.05433)
-    { -7526.27f, -1135.04f, 473.445f},                      // same as above, closest to door (ori 5.75959)
-    { -7348.849f, -1495.134f, 552.5152f},                   // nefarian spawn location (ori 1.798)
+    { -7599.32f,  -1191.72f,  475.545f, 0.0},                      // opening where red/blue/black darknid spawner appear (ori 3.05433)
+    { -7526.27f,  -1135.04f,  473.445f, 0.0},                      // same as above, closest to door (ori 5.75959)
+    {-7348.849f, -1495.134f, 552.5152f, 0.0},                   // nefarian spawn location (ori 1.798)
 };
 
 // Coords used in intro event for Vaelastrasz to spawn Nefarius at the throne and sort the gobelins

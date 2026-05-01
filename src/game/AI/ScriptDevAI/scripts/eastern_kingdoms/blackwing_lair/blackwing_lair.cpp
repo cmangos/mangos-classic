@@ -528,7 +528,7 @@ void instance_blackwing_lair::Update(uint32 uiDiff)
         {
             if (Creature* nefarius = GetSingleCreatureFromStorage(NPC_LORD_VICTOR_NEFARIUS))
             {
-                nefarius->SummonCreature(NPC_NEFARIAN, aNefarianLocs[2].m_fX, aNefarianLocs[2].m_fY, aNefarianLocs[2].m_fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0, true);
+                nefarius->SummonCreature(NPC_NEFARIAN, aNefarianLocs[2].x, aNefarianLocs[2].y, aNefarianLocs[2].z, 0, TEMPSPAWN_DEAD_DESPAWN, 0, true);
                 // Despawn Nefarius
                 if (!nefarius->IsDespawned() && GetData(TYPE_NEFARIAN) == SPECIAL)
                 {

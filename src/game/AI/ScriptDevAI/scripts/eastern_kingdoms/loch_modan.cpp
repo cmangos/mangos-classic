@@ -48,12 +48,7 @@ enum
     MIRAN_ESCORT_PATH     = 1379
 };
 
-struct Location
-{
-    float m_fX, m_fY, m_fZ, m_fO;
-};
-
-static const Location m_afAmbushSpawn[] =
+static const Position m_afAmbushSpawn[] =
 {
     { -5705.012f, -3736.6575f, 318.56738f, 0.57595f},
     { -5696.1943f, -3736.78f, 318.58145f, 2.40855f}
@@ -83,8 +78,8 @@ struct npc_miranAI: public npc_escortAI
                 break;
             case 17:
                 SetEscortPaused(true);
-                m_creature->SummonCreature(NPC_DARK_IRON_RAIDER, m_afAmbushSpawn[0].m_fX, m_afAmbushSpawn[0].m_fY, m_afAmbushSpawn[0].m_fZ, m_afAmbushSpawn[0].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 25000);
-                m_creature->SummonCreature(NPC_DARK_IRON_RAIDER, m_afAmbushSpawn[1].m_fX, m_afAmbushSpawn[1].m_fY, m_afAmbushSpawn[1].m_fZ, m_afAmbushSpawn[1].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 25000);
+                m_creature->SummonCreature(NPC_DARK_IRON_RAIDER, m_afAmbushSpawn[0].x, m_afAmbushSpawn[0].y, m_afAmbushSpawn[0].z, m_afAmbushSpawn[0].o, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 25000);
+                m_creature->SummonCreature(NPC_DARK_IRON_RAIDER, m_afAmbushSpawn[1].x, m_afAmbushSpawn[1].y, m_afAmbushSpawn[1].z, m_afAmbushSpawn[1].o, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 25000);
                 break;
             case 21:
                 DoBroadcastText(SAY_MIRAN_3, m_creature);
