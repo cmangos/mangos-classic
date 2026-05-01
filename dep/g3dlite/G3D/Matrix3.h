@@ -113,7 +113,7 @@ public:
 
     // assignment and comparison
     inline Matrix3& operator= (const Matrix3& rkMatrix) {
-        memcpy(elt, rkMatrix.elt, 9 * sizeof(float));
+        memcpy(&(elt[0][0]), &(rkMatrix.elt[0][0]), 9 * sizeof(float));
         return *this;
     }
 
