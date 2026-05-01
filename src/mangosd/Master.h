@@ -23,6 +23,8 @@
 #ifndef _MASTER_H
 #define _MASTER_H
 
+#define BOOST_BIND_NO_PLACEHOLDERS 1
+
 #include "Common.h"
 #include "Policies/Singleton.h"
 

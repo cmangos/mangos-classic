@@ -23,6 +23,10 @@
 #ifndef _AUTHSOCKET_H
 #define _AUTHSOCKET_H
 
+
+
+#define BOOST_BIND_NO_PLACEHOLDERS 1
+
 #include "Common.h"
 #include "Auth/BigNumber.h"
 #include "Auth/CryptoHash.h"
