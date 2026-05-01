@@ -64,12 +64,7 @@ enum
     POINT_DOWNSTAIRS    = 1
 };
 
-struct SpawnLocations
-{
-    float fX, fY, fZ, fAng;
-};
-
-static SpawnLocations aSpirits[] =
+static Position aSpirits[] =
 {
     { -12150.9f, -1956.24f, 133.407f, 2.57835f},
     { -12157.1f, -1972.78f, 133.947f, 2.64903f},
@@ -124,7 +119,7 @@ struct boss_mandokirAI : public CombatAI
         DoScriptText(SAY_AGGRO, m_creature);
 
         for (auto& aSpirit : aSpirits)
-            m_creature->SummonCreature(NPC_CHAINED_SPIRIT, aSpirit.fX, aSpirit.fY, aSpirit.fZ, aSpirit.fAng, TEMPSPAWN_CORPSE_DESPAWN, 0);
+            m_creature->SummonCreature(NPC_CHAINED_SPIRIT, aSpirit.x, aSpirit.y, aSpirit.z, aSpirit.o, TEMPSPAWN_CORPSE_DESPAWN, 0);
 
         // At combat start Mandokir is mounted so we must unmount it first
         m_creature->Unmount();

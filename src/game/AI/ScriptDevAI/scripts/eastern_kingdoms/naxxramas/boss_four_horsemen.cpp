@@ -98,17 +98,12 @@ static int32 const killSayList[4] = { SAY_BLAU_SLAY, 0, SAY_KORT_SLAY, SAY_ZELI_
 static uint32 const spiritSpellList[4] = { SPELL_SPIRIT_BLAUMEUX, SPELL_SPIRIT_MOGRAINE, SPELL_SPIRIT_KORTHAZZ, SPELL_SPIRIT_ZELIEK };
 static uint32 const markSpellList[4] = { SPELL_MARK_OF_BLAUMEUX, SPELL_MARK_OF_MOGRAINE, SPELL_MARK_OF_KORTHAZZ, SPELL_MARK_OF_ZELIEK };
 
-struct Location2DPoint
-{
-    float x, y;
-};
-
 // Coordinates at the entrance of the Four Horsemen room. Beyond these, the Horsemen reset (leashing)
-static const Location2DPoint resetCoords[3] =
+static const Position resetCoords[3] =
 {
-        {2577.3f, -3024.0f},
-        {2585.9f, -3015.1f},
-        {2594.6f, -3006.7f}
+        {2577.3f, -3024.0f, 0.0, 0.0},
+        {2585.9f, -3015.1f, 0.0, 0.0},
+        {2594.6f, -3006.7f, 0.0, 0.0}
 };
 
 enum BlaumeuxActions

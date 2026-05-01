@@ -148,7 +148,7 @@ struct boss_majordomoAI : public CombatAI
             m_creature->SetFactionTemporary(FACTION_MAJORDOMO_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN);
 
             // Reset orientation
-            m_creature->SetFacingTo(m_aMajordomoLocations[0].m_fO);
+            m_creature->SetFacingTo(m_aMajordomoLocations[0].m_fo);
 
             // Start his speech
             ResetTimer(MAJORDOMO_OUTRO, 0); // at next tick

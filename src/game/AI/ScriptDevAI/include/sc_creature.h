@@ -10,6 +10,24 @@
 #include "AI/BaseAI/CreatureAI.h"
 #include "Entities/Creature.h"
 
+typedef struct {
+    uint32 uiEntry;
+    float m_fx;
+    float m_fy;
+    float m_fz;
+    uint32 uiPathId;
+} WaveLocation;
+
+typedef struct {
+    uint32 m_spawnEntry;
+    float m_fx;
+    float m_fy;
+    float m_fz;
+    float m_fo;
+    uint32 m_uiAllianceEntry;
+    uint32 m_uiHordeEntry;
+} SpawnLocation;
+
 // Spell targets used by SelectSpell
 enum SelectTarget
 {

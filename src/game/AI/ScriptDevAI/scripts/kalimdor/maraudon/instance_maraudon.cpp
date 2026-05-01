@@ -152,7 +152,7 @@ void instance_maraudon::Update(uint32 uiDiff)
         if (m_spewLarvaTimer <= uiDiff)
         {
             if (GameObject* pGo = GetSingleGameObjectFromStorage(GO_LARVA_SPEWER))
-                pGo->SummonCreature(NPC_SPEWED_LARVA, spawnLocation.m_fX, spawnLocation.m_fY, spawnLocation.m_fZ, spawnLocation.m_fO, TEMPSPAWN_TIMED_DESPAWN, 10 * MINUTE * IN_MILLISECONDS); // Despawn is handled by DBScript we just want to avoid an infinite number of larvas near Noxxion
+                pGo->SummonCreature(NPC_SPEWED_LARVA, spawnLocation.x, spawnLocation.y, spawnLocation.z, spawnLocation.o, TEMPSPAWN_TIMED_DESPAWN, 10 * MINUTE * IN_MILLISECONDS); // Despawn is handled by DBScript we just want to avoid an infinite number of larvas near Noxxion
             m_spewLarvaTimer = 1 * MINUTE * IN_MILLISECONDS;
         }
         else

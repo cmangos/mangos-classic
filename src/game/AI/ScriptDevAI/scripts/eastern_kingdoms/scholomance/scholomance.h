@@ -74,19 +74,14 @@ enum
     SPELL_XMAS_GANDLING     = 26199,
 };
 
-struct SpawnLocation
-{
-    float m_fX, m_fY, m_fZ, m_fO;
-};
-
-static const SpawnLocation aGandlingSpawnLocs[1] =
+static const Position aGandlingSpawnLocs[1] =
 {
     {180.771f, -5.4286f, 75.5702f, 1.29154f}
 };
 
 // Coordinates used to respawn the NPCs in the entrance room
 // (right before the Viewing Room) on Rattlegore's death
-static const SpawnLocation aEntranceRoomSpawnLocs[17] =
+static const Position aEntranceRoomSpawnLocs[17] =
 {
     {186.036f, 94.5f, 104.72f, 1.29154f},      // First corner
     {179.117f, 95.5166f, 104.81f, 1.29154f},

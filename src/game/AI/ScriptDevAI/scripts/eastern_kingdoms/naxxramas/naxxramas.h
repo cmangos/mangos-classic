@@ -242,13 +242,8 @@ struct GothTrigger
 
 static const float sapphironPositions[4] = {3521.48f, -5234.87f, 137.626f, 4.53329f};
 
-struct SpawnLocation
-{
-    float m_fX, m_fY, m_fZ, m_fO;
-};
-
 // Used in Construct Quarter for the deadly blobs continuously spawning in Patchwerk corridor
-static const SpawnLocation livingPoisonPositions[6] =
+static const Position livingPoisonPositions[6] =
 {
     {3128.692f, -3119.211f, 293.346f, 4.725505f},
     {3154.432f, -3125.669f, 293.408f, 4.456693f},

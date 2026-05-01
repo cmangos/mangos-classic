@@ -144,12 +144,12 @@ void instance_scholomance::DoRespawnEntranceRoom(Player* pSummoner)
         std::shuffle(uiMobList.begin(), uiMobList.end(), *GetRandomGenerator());
 
         for (uint8 j = 0; j < MAX_NPC_PER_GROUP; ++j)
-            pSummoner->SummonCreature(uiMobList[j], aEntranceRoomSpawnLocs[4 * i + j].m_fX, aEntranceRoomSpawnLocs[4 * i + j].m_fY, aEntranceRoomSpawnLocs[4 * i + j].m_fZ, aEntranceRoomSpawnLocs[4 * i + j].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
+            pSummoner->SummonCreature(uiMobList[j], aEntranceRoomSpawnLocs[4 * i + j].x, aEntranceRoomSpawnLocs[4 * i + j].y, aEntranceRoomSpawnLocs[4 * i + j].z, aEntranceRoomSpawnLocs[4 * i + j].o, TEMPSPAWN_DEAD_DESPAWN, 0);
     }
     // spawn also a patrolling necrofiend
     // the waypoints are handled in DB creature_movement_template table (shared with the other necrofiend in the room)
     // the two other necrofiends in the instance are using DB creature_movement table
-    if (Creature* pNecrofiend = pSummoner->SummonCreature(NPC_NECROFIEND, aEntranceRoomSpawnLocs[16].m_fX, aEntranceRoomSpawnLocs[16].m_fY, aEntranceRoomSpawnLocs[16].m_fZ, aEntranceRoomSpawnLocs[16].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0))
+    if (Creature* pNecrofiend = pSummoner->SummonCreature(NPC_NECROFIEND, aEntranceRoomSpawnLocs[16].x, aEntranceRoomSpawnLocs[16].y, aEntranceRoomSpawnLocs[16].z, aEntranceRoomSpawnLocs[16].o, TEMPSPAWN_DEAD_DESPAWN, 0))
         pNecrofiend->GetMotionMaster()->MoveWaypoint();
 
     m_bIsRoomReset = true;
@@ -249,7 +249,7 @@ void instance_scholomance::DoSpawnGandlingIfCan(bool bByPlayerEnter)
     if (m_auiEncounter[TYPE_MALICIA] == DONE && m_auiEncounter[TYPE_THEOLEN] == DONE && m_auiEncounter[TYPE_POLKELT] == DONE &&
             m_auiEncounter[TYPE_RAVENIAN] == DONE && m_auiEncounter[TYPE_ALEXEI_BAROV] == DONE && m_auiEncounter[TYPE_ILLUCIA_BAROV] == DONE)
     {
-        if (Creature* pGandling = pPlayer->SummonCreature(NPC_DARKMASTER_GANDLING, aGandlingSpawnLocs[0].m_fX, aGandlingSpawnLocs[0].m_fY, aGandlingSpawnLocs[0].m_fZ, aGandlingSpawnLocs[0].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0))
+        if (Creature* pGandling = pPlayer->SummonCreature(NPC_DARKMASTER_GANDLING, aGandlingSpawnLocs[0].x, aGandlingSpawnLocs[0].y, aGandlingSpawnLocs[0].z, aGandlingSpawnLocs[0].o, TEMPSPAWN_DEAD_DESPAWN, 0))
         {
             // Switch model to Christmas Gandling if Winter Veil event is active
             if (IsHolidayActive(HOLIDAY_FEAST_OF_WINTER_VEIL))

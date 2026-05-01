@@ -152,11 +152,11 @@ struct npc_general_andorovAI : public CombatAI, private DialogueHelper
             case 1:
             case 3:
                 ++m_pointId;
-                m_creature->GetMotionMaster()->MovePoint(m_pointId, aAndorovMoveLocs[m_pointId].m_fX, aAndorovMoveLocs[m_pointId].m_fY, aAndorovMoveLocs[m_pointId].m_fZ);
+                m_creature->GetMotionMaster()->MovePoint(m_pointId, aAndorovMoveLocs[m_pointId].m_fx, aAndorovMoveLocs[m_pointId].m_fy, aAndorovMoveLocs[m_pointId].m_fz);
                 break;
             case POINT_ID_MOVE_INTRO:
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                m_creature->SetFacingTo(aAndorovMoveLocs[3].m_fO);
+                m_creature->SetFacingTo(aAndorovMoveLocs[3].m_fo);
                 ++m_pointId;
                 break;
             case POINT_ID_MOVE_ATTACK:
@@ -182,10 +182,10 @@ struct npc_general_andorovAI : public CombatAI, private DialogueHelper
         {
             // reset to combat position
             if (m_pointId >= 4)
-                m_creature->GetMotionMaster()->MovePoint(POINT_ID_MOVE_ATTACK, aAndorovMoveLocs[4].m_fX, aAndorovMoveLocs[4].m_fY, aAndorovMoveLocs[4].m_fZ);
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_MOVE_ATTACK, aAndorovMoveLocs[4].m_fx, aAndorovMoveLocs[4].m_fy, aAndorovMoveLocs[4].m_fz);
             // reset to intro position
             else
-                m_creature->GetMotionMaster()->MovePoint(POINT_ID_MOVE_INTRO, aAndorovMoveLocs[2].m_fX, aAndorovMoveLocs[2].m_fY, aAndorovMoveLocs[2].m_fZ);
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_MOVE_INTRO, aAndorovMoveLocs[2].m_fx, aAndorovMoveLocs[2].m_fy, aAndorovMoveLocs[2].m_fz);
         }
 
         m_creature->SetLootRecipient(nullptr);
@@ -210,7 +210,7 @@ struct npc_general_andorovAI : public CombatAI, private DialogueHelper
     // Wrapper to start the event
     void DoMoveToEventLocation()
     {
-        m_creature->GetMotionMaster()->MovePoint(m_pointId, aAndorovMoveLocs[m_pointId].m_fX, aAndorovMoveLocs[m_pointId].m_fY, aAndorovMoveLocs[m_pointId].m_fZ);
+        m_creature->GetMotionMaster()->MovePoint(m_pointId, aAndorovMoveLocs[m_pointId].m_fx, aAndorovMoveLocs[m_pointId].m_fy, aAndorovMoveLocs[m_pointId].m_fz);
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
         GuidList m_lKaldoreiGuids;
@@ -239,7 +239,7 @@ struct npc_general_andorovAI : public CombatAI, private DialogueHelper
     void HandleMove()
     {
         m_creature->SetWalk(false);
-        m_creature->GetMotionMaster()->MovePoint(m_pointId, aAndorovMoveLocs[m_pointId].m_fX, aAndorovMoveLocs[m_pointId].m_fY, aAndorovMoveLocs[m_pointId].m_fZ);
+        m_creature->GetMotionMaster()->MovePoint(m_pointId, aAndorovMoveLocs[m_pointId].m_fx, aAndorovMoveLocs[m_pointId].m_fy, aAndorovMoveLocs[m_pointId].m_fz);
 
         DoInitializeFollowers();
     }

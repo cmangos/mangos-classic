@@ -81,30 +81,20 @@ enum MuglashActions
     MUGLASH_EVENT
 };
 
-struct firstWaveLocations
-{
-    uint32 uiEntry;
-    float fX, fY, fZ;
-};
 // First Wave Data
-static const firstWaveLocations nagaLocations[3] =
+static const WaveLocation nagaLocations[3] =
 {
-    { NPC_WRATH_RAZORTAIL, 3629.9194f, 1169.9987f, -3.4472558f},
-    { NPC_WRATH_RIDER, 3617.8516f, 1097.7166f, -4.0877485f},
-    { NPC_WRATH_SORCERESS, 3583.1497f, 1165.5658f, -5.3660164f}
+    { NPC_WRATH_RAZORTAIL, 3629.9194f, 1169.9987f, -3.4472558f, 0},
+    { NPC_WRATH_RIDER, 3617.8516f, 1097.7166f, -4.0877485f, 0},
+    { NPC_WRATH_SORCERESS, 3583.1497f, 1165.5658f, -5.3660164f, 0}
 };
 
 // 2nd Wave Data
-struct secondWaveLocations
+static const WaveLocation secondnagaLocations[3] =
 {
-    uint32 uiEntry;
-    float fX, fY, fZ;
-};
-static const secondWaveLocations secondnagaLocations[3] =
-{
-    { NPC_WRATH_MYRMIDON, 3575.009f, 1119.8704f, -4.2547455f},
-    { NPC_WRATH_SEAWITCH, 3606.9448f, 1176.3822f, -2.9632108f},
-    { NPC_WRATH_PRIESTESS, 3651.5383f, 1155.5522f, -3.9628646f}
+    { NPC_WRATH_MYRMIDON, 3575.009f, 1119.8704f, -4.2547455f, 0},
+    { NPC_WRATH_SEAWITCH, 3606.9448f, 1176.3822f, -2.9632108f, 0},
+    { NPC_WRATH_PRIESTESS, 3651.5383f, 1155.5522f, -3.9628646f, 0}
 };
 
 struct npc_muglashAI : public npc_escortAI
@@ -219,7 +209,7 @@ struct npc_muglashAI : public npc_escortAI
                 if (m_uiWaveOneAlive == 0)
                 {
                     for (auto& i : secondnagaLocations)
-                        m_creature->SummonCreature(i.uiEntry, i.fX, i.fY, i.fZ, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 60000, true, true);
+                        m_creature->SummonCreature(i.uiEntry, i.m_fx, i.m_fy, i.m_fz, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 60000, true, true);
                     m_uiEventId = 3;
                     ResetTimer(MUGLASH_EVENT, 5000);
                 }
@@ -288,7 +278,7 @@ struct npc_muglashAI : public npc_escortAI
                     DoBroadcastText(SAY_MUGLASH_EVENT_01, m_creature, player);
                 // Summon first wave of adds
                 for (auto& i : nagaLocations)
-                    m_creature->SummonCreature(i.uiEntry, i.fX, i.fY, i.fZ, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 60000, true, true);
+                    m_creature->SummonCreature(i.uiEntry, i.m_fx, i.m_fy, i.m_fz, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 60000, true, true);
                 SetEscortPaused(false); // go to next waypoint
                 break;
             case 3:

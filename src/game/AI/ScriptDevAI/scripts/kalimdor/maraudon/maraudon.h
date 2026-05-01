@@ -18,12 +18,7 @@ enum
     GO_CORRUPTION_SPEWER        = 178570,
 };
 
-struct Locations
-{
-    float m_fX, m_fY, m_fZ, m_fO;
-};
-
-static const Locations spawnLocation = {937.213f, -377.967f, -50.346f, 2.578f};
+static const Position spawnLocation = {937.213f, -377.967f, -50.346f, 2.578f};
 
 class instance_maraudon : public ScriptedInstance
 {

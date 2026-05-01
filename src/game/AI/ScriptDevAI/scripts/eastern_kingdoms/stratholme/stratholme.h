@@ -124,19 +124,14 @@ static const uint32 plaguedCritters[] =
     NPC_PLAGUED_RAT, NPC_PLAGUED_MAGGOT, NPC_PLAGUED_INSECT
 };
 
-struct EventLocation
+static const Position stratholmeLocation[] =
 {
-    float m_fX, m_fY, m_fZ, m_fO;
-};
-
-static const EventLocation stratholmeLocation[] =
-{
-    {3725.577f, -3599.484f, 142.367f},                      // Barthilas door run
+    {3725.577f, -3599.484f, 142.367f, 0.0},                 // Barthilas door run
     {4068.284f, -3535.678f, 122.771f, 2.50f},               // Barthilas tele
     {4032.643f, -3378.546f, 119.752f, 4.74f},               // Ramstein summon loc
-    {4032.843f, -3390.246f, 119.732f},                      // Ramstein move loc
+    {4032.843f, -3390.246f, 119.732f, 0.0},                 // Ramstein move loc
     {3969.357f, -3391.871f, 119.116f, 5.91f},               // Skeletons summon loc
-    {4033.044f, -3431.031f, 119.055f},                      // Skeletons move loc
+    {4033.044f, -3431.031f, 119.055f, 0.0},                 // Skeletons move loc
     {4032.602f, -3378.506f, 119.752f, 4.74f},               // Guards summon loc
     {4044.78f,  -3333.68f,  115.53f,  4.15f},               // Ysida summon loc
     {4041.9f,   -3337.6f,   115.06f,  3.82f}                // Ysida move/death loc
@@ -164,29 +159,29 @@ static const int ScarletEventYells[] =
     YELL_BASTION_HALL_LIGHTS, YELL_BASTION_INNER_1, YELL_BASTION_INNER_2
 };
 
-static const EventLocation defensePoints[] =
+static const Position defensePoints[] =
 {
-    {3662.84f, -3175.15f, 126.559f},                        // Last barricade before the Scarlet Bastion (Courtyard)
-    {3661.57f, -3157.80f, 128.945f},                        // Scarlet Bastion stairs (Courtyard)
-    {3668.60f, -3183.31f, 126.215f},                        // Courtyard mobs sort point (Timmy)
-    {3646.49f, -3072.84f, 134.207f},                        // Scarlet Bastion entrance corridor
-    {3599.28f, -3107.91f, 134.204f},                        // Hall of Lights
-    {3485.98f, -3087.02f, 135.080f},                        // Inner Bastion: first corridor
-    {3436.74f, -3090.19f, 135.085f},                        // Inner Bastion: Second corridor
-    {3661.89f, -3192.89f, 126.691f}                         // Barricades before the last one (Courtyard): in last position for conveniently iterate over the table
+    {3662.84f, -3175.15f, 126.559f, 0.0},                        // Last barricade before the Scarlet Bastion (Courtyard)
+    {3661.57f, -3157.80f, 128.945f, 0.0},                        // Scarlet Bastion stairs (Courtyard)
+    {3668.60f, -3183.31f, 126.215f, 0.0},                        // Courtyard mobs sort point (Timmy)
+    {3646.49f, -3072.84f, 134.207f, 0.0},                        // Scarlet Bastion entrance corridor
+    {3599.28f, -3107.91f, 134.204f, 0.0},                        // Hall of Lights
+    {3485.98f, -3087.02f, 135.080f, 0.0},                        // Inner Bastion: first corridor
+    {3436.74f, -3090.19f, 135.085f, 0.0},                        // Inner Bastion: Second corridor
+    {3661.89f, -3192.89f, 126.691f, 0.0}                         // Barricades before the last one (Courtyard): in last position for conveniently iterate over the table
 };
 
-static const EventLocation scarletGuards[] =               // Spawned when players cleared some parts of the Bastion
+static const Position scarletGuards[] =               // Spawned when players cleared some parts of the Bastion
 {
     {3598.213f, -3094.812f, 135.657f, 5.3425f},             // Hall of Lights
-    {3602.198f, -3096.243f, 134.120f},
-    {3598.152f, -3098.927f, 134.120f},
+    {3602.198f, -3096.243f, 134.120f, 0.0},
+    {3598.152f, -3098.927f, 134.120f, 0.0},
     {3432.967f, -3069.643f, 136.529f, 5.3425f},             // Inner Bastion
-    {3441.795f, -3077.431f, 135.000f},
-    {3437.445f, -3080.316f, 135.000f}
+    {3441.795f, -3077.431f, 135.000f, 0.0},
+    {3437.445f, -3080.316f, 135.000f, 0.0}
 };
 
-static const EventLocation scourgeInvaders[] =             // Attack when players cleared some parts of the Bastion
+static const Position scourgeInvaders[] =             // Attack when players cleared some parts of the Bastion
 {
     {3614.702f, -3187.642f, 131.406f, 4.024f},              // Timmy. TIMMYYYYYYY !!!
     {3647.36f, -3139.70f, 134.78f, 2.1962f},                // Entrance
@@ -197,7 +192,7 @@ static const EventLocation scourgeInvaders[] =             // Attack when player
     {3443.18f, -3083.90f, 135.01f, 2.1563f}
 };
 
-static const EventLocation scarletLastStand[] =            // Positions remaining Scarlet defenders will move to if the position is lost
+static const Position scarletLastStand[] =            // Positions remaining Scarlet defenders will move to if the position is lost
 {
     {3658.43f, -3178.07f, 126.696f, 5.23599f},              // Last barricade
     {3665.62f, -3173.88f, 126.551f, 5.02655f},
@@ -207,7 +202,7 @@ static const EventLocation scarletLastStand[] =            // Positions remainin
     {3661.57f, -3157.80f, 128.945f, 5.23599f}
 };
 
-static const EventLocation gateTrap[] =                    // Positions of the two Gate Traps
+static const Position gateTrap[] =                    // Positions of the two Gate Traps
 {
     {3612.29f, -3335.39f, 124.077f, 3.14159f},              // Scarlet side
     {3919.88f, -3547.34f, 134.269f, 2.94961f}               // Undead side

@@ -749,9 +749,9 @@ void instance_naxxramas::Update(uint32 diff)
             {
                 // Spawn 3 living poisons every 5 secs and make them cross the corridor and then despawn, for ever and ever
                 for (uint8 i = 0; i < 3; i++)
-                    if (Creature* poison = trigger->SummonCreature(NPC_LIVING_POISON, livingPoisonPositions[i].m_fX, livingPoisonPositions[i].m_fY, livingPoisonPositions[i].m_fZ, livingPoisonPositions[i].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0))
+                    if (Creature* poison = trigger->SummonCreature(NPC_LIVING_POISON, livingPoisonPositions[i].x, livingPoisonPositions[i].y, livingPoisonPositions[i].z, livingPoisonPositions[i].o, TEMPSPAWN_DEAD_DESPAWN, 0))
                     {
-                        poison->GetMotionMaster()->MovePoint(0, livingPoisonPositions[i + 3].m_fX, livingPoisonPositions[i + 3].m_fY, livingPoisonPositions[i + 3].m_fZ);
+                        poison->GetMotionMaster()->MovePoint(0, livingPoisonPositions[i + 3].x, livingPoisonPositions[i + 3].y, livingPoisonPositions[i + 3].z);
                         poison->ForcedDespawn(15000);
                     }
             }
@@ -950,12 +950,7 @@ bool instance_naxxramas::DoHandleEvent(uint32 eventId)
     return false;
 }
 
-struct Location3DPoint
-{
-    float x, y, z;
-};
-
-static const Location3DPoint gargoyleResetCoords = {2963.f, -3476.f, 297.6f};
+static const Position gargoyleResetCoords = {2963.f, -3476.f, 297.6f, 0.0};
 
 enum
 {

@@ -81,16 +81,10 @@ static const sRuneEncounters m_aMoltenCoreRunes[MAX_MOLTEN_RUNES] =
     {GO_RUNE_KORO,  GO_CIRCLE_SULFURON,     TYPE_SULFURON}
 };
 
-struct sSpawnLocation
+static SpawnLocation m_aMajordomoLocations[2] =
 {
-    uint32 m_uiEntry;
-    float m_fX, m_fY, m_fZ, m_fO;
-};
-
-static sSpawnLocation m_aMajordomoLocations[2] =
-{
-    {NPC_MAJORDOMO, 758.0892f, -1176.712f, -118.6403f, 3.124139f},  // Summon fight position
-    {NPC_MAJORDOMO, 848.933f, -812.875f, -229.601f, 4.046f}     // Summon and teleport location (near Ragnaros)
+    {NPC_MAJORDOMO, 758.0892f, -1176.712f, -118.6403f, 3.124139f, 0, 0},  // Summon fight position
+    {NPC_MAJORDOMO, 848.933f, -812.875f, -229.601f, 4.046f,       0, 0}     // Summon and teleport location (near Ragnaros)
 };
 
 class instance_molten_core : public ScriptedInstance

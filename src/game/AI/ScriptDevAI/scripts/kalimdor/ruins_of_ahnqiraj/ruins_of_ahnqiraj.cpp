@@ -272,7 +272,7 @@ void instance_ruins_of_ahnqiraj::DoSpawnAndorovIfCan()
         return;
 
     for (const auto& aAndorovSpawnLoc : aAndorovSpawnLocs)
-        player->SummonCreature(aAndorovSpawnLoc.m_uiEntry, aAndorovSpawnLoc.m_fX, aAndorovSpawnLoc.m_fY, aAndorovSpawnLoc.m_fZ, aAndorovSpawnLoc.m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
+        player->SummonCreature(aAndorovSpawnLoc.m_spawnEntry, aAndorovSpawnLoc.m_fx, aAndorovSpawnLoc.m_fy, aAndorovSpawnLoc.m_fz, aAndorovSpawnLoc.m_fo, TEMPSPAWN_DEAD_DESPAWN, 0);
 }
 
 void instance_ruins_of_ahnqiraj::Load(const char* chrIn)

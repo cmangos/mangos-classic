@@ -214,12 +214,7 @@ enum
     SAY_MIRAN_AMBUSH                    = -1010029,
 };
 
-struct Location
-{
-    float m_fX, m_fY, m_fZ, m_fO;
-};
-
-static const Location m_miranAmbushSpawns[] =
+static const Position m_miranAmbushSpawns[] =
 {
     { -5760.73f, -3437.71f, 305.54f, 2.41f },   // Saean
     { -5759.85f, -3441.29f, 305.57f, 2.24f },   // Dark Iron Ambusher 1
@@ -261,7 +256,7 @@ bool AreaTrigger_at_huldar_miran(Player* pPlayer, AreaTriggerEntry const* /*pAt*
         m_saean->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN);
     else
     {
-        m_saean = m_huldar->SummonCreature(NPC_SAEAN, m_miranAmbushSpawns[0].m_fX, m_miranAmbushSpawns[0].m_fY, m_miranAmbushSpawns[0].m_fZ, m_miranAmbushSpawns[0].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 25000);
+        m_saean = m_huldar->SummonCreature(NPC_SAEAN, m_miranAmbushSpawns[0].x, m_miranAmbushSpawns[0].y, m_miranAmbushSpawns[0].z, m_miranAmbushSpawns[0].o, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 25000);
         if (m_saean)
             m_saean->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN);
     }
@@ -269,8 +264,8 @@ bool AreaTrigger_at_huldar_miran(Player* pPlayer, AreaTriggerEntry const* /*pAt*
     // Check if any Dark Iron Ambusher are already spawned or dead, if so, do nothing
     if (m_saean && !GetClosestCreatureWithEntry(pPlayer, NPC_DARK_IRON_AMBUSHER, 60.0f, false, false))
     {
-        m_saean->SummonCreature(NPC_DARK_IRON_AMBUSHER, m_miranAmbushSpawns[1].m_fX, m_miranAmbushSpawns[1].m_fY, m_miranAmbushSpawns[1].m_fZ, m_miranAmbushSpawns[1].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 25000);
-        m_saean->SummonCreature(NPC_DARK_IRON_AMBUSHER, m_miranAmbushSpawns[2].m_fX, m_miranAmbushSpawns[2].m_fY, m_miranAmbushSpawns[2].m_fZ, m_miranAmbushSpawns[2].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 25000);
+        m_saean->SummonCreature(NPC_DARK_IRON_AMBUSHER, m_miranAmbushSpawns[1].x, m_miranAmbushSpawns[1].y, m_miranAmbushSpawns[1].z, m_miranAmbushSpawns[1].o, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 25000);
+        m_saean->SummonCreature(NPC_DARK_IRON_AMBUSHER, m_miranAmbushSpawns[2].x, m_miranAmbushSpawns[2].y, m_miranAmbushSpawns[2].z, m_miranAmbushSpawns[2].o, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 25000);
     }
 
     return true;
@@ -288,7 +283,7 @@ enum
     SAY_TWILIGHT_CORRUPTER_SPAWN    = -1000411
 };
 
-static const Location m_twilightCorrupterSpawn = { -10326.3f, -487.423f, 50.1127f, 5.73692f };
+static const Position m_twilightCorrupterSpawn = { -10326.3f, -487.423f, 50.1127f, 5.73692f };
 
 bool AreaTrigger_at_twilight_grove(Player* player, AreaTriggerEntry const* /*pAt*/)
 {
@@ -308,7 +303,7 @@ bool AreaTrigger_at_twilight_grove(Player* player, AreaTriggerEntry const* /*pAt
         return true;
 
     // Spawn the Twilight Corrupter and send whisper to player
-    if (Creature* twilightCorrupter = player->SummonCreature(NPC_TWILIGHT_CORRUPTER, m_twilightCorrupterSpawn.m_fX, m_twilightCorrupterSpawn.m_fY, m_twilightCorrupterSpawn.m_fZ, m_twilightCorrupterSpawn.m_fO, TEMPSPAWN_TIMED_OOC_DESPAWN, 30 * MINUTE * IN_MILLISECONDS))
+    if (Creature* twilightCorrupter = player->SummonCreature(NPC_TWILIGHT_CORRUPTER, m_twilightCorrupterSpawn.x, m_twilightCorrupterSpawn.y, m_twilightCorrupterSpawn.z, m_twilightCorrupterSpawn.o, TEMPSPAWN_TIMED_OOC_DESPAWN, 30 * MINUTE * IN_MILLISECONDS))
     {
         DoScriptText(SAY_TWILIGHT_CORRUPTER_SPAWN, twilightCorrupter, player);
         return true;

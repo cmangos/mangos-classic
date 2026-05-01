@@ -70,15 +70,8 @@ enum
     PATH_ID_NARALEX         = 3678,                      // Sniffed Waypoints for Escort Event
 };
 
-struct firstWaveLocations
-{
-    uint32 uiEntry;
-    float fX, fY, fZ;
-    uint32 uiPathId;
-};
-
 // Raptor spawns
-static const firstWaveLocations raptorLocations[2] =
+static const WaveLocation raptorLocations[2] =
 {
     { NPC_DEVIATE_RAPTOR , -67.44779f, 214.5348f, -93.42037f, 1 },
     { NPC_DEVIATE_RAPTOR , -67.85276f, 203.7873f, -93.57328f, 2 }
@@ -91,29 +84,16 @@ static const float circleLocations[3][4] =
     { -57.5452f, 280.2068f, -92.7608f, 5.0789f}
 };
 
-struct secondWaveLocations
-{
-    uint32 uiEntry;
-    float fX, fY, fZ;
-    uint32 uiPathId;
-};
-
 // Todo: have more then 3 spawn points, but always spawn 3
-static const secondWaveLocations moccasinLocations[3] =
+static const WaveLocation moccasinLocations[3] =
 {
     { NPC_DEVIATE_MOCCASIN, 171.39545f, 213.76605f, -105.50746f, 1},
     { NPC_DEVIATE_MOCCASIN, 156.72229f, 189.91829f, -107.48995f, 2},
     { NPC_DEVIATE_MOCCASIN, 121.39977f, 166.31746f, -105.54061f, 3}
 };
 
-struct thirdWaveLocations
-{
-    uint32 uiEntry;
-    float fX, fY, fZ;
-    uint32 uiPathId;
-};
 // Todo: have more then 7 spawn points, but always spawn 7
-static const thirdWaveLocations ectoplasmLocations[7] =
+static const WaveLocation ectoplasmLocations[7] =
 {
     { NPC_NIGHTMARE_ECTOPLASM, 162.06705f, 218.71494f, -105.36240f, 1},
     { NPC_NIGHTMARE_ECTOPLASM, 115.55489f, 168.22847f, -105.68655f, 2},
@@ -275,7 +255,7 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
                             case 0:
                                 // Summon raptors at first stop
                                 for (auto& i : raptorLocations)
-                                    m_creature->SummonCreature(i.uiEntry, i.fX, i.fY, i.fZ, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 20000, true, true, i.uiPathId);
+                                    m_creature->SummonCreature(i.uiEntry, i.m_fx, i.m_fy, i.m_fz, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 20000, true, true, i.uiPathId);
                                 m_uiEventTimer = 0;
                                 ++m_uiSubeventPhase;
                                 break;
@@ -338,7 +318,7 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
                             case 2:
                                 // First set of mobs
                                 for (auto& i : moccasinLocations)
-                                    m_creature->SummonCreature(i.uiEntry, i.fX, i.fY, i.fZ, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 20000, false, false, i.uiPathId);
+                                    m_creature->SummonCreature(i.uiEntry, i.m_fx, i.m_fy, i.m_fz, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 20000, false, false, i.uiPathId);
                                 m_uiEventTimer = 5000;
                                 ++m_uiSubeventPhase;
                                 break;
@@ -351,7 +331,7 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
                             case 4:
                                 // Second set of mobs
                                 for (auto& i : ectoplasmLocations)
-                                    m_creature->SummonCreature(i.uiEntry, i.fX, i.fY, i.fZ, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 20000, true, false, i.uiPathId);
+                                    m_creature->SummonCreature(i.uiEntry, i.m_fx, i.m_fy, i.m_fz, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 20000, true, false, i.uiPathId);
                                 m_uiEventTimer = 20000;
                                 ++m_uiSubeventPhase;
                                 break;

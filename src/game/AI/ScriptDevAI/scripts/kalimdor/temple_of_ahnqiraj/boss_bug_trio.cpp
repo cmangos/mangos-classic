@@ -60,12 +60,7 @@ enum
     POINT_CONSUME           = 0,
 };
 
-struct Location
-{
-    float m_fX, m_fY, m_fZ;
-};
-
-static const Location resetPoint = { -8582.0f, 2047.0f, -1.62f };
+static const Position resetPoint = { -8582.0f, 2047.0f, -1.62f, 0.0 };
 
 enum RoyaltyActions
 {
@@ -82,7 +77,7 @@ struct boss_silithidRoyaltyAI : public CombatAI
         AddCustomAction(ROYALTY_DEVOUR_DELAY, true, [&]() { HandleDevourDelay(); });
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit* unit, float x, float y, float z) -> bool
         {
-            return m_creature->GetDistance(resetPoint.m_fX, resetPoint.m_fY, resetPoint.m_fZ, DIST_CALC_COMBAT_REACH) < 10.0f;
+            return m_creature->GetDistance(resetPoint.x, resetPoint.y, resetPoint.z, DIST_CALC_COMBAT_REACH) < 10.0f;
         });
     }
 

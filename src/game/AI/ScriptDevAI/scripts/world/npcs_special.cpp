@@ -127,12 +127,7 @@ enum
     HORDE_COORDS                = 6
 };
 
-struct Location
-{
-    float x, y, z, o;
-};
-
-static Location AllianceCoords[] =
+static Position AllianceCoords[] =
 {
     { -3757.38f, -4533.05f, 14.16f, 3.62f},                 // Top-far-right bunk as seen from entrance
     { -3754.36f, -4539.13f, 14.16f, 5.13f},                 // Top-far-left bunk
@@ -148,7 +143,7 @@ static Location AllianceCoords[] =
 #define A_RUNTOY -4531.52f
 #define A_RUNTOZ 11.91f
 
-static Location HordeCoords[] =
+static Position HordeCoords[] =
 {
     { -1013.75f, -3492.59f, 62.62f, 4.34f},                 // Left, Behind
     { -1017.72f, -3490.92f, 62.62f, 4.34f},                 // Right, Behind
@@ -195,7 +190,7 @@ struct npc_doctorAI : public ScriptedAI
     bool m_bIsEventInProgress;
 
     GuidList m_lPatientGuids;
-    std::vector<Location*> m_vPatientSummonCoordinates;
+    std::vector<Position*> m_vPatientSummonCoordinates;
 
     void Reset() override
     {
@@ -215,8 +210,8 @@ struct npc_doctorAI : public ScriptedAI
     }
 
     void BeginEvent(Player* pPlayer);
-    void PatientDied(Location* pPoint);
-    void PatientSaved(Creature* pSoldier, Player* pPlayer, Location* pPoint);
+    void PatientDied(Position* pPoint);
+    void PatientSaved(Creature* pSoldier, Player* pPlayer, Position* pPoint);
     void UpdateAI(const uint32 uiDiff) override;
 };
 
@@ -229,7 +224,7 @@ struct npc_injured_patientAI : public ScriptedAI
     npc_injured_patientAI(Creature* pCreature) : ScriptedAI(pCreature), isSaved(false) {Reset();}
 
     ObjectGuid m_doctorGuid;
-    Location* m_pCoord;
+    Position* m_pCoord;
     bool isSaved;
 
     void EnterEvadeMode() override
@@ -377,7 +372,7 @@ void npc_doctorAI::BeginEvent(Player* pPlayer)
     m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 }
 
-void npc_doctorAI::PatientDied(Location* pPoint)
+void npc_doctorAI::PatientDied(Position* pPoint)
 {
     Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
 
@@ -403,7 +398,7 @@ void npc_doctorAI::PatientDied(Location* pPoint)
         Reset();
 }
 
-void npc_doctorAI::PatientSaved(Creature* /*soldier*/, Player* pPlayer, Location* pPoint)
+void npc_doctorAI::PatientSaved(Creature* /*soldier*/, Player* pPlayer, Position* pPoint)
 {
     if (pPlayer && m_playerGuid == pPlayer->GetObjectGuid())
     {
@@ -449,33 +444,70 @@ void npc_doctorAI::UpdateAI(const uint32 uiDiff)
     {
         if (m_uiSummonPatientTimer < uiDiff)
         {
-            std::vector<Location*>::iterator itr = m_vPatientSummonCoordinates.begin() + urand(0, m_vPatientSummonCoordinates.size() - 1);
-            uint32 patientEntry = 0;
+            uint32 totalAlive = 0;
 
-            switch (m_creature->GetEntry())
+            for (GuidList::const_iterator itr = m_lPatientGuids.begin(); itr != m_lPatientGuids.end(); ++itr)
+                if (Creature* pSummoned = m_creature->GetMap()->GetCreature(*itr))
+                    if (pSummoned->IsAlive())
+                        totalAlive++;
+
+            uint32 totalToSpawn = 0;
+
+            if (totalAlive == 0)
+                totalToSpawn = urand(2, 3); //if non are alive then we need to spawn at minimum 2 up to 3
+            else if (totalAlive == 1)
+                totalToSpawn = urand(1, 2); //if 1 is alive then we need to spawn at minimum 1 up to 2 more
+            else
+                totalToSpawn = 0; //everyone is still alive
+
+            uint32 totalSpawned = 0;
+
+            if (totalToSpawn)
             {
-                case DOCTOR_ALLIANCE: patientEntry = AllianceSoldierId[urand(0, 2)]; break;
-                case DOCTOR_HORDE:    patientEntry = HordeSoldierId[urand(0, 2)];    break;
-                default:
-                    script_error_log("Invalid entry for Triage doctor. Please check your database");
-                    return;
-            }
-
-            if (Creature* Patient = m_creature->SummonCreature(patientEntry, (*itr)->x, (*itr)->y, (*itr)->z, (*itr)->o, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 5000))
-            {
-                // 2.4.3, this flag appear to be required for client side item->spell to work (TARGET_UNIT_FRIEND)
-                Patient->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
-
-                m_lPatientGuids.push_back(Patient->GetObjectGuid());
-
-                if (npc_injured_patientAI* pPatientAI = dynamic_cast<npc_injured_patientAI*>(Patient->AI()))
+                for (uint32 y = 0; y < totalToSpawn; y++)
                 {
-                    pPatientAI->m_doctorGuid = m_creature->GetObjectGuid();
-                    pPatientAI->m_pCoord = *itr;
-                    m_vPatientSummonCoordinates.erase(itr);
+                    if (m_vPatientSummonCoordinates.empty())
+                        break;
+
+                    std::vector<Position*>::iterator itr = m_vPatientSummonCoordinates.begin() + urand(0, m_vPatientSummonCoordinates.size() - 1);
+
+                    uint32 patientEntry = 0;
+
+                    switch (m_creature->GetEntry())
+                    {
+                        case DOCTOR_ALLIANCE: patientEntry = AllianceSoldierId[urand(0, 2)]; break;
+                        case DOCTOR_HORDE: patientEntry = HordeSoldierId[urand(0, 2)]; break;
+                        default:
+                            script_error_log("Invalid entry for Triage doctor. Please check your database");
+                            return;
+                    }
+
+                    if (Creature* Patient = m_creature->SummonCreature(patientEntry, (*itr)->x, (*itr)->y, (*itr)->z, (*itr)->o, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 5000))
+                    {
+                        totalSpawned++;
+
+                        // 2.4.3, this flag appear to be required for client side item->spell to work (TARGET_UNIT_FRIEND)
+                        Patient->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
+
+                        m_lPatientGuids.push_back(Patient->GetObjectGuid());
+
+                        if (npc_injured_patientAI* pPatientAI = dynamic_cast<npc_injured_patientAI*>(Patient->AI()))
+                        {
+                            pPatientAI->m_doctorGuid = m_creature->GetObjectGuid();
+                            pPatientAI->m_pCoord = *itr;
+                            m_vPatientSummonCoordinates.erase(itr);
+                        }
+                    }
                 }
             }
-            m_uiSummonPatientTimer = 10000;
+
+            if (totalSpawned == 0)
+                m_uiSummonPatientTimer = urand(2000, 3000); //lets check after 2 to 3 seconds since non where spawned
+            else if (totalSpawned == 1)
+                m_uiSummonPatientTimer = urand(8000, 9000); //player has someone to heal still
+            else
+                m_uiSummonPatientTimer = 10000;
+
             ++m_uiSummonPatientCount;
         }
         else
