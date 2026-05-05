@@ -139,6 +139,18 @@ void WorldSession::HandleLootOpcode(WorldPacket& recv_data)
                 }
             }
         }
+        else if (lguid.IsCorpse())
+        {
+            if (Corpse* corpse = _player->GetMap()->GetCorpse(lguid))
+            {
+                float range = 5.f;
+                if (range * range < _player->GetDistance(corpse, true, DIST_CALC_NONE))
+                {
+                    _player->SendLootError(lguid, LOOT_ERROR_TOO_FAR);
+                    return;
+                }
+            }
+        }
     }
 
     if (Loot* loot = sLootMgr.GetLoot(_player, lguid))
