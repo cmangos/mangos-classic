@@ -357,11 +357,6 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Mage
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
-(11213,'spell_arcane_concentration'),
-(12574,'spell_arcane_concentration'),
-(12575,'spell_arcane_concentration'),
-(12576,'spell_arcane_concentration'),
-(12577,'spell_arcane_concentration'),
 (11170,'spell_shatter_mage'),
 (12982,'spell_shatter_mage'),
 (12983,'spell_shatter_mage'),
