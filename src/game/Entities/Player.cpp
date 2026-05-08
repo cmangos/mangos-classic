@@ -5730,7 +5730,7 @@ void Player::UpdateSpellTrainedSkills(uint32 spellId, bool apply)
                     continue;
 
                 // Check if obtainable
-                auto entry = GetSkillInfo(skillId);
+                SkillRaceClassInfoEntry const* entry = GetSkillInfo(skillId);
                 if (!entry)
                     continue;
 
@@ -19399,14 +19399,14 @@ void Player::_LoadSkills(std::unique_ptr<QueryResult> queryResult)
         {
             Field* fields = queryResult->Fetch();
 
-            uint16 skill    = fields[0].GetUInt16();
+            uint16 skillId  = fields[0].GetUInt16();
             uint16 value    = fields[1].GetUInt16();
             uint16 max      = fields[2].GetUInt16();
 
-            SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(skill);
+            SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(skillId);
             if (!pSkill)
             {
-                sLog.outError("Character %u has skill %u that does not exist.", GetGUIDLow(), skill);
+                sLog.outError("Character %u has skill %u that does not exist.", GetGUIDLow(), skillId);
                 continue;
             }
 
@@ -19417,8 +19417,14 @@ void Player::_LoadSkills(std::unique_ptr<QueryResult> queryResult)
                     value = max = 300;
                     break;
                 case SKILL_RANGE_MONO:                      // 1..1, grey monolite bar
-                    value = max = 1;
+                {
+                    SkillRaceClassInfoEntry const* entry = GetSkillInfo(skillId);
+                    if (entry && entry->flags & SKILL_FLAG_MAXIMIZED)
+                        value = max = GetSkillMaxForLevel();
+                    else
+                        value = max = 1;
                     break;
+                }
                 case SKILL_RANGE_LEVEL:
                     max = GetSkillMaxForLevel();
                     break;
@@ -19428,8 +19434,8 @@ void Player::_LoadSkills(std::unique_ptr<QueryResult> queryResult)
 
             if (value == 0)
             {
-                sLog.outError("Character %u has skill %u with value 0. Will be deleted.", GetGUIDLow(), skill);
-                CharacterDatabase.PExecute("DELETE FROM character_skills WHERE guid = '%u' AND skill = '%u' ", GetGUIDLow(), skill);
+                sLog.outError("Character %u has skill %u with value 0. Will be deleted.", GetGUIDLow(), skillId);
+                CharacterDatabase.PExecute("DELETE FROM character_skills WHERE guid = '%u' AND skill = '%u' ", GetGUIDLow(), skillId);
                 continue;
             }
 
@@ -19439,7 +19445,7 @@ void Player::_LoadSkills(std::unique_ptr<QueryResult> queryResult)
 
             uint32 raceMask = getRaceMask();
             uint32 classMask = getClassMask();
-            auto bounds = sSpellMgr.GetSkillRaceClassInfoMapBounds(skill);
+            auto bounds = sSpellMgr.GetSkillRaceClassInfoMapBounds(skillId);
 
             for (auto itr = bounds.first; (itr != bounds.second && !step); ++itr)
             {
@@ -19469,11 +19475,11 @@ void Player::_LoadSkills(std::unique_ptr<QueryResult> queryResult)
                 }
             }
 
-            SetUInt32Value(PLAYER_SKILL_INDEX(count), MAKE_PAIR32(skill, step));
+            SetUInt32Value(PLAYER_SKILL_INDEX(count), MAKE_PAIR32(skillId, step));
             SetUInt32Value(PLAYER_SKILL_VALUE_INDEX(count), MAKE_SKILL_VALUE(value, max));
             SetUInt32Value(PLAYER_SKILL_BONUS_INDEX(count), 0);
 
-            mSkillStatus.insert(SkillStatusMap::value_type(skill, SkillStatusData(count, SKILL_UNCHANGED)));
+            mSkillStatus.insert(SkillStatusMap::value_type(skillId, SkillStatusData(count, SKILL_UNCHANGED)));
 
             ++count;
 
