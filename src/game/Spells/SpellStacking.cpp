@@ -158,8 +158,11 @@ bool SpellStacker::IsStackableAuraEffect(SpellEntry const* entry, SpellEntry con
     const bool player = (entry->SpellFamilyName && !entry->SpellFamilyFlags.Empty());
     const bool multirank = (related && siblings && player);
     const bool instance = (entry->Id == entry2->Id || multirank);
-    const bool icon = (entry->SpellIconID == entry2->SpellIconID); // Old bad practice, but a few old spells detection may still depend on it
-    const bool visual = (entry->SpellVisual == entry2->SpellVisual); // Old bad practice, but a few old spells detection may still depend on it
+
+    // HACK:
+    // Old, bad practice, but the detection of a few old spells may still depend on it
+    const bool icon = (entry->SpellIconID == entry2->SpellIconID);
+    const bool visual = std::equal(std::begin(entry->SpellVisual), std::end(entry->SpellVisual), std::begin(entry2->SpellVisual));
 
     // If aura makes spell not multi-instanceable (do not stack the same spell id or ranks of this spell)
     bool nonmui = false;
