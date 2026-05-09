@@ -235,8 +235,18 @@ void SpawnGroup::Spawn(bool force)
 
     if (m_entry.Squads.empty())
     {
-        for (auto& guid : m_entry.DbGuids)
-            eligibleGuids.push_back(&guid);
+        // once picked, only reuse
+        if (m_map.IsDungeon() && m_chosenEntries.size() == m_entry.MaxCount)
+        {
+            for (auto& guid : m_entry.DbGuids)
+                if (m_chosenEntries.find(guid.DbGuid) != m_chosenEntries.end())
+                    eligibleGuids.push_back(&guid);
+        }
+        else
+        {
+            for (auto& guid : m_entry.DbGuids)
+                eligibleGuids.push_back(&guid);            
+        }
 
         for (auto& randomEntry : m_entry.RandomEntries)
         {
