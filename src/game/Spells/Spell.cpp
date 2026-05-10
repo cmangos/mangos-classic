@@ -7978,10 +7978,6 @@ bool Spell::OnCheckTarget(Unit* target, SpellEffectIndex eff) const
 {
     switch (m_spellInfo->Id)
     {
-        case 5246:                                          // Intimidating Shout
-            if (eff != EFFECT_INDEX_0 && target == m_targets.getUnitTarget())
-                return false;
-            break;
         case 9082:                                          // Create Containment Coffer
             if (!target->HasAura(9032))
                 return false;

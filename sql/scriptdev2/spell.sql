@@ -76,6 +76,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (17536,'spell_awaken_kerlonian'),
 (18153,'spell_kodo_kombobulator'),
 (18969,'spell_taelan_death'),
+(19134,'spell_intimidating_shout'),
 (19707,'spell_hate_to_half'),
 (19832,'spell_possess_razorgore'),
 (19872,'spell_calm_dragonkin'),
@@ -347,6 +348,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Warrior
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(5246,'spell_intimidating_shout'),
 (5308,'spell_warrior_execute'),
 (20658,'spell_warrior_execute'),
 (20660,'spell_warrior_execute'),
