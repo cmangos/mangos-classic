@@ -1655,6 +1655,18 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap 
 
 void WorldObject::MovePositionToFirstCollision(Position& pos, float dist, float angle)
 {
+    // Guard against callers passing invalid source coords. Stale Position
+    // state on a bot resuming a long-unloaded BG instance lets the
+    // GetHitPosition call below underflow the grid-cell index inside the
+    // vmap tile lookup, dereferencing NULL and crashing the world server.
+    // Incident: May 2026, RAX=0 at MovePositionToFirstCollision+1424.
+    if (!MaNGOS::IsValidMapCoord(pos.x, pos.y, pos.z))
+    {
+        sLog.outError("MovePositionToFirstCollision: invalid src (%.2f, %.2f, %.2f) for %s; skipping",
+                      pos.x, pos.y, pos.z, GetGuidStr().c_str());
+        return;
+    }
+
     float destX = pos.x + dist * cos(angle);
     float destY = pos.y + dist * sin(angle);
     float destZ = pos.z;
