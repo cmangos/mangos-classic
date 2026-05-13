@@ -1017,7 +1017,7 @@ struct DoSpellThreat
 
         // flat threat bonus and attack power bonus currently only work properly when all
         // effects have same targets, otherwise, we'd need to separate it by effect index
-        if (ste.threat || ste.ap_bonus != 0.f)
+        if (ste.inverseEffectMask == 0 && (ste.threat || ste.ap_bonus != 0.f))
         {
             const uint32* targetA = spell->EffectImplicitTargetA;
 
@@ -1034,7 +1034,7 @@ struct DoSpellThreat
                 }
             }
             if (failed)
-                sLog.outErrorDb("Spell %u listed in `spell_threat` has effects with different targets, threat may be assigned incorrectly", spell->Id);
+                sLog.outErrorDb("Spell %u listed in `spell_threat` has effects with different targets, threat may be assigned incorrectly. Consider using inverse effect mask.", spell->Id);
         }
         ++count;
     }
@@ -1050,8 +1050,8 @@ void SpellMgr::LoadSpellThreats()
 {
     mSpellThreatMap.clear();                                // need for reload case
 
-    //                                             0      1       2           3
-    auto queryResult = WorldDatabase.Query("SELECT entry, Threat, multiplier, ap_bonus FROM spell_threat");
+    //                                             0      1       2           3         4
+    auto queryResult = WorldDatabase.Query("SELECT entry, Threat, multiplier, ap_bonus, InverseEffectMask FROM spell_threat");
     if (!queryResult)
     {
         BarGoLink bar(1);
@@ -1077,6 +1077,7 @@ void SpellMgr::LoadSpellThreats()
         ste.threat = fields[1].GetUInt16();
         ste.multiplier = fields[2].GetFloat();
         ste.ap_bonus = fields[3].GetFloat();
+        ste.inverseEffectMask = fields[4].GetUInt32();
 
         rankHelper.RecordRank(ste, entry);
     }

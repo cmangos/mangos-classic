@@ -1759,6 +1759,9 @@ struct SpellThreatEntry
     uint16 threat;
     float multiplier;
     float ap_bonus;
+    uint32 inverseEffectMask;
+
+    bool CanCauseThreatOnMask(uint32 mask) const { return ((~inverseEffectMask) & mask) != 0; }
 };
 
 typedef std::map<uint32, uint8> SpellElixirMap;

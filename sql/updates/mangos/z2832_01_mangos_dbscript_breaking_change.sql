@@ -1,4 +1,4 @@
-ALTER TABLE db_version CHANGE COLUMN required_z2831_01_mangos_wmogroupgen required_z2832_01_mangos_dbscript_breaking_change bit;
+ALTER TABLE db_version CHANGE COLUMN required_z2832_01_mangos_spell_threat_mask required_z2832_01_mangos_dbscript_breaking_change bit;
 
 -- move datalong2 to joint speed field
 UPDATE dbscripts_on_event SET speed=datalong2/100, datalong2=0 WHERE datalong2>0 AND command=3;
