@@ -389,7 +389,7 @@ void DialogueHelper::DoNextDialogueStep()
         if (pSpeaker)
             DoScriptText(iTextEntry, pSpeaker);
     }
-    else if (uiSpeakerEntry && iTextEntry > 0)
+    else if (uiSpeakerEntry && iTextEntry > 0 && m_currentEntry->type == DIALOGUE_STEP_TEXT)
     {
         // Use Speaker if directly provided
         Creature* speaker = GetSpeakerByEntry(uiSpeakerEntry);

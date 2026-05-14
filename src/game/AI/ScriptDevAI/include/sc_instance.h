@@ -85,12 +85,20 @@ class ScriptedMap : public ScriptedInstance
         ScriptedMap(Map* map) : ScriptedInstance(map) {}
 };
 
+enum DialogueStepType
+{
+    DIALOGUE_STEP_ACTION,
+    DIALOGUE_STEP_TEXT,
+    DIALOGUE_STEP_MAX
+};
+
 /// A static const array of this structure must be handled to DialogueHelper
 struct DialogueEntry
 {
     int32 textEntry;                                       ///< To be said text entry
     uint32 sayerEntry;                                    ///< Entry of the mob who should say
     uint32 timer;                                         ///< Time delay until next text of array is said (0 stops)
+    DialogueStepType type {DIALOGUE_STEP_ACTION};
 };
 
 /// A static const array of this structure must be handled to DialogueHelper
@@ -101,6 +109,7 @@ struct DialogueEntryTwoSide
     int32 textEntryAlt;                                    ///< To be said text entry (second side)
     uint32 sayerEntryAlt;                                 ///< Entry of the mob who should say (second side)
     uint32 timer;                                         ///< Time delay until next text of array is said (0 stops)
+    DialogueStepType type {DIALOGUE_STEP_ACTION};
 };
 
 /// Helper class handling a dialogue given as static const array of DialogueEntry or DialogueEntryTwoSide
