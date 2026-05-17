@@ -544,10 +544,7 @@ void CreatureGroup::TriggerLinkingEvent(uint32 event, Unit* target)
                 uint32 dbGuid = data.first;
                 if (Creature* creature = m_map.GetCreature(dbGuid))
                 {
-                    creature->AddThreat(target);
-                    target->AddThreat(creature);
-                    target->SetInCombatWith(creature);
-                    target->GetCombatManager().TriggerCombatTimer(creature);
+                    creature->EngageInCombatWith(target);
                 }
             }
 
