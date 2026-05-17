@@ -6111,7 +6111,7 @@ int32 Aura::OnAuraValueCalculate(Unit* caster, int32 currentValue, Item* castIte
     return currentValue;
 }
 
-void Aura::OnDamageCalculate(Unit* victim, Unit* attacker, int32& advertisedBenefit, float& totalMod)
+void Aura::OnDamageCalculate(Unit* attacker, Unit* victim, int32& advertisedBenefit, float& totalMod)
 {
     if (AuraScript* script = GetAuraScript())
         return script->OnDamageCalculate(this, attacker, victim, advertisedBenefit, totalMod);

@@ -495,7 +495,7 @@ class Aura
         // hooks
         void OnAuraInit();
         int32 OnAuraValueCalculate(Unit* caster, int32 currentValue, Item* castItem);
-        void OnDamageCalculate(Unit* victim, Unit* attacker, int32& advertisedBenefit, float& totalMod);
+        void OnDamageCalculate(Unit* attacker, Unit* victim, int32& advertisedBenefit, float& totalMod);
         void OnCritChanceCalculate(Unit const* victim, float& chance, SpellEntry const* spellInfo);
         void OnApply(bool apply);
         void OnAfterApply(bool apply);
