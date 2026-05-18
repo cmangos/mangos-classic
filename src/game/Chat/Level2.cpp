@@ -4463,7 +4463,6 @@ bool ChatHandler::LookupPlayerSearchCommand(std::unique_ptr<QueryResult> queryRe
         Field* fields = queryResult->Fetch();
         uint32 acc_id = fields[0].GetUInt32();
         std::string acc_name = fields[1].GetCppString();
-        std::string acc_email = fields[2].GetCppString();
 
         ///- Get the characters for account id
         auto chars = CharacterDatabase.PQuery("SELECT guid, name, race, class, level FROM characters WHERE account = %u", acc_id);
@@ -4471,7 +4470,7 @@ bool ChatHandler::LookupPlayerSearchCommand(std::unique_ptr<QueryResult> queryRe
         {
             if (chars->GetRowCount())
             {
-                PSendSysMessage(LANG_LOOKUP_PLAYER_ACCOUNT, acc_name.c_str(), acc_id, acc_email.c_str());
+                PSendSysMessage(LANG_LOOKUP_PLAYER_ACCOUNT, acc_name.c_str(), acc_id);
                 ShowPlayerListHelper(std::move(chars), playersLimit, true, false);
             }
         }
