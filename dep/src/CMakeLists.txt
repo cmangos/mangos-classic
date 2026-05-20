@@ -25,26 +25,24 @@ if(BUILD_EXTRACTORS AND NOT (BZip2_FOUND OR BZIP2_FOUND))
 endif()
 
 # zlib
-find_package(ZLIB)
-if (NOT ZLIB_FOUND OR ZLIB_VERSION_STRING VERSION_LESS 1.3.1)
+find_package(ZLIB CONFIG COMPONENTS static)
+if (NOT ZLIB_FOUND OR ZLIB_VERSION_STRING VERSION_LESS 1.3.2)
   FetchContent_Declare(
     zlib
     GIT_REPOSITORY "https://github.com/madler/zlib.git"
-    GIT_TAG "v1.3.1"
+    GIT_TAG "v1.3.2"
   )
   FetchContent_GetProperties(zlib)
   if(NOT zlib_POPULATED)
     message(STATUS "Setting up zlib ...")
+    set(ZLIB_BUILD_SHARED  false)
+    set(ZLIB_BUILD_STATIC  true)
+    set(ZLIB_BUILD_TESTING false)
+    set(ZLIB_INSTALL       false)
     FetchContent_MakeAvailable(zlib)
-    set(SKIP_INSTALL_ALL true)
-    set(BUILD_SHARED false)
-    # patch provided cmake to avoid unneeded target install and deprecation warning.
-    #file(COPY_FILE "patch-zlib-CMakeLists.txt" "${zlib_SOURCE_DIR}/CMakeLists.txt" ONLY_IF_DIFFERENT) #not working on cmake < 3.21 so replaced with 3 next lines
-    file(COPY "patch-zlib-CMakeLists.txt" DESTINATION "${zlib_SOURCE_DIR}")
-    file(REMOVE "${zlib_SOURCE_DIR}/CMakeLists.txt")
-    file(RENAME "${zlib_SOURCE_DIR}/patch-zlib-CMakeLists.txt" "${zlib_SOURCE_DIR}/CMakeLists.txt")
-    target_include_directories(zlib PUBLIC ${zlib_SOURCE_DIR} ${zlib_BINARY_DIR})
-    message(STATUS "zlib ${ZLIB_FULL_VERSION} successfully installed!")
+    # CMaNGOS links a target named "zlib"; zlib's static target is "zlibstatic".
+    add_library(zlib ALIAS zlibstatic)
+    message(STATUS "zlib successfully set up!")
   endif()
 else()
   add_library(zlib INTERFACE)
