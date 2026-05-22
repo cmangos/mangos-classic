@@ -11,7 +11,7 @@ env:
   REPO_DIR : ${{github.workspace}}
   BUILD_DIR: ${{github.workspace}}/bin/builddir
   BOOST_TOOLSET: "msvc"
-  BOOST_VERSION: "1.83.0"
+  BOOST_VERSION: "1.87.0"
   BOOST_PLATFORM_VERSION: "2022"
 
 jobs:
@@ -69,7 +69,7 @@ jobs:
       - name: Build
         env:
           MAKEFLAGS: "-j8"
-        run: cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}}
+        run: cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}} --parallel
 
       - name: Archive files
         run: |
@@ -85,7 +85,7 @@ jobs:
   upload:
     runs-on: windows-2022
     permissions:
-      contents: write  # for marvinpinto/action-automatic-releases to generate pre-release
+      contents: write  # for softprops/action-gh-release to publish the release
     needs: build
 
     steps:
@@ -117,16 +117,15 @@ jobs:
 
       - name: Get Current Date
         id: date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
       - name: Upload Snapshot
-        uses: "marvinpinto/action-automatic-releases@latest"
+        uses: softprops/action-gh-release@v3
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
+          tag_name: latest
+          name: "Development Build(${{ steps.date.outputs.date }})"
           prerelease: false
-          title: "Development Build(${{ steps.date.outputs.date }})"
-          files: all_snapshots
+          files: all_snapshots/**
 
   notify-success:
     name: Send Notification to Discord on Success

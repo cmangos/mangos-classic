@@ -2,13 +2,18 @@ name: Ubuntu Build
 
 on: [push]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
   REPO_DIR : ${{github.workspace}}
   BUILD_DIR: ${{github.workspace}}/bin/builddir
-  BOOST_VERSION: "1.83.0"
+  BOOST_VERSION: "1.87.0"
   BOOST_PLATFORM_VERSION: "22.04"
+  SCCACHE_GHA_ENABLED: "true"
 
 jobs:
   build:
@@ -31,17 +36,14 @@ jobs:
             USE_PCH: ON
             EXTRA_BUILD: "-DBUILD_EXTRACTORS=ON -DBUILD_AHBOT=ON -DBUILD_PLAYERBOT=ON "
 
-          - os: ubuntu-22.04
-            COMPILER_CC: clang
-            COMPILER_PP: clang++
-            USE_PCH: OFF
-            EXTRA_BUILD: ""
-
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           path: ${{env.REPO_DIR}}
+
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.10
 
       - name: Create Build Environment
         run: |
@@ -73,15 +75,19 @@ jobs:
           USE_PCH: ${{ matrix.USE_PCH }}
           EXTRA_BUILD: ${{ matrix.EXTRA_BUILD }}
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
-        run: cmake -DBoost_ARCHITECTURE=-x64 -DPCH=${{env.USE_PCH}} -DCMAKE_INSTALL_PREFIX=/home/runner/work ${{env.EXTRA_BUILD}}-B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
+        run: cmake -DBoost_ARCHITECTURE=-x64 -DPCH=${{env.USE_PCH}} -DCMAKE_INSTALL_PREFIX=/home/runner/work ${{env.EXTRA_BUILD}}-DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
 
 
       - name: Build
         env:
           MAKEFLAGS: "-j8"
         run: |
-            cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}}
+            cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}} --parallel
             cmake --install ${{env.BUILD_DIR}}
+
+      - name: sccache stats
+        if: always()
+        run: sccache --show-stats
 
   notify:
     name: Send Notification to Discord on Failure

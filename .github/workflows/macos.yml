@@ -2,11 +2,20 @@ name: macOS Build
 
 on: [push]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
-  REPO_DIR : ${{github.workspace}}
+  REPO_DIR: ${{github.workspace}}
   BUILD_DIR: ${{github.workspace}}/bin/builddir
+  BOOST_VERSION: "1.87.0"
+  BOOST_PLATFORM_VERSION: "14"
+  HOMEBREW_NO_AUTO_UPDATE: 1
+  HOMEBREW_NO_INSTALL_CLEANUP: 1
+  SCCACHE_GHA_ENABLED: "true"
 
 permissions:
   contents: read
@@ -23,31 +32,47 @@ jobs:
         with:
           path: ${{env.REPO_DIR}}
 
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.10
+
       - name: Install Dependencies
         run: |
           brew install mysql-client@8.4
           brew install openssl
-          brew install boost@1.85
-          brew link boost@1.85
+          brew install icu4c@78
+          brew link icu4c@78 --force
           echo "OPENSSL_ROOT_DIR=$(brew --prefix --installed openssl)" >> $GITHUB_ENV
+
+      - name: Install Boost
+        uses: MarkusJx/install-boost@v2.6.0
+        id: install-boost
+        with:
+          boost_version: ${{env.BOOST_VERSION}}
+          platform_version: ${{env.BOOST_PLATFORM_VERSION}}
+          toolset: clang
+          arch: aarch64
 
       - name: Configure
         env:
-          BOOST_ROOT: /opt/homebrew/opt/boost
+          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
           CMAKE_PREFIX_PATH: /opt/homebrew
-        run: cmake -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}} -DBoost_ARCHITECTURE=-arm64 -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+        run: cmake -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}} -DBoost_ARCHITECTURE=-arm64 -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build
         env:
           MAKEFLAGS: "-j8"
-        run: cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}}
+        run: cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}} --parallel
+
+      - name: sccache stats
+        if: always()
+        run: sccache --show-stats
 
   notify:
     permissions:
       contents: none
     name: Send Notification to Discord on Failure
     runs-on: ubuntu-latest
-    needs: # make sure the notification is sent AFTER the jobs you want included have completed
+    needs:
       - build
     if: failure()
 
