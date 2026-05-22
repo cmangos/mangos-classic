@@ -10,6 +10,9 @@ env:
   BUILD_TYPE: RelWithDebInfo
   REPO_DIR : ${{github.workspace}}
   BUILD_DIR: ${{github.workspace}}/bin/builddir
+  BOOST_TOOLSET: "msvc"
+  BOOST_VERSION: "1.83.0"
+  BOOST_PLATFORM_VERSION: "2022"
 
 jobs:
   build:
@@ -46,9 +49,21 @@ jobs:
         run: |
           echo "ARCHIVE_FILENAME=$env:CI_REPOSITORY_NAME-${{matrix.TYPE}}-$env:CI_SHA_SHORT.zip" >> $env:GITHUB_ENV
           cmake -E make_directory ${{ env.BUILD_DIR }}
-          choco install boost-msvc-14.3
+
+      # install dependencies — install-boost provides BoostConfig.cmake, which
+      # find_package(Boost) now requires (config mode); choco's boost-msvc
+      # package is not discoverable that way.
+      - name: Install Boost
+        uses: MarkusJx/install-boost@v2.6.0
+        id: install-boost
+        with:
+          boost_version: ${{env.BOOST_VERSION}}
+          platform_version: ${{env.BOOST_PLATFORM_VERSION}}
+          toolset: ${{env.BOOST_TOOLSET}}
 
       - name: Configure
+        env:
+          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         run: cmake ${{matrix.OPTIONAL_DEFINES}} -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
 
       - name: Build
