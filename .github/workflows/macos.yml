@@ -59,9 +59,7 @@ jobs:
         run: cmake -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}} -DBoost_ARCHITECTURE=-arm64 -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build
-        env:
-          MAKEFLAGS: "-j8"
-        run: cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}} --parallel
+        run: cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}} --parallel 3
 
       - name: sccache stats
         if: always()
