@@ -188,6 +188,7 @@ Defining a buddy could be done in several way:
                                             * x/y/z/o
                                             * dataint = 1 to init move to respawn position, 2 to init creature group member each in their respawn position.
                                                         no other data is needed. So ex: command 3 ... dataint=1 and creature should head to its respawn pos
+                                            * dataint2 = 0x1 to make it main movegen and persist through combat evade
 
  4 SCRIPT_COMMAND_FLAG_SET                  source = any
                                             * datalong = field_id
@@ -366,6 +367,7 @@ Defining a buddy could be done in several way:
                                               Ignore bounding radius for datalong3 use
                                             * dataint1 = enum ForcedMovement
                                             * dataint2 = dbscripts_on_relay id
+                                            * dataint3 = 0x1 to make it main movegen and persist through combat evade
 
 38 SCRIPT_COMMAND_SEND_MAIL                 Send a mail from resSource  to resTarget
                                             * resultingSource = Creature OR NULL, resTarget must be Player
