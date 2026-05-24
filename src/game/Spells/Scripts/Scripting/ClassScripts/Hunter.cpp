@@ -19,8 +19,19 @@
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
 
-struct TameBeastChannel : public AuraScript
+// 1515 - Tame Beast
+struct TameBeastChannel : public SpellScript, public AuraScript
 {
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target)
+            return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
+        if (target->GetLevel() > spell->GetCaster()->GetLevel())
+            return SPELL_FAILED_HIGHLEVEL;
+        return SPELL_CAST_OK;
+    }
+
     void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
     {
         data.caster = aura->GetCaster();
@@ -28,6 +39,7 @@ struct TameBeastChannel : public AuraScript
     }
 };
 
+// 13535 - Tame Beast
 struct TameBeastDummy : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
