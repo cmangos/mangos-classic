@@ -1088,6 +1088,8 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
             spell.Probability = fields[8].GetUInt32();
             spell.InitialMin = fields[9].GetUInt32();
             spell.InitialMax = fields[10].GetUInt32();
+            spell.RepeatMin = fields[11].GetUInt32();
+            spell.RepeatMax = fields[12].GetUInt32();
 
             if (spell.InitialMin > spell.InitialMax)
             {
@@ -1101,8 +1103,7 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
                 continue;
             }
 
-            spell.RepeatMin = fields[11].GetUInt32();
-            spell.RepeatMax = fields[12].GetUInt32();
+
             spell.DisabledForAI = !spellInfo || spellInfo->HasAttribute(SPELL_ATTR_EX_NO_AUTOCAST_AI);
             newContainer->spellLists[spell.Id].Spells.emplace(spell.Position, spell);
         } while (result->NextRow());
