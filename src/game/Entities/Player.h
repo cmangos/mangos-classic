@@ -1222,7 +1222,7 @@ class Player : public Unit
 
         void PrepareQuestMenu(ObjectGuid guid) const;
         void SendPreparedQuest(ObjectGuid guid) const;
-        bool IsActiveQuest(uint32 quest_id) const;          // can be taken or taken
+        bool IsActiveQuest(uint32 quest_id) const; // can be taken or completed
 
         // Quest is taken and not yet rewarded
         // if completed_or_not = 0 (or any other value except 1 or 2) - returns true, if quest is taken and doesn't depend if quest is completed or not
