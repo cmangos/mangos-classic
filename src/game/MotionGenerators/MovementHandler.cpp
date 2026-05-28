@@ -40,6 +40,9 @@ void WorldSession::HandleMoveWorldportAckOpcode(WorldPacket& /*recv_data*/)
 
 void WorldSession::HandleMoveWorldportAckOpcode()
 {
+    if (!GetPlayer())
+        return;
+
     // ignore unexpected far teleports
     if (!GetPlayer()->IsBeingTeleportedFar())
         return;
