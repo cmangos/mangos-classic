@@ -544,6 +544,8 @@ void CreatureGroup::TriggerLinkingEvent(uint32 event, Unit* target)
                 uint32 dbGuid = data.first;
                 if (Creature* creature = m_map.GetCreature(dbGuid))
                 {
+                    // linking call constitutes call for assistance
+                    creature->SetNoCallAssistance(true);
                     creature->EngageInCombatWith(target);
                 }
             }
