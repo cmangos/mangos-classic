@@ -2940,6 +2940,9 @@ void Spell::Prepare()
 
     if (!m_IsTriggeredSpell && !m_trueCaster->IsGameObject())
     {
+        if (m_clientCast && m_itemCastSpell)
+            m_caster->RemoveAurasOnCast(AURA_INTERRUPT_FLAG_ITEM_USE, m_spellInfo);
+
         if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_AN_ACTION))
             m_caster->RemoveAurasOnCast(AURA_INTERRUPT_FLAG_ACTION, m_spellInfo);
 
