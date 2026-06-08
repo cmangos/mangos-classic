@@ -1679,8 +1679,6 @@ void Player::SetDeathState(DeathState s)
         if (!ressSpellId)
             ressSpellId = GetResurrectionSpellId();
 
-        FailQuestsOnDeath(); // TODO: Order needs to be verified
-
         if (InstanceData* mapInstance = GetInstanceData())
             mapInstance->OnPlayerDeath(this);
     }
@@ -4297,6 +4295,8 @@ void Player::BuildPlayerRepop()
 
     // to prevent cheating
     corpse->ResetGhostTime();
+
+    FailQuestsOnDeath(); // confirmed to be on release
 }
 
 void Player::ResurrectPlayer(float restore_percent, bool applySickness)
