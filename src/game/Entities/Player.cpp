@@ -5245,7 +5245,6 @@ void Player::UpdateCombatSkills(uint32 procEx, WeaponAttackType attType, bool de
     const uint16 skillMax = GetSkillMaxPure(skillId);
     const int32 room = int32(skillMax - skill);
     const int32 level = GetLevel();
-    const uint32 levelMax = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
 
     // Skill already capped or invalid state: nothing to gain
     if (skillMax == 0 || level == 0 || skill >= skillMax)
@@ -5254,7 +5253,8 @@ void Player::UpdateCombatSkills(uint32 procEx, WeaponAttackType attType, bool de
     // skillGapLogGrowth controls the slope of the logarithmic catch-up portion
     const double skillGapLogGrowth = 0.22 * (1.0 + (12.0 / level));
     // levelCapScale normalizes the curve across realm caps and anchors the seam at room = 7
-    const double levelCapScale = levelMax / 60.0;
+    // TODO: Figure out if scaling of 295 to 300 is same in vanilla, tbc and wotlk when level 60
+    const double levelCapScale = 1;
 
     double baseChance = 0.0;
 
@@ -5273,13 +5273,18 @@ void Player::UpdateCombatSkills(uint32 procEx, WeaponAttackType attType, bool de
     {
         const double maxIntellectBonus = 0.10;
         const double intellect = GetStat(STAT_INTELLECT);
-        const double intellectMax = (levelMax == 60) ? 750 :
-                                    (levelMax == 70) ? 1500 :
-                                    (levelMax == 80) ? 3000 : 750; // default fallback
+        // TODO: Figure out actual intellect scaling contribution - likely a per level value like everything else and not linearly
+        const int levelBracket =    (level <= 60) ? 60 :
+                                    (level <= 70) ? 70 :
+                                    (level <= 80) ? 80 : 255;
+
+        const double intellectMax = (level <= 60) ? 750 :
+                                    (level <= 70) ? 1500 :
+                                    (level <= 80) ? 3000 : 6000; // default fallback
 
         intellectBonus = maxIntellectBonus *
                          (intellect / intellectMax) *
-                         (static_cast<double>(levelMax) / static_cast<double>(level));
+                         (static_cast<double>(levelBracket) / static_cast<double>(level));
 
         intellectBonus = std::clamp(intellectBonus, 0.0, maxIntellectBonus);
     }
