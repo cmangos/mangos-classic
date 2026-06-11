@@ -709,6 +709,7 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADMAILS,
     PLAYER_LOGIN_QUERY_LOADMAILEDITEMS,
     PLAYER_LOGIN_QUERY_LOADWEEKLYQUESTSTATUS,
+    PLAYER_LOGIN_QUERY_LOADROGUELIKELEVELBONUSES,
 
     MAX_PLAYER_LOGIN_QUERY
 };
@@ -978,6 +979,8 @@ class Player : public Unit
         void GiveLevel(uint32 level);
 
         void InitStatsForLevel(bool reapplyMods = false);
+        void ApplyRoguelikeLevelBonusesToCreateStats();
+        void RollRoguelikeLevelBonuses(uint32 oldLevel, uint32 newLevel);
 
         // Played Time Stuff
         time_t m_logintime;
@@ -2288,6 +2291,7 @@ class Player : public Unit
         void _LoadGroup(std::unique_ptr<QueryResult> queryResult);
         void _LoadSkills(std::unique_ptr<QueryResult> queryResult);
         void _LoadSpells(std::unique_ptr<QueryResult> queryResult);
+        void _LoadRoguelikeLevelBonuses(std::unique_ptr<QueryResult> queryResult);
         bool _LoadHomeBind(std::unique_ptr<QueryResult> queryResult);
         void _LoadBGData(std::unique_ptr<QueryResult> queryResult);
         void _LoadForgottenSkills(std::unique_ptr<QueryResult> queryResult);
@@ -2346,6 +2350,7 @@ class Player : public Unit
         uint32 m_stored_honorableKills;
         uint32 m_stored_dishonorableKills;
         int32 m_standing_pos;
+        std::map<uint32, std::map<uint8, int32>> m_roguelikeLevelBonuses;
 
         void outDebugStatsValues() const;
         ObjectGuid m_lootGuid;

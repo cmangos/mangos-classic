@@ -217,7 +217,8 @@ struct LootStoreItem
           group(_group), needs_quest(_chanceOrQuestChance < 0), maxcount(_maxcount), conditionId(_conditionId)
     {}
 
-    bool Roll(bool rate) const;                             // Checks if the entry takes it's chance (at loot generation)
+    float GetEffectiveChance(bool rate, Player const* lootOwner) const;
+    bool Roll(bool rate, Player const* lootOwner) const;    // Checks if the entry takes it's chance (at loot generation)
 };
 
 struct LootItem
@@ -280,7 +281,7 @@ class LootTemplate
                 LootStoreItemList EqualChanced;                     // Zero chances - every entry takes the same chance
 
                 // Rolls an item from the group, returns nullptr if all miss their chances
-                LootStoreItem const* Roll(Loot const& loot, Player const* lootOwner) const;
+                LootStoreItem const* Roll(Loot const& loot, Player const* lootOwner, bool rate) const;
         };
         using LootGroups = std::vector<LootGroup>;
 

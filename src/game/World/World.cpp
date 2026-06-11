@@ -418,6 +418,11 @@ void World::LoadConfigSettings(bool reload)
     setConfigPos(CONFIG_FLOAT_RATE_DROP_ITEM_REFERENCED,                 "Rate.Drop.Item.Referenced",                 1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_DROP_ITEM_QUEST,                      "Rate.Drop.Item.Quest",                      1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_DROP_MONEY,                           "Rate.Drop.Money",                           1.0f);
+    setConfigPos(CONFIG_FLOAT_ROGUELIKE_LEVEL_BONUS_CHANCE,              "Roguelike.LevelBonus.Chance",              100.0f);
+    setConfigPos(CONFIG_FLOAT_ROGUELIKE_LOOT_PROGRESSIVE_CHANCE_PER_LEVEL,"Roguelike.Loot.ProgressiveChancePerLevel", 0.5f);
+    setConfigPos(CONFIG_FLOAT_ROGUELIKE_LOOT_PROGRESSIVE_CHANCE_MAX,      "Roguelike.Loot.ProgressiveChanceMax",      50.0f);
+    setConfigPos(CONFIG_FLOAT_ROGUELIKE_LOOT_BONUS_GEAR_CHANCE,           "Roguelike.Loot.BonusGearChance",           20.0f);
+    setConfigPos(CONFIG_FLOAT_ROGUELIKE_LOOT_BONUS_GEAR_RARE_CHANCE,      "Roguelike.Loot.BonusGearRareChance",        8.0f);
     setConfigPos(CONFIG_FLOAT_RATE_PET_XP_KILL,                          "Rate.Pet.XP.Kill",                          1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_XP_KILL,                              "Rate.XP.Kill",                              1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_XP_QUEST,                             "Rate.XP.Quest",                             1.0f);
@@ -731,6 +736,8 @@ void World::LoadConfigSettings(bool reload)
     setConfigMin(CONFIG_UINT32_ENVIRONMENTAL_DAMAGE_MAX, "EnvironmentalDamage.Max", 610, getConfig(CONFIG_UINT32_ENVIRONMENTAL_DAMAGE_MIN));
 
     setConfig(CONFIG_UINT32_INTERACTION_PAUSE_TIMER, "InteractionPauseTimer", 180000);
+    setConfig(CONFIG_UINT32_ROGUELIKE_LEVEL_BONUS_MIN, "Roguelike.LevelBonus.Min", 1);
+    setConfig(CONFIG_UINT32_ROGUELIKE_LEVEL_BONUS_MAX, "Roguelike.LevelBonus.Max", 2);
 
     setConfig(CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT,      "PetUnsummonAtMount", false);
     setConfig(CONFIG_BOOL_PET_ATTACK_FROM_BEHIND,     "PetAttackFromBehind", false);
@@ -838,6 +845,7 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_PATH_FIND_NORMALIZE_Z, "PathFinder.NormalizeZ", false);
 
     setConfig(CONFIG_BOOL_REGEN_ZONE_AREA_ON_STARTUP, "Spawns.ZoneArea", false);
+    setConfig(CONFIG_BOOL_ROGUELIKE_LOOT_DEBUG, "Roguelike.Loot.Debug", false);
 
     sLog.outString();
 }

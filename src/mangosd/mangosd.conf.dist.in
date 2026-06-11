@@ -1360,6 +1360,37 @@ Visibility.AIRelocationNotifyDelay = 1000
 #        Drop rates (items by quality and money)
 #        Default: 1
 #
+#    Roguelike.LevelBonus.Chance
+#        Chance from 0 to 100 that a player gets a random primary stat bonus when gaining a level.
+#        Default: 100
+#
+#    Roguelike.LevelBonus.Min
+#    Roguelike.LevelBonus.Max
+#        Minimum and maximum stat value for random level-up primary stat bonuses.
+#        Default: 1 / 2
+#
+#    Roguelike.Loot.ProgressiveChancePerLevel
+#        Relative non-quest item drop chance bonus per player level.
+#        Example: 0.5 gives a level 60 player +30% relative chance before the max cap.
+#        Default: 0.5
+#
+#    Roguelike.Loot.ProgressiveChanceMax
+#        Maximum relative non-quest item drop chance bonus.
+#        Default: 50
+#
+#    Roguelike.Loot.BonusGearChance
+#        Base chance for an extra level-appropriate uncommon-or-better gear item on creature corpse loot.
+#        This is added on top of normal creature loot, so materials and normal drops are preserved.
+#        Default: 20
+#
+#    Roguelike.Loot.BonusGearRareChance
+#        Chance that the extra roguelike gear item prefers rare quality instead of uncommon quality.
+#        Default: 8
+#
+#    Roguelike.Loot.Debug
+#        Log roguelike loot chance calculations.
+#        Default: false
+#
 #    Rate.Pet.XP.Kill
 #    Rate.XP.Kill
 #    Rate.XP.Quest
@@ -1506,6 +1537,14 @@ Rate.Drop.Item.Artifact = 1
 Rate.Drop.Item.Referenced = 1
 Rate.Drop.Item.Quest = 1
 Rate.Drop.Money = 1
+Roguelike.LevelBonus.Chance = 100
+Roguelike.LevelBonus.Min = 1
+Roguelike.LevelBonus.Max = 2
+Roguelike.Loot.ProgressiveChancePerLevel = 0.5
+Roguelike.Loot.ProgressiveChanceMax = 50
+Roguelike.Loot.BonusGearChance = 20
+Roguelike.Loot.BonusGearRareChance = 8
+Roguelike.Loot.Debug = false
 Rate.Pet.XP.Kill = 1
 Rate.XP.Kill    = 1
 Rate.XP.Quest   = 1

@@ -2802,7 +2802,7 @@ void Creature::SetLootStatus(CreatureLootStatus status, bool forced)
             RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             break;
         case CREATURE_LOOT_STATUS_SKIN_AVAILABLE:
-            SetFlag(UNIT_FIELD_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+            SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
             break;
         case CREATURE_LOOT_STATUS_PICKPOCKETED:

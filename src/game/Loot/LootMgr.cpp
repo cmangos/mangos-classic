@@ -26,12 +26,15 @@
 #include "Globals/ObjectMgr.h"
 #include "Server/DBCStores.h"
 #include "Server/SQLStorages.h"
+#include "Entities/Player.h"
 #include "Entities/ItemEnchantmentMgr.h"
 #include "Entities/Corpse.h"
 #include "Tools/Language.h"
 #include "BattleGround/BattleGroundMgr.h"
+#include <algorithm>
 #include <sstream>
 #include <iomanip>
+#include <vector>
 
 INSTANTIATE_SINGLETON_1(LootMgr);
 
@@ -55,6 +58,179 @@ LootStore LootTemplates_Mail("mail_loot_template",         "mail template id",  
 LootStore LootTemplates_Pickpocketing("pickpocketing_loot_template", "creature pickpocket lootid",     true);
 LootStore LootTemplates_Reference("reference_loot_template",    "reference id",                   false);
 LootStore LootTemplates_Skinning("skinning_loot_template",     "creature skinning id",           true);
+
+namespace
+{
+    std::vector<uint32> s_roguelikeBonusGearItems;
+    bool s_roguelikeBonusGearItemsLoaded = false;
+
+    bool IsRoguelikeGearInventoryType(uint32 inventoryType)
+    {
+        switch (inventoryType)
+        {
+            case INVTYPE_HEAD:
+            case INVTYPE_NECK:
+            case INVTYPE_SHOULDERS:
+            case INVTYPE_CHEST:
+            case INVTYPE_WAIST:
+            case INVTYPE_LEGS:
+            case INVTYPE_FEET:
+            case INVTYPE_WRISTS:
+            case INVTYPE_HANDS:
+            case INVTYPE_FINGER:
+            case INVTYPE_TRINKET:
+            case INVTYPE_WEAPON:
+            case INVTYPE_SHIELD:
+            case INVTYPE_RANGED:
+            case INVTYPE_CLOAK:
+            case INVTYPE_2HWEAPON:
+            case INVTYPE_ROBE:
+            case INVTYPE_WEAPONMAINHAND:
+            case INVTYPE_WEAPONOFFHAND:
+            case INVTYPE_HOLDABLE:
+            case INVTYPE_THROWN:
+            case INVTYPE_RANGEDRIGHT:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    void LoadRoguelikeBonusGearItems()
+    {
+        if (s_roguelikeBonusGearItemsLoaded)
+            return;
+
+        s_roguelikeBonusGearItemsLoaded = true;
+        s_roguelikeBonusGearItems.clear();
+
+        std::unique_ptr<QueryResult> result(WorldDatabase.Query(
+            "SELECT entry FROM item_template "
+            "WHERE class IN (2, 4) "
+            "AND Quality IN (2, 3) "
+            "AND InventoryType IN (1,2,3,5,6,7,8,9,10,11,12,13,14,15,16,17,20,21,22,23,25,26) "
+            "AND RequiredSkill = 0 "
+            "AND RequiredSpell = 0 "
+            "AND RequiredHonorRank = 0 "
+            "AND RequiredCityRank = 0 "
+            "AND RequiredReputationFaction = 0 "
+            "AND StartQuest = 0 "
+            "AND MaxCount = 0"));
+
+        if (!result)
+        {
+            sLog.outErrorDb("Roguelike bonus gear: no candidate items found in item_template.");
+            return;
+        }
+
+        do
+        {
+            Field* fields = result->Fetch();
+            uint32 itemId = fields[0].GetUInt32();
+            if (ObjectMgr::GetItemPrototype(itemId))
+                s_roguelikeBonusGearItems.push_back(itemId);
+        }
+        while (result->NextRow());
+
+        sLog.outString("Roguelike bonus gear: loaded %zu candidate items.", s_roguelikeBonusGearItems.size());
+    }
+
+    bool IsRoguelikeBonusGearCandidate(ItemPrototype const* proto, Player const* player, uint32 targetLevel, uint32 quality)
+    {
+        if (!proto || !player)
+            return false;
+
+        if (proto->Quality != quality)
+            return false;
+
+        if (!IsRoguelikeGearInventoryType(proto->InventoryType))
+            return false;
+
+        uint32 playerLevel = player->GetLevel();
+        uint32 requiredLevel = proto->RequiredLevel ? proto->RequiredLevel : std::max<uint32>(1, proto->ItemLevel > 5 ? proto->ItemLevel - 5 : 1);
+        uint32 minLevel = playerLevel > 5 ? playerLevel - 5 : 1;
+        uint32 maxLevel = std::min<uint32>(STRONG_MAX_LEVEL, std::max(playerLevel, targetLevel) + 3);
+
+        if (requiredLevel < minLevel || requiredLevel > maxLevel)
+            return false;
+
+        if (proto->ItemLevel > maxLevel + 8)
+            return false;
+
+        if (proto->AllowableClass && proto->AllowableClass != 0xFFFFFFFF && !(proto->AllowableClass & (1u << (player->getClass() - 1))))
+            return false;
+
+        if (proto->AllowableRace && proto->AllowableRace != 0xFFFFFFFF && !(proto->AllowableRace & (1u << (player->getRace() - 1))))
+            return false;
+
+        return true;
+    }
+
+    uint32 SelectRoguelikeBonusGearItem(Player* player, uint32 targetLevel)
+    {
+        LoadRoguelikeBonusGearItems();
+        if (s_roguelikeBonusGearItems.empty())
+            return 0;
+
+        uint32 quality = roll_chance_f(sWorld.getConfig(CONFIG_FLOAT_ROGUELIKE_LOOT_BONUS_GEAR_RARE_CHANCE)) ? ITEM_QUALITY_RARE : ITEM_QUALITY_UNCOMMON;
+
+        std::vector<uint32> candidates;
+        candidates.reserve(64);
+        for (uint32 itemId : s_roguelikeBonusGearItems)
+        {
+            ItemPrototype const* proto = ObjectMgr::GetItemPrototype(itemId);
+            if (IsRoguelikeBonusGearCandidate(proto, player, targetLevel, quality))
+                candidates.push_back(itemId);
+        }
+
+        if (candidates.empty() && quality == ITEM_QUALITY_RARE)
+        {
+            quality = ITEM_QUALITY_UNCOMMON;
+            for (uint32 itemId : s_roguelikeBonusGearItems)
+            {
+                ItemPrototype const* proto = ObjectMgr::GetItemPrototype(itemId);
+                if (IsRoguelikeBonusGearCandidate(proto, player, targetLevel, quality))
+                    candidates.push_back(itemId);
+            }
+        }
+
+        if (candidates.empty())
+            return 0;
+
+        return candidates[urand(0, candidates.size() - 1)];
+    }
+
+    void AddRoguelikeBonusGearLoot(Loot& loot, Player* player, CreatureInfo const* creatureInfo)
+    {
+        if (!player || !creatureInfo)
+            return;
+
+        float chance = sWorld.getConfig(CONFIG_FLOAT_ROGUELIKE_LOOT_BONUS_GEAR_CHANCE);
+        if (chance <= 0.0f)
+            return;
+
+        float perLevel = sWorld.getConfig(CONFIG_FLOAT_ROGUELIKE_LOOT_PROGRESSIVE_CHANCE_PER_LEVEL);
+        float maxBonus = sWorld.getConfig(CONFIG_FLOAT_ROGUELIKE_LOOT_PROGRESSIVE_CHANCE_MAX);
+        if (perLevel > 0.0f && maxBonus > 0.0f)
+            chance *= 1.0f + std::min(float(player->GetLevel()) * perLevel, maxBonus) / 100.0f;
+
+        if (chance > 100.0f)
+            chance = 100.0f;
+
+        if (!roll_chance_f(chance))
+            return;
+
+        uint32 itemId = SelectRoguelikeBonusGearItem(player, creatureInfo->MaxLevel ? creatureInfo->MaxLevel : player->GetLevel());
+        if (!itemId)
+            return;
+
+        loot.AddItem(itemId, 1, 0, Item::GenerateItemRandomPropertyId(itemId));
+
+        if (sWorld.getConfig(CONFIG_BOOL_ROGUELIKE_LOOT_DEBUG))
+            sLog.outString("Roguelike bonus gear: player %s level %u rolled item %u at %.2f%% chance.",
+                           player->GetName(), player->GetLevel(), itemId, chance);
+    }
+}
 
 // Remove all data and free all memory
 void LootStore::Clear()
@@ -371,22 +547,47 @@ bool LootStore::IsValidItemTemplate(uint32 entry, uint32 itemId, uint32 group, i
 
 // Checks if the entry (quest, non-quest, reference) takes it's chance (at loot generation)
 // RATE_DROP_ITEMS is no longer used for all types of entries
-bool LootStoreItem::Roll(bool rate) const
+float LootStoreItem::GetEffectiveChance(bool rate, Player const* lootOwner) const
+{
+    float effectiveChance = chance;
+
+    if (mincountOrRef < 0)                                  // reference case
+        effectiveChance *= rate ? sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_ITEM_REFERENCED) : 1.0f;
+    else if (needs_quest)
+        effectiveChance *= rate ? sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_ITEM_QUEST) : 1.0f;
+    else
+    {
+        ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemid);
+        effectiveChance *= pProto && rate ? sWorld.getConfig(qualityToRate[pProto->Quality]) : 1.0f;
+
+        if (lootOwner)
+        {
+            float perLevel = sWorld.getConfig(CONFIG_FLOAT_ROGUELIKE_LOOT_PROGRESSIVE_CHANCE_PER_LEVEL);
+            float maxBonus = sWorld.getConfig(CONFIG_FLOAT_ROGUELIKE_LOOT_PROGRESSIVE_CHANCE_MAX);
+            if (perLevel > 0.0f && maxBonus > 0.0f)
+            {
+                float bonusPercent = std::min(float(lootOwner->GetLevel()) * perLevel, maxBonus);
+                effectiveChance *= 1.0f + bonusPercent / 100.0f;
+            }
+        }
+    }
+
+    if (effectiveChance > 100.0f)
+        effectiveChance = 100.0f;
+
+    if (sWorld.getConfig(CONFIG_BOOL_ROGUELIKE_LOOT_DEBUG) && effectiveChance != chance)
+        sLog.outString("Roguelike loot chance: item %u playerLevel %u base %.4f effective %.4f",
+                       itemid, lootOwner ? lootOwner->GetLevel() : 0, chance, effectiveChance);
+
+    return effectiveChance;
+}
+
+bool LootStoreItem::Roll(bool rate, Player const* lootOwner) const
 {
     if (chance >= 100.0f)
         return true;
 
-    if (mincountOrRef < 0)                                  // reference case
-        return roll_chance_f(chance * (rate ? sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_ITEM_REFERENCED) : 1.0f));
-
-    if (needs_quest)
-        return roll_chance_f(chance * (rate ? sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_ITEM_QUEST) : 1.0f));
-
-    ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemid);
-
-    float qualityModifier = pProto && rate ? sWorld.getConfig(qualityToRate[pProto->Quality]) : 1.0f;
-
-    return roll_chance_f(chance * qualityModifier);
+    return roll_chance_f(GetEffectiveChance(rate, lootOwner));
 }
 
 //
@@ -1699,7 +1900,10 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
                 SetGroupLootRight(player);
             m_clientLootType = CLIENT_LOOT_CORPSE;
 
-            if ((creatureInfo->LootId && FillLoot(creatureInfo->LootId, LootTemplates_Creature, player, false)) || creatureInfo->MaxLootGold > 0)
+            bool hasNormalLoot = creatureInfo->LootId && FillLoot(creatureInfo->LootId, LootTemplates_Creature, player, false);
+            AddRoguelikeBonusGearLoot(*this, player, creatureInfo);
+
+            if (hasNormalLoot || !m_lootItems.empty() || creatureInfo->MaxLootGold > 0)
             {
                 GenerateMoneyLoot(creatureInfo->MinLootGold, creatureInfo->MaxLootGold);
                 // loot may be anyway empty (loot may be empty or contain items that no one have right to loot)
@@ -2393,7 +2597,7 @@ void LootTemplate::LootGroup::AddEntry(LootStoreItem const& item)
 }
 
 // Rolls an item from the group, returns nullptr if all miss their chances
-LootStoreItem const* LootTemplate::LootGroup::Roll(Loot const& loot, Player const* lootOwner) const
+LootStoreItem const* LootTemplate::LootGroup::Roll(Loot const& loot, Player const* lootOwner, bool rate) const
 {
     if (!ExplicitlyChanced.empty())                         // First explicitly chanced entries are checked
     {
@@ -2419,10 +2623,12 @@ LootStoreItem const* LootTemplate::LootGroup::Roll(Loot const& loot, Player cons
                 continue;
             }
 
-            if (lsi->chance >= 100.0f)
+            float effectiveChance = lsi->GetEffectiveChance(rate, lootOwner);
+
+            if (effectiveChance >= 100.0f)
                 return lsi;
 
-            chance -= lsi->chance;
+            chance -= effectiveChance;
             if (chance < 0)
                 return lsi;
         }
@@ -2499,7 +2705,7 @@ void LootTemplate::LootGroup::Process(Loot& loot, Player const* lootOwner, bool 
         groupStats = lootStatsData->stats->GetStatsForLootId(lootStatsData->groupIdOrItemId);
     }
 
-    LootStoreItem const* item = Roll(loot, lootOwner);
+    LootStoreItem const* item = Roll(loot, lootOwner, rate);
     if (item != nullptr)
     {
         if (item->mincountOrRef > 0)
@@ -2621,7 +2827,7 @@ void LootTemplate::Process(Loot& loot, Player const* lootOwner, bool rate, LootS
         if (Entrie.conditionId && lootOwner && !PlayerOrGroupFulfilsCondition(loot, lootOwner, Entrie.conditionId))
             continue;
 
-        if (!Entrie.Roll(rate))
+        if (!Entrie.Roll(rate, lootOwner))
             continue;                                       // Bad luck for the entry
 
         if (Entrie.mincountOrRef < 0)                           // References processing

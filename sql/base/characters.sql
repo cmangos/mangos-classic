@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `character_db_version`;
 CREATE TABLE `character_db_version` (
-  `required_z2819_01_characters_item_instance_text_id_fix` bit(1) DEFAULT NULL
+  `required_z2820_01_characters_roguelike_level_bonus` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Last applied sql update to DB';
 
 --
@@ -156,6 +156,19 @@ CREATE TABLE `character_account_data` (
   `data` longblob NOT NULL,
   PRIMARY KEY (`guid`,`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Table structure for table `character_roguelike_level_bonus`
+--
+
+DROP TABLE IF EXISTS `character_roguelike_level_bonus`;
+CREATE TABLE `character_roguelike_level_bonus` (
+  `guid` int(11) unsigned NOT NULL DEFAULT '0',
+  `level` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `stat` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `value` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`guid`, `level`, `stat`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='Persistent roguelike stat bonuses rolled on level up';
 
 --
 -- Table structure for table `character_action`

@@ -2709,6 +2709,7 @@ void Player::GiveLevel(uint32 level)
     if (level == GetLevel())
         return;
 
+    uint32 oldLevel = GetLevel();
     uint32 plClass = getClass();
 
     PlayerLevelInfo info;
@@ -2747,6 +2748,8 @@ void Player::GiveLevel(uint32 level)
 
     SetCreateHealth(classInfo.basehealth);
     SetCreateMana(classInfo.basemana);
+    RollRoguelikeLevelBonuses(oldLevel, level);
+    ApplyRoguelikeLevelBonusesToCreateStats();
 
     InitTalentForLevel();
 
@@ -2766,6 +2769,136 @@ void Player::GiveLevel(uint32 level)
 
     // resend quests status directly
     GetSession()->SetCurrentPlayerLevel(level);
+}
+
+void Player::ApplyRoguelikeLevelBonusesToCreateStats()
+{
+    uint32 currentLevel = GetLevel();
+
+    for (auto const& levelBonuses : m_roguelikeLevelBonuses)
+    {
+        if (levelBonuses.first > currentLevel)
+            continue;
+
+        for (auto const& statBonus : levelBonuses.second)
+        {
+            if (statBonus.first >= MAX_STATS || statBonus.second == 0)
+                continue;
+
+            Stats stat = Stats(statBonus.first);
+            SetCreateStat(stat, GetCreateStat(stat) + statBonus.second);
+        }
+    }
+}
+
+namespace
+{
+uint8 RollRoguelikeLevelBonusStatForClass(uint8 playerClass)
+{
+    static uint8 const warriorStats[] = { STAT_STRENGTH, STAT_STRENGTH, STAT_STRENGTH, STAT_STAMINA, STAT_STAMINA, STAT_AGILITY };
+    static uint8 const paladinStats[] = { STAT_STRENGTH, STAT_STRENGTH, STAT_STAMINA, STAT_STAMINA, STAT_INTELLECT, STAT_SPIRIT };
+    static uint8 const hunterStats[] = { STAT_AGILITY, STAT_AGILITY, STAT_AGILITY, STAT_STAMINA, STAT_STRENGTH, STAT_INTELLECT };
+    static uint8 const rogueStats[] = { STAT_AGILITY, STAT_AGILITY, STAT_AGILITY, STAT_STRENGTH, STAT_STAMINA };
+    static uint8 const priestStats[] = { STAT_INTELLECT, STAT_INTELLECT, STAT_SPIRIT, STAT_SPIRIT, STAT_STAMINA };
+    static uint8 const shamanStats[] = { STAT_INTELLECT, STAT_STAMINA, STAT_STRENGTH, STAT_AGILITY, STAT_SPIRIT, STAT_SPIRIT };
+    static uint8 const mageStats[] = { STAT_INTELLECT, STAT_INTELLECT, STAT_INTELLECT, STAT_SPIRIT, STAT_STAMINA };
+    static uint8 const warlockStats[] = { STAT_INTELLECT, STAT_INTELLECT, STAT_STAMINA, STAT_STAMINA, STAT_SPIRIT };
+    static uint8 const druidStats[] = { STAT_INTELLECT, STAT_STAMINA, STAT_AGILITY, STAT_STRENGTH, STAT_SPIRIT, STAT_SPIRIT };
+
+    uint8 const* stats = nullptr;
+    uint32 statsCount = 0;
+
+    switch (playerClass)
+    {
+        case CLASS_WARRIOR:
+            stats = warriorStats;
+            statsCount = countof(warriorStats);
+            break;
+        case CLASS_PALADIN:
+            stats = paladinStats;
+            statsCount = countof(paladinStats);
+            break;
+        case CLASS_HUNTER:
+            stats = hunterStats;
+            statsCount = countof(hunterStats);
+            break;
+        case CLASS_ROGUE:
+            stats = rogueStats;
+            statsCount = countof(rogueStats);
+            break;
+        case CLASS_PRIEST:
+            stats = priestStats;
+            statsCount = countof(priestStats);
+            break;
+        case CLASS_SHAMAN:
+            stats = shamanStats;
+            statsCount = countof(shamanStats);
+            break;
+        case CLASS_MAGE:
+            stats = mageStats;
+            statsCount = countof(mageStats);
+            break;
+        case CLASS_WARLOCK:
+            stats = warlockStats;
+            statsCount = countof(warlockStats);
+            break;
+        case CLASS_DRUID:
+            stats = druidStats;
+            statsCount = countof(druidStats);
+            break;
+        default:
+            break;
+    }
+
+    if (!stats || !statsCount)
+        return uint8(urand(STAT_STRENGTH, STAT_SPIRIT));
+
+    return stats[urand(0, statsCount - 1)];
+}
+}
+
+void Player::RollRoguelikeLevelBonuses(uint32 oldLevel, uint32 newLevel)
+{
+    float chance = sWorld.getConfig(CONFIG_FLOAT_ROGUELIKE_LEVEL_BONUS_CHANCE);
+    if (chance <= 0.0f || newLevel <= oldLevel)
+        return;
+
+    uint32 minValue = sWorld.getConfig(CONFIG_UINT32_ROGUELIKE_LEVEL_BONUS_MIN);
+    uint32 maxValue = sWorld.getConfig(CONFIG_UINT32_ROGUELIKE_LEVEL_BONUS_MAX);
+    if (!minValue || !maxValue)
+        return;
+
+    if (minValue > maxValue)
+        std::swap(minValue, maxValue);
+
+    static char const* statNames[MAX_STATS] =
+    {
+        "Strength",
+        "Agility",
+        "Stamina",
+        "Intellect",
+        "Spirit"
+    };
+
+    for (uint32 level = oldLevel + 1; level <= newLevel; ++level)
+    {
+        auto existingLevel = m_roguelikeLevelBonuses.find(level);
+        if (existingLevel != m_roguelikeLevelBonuses.end() && !existingLevel->second.empty())
+            continue;
+
+        if (!roll_chance_f(chance))
+            continue;
+
+        uint8 stat = RollRoguelikeLevelBonusStatForClass(getClass());
+        int32 value = int32(urand(minValue, maxValue));
+
+        m_roguelikeLevelBonuses[level][stat] = value;
+        CharacterDatabase.PExecute("REPLACE INTO character_roguelike_level_bonus (guid, level, stat, value) VALUES ('%u', '%u', '%u', '%i')",
+            GetGUIDLow(), level, uint32(stat), value);
+
+        if (GetSession())
+            GetSession()->SendNotification("Level %u roguelike bonus: +%i %s", level, value, statNames[stat]);
+    }
 }
 
 void Player::UpdateFreeTalentPoints(bool resetIfNeed)
@@ -2833,8 +2966,10 @@ void Player::InitStatsForLevel(bool reapplyMods)
     for (int i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetCreateStat(Stats(i), info.stats[i]);
 
+    ApplyRoguelikeLevelBonusesToCreateStats();
+
     for (int i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        SetStat(Stats(i), info.stats[i]);
+        SetStat(Stats(i), GetCreateStat(Stats(i)));
 
     SetCreateHealth(classInfo.basehealth);
 
@@ -4189,6 +4324,7 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
             CharacterDatabase.PExecute("DELETE FROM character_inventory WHERE guid = '%u'", lowguid);
             CharacterDatabase.PExecute("DELETE FROM character_queststatus WHERE guid = '%u'", lowguid);
             CharacterDatabase.PExecute("DELETE FROM character_reputation WHERE guid = '%u'", lowguid);
+            CharacterDatabase.PExecute("DELETE FROM character_roguelike_level_bonus WHERE guid = '%u'", lowguid);
             CharacterDatabase.PExecute("DELETE FROM character_skills WHERE guid = '%u'", lowguid);
             CharacterDatabase.PExecute("DELETE FROM character_spell WHERE guid = '%u'", lowguid);
             CharacterDatabase.PExecute("DELETE FROM character_spell_cooldown WHERE guid = '%u'", lowguid);
@@ -13923,6 +14059,33 @@ void Player::_LoadForgottenSkills(std::unique_ptr<QueryResult> queryResult)
     }
 }
 
+void Player::_LoadRoguelikeLevelBonuses(std::unique_ptr<QueryResult> queryResult)
+{
+    m_roguelikeLevelBonuses.clear();
+
+    if (!queryResult)
+        return;
+
+    do
+    {
+        Field* fields = queryResult->Fetch();
+
+        uint32 level = fields[0].GetUInt32();
+        uint8 stat = fields[1].GetUInt8();
+        int32 value = fields[2].GetInt32();
+
+        if (!level || stat >= MAX_STATS || !value)
+        {
+            sLog.outError("Player::_LoadRoguelikeLevelBonuses: Player %s has invalid roguelike level bonus (level: %u stat: %u value: %i), ignored.",
+                GetName(), level, uint32(stat), value);
+            continue;
+        }
+
+        m_roguelikeLevelBonuses[level][stat] += value;
+    }
+    while (queryResult->NextRow());
+}
+
 bool Player::LoadPositionFromDB(ObjectGuid guid, uint32& mapid, float& x, float& y, float& z, float& o, bool& in_flight)
 {
     auto queryResult = CharacterDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map,taxi_path FROM characters WHERE guid = '%u'", guid.GetCounter());
@@ -14328,6 +14491,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     SetUInt32Value(PLAYER_DUEL_TEAM, 0);
 
     // reset stats before loading any modifiers
+    _LoadRoguelikeLevelBonuses(holder->GetResult(PLAYER_LOGIN_QUERY_LOADROGUELIKELEVELBONUSES));
     InitStatsForLevel();
 
     // is it need, only in pre-2.x used and field byte removed later?
