@@ -49,6 +49,7 @@ class PlayerAI : public UnitAI
         struct SpellData
         {
             uint32 spellId;
+            bool failureOnNoTarget;
             std::function<Unit*()> targetFinder;
             SpellData(uint32 spellId, bool failureOnNoTarget, std::function<Unit*()> targetFinder) : spellId(spellId), failureOnNoTarget(failureOnNoTarget), targetFinder(targetFinder) {}
         };
