@@ -55,6 +55,7 @@ class PetAI : public CreatureAI
         bool Cast(std::tuple<SpellEntry const*, Unit*, bool> spellWithTarget);
         bool ShouldCast(SpellEntry const* spellInfo, Unit* victim);
 
+        bool CanAutoCastAreaAura(SpellEntry const* spellInfo, Unit* target) const;
         bool CanAutoCast(SpellEntry const* spellInfo, Unit* target) const;
         SpellCastResult CheckPetCast(SpellEntry const* spellInfo, Unit* target) const;
 
