@@ -1494,8 +1494,16 @@ SpellCastResult Unit::CastSpell(Unit* Victim, SpellEntry const* spellInfo, uint3
     SpellCastTargets targets;
     targets.setUnitTarget(Victim);
 
-    if (spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
-        targets.setDestination(Victim->GetPositionX(), Victim->GetPositionY(), Victim->GetPositionZ());
+    if ((spellInfo->Targets & TARGET_FLAG_DEST_LOCATION))
+    {
+        // This shouldn't happen, but we should return gracefully if it does...
+        if (!Victim)
+        {
+            sLog.outError("CastSpell: victim was nullptr but tried to get position: caster %s, spellId %i", GetGuidStr().c_str(), spellInfo->Id);
+            return SPELL_FAILED_BAD_TARGETS;
+        }    
+        targets.setDestination(Victim->GetPositionX(), Victim->GetPositionY(), Victim->GetPositionZ()); 
+    }
     if (spellInfo->Targets & TARGET_FLAG_SOURCE_LOCATION)
         if (WorldObject* caster = spell->GetCastingObject())
             targets.setSource(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ());

@@ -288,7 +288,7 @@ std::vector<std::tuple<SpellEntry const*, Unit*, bool>> PetAI::PickSpellWithTarg
         }
     }
 
-    uint32 creatureEntry = m_pet->getPetType() == HUNTER_PET ? 1 : m_creature->GetCreatureInfo()->Entry;
+    uint32 creatureEntry = (m_pet && m_pet->getPetType() == HUNTER_PET) ? 1 : m_creature->GetCreatureInfo()->Entry;
     // Cast a spell from autocast selection
     for (uint8 i = 0; i < m_creature->GetPetAutoSpellSize(); ++i)
     {
