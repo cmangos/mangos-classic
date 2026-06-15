@@ -168,7 +168,10 @@ namespace Movement
 #define CHECK(exp) \
     if (!(exp))\
     {\
-        sLog.outError("MoveSplineInitArgs::Validate: expression '%s' failed for %s", #exp, unit->GetGuidStr().c_str());\
+        if (unit)\
+            sLog.outError("MoveSplineInitArgs::Validate: expression '%s' failed for %s", #exp, unit->GetGuidStr().c_str());\
+        else\
+            sLog.outError("MoveSplineInitArgs::Validate: expression '%s' failed for cyclic spline continuation", #exp);\
         return false;\
     }
         CHECK(path.size() > 1);
