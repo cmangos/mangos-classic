@@ -1368,6 +1368,9 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
         case ACTION_T_SET_FOLLOW_MOVEMENT:
             SetFollowMovement(action.followMovement.state != 0);
             break;
+        case ACTION_T_RETREAT:
+            DoRetreat();
+            break;
         default:
             sLog.outError("%s::ProcessAction(): action(%u) not implemented", GetAIName().data(), static_cast<uint32>(action.type));
             return false;
