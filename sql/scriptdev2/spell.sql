@@ -39,6 +39,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (8655,'spell_tribal_death'),
 (8894,'spell_tribal_death'),
 (9144,'spell_tribal_death'),
+(15782,'spell_tribal_death'),
 (9204,'spell_hate_to_zero'),
 (20538,'spell_hate_to_zero'),
 (26569,'spell_hate_to_zero'),
