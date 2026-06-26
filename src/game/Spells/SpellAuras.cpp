@@ -428,7 +428,7 @@ void AreaAura::Update(uint32 diff)
                     Group* pGroup = nullptr;
 
                     // Handle aura party for players
-                    if (owner->GetTypeId() == TYPEID_PLAYER)
+                    if (owner->IsPlayer())
                     {
                         pGroup = ((Player*)owner)->GetGroup();
 
@@ -519,7 +519,7 @@ void AreaAura::Update(uint32 diff)
                             // non caster self-casted auras (stacked from diff. casters)
                             if (aur->GetModifier()->m_auraname != SPELL_AURA_NONE && i->second->GetCasterGuid() != GetCasterGuid())
                             {
-                                apply = sSpellStacker.IsStackableSpell(actualSpellInfo, i->second->GetSpellProto(), target);
+                                apply = sSpellStacker.IsSpellStackableWithSpell(actualSpellInfo, i->second->GetSpellProto(), target);
                                 break;
                             }
                             if (aur->GetModifier()->m_auraname != SPELL_AURA_NONE || i->second->GetCasterGuid() == GetCasterGuid())
@@ -592,12 +592,14 @@ void AreaAura::Update(uint32 diff)
         // remove aura if out-of-range from caster (after teleport for example)
         // or caster is isolated or caster no longer has the aura
         // or caster is (no longer) friendly
+        // needs to mirror application rules
+        bool needHostilityCheck = m_areaAuraType != AREA_AURA_PARTY || caster && caster->IsPlayer();
         bool needFriendly = true;
         if (!caster ||
                 caster->hasUnitState(UNIT_STAT_ISOLATED)               ||
                 !caster->HasAura(originalRankSpellId, GetEffIndex())   ||
                 !caster->IsWithinDistInMap(target, m_radius)           ||
-                caster->CanAssistSpell(target, GetSpellProto()) != needFriendly
+                (needHostilityCheck && caster->CanAssistSpell(target, GetSpellProto()) != needFriendly)
            )
         {
             target->RemoveSingleAuraFromSpellAuraHolder(GetId(), GetEffIndex(), GetCasterGuid());
