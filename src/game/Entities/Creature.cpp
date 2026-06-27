@@ -2164,6 +2164,30 @@ void Creature::CallAssistance(Unit* enemy)
     }
 }
 
+bool Creature::MarkCallAssistanceOnPull()
+{
+    bool stored = m_AlreadyCallAssistance;
+    SetNoCallAssistance(true);
+
+    if (!CanCallForAssistance())
+        return false;
+
+    return stored;
+}
+
+void Creature::CallAssistanceOnPull(Unit* enemy)
+{
+    if (enemy && !HasCharmer())
+    {
+        MANGOS_ASSERT(AI());
+
+        float radius = sWorld.getConfig(CONFIG_FLOAT_CREATURE_FAMILY_ASSISTANCE_RADIUS);
+        if (GetCreatureInfo()->CallForHelp > 0)
+            radius = GetCreatureInfo()->CallForHelp;
+        AI()->SendAIEventAround(AI_EVENT_CALL_ASSISTANCE, enemy, 0, radius);
+    }
+}
+
 void Creature::CallForHelp(float radius)
 {
     if (!GetVictim() || IsPet() || HasCharmer())
