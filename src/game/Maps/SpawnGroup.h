@@ -46,7 +46,7 @@ class SpawnGroup
         uint32 GetGuidEntry(uint32 dbGuid) const;
         virtual void Update();
         uint32 GetEligibleEntry(std::map<uint32, uint32>& existingEntries, std::map<uint32, uint32>& minEntries);
-        virtual void Spawn(bool force);
+        void Spawn(bool force, bool ignoreRespawntime);
         virtual void Despawn(uint32 timeMSToDespawn = 0, uint32 forcedDespawnTime = 0) = 0;
         std::string to_string() const;
         uint32 GetObjectTypeId() const { return m_objectTypeId; }

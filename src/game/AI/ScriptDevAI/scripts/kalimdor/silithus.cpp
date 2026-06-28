@@ -310,7 +310,7 @@ bool AreaTrigger_at_southwind_tower(Player* player, AreaTriggerEntry const* area
 
     SpawnGroup* spawnGroup = player->GetMap()->GetSpawnManager().GetSpawnGroup("SILITHUS_HIVE_ASHI_TRAP_AREATRIGGER");
     if (spawnGroup)
-        spawnGroup->Spawn(true);
+        spawnGroup->Spawn(true, false);
 
     const std::vector<Creature*>* drones = player->GetMap()->GetCreatures("SILITHUS_HIVE_ASHI_TRAP_AREATRIGGER");
     if (drones && !drones->empty())
