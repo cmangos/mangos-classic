@@ -951,6 +951,19 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
                 }
                 break;
             }
+            case SCRIPT_COMMAND_SPAWN_SPAWN_GROUP: 
+            {
+                auto const& spgCont = sObjectMgr.GetSpawnGroupContainer()->spawnGroupMap;
+                if (spgCont.find(tmp.spawnGroupData.groupId) == spgCont.end())
+                {
+                    sLog.outErrorDb("Table `%s` uses invalid spawngroup id(%u) skipping",
+                        tablename,
+                        tmp.spawnGroupData.groupId);
+                    continue;
+                }
+
+                break;
+            }
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping", tablename, tmp.command);
@@ -3286,6 +3299,18 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
         case SCRIPT_COMMAND_SET_STRING_ID:
         {
             pSource->SetStringId(m_script->stringId.stringId, m_script->stringId.apply);
+            break;
+        }
+        case SCRIPT_COMMAND_SPAWN_SPAWN_GROUP: 
+        {
+            uint32 time_to_despawn = m_script->spawnGroupData.despawnDelay;
+            SpawnGroup* group = pSource->GetMap()->GetSpawnManager().GetSpawnGroup(m_script->spawnGroupData.groupId);
+            if (group)
+            {
+                group->Spawn(true, false);
+                if (time_to_despawn != 0)
+                    group->Despawn(time_to_despawn, true);
+            }
             break;
         }
         default:

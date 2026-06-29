@@ -452,3 +452,8 @@ Defining a buddy could be done in several way:
                                             * datalong = string_id id
                                             * apply = 0 remove, 1 add
 
+56 57 used in wotlk
+
+58 SCRIPT_COMMAND_SPAWN_SPAWN_GROUP	    Spawns the spawn_group
+                                            * datalong = spawn_group.id
+                                            * datalong2 = despawn-delay - Time to despawn group

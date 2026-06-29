@@ -140,6 +140,7 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_SET_SHEATHE              = 54,           // dataint = worldstate id, dataint2 = new value,
     SCRIPT_COMMAND_SET_STRING_ID            = 55,           // datalong = string_id id, datalong2 = 0 unapply, 1 apply
     // 56 57 used in wotlk
+    SCRIPT_COMMAND_SPAWN_SPAWN_GROUP        = 58,           // datalong = spawn_group_id, datalong2=despawn_delay
     SCRIPT_COMMAND_MEETINGSTONE             = 200,          // datalong = area id - vanilla only
 };
 
@@ -478,6 +479,12 @@ struct ScriptInfo
             uint32 stringId;                                // datalong
             uint32 apply;                                   // datalong2
         } stringId;
+
+        struct                                              // SCRIPT_COMMAND_SPAWN_SPAWN_GROUP (58)
+        {
+            uint32 groupId;                                 // datalong = spawn_group.Id
+            uint32 despawnDelay;                            // datalong2
+        } spawnGroupData;
 
         struct
         {
