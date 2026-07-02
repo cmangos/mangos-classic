@@ -5273,9 +5273,9 @@ void Player::UpdateCombatSkills(uint32 procEx, WeaponAttackType attType, bool de
     {
         const double maxIntellectBonus = 0.10;
         const double intellect = GetStat(STAT_INTELLECT);
-        const double intellectMax = (levelMax == 60) ? 750 :
-                                    (levelMax == 70) ? 1500 :
-                                    (levelMax == 80) ? 3000 : 750; // default fallback
+        const double intellectMax = (levelMax <= 60) ? 750 :
+                                    (levelMax <= 70) ? 1500 :
+                                    (levelMax <= 80) ? 3000 : 750; // default fallback
 
         intellectBonus = maxIntellectBonus *
                          (intellect / intellectMax) *
