@@ -5149,11 +5149,15 @@ bool Player::UpdateFishingSkill()
 
     uint8 stepsNeededToLevelUp = GetFishingStepsNeededToLevelUp(SkillValue);
     ++m_fishingSteps;
+    // random component, gets more rare as skill gets higher - evidence - when 4 skillups are needed, can be between 2 and 4
+    // actual chances unknown - fishing steps acts as a grace mechanism and random component acts as quasi-normal skillup
+    if (urand(0, stepsNeededToLevelUp) == 0)
+        ++m_fishingSteps;
 
     // impl of SPELL_ATTR_EX_SPECIAL_SKILLUP
     if (m_fishingSteps >= stepsNeededToLevelUp)
     {
-        m_fishingSteps = 0;
+        m_fishingSteps -= stepsNeededToLevelUp;
 
         return UpdateSkillPro(SKILL_FISHING, 100*10, 1);
     }
