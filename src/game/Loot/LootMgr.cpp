@@ -2272,9 +2272,7 @@ void Loot::SendGold(Player* player)
     {
         player->ModifyMoney(m_gold);
 
-        WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4);
-        data << uint32(m_gold);
-        player->GetSession()->SendPacket(data);
+        // Known deviation from WoW Classic Era: do not send SMSG_LOOT_MONEY_NOTIFY for solo money loot
 
         if (m_guidTarget.IsItem())
         {
