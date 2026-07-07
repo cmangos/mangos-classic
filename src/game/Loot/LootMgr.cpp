@@ -2272,6 +2272,8 @@ void Loot::SendGold(Player* player)
     {
         player->ModifyMoney(m_gold);
 
+        // Known deviation from WoW Classic Era: do not send SMSG_LOOT_MONEY_NOTIFY for solo money loot
+
         if (m_guidTarget.IsItem())
         {
             if (Item* item = player->GetItemByGuid(m_guidTarget))
