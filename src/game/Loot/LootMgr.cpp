@@ -2272,6 +2272,10 @@ void Loot::SendGold(Player* player)
     {
         player->ModifyMoney(m_gold);
 
+        WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4);
+        data << uint32(m_gold);
+        player->GetSession()->SendPacket(data);
+
         if (m_guidTarget.IsItem())
         {
             if (Item* item = player->GetItemByGuid(m_guidTarget))
