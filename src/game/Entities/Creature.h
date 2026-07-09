@@ -774,8 +774,8 @@ class Creature : public Unit
         void CallForHelp(float radius);
         void CallAssistance();
         void CallAssistance(Unit* enemy);
-        bool MarkCallAssistanceOnPull();
-        void CallAssistanceOnPull(Unit* enemy);
+        std::pair<bool, CreatureList> MarkCallAssistanceOnPull(Unit* enemy);
+        void CallAssistanceOnPull(Unit* enemy, CreatureList const& receiverList);
         void SetNoCallAssistance(bool val) { m_AlreadyCallAssistance = val; }
         bool CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction = true) const;
         bool CanInitiateAttack() const;

@@ -561,9 +561,10 @@ void Unit::TriggerAggroLinkingEvent(Unit* enemy)
     if (!IsCreature() || !enemy)
         return;
 
-    bool callAssistance = static_cast<Creature*>(this)->MarkCallAssistanceOnPull();
+    bool callAssistance; CreatureList receiverList;
+    std::tie(callAssistance, receiverList) = static_cast<Creature*>(this)->MarkCallAssistanceOnPull(enemy);
 
-    m_events.AddEvent(new UnitLambdaEvent(*this, [enemyGuid = enemy->GetObjectGuid(), creatureGroup = static_cast<Creature*>(this)->GetCreatureGroup(), callAssistance](Unit& unit)
+    m_events.AddEvent(new UnitLambdaEvent(*this, [enemyGuid = enemy->GetObjectGuid(), creatureGroup = static_cast<Creature*>(this)->GetCreatureGroup(), callAssistance, receiverList](Unit& unit)
     {
         Unit* enemy = unit.GetMap()->GetUnit(enemyGuid);
         if (!enemy || !unit.IsInCombat())
@@ -576,7 +577,7 @@ void Unit::TriggerAggroLinkingEvent(Unit* enemy)
             creatureGroup->TriggerLinkingEvent(CREATURE_GROUP_EVENT_AGGRO, enemy);
 
         if (callAssistance)
-            static_cast<Creature&>(unit).CallAssistanceOnPull(enemy);
+            static_cast<Creature&>(unit).CallAssistanceOnPull(enemy, receiverList);
     }), m_events.CalculateTime(sWorld.getConfig(CONFIG_UINT32_CREATURE_CHECK_FOR_HELP_AGGRO_DELAY)));
 }
 
