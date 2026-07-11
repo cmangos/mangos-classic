@@ -561,7 +561,7 @@ void Unit::TriggerAggroLinkingEvent(Unit* enemy)
     if (!IsCreature() || !enemy)
         return;
 
-    bool callAssistance; CreatureList receiverList;
+    bool callAssistance; GuidVector receiverList;
     std::tie(callAssistance, receiverList) = static_cast<Creature*>(this)->MarkCallAssistanceOnPull(enemy);
 
     m_events.AddEvent(new UnitLambdaEvent(*this, [enemyGuid = enemy->GetObjectGuid(), creatureGroup = static_cast<Creature*>(this)->GetCreatureGroup(), callAssistance, receiverList](Unit& unit)

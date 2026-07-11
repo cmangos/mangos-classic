@@ -586,9 +586,9 @@ class AiDelayEventAround : public BasicEvent
             if (!pInvoker)
                 return true;
 
-            for (GuidVector::const_reverse_iterator itr = m_receiverGuids.rbegin(); itr != m_receiverGuids.rend(); ++itr)
+            for (ObjectGuid guid : m_receiverGuids)
             {
-                if (Creature* pReceiver = m_owner.GetMap()->GetAnyTypeCreature(*itr))
+                if (Creature* pReceiver = m_owner.GetMap()->GetAnyTypeCreature(guid))
                 {
                     pReceiver->AI()->ReceiveAIEvent(m_eventType, &m_owner, pInvoker, m_miscValue);
                     // Special case for type 0 (call-assistance)
