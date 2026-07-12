@@ -692,22 +692,27 @@ void Creature::UpdateAttackPowerAndDamage(bool ranged)
 
         mod = AttackPowerMod::RANGED_ATTACK_POWER;
 
-        val2 = GetStat(STAT_AGILITY) - 10.0f;
+        val2 = GetStat(STAT_AGILITY) - GetCreateStat(STAT_AGILITY);
+
+        val2 += m_baseRAP * m_damageMultiplier;
     }
     else
     {
         switch (getClass())
         {
             case CLASS_MAGE:
-                val2 = GetStat(STAT_STRENGTH) - 10.0f;
+                val2 = GetStat(STAT_STRENGTH);
                 break;
             case CLASS_ROGUE:
-                val2 = (GetStat(STAT_STRENGTH) - 10.0f) + GetStat(STAT_AGILITY);
+                val2 = (GetStat(STAT_STRENGTH) - GetCreateStat(STAT_STRENGTH)) + GetStat(STAT_AGILITY) - GetCreateStat(STAT_AGILITY);
                 break;
             default:
-                val2 = (GetStat(STAT_STRENGTH) - 10.0f) * 2.f;
+                val2 = (GetStat(STAT_STRENGTH) - GetCreateStat(STAT_STRENGTH)) * 2.f;
                 break;
         }
+
+        // damage multiplier confirmed to apply to AP bonus
+        val2 += m_baseAP * m_damageMultiplier;
     }
 
     SetModifierValue(unitMod, BASE_VALUE, val2);
@@ -753,13 +758,13 @@ void Creature::UpdateDamagePhysical(WeaponAttackType attType)
             break;
     }
 
-    float base_value  = GetModifierValue(unitMod, BASE_VALUE) + (GetTotalAttackPowerValue(attType) * GetAPMultiplier(attType, false) / 14.0f) * m_damageMultiplier; // damage multiplier confirmed to apply to AP bonus
+    float base_value  = GetModifierValue(unitMod, BASE_VALUE) + (GetTotalAttackPowerValue(attType) / 14.0f);
     float base_pct    = GetModifierValue(unitMod, BASE_PCT);
     float total_value = GetModifierValue(unitMod, TOTAL_VALUE);
     float total_pct   = GetModifierValue(unitMod, TOTAL_PCT);
 
-    float weapon_mindamage = GetBaseWeaponDamage(attType, MINDAMAGE);
-    float weapon_maxdamage = GetBaseWeaponDamage(attType, MAXDAMAGE);
+    float weapon_mindamage = GetBaseWeaponDamage(attType, MINDAMAGE) * m_damageMultiplier;
+    float weapon_maxdamage = GetBaseWeaponDamage(attType, MAXDAMAGE) * m_damageMultiplier;
 
     float mindamage = ((base_value + weapon_mindamage) * base_pct + total_value) * total_pct;
     float maxdamage = ((base_value + weapon_maxdamage) * base_pct + total_value) * total_pct;
