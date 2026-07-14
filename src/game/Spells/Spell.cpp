@@ -2122,6 +2122,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 case 43: // wailing caverns
                 case 48: // blackfathom
                     minimumRequiredSkill = 55;
+                    break;
                 case 189: // scarlet monastery
                 case 349: // maraudon
                     minimumRequiredSkill = 205;
