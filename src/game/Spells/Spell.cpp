@@ -739,7 +739,7 @@ bool Spell::FillUnitTargets(TempTargetingData& targetingData, SpellTargetingData
         {
             for (auto itr = unitTargetList.begin(); itr != unitTargetList.end();)
             {
-                if (!CheckTarget(*itr, SpellEffectIndex(i), bool(rightTarget), CheckException(targetingData.magnet)))
+                if (!CheckTarget(*itr, SpellEffectIndex(i), bool(rightTarget), targetingData.data[i].neutralFlagFill, CheckException(targetingData.magnet)))
                     itr = unitTargetList.erase(itr);
                 else
                     ++itr;
@@ -933,11 +933,11 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
     // Get spell hit result on target
     TargetInfo targetInfo;
     targetInfo.targetGUID = targetGUID;                         // Store target GUID
-    targetInfo.effectHitMask = exception != EXCEPTION_MAGNET ? notImmunedMask : effectMask; // Store not immuned effects
+    targetInfo.effectHitMask = exception != CheckException::EXCEPTION_MAGNET ? notImmunedMask : effectMask; // Store not immuned effects
     targetInfo.effectMask = effectMask;                         // Store index of effect
     targetInfo.effectMaskProcessed = 0;
     targetInfo.processed  = false;                              // Effects not applied on target
-    targetInfo.magnet = (exception == EXCEPTION_MAGNET);
+    targetInfo.magnet = (exception == CheckException::EXCEPTION_MAGNET);
     targetInfo.procReflect = false;
     targetInfo.isCrit = false;
     targetInfo.heartbeatResistChance = 0;
@@ -5207,12 +5207,12 @@ SpellCastResult Spell::CheckCast(bool strict)
                         {
                             case TYPEID_UNIT:
                             case TYPEID_PLAYER:
-                                if (!CheckTarget(static_cast<Unit*>(result), SpellEffectIndex(i), false, EXCEPTION_NONE))
+                                if (!CheckTarget(static_cast<Unit*>(result), SpellEffectIndex(i), false, false, CheckException::EXCEPTION_NONE))
                                     return SPELL_FAILED_NO_EDIBLE_CORPSES;
                                 break;
                             case TYPEID_CORPSE:
                                 if (Player* owner = ObjectAccessor::FindPlayer(static_cast<Corpse*>(result)->GetOwnerGuid()))
-                                    if (!CheckTarget(owner, SpellEffectIndex(i), false, EXCEPTION_NONE))
+                                    if (!CheckTarget(owner, SpellEffectIndex(i), false, false, CheckException::EXCEPTION_NONE))
                                         return SPELL_FAILED_NO_EDIBLE_CORPSES;
                                 break;
                         }
@@ -7038,10 +7038,10 @@ CurrentSpellTypes Spell::GetCurrentContainer() const
     return (CURRENT_GENERIC_SPELL);
 }
 
-bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckException exception) const
+bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, bool neutralFlagFill, CheckException exception) const
 {
     // Check targets for creature type mask and remove not appropriate (skip explicit self target case, maybe need other explicit targets)
-    if (exception != EXCEPTION_MAGNET && m_spellInfo->EffectImplicitTargetA[eff] != TARGET_UNIT_CASTER)
+    if (exception != CheckException::EXCEPTION_MAGNET && m_spellInfo->EffectImplicitTargetA[eff] != TARGET_UNIT_CASTER)
     {
         if (!CheckTargetCreatureType(target, m_spellInfo))
             return false;
@@ -7055,6 +7055,8 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
     else
         targetType = m_spellInfo->EffectImplicitTargetB[eff], info = SpellTargetInfoTable[m_spellInfo->EffectImplicitTargetB[eff]];
     bool scriptTarget = (info.type == TARGET_TYPE_UNIT && info.filter == TARGET_SCRIPT);
+    if (neutralFlagFill)
+        scriptTarget = true;
 
     if (target != affectiveCaster)
     {
@@ -7117,7 +7119,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
                 // all ok by some way or another, skip normal check
                 break;
             default:                                            // normal case
-                if (exception != EXCEPTION_MAGNET && !IsIgnoreLosSpellEffect(m_spellInfo, eff, targetB))
+                if (exception != CheckException::EXCEPTION_MAGNET && !IsIgnoreLosSpellEffect(m_spellInfo, eff, targetB))
                 {
                     float x, y, z;
                     switch (info.los)
@@ -7906,7 +7908,10 @@ void Spell::FillFromTargetFlags(TempTargetingData& targetingData, SpellEffectInd
     if (m_spellInfo->Targets & (TARGET_FLAG_UNIT_ALLY | TARGET_FLAG_UNIT | TARGET_FLAG_UNIT_ENEMY))
     {
         if (Unit* unit = m_targets.getUnitTarget())
+        {
             targetingData.data[effIdx].tmpUnitList[false].push_back(unit);
+            targetingData.data[effIdx].neutralFlagFill = (m_spellInfo->Targets & (TARGET_FLAG_UNIT_ALLY | TARGET_FLAG_UNIT | TARGET_FLAG_UNIT_ENEMY)) == TARGET_FLAG_UNIT;
+        }
     }
     else if (m_spellInfo->Targets & (TARGET_FLAG_CORPSE_ENEMY | TARGET_FLAG_CORPSE_ALLY))
     {
