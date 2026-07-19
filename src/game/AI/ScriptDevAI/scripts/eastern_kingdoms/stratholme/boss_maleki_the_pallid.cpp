@@ -76,7 +76,10 @@ struct boss_maleki_the_pallidAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_ICE_TOMB) == CAST_OK)
+                {
+                    m_creature->getThreatManager().modifyThreatPercent(pTarget, -100);
                     m_uiIceTombTimer = urand(15000, 20000);
+                }
             }
         }
         else
