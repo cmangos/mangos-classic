@@ -23,6 +23,7 @@
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
 #include "AsyncSocket.hpp"
+#include <boost/bind/placeholders.hpp>
 
 using namespace boost::placeholders;
 

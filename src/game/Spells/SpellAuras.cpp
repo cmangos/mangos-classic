@@ -5722,7 +5722,7 @@ void SpellAuraHolder::Update(uint32 diff)
 void SpellAuraHolder::RefreshHolder()
 {
     SetAuraDuration(GetAuraMaxDuration());
-    ForceUpdateAuraDuration();
+    UpdateAuraDuration();
 }
 
 void SpellAuraHolder::SetAuraMaxDuration(int32 duration)
