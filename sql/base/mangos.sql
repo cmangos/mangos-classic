@@ -23,7 +23,11 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2833_01_mangos_spell_threat_mask` bit(1) DEFAULT NULL
+<<<<<<< HEAD
+  `required_z2834_01_mangos_spillover_rename` bit(1) DEFAULT NULL
+=======
+  `required_s2491_01_mangos_spillover_rename` bit(1) DEFAULT NULL
+>>>>>>> 0b83de892ac ([s2491] Add column rename from wotlk work)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -10229,7 +10233,17 @@ CREATE TABLE `quest_template` (
   `RewRepValue3` mediumint(9) NOT NULL DEFAULT '0',
   `RewRepValue4` mediumint(9) NOT NULL DEFAULT '0',
   `RewRepValue5` mediumint(9) NOT NULL DEFAULT '0',
+<<<<<<< HEAD
   `ReputationSpilloverMask` tinyint unsigned NOT NULL DEFAULT '0',
+=======
+  `RewMaxRepValue1` mediumint(9) NOT NULL DEFAULT '42999',
+  `RewMaxRepValue2` mediumint(9) NOT NULL DEFAULT '42999',
+  `RewMaxRepValue3` mediumint(9) NOT NULL DEFAULT '42999',
+  `RewMaxRepValue4` mediumint(9) NOT NULL DEFAULT '42999',
+  `RewMaxRepValue5` mediumint(9) NOT NULL DEFAULT '42999',
+  `RewFactionFlags` tinyint unsigned NOT NULL DEFAULT '0',
+  `RewHonorableKills` int(10) unsigned NOT NULL DEFAULT '0',
+>>>>>>> 0b83de892ac ([s2491] Add column rename from wotlk work)
   `RewOrReqMoney` int(11) NOT NULL DEFAULT '0',
   `RewMoneyMaxLevel` int(10) unsigned NOT NULL DEFAULT '0',
   `RewSpell` mediumint(8) unsigned NOT NULL DEFAULT '0',
