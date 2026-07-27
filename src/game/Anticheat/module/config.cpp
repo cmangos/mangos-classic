@@ -82,6 +82,10 @@ void AnticheatConfig::loadConfigSettings()
     setConfig(CONFIG_UINT32_AC_IP_BAN_DELAY_MIN, "IPBanDelay.Min", 5);
     setConfig(CONFIG_UINT32_AC_IP_BAN_DELAY_MAX, "IPBanDelay.Max", 10);
 
+    setConfig(CONFIG_UINT32_AC_BAN_WAVE_DAY, "BanWave.Day", 1);
+    setConfig(CONFIG_UINT32_AC_BAN_WAVE_HOUR, "BanWave.Hour", 10);
+    setConfig(CONFIG_UINT32_AC_BAN_WAVE_MINUTE, "BanWave.Minute", 0);
+
     setConfig(CONFIG_UINT32_AC_ANTISPAM_MAX_LEVEL, "Antispam.MaxLevel", 25);
     setConfig(CONFIG_UINT32_AC_ANTISPAM_NORMALIZE_MASK, "Antispam.NormalizeMask", 0);
     setConfig(CONFIG_UINT32_AC_ANTISPAM_ANALYSIS_TIMER, "Antispam.AnalysisTimer", 30);
@@ -192,7 +196,7 @@ void AnticheatConfig::GetBanWaveTime(uint32 &day, uint32 &hour, uint32 &minute) 
 {
     day = getConfig(CONFIG_UINT32_AC_BAN_WAVE_DAY);
     hour = getConfig(CONFIG_UINT32_AC_BAN_WAVE_HOUR);
-    minute = getConfig(CONFIG_UINT32_AC_BAN_WAVE_DAY);
+    minute = getConfig(CONFIG_UINT32_AC_BAN_WAVE_MINUTE);
 }
 
 const char *AnticheatConfig::GetDetectorName(CheatType cheatType)

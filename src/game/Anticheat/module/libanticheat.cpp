@@ -126,7 +126,7 @@ std::string ActionMaskToString(uint32 actionMask)
         r << "Silence, ";
 
     auto ret = r.str();
-    if (ret[ret.length() - 2] == ',')
+    if (ret.length() >= 2 && ret[ret.length() - 2] == ',')
         ret = ret.substr(0, ret.length() - 2);
 
     return ret;
@@ -167,7 +167,7 @@ void LogCheat(WorldSession *session, uint32 actionMask, const std::string &info)
     else
         stmt.addUInt32(0);
 
-    stmt.addUInt8(actionMask);
+    stmt.addUInt32(actionMask);
     stmt.addString(name);
     stmt.addString(info);
 
@@ -950,7 +950,7 @@ void SessionAnticheat::RecordCheat(uint32 actionMask, const char *detector, cons
         {
             // ACCOUNT FLAGS
             LoginDatabase.PExecute("UPDATE account SET flags = flags | 0x%x WHERE id = %u",
-                _session->GetAccountId(), ACCOUNT_FLAG_SILENCED);
+                ACCOUNT_FLAG_SILENCED, _session->GetAccountId());
 
             _session->AddAccountFlag(ACCOUNT_FLAG_SILENCED);
         }
