@@ -75,6 +75,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (17536,'spell_awaken_kerlonian'),
 (18153,'spell_kodo_kombobulator'),
 (18969,'spell_taelan_death'),
+(19636,'spell_fireblossom'),
 (19707,'spell_hate_to_half'),
 (19832,'spell_possess_razorgore'),
 (19872,'spell_calm_dragonkin'),
