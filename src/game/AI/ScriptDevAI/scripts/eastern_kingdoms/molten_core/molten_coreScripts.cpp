@@ -64,7 +64,7 @@ struct FireBlossom : public AuraScript
         Creature* caster = static_cast<Creature*>(data.caster);
         if (!caster)
             return;
-        Unit* target = caster->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, data.spellInfo, SELECT_FLAG_IN_LOS);
+        Unit* target = caster->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, data.spellInfo);
         if (!target)
             return;
         data.target = target;
