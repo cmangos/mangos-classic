@@ -64,7 +64,7 @@ struct FireBlossom : public AuraScript
         Creature* caster = static_cast<Creature*>(data.caster);
         if (!caster)
             return;
-        Unit* target = caster->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, data.spellInfo, SELECT_FLAG_IN_LOS);
+        Unit* target = caster->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, data.spellInfo);
         if (!target)
             return;
         data.target = target;
@@ -80,5 +80,5 @@ void AddSC_molten_core()
     pNewScript->pGOUse = &GOUse_go_molten_core_rune;
     pNewScript->RegisterSelf();
 
-    RegisterSpellScript<FireBlossom>("spell_fireblossom");
+    RegisterSpellScript<FireBlossom>("spell_fire_blossom");
 }
