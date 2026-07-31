@@ -56,6 +56,21 @@ bool GOUse_go_molten_core_rune(Player* /*pPlayer*/, GameObject* pGo)
     return true;
 }
 
+// 19636 - Fire Blossom
+struct FireBlossom : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* /*aura*/, PeriodicTriggerData& data) const override
+    {
+        Creature* caster = static_cast<Creature*>(data.caster);
+        if (!caster)
+            return;
+        Unit* target = caster->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, data.spellInfo);
+        if (!target)
+            return;
+        data.target = target;
+    }
+};
+
 void AddSC_molten_core()
 {
     Script* pNewScript;
@@ -64,4 +79,6 @@ void AddSC_molten_core()
     pNewScript->Name = "go_molten_core_rune";
     pNewScript->pGOUse = &GOUse_go_molten_core_rune;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<FireBlossom>("spell_fireblossom");
 }
