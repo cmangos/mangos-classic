@@ -11201,6 +11201,21 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, uint32 effIdx, float x, 
     return possessed;
 }
 
+void Unit::SendMessageToAllWhoSeeMeMove(WorldPacket const& data, ObjectGuid moverOwner) const
+{
+    if (IsInWorld())
+    {
+        GuidSet const& clientGuidsIAmAt = GetClientGuidsIAmAt();
+        for (ObjectGuid guid : clientGuidsIAmAt)
+        {
+            if (moverOwner == guid)
+                continue;
+            if (Player* player = GetMap()->GetPlayer(guid))
+                player->GetSession()->SendPacket(data);
+        }
+    }
+}
+
 bool Unit::TakePossessOf(Unit* possessed)
 {
     // Possess is a unique advertised charm, another advertised charm already exists: we should get rid of it first

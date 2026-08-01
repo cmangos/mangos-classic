@@ -2357,6 +2357,8 @@ class Unit : public WorldObject
 
         void ForceHealthAndPowerUpdate();   // force server to send new value for hp and power (including max)
 
+        void SendMessageToAllWhoSeeMeMove(WorldPacket const& data, ObjectGuid mover) const;
+
         // Take possession of an unit (pet, creature, ...)
         bool TakePossessOf(Unit* possessed);
 

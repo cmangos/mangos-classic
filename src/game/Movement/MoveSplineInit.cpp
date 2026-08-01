@@ -114,7 +114,7 @@ namespace Movement
         }
 
         PacketBuilder::WriteMonsterMove(move_spline, data);
-        unit.SendMessageToAllWhoSeeMe(data, true);
+        unit.SendMessageToAllWhoSeeMeMove(data, ObjectGuid());
 
         return move_spline.Duration();
     }
@@ -167,7 +167,7 @@ namespace Movement
         data << real_position.x << real_position.y << real_position.z;
         data << move_spline.GetId();
         data << uint8(MonsterMoveStop);
-        unit.SendMessageToAllWhoSeeMe(data, true);
+        unit.SendMessageToAllWhoSeeMeMove(data, ObjectGuid());
     }
 
     MoveSplineInit::MoveSplineInit(Unit& m) : unit(m)
