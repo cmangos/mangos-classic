@@ -629,16 +629,36 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
 
         m_creature->ForcedDespawn(1000);
     }
+
+    // NPCs the scripted sequence depends on: never culled by the summon cap.
+    static bool IsScriptCriticalSummon(uint32 entry)
+    {
+        switch (entry)
+        {
+            case NPC_JOSEPH_REDPATH:
+            case NPC_DAVIL_CROKFORD:
+            case NPC_CAPTAIN_REDPATH:
+            case NPC_MARDUK_THE_BLACK:
+            case NPC_REDPATH_THE_CORRUPTED:
+            case NPC_HORGUS_THE_RAVAGER:
+            case NPC_DAVIL_LIGHTFIRE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     void JustSummoned(Creature* summoned) override
     {
         if (!summoned)
             return;
 
         // Summon cap: keep the event population bounded (VMangos parity).
-        // Quest-critical NPCs are exempt so the finale can never be culled.
+        // The list is pruned on despawn, so this counts live summons only.
+        // Script-critical NPCs are exempt so the scripted sequence can never
+        // be culled.
         if (m_summonedMobsList.size() >= MAX_EVENT_SUMMONS &&
-            summoned->GetEntry() != NPC_JOSEPH_REDPATH &&
-            summoned->GetEntry() != NPC_DAVIL_CROKFORD)
+            !IsScriptCriticalSummon(summoned->GetEntry()))
         {
             DBG_DARROWSHIRE("summon CULLED by cap (list=%u) entry %u", uint32(m_summonedMobsList.size()), summoned->GetEntry());
             summoned->ForcedDespawn();
@@ -735,6 +755,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
             return;
 
         DBG_DARROWSHIRE("summoned died: entry %u (phaseStep=%u)", pSummoned->GetEntry(), m_phaseStep);
+        m_summonedMobsList.remove(pSummoned->GetObjectGuid()); // prune: cap counts live summons only
 
         switch (pSummoned->GetEntry())
         {
@@ -788,6 +809,19 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                 break;
         }
     }
+
+    void SummonedCreatureDespawn(Creature* summoned) override
+    {
+        if (!summoned)
+            return;
+
+        // Prune the summon list on temp-spawn expiry/despawn so the cap counts
+        // live summons only (dead or OOC-expired creatures must not accumulate
+        // and eventually block all further spawns).
+        m_summonedMobsList.remove(summoned->GetObjectGuid());
+        DBG_DARROWSHIRE("summon despawned: entry %u (list=%u)", summoned->GetEntry(), uint32(m_summonedMobsList.size()));
+    }
+
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_initialized)
