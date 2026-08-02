@@ -904,9 +904,10 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                             m_redpathCorruptedGuid = pRedpathCorrupted->GetObjectGuid();
                         }
                         break;
-                }
+                    }
+                    }
 
-                if (Creature* pRedpath = m_creature->GetMap()->GetCreature(m_redpathGuid))
+                    if (Creature* pRedpath = m_creature->GetMap()->GetCreature(m_redpathGuid))
                 {
                     float x, y, z;
                     m_creature->GetRandomPoint(pRedpath->GetPositionX(), pRedpath->GetPositionY(), pRedpath->GetPositionZ(), 10.0f, x, y, z);
