@@ -880,9 +880,10 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                 {
                     case 0: // NPC_MARAUDING_CORPSE / NPC_MARAUDING_SKELETON
                     {
+                        // [BALANCE] more attackers than defenders: bigger waves, shorter interval
                         for (int spawnGroupIndex = 0; spawnGroupIndex < 3; ++spawnGroupIndex)
                         {
-                            int amount = urand(1, 2);
+                            int amount = urand(2, 3);
                             for (int spawnIndex = 0; spawnIndex < amount; ++spawnIndex)
                             {
                                 float x, y, z;
@@ -891,18 +892,19 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                                 m_creature->SummonCreature(entry, x, y, z, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000);
                             }
                         }
-                        m_mobTimer[mobIndex] = 25000;
+                        m_mobTimer[mobIndex] = 20000;
                         break;
                     }
                     case 1: // NPC_DARROWSHIRE_DEFENDER
                     {
-                        for (int spawnGroupIndex = 4; spawnGroupIndex < MAX_MOB_SLOTS; ++spawnGroupIndex)
+                        // [BALANCE] fewer defenders than attackers: 2 per wave, slower interval
+                        for (int spawnGroupIndex = 4; spawnGroupIndex < 6; ++spawnGroupIndex)
                         {
                             float x, y, z;
                             m_creature->GetRandomPoint(DarrowshireEvent[spawnGroupIndex].x, DarrowshireEvent[spawnGroupIndex].y, DarrowshireEvent[spawnGroupIndex].z, 5.0f, x, y, z);
                             m_creature->SummonCreature(NPC_DARROWSHIRE_DEFENDER, x, y, z, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000);
                         }
-                        m_mobTimer[mobIndex] = 45000;
+                        m_mobTimer[mobIndex] = 60000;
                         break;
                     }
                     case 2: // NPC_SERVANT_OF_HORGUS
