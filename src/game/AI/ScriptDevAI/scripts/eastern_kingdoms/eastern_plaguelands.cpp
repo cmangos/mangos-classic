@@ -722,7 +722,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
     void HandleSpawnAttackers()
     {
         DBG_DARROWSHIRE("wave: attackers (phaseStep=%u)", m_uiPhaseStep);
-        // [BALANCE] more attackers than defenders: bigger waves, shorter interval
+        // [BALANCE] attackers outnumber defenders, not flood them
         for (uint32 group = 0; group < 3; ++group)
         {
             uint32 amount = urand(2, 3);
@@ -734,14 +734,14 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                 m_creature->SummonCreature(entry, x, y, z, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000);
             }
         }
-        ResetTimer(ACTION_SPAWN_ATTACKERS, 20000);
+        ResetTimer(ACTION_SPAWN_ATTACKERS, 25000);
     }
 
     void HandleSpawnDefenders()
     {
         DBG_DARROWSHIRE("wave: defenders (phaseStep=%u)", m_uiPhaseStep);
-        // [BALANCE] fewer defenders than attackers: 2 per wave, slower interval
-        SpawnWave(NPC_DARROWSHIRE_DEFENDER, 4, 5, 1, 5.0f);
+        // [BALANCE] defenders hold the line, not crowd the square
+        SpawnWave(NPC_DARROWSHIRE_DEFENDER, 4, 6, 1, 5.0f);
         ResetTimer(ACTION_SPAWN_DEFENDERS, 60000);
     }
 
