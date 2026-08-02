@@ -412,7 +412,7 @@ enum
     EVENT_MAX_DURATION = 1200000   // Hard lifetime: 20 min of active runtime (nominal event ~12 min worst case)
 };
 
-static DarrowshireMove DarrowshireEvent[] =
+static const DarrowshireMove DarrowshireEvent[] =
 {
     {1500.04f, -3662.67f, 82.832f, 3.70805f},       // Attacker spawn 1
     {1506.17f, -3686.72f, 82.8769f, 5.75945f},      // Attacker spawn 2
@@ -561,6 +561,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
     uint32 m_phaseStep;
     uint32 m_phaseTimer;
     uint32 m_eventDuration; // hard lifetime counter (EVENT_MAX_DURATION)
+    uint32 m_factionRescanTimer; // re-scan cadence while defender faction unknown
     uint32 m_mobTimer[MAX_MOB_SLOTS];
     uint32 m_defenderFaction;
     GuidList m_summonedMobsList;
@@ -578,6 +579,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
         m_phaseStep = 0;
         m_phaseTimer = 6000;
         m_eventDuration = 0;
+        m_factionRescanTimer = 0;
 
         m_mobTimer[0] = 15000;
         m_mobTimer[1] = 17000;
@@ -622,10 +624,8 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
         DespawnGuid(m_davilGuid);
         DespawnGuid(m_horgusGuid);
 
-        CreatureList betrayerList;
-        GetCreatureListWithEntryInGrid(betrayerList, m_creature, NPC_DARROWSHIRE_BETRAYER, 150.0f);
-        for (Creature* betrayer : betrayerList)
-            betrayer->ForcedDespawn();
+        // (removed: betrayer grid sweep was dead code - NPC_DARROWSHIRE_BETRAYER
+        // is never summoned by this event)
 
         m_creature->ForcedDespawn(1000);
     }
@@ -646,6 +646,27 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
             default:
                 return false;
         }
+    }
+
+    // Find a nearby quest-holder and set the defender faction (57 Ironforge /
+    // 85 Orgrimmar, both hostile to Scourge 974). Re-runnable: called at init
+    // and every 5s until a player is found.
+    void ScanForQuestPlayer()
+    {
+        Map::PlayerList const& players = m_creature->GetMap()->GetPlayers();
+        for (const auto& it : players)
+        {
+            Player* pPlayer = it.getSource();
+            if (pPlayer && pPlayer->IsAlive() && !pPlayer->IsGameMaster() &&
+                m_creature->IsWithinDist(pPlayer, 20.0f, false) &&
+                pPlayer->GetQuestStatus(QUEST_BATTLE_DARROWSHIRE) == QUEST_STATUS_INCOMPLETE)
+            {
+                m_defenderFaction = (pPlayer->GetTeam() == ALLIANCE) ? 57 : 85;
+                DBG_DARROWSHIRE("scan: quest-holder '%s' (%s) -> defender faction %u", pPlayer->GetName(), pPlayer->GetTeam() == ALLIANCE ? "ALLIANCE" : "HORDE", m_defenderFaction);
+                return;
+            }
+        }
+        DBG_DARROWSHIRE("scan: no quest-holder within 20y (retrying in 5s)");
     }
 
     void JustSummoned(Creature* summoned) override
@@ -841,22 +862,20 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
             DBG_DARROWSHIRE("manager init: first in range, proceeding (guid %s)", m_creature->GetObjectGuid().GetString().c_str());
 
             // Scan nearby players for quest 5721 to determine faction (same as VMangos Reset)
-            Map::PlayerList const& players = m_creature->GetMap()->GetPlayers();
-            for (const auto& it : players)
+            ScanForQuestPlayer();
+        }
+
+        // Faction safety net: if no quest-holder was in range at init, re-scan
+        // every 5s so a late-arriving player still gives the battle a faction
+        // instead of running it with neutral (faction 0) defenders.
+        if (!m_defenderFaction)
+        {
+            m_factionRescanTimer += uiDiff;
+            if (m_factionRescanTimer >= 5000)
             {
-                Player* pPlayer = it.getSource();
-                if (pPlayer && pPlayer->IsAlive() && !pPlayer->IsGameMaster() &&
-                    m_creature->IsWithinDist(pPlayer, 20.0f, false) &&
-                    pPlayer->GetQuestStatus(QUEST_BATTLE_DARROWSHIRE) == QUEST_STATUS_INCOMPLETE)
-                {
-                    m_defenderFaction = (pPlayer->GetTeam() == ALLIANCE) ? 57 : 85;
-                    // 57 = Ironforge, 85 = Orgrimmar — both hostile to Scourge (974) for natural aggro
-                    DBG_DARROWSHIRE("init: quest-holder '%s' (%s) -> defender faction %u", pPlayer->GetName(), pPlayer->GetTeam() == ALLIANCE ? "ALLIANCE" : "HORDE", m_defenderFaction);
-                    break;
-                }
+                m_factionRescanTimer = 0;
+                ScanForQuestPlayer();
             }
-            if (!m_defenderFaction)
-                DBG_DARROWSHIRE("init: NO quest-holder with quest 5721 within 20y - defender faction stays 0 (EVENT WILL NOT FIGHT)");
         }
 
         // Hard event lifetime: clean everything up after EVENT_MAX_DURATION of
@@ -883,7 +902,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                         // [BALANCE] more attackers than defenders: bigger waves, shorter interval
                         for (int spawnGroupIndex = 0; spawnGroupIndex < 3; ++spawnGroupIndex)
                         {
-                            int amount = urand(2, 3);
+                            uint32 amount = urand(2, 3);
                             for (int spawnIndex = 0; spawnIndex < amount; ++spawnIndex)
                             {
                                 float x, y, z;
@@ -995,9 +1014,11 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                                 if (pCrea->IsAlive() && !pCrea->IsInCombat() &&
                                     pCrea->GetMotionMaster()->GetCurrentMovementGeneratorType() != POINT_MOTION_TYPE)
                                 {
-                                    int point = urand(0, 3);
-                                    static const int patrolMap[] = {5, 7, 4, 6};
-                                    int rnd = patrolMap[point];
+                                    // Same cyclic route as SummonedMovementInform
+                                    // (5 -> 7 -> 4 -> 6 -> 5): spawn, center, rally, flank.
+                                    uint32 point = urand(0, 3);
+                                    static const uint8 patrolRoute[] = {5, 7, 4, 6};
+                                    uint32 rnd = patrolRoute[point];
                                     pCrea->GetMotionMaster()->MovePoint(point, DarrowshireEvent[rnd].x, DarrowshireEvent[rnd].y, DarrowshireEvent[rnd].z, FORCED_MOVEMENT_WALK);
                                 }
                             }
@@ -1241,15 +1262,15 @@ struct npc_joseph_redpathAI : public ScriptedAI
                     DBG_DARROWSHIRE("Joseph: spotted Pamela, moving to her");
                     DoBroadcastText(BCT_PAMELA_2, pPamela); // retail: Pamela: "Daddy! You're back!"
                     m_creature->SetWalk(false);
-                    float x, y, z = 0;
+                    float x = 0.0f, y = 0.0f, z = 0.0f;
                     pPamela->GetContactPoint(m_creature, x, y, z, 1.0f);
-                    m_creature->GetMotionMaster()->MovePoint(3, x, y, z, FORCED_MOVEMENT_WALK);
+                    m_creature->GetMotionMaster()->MovePoint(3, x, y, z, FORCED_MOVEMENT_RUN); // he runs to her
                     DisableTimer(ACTION_REUNION_STEP);
                 }
                 else
                 {
                     DBG_DARROWSHIRE("Joseph: Pamela NOT found at point 2 - retrying");
-                    ResetTimer(ACTION_REUNION_STEP, 1);
+                    ResetTimer(ACTION_REUNION_STEP, 1000);
                 }
                 break;
             case 3: // Joseph and Pamela face each other (reunion complete)
@@ -1312,13 +1333,16 @@ struct npc_joseph_redpathAI : public ScriptedAI
                 ++m_uiEventStep;
                 ResetTimer(ACTION_REUNION_STEP, 4000);
                 break;
-            case 5: // Joseph's final farewell, both despawn
+            case 5: // Joseph's final farewell; Pamela walks back home - she is a
+                // permanent world spawn AND quest 5721's turn-in NPC, despawning
+                // her would block the turn-in for ~6 minutes for everyone.
                 DoBroadcastText(BCT_JOSEPH_3, m_creature);
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 m_creature->ForcedDespawn(6000);
                 if (Creature* pPamela = GetClosestCreatureWithEntry(m_creature, NPC_PAMELA_REDPATH, 150.0f, true))
                 {
-                    pPamela->ForcedDespawn(4000);
+                    DBG_DARROWSHIRE("Joseph: Pamela walking back home");
+                    pPamela->GetMotionMaster()->MovePoint(0, 1456.32f, -3596.44f, 86.963f, FORCED_MOVEMENT_WALK);
                 }
                 DisableTimer(ACTION_REUNION_STEP);
                 break;
