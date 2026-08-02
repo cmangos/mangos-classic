@@ -1367,7 +1367,11 @@ struct npc_joseph_redpathAI : public ScriptedAI
 
 bool GossipHello_npc_joseph_redpath(Player* player, Creature* creature)
 {
-    player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetObjectGuid());
+    // Always show Joseph's spirit dialogue (npc_text 4778, the vanilla quest
+    // text): the gossip_menu 3861 -> 4778 row is gated by 'quest 5721 taken',
+    // so it would fall back to the client default greeting once the quest
+    // completes. The quest credit is handled below.
+    player->SEND_GOSSIP_MENU(4778, creature->GetObjectGuid());
     if (player->GetQuestStatus(QUEST_BATTLE_DARROWSHIRE) == QUEST_STATUS_INCOMPLETE)
     {
         player->KilledMonsterCredit(NPC_JOSEPH_REDPATH, creature->GetObjectGuid());
