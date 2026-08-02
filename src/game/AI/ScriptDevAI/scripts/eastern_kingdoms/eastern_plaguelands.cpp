@@ -407,7 +407,7 @@ struct DarrowshireMove
 
 enum
 {
-    MAX_EVENT_SUMMONS  = 200,      // Summon cap (VMangos parity: SetCreatureSummonLimit(200))
+    MAX_EVENT_SUMMONS  = 200,      // Summon cap: keeps the battle population bounded
     EVENT_MAX_DURATION = 1200000   // Hard lifetime: 20 min of active runtime (nominal event ~12 min worst case)
 };
 
@@ -490,19 +490,6 @@ enum DarrowshireTriggerData
 ## go_darrowshire_trigger
 ######*/
 
-// ============================================================================
-// [DBG-DARROWSHIRE] TEMPORARY DEBUG LOGGING - REMOVE AFTER TESTING.
-// Every debug line is tagged [DBG-DARROWSHIRE] and gated by DARROWSHIRE_DEBUG.
-// To strip all debug code: delete the #define below and every
-// #ifdef DARROWSHIRE_DEBUG block (grep -n "DBG-DARROWSHIRE" finds every line).
-// ============================================================================
-#define DARROWSHIRE_DEBUG
-#ifdef DARROWSHIRE_DEBUG
-#define DBG_DARROWSHIRE(...) sLog.outString("[DBG-DARROWSHIRE] " __VA_ARGS__)
-#else
-#define DBG_DARROWSHIRE(...) ((void)0)
-#endif
-
 struct go_darrowshire_triggerAI : public GameObjectAI
 {
     explicit go_darrowshire_triggerAI(GameObject* go) : GameObjectAI(go), m_spawned(false) {}
@@ -518,24 +505,19 @@ struct go_darrowshire_triggerAI : public GameObjectAI
             GetGameObjectListWithEntryInGrid(otherTriggers, m_go, GO_DARROWSHIRE_TRIGGER, 100.0f);
             if (otherTriggers.size() > 1)
             {
-                DBG_DARROWSHIRE("GO trigger despawned as duplicate (%u other trigger(s) in range)", uint32(otherTriggers.size() - 1));
-                m_go->ForcedDespawn();
+                                m_go->ForcedDespawn();
                 return;
             }
             m_spawned = true;
-            DBG_DARROWSHIRE("GO trigger 177526 active (first in range), spawning event manager");
-
+            
             // Spawn NPC event manager (cmangos only routes
             // JustSummoned/SummonedCreatureJustDied to Creature AIs).
             // NOT an active object: the event only advances while a player is
             // in range, so an abandoned event freezes instead of simulating
             // unattended for 30 minutes.
-            if (Creature* pManager = m_go->SummonCreature(NPC_DARROWSHIRE_EVENT_MANAGER,
+            m_go->SummonCreature(NPC_DARROWSHIRE_EVENT_MANAGER,
                 DarrowshireEvent[7].x, DarrowshireEvent[7].y, DarrowshireEvent[7].z, DarrowshireEvent[7].o,
-                TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 1800000, false))
-                DBG_DARROWSHIRE("GO spawned event manager (guid %s)", pManager->GetObjectGuid().GetString().c_str());
-            else
-                DBG_DARROWSHIRE("GO FAILED to spawn event manager (SummonCreature returned null)");
+                TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 1800000, false);
         }
     }
 };
@@ -625,8 +607,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
     {
         if (m_bCleanupDone)
             return;
-        DBG_DARROWSHIRE("DespawnAll triggered: %s (phaseStep=%u)", reason, m_uiPhaseStep);
-        m_bCleanupDone = true;
+                m_bCleanupDone = true;
 
         // Stop every event action
         DisableTimer(ACTION_PHASE);
@@ -694,20 +675,10 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                 pPlayer->GetQuestStatus(QUEST_BATTLE_DARROWSHIRE) == QUEST_STATUS_INCOMPLETE)
             {
                 m_uiDefenderFaction = (pPlayer->GetTeam() == ALLIANCE) ? 57 : 85;
-                DBG_DARROWSHIRE("scan: quest-holder '%s' (%s) -> defender faction %u", pPlayer->GetName(), pPlayer->GetTeam() == ALLIANCE ? "ALLIANCE" : "HORDE", m_uiDefenderFaction);
-                return;
+                                return;
             }
         }
-        DBG_DARROWSHIRE("scan: no quest-holder within 20y (retrying in 5s)");
-    }
-
-    // Broadcast a battle yell zone-wide (retail event yells are heard across
-    // Eastern Plaguelands) with debug logging
-    void Yell(uint32 textId, WorldObject* source)
-    {
-        DBG_DARROWSHIRE("yell: id=%u from entry %u", textId, source ? source->GetEntry() : 0);
-        DoBroadcastText(textId, source, nullptr, CHAT_TYPE_ZONE_YELL);
-    }
+            }
 
     // Summon `amount` creatures of `entry` at each of the given DarrowshireEvent
     // spawn groups, jittered within `radius` yards. Returns the first summon
@@ -729,10 +700,10 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
 
     void HandleSpawnAttackers()
     {
-        DBG_DARROWSHIRE("wave: attackers (phaseStep=%u)", m_uiPhaseStep);
+        // Attackers: marauding corpses and skeletons, 3-6 per wave from the three attack points
         for (uint32 group = 0; group < 3; ++group)
         {
-            uint32 amount = urand(1, 2); // VMangos parity
+            uint32 amount = urand(1, 2);
             for (uint32 i = 0; i < amount; ++i)
             {
                 float x, y, z;
@@ -746,14 +717,14 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
 
     void HandleSpawnDefenders()
     {
-        DBG_DARROWSHIRE("wave: defenders (phaseStep=%u)", m_uiPhaseStep);
+        // Defenders: one per wave at each of the three defender positions
         SpawnWave(NPC_DARROWSHIRE_DEFENDER, 4, 6, 1, 5.0f);
-        ResetTimer(ACTION_SPAWN_DEFENDERS, 45000); // VMangos parity
+        ResetTimer(ACTION_SPAWN_DEFENDERS, 45000);
     }
 
     void HandleSpawnServants()
     {
-        DBG_DARROWSHIRE("wave: servants (phaseStep=%u)", m_uiPhaseStep);
+        // Servants of Horgus: reinforce the attackers while phase 2 runs
         for (uint32 group = 0; group < 3; ++group)
             SpawnWave(NPC_SERVANT_OF_HORGUS, group, group, urand(1, 2), 5.0f);
         ResetTimer(ACTION_SPAWN_SERVANTS, 35000);
@@ -761,28 +732,29 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
 
     void HandleSpawnDisciples()
     {
-        DBG_DARROWSHIRE("wave: disciples (phaseStep=%u)", m_uiPhaseStep);
+        // Silver Hand disciples: healers for the defenders (phase 3+)
         SpawnWave(NPC_SILVERHAND_DISCIPLE, 4, 6, 1, 5.0f);
         ResetTimer(ACTION_SPAWN_DISCIPLES, 45000);
     }
 
     void HandleSpawnBloodletters()
     {
-        DBG_DARROWSHIRE("wave: bloodletters (phaseStep=%u)", m_uiPhaseStep);
-        SpawnWave(NPC_BLOODLETTER, 3, 3, 3, 5.0f); // 3 stacked at the bloodletter point (VMangos parity)
+        // Bloodletters: strike squad of three at the bloodletter point
+        SpawnWave(NPC_BLOODLETTER, 3, 3, 3, 5.0f);
         ResetTimer(ACTION_SPAWN_BLOODLETTERS, 35000);
     }
 
     void HandleSpawnMilitia()
     {
-        DBG_DARROWSHIRE("wave: militia (phaseStep=%u)", m_uiPhaseStep);
+        // Redpath militia: final defenders; the first one rallies with a yell (phase 5)
         if (Creature* pMilitia = SpawnWave(NPC_REDPATH_MILITIA, 4, 6, 1, 6.0f))
-            DoBroadcastText(BCT_MILITIA_RANDOM_1 + (urand(0, 7)), pMilitia, nullptr, 1);
+            DoBroadcastText(BCT_MILITIA_RANDOM_1 + (urand(0, 7)), pMilitia, nullptr, CHAT_TYPE_ZONE_YELL);
         ResetTimer(ACTION_SPAWN_MILITIA, 45000);
     }
 
     void HandlePatrol()
     {
+        // Patrol the battle captains (Davil, Redpath, Bloodletter) around the square
         for (const auto& guid : m_summonedMobsList)
         {
             if (Creature* pCrea = m_creature->GetMap()->GetCreature(guid))
@@ -819,8 +791,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
 
     void HandlePhase()
     {
-        DBG_DARROWSHIRE("phase timer fired: step=%u (duration=%u ms)", m_uiPhaseStep, m_uiEventDuration);
-        switch (m_uiPhaseStep)
+                switch (m_uiPhaseStep)
         {
             case 0: // First defender spawns and rallies the troops (t=6s)
             {
@@ -828,7 +799,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                     DarrowshireEvent[7].x, DarrowshireEvent[7].y, DarrowshireEvent[7].z, 0.0f,
                     TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000))
                 {
-                    Yell(BCT_DEFENDER_YELL, pDefender);
+                    DoBroadcastText(BCT_DEFENDER_YELL, pDefender, nullptr, CHAT_TYPE_ZONE_YELL);
                     pDefender->SetWalk(false);
                     pDefender->SetRespawnCoord(DarrowshireEvent[4].x, DarrowshireEvent[4].y, DarrowshireEvent[4].z, DarrowshireEvent[4].o);
                     pDefender->GetMotionMaster()->MovePoint(0, DarrowshireEvent[4].x, DarrowshireEvent[4].y, DarrowshireEvent[4].z, FORCED_MOVEMENT_RUN);
@@ -836,7 +807,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                     ResetTimer(ACTION_PHASE, urand(120000, 180000));
                 }
                 else
-                    ResetTimer(ACTION_PHASE, 5000); // retry, never busy-loop
+                    ResetTimer(ACTION_PHASE, 5000); // retry
                 break;
             }
             case 1: // Davil Lightfire spawns (t=2-3min after Phase 0)
@@ -845,7 +816,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                     DarrowshireEvent[7].x, DarrowshireEvent[7].y, DarrowshireEvent[7].z, 0.0f,
                     TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000))
                 {
-                    Yell(BCT_LIGHTFIRE_YELL, pDavil);
+                    DoBroadcastText(BCT_LIGHTFIRE_YELL, pDavil, nullptr, CHAT_TYPE_ZONE_YELL);
                     m_davilGuid = pDavil->GetObjectGuid();
                     m_uiPhaseStep = 2;
                     ResetTimer(ACTION_SPAWN_SERVANTS, 4000); // servants: phase 2 begins
@@ -861,14 +832,13 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                 Creature* pDavil = m_creature->GetMap()->GetCreature(m_davilGuid);
                 if (!pDavil)
                 {
-                    DBG_DARROWSHIRE("phase2: Davil missing (despawned/dead) - retrying in 5s");
-                    ResetTimer(ACTION_PHASE, 5000);
+                                        ResetTimer(ACTION_PHASE, 5000);
                     break;
                 }
 
                 if (m_creature->GetMap()->GetCreature(m_horgusGuid))
                 {
-                    Yell(BCT_DAVIL_YELL, pDavil);
+                    DoBroadcastText(BCT_DAVIL_YELL, pDavil, nullptr, CHAT_TYPE_ZONE_YELL);
                     DisableTimer(ACTION_PHASE);
                     break;
                 }
@@ -880,14 +850,12 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                 {
                     pHorgus->AI()->AttackStart(pDavil);
                     m_horgusGuid = pHorgus->GetObjectGuid();
-                    Yell(BCT_HORGUS_YELL, pHorgus);
-                    DBG_DARROWSHIRE("phase2: Horgus spawned (guid %s), attacking Davil", pHorgus->GetObjectGuid().GetString().c_str());
-                    ResetTimer(ACTION_PHASE, 3000);
+                    DoBroadcastText(BCT_HORGUS_YELL, pHorgus, nullptr, CHAT_TYPE_ZONE_YELL);
+                                        ResetTimer(ACTION_PHASE, 3000);
                 }
                 else
                 {
-                    DBG_DARROWSHIRE("phase2: Horgus SummonCreature FAILED - retrying in 5s");
-                    ResetTimer(ACTION_PHASE, 5000);
+                                        ResetTimer(ACTION_PHASE, 5000);
                 }
                 break;
             }
@@ -896,9 +864,8 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                 if (Creature* pDavil = m_creature->GetMap()->GetCreature(m_davilGuid))
                 {
                     pDavil->ForcedDespawn(2000);
-                    Yell(BCT_DAVIL_DESPAWN, pDavil);
-                    DBG_DARROWSHIRE("phase3: Davil despawning (2s), phaseTimer=10000");
-                    ResetTimer(ACTION_PHASE, 10000);
+                    DoBroadcastText(BCT_DAVIL_DESPAWN, pDavil, nullptr, CHAT_TYPE_ZONE_YELL);
+                                        ResetTimer(ACTION_PHASE, 10000);
                     break;
                 }
 
@@ -906,17 +873,15 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                     DarrowshireEvent[7].x, DarrowshireEvent[7].y, DarrowshireEvent[7].z, 0.0f,
                     TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000))
                 {
-                    Yell(BCT_REDPATH_YELL, pRedpath);
+                    DoBroadcastText(BCT_REDPATH_YELL, pRedpath, nullptr, CHAT_TYPE_ZONE_YELL);
                     m_redpathGuid = pRedpath->GetObjectGuid();
                     m_uiPhaseStep = 4;
                     ResetTimer(ACTION_SPAWN_BLOODLETTERS, 4000); // bloodletters: phase 4 begins
-                    DBG_DARROWSHIRE("phase3: Captain Redpath spawned (guid %s), phaseStep=4, next phase in %u ms", pRedpath->GetObjectGuid().GetString().c_str(), urand(300000, 350000));
-                    ResetTimer(ACTION_PHASE, urand(300000, 350000));
+                                        ResetTimer(ACTION_PHASE, urand(300000, 350000));
                 }
                 else
                 {
-                    DBG_DARROWSHIRE("phase3: Redpath SummonCreature FAILED - retrying in 10s");
-                    ResetTimer(ACTION_PHASE, 10000); // retry, never busy-loop
+                                        ResetTimer(ACTION_PHASE, 10000); // retry
                 }
                 break;
             }
@@ -935,16 +900,13 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                             pRedpath->GetPositionX(), pRedpath->GetPositionY(), pRedpath->GetPositionZ(), 0.0f,
                             TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000))
                         {
-                            Yell(BCT_REDPATH_CORRUPTED, pRedpathCorrupted);
+                            DoBroadcastText(BCT_REDPATH_CORRUPTED, pRedpathCorrupted, nullptr, CHAT_TYPE_ZONE_YELL);
                             m_redpathCorruptedGuid = pRedpathCorrupted->GetObjectGuid();
-                            DBG_DARROWSHIRE("phase4: Marduk killed Redpath -> Redpath the Corrupted spawned (guid %s), phaseStep=5, militia armed", pRedpathCorrupted->GetObjectGuid().GetString().c_str());
-                        }
+                                                    }
                         else
-                            DBG_DARROWSHIRE("phase4: corrupted SummonCreature FAILED after Marduk kill");
-                    }
+                                                }
                     else
-                        DBG_DARROWSHIRE("phase4: Marduk alive but Redpath missing (guid lookup failed)");
-                    break;
+                                            break;
                 }
 
                 if (Creature* pRedpath = m_creature->GetMap()->GetCreature(m_redpathGuid))
@@ -954,15 +916,13 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                     if (Creature* pMardukNew = m_creature->SummonCreature(NPC_MARDUK_THE_BLACK, x, y, z, 0.0f,
                         TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000))
                     {
-                        Yell(BCT_MARDUK_YELL, pMardukNew);
+                        DoBroadcastText(BCT_MARDUK_YELL, pMardukNew, nullptr, CHAT_TYPE_ZONE_YELL);
                         m_mardukGuid = pMardukNew->GetObjectGuid();
-                        DBG_DARROWSHIRE("phase4: Marduk spawned (guid %s), scripted kill in 5s", pMardukNew->GetObjectGuid().GetString().c_str());
-                        ResetTimer(ACTION_PHASE, 5000);
+                                                ResetTimer(ACTION_PHASE, 5000);
                     }
                     else
                     {
-                        DBG_DARROWSHIRE("phase4: Marduk SummonCreature FAILED - retrying in 5s");
-                        ResetTimer(ACTION_PHASE, 5000); // retry, never busy-loop
+                                                ResetTimer(ACTION_PHASE, 5000); // retry
                     }
                 }
                 else
@@ -975,13 +935,11 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                         TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000))
                     {
                         m_redpathGuid = pRedpathNew->GetObjectGuid();
-                        DBG_DARROWSHIRE("phase4: Redpath was missing - RE-SUMMONED (guid %s), retrying Marduk in 5s", pRedpathNew->GetObjectGuid().GetString().c_str());
-                        ResetTimer(ACTION_PHASE, 5000);
+                                                ResetTimer(ACTION_PHASE, 5000);
                     }
                     else
                     {
-                        DBG_DARROWSHIRE("phase4: Redpath missing AND re-summon FAILED - retrying in 5s");
-                        ResetTimer(ACTION_PHASE, 5000);
+                                                ResetTimer(ACTION_PHASE, 5000);
                     }
                 }
                 break;
@@ -996,22 +954,18 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
         if (!summoned)
             return;
 
-        // Summon cap: keep the event population bounded (VMangos parity).
-        // The list is pruned on despawn, so this counts live summons only.
-        // Script-critical NPCs are exempt so the scripted sequence can never
-        // be culled.
+        // Summon cap: the list is pruned on despawn, so it counts live
+        // summons only. Script-critical NPCs are exempt so the scripted
+        // sequence can never be culled.
         if (m_summonedMobsList.size() >= MAX_EVENT_SUMMONS &&
             !IsScriptCriticalSummon(summoned->GetEntry()))
         {
-            DBG_DARROWSHIRE("summon CULLED by cap (list=%u) entry %u", uint32(m_summonedMobsList.size()), summoned->GetEntry());
-            summoned->ForcedDespawn();
+                        summoned->ForcedDespawn();
             return;
         }
 
-        DBG_DARROWSHIRE("summoned entry %u at (%.1f,%.1f) list=%u phaseStep=%u", summoned->GetEntry(),
-            summoned->GetPositionX(), summoned->GetPositionY(), uint32(m_summonedMobsList.size()), m_uiPhaseStep);
-        m_summonedMobsList.push_back(summoned->GetObjectGuid());
-        // Set faction for defenders, movement for attackers, following VMangos JustSummoned pattern
+                m_summonedMobsList.push_back(summoned->GetObjectGuid());
+        // Set faction for defenders, movement for attackers
 
         switch (summoned->GetEntry())
         {
@@ -1097,28 +1051,26 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
         if (!pSummoned)
             return;
 
-        DBG_DARROWSHIRE("summoned died: entry %u (phaseStep=%u)", pSummoned->GetEntry(), m_uiPhaseStep);
-        m_summonedMobsList.remove(pSummoned->GetObjectGuid()); // prune: cap counts live summons only
+                m_summonedMobsList.remove(pSummoned->GetObjectGuid()); // prune: cap counts live summons only
 
         switch (pSummoned->GetEntry())
         {
             case NPC_HORGUS_THE_RAVAGER:
             {
                 if (Creature* pDefender = GetClosestCreatureWithEntry(m_creature, NPC_DARROWSHIRE_DEFENDER, 100.0f, true))
-                    Yell(BCT_HORGUS_DIED, pDefender);
+                    DoBroadcastText(BCT_HORGUS_DIED, pDefender, nullptr, CHAT_TYPE_ZONE_YELL);
                 m_uiPhaseStep = 3;
                 DisableTimer(ACTION_SPAWN_SERVANTS);      // servants: phase 2 only
                 ResetTimer(ACTION_SPAWN_DISCIPLES, 4000); // disciples: armed when phase 3 begins
                 ResetTimer(ACTION_PHASE, 8000);
-                DBG_DARROWSHIRE("Horgus slain: phaseStep=3, disciples armed (4000ms)");
-                break;
+                                break;
             }
             case NPC_DAVIL_LIGHTFIRE:
             {
                 if (m_uiPhaseStep < 3)
                 {
                     if (Creature* pDefender = GetClosestCreatureWithEntry(m_creature, NPC_DARROWSHIRE_DEFENDER, 100.0f, true))
-                        Yell(BCT_LIGHTFIRE_DIED, pDefender);
+                        DoBroadcastText(BCT_LIGHTFIRE_DIED, pDefender, nullptr, CHAT_TYPE_ZONE_YELL);
                     DespawnAll("davil died early");
                 }
                 break;
@@ -1128,17 +1080,16 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                 if (m_uiPhaseStep < 5)
                 {
                     if (Creature* pDefender = GetClosestCreatureWithEntry(m_creature, NPC_DARROWSHIRE_DEFENDER, 100.0f, true))
-                        Yell(BCT_REDPATH_DIED, pDefender);
+                        DoBroadcastText(BCT_REDPATH_DIED, pDefender, nullptr, CHAT_TYPE_ZONE_YELL);
                     DespawnAll("redpath died early");
                 }
                 else
-                    DBG_DARROWSHIRE("Captain Redpath died during scripted Marduk kill - expected");
-                break;
+                                    break;
             }
             case NPC_REDPATH_THE_CORRUPTED:
             {
                 if (Creature* pDefender = GetClosestCreatureWithEntry(m_creature, NPC_DARROWSHIRE_DEFENDER, 100.0f, true))
-                    Yell(BCT_SCOURGE_DEFEATED, pDefender);
+                    DoBroadcastText(BCT_SCOURGE_DEFEATED, pDefender, nullptr, CHAT_TYPE_ZONE_YELL);
                 // Active object: the reunion scene must keep playing even if the
                 // player is out of the creature's active range (e.g. watching from afar)
                 m_creature->SummonCreature(NPC_JOSEPH_REDPATH,
@@ -1147,8 +1098,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                 m_creature->SummonCreature(NPC_DAVIL_CROKFORD,
                     1465.43f, -3678.48f, 78.0816f, 0.0402176f,
                     TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000);
-                DBG_DARROWSHIRE("Redpath the Corrupted slain - event won, spawning Joseph + Crokford");
-                DespawnAll("event won - corrupted slain");
+                                DespawnAll("event won - corrupted slain");
                 break;
             }
             default:
@@ -1165,8 +1115,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
         // live summons only (dead or OOC-expired creatures must not accumulate
         // and eventually block all further spawns).
         m_summonedMobsList.remove(summoned->GetObjectGuid());
-        DBG_DARROWSHIRE("summon despawned: entry %u (list=%u)", summoned->GetEntry(), uint32(m_summonedMobsList.size()));
-    }
+            }
 
     void UpdateAI(const uint32 uiDiff) override
     {
@@ -1179,13 +1128,11 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
             GetCreatureListWithEntryInGrid(otherManagers, m_creature, NPC_DARROWSHIRE_EVENT_MANAGER, 100.0f);
             if (otherManagers.size() > 1)
             {
-                DBG_DARROWSHIRE("manager %s despawned as duplicate (%u manager(s) in range)", m_creature->GetObjectGuid().GetString().c_str(), uint32(otherManagers.size()));
-                m_creature->ForcedDespawn();
+                                m_creature->ForcedDespawn();
                 return;
             }
-            DBG_DARROWSHIRE("manager init: first in range, proceeding (guid %s)", m_creature->GetObjectGuid().GetString().c_str());
-
-            // Player scan: determine defender faction based on quest holder team (same as VMangos Reset)
+            
+            // Player scan: determine the defender faction from the quest holder
             ScanForQuestPlayer();
             // Faction safety net: keep re-scanning every 5s until a quest-holder
             // is found, so a late-arriving player still gives the battle a faction
@@ -1204,8 +1151,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
         m_uiEventDuration += uiDiff;
         if (m_uiEventDuration >= EVENT_MAX_DURATION)
         {
-            DBG_DARROWSHIRE("hard lifetime expired (%u ms active runtime)", m_uiEventDuration);
-            DespawnAll("hard lifetime expired");
+                        DespawnAll("hard lifetime expired");
             return;
         }
     }
@@ -1232,21 +1178,12 @@ struct npc_joseph_redpathAI : public ScriptedAI
 
     void BeginEvent()
     {
-        DBG_DARROWSHIRE("Joseph: event begun (30s wait, then walk)");
-        if (!m_bEventStarted)
+                if (!m_bEventStarted)
         {
             ResetTimer(ACTION_REUNION_STEP, 30000);
             m_uiEventStep = 0;
             m_bEventStarted = true;
         }
-    }
-
-    // Broadcast a dialogue line zone-wide so the reunion is heard regardless
-    // of the player's distance from Joseph (with debug logging)
-    void Say(uint32 textId, Creature* source)
-    {
-        DBG_DARROWSHIRE("Joseph: say id=%u from %s", textId, source ? source->GetName() : "null");
-        DoBroadcastText(textId, source, nullptr, CHAT_TYPE_ZONE_YELL);
     }
 
     void MovementInform(uint32 uiType, uint32 uiPointId) override
@@ -1257,20 +1194,17 @@ struct npc_joseph_redpathAI : public ScriptedAI
         switch (uiPointId)
         {
             case 0: // Joseph walks toward meeting point (30s after event start)
-                DBG_DARROWSHIRE("Joseph: reached point 0, walking to meeting point");
                 m_creature->GetMotionMaster()->MovePoint(1, 1434.22f, -3668.756f, 76.671f, FORCED_MOVEMENT_WALK);
                 break;
             case 1: // Joseph reaches meeting point, calls for Pamela
-                DBG_DARROWSHIRE("Joseph: reached meeting point (1), dialogue in 3s");
                 m_creature->GetMotionMaster()->MovePoint(2, 1438.526f, -3632.733f, 78.268f, FORCED_MOVEMENT_WALK);
-                Say(BCT_JOSEPH_1, m_creature);
+                DoBroadcastText(BCT_JOSEPH_1, m_creature, nullptr, CHAT_TYPE_ZONE_YELL); // "Pamela? Are you there, honey?"
                 ResetTimer(ACTION_REUNION_STEP, 3000);
                 break;
             case 2: // Joseph spots Pamela, runs toward her
                 if (Creature* pPamela = GetClosestCreatureWithEntry(m_creature, NPC_PAMELA_REDPATH, 150.0f, true))
                 {
-                    DBG_DARROWSHIRE("Joseph: spotted Pamela, moving to her");
-                    Say(BCT_PAMELA_2, pPamela); // retail: Pamela: "Daddy! You're back!"
+                                        DoBroadcastText(BCT_PAMELA_2, pPamela, nullptr, CHAT_TYPE_ZONE_YELL); // "Daddy! You're back!"
                     m_creature->SetWalk(false);
                     float x = 0.0f, y = 0.0f, z = 0.0f;
                     pPamela->GetContactPoint(m_creature, x, y, z, 1.0f);
@@ -1279,13 +1213,11 @@ struct npc_joseph_redpathAI : public ScriptedAI
                 }
                 else
                 {
-                    DBG_DARROWSHIRE("Joseph: Pamela NOT found at point 2 - retrying");
-                    ResetTimer(ACTION_REUNION_STEP, 1000);
+                                        ResetTimer(ACTION_REUNION_STEP, 1000);
                 }
                 break;
             case 3: // Joseph and Pamela face each other (reunion complete)
-                DBG_DARROWSHIRE("Joseph: reunion point reached (3), farewell dialogue in 2s");
-                if (Creature* pPamela = GetClosestCreatureWithEntry(m_creature, NPC_PAMELA_REDPATH, 20.0f, true))
+                                if (Creature* pPamela = GetClosestCreatureWithEntry(m_creature, NPC_PAMELA_REDPATH, 20.0f, true))
                 {
                     m_creature->SetFacingToObject(pPamela);
                     pPamela->SetFacingToObject(m_creature);
@@ -1297,8 +1229,7 @@ struct npc_joseph_redpathAI : public ScriptedAI
 
     void HandleReunionStep()
     {
-        DBG_DARROWSHIRE("Joseph: reunion step %u", m_uiEventStep);
-        switch (m_uiEventStep)
+                switch (m_uiEventStep)
         {
             case 0: // Joseph walks toward meeting point (30s wait ends)
                 m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
@@ -1309,8 +1240,7 @@ struct npc_joseph_redpathAI : public ScriptedAI
             case 1: // Pamela appears and runs toward Joseph
                 if (Creature* pPamela = GetClosestCreatureWithEntry(m_creature, NPC_PAMELA_REDPATH, 150.0f, true))
                 {
-                    DBG_DARROWSHIRE("Joseph: step 1 - Pamela found, she calls out");
-                    Say(BCT_PAMELA_1, pPamela);
+                                        DoBroadcastText(BCT_PAMELA_1, pPamela, nullptr, CHAT_TYPE_ZONE_YELL); // "Daddy!"
                     pPamela->GetMotionMaster()->MovePoint(0, 1450.733f, -3599.974f, 85.621f, FORCED_MOVEMENT_WALK);
                     ++m_uiEventStep;
                     DisableTimer(ACTION_REUNION_STEP);
@@ -1318,27 +1248,26 @@ struct npc_joseph_redpathAI : public ScriptedAI
                 else
                 {
                     // Do not lose Pamela's line: retry until she is found.
-                    DBG_DARROWSHIRE("Joseph: step 1 - Pamela NOT found, retrying in 1s");
-                    ResetTimer(ACTION_REUNION_STEP, 1000);
+                                        ResetTimer(ACTION_REUNION_STEP, 1000);
                 }
                 break;
             case 2: // Pamela sees Joseph
                 if (Creature* pPamela = GetClosestCreatureWithEntry(m_creature, NPC_PAMELA_REDPATH, 150.0f, true))
                 {
-                    Say(BCT_PAMELA_3, pPamela);
+                    DoBroadcastText(BCT_PAMELA_3, pPamela, nullptr, CHAT_TYPE_ZONE_YELL); // "Let's go play! No, tell me a story, Daddy!..."
                 }
                 ++m_uiEventStep;
                 ResetTimer(ACTION_REUNION_STEP, 5000);
                 break;
             case 3: // Joseph explains his return
-                Say(BCT_JOSEPH_2, m_creature);
+                DoBroadcastText(BCT_JOSEPH_2, m_creature, nullptr, CHAT_TYPE_ZONE_YELL); // "Hahah!"
                 ++m_uiEventStep;
                 ResetTimer(ACTION_REUNION_STEP, 3000);
                 break;
             case 4: // Pamela's farewell
                 if (Creature* pPamela = GetClosestCreatureWithEntry(m_creature, NPC_PAMELA_REDPATH, 150.0f, true))
                 {
-                    Say(BCT_PAMELA_4, pPamela);
+                    DoBroadcastText(BCT_PAMELA_4, pPamela, nullptr, CHAT_TYPE_ZONE_YELL); // "I missed you so much, Daddy!"
                 }
                 ++m_uiEventStep;
                 ResetTimer(ACTION_REUNION_STEP, 4000);
@@ -1346,13 +1275,12 @@ struct npc_joseph_redpathAI : public ScriptedAI
             case 5: // Joseph's final farewell; Pamela walks back home - she is a
                 // permanent world spawn AND quest 5721's turn-in NPC, despawning
                 // her would block the turn-in for ~6 minutes for everyone.
-                Say(BCT_JOSEPH_3, m_creature);
+                DoBroadcastText(BCT_JOSEPH_3, m_creature, nullptr, CHAT_TYPE_ZONE_YELL); // "I missed you too, honey. And I'm finally home..."
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 m_creature->ForcedDespawn(6000);
                 if (Creature* pPamela = GetClosestCreatureWithEntry(m_creature, NPC_PAMELA_REDPATH, 150.0f, true))
                 {
-                    DBG_DARROWSHIRE("Joseph: Pamela walking back home");
-                    pPamela->GetMotionMaster()->MovePoint(0, 1456.32f, -3596.44f, 86.963f, FORCED_MOVEMENT_WALK);
+                                        pPamela->GetMotionMaster()->MovePoint(0, 1456.32f, -3596.44f, 86.963f, FORCED_MOVEMENT_WALK);
                 }
                 DisableTimer(ACTION_REUNION_STEP);
                 break;
