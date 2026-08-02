@@ -385,3 +385,7 @@ UPDATE spell_template SET EffectBasePoints1=599 WHERE Id IN('8087','8088','8089'
 -- doesnt stack multiple times
 UPDATE spell_template SET AttributesEx=AttributesEx|0x00000800 WHERE Id IN(15971); -- Demoralizing Roar
 
+-- s.14108 Venomhide Poison
+-- was 4 (poison) - and source has immunity to it - so it prevents itself with applying aura - had to remove it.
+UPDATE spell_template SET Dispel = 0 WHERE id = 14108;
+
