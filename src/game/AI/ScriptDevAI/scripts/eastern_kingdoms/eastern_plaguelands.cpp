@@ -701,11 +701,12 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
         DBG_DARROWSHIRE("scan: no quest-holder within 20y (retrying in 5s)");
     }
 
-    // Broadcast a battle yell (chatTypeOverride=1) with debug logging
+    // Broadcast a battle yell zone-wide (retail event yells are heard across
+    // Eastern Plaguelands) with debug logging
     void Yell(uint32 textId, WorldObject* source)
     {
         DBG_DARROWSHIRE("yell: id=%u from entry %u", textId, source ? source->GetEntry() : 0);
-        DoBroadcastText(textId, source, nullptr, 1);
+        DoBroadcastText(textId, source, nullptr, CHAT_TYPE_ZONE_YELL);
     }
 
     // Summon `amount` creatures of `entry` at each of the given DarrowshireEvent
@@ -1138,9 +1139,11 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
             {
                 if (Creature* pDefender = GetClosestCreatureWithEntry(m_creature, NPC_DARROWSHIRE_DEFENDER, 100.0f, true))
                     Yell(BCT_SCOURGE_DEFEATED, pDefender);
+                // Active object: the reunion scene must keep playing even if the
+                // player is out of the creature's active range (e.g. watching from afar)
                 m_creature->SummonCreature(NPC_JOSEPH_REDPATH,
                     DarrowshireEvent[7].x, DarrowshireEvent[7].y, DarrowshireEvent[7].z, 0.0f,
-                    TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 600000);
+                    TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 600000, true);
                 m_creature->SummonCreature(NPC_DAVIL_CROKFORD,
                     1465.43f, -3678.48f, 78.0816f, 0.0402176f,
                     TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000);
@@ -1238,11 +1241,12 @@ struct npc_joseph_redpathAI : public ScriptedAI
         }
     }
 
-    // Broadcast a dialogue line with debug logging
+    // Broadcast a dialogue line zone-wide so the reunion is heard regardless
+    // of the player's distance from Joseph (with debug logging)
     void Say(uint32 textId, Creature* source)
     {
         DBG_DARROWSHIRE("Joseph: say id=%u from %s", textId, source ? source->GetName() : "null");
-        DoBroadcastText(textId, source);
+        DoBroadcastText(textId, source, nullptr, CHAT_TYPE_ZONE_YELL);
     }
 
     void MovementInform(uint32 uiType, uint32 uiPointId) override
