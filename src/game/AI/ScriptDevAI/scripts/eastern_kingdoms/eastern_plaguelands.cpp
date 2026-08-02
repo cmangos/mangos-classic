@@ -450,37 +450,37 @@ enum DarrowshireTriggerData
 
     GO_DARROWSHIRE_TRIGGER      = 177526,
 
-    // broadcast_text entries
-    BCT_HORGUS_DIED             = 2000001,
-    BCT_LIGHTFIRE_DIED          = 2000002,
-    BCT_REDPATH_DIED            = 2000003,
-    BCT_SCOURGE_DEFEATED        = 2000004,
-    BCT_MILITIA_RANDOM_1        = 2000005,
-    BCT_MILITIA_RANDOM_2        = 2000006,
-    BCT_MILITIA_RANDOM_3        = 2000007,
-    BCT_MILITIA_RANDOM_4        = 2000008,
-    BCT_MILITIA_RANDOM_5        = 2000009,
-    BCT_MILITIA_RANDOM_6        = 2000010,
-    BCT_MILITIA_RANDOM_7        = 2000011,
-    BCT_MILITIA_RANDOM_8        = 2000012,
-    BCT_DEFENDER_YELL           = 2000013,
-    BCT_LIGHTFIRE_YELL          = 2000014,
-    BCT_DAVIL_YELL              = 2000015,
-    BCT_HORGUS_YELL             = 2000016,
-    BCT_DAVIL_DESPAWN           = 2000017,
-    BCT_REDPATH_YELL            = 2000018,
-    BCT_REDPATH_CORRUPTED       = 2000019,
-    BCT_MARDUK_YELL             = 2000020,
+    // broadcast_text entries (retail IDs - all verified present in classic DB)
+    BCT_HORGUS_DIED             = 7368,
+    BCT_LIGHTFIRE_DIED          = 7366,
+    BCT_REDPATH_DIED            = 7369,
+    BCT_SCOURGE_DEFEATED        = 7407,
+    BCT_MILITIA_RANDOM_1        = 7347,
+    BCT_MILITIA_RANDOM_2        = 7348,
+    BCT_MILITIA_RANDOM_3        = 7349,
+    BCT_MILITIA_RANDOM_4        = 7350,
+    BCT_MILITIA_RANDOM_5        = 7351,
+    BCT_MILITIA_RANDOM_6        = 7352,
+    BCT_MILITIA_RANDOM_7        = 7353,
+    BCT_MILITIA_RANDOM_8        = 7354,
+    BCT_DEFENDER_YELL           = 7358,
+    BCT_LIGHTFIRE_YELL          = 7343,
+    BCT_DAVIL_YELL              = 7346,
+    BCT_HORGUS_YELL             = 7344,
+    BCT_DAVIL_DESPAWN           = 7227,
+    BCT_REDPATH_YELL            = 7355,
+    BCT_REDPATH_CORRUPTED       = 7357,
+    BCT_MARDUK_YELL             = 7471,
 
-    // Joseph Redpath dialogue
-    BCT_JOSEPH_1                = 2000021,
-    BCT_PAMELA_1                = 2000022,
-    BCT_PAMELA_2                = 2000023,
-    BCT_PAMELA_3                = 2000024,
-    BCT_JOSEPH_2                = 2000025,
-    BCT_PAMELA_4                = 2000026,
-    BCT_JOSEPH_3                = 2000027,
-    BCT_JOSEPH_DESPAWN          = 2000028,
+    // Joseph Redpath reunion dialogue (7399-7402 filled by DB PR with
+    // the authentic client texts - empty in the base DB)
+    BCT_JOSEPH_1                = 7397,
+    BCT_PAMELA_1                = 7399,
+    BCT_PAMELA_2                = 7400,
+    BCT_PAMELA_3                = 7401,
+    BCT_JOSEPH_2                = 7398,
+    BCT_PAMELA_4                = 7402,
+    BCT_JOSEPH_3                = 7403,
 
     QUEST_BATTLE_DARROWSHIRE    = 5721,
 
@@ -762,7 +762,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
             case NPC_HORGUS_THE_RAVAGER:
             {
                 if (Creature* pDefender = GetClosestCreatureWithEntry(m_creature, NPC_DARROWSHIRE_DEFENDER, 100.0f, true))
-                    DoBroadcastText(BCT_HORGUS_DIED, pDefender);
+                    DoBroadcastText(BCT_HORGUS_DIED, pDefender, nullptr, 1);
                 m_phaseStep = 3;
                 m_phaseTimer = 8000;
                 m_mobTimer[3] = 4000; // disciples: armed when phase 3 begins (arming at phase 2 made the gate cull them)
@@ -774,7 +774,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                 if (m_phaseStep < 3)
                 {
                     if (Creature* pDefender = GetClosestCreatureWithEntry(m_creature, NPC_DARROWSHIRE_DEFENDER, 100.0f, true))
-                        DoBroadcastText(BCT_LIGHTFIRE_DIED, pDefender);
+                        DoBroadcastText(BCT_LIGHTFIRE_DIED, pDefender, nullptr, 1);
                     DespawnAll("davil died early");
                 }
                 break;
@@ -784,7 +784,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                 if (m_phaseStep < 5)
                 {
                     if (Creature* pDefender = GetClosestCreatureWithEntry(m_creature, NPC_DARROWSHIRE_DEFENDER, 100.0f, true))
-                        DoBroadcastText(BCT_REDPATH_DIED, pDefender);
+                        DoBroadcastText(BCT_REDPATH_DIED, pDefender, nullptr, 1);
                     DespawnAll("redpath died early");
                 }
                 else
@@ -794,7 +794,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
             case NPC_REDPATH_THE_CORRUPTED:
             {
                 if (Creature* pDefender = GetClosestCreatureWithEntry(m_creature, NPC_DARROWSHIRE_DEFENDER, 100.0f, true))
-                    DoBroadcastText(BCT_SCOURGE_DEFEATED, pDefender);
+                    DoBroadcastText(BCT_SCOURGE_DEFEATED, pDefender, nullptr, 1);
                 m_creature->SummonCreature(NPC_JOSEPH_REDPATH,
                     DarrowshireEvent[7].x, DarrowshireEvent[7].y, DarrowshireEvent[7].z, 0.0f,
                     TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 600000);
@@ -973,7 +973,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                             {
                                 if (!yelled)
                                 {
-                                    DoBroadcastText(BCT_MILITIA_RANDOM_1 + (urand(0, 7)), pMilitia);
+                                    DoBroadcastText(BCT_MILITIA_RANDOM_1 + (urand(0, 7)), pMilitia, nullptr, 1);
                                     yelled = true;
                                 }
                             }
@@ -1025,7 +1025,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                         DarrowshireEvent[7].x, DarrowshireEvent[7].y, DarrowshireEvent[7].z, 0.0f,
                         TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000))
                     {
-                        DoBroadcastText(BCT_DEFENDER_YELL, pDefender);
+                        DoBroadcastText(BCT_DEFENDER_YELL, pDefender, nullptr, 1);
                         pDefender->SetWalk(false);
                         pDefender->SetRespawnCoord(DarrowshireEvent[4].x, DarrowshireEvent[4].y, DarrowshireEvent[4].z, DarrowshireEvent[4].o);
                         pDefender->GetMotionMaster()->MovePoint(0, DarrowshireEvent[4].x, DarrowshireEvent[4].y, DarrowshireEvent[4].z, FORCED_MOVEMENT_RUN);
@@ -1040,7 +1040,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                         DarrowshireEvent[7].x, DarrowshireEvent[7].y, DarrowshireEvent[7].z, 0.0f,
                         TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000))
                     {
-                        DoBroadcastText(BCT_LIGHTFIRE_YELL, pDavil);
+                        DoBroadcastText(BCT_LIGHTFIRE_YELL, pDavil, nullptr, 1);
                         m_davilGuid = pDavil->GetObjectGuid();
                         m_phaseTimer = 60000;
                         m_mobTimer[2] = 4000;
@@ -1061,7 +1061,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
 
                     if (m_creature->GetMap()->GetCreature(m_horgusGuid))
                     {
-                        DoBroadcastText(BCT_DAVIL_YELL, pDavil);
+                        DoBroadcastText(BCT_DAVIL_YELL, pDavil, nullptr, 1);
                         m_phaseTimer = 0;
                         break;
                     }
@@ -1073,7 +1073,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                     {
                         pHorgus->AI()->AttackStart(pDavil);
                         m_horgusGuid = pHorgus->GetObjectGuid();
-                        DoBroadcastText(BCT_HORGUS_YELL, pHorgus);
+                        DoBroadcastText(BCT_HORGUS_YELL, pHorgus, nullptr, 1);
                         DBG_DARROWSHIRE("phase2: Horgus spawned (guid %s), attacking Davil", pHorgus->GetObjectGuid().GetString().c_str());
                         m_phaseTimer = 3000;
                     }
@@ -1089,7 +1089,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                     if (Creature* pDavil = m_creature->GetMap()->GetCreature(m_davilGuid))
                     {
                         pDavil->ForcedDespawn(2000);
-                        DoBroadcastText(BCT_DAVIL_DESPAWN, pDavil);
+                        DoBroadcastText(BCT_DAVIL_DESPAWN, pDavil, nullptr, 1);
                         DBG_DARROWSHIRE("phase3: Davil despawning (2s), phaseTimer=10000");
                         m_phaseTimer = 10000;
                         break;
@@ -1099,7 +1099,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                         DarrowshireEvent[7].x, DarrowshireEvent[7].y, DarrowshireEvent[7].z, 0.0f,
                         TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000))
                     {
-                        DoBroadcastText(BCT_REDPATH_YELL, pRedpath);
+                        DoBroadcastText(BCT_REDPATH_YELL, pRedpath, nullptr, 1);
                         m_redpathGuid = pRedpath->GetObjectGuid();
                         DBG_DARROWSHIRE("phase3: Captain Redpath spawned (guid %s), phaseStep=4, next phase in %u ms", pRedpath->GetObjectGuid().GetString().c_str(), m_phaseTimer);
                         m_phaseTimer = urand(300000, 350000);
@@ -1128,7 +1128,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                                 pRedpath->GetPositionX(), pRedpath->GetPositionY(), pRedpath->GetPositionZ(), 0.0f,
                                 TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000))
                             {
-                                DoBroadcastText(BCT_REDPATH_CORRUPTED, pRedpathCorrupted);
+                                DoBroadcastText(BCT_REDPATH_CORRUPTED, pRedpathCorrupted, nullptr, 1);
                                 m_redpathCorruptedGuid = pRedpathCorrupted->GetObjectGuid();
                                 DBG_DARROWSHIRE("phase4: Marduk killed Redpath -> Redpath the Corrupted spawned (guid %s), phaseStep=5, militia armed", pRedpathCorrupted->GetObjectGuid().GetString().c_str());
                             }
@@ -1147,7 +1147,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                         if (Creature* pMardukNew = m_creature->SummonCreature(NPC_MARDUK_THE_BLACK, x, y, z, 0.0f,
                             TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000))
                         {
-                            DoBroadcastText(BCT_MARDUK_YELL, pMardukNew);
+                            DoBroadcastText(BCT_MARDUK_YELL, pMardukNew, nullptr, 1);
                             m_mardukGuid = pMardukNew->GetObjectGuid();
                             DBG_DARROWSHIRE("phase4: Marduk spawned (guid %s), scripted kill in 5s", pMardukNew->GetObjectGuid().GetString().c_str());
                             m_phaseTimer = 5000;
@@ -1239,7 +1239,7 @@ struct npc_joseph_redpathAI : public ScriptedAI
                 if (Creature* pPamela = GetClosestCreatureWithEntry(m_creature, NPC_PAMELA_REDPATH, 150.0f, true))
                 {
                     DBG_DARROWSHIRE("Joseph: spotted Pamela, moving to her");
-                    DoBroadcastText(BCT_PAMELA_2, m_creature); // "Pamela, my dear daughter..." is Joseph's line
+                    DoBroadcastText(BCT_PAMELA_2, pPamela); // retail: Pamela: "Daddy! You're back!"
                     m_creature->SetWalk(false);
                     float x, y, z = 0;
                     pPamela->GetContactPoint(m_creature, x, y, z, 1.0f);
