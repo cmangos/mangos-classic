@@ -724,7 +724,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
         DBG_DARROWSHIRE("wave: attackers (phaseStep=%u)", m_uiPhaseStep);
         for (uint32 group = 0; group < 3; ++group)
         {
-            uint32 amount = urand(2, 3);
+            uint32 amount = urand(1, 2); // VMangos parity
             for (uint32 i = 0; i < amount; ++i)
             {
                 float x, y, z;
@@ -740,7 +740,7 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
     {
         DBG_DARROWSHIRE("wave: defenders (phaseStep=%u)", m_uiPhaseStep);
         SpawnWave(NPC_DARROWSHIRE_DEFENDER, 4, 6, 1, 5.0f);
-        ResetTimer(ACTION_SPAWN_DEFENDERS, 60000);
+        ResetTimer(ACTION_SPAWN_DEFENDERS, 45000); // VMangos parity
     }
 
     void HandleSpawnServants()
