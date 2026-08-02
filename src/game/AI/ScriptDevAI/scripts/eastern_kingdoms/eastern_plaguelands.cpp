@@ -1239,7 +1239,7 @@ struct npc_joseph_redpathAI : public ScriptedAI
                 if (Creature* pPamela = GetClosestCreatureWithEntry(m_creature, NPC_PAMELA_REDPATH, 150.0f, true))
                 {
                     DBG_DARROWSHIRE("Joseph: spotted Pamela, moving to her");
-                    DoBroadcastText(BCT_PAMELA_2, pPamela);
+                    DoBroadcastText(BCT_PAMELA_2, m_creature); // "Pamela, my dear daughter..." is Joseph's line
                     m_creature->SetWalk(false);
                     float x, y, z = 0;
                     pPamela->GetContactPoint(m_creature, x, y, z, 1.0f);
@@ -1278,11 +1278,18 @@ struct npc_joseph_redpathAI : public ScriptedAI
             case 1: // Pamela appears and runs toward Joseph
                 if (Creature* pPamela = GetClosestCreatureWithEntry(m_creature, NPC_PAMELA_REDPATH, 150.0f, true))
                 {
+                    DBG_DARROWSHIRE("Joseph: step 1 - Pamela found, she calls out");
                     DoBroadcastText(BCT_PAMELA_1, pPamela);
                     pPamela->GetMotionMaster()->MovePoint(0, 1450.733f, -3599.974f, 85.621f, FORCED_MOVEMENT_WALK);
+                    ++m_uiEventStep;
+                    DisableTimer(ACTION_REUNION_STEP);
                 }
-                ++m_uiEventStep;
-                DisableTimer(ACTION_REUNION_STEP);
+                else
+                {
+                    // Do not lose Pamela's line: retry until she is found.
+                    DBG_DARROWSHIRE("Joseph: step 1 - Pamela NOT found, retrying in 1s");
+                    ResetTimer(ACTION_REUNION_STEP, 1000);
+                }
                 break;
             case 2: // Pamela sees Joseph
                 if (Creature* pPamela = GetClosestCreatureWithEntry(m_creature, NPC_PAMELA_REDPATH, 150.0f, true))
