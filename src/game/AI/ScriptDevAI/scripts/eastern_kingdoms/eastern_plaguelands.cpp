@@ -902,11 +902,8 @@ struct npc_darrowshire_event_managerAI : public ScriptedAI
                         {
                             DoBroadcastText(BCT_REDPATH_CORRUPTED, pRedpathCorrupted, nullptr, CHAT_TYPE_ZONE_YELL);
                             m_redpathCorruptedGuid = pRedpathCorrupted->GetObjectGuid();
-                                                    }
-                        else
-                                                }
-                    else
-                                            break;
+                        }
+                        break;
                 }
 
                 if (Creature* pRedpath = m_creature->GetMap()->GetCreature(m_redpathGuid))
