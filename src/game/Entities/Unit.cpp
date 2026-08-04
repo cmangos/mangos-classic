@@ -11221,6 +11221,9 @@ void Unit::SendMessageToAllWhoSeeMeMove(WorldPacket const& data, ObjectGuid move
             if (Player* player = GetMap()->GetPlayer(guid))
                 player->GetSession()->SendPacket(data);
         }
+
+        if (IsPlayer() && moverOwner != GetObjectGuid())
+            static_cast<Player const*>(this)->GetSession()->SendPacket(data);
     }
 }
 
