@@ -1707,7 +1707,7 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
                 if (isLootedForAll)
                 {
                     // show sometimes an empty window
-                    if (sWorld.getConfig(CONFIG_BOOL_CORPSE_EMPTY_LOOT_SHOW) && urand(0, 2) == 1)
+                    if (sWorld.getConfig(CONFIG_BOOL_CORPSE_EMPTY_LOOT_SHOW))
                     {
                         m_isFakeLoot = true;
                         isLootedForAll = false;
