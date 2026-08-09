@@ -1886,7 +1886,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
             }
 
             // Normal Movement
-            if ((m_script->textId[1] & 0x1) != 0) // make it main movegen
+            if ((m_script->moveTo.flags & 0x2) != 0) // make it main movegen
                 unit->GetMotionMaster()->Clear(false, true);
             else
                 unit->GetMotionMaster()->Clear();

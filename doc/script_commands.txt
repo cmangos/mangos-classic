@@ -182,13 +182,12 @@ Defining a buddy could be done in several way:
  3 SCRIPT_COMMAND_MOVE_TO                   resultingSource = Creature
                                             If position is very near to current position, or x=y=z=0, then only orientation is changed
                                             * datalong = dbscripts_on_relay id - executed for source and target same as this script
-                                            * datalong2
+                                            * datalong2 = 0x2 make it main movegen and persist through combat evade
                                             * datalong3 = enum ForcedMovement
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: teleport unit to position
                                             * x/y/z/o
                                             * dataint = 1 to init move to respawn position, 2 to init creature group member each in their respawn position.
                                                         no other data is needed. So ex: command 3 ... dataint=1 and creature should head to its respawn pos
-                                            * dataint2 = 0x1 to make it main movegen and persist through combat evade
 
  4 SCRIPT_COMMAND_FLAG_SET                  source = any
                                             * datalong = field_id
