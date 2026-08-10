@@ -68,6 +68,12 @@ PetAI::PetAI(Creature* creature, uint32 combatActions) : CreatureAI(creature, co
 void PetAI::MoveInLineOfSight(Unit* who)
 {
     CharmInfo* charmInfo = m_unit->GetCharmInfo();
+    if (CanHandleCharm() && !charmInfo)
+    {
+        CreatureAI::MoveInLineOfSight(who);
+        return;
+    }
+
     MANGOS_ASSERT(charmInfo);
 
     Unit* victim = m_unit->GetVictim();
