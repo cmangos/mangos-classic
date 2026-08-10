@@ -2839,6 +2839,26 @@ bool ChatHandler::ExtractUint32KeyFromLink(char** text, char const* linkType, ui
     return ExtractUInt32(&arg, value);
 }
 
+bool ChatHandler::ExtractUint32KeysFromLink(char** text, char const* linkType1, char const* linkType2, uint32& value1, uint32& value2)
+{
+    char const* linkTypes[2];
+    linkTypes[0] = linkType1;
+    linkTypes[1] = linkType2;
+
+    int foundIdx;
+    char something1[100];
+    char* something1Pointer = &something1[0];
+
+    char* arg = ExtractKeyFromLink(text, linkTypes, &foundIdx, &something1Pointer);
+    if (!arg)
+        return false;
+
+    if (foundIdx == -1)
+        return ExtractUInt32(&arg, value1) && ExtractUInt32(text, value2);
+
+    return ExtractUInt32(&arg, value1) && ExtractUInt32(&something1Pointer, value2);
+}
+
 GameObject* ChatHandler::GetGameObjectWithGuid(uint32 lowguid, uint32 entry) const
 {
     if (!m_session)

@@ -1008,19 +1008,15 @@ bool ChatHandler::HandleGameObjectDeleteCommand(char* args)
 // turn selected object
 bool ChatHandler::HandleGameObjectTurnCommand(char* args)
 {
-    // number or [name] Shift-click form |color|Hgameobject:go_id|h[name]|h|r
-    uint32 lowguid;
-    if (!ExtractUint32KeyFromLink(&args, "Hgameobject", lowguid))
+    // number or [name] Shift-click form |color|Hgameobject:go_id:go_entry|h[name]|h|r
+    uint32 lowguid, entry;
+    if (!ExtractUint32KeysFromLink(&args, "Hgameobject", nullptr, lowguid, entry))
         return false;
 
-    if (!lowguid)
+    if (!lowguid || !entry)
         return false;
 
-    GameObject* obj = nullptr;
-
-    // by DB guid
-    if (GameObjectData const* go_data = sObjectMgr.GetGOData(lowguid))
-        obj = GetGameObjectWithGuid(lowguid, go_data->id);
+    GameObject* obj = GetGameObjectWithGuid(lowguid, entry);
 
     if (!obj)
     {
@@ -1052,19 +1048,15 @@ bool ChatHandler::HandleGameObjectTurnCommand(char* args)
 // move selected object
 bool ChatHandler::HandleGameObjectMoveCommand(char* args)
 {
-    // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
-    uint32 lowguid;
-    if (!ExtractUint32KeyFromLink(&args, "Hgameobject", lowguid))
+    // number or [name] Shift-click form |color|Hgameobject:go_guid:go_entry|h[name]|h|r
+    uint32 lowguid, entry;
+    if (!ExtractUint32KeysFromLink(&args, "Hgameobject", nullptr, lowguid, entry))
         return false;
 
-    if (!lowguid)
+    if (!lowguid || !entry)
         return false;
 
-    GameObject* obj = nullptr;
-
-    // by DB guid
-    if (GameObjectData const* go_data = sObjectMgr.GetGOData(lowguid))
-        obj = GetGameObjectWithGuid(lowguid, go_data->id);
+    GameObject* obj = GetGameObjectWithGuid(lowguid, entry);
 
     if (!obj)
     {
@@ -1262,19 +1254,15 @@ bool ChatHandler::HandleGameObjectNearCommand(char* args)
 
 bool ChatHandler::HandleGameObjectActivateCommand(char* args)
 {
-    // number or [name] Shift-click form |color|Hgameobject:go_id|h[name]|h|r
-    uint32 lowguid;
-    if (!ExtractUint32KeyFromLink(&args, "Hgameobject", lowguid))
+    // number or [name] Shift-click form |color|Hgameobject:go_id:go_entry|h[name]|h|r
+    uint32 lowguid, entry;
+    if (!ExtractUint32KeysFromLink(&args, "Hgameobject", nullptr, lowguid, entry))
         return false;
 
-    if (!lowguid)
+    if (!lowguid || !entry)
         return false;
 
-    GameObject* obj = nullptr;
-
-    // by DB guid
-    if (GameObjectData const* go_data = sObjectMgr.GetGOData(lowguid))
-        obj = GetGameObjectWithGuid(lowguid, go_data->id);
+    GameObject* obj = GetGameObjectWithGuid(lowguid, entry);
 
     if (!obj)
     {
@@ -1348,7 +1336,7 @@ bool ChatHandler::HandleGameObjectNearSpawnedCommand(char* args)
         uint32 spawnGroupId = 0;
         if (SpawnGroupEntry* groupEntry = player->GetMap()->GetMapDataContainer().GetSpawnGroupByGuid(guid, TYPEID_GAMEOBJECT))
             spawnGroupId = groupEntry->Id;
-        PSendSysMessage(LANG_GO_MIXED_LIST_CHAT, guid.GetCounter(), PrepareStringNpcOrGoSpawnInformation<GameObject>(guid).c_str(), entry, guid, entry, goInfo->name, x, y, z, go->GetMapId(), spawnGroupId);
+        PSendSysMessage(LANG_GO_MIXED_LIST_CHAT, guid.GetCounter(), PrepareStringNpcOrGoSpawnInformation<GameObject>(guid).c_str(), entry, guid.GetCounter(), entry, goInfo->name, x, y, z, go->GetMapId(), spawnGroupId);
     }
 
     PSendSysMessage(LANG_COMMAND_NEAROBJMESSAGE, distance, gameobjects.size());
