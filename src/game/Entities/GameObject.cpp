@@ -1414,7 +1414,7 @@ bool GameObject::CanUseNow(Player const* player) const
                 return false;
 
             WorldObject const* owner = GetOwner();
-            if (owner->IsPlayer())
+            if (owner && owner->IsPlayer())
             {
                 Player const* ownerPlayer = static_cast<Player const*>(owner);
                 if (!player->IsInGroup(ownerPlayer, false))
