@@ -1397,6 +1397,14 @@ void GameObject::SwitchDoorOrButton(bool activate, bool alternative /* = false *
 
 bool GameObject::CanUseNow(Player const* player) const
 {
+    // Safety check: ensure GameObjectInfo is valid before proceeding
+    GameObjectInfo const* goInfo = GetGOInfo();
+    if (!goInfo)
+    {
+        sLog.outError("GameObject::CanUseNow: GetGOInfo() returned NULL for entry %u, guid %u", GetEntry(), GetGUIDLow());
+        return false;
+    }
+
     switch (GetGoType())
     {
         case GAMEOBJECT_TYPE_CHAIR:
@@ -1409,12 +1417,13 @@ bool GameObject::CanUseNow(Player const* player) const
         }
         case GAMEOBJECT_TYPE_SUMMONING_RITUAL:
         {
-            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(m_goInfo->summoningRitual.spellId);
+            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(goInfo->summoningRitual.spellId);
             if (spellInfo && spellInfo->HasAttribute(SPELL_ATTR_NOT_IN_COMBAT_ONLY_PEACEFUL) && player->IsInCombat())
                 return false;
 
+            // Safety check: owner might be nullptr
             WorldObject const* owner = GetOwner();
-            if (owner->IsPlayer())
+            if (owner && owner->IsPlayer())
             {
                 Player const* ownerPlayer = static_cast<Player const*>(owner);
                 if (!player->IsInGroup(ownerPlayer, false))
@@ -1424,10 +1433,10 @@ bool GameObject::CanUseNow(Player const* player) const
         }
     }
 
-    if (!GetGOInfo()->GetLockId())
+    if (!goInfo->GetLockId())
     {
         // mounted and cannot unmount
-        if (player->GetMountID() && !GetGOInfo()->IsUsableMounted() && (player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_TAXI_FLIGHT) || !player->IsClientControlled()))
+        if (player->GetMountID() && !goInfo->IsUsableMounted() && (player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_TAXI_FLIGHT) || !player->IsClientControlled()))
             return false;
 
         // We can't interact with anyone while being shapeshifted, unless form flags allow us to do so
@@ -1443,6 +1452,20 @@ bool GameObject::CanUseNow(Player const* player) const
                 return false;
         }
     }
+
+    // client checks this but needs recheck
+    if (!goInfo->IsUsableInCombat() && player->IsInCombat())
+        return false;
+
+    // client checks this but needs recheck
+    if (goInfo->CannotBeUsedUnderImmunity() && player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE))
+        return false;
+
+    if (HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED) && !GetSpellForLock(player)) // we should not allow use of a locked GO
+        return false;
+
+    return true;
+}
 
     // client checks this but needs recheck
     if (!GetGOInfo()->IsUsableInCombat() && player->IsInCombat())
