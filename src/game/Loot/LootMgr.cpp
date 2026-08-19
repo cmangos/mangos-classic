@@ -1012,8 +1012,9 @@ bool Loot::FillLoot(uint32 loot_id, LootStore const& store, Player* lootOwner, b
             {
                 case MASTER_LOOT:
                 {
-                    // roll item if masterloot is not in the list or if masterloot have no right for this item
-                    if (!masterLooter || lootItem->allowedGuid.find(m_masterOwnerGuid) == lootItem->allowedGuid.end())
+                    // roll item only if there is no masterloot to distribute it. Not meeting the
+                    // item condition does not prevent him from giving it to an eligible player.
+                    if (!masterLooter)
                         lootItem->isBlocked = true;
                     break;
                 }
