@@ -775,6 +775,7 @@ class Creature : public Unit
         std::pair<bool, GuidVector> MarkCallAssistanceOnPull(Unit* enemy);
         void CallAssistanceOnPull(Unit* enemy, GuidVector const& receiverList);
         void SetNoCallAssistance(bool val) { m_AlreadyCallAssistance = val; }
+        bool GetNoCallAssistance() { return m_AlreadyCallAssistance; }
         bool CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction = true) const;
         bool CanInitiateAttack() const override;
         bool CanCallForAssistance() const override { return m_canCallForAssistance; }

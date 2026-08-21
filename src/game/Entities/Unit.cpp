@@ -7964,7 +7964,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
                     if (PvP)
                         enemy->GetCombatManager().TriggerCombatTimer(controller);
                 }
-                else
+                else if (!controller->GetVictim())
                 {
                     MANGOS_ASSERT(controller->AI()); // a player without UNIT_FLAG_PLAYER_CONTROLLED should always have AI
                     controller->AI()->AttackStart(enemy);
