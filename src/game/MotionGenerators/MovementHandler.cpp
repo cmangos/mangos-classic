@@ -377,6 +377,16 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recv_data)
     recv_data >> movementInfo;
     /*----------------*/
 
+    // The Vanilla client treats space as a normal jump even while the legacy
+    // flying flags are active. Reject it and resync the client before it can
+    // replace fly mode with a falling movement state.
+    if (opcode == MSG_MOVE_JUMP && plMover && plMover->CanFly())
+    {
+        plMover->m_movementInfo.RemoveMovementFlag(movementOrTurningFlagsMask);
+        plMover->SendHeartBeat();
+        return;
+    }
+
     if (!ProcessMovementInfo(movementInfo, mover, plMover, recv_data))
         return;
 
