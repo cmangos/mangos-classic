@@ -12401,7 +12401,23 @@ void Unit::SetSwim(bool enable)
 
 void Unit::SetCanFly(bool enable)
 {
-    // TBC+
+    if (!IsPlayer())
+        return;
+
+    if (enable)
+    {
+        if (GenericTransport* transport = GetTransport())
+        {
+            transport->RemovePassenger(this);
+            StopMoving(true);
+        }
+
+        m_movementInfo.SetMovementFlags(MovementFlags(MOVEFLAG_LEVITATING | MOVEFLAG_SWIMMING | MOVEFLAG_SPLINE_ENABLED | MOVEFLAG_FLYING));
+    }
+    else
+        m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
+
+    SendHeartBeat();
 }
 
 void Unit::SetFeatherFall(bool enable)
