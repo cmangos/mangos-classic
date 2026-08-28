@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
         if (vm.count("version"))
         {
             std::cout << _FULLVERSION(REVISION_DATE, REVISION_ID) << std::endl;
-            std::cout << "Boost version " << (BOOST_VERSION / 10000) << "." << ((BOOST_VERSION / 100) % 1000) << "." << (BOOST_VERSION % 100) << std::endl;
+            std::cout << "Boost version " << (BOOST_VERSION / 100000) << "." << ((BOOST_VERSION / 100) % 1000) << "." << (BOOST_VERSION % 100) << std::endl;
             return 0;
         }
     }
