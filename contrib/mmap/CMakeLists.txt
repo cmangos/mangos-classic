@@ -121,4 +121,9 @@ if (BUILD_EXTRACTORS)
   install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR}/tools)
   install(PROGRAMS "${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/MoveMapGen.sh" DESTINATION ${BIN_DIR}/tools)
   install(FILES "${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/offmesh.txt" DESTINATION ${BIN_DIR}/tools)
+  # MoveMapGen.sh passes --configInputPath config.json unconditionally, and
+  # MapBuilder silently ignores a config file it cannot open, so without this
+  # every non-MSVC build generates mmaps with the per-map tuning overrides
+  # missing -- and reports success while doing it.
+  install(FILES "${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/config.json" DESTINATION ${BIN_DIR}/tools)
 endif()
