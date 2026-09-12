@@ -354,6 +354,9 @@ INSERT INTO scripted_areatrigger VALUES
 
 /* EASTERN PLAGUELANDS */
 UPDATE creature_template SET ScriptName='npc_eris_havenfire' WHERE entry=14494;
+UPDATE creature_template SET ScriptName='npc_darrowshire_event_manager' WHERE entry=18200;
+UPDATE creature_template SET ScriptName='npc_joseph_redpath' WHERE entry=10936;
+UPDATE gameobject_template SET ScriptName='go_darrowshire_trigger' WHERE entry=177526;
 
 /* ELWYNN FOREST */
 UPDATE gameobject_template SET ScriptName = 'go_marshal_haggards_chest' WHERE entry=1562;
