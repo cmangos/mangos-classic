@@ -2814,7 +2814,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 break;
             }
 
-            float x, y, z;
+            float x, y, z = pTarget->GetPositionZ();
             if (m_script->moveDynamic.maxDist == 0)         // Move to pTarget
             {
                 if (pTarget == source)
