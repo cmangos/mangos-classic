@@ -726,7 +726,7 @@ bool AuthSocket::_HandleReconnectChallenge()
         uint16 remaining = header->size;
         DEBUG_LOG("[ReconnectChallenge] got header, body is %#04x bytes", remaining);
 
-        if ((remaining < sizeof(sAuthLogonChallengeBody) - 10))
+        if ((remaining < sizeof(sAuthLogonChallengeBody) - AUTH_LOGON_MAX_NAME))
             return;
 
         if (remaining > sizeof(sAuthLogonChallengeBody))
@@ -749,7 +749,7 @@ bool AuthSocket::_HandleReconnectChallenge()
                 return;
             }
 
-            if (body->userName_len > 10)
+            if (body->userName_len > AUTH_LOGON_MAX_NAME)
                 return;
 
             body->userName[body->userName_len] = '\0';
