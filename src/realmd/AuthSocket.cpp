@@ -154,7 +154,6 @@ typedef struct AUTH_LOGON_PROOF_S_BUILD_6005
 
 typedef struct AUTH_RECONNECT_PROOF_C
 {
-    uint8   cmd;
     uint8   R1[16];
     uint8   R2[20];
     uint8   R3[20];
@@ -844,6 +843,8 @@ bool AuthSocket::_HandleReconnectProof()
 
             // Set _status to authed!
             self->_status = STATUS_AUTHED;
+
+            self->ProcessIncomingData();
 
             return;
         }
