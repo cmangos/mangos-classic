@@ -60,7 +60,9 @@ void SOAPThread::Work()
 
         auto copy = soap_copy(&soap);
         soap_serve(copy);
-        soap_destroy(copy);
+        soap_destroy(copy); // deserialized C++ objects
+        soap_end(copy);     // temporary data
+        soap_free(copy);    // the copied context itself (allocated by soap_copy)
     }
 
     soap_end(&soap);
