@@ -35,7 +35,7 @@ jobs:
             COMPILER_CC: clang
             COMPILER_PP: clang++
             USE_PCH: ON
-            EXTRA_BUILD: "-DBUILD_EXTRACTORS=ON -DBUILD_AHBOT=ON -DBUILD_PLAYERBOT=ON "
+            EXTRA_BUILD: "-DBUILD_EXTRACTORS=ON -DBUILD_AHBOT=ON -DBUILD_PLAYERBOTS=ON "
 
     steps:
       - name: Checkout
