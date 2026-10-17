@@ -498,8 +498,6 @@ void npc_doctorAI::UpdateAI(const uint32 uiDiff)
                             m_vPatientSummonCoordinates.erase(itr);
                         }
                     }
-
-                    ++m_uiSummonPatientCount;
                 }
             }
 
@@ -510,6 +508,7 @@ void npc_doctorAI::UpdateAI(const uint32 uiDiff)
             else
                 m_uiSummonPatientTimer = 10000;
 
+            m_uiSummonPatientCount += totalSpawned;
         }
         else
             m_uiSummonPatientTimer -= uiDiff;
