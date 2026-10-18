@@ -206,6 +206,9 @@ class BIH
                                 intervalMax = (tf <= intervalMax) ? tf : intervalMax;
                                 continue;
                             }
+
+                            MANGOS_ASSERT(stackPos < MAX_STACK_SIZE); // should never happen, subdivide guards against this
+
                             // ray passes through both nodes
                             // push back node
                             stack[stackPos].node = back;

@@ -157,6 +157,8 @@ namespace VMAP
         float maxDist = (pos2 - pos1).magnitude();
         // valid map coords should *never ever* produce float overflow, but this would produce NaNs too:
         MANGOS_ASSERT(maxDist < std::numeric_limits<float>::max());
+        MANGOS_ASSERT(!std::isnan(maxDist));
+        MANGOS_ASSERT(std::isfinite(maxDist));
         // prevent NaN values which can cause BIH intersection to enter infinite loop
         if (maxDist < 1e-10f)
             return true;
@@ -175,6 +177,8 @@ namespace VMAP
         float maxDist = (pPos2 - pPos1).magnitude();
         // valid map coords should *never ever* produce float overflow, but this would produce NaNs too:
         MANGOS_ASSERT(maxDist < std::numeric_limits<float>::max());
+        MANGOS_ASSERT(!std::isnan(maxDist));
+        MANGOS_ASSERT(std::isfinite(maxDist));
         // prevent NaN values which can cause BIH intersection to enter infinite loop
         if (maxDist < 1e-10f)
         {
@@ -212,6 +216,11 @@ namespace VMAP
 
     float StaticMapTree::getHeight(const Vector3& pPos, float maxSearchDist) const
     {
+        MANGOS_ASSERT(maxSearchDist < std::numeric_limits<float>::max());
+        MANGOS_ASSERT(maxSearchDist > std::numeric_limits<float>::lowest());
+        MANGOS_ASSERT(!std::isnan(maxSearchDist));
+        MANGOS_ASSERT(std::isfinite(maxSearchDist));
+
         float height = G3D::inf();
         Vector3 dir;
         if (maxSearchDist >= 0.f)
