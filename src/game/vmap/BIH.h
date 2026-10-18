@@ -24,6 +24,7 @@
 #include <G3D/AABox.h>
 
 #include <Platform/Define.h>
+#include <Util/Errors.h>
 
 #include <vector>
 #include <algorithm>
