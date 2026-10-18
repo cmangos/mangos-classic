@@ -71,7 +71,7 @@ struct MelodiousRapture : public SpellScript
     {
         Unit* caster = spell->GetCaster();
         Unit* target = spell->GetUnitTarget();
-        if (caster->IsPlayer())
+        if (!caster->IsPlayer())
             return;
 
         static_cast<Creature*>(target)->UpdateEntry(NPC_ENTHRALLED_DEEPRUN_RAT);
