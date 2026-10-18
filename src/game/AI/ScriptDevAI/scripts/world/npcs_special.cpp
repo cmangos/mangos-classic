@@ -434,7 +434,7 @@ void npc_doctorAI::PatientSaved(Creature* /*soldier*/, Player* pPlayer, Position
 
 void npc_doctorAI::UpdateAI(const uint32 uiDiff)
 {
-    if (m_bIsEventInProgress && m_uiSummonPatientCount >= 21)	// worst case scenario : 5 deads + 15 saved
+    if (m_bIsEventInProgress && m_uiSummonPatientCount >= 21)	// worst case scenario : 5 dead + 15 saved
     {
         Reset();
         return;
@@ -508,7 +508,7 @@ void npc_doctorAI::UpdateAI(const uint32 uiDiff)
             else
                 m_uiSummonPatientTimer = 10000;
 
-            ++m_uiSummonPatientCount;
+            m_uiSummonPatientCount += totalSpawned;
         }
         else
             m_uiSummonPatientTimer -= uiDiff;
