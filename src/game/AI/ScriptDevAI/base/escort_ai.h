@@ -21,6 +21,7 @@ struct npc_escortAI : public ScriptedAI
 {
     public:
         explicit npc_escortAI(Creature* creature);
+        explicit npc_escortAI(Creature* creature, uint32 combatActions);
         ~npc_escortAI() {}
 
         void GetAIInformation(ChatHandler& reader) override;

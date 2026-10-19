@@ -16,7 +16,12 @@ EndScriptData */
 
 const float MAX_PLAYER_DISTANCE = 66.0f;
 
-npc_escortAI::npc_escortAI(Creature* creature) : ScriptedAI(creature),
+npc_escortAI::npc_escortAI(Creature* creature) : npc_escortAI(creature, 0)
+{
+
+}
+
+npc_escortAI::npc_escortAI(Creature* creature, uint32 combatActions) : ScriptedAI(creature, combatActions),
     m_questForEscort(nullptr),
     m_playerGuid(),
     m_playerCheckTimer(1000),
@@ -26,7 +31,8 @@ npc_escortAI::npc_escortAI(Creature* creature) : ScriptedAI(creature),
     m_canReturnToStart(false),
     m_waypointPathID(0),
     m_currentEscortWaypointPath(0)
-{}
+{
+}
 
 void npc_escortAI::GetAIInformation(ChatHandler& reader)
 {
