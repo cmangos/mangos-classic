@@ -1221,9 +1221,16 @@ float TerrainInfo::GetWaterOrGroundLevel(float x, float y, float z, float& groun
 
 GridMap* TerrainInfo::GetGrid(const float x, const float y, bool loadOnlyMap /*= false*/)
 {
+    // Range-check as floats before the int cast, which is undefined for NaN, inf or huge values.
+    // The negated comparisons reject NaN.
+    const float fx = 32 - x / SIZE_OF_GRIDS;
+    const float fy = 32 - y / SIZE_OF_GRIDS;
+    if (!(fx > -1.0f && fx < MAX_NUMBER_OF_GRIDS) || !(fy > -1.0f && fy < MAX_NUMBER_OF_GRIDS))
+        return nullptr;
+
     // half opt method
-    int gx = (int)(32 - x / SIZE_OF_GRIDS);                 // grid x
-    int gy = (int)(32 - y / SIZE_OF_GRIDS);                 // grid y
+    int gx = (int)fx;                                       // grid x
+    int gy = (int)fy;                                       // grid y
 
     // quick check if GridMap already loaded
     GridMap* pMap = m_GridMaps[gx][gy];
