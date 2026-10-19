@@ -254,8 +254,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
 
 static AuraType const frozenAuraTypes[] = { SPELL_AURA_MOD_ROOT, SPELL_AURA_MOD_STUN, SPELL_AURA_NONE };
 
-Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster, Item* castItem) :
-    m_spellmod(nullptr), m_periodicTimer(0), m_periodicTick(0), m_removeMode(AURA_REMOVE_BY_DEFAULT),
+Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster, Item* castItem, bool spellModFinalUse) :
+    m_spellmod(nullptr), m_unmoddedAmount(0), m_periodicTimer(0), m_periodicTick(0), m_removeMode(AURA_REMOVE_BY_DEFAULT),
     m_effIndex(eff), m_positive(false), m_isPeriodic(false), m_isAreaAura(false),
     m_isPersistent(false), m_magnetUsed(false), m_spellAuraHolder(holder),
     m_scriptValue(0), m_storage(nullptr), m_affectOverriden(false), m_scriptRef(this, NoopAuraDeleter())
@@ -270,8 +270,14 @@ Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* curr
     m_applyTime = time(nullptr);
 
     int32 damage = currentDamage ? *currentDamage : m_currentBasePoints;
+    m_unmoddedAmount = damage;
     if (caster)
     {
+        // Caster spellmods on the aura value (Permafrost's extra slow, absorb spell power bonus).
+        // The only place they reach an applied aura; Spell::CheckCast computes a throwaway copy,
+        // and AreaAura::Update passes m_unmoddedAmount so the mods are not applied twice and
+        // spellModFinalUse false so a spread to a new target consumes no spellmod charges.
+        damage = CalculateAuraEffectValue(caster, target, spellproto, eff, damage, spellModFinalUse);
         damage = OnAuraValueCalculate(caster, damage, castItem);
     }
 
@@ -297,7 +303,7 @@ Aura::~Aura()
 
 AreaAura::AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target,
                    Unit* caster, Item* castItem, uint32 originalRankSpellId)
-    : Aura(spellproto, eff, currentDamage, currentBasePoints, holder, target, caster, castItem), m_originalRankSpellId(originalRankSpellId)
+    : Aura(spellproto, eff, currentDamage, currentBasePoints, holder, target, caster, castItem, originalRankSpellId == 0), m_originalRankSpellId(originalRankSpellId)
 {
     m_isAreaAura = true;
 
@@ -543,7 +549,10 @@ void AreaAura::Update(uint32 diff)
                     continue;
 
                 int32 actualBasePoints = m_currentBasePoints;
-                int32 actualDamage = m_modifier.m_baseAmount;
+                // Pre-mod value: the new aura's ctor applies the caster mods itself. Like m_baseAmount
+                // (only written by SetModifier from the ctor; stack refresh rescales m_amount), it
+                // never changes after construction.
+                int32 actualDamage = m_unmoddedAmount;
                 // recalculate basepoints for lower rank (all AreaAura spell not use custom basepoints?)
                 if (actualSpellInfo != GetSpellProto())
                 {
@@ -6048,7 +6057,7 @@ void SpellAuraHolder::OnDispel(Unit* dispeller, uint32 dispellingSpellId, uint32
         script->OnDispel(this, dispeller, dispellingSpellId, originalStacks);
 }
 
-uint32 Aura::CalculateAuraEffectValue(Unit* caster, Unit* target, SpellEntry const* spellProto, SpellEffectIndex effIdx, uint32 value)
+int32 Aura::CalculateAuraEffectValue(Unit* caster, Unit* target, SpellEntry const* spellProto, SpellEffectIndex effIdx, int32 value, bool finalUse)
 {
     switch (spellProto->EffectApplyAuraName[effIdx])
     {
@@ -6069,7 +6078,7 @@ uint32 Aura::CalculateAuraEffectValue(Unit* caster, Unit* target, SpellEntry con
         {
             if (caster)
                 if (Player* modOwner = caster->GetSpellModOwner())
-                    modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_SPEED, value);
+                    modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_SPEED, value, finalUse);
             return value;
         }
         case SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK:
@@ -6080,7 +6089,7 @@ uint32 Aura::CalculateAuraEffectValue(Unit* caster, Unit* target, SpellEntry con
         {
             if (caster)
                 if (Player* modOwner = caster->GetSpellModOwner())
-                    modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_HASTE, value);
+                    modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_HASTE, value, finalUse);
             return value;
         }
         case SPELL_AURA_MOD_ATTACK_POWER:
@@ -6090,7 +6099,7 @@ uint32 Aura::CalculateAuraEffectValue(Unit* caster, Unit* target, SpellEntry con
         {
             if (caster)
                 if (Player* modOwner = caster->GetSpellModOwner())
-                    modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_ATTACK_POWER, value);
+                    modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_ATTACK_POWER, value, finalUse);
             return value;
         }
     }

@@ -483,7 +483,7 @@ class Aura
         void UseMagnet() { m_magnetUsed = true; }
         bool IsMagnetUsed() const { return m_magnetUsed; }
 
-        static uint32 CalculateAuraEffectValue(Unit* caster, Unit* target, SpellEntry const* spellProto, SpellEffectIndex effIdx, uint32 value);
+        static int32 CalculateAuraEffectValue(Unit* caster, Unit* target, SpellEntry const* spellProto, SpellEffectIndex effIdx, int32 value, bool finalUse = true);
 
         // Scripting system
         AuraScript* GetAuraScript() const { return GetHolder()->GetAuraScript(); }
@@ -519,7 +519,7 @@ class Aura
         void InvalidateScriptRef() { m_scriptRef = nullptr; }
 
     protected:
-        Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = nullptr, Item* castItem = nullptr);
+        Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = nullptr, Item* castItem = nullptr, bool spellModFinalUse = true);
 
         // must be called only from Aura::UpdateAura
         virtual void Update(uint32 diff);
@@ -539,6 +539,7 @@ class Aura
         time_t m_applyTime;
 
         int32 m_currentBasePoints;                          // cache SpellEntry::CalculateSimpleValue and use for set custom base points
+        int32 m_unmoddedAmount;                             // aura value before caster spellmods and the aura script, reused by AreaAura::Update
         int32 m_periodicTimer;                              // Timer for periodic auras
         uint32 m_periodicTick;                              // Tick count pass (including current if use in tick code) from aura apply, used for some tick count dependent aura effects
 
