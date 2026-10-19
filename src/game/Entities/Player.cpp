@@ -1996,7 +1996,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         }
     }
 
-    if ((GetMapId() == mapid) && (!m_transport))            // TODO the !m_transport might have unexpected effects when teleporting from transport to other place on same map
+    // A player outside the world (already removed from its map) needs the far path
+    // even on the same map id: the near path never adds it back to a map.
+    if ((GetMapId() == mapid) && (!m_transport) && IsInWorld()) // TODO the !m_transport might have unexpected effects when teleporting from transport to other place on same map
     {
         // lets reset far teleport flag if it wasn't reset during chained teleports
         SetSemaphoreTeleportFar(false);
