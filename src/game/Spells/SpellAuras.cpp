@@ -6066,7 +6066,24 @@ int32 Aura::CalculateAuraEffectValue(Unit* caster, Unit* target, SpellEntry cons
             float DoneActualBenefit = 0.0f;
             if (spellProto->effectBonusCoefficient[effIdx] > 0)
             {
-                DoneActualBenefit = caster->SpellBaseHealingBonusDone(GetSpellSchoolMask(spellProto)) * spellProto->effectBonusCoefficient[effIdx];
+                // 1.12 scales only these shields, as vmangos does: Power Word: Shield from +healing,
+                // Fire/Frost Ward and Shadow Ward from +spell damage of their school. Ice Barrier and
+                // item or creature absorbs get no bonus.
+                SpellSchoolMask schoolMask = GetSpellSchoolMask(spellProto);
+                switch (sSpellMgr.GetFirstSpellInChain(spellProto->Id))
+                {
+                    case 17:                                // Power Word: Shield
+                        DoneActualBenefit = caster->SpellBaseHealingBonusDone(schoolMask);
+                        break;
+                    case 543:                               // Fire Ward
+                    case 6143:                              // Frost Ward
+                    case 6229:                              // Shadow Ward
+                        DoneActualBenefit = caster->SpellBaseDamageBonusDone(schoolMask);
+                        break;
+                    default:
+                        break;
+                }
+                DoneActualBenefit *= spellProto->effectBonusCoefficient[effIdx];
                 DoneActualBenefit *= caster->CalculateLevelPenalty(spellProto);
 
                 value += (int32)DoneActualBenefit;
