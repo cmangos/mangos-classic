@@ -1921,14 +1921,15 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
 
             spellId = info->spellcaster.spellId;
 
-            onSuccess = [&]()
+            // called after the switch, once the spell has started: capture by value only
+            onSuccess = [this, charges = info->spellcaster.charges]()
             {
                 AddUse();
 
                 // Previously we locked all spellcasters on use with no real indication why
                 // or timeout of the locking. Now only doing it on it being consumed to prevent further use.
                 // spellcaster GOs like city portals should never be locked
-                if (info->spellcaster.charges > 0 && !GetUseCount())
+                if (charges > 0 && !GetUseCount())
                     SetUInt32Value(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
             };
             break;
