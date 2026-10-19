@@ -5010,14 +5010,15 @@ SpellCastResult Spell::CheckCast(bool strict)
                 && m_spellInfo->Effect[2] == SPELL_EFFECT_NONE)
             {
                 bool dispelTarget = false;
-                uint32 mechanic = m_spellInfo->EffectMiscValue[0];
+                // EffectMiscValue is a DispelType; DISPEL_ALL covers several types, so test the mask as Spell::EffectDispel does
+                uint32 checkMask = GetDispellMask(DispelType(m_spellInfo->EffectMiscValue[0]));
                 SpellEntry const* spell = nullptr;
 
                 Unit::SpellAuraHolderMap& Auras = target->GetSpellAuraHolderMap();
                 for (Unit::SpellAuraHolderMap::iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
                 {
                     spell = iter->second->GetSpellProto();
-                    if (spell->Dispel == mechanic)
+                    if (((1 << spell->Dispel) & checkMask) != 0)
                     {
                         dispelTarget = true;
                         break;
