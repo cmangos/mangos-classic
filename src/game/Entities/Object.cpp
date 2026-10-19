@@ -31,6 +31,7 @@
 #include "Entities/UpdateMask.h"
 #include "Entities/Transports.h"
 #include "Maps/TransportMgr.h"
+#include "Movement/MoveSpline.h"
 #include "Util/Util.h"
 #include "Grids/CellImpl.h"
 #include "Grids/GridNotifiers.h"
@@ -318,7 +319,8 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags, Player con
     if (updateFlags & UPDATEFLAG_LIVING)
     {
         MANGOS_ASSERT(unit);
-        if (unit->IsStopped() && unit->m_movementInfo.HasMovementFlag(MOVEFLAG_SPLINE_ENABLED))
+        // IsStopped() is true during a taxi flight, which still runs a spline
+        if (unit->m_movementInfo.HasMovementFlag(MOVEFLAG_SPLINE_ENABLED) && unit->movespline->Finalized())
         {
             sLog.outError("%s is not moving but have spline movement enabled!", GetGuidStr().c_str());
             ((Unit*)this)->m_movementInfo.RemoveMovementFlag(MovementFlags(MOVEFLAG_SPLINE_ENABLED | MOVEFLAG_FORWARD));
