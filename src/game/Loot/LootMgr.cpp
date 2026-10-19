@@ -2226,12 +2226,17 @@ void Loot::GetLootItemsListFor(Player* player, LootItemList& lootList)
 Loot::~Loot()
 {
     SendReleaseForAll();
+    // rolls hold raw LootItem pointers and a started roll reads its item when destroyed,
+    // so they must go before the items
+    m_roll.clear();
     for (auto& m_lootItem : m_lootItems)
         delete m_lootItem;
 }
 
 void Loot::Clear()
 {
+    // same order as in ~Loot: rolls read their LootItem when destroyed
+    m_roll.clear();
     for (auto& m_lootItem : m_lootItems)
         delete m_lootItem;
     m_lootItems.clear();
@@ -2240,7 +2245,6 @@ void Loot::Clear()
     m_ownerSet.clear();
     m_masterOwnerGuid.Clear();
     m_currentLooterGuid.Clear();
-    m_roll.clear();
     m_maxEnchantSkill = 0;
     m_haveItemOverThreshold = false;
     m_isChecked = false;
