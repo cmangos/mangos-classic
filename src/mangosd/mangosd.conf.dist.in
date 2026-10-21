@@ -281,6 +281,11 @@ MaxWhoListReturns = 49
 ###################################################################################################################
 # SERVER LOGGING
 #
+#    LogAppend
+#        Append the new log entries to the same log file instead of clearing/overwriting it at every server start.
+#        Default: 0 - Clear/Overwrite
+#                 1 - Append
+#
 #    LogSQL
 #        Enable logging of GM commands - all SQL code will be written to a log file
 #        All commands are written to a file: YYYY-MM-DD_logSQL.sql
@@ -414,6 +419,7 @@ MaxWhoListReturns = 49
 #
 ###################################################################################################################
 
+LogAppend = 0
 LogSQL = 1
 PidFile = ""
 LogLevel = 1
