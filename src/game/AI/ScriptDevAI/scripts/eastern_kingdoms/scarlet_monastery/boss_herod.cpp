@@ -33,11 +33,12 @@ enum
     SAY_ENRAGE             = -1189002,
     SAY_KILL               = -1189003,
     EMOTE_GENERIC_ENRAGED  = -1000003,
+    GENERIC_EMOTE_FLEE     = 1150,
 
     SAY_TRAINEE_SPAWN      = -1189035,
 
     SPELL_RUSHINGCHARGE    = 8260,
-    SPELL_CLEAVE           = 15496,
+    SPELL_CLEAVE           = 22540,
     SPELL_WHIRLWIND        = 8989,
     SPELL_FRENZY           = 8269,
 
@@ -53,20 +54,21 @@ struct boss_herodAI : public ScriptedAI
 
     uint32 m_uiCleaveTimer;
     uint32 m_uiWhirlwindTimer;
+    uint32 m_uiRushingChargeTimer;
 
     void Reset() override
     {
         m_bTraineeSay = false;
         m_bEnrage     = false;
 
-        m_uiCleaveTimer    = 7500;
-        m_uiWhirlwindTimer = 14500;
+        m_uiCleaveTimer    = urand(3000, 15000);
+        m_uiWhirlwindTimer = urand(10000, 15000);
+        m_uiRushingChargeTimer = urand(0, 5000);
     }
 
     void Aggro(Unit* /*pWho*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_RUSHINGCHARGE);
     }
 
     void SummonedCreature(Creature* pSummoned)
@@ -95,8 +97,8 @@ struct boss_herodAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
-        // If we are < 30% hp enrage
-        if (!m_bEnrage && m_creature->GetHealthPercent() <= 30.0f && !m_creature->IsNonMeleeSpellCasted(false))
+        // If we are < 50% hp enrage
+        if (!m_bEnrage && m_creature->GetHealthPercent() <= 50.0f && !m_creature->IsNonMeleeSpellCasted(false))
         {
             if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
             {
@@ -106,11 +108,10 @@ struct boss_herodAI : public ScriptedAI
             }
         }
 
-        // Cleave
         if (m_uiCleaveTimer < uiDiff)
         {
             DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE);
-            m_uiCleaveTimer = urand(7500, 17500);
+            m_uiCleaveTimer = urand(8000, 24000);
         }
         else
             m_uiCleaveTimer -= uiDiff;
@@ -125,6 +126,17 @@ struct boss_herodAI : public ScriptedAI
         }
         else
             m_uiWhirlwindTimer -= uiDiff;
+
+        if (m_uiRushingChargeTimer < uiDiff)
+        {
+            if (m_creature->IsInRange(m_creature->GetVictim(), 10.0f, 100.0f, true, true))
+            {
+                DoCastSpellIfCan(nullptr, SPELL_RUSHINGCHARGE);
+                m_uiRushingChargeTimer = urand(5000, 10000);
+            }
+        }
+        else
+            m_uiRushingChargeTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
@@ -144,8 +156,13 @@ struct mob_scarlet_traineeAI : public npc_escortAI
     }
 
     uint32 m_uiStartTimer;
+    bool m_hasFled;
 
-    void Reset() override { }
+    void Reset() override
+    {
+        m_hasFled = false;
+    }
+
     void WaypointReached(uint32 /*uiPointId*/) override {}
 
     void UpdateEscortAI(const uint32 uiDiff) override
@@ -163,6 +180,16 @@ struct mob_scarlet_traineeAI : public npc_escortAI
 
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
+
+        // Flee at 15% HP
+        if (m_creature->GetHealthPercent() <= 15.0f && !m_hasFled)
+        {
+            if (m_creature->AI()->DoFlee())
+            {
+                DoBroadcastText(GENERIC_EMOTE_FLEE, m_creature);
+                m_hasFled = true;
+            }
+        }
 
         DoMeleeAttackIfReady();
     }
