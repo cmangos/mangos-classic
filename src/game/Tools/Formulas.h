@@ -298,7 +298,6 @@ namespace MaNGOS
                 default:    // 60+
                     return 12;
             }
-            return false;
         }
 
         enum XPColorChar { RED, ORANGE, YELLOW, GREEN, GRAY };
