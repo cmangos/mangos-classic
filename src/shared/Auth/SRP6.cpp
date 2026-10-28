@@ -18,8 +18,6 @@
 
 #include "Common.h"
 #include "Auth/CryptoHash.h"
-#include "Auth/HMACSHA1.h"
-#include "Auth/base32.h"
 #include "SRP6.h"
 
 SRP6::SRP6()

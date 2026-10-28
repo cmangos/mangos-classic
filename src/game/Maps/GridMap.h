@@ -32,7 +32,6 @@
 class Creature;
 class Unit;
 class WorldPacket;
-class InstanceData;
 class Group;
 class BattleGround;
 class Map;
