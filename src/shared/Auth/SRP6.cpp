@@ -51,8 +51,6 @@ void SRP6::CalculateProof(std::string username)
     {
         hash[i] ^= sha.GetDigest()[i];
     }
-    BigNumber t3;
-    t3.SetBinary(hash, 20);
 
     sha.Initialize();
     sha.UpdateData(username);
@@ -61,7 +59,7 @@ void SRP6::CalculateProof(std::string username)
     memcpy(t4, sha.GetDigest(), Sha1Hash::GetLength());
 
     sha.Initialize();
-    sha.UpdateBigNumbers(&t3, nullptr);
+    sha.UpdateData(hash, 20);
     sha.UpdateData(t4, Sha1Hash::GetLength());
     sha.UpdateBigNumbers(&s, &A, &B, &K, nullptr);
     sha.Finalize();
