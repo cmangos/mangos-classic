@@ -454,7 +454,7 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ BuildPolyPath :: farFromPoly distToStartPoly=%.3f distToEndPoly=%.3f\n", distToStartPoly, distToEndPoly);
 
-        bool buildShotrcut = false;
+        bool buildShortcut = false;
 #ifdef ENABLE_PLAYERBOTS
         if (m_sourceUnit)
         {
@@ -464,13 +464,13 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
             {
                 DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ BuildPolyPath :: underWater case\n");
                 if (m_sourceUnit->CanSwim())
-                    buildShotrcut = true;
+                    buildShortcut = true;
             }
             else
             {
                 DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ BuildPolyPath :: flying case\n");
                 if (m_sourceUnit->CanFly())
-                    buildShotrcut = true;
+                    buildShortcut = true;
             }
 #ifdef ENABLE_PLAYERBOTS
         }
@@ -480,11 +480,11 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
         if (m_sourceUnit && m_sourceUnit->IsPlayer() && IsPointHigherThan(getActualEndPosition(), getStartPosition()))
         {
             sLog.outDebug("%s (%u) Path Shortcut skipped: endPoint is higher", m_sourceUnit->GetName(), m_sourceUnit->GetGUIDLow());
-            buildShotrcut = false;
+            buildShortcut = false;
         }
 #endif
 
-        if (buildShotrcut)
+        if (buildShortcut)
         {
             BuildShortcut();
             m_type = PathType(PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH);
