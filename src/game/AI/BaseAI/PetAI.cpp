@@ -25,6 +25,7 @@
 #include "Entities/Creature.h"
 #include "World/World.h"
 #include "Util/Util.h"
+#include "Globals/ObjectMgr.h"
 
 int PetAI::Permissible(const Creature* creature)
 {

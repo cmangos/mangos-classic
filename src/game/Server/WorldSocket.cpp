@@ -24,7 +24,6 @@
 #include "Server/WorldPacket.h"
 #include "Globals/SharedDefines.h"
 #include "Util/ByteBuffer.h"
-#include "Addons/AddonHandler.h"
 #include "Server/Opcodes.h"
 #include "Server/PacketLog.h"
 #include "Database/DatabaseEnv.h"
@@ -304,8 +303,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     uint32 unk2;
     LocaleConstant locale;
     std::string account, os;
-    Sha1Hash sha1;
-    BigNumber v, s, g, N, K;
+    BigNumber v, s, K;
 
     // Read the content of the packet
     recvPacket >> ClientBuild;
@@ -367,9 +365,6 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     }
 
     Field* fields = queryResult->Fetch();
-
-    N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
-    g.SetDword(7);
 
     v.SetHexStr(fields[5].GetString());
     s.SetHexStr(fields[6].GetString());
@@ -450,12 +445,11 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     Sha1Hash sha;
 
     uint32 t = 0;
-    uint32 seed = m_seed;
 
     sha.UpdateData(account);
     sha.UpdateData((uint8*) & t, 4);
     sha.UpdateData((uint8*) & clientSeed, 4);
-    sha.UpdateData((uint8*) & seed, 4);
+    sha.UpdateData((uint8*) & m_seed, 4);
     sha.UpdateBigNumbers(&K, nullptr);
     sha.Finalize();
 

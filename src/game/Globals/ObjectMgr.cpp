@@ -40,7 +40,6 @@
 #include "Entities/GossipDef.h"
 #include "Mails/Mail.h"
 #include "Tools/Formulas.h"
-#include "Maps/InstanceData.h"
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
 #include "Grids/CellImpl.h"

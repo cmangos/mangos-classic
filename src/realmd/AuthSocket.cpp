@@ -29,10 +29,10 @@
 #include "RealmList.h"
 #include "AuthSocket.h"
 #include "AuthCodes.h"
+#include "Auth/CryptoHash.h"
 #include "Auth/SRP6.h"
 #include "Util/CommonDefines.h"
 
-#include <openssl/md5.h>
 #include <ctime>
 #include <memory>
 #include <utility>
