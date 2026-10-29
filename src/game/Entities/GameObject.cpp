@@ -1910,7 +1910,8 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
 
             spellId = info->spellcaster.spellId;
 
-            onSuccess = [&]()
+            // runs after this case block has left scope, so capture info by value
+            onSuccess = [this, info]()
             {
                 AddUse();
 

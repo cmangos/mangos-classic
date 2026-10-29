@@ -3006,9 +3006,13 @@ SpellCastResult Spell::SpellStart(SpellCastTargets const* targets, Aura* trigger
 
     // create and add update event for this spell
     m_spellEvent = new SpellEvent(this);
+    // cast checks and preparation can remove the caster's events, which deletes this spell; keep it alive until we return
+    auto spellLifetime = m_spellEvent->GetSpellWeakPtr().lock();
     m_trueCaster->m_events.AddEvent(m_spellEvent, m_trueCaster->m_events.CalculateTime(1));
 
     SpellCastResult result = PreCastCheck();
+    if (m_spellState == SPELL_STATE_FINISHED)              // cancelled during the checks
+        return result == SPELL_CAST_OK ? SPELL_FAILED_ERROR : result;
     if (result != SPELL_CAST_OK)
     {
         SendCastResult(result);
@@ -3159,6 +3163,10 @@ void Spell::cancel()
 
 SpellCastResult Spell::cast(bool skipCheck)
 {
+    // preparation can cancel the spell before an instant cast gets here
+    if (m_spellState == SPELL_STATE_FINISHED)
+        return SPELL_FAILED_ERROR;
+
     SetExecutedCurrently(true);
     SpellModRAII spellModController(this, m_trueCaster->GetSpellModOwner());
 
