@@ -2088,6 +2088,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                         case 17: // barrens
                         case 141: // teldrassil
                         case 148: // darkshore
+                        case 215: // mulgore
                         case 1657: // darnassus
                             minimumRequiredSkill = 0;
                             break;
