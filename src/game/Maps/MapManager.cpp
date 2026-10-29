@@ -271,6 +271,10 @@ void MapManager::InitMaxInstanceId()
     {
         i_MaxInstanceId = queryResult->Fetch()[0].GetUInt32();
     }
+
+    // instance id 1 is reserved (see MapPersistentStateManager::PackInstances), so generated ids start at 2
+    if (i_MaxInstanceId < 1)
+        i_MaxInstanceId = 1;
 }
 
 uint32 MapManager::GetNumInstances()
