@@ -4974,8 +4974,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                         {
                             if (affectedMask & (1 << i))
                             {
+                                // Comparison-only copy of the value the Aura constructor computes; never applied,
+                                // and finalUse false so it consumes no spellmod charges
                                 amounts[i] = CalculateSpellEffectValue(SpellEffectIndex(i), target, true, false);
-                                amounts[i] = Aura::CalculateAuraEffectValue(m_caster, target, m_spellInfo, SpellEffectIndex(i), amounts[i]);
+                                amounts[i] = Aura::CalculateAuraEffectValue(m_caster, target, m_spellInfo, SpellEffectIndex(i), amounts[i], false);
                                 if (m_auraScript)
                                 {
                                     AuraCalcData data(nullptr, m_caster, target, m_spellInfo, SpellEffectIndex(i), m_CastItem);
