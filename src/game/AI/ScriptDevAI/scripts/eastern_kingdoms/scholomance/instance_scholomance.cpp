@@ -76,7 +76,7 @@ void instance_scholomance::OnCreatureCreate(Creature* pCreature)
         case NPC_RISEN_GUARDIAN:
             GandlingEventMap::iterator find = m_mGandlingData.find(m_uiGandlingEvent);
             if (find != m_mGandlingData.end())
-                find->second.m_sAddGuids.insert(pCreature->GetGUIDLow());
+                find->second.m_sAddGuids.insert(pCreature->GetObjectGuid());
             break;
     }
 }
@@ -343,7 +343,7 @@ void instance_scholomance::OnCreatureEnterCombat(Creature* pCreature)
                 if (!itr.second.m_sAddGuids.empty())
                 {
                     // set data to fail in case of player death
-                    if (itr.second.m_sAddGuids.find(pCreature->GetGUIDLow()) != itr.second.m_sAddGuids.end())
+                    if (itr.second.m_sAddGuids.find(pCreature->GetObjectGuid()) != itr.second.m_sAddGuids.end())
                     {
                         HandlePortalEvent(itr.first, IN_PROGRESS);
                         break;
@@ -376,7 +376,7 @@ void instance_scholomance::OnCreatureEvade(Creature* pCreature)
                 if (!itr.second.m_sAddGuids.empty())
                 {
                     // set data to fail in case of player death
-                    if (itr.second.m_sAddGuids.find(pCreature->GetGUIDLow()) != itr.second.m_sAddGuids.end())
+                    if (itr.second.m_sAddGuids.find(pCreature->GetObjectGuid()) != itr.second.m_sAddGuids.end())
                     {
                         HandlePortalEvent(itr.first, FAIL);
                         break;
@@ -409,9 +409,9 @@ void instance_scholomance::OnCreatureDeath(Creature* pCreature)
                 if (!itr.second.m_sAddGuids.empty())
                 {
                     // search for the dead minion and erase it
-                    if (itr.second.m_sAddGuids.find(pCreature->GetGUIDLow()) != itr.second.m_sAddGuids.end())
+                    if (itr.second.m_sAddGuids.find(pCreature->GetObjectGuid()) != itr.second.m_sAddGuids.end())
                     {
-                        itr.second.m_sAddGuids.erase(pCreature->GetGUIDLow());
+                        itr.second.m_sAddGuids.erase(pCreature->GetObjectGuid());
 
                         // if the current list is empty; set event id as done
                         if (itr.second.m_sAddGuids.empty())

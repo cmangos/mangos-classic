@@ -171,7 +171,7 @@ class instance_dire_maul : public ScriptedInstance
         GuidList m_luiHighborneSummonerGUIDs;
         GuidList m_lGeneratorGuardGUIDs;
         GuidList m_lDreadsteedPortalsGUIDs;
-        std::set<uint32> m_sSortedGeneratorGuards[MAX_GENERATORS];
+        GuidSet m_sSortedGeneratorGuards[MAX_GENERATORS];
 
         GuidVector m_lRitualSymbolGUIDs;
 

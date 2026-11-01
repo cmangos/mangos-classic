@@ -582,7 +582,7 @@ void instance_dire_maul::SortPylonGuards()
 
                 if (pGuard->IsWithinDist2d(pGenerator->GetPositionX(), pGenerator->GetPositionY(), 20.0f))
                 {
-                    m_sSortedGeneratorGuards[i].insert(pGuard->GetGUIDLow());
+                    m_sSortedGeneratorGuards[i].insert(pGuard->GetObjectGuid());
                     m_lGeneratorGuardGUIDs.erase(itr++);
                 }
                 else
@@ -601,9 +601,9 @@ void instance_dire_maul::PylonGuardJustDied(Creature* pCreature)
             continue;
 
         // Only process generator where the npc is sorted in
-        if (m_sSortedGeneratorGuards[i].find(pCreature->GetGUIDLow()) != m_sSortedGeneratorGuards[i].end())
+        if (m_sSortedGeneratorGuards[i].find(pCreature->GetObjectGuid()) != m_sSortedGeneratorGuards[i].end())
         {
-            m_sSortedGeneratorGuards[i].erase(pCreature->GetGUIDLow());
+            m_sSortedGeneratorGuards[i].erase(pCreature->GetObjectGuid());
             if (m_sSortedGeneratorGuards[i].empty())
                 SetData(TYPE_PYLON_1 + i, DONE);
 

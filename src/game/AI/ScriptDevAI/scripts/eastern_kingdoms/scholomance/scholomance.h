@@ -107,7 +107,7 @@ struct GandlingEventData
     GandlingEventData() : m_bIsActive(false) {}
     bool m_bIsActive;
     ObjectGuid m_doorGuid;
-    std::set<uint32> m_sAddGuids;
+    GuidSet m_sAddGuids;
 };
 
 struct BoxVolume

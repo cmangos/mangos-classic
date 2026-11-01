@@ -103,7 +103,7 @@ void instance_blackfathom_deeps::DoSpawnMobs(uint8 uiWaveIndex)
                 if (Creature* pSummoned = pKelris->SummonCreature(i.m_uiNpcEntry, fPosX, fPosY, fPosZ, fPosO, TEMPSPAWN_DEAD_DESPAWN, 0))
                 {
                     pSummoned->GetMotionMaster()->MovePoint(0, fX_resp, fY_resp, fZ_resp);
-                    m_lWaveMobsGuids[uiWaveIndex].push_back(pSummoned->GetGUIDLow());
+                    m_lWaveMobsGuids[uiWaveIndex].push_back(pSummoned->GetObjectGuid());
                 }
             }
         }
@@ -193,16 +193,16 @@ void instance_blackfathom_deeps::OnCreatureDeath(Creature* pCreature)
     switch (pCreature->GetEntry())
     {
         case NPC_AKUMAI_SERVANT:
-            m_lWaveMobsGuids[1].remove(pCreature->GetGUIDLow());
+            m_lWaveMobsGuids[1].remove(pCreature->GetObjectGuid());
             break;
         case NPC_AKUMAI_SNAPJAW:
-            m_lWaveMobsGuids[0].remove(pCreature->GetGUIDLow());
+            m_lWaveMobsGuids[0].remove(pCreature->GetObjectGuid());
             break;
         case NPC_BARBED_CRUSTACEAN:
-            m_lWaveMobsGuids[2].remove(pCreature->GetGUIDLow());
+            m_lWaveMobsGuids[2].remove(pCreature->GetObjectGuid());
             break;
         case NPC_MURKSHALLOW_SOFTSHELL:
-            m_lWaveMobsGuids[3].remove(pCreature->GetGUIDLow());
+            m_lWaveMobsGuids[3].remove(pCreature->GetObjectGuid());
             break;
     }
 

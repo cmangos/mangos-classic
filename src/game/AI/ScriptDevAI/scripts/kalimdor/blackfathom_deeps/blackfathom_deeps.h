@@ -115,7 +115,7 @@ class instance_blackfathom_deeps : public ScriptedInstance
         uint32 m_uiSpawnMobsTimer[MAX_FIRES];
         uint8 m_uiWaveCounter;
 
-        std::list<uint32> m_lWaveMobsGuids[MAX_FIRES];
+        GuidList m_lWaveMobsGuids[MAX_FIRES];
 };
 
 #endif
