@@ -1567,8 +1567,9 @@ void Player::Update(const uint32 diff)
     else
         m_createdInstanceClearTimer -= diff;
 
+    // a pet beyond the visibility distance is unsummoned, unless its owner possesses it (Eyes of the Beast)
     Pet* pet = GetPet();
-    if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityDistance()) && (GetCharmGuid() && (pet->GetObjectGuid() != GetCharmGuid())))
+    if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityDistance()) && pet->GetObjectGuid() != GetCharmGuid())
         pet->Unsummon(PET_SAVE_REAGENTS, this);
 
     if (IsHasDelayedTeleport() && !m_semaphoreTeleport_Near)
