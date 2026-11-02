@@ -158,7 +158,12 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId)
       m_VisibleDistance(DEFAULT_VISIBILITY_DISTANCE), m_persistentState(nullptr),
       m_activeNonPlayersIter(m_activeNonPlayers.end()), m_onEventNotifiedIter(m_onEventNotifiedObjects.end()),
       i_gridExpiry(expiry), m_TerrainData(sTerrainMgr.LoadTerrain(id)),
-      i_data(nullptr), i_script_id(0), m_transportsIterator(m_transports.begin()), m_spawnManager(*this),
+      i_data(nullptr), i_script_id(0),
+      m_CreatureGuids(HIGHGUID_UNIT, id, InstanceId, [this](ObjectGuid const& guid) { return GetCreature(guid) != nullptr; }),
+      m_GameObjectGuids(HIGHGUID_GAMEOBJECT, id, InstanceId, [this](ObjectGuid const& guid) { return GetGameObject(guid) != nullptr; }),
+      m_DynObjectGuids(HIGHGUID_DYNAMICOBJECT, id, InstanceId, [this](ObjectGuid const& guid) { return GetDynamicObject(guid) != nullptr; }),
+      m_PetGuids(HIGHGUID_PET, id, InstanceId, [this](ObjectGuid const& guid) { return GetPet(guid) != nullptr; }),
+      m_transportsIterator(m_transports.begin()), m_spawnManager(*this),
 #ifdef ENABLE_PLAYERBOTS
       m_activeZonesTimer(0), hasRealPlayers(false),
 #endif
@@ -2543,20 +2548,20 @@ void Map::RemoveStringIdObject(uint32 stringId, WorldObject* obj)
         data.gameobjects.erase(std::remove(data.gameobjects.begin(), data.gameobjects.end(), static_cast<GameObject*>(obj)), data.gameobjects.end());
 }
 
-uint32 Map::GenerateLocalLowGuid(HighGuid guidhigh)
+uint32 Map::GenerateLocalLowGuid(HighGuid guidhigh, uint32 entry /*= 0*/)
 {
-    // TODO: for map local guid counters possible force reload map instead shutdown server at guid counter overflow
+    // Creature, gameobject and pet counters wrap around instead of running out (see MapGuidAllocator)
     switch (guidhigh)
     {
         case HIGHGUID_UNIT:
-            return m_CreatureGuids.Generate();
+            return m_CreatureGuids.Generate(entry);
         case HIGHGUID_TRANSPORT:
         case HIGHGUID_GAMEOBJECT:
-            return m_GameObjectGuids.Generate();
+            return m_GameObjectGuids.Generate(entry);
         case HIGHGUID_DYNAMICOBJECT:
-            return m_DynObjectGuids.Generate();
+            return m_DynObjectGuids.Generate(entry);
         case HIGHGUID_PET:
-            return m_PetGuids.Generate();
+            return m_PetGuids.Generate(entry);
         default:
             MANGOS_ASSERT(false);
             return 0;

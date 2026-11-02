@@ -1601,6 +1601,9 @@ void Creature::SetMountInfo(CreatureInfo const* info)
 
 bool Creature::CreateFromProto(uint32 dbGuid, uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data /*=nullptr*/, GameEventCreatureData const* eventData /*=nullptr*/)
 {
+    if (!guidlow)                                           // no free map guid counter, already logged
+        return false;
+
     m_originalEntry = cinfo->Entry;
 
     uint32 newEntry = cinfo->Entry;
@@ -1669,7 +1672,7 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
     }
 
     if (dynguid || newGuid == 0)
-        newGuid = map->GenerateLocalLowGuid(cinfo->GetHighGuid());
+        newGuid = map->GenerateLocalLowGuid(cinfo->GetHighGuid(), cinfo->Entry);
 
     CreatureCreatePos pos(map, data->posX, data->posY, data->posZ, data->orientation);
 

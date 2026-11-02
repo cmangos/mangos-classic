@@ -38,6 +38,7 @@
 #include "Globals/GraveyardManager.h"
 #include "Maps/SpawnManager.h"
 #include "Maps/MapDataContainer.h"
+#include "Maps/MapGuidAllocator.h"
 #include "Util/UniqueTrackablePtr.h"
 #include "World/WorldStateVariableManager.h"
 
@@ -294,8 +295,9 @@ class Map : public GridRefManager<NGridType>
             i_objectsToClientUpdate.erase(obj);
         }
 
-        // DynObjects currently
-        uint32 GenerateLocalLowGuid(HighGuid guidhigh);
+        // entry: the one written in the guid (the pet number for pets), not used for dynamic objects
+        // Stops the server if no counter is free for this entry after a full round (see MapGuidAllocator)
+        uint32 GenerateLocalLowGuid(HighGuid guidhigh, uint32 entry = 0);
 
         // get corresponding TerrainData object for this particular map
         const TerrainInfo* GetTerrain() const { return m_TerrainData; }
@@ -470,11 +472,11 @@ class Map : public GridRefManager<NGridType>
         uint32 i_script_id;
 
         // Map local low guid counters
-        ObjectGuidGenerator<HIGHGUID_UNIT> m_CreatureGuids;
-        ObjectGuidGenerator<HIGHGUID_GAMEOBJECT> m_GameObjectGuids;
+        MapGuidAllocator m_CreatureGuids;
+        MapGuidAllocator m_GameObjectGuids;
         ObjectGuidGenerator<HIGHGUID_TRANSPORT> m_transportGuids;
-        ObjectGuidGenerator<HIGHGUID_DYNAMICOBJECT> m_DynObjectGuids;
-        ObjectGuidGenerator<HIGHGUID_PET> m_PetGuids;
+        MapGuidAllocator m_DynObjectGuids;
+        MapGuidAllocator m_PetGuids;
 
         // Type specific code for add/remove to/from grid
         template<class T>

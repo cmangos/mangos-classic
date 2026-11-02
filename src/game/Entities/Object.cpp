@@ -2052,7 +2052,7 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map)
         float dist = settings.forcedOnTop ? 0.0f : CONTACT_DISTANCE;
         pos = CreatureCreatePos(settings.spawner, settings.spawner->GetOrientation(), dist, settings.ori);
     }
-    uint32 lowGuid = map->GenerateLocalLowGuid(cinfo->GetHighGuid());
+    uint32 lowGuid = map->GenerateLocalLowGuid(cinfo->GetHighGuid(), cinfo->Entry);
     if (!creature->Create(lowGuid, lowGuid, pos, cinfo))
     {
         delete creature;
