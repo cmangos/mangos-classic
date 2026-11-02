@@ -1043,7 +1043,9 @@ uint8 AuthSocket::getEligibleRealmCount(uint8 accountSecurityLevel)
 {
     uint8 size = 0;
     for (const auto& i : sRealmList)
-        if (i.second.allowedSecurityLevel <= accountSecurityLevel)
+        // must match the skip condition of the loops that actually write the realms below:
+        // a higher-security realm is only left out of the list for plain players, not for GMs
+        if (accountSecurityLevel || i.second.allowedSecurityLevel == 0)
             size++;
 
     return size;
