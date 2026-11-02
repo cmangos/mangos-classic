@@ -55,9 +55,12 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
     const char* s_hex = srp.GetSalt().AsHexStr();
     const char* v_hex = srp.GetVerifier().AsHexStr();
 
+    std::string safe_username = username;
+    LoginDatabase.escape_string(safe_username);
+
     bool update_sv = LoginDatabase.PExecute(
         "INSERT INTO account(username,v,s,joindate) VALUES('%s','%s','%s'," _NOW_ ")",
-            username.c_str(), v_hex, s_hex);
+            safe_username.c_str(), v_hex, s_hex);
 
     OPENSSL_free((void*)s_hex);
     OPENSSL_free((void*)v_hex);

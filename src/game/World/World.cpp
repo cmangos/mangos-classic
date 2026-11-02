@@ -2041,8 +2041,11 @@ bool World::RemoveBanAccount(BanMode mode, const std::string& source, const std:
         if (!account)
             return false;
 
+        std::string safe_source = source;
+        LoginDatabase.escape_string(safe_source);
+
         // NO SQL injection as account is uint32
-        LoginDatabase.PExecute("UPDATE account_banned SET active = '0', unbanned_at = " _UNIXTIME_ ", unbanned_by = '%s' WHERE account_id = '%u'", source.data(), account);
+        LoginDatabase.PExecute("UPDATE account_banned SET active = '0', unbanned_at = " _UNIXTIME_ ", unbanned_by = '%s' WHERE account_id = '%u'", safe_source.c_str(), account);
         WarnAccount(account, source, message, "UNBAN");
     }
     return true;
