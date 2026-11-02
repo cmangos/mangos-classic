@@ -86,8 +86,7 @@ struct npc_aged_dying_ancient_kodoAI : public ScriptedAI
                     case 2: DoScriptText(SAY_SMEED_HOME_3, pWho); break;
                 }
 
-                // spell have no implemented effect (dummy), so useful to notify spellHit
-                m_creature->CastSpell(m_creature, SPELL_KODO_KOMBO_GOSSIP, TRIGGERED_OLD_TRIGGERED);
+                m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             }
         }
     }
@@ -148,7 +147,7 @@ struct KodoKombobulator : public SpellScript
     {
         Unit* caster = spell->GetCaster();
         Unit* target = spell->GetUnitTarget();
-        target->CastSpell(caster, SPELL_KODO_KOMBO_PLAYER_BUFF, TRIGGERED_OLD_TRIGGERED);
+        caster->CastSpell(caster, SPELL_KODO_KOMBO_PLAYER_BUFF, TRIGGERED_OLD_TRIGGERED);
 
         static_cast<Creature*>(target)->UpdateEntry(NPC_TAMED_KODO);
         target->CastSpell(nullptr, SPELL_KODO_KOMBO_DESPAWN_BUFF, TRIGGERED_NONE);
@@ -157,6 +156,7 @@ struct KodoKombobulator : public SpellScript
             target->GetMotionMaster()->MoveIdle();
 
         target->GetMotionMaster()->MoveFollow(caster, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE, true);
+        target->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
     }
 };
 
