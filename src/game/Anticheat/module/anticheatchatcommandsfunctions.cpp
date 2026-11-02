@@ -199,14 +199,14 @@ bool ChatHandler::HandleAnticheatCheatinformCommand(char* args)
     if (!session->HasAccountFlag(ACCOUNT_FLAG_SHOW_ANTICHEAT))
     {
         session->AddAccountFlag(ACCOUNT_FLAG_SHOW_ANTICHEAT);
-        LoginDatabase.PExecute("UPDATE account SET flags = flags | 0x%x WHERE id = %u", session->GetAccountId(), ACCOUNT_FLAG_SHOW_ANTICHEAT);
+        LoginDatabase.PExecute("UPDATE account SET flags = flags | 0x%x WHERE id = %u", ACCOUNT_FLAG_SHOW_ANTICHEAT, session->GetAccountId());
 
         SendSysMessage("Anticheat messages will be shown");
     }
     else
     {
         session->RemoveAccountFlag(ACCOUNT_FLAG_SHOW_ANTICHEAT);
-        LoginDatabase.PExecute("UPDATE account SET flags = flags & ~0x%x WHERE id = %u", session->GetAccountId(), ACCOUNT_FLAG_SHOW_ANTICHEAT);
+        LoginDatabase.PExecute("UPDATE account SET flags = flags & ~0x%x WHERE id = %u", ACCOUNT_FLAG_SHOW_ANTICHEAT, session->GetAccountId());
 
         SendSysMessage("Anticheat messages will be hidden");
     }
@@ -221,14 +221,14 @@ bool ChatHandler::HandleAnticheatSpaminformCommand(char* args)
     if (!session->HasAccountFlag(ACCOUNT_FLAG_SHOW_ANTISPAM))
     {
         session->AddAccountFlag(ACCOUNT_FLAG_SHOW_ANTISPAM);
-        LoginDatabase.PExecute("UPDATE account SET flags = flags | 0x%x WHERE id = %u", session->GetAccountId(), ACCOUNT_FLAG_SHOW_ANTISPAM);
+        LoginDatabase.PExecute("UPDATE account SET flags = flags | 0x%x WHERE id = %u", ACCOUNT_FLAG_SHOW_ANTISPAM, session->GetAccountId());
 
         SendSysMessage("Antispam messages will be shown");
     }
     else
     {
         session->RemoveAccountFlag(ACCOUNT_FLAG_SHOW_ANTISPAM);
-        LoginDatabase.PExecute("UPDATE account SET flags = flags & ~0x%x WHERE id = %u", session->GetAccountId(), ACCOUNT_FLAG_SHOW_ANTISPAM);
+        LoginDatabase.PExecute("UPDATE account SET flags = flags & ~0x%x WHERE id = %u", ACCOUNT_FLAG_SHOW_ANTISPAM, session->GetAccountId());
 
         SendSysMessage("Antispam messages will be hidden");
     }

@@ -562,14 +562,14 @@ bool AnticheatLib::ChatCommand(ChatHandler *handler, const std::string &origArgs
         {
             session->SetAccountFlags(flags | ACCOUNT_FLAG_SHOW_ANTICHEAT);
             LoginDatabase.PExecute("UPDATE account SET flags = flags | 0x%x WHERE id = %u",
-                session->GetAccountId(), ACCOUNT_FLAG_SHOW_ANTICHEAT);
+                ACCOUNT_FLAG_SHOW_ANTICHEAT, session->GetAccountId());
             handler->SendSysMessage("Anticheat messages will be shown");
         }
         else
         {
             session->SetAccountFlags(flags & ~ACCOUNT_FLAG_SHOW_ANTICHEAT);
             LoginDatabase.PExecute("UPDATE account SET flags = flags & ~0x%x WHERE id = %u",
-                session->GetAccountId(), ACCOUNT_FLAG_SHOW_ANTICHEAT);
+                ACCOUNT_FLAG_SHOW_ANTICHEAT, session->GetAccountId());
             handler->SendSysMessage("Anticheat messages will be hidden");
         }
 
@@ -591,14 +591,14 @@ bool AnticheatLib::ChatCommand(ChatHandler *handler, const std::string &origArgs
         {
             session->SetAccountFlags(flags | ACCOUNT_FLAG_SHOW_ANTISPAM);
             LoginDatabase.PExecute("UPDATE account SET flags = flags | 0x%x WHERE id = %u",
-                session->GetAccountId(), ACCOUNT_FLAG_SHOW_ANTISPAM);
+                ACCOUNT_FLAG_SHOW_ANTISPAM, session->GetAccountId());
             handler->SendSysMessage("Antispam messages will be shown");
         }
         else
         {
             session->SetAccountFlags(flags & ~ACCOUNT_FLAG_SHOW_ANTISPAM);
             LoginDatabase.PExecute("UPDATE account SET flags = flags & ~0x%x WHERE id = %u",
-                session->GetAccountId(), ACCOUNT_FLAG_SHOW_ANTISPAM);
+                ACCOUNT_FLAG_SHOW_ANTISPAM, session->GetAccountId());
             handler->SendSysMessage("Antispam messages will be hidden");
         }
 
