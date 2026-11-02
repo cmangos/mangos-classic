@@ -5173,7 +5173,7 @@ bool ChatHandler::HandleBanInfoIPCommand(char* args)
     std::string IP = cIP;
 
     LoginDatabase.escape_string(IP);
-    auto queryResult = LoginDatabase.PQuery("SELECT ip, " _FROM_UNIXTIME_("banned_at") ", " _FROM_UNIXTIME_("expires_at") ", expires_at-" _UNIXTIME_ ", reason,banned_by,expires_at-banned_at"
+    auto queryResult = LoginDatabase.PQuery("SELECT ip, " _FROM_UNIXTIME_("banned_at") ", " _FROM_UNIXTIME_("expires_at") ", expires_at-" _UNIXTIME_ ", reason,banned_by,expires_at-banned_at "
                                             "FROM ip_banned WHERE ip = '%s'", IP.c_str());
     if (!queryResult)
     {
