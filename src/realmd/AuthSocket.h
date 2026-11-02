@@ -74,6 +74,7 @@ class AuthSocket : public MaNGOS::AsyncSocket<AuthSocket>
 
     private:
         void verifyVersionAndFinalizeAuthentication(std::shared_ptr<sAuthLogonProof_C> lp);
+        void ArmTimeoutTimer();
 
         enum eStatus
         {

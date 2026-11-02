@@ -195,7 +195,7 @@ AuthSocket::AuthSocket(boost::asio::io_context& context)
 {
 }
 
-bool AuthSocket::OnOpen()
+void AuthSocket::ArmTimeoutTimer()
 {
     m_timeoutTimer.expires_after(std::chrono::seconds(30));
     m_timeoutTimer.async_wait([&] (const boost::system::error_code& error)
@@ -208,6 +208,11 @@ bool AuthSocket::OnOpen()
         if (!IsClosed())
             Close();
     });
+}
+
+bool AuthSocket::OnOpen()
+{
+    ArmTimeoutTimer();
 
     return true;
 }
@@ -273,8 +278,11 @@ bool AuthSocket::ProcessIncomingData()
             return;
         }
 
-        // if we reach here, it means that a valid opcode was found and the handler completed successfully
-        self->m_timeoutTimer.cancel();
+        // if we reach here, it means that a valid opcode was found and the handler completed successfully;
+        // re-arm the timeout instead of just cancelling it, so a client that goes on to send a command out of
+        // order or with an unknown opcode (which are otherwise ignored without closing the socket) still gets
+        // disconnected eventually instead of holding the connection open forever
+        self->ArmTimeoutTimer();
     });
 
     return true;
