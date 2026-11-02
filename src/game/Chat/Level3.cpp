@@ -5290,7 +5290,13 @@ bool ChatHandler::HandleBanListHelper(std::unique_ptr<QueryResult> queryResult)
                 do
                 {
                     time_t t_ban = fields2[0].GetUInt64();
-                    tm* aTm_ban = localtime(&t_ban);
+                    tm tm_ban;
+#ifdef _WIN32
+                    localtime_s(&tm_ban, &t_ban);
+#else
+                    localtime_r(&t_ban, &tm_ban);
+#endif
+                    tm* aTm_ban = &tm_ban;
 
                     if (fields2[0].GetUInt64() == fields2[1].GetUInt64())
                     {
@@ -5301,7 +5307,13 @@ bool ChatHandler::HandleBanListHelper(std::unique_ptr<QueryResult> queryResult)
                     else
                     {
                         time_t t_unban = fields2[1].GetUInt64();
-                        tm* aTm_unban = localtime(&t_unban);
+                        tm tm_unban;
+#ifdef _WIN32
+                        localtime_s(&tm_unban, &t_unban);
+#else
+                        localtime_r(&t_unban, &tm_unban);
+#endif
+                        tm* aTm_unban = &tm_unban;
                         PSendSysMessage("|%-15.15s|%02d-%02d-%02d %02d:%02d|%02d-%02d-%02d %02d:%02d|%-15.15s|%-15.15s|%-15.15s|%-15.15s|",
                                         account_name.c_str(), aTm_ban->tm_year % 100, aTm_ban->tm_mon + 1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min,
                                         aTm_unban->tm_year % 100, aTm_unban->tm_mon + 1, aTm_unban->tm_mday, aTm_unban->tm_hour, aTm_unban->tm_min,
@@ -5369,7 +5381,13 @@ bool ChatHandler::HandleBanListIPCommand(char* args)
             SendSysMessage("-------------------------------------------------------------------------------");
             Field* fields = queryResult->Fetch();
             time_t t_ban = fields[1].GetUInt64();
-            tm* aTm_ban = localtime(&t_ban);
+            tm tm_ban;
+#ifdef _WIN32
+            localtime_s(&tm_ban, &t_ban);
+#else
+            localtime_r(&t_ban, &tm_ban);
+#endif
+            tm* aTm_ban = &tm_ban;
             if (fields[1].GetUInt64() == fields[2].GetUInt64())
             {
                 PSendSysMessage("|%-15.15s|%02d-%02d-%02d %02d:%02d|   permanent  |%-15.15s|%-15.15s|",
@@ -5379,7 +5397,13 @@ bool ChatHandler::HandleBanListIPCommand(char* args)
             else
             {
                 time_t t_unban = fields[2].GetUInt64();
-                tm* aTm_unban = localtime(&t_unban);
+                tm tm_unban;
+#ifdef _WIN32
+                localtime_s(&tm_unban, &t_unban);
+#else
+                localtime_r(&t_unban, &tm_unban);
+#endif
+                tm* aTm_unban = &tm_unban;
                 PSendSysMessage("|%-15.15s|%02d-%02d-%02d %02d:%02d|%02d-%02d-%02d %02d:%02d|%-15.15s|%-15.15s|",
                                 fields[0].GetString(), aTm_ban->tm_year % 100, aTm_ban->tm_mon + 1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min,
                                 aTm_unban->tm_year % 100, aTm_unban->tm_mon + 1, aTm_unban->tm_mday, aTm_unban->tm_hour, aTm_unban->tm_min,
