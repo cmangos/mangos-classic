@@ -399,7 +399,21 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     if (security > SEC_ADMINISTRATOR)                       // prevent invalid security settings in DB
         security = SEC_ADMINISTRATOR;
 
-    K.SetHexStr(fields[2].GetString());
+    // sessionkey must be a full 40 byte (80 hex char) SRP6 session key; anything else
+    // (in particular an empty string, which SetHexStr turns into 0) must not be accepted
+    // as it would let the session proof be computed without knowing the real key.
+    std::string sessionKeyStr = fields[2].GetString();
+    if (sessionKeyStr.size() != 80)
+    {
+        WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
+        packet << uint8(AUTH_FAILED);
+        SendPacket(packet);
+
+        sLog.outError("WorldSocket::HandleAuthSession: Sent Auth Response (invalid session key for account %s).", safe_account.c_str());
+        return false;
+    }
+
+    K.SetHexStr(sessionKeyStr.c_str());
 
     time_t mutetime = time_t (fields[7].GetUInt64());
 
