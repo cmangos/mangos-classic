@@ -642,6 +642,7 @@ bool AuthSocket::_HandleLogonProof()
                         if (ServerToken != clientToken)
                         {
                             BASIC_LOG("[AuthChallenge] Account %s tried to login with wrong pincode! Given %u Expected %u Pin Count: %u", self->_login.c_str(), clientToken, ServerToken, *pinCount);
+                            self->RegisterFailedLogin();
                             self->Write(logonProofUnknownAccount, sizeof(logonProofUnknownAccount), [self](const boost::system::error_code& /*error*/, std::size_t /*written*/) {});
                             return;
                         }
@@ -652,12 +653,15 @@ bool AuthSocket::_HandleLogonProof()
                 return;
             }
 
-            if ((lp->securityFlags & SECURITY_FLAG_PIN) && !self->_token.empty())
+            // m_promptPin is server-side state set during the challenge (token present, build <= 6141): the client cannot
+            // skip this check by replying with securityFlags = 0, unlike checking lp->securityFlags here instead
+            if (self->m_promptPin)
             {
                 int32 serverToken = self->generateToken(self->_token.c_str());
                 if (!self->VerifyPinData(serverToken, lp->pinData))
                 {
                     BASIC_LOG("[AuthChallenge] Account %s tried to login with wrong pincode!", self->_login.c_str());
+                    self->RegisterFailedLogin();
                     self->Write(logonProofUnknownAccount, sizeof(logonProofUnknownAccount), [self](const boost::system::error_code& /*error*/, std::size_t /*written*/) {});
                     return;
                 }
@@ -678,44 +682,7 @@ bool AuthSocket::_HandleLogonProof()
             }
 
             BASIC_LOG("[AuthChallenge] account %s tried to login with wrong password!", self->_login.c_str());
-
-            uint32 MaxWrongPassCount = sConfig.GetIntDefault("WrongPass.MaxCount", 0);
-            if (MaxWrongPassCount > 0)
-            {
-                // Increment number of failed logins by one and if it reaches the limit temporarily ban that account or IP
-                LoginDatabase.PExecute("UPDATE account SET failed_logins = failed_logins + 1 WHERE username = '%s'", self->_safelogin.c_str());
-
-                if (auto loginfail = LoginDatabase.PQuery("SELECT id, failed_logins FROM account WHERE username = '%s'", self->_safelogin.c_str()))
-                {
-                    Field* fields = loginfail->Fetch();
-                    uint32 failed_logins = fields[1].GetUInt32();
-
-                    if (failed_logins >= MaxWrongPassCount)
-                    {
-                        uint32 WrongPassBanTime = sConfig.GetIntDefault("WrongPass.BanTime", 600);
-                        bool WrongPassBanType = sConfig.GetBoolDefault("WrongPass.BanType", false);
-
-                        if (WrongPassBanType)
-                        {
-                            uint32 acc_id = fields[0].GetUInt32();
-                            LoginDatabase.PExecute("INSERT INTO account_banned(account_id, banned_at, expires_at, banned_by, reason, active)"
-                                "VALUES ('%u'," _UNIXTIME_ "," _UNIXTIME_ "+'%u','MaNGOS realmd','Failed login autoban',1)",
-                                acc_id, WrongPassBanTime);
-                            BASIC_LOG("[AuthChallenge] account %s got banned for '%u' seconds because it failed to authenticate '%u' times",
-                                self->_login.c_str(), WrongPassBanTime, failed_logins);
-                        }
-                        else
-                        {
-                            std::string current_ip = self->GetRemoteAddress();
-                            LoginDatabase.escape_string(current_ip);
-                            LoginDatabase.PExecute("INSERT INTO ip_banned VALUES ('%s'," _UNIXTIME_ "," _UNIXTIME_ "+'%u','MaNGOS realmd','Failed login autoban')",
-                                current_ip.c_str(), WrongPassBanTime);
-                            BASIC_LOG("[AuthChallenge] IP %s got banned for '%u' seconds because account %s failed to authenticate '%u' times",
-                                current_ip.c_str(), WrongPassBanTime, self->_login.c_str(), failed_logins);
-                        }
-                    }
-                }
-            }
+            self->RegisterFailedLogin();
             self->ProcessIncomingData();
         }
     });
@@ -1234,6 +1201,49 @@ void AuthSocket::verifyVersionAndFinalizeAuthentication(std::shared_ptr<sAuthLog
     _status = STATUS_AUTHED;
 
     ProcessIncomingData();
+}
+
+// Counts a wrong password, PIN or authenticator code towards WrongPass.MaxCount, and bans the account or the IP
+// once the threshold is reached (shared by all three failure paths of the logon proof).
+void AuthSocket::RegisterFailedLogin()
+{
+    uint32 MaxWrongPassCount = sConfig.GetIntDefault("WrongPass.MaxCount", 0);
+    if (MaxWrongPassCount == 0)
+        return;
+
+    // Increment number of failed logins by one and if it reaches the limit temporarily ban that account or IP
+    LoginDatabase.PExecute("UPDATE account SET failed_logins = failed_logins + 1 WHERE username = '%s'", _safelogin.c_str());
+
+    auto loginfail = LoginDatabase.PQuery("SELECT id, failed_logins FROM account WHERE username = '%s'", _safelogin.c_str());
+    if (!loginfail)
+        return;
+
+    Field* fields = loginfail->Fetch();
+    uint32 failed_logins = fields[1].GetUInt32();
+    if (failed_logins < MaxWrongPassCount)
+        return;
+
+    uint32 WrongPassBanTime = sConfig.GetIntDefault("WrongPass.BanTime", 600);
+    bool WrongPassBanType = sConfig.GetBoolDefault("WrongPass.BanType", false);
+
+    if (WrongPassBanType)
+    {
+        uint32 acc_id = fields[0].GetUInt32();
+        LoginDatabase.PExecute("INSERT INTO account_banned(account_id, banned_at, expires_at, banned_by, reason, active)"
+            "VALUES ('%u'," _UNIXTIME_ "," _UNIXTIME_ "+'%u','MaNGOS realmd','Failed login autoban',1)",
+            acc_id, WrongPassBanTime);
+        BASIC_LOG("[AuthChallenge] account %s got banned for '%u' seconds because it failed to authenticate '%u' times",
+            _login.c_str(), WrongPassBanTime, failed_logins);
+    }
+    else
+    {
+        std::string current_ip = GetRemoteAddress();
+        LoginDatabase.escape_string(current_ip);
+        LoginDatabase.PExecute("INSERT INTO ip_banned VALUES ('%s'," _UNIXTIME_ "," _UNIXTIME_ "+'%u','MaNGOS realmd','Failed login autoban')",
+            current_ip.c_str(), WrongPassBanTime);
+        BASIC_LOG("[AuthChallenge] IP %s got banned for '%u' seconds because account %s failed to authenticate '%u' times",
+            current_ip.c_str(), WrongPassBanTime, _login.c_str(), failed_logins);
+    }
 }
 
 int32 AuthSocket::generateToken(char const* b32key)

@@ -56,6 +56,7 @@ class AuthSocket : public MaNGOS::AsyncSocket<AuthSocket>
         void SendProof(Sha1Hash sha);
         void LoadRealmlist(ByteBuffer& pkt, uint32 acctid, uint8 accountSecurityLevel = 0);
         bool VerifyPinData(uint32 pin, const sAuthLogonPinData_C& clientData);
+        void RegisterFailedLogin();           // counts a wrong password, PIN or authenticator code towards WrongPass.MaxCount
         int32 generateToken(char const* b32key);
 
         uint8 getEligibleRealmCount(uint8 accountSecurityLevel);
