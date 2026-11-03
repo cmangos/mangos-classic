@@ -33,6 +33,8 @@
 #include "Auth/SRP6.h"
 #include "Util/CommonDefines.h"
 
+#include <algorithm>
+#include <cctype>
 #include <ctime>
 #include <memory>
 #include <utility>
@@ -184,6 +186,9 @@ typedef struct AuthHandler
 } AuthHandler;
 
 std::array<uint8, 16> VersionChallenge = { { 0xBA, 0xA3, 0x1E, 0x99, 0xA0, 0x0B, 0x21, 0x57, 0xFC, 0x37, 0x3F, 0xB3, 0x69, 0xCD, 0xD2, 0xF1 } };
+
+static const std::vector<uint8>& GetFakeAccountSecret();   // defined with BuildLogonChallengeSuccess, used by _HandleLogonChallenge
+static std::vector<uint8> ExpandFakeSecret(const std::vector<uint8>& secret, const std::string& login, const char* tag, bool matchSaltShape);
 const char logonProofUnknownAccount[4] = { CMD_AUTH_LOGON_PROOF, AUTH_LOGON_FAILED_UNKNOWN_ACCOUNT, 0, 0 };
 const char logonProofUnknownAccountVanilla[2] = { CMD_AUTH_LOGON_PROOF, AUTH_LOGON_FAILED_UNKNOWN_ACCOUNT };
 const char logonProofVersionInvalid[2] = { CMD_AUTH_LOGON_PROOF, AUTH_LOGON_FAILED_VERSION_INVALID };
@@ -499,67 +504,39 @@ bool AuthSocket::_HandleLogonChallenge()
                         else
                         {
                             DEBUG_LOG("database authentication values: v='%s' s='%s'", databaseV.c_str(), databaseS.c_str());
-
-                            BigNumber s;
-                            s.SetHexStr(databaseS.c_str());
-
-                            self->srp.CalculateHostPublicEphemeral();
-
-                            ///- Fill the response packet with the result
-                            *pkt << uint8(AUTH_LOGON_SUCCESS);
-
-                            // B may be calculated < 32B so we force minimal length to 32B
-                            pkt->append(self->srp.GetHostPublicEphemeral().AsByteArray(32));      // 32 bytes
-                            *pkt << uint8(1);
-                            pkt->append(self->srp.GetGeneratorModulo().AsByteArray());
-                            *pkt << uint8(32);
-                            pkt->append(self->srp.GetPrime().AsByteArray(32));
-                            pkt->append(s.AsByteArray(32));// 32 bytes
-                            pkt->append(VersionChallenge.data(), VersionChallenge.size());
-                            uint8 securityFlags = 0;
-
-                            self->_token = fields[6].GetCppString();
-                            if (!self->_token.empty() && self->_build >= 8606) // authenticator was added in 2.4.3
-                                securityFlags = SECURITY_FLAG_AUTHENTICATOR;
-
-                            if (!self->_token.empty() && self->_build <= 6141)
-                                securityFlags = SECURITY_FLAG_PIN;
-
-                            *pkt << uint8(securityFlags);                    // security flags (0x0...0x04)
-
-                            if (securityFlags & SECURITY_FLAG_PIN)          // PIN input
-                            {
-                                uint32 gridSeedPkt = self->m_gridSeed = static_cast<uint32>(0);
-                                EndianConvert(gridSeedPkt);
-                                self->m_serverSecuritySalt.SetRand(16 * 8); // 16 bytes random
-                                self->m_promptPin = true;
-
-                                *pkt << gridSeedPkt;
-                                pkt->append(self->m_serverSecuritySalt.AsByteArray(16).data(), 16);
-                            }
-
-                            if (securityFlags & SECURITY_FLAG_UNK)          // Matrix input
-                            {
-                                *pkt << uint8(0);
-                                *pkt << uint8(0);
-                                *pkt << uint8(0);
-                                *pkt << uint8(0);
-                                *pkt << uint64(0);
-                            }
-
-                            if (securityFlags & SECURITY_FLAG_AUTHENTICATOR)    // Authenticator input
-                                *pkt << uint8(1);
-
-                            uint8 secLevel = fields[3].GetUInt8();
-                            self->_accountSecurityLevel = secLevel <= SEC_ADMINISTRATOR ? AccountTypes(secLevel) : SEC_ADMINISTRATOR;
-
-                            ///- All good, await client's proof
-                            self->_status = STATUS_LOGON_PROOF;
+                            self->BuildLogonChallengeSuccess(*pkt, databaseV.c_str(), databaseS.c_str(), fields[3].GetUInt8(), fields[6].GetCppString());
                         }
                     }
                 }
-                else                                                // no account
-                    *pkt << uint8(AUTH_LOGON_FAILED_UNKNOWN_ACCOUNT);
+                else
+                {
+                    // Unknown account: a fake, but stable (same username -> same challenge every time) and
+                    // never-matchable challenge, so the client cannot tell this apart from a real but wrong password.
+                    // Sending AUTH_LOGON_FAILED_UNKNOWN_ACCOUNT here let an attacker enumerate valid account names
+                    // (see BUGS-INTERNES.md C8).
+                    // Case-fold the name first: the account lookup above is case-insensitive (DB default collation), so a
+                    // real account gives the same v/s for any casing of its name. Hashing the raw, unfolded name here
+                    // would make two casings of the same unknown name look like two different accounts, and (since a
+                    // real account's answer does not vary with casing either) that mismatch would itself tell a fake
+                    // challenge apart from a real one.
+                    std::string foldedLogin = self->_login;
+                    std::transform(foldedLogin.begin(), foldedLogin.end(), foldedLogin.begin(),
+                        [](unsigned char c) { return static_cast<char>(std::toupper(c)); });
+
+                    std::vector<uint8> vBytes = ExpandFakeSecret(GetFakeAccountSecret(), foldedLogin, "v", false);
+                    BigNumber fakeV;
+                    fakeV.SetBinary(vBytes.data(), vBytes.size());
+
+                    std::vector<uint8> sBytes = ExpandFakeSecret(GetFakeAccountSecret(), foldedLogin, "s", true);
+                    BigNumber fakeS;
+                    fakeS.SetBinary(sBytes.data(), sBytes.size());
+
+                    const char* v_hex = fakeV.AsHexStr();
+                    const char* s_hex = fakeS.AsHexStr();
+                    self->BuildLogonChallengeSuccess(*pkt, v_hex, s_hex, 0, "");
+                    OPENSSL_free((void*)v_hex);
+                    OPENSSL_free((void*)s_hex);
+                }
             }
 
             self->Write((const char*)pkt->contents(), pkt->size(), [self, pkt](const boost::system::error_code& /*error*/, std::size_t /*written*/) {});
@@ -1163,6 +1140,112 @@ bool AuthSocket::VerifyPinData(uint32 pin, const sAuthLogonPinData_C& clientData
     hash.SetBinary(sha.GetDigest(), sha.GetLength());
 
     return !memcmp(hash.AsDecStr(), clientHash.AsDecStr(), 20);
+}
+
+// A random secret, generated once per realmd process, used to derive a stable fake salt/verifier pair for an
+// account that does not exist (see BuildLogonChallengeSuccess's caller for unknown accounts).
+static const std::vector<uint8>& GetFakeAccountSecret()
+{
+    static const std::vector<uint8> secret = []
+    {
+        BigNumber r;
+        r.SetRand(20 * 8);
+        return r.AsByteArray();
+    }();
+    return secret;
+}
+
+// Expands a tagged hash of (secret, login) into 32 pseudorandom bytes, with the same high bit always set as
+// BigNumber::SetRand(256) forces on a real salt (BN_rand top=0): a single SHA1 digest is only 20 bytes, so stuffing
+// it into a 32-byte BigNumber left its 12 high-order bytes always zero -- a one-request fingerprint that told an
+// attacker apart a fake challenge from a real one, defeating the whole point of this function.
+static std::vector<uint8> ExpandFakeSecret(const std::vector<uint8>& secret, const std::string& login, const char* tag, bool matchSaltShape)
+{
+    std::vector<uint8> out;
+    for (uint8 counter = 0; out.size() < 32; ++counter)
+    {
+        Sha1Hash h;
+        h.Initialize();
+        h.UpdateData(secret);
+        h.UpdateData(login);
+        h.UpdateData(std::string(tag));
+        h.UpdateData(&counter, 1);
+        h.Finalize();
+        out.insert(out.end(), h.GetDigest(), h.GetDigest() + Sha1Hash::GetLength());
+    }
+    out.resize(32);
+
+    // Only a real SALT goes through BN_rand(.., top=0, bottom=1) (SRP6::CalculateVerifier's SetRand call): a real
+    // VERIFIER is g^x mod N, which has no such guarantee (its own top and bottom bits are close to evenly split).
+    // BigNumber::SetBinary takes little-endian input: byte 31 becomes the number's top byte, byte 0 its bottom one.
+    if (matchSaltShape)
+    {
+        out[31] |= 0x80;        // full 256-bit width, like every real salt
+        out[0]  |= 0x01;        // always odd, like every real salt
+    }
+    return out;
+}
+
+// Fills in a CMD_AUTH_LOGON_CHALLENGE success packet from a salt/verifier pair, real or fake, exactly as a real
+// account would get one: a client cannot tell a fake challenge apart from a real one at this step.
+void AuthSocket::BuildLogonChallengeSuccess(ByteBuffer& pkt, const char* v_hex, const char* s_hex, uint8 secLevel, const std::string& token)
+{
+    srp.SetVerifier(v_hex);
+    srp.SetSalt(s_hex);
+
+    BigNumber s;
+    s.SetHexStr(s_hex);
+
+    srp.CalculateHostPublicEphemeral();
+
+    pkt << uint8(AUTH_LOGON_SUCCESS);
+
+    // B may be calculated < 32B so we force minimal length to 32B
+    pkt.append(srp.GetHostPublicEphemeral().AsByteArray(32));      // 32 bytes
+    pkt << uint8(1);
+    pkt.append(srp.GetGeneratorModulo().AsByteArray());
+    pkt << uint8(32);
+    pkt.append(srp.GetPrime().AsByteArray(32));
+    pkt.append(s.AsByteArray(32));// 32 bytes
+    pkt.append(VersionChallenge.data(), VersionChallenge.size());
+    uint8 securityFlags = 0;
+
+    _token = token;
+    if (!_token.empty() && _build >= 8606) // authenticator was added in 2.4.3
+        securityFlags = SECURITY_FLAG_AUTHENTICATOR;
+
+    if (!_token.empty() && _build <= 6141)
+        securityFlags = SECURITY_FLAG_PIN;
+
+    pkt << uint8(securityFlags);                    // security flags (0x0...0x04)
+
+    if (securityFlags & SECURITY_FLAG_PIN)          // PIN input
+    {
+        uint32 gridSeedPkt = m_gridSeed = static_cast<uint32>(0);
+        EndianConvert(gridSeedPkt);
+        m_serverSecuritySalt.SetRand(16 * 8); // 16 bytes random
+        m_promptPin = true;
+
+        pkt << gridSeedPkt;
+        pkt.append(m_serverSecuritySalt.AsByteArray(16).data(), 16);
+    }
+
+    if (securityFlags & SECURITY_FLAG_UNK)          // Matrix input
+    {
+        pkt << uint8(0);
+        pkt << uint8(0);
+        pkt << uint8(0);
+        pkt << uint8(0);
+        pkt << uint64(0);
+    }
+
+    if (securityFlags & SECURITY_FLAG_AUTHENTICATOR)    // Authenticator input
+        pkt << uint8(1);
+
+    _accountSecurityLevel = secLevel <= SEC_ADMINISTRATOR ? AccountTypes(secLevel) : SEC_ADMINISTRATOR;
+
+    ///- All good, await client's proof
+    _status = STATUS_LOGON_PROOF;
 }
 
 void AuthSocket::verifyVersionAndFinalizeAuthentication(std::shared_ptr<sAuthLogonProof_C> lp)
