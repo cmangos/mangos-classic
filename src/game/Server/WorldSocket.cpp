@@ -368,7 +368,6 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     v.SetHexStr(fields[5].GetString());
     s.SetHexStr(fields[6].GetString());
-    m_s = s;
 
     const char* sStr = s.AsHexStr();                        // Must be freed by OPENSSL_free()
     const char* vStr = v.AsHexStr();                        // Must be freed by OPENSSL_free()
@@ -502,6 +501,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     SqlStatement stmt = LoginDatabase.CreateStatement(updAccount, "INSERT INTO account_logons(accountId,ip,loginTime,loginSource) VALUES(?,?," _NOW_ ",?)");
     stmt.PExecute(id, address.c_str(), std::to_string(LOGIN_TYPE_MANGOSD).c_str());
 
+    m_sessionKey = K;             // keep the real session key around: GetSessionKey() used to wrongly return the salt
     m_crypt.Init(&K);
 
     m_session = sWorld.FindSession(id);
