@@ -782,7 +782,12 @@ bool AuthSocket::_HandleReconnectChallenge()
             EndianConvert(body->build);
             self->_build = body->build;
 
-            auto queryResult = LoginDatabase.PQuery("SELECT sessionkey FROM account WHERE username = '%s'", self->_safelogin.c_str());
+            // One query for everything: same checks as a full logon challenge (ip ban, account ban, IP lock).
+            // The remote address comes from the socket, the login is escaped: no SQL injection.
+            auto queryResult = LoginDatabase.PQuery("SELECT a.locked,a.lockedIp,a.sessionkey,"
+                "(SELECT COUNT(*) FROM ip_banned WHERE (expires_at = banned_at OR expires_at > " _UNIXTIME_ ") AND ip = '%s'),"
+                "(SELECT COUNT(*) FROM account_banned WHERE account_id = a.id AND active = 1 AND (expires_at > " _UNIXTIME_ " OR expires_at = banned_at)) "
+                "FROM account a WHERE a.username = '%s'", self->GetRemoteAddress().c_str(), self->_safelogin.c_str());
 
             // Stop if the account is not found
             if (!queryResult)
@@ -793,7 +798,25 @@ bool AuthSocket::_HandleReconnectChallenge()
             }
 
             Field* fields = queryResult->Fetch();
-            self->srp.SetStrongSessionKey(fields[0].GetString());
+
+            // The client cannot display an error at this step (it drops the link on a non-zero result byte),
+            // so just close: the player then falls back to a full logon, which reports the reason.
+            if (fields[3].GetUInt32() || fields[4].GetUInt32())
+            {
+                BASIC_LOG("[ReconnectChallenge] Banned %s %s tries to reconnect!", fields[3].GetUInt32() ? "ip" : "account",
+                    fields[3].GetUInt32() ? self->GetRemoteAddress().c_str() : self->_login.c_str());
+                self->Close();
+                return;
+            }
+
+            if (fields[0].GetUInt8() == 1 && strcmp(fields[1].GetString(), self->GetRemoteAddress().c_str()))
+            {
+                BASIC_LOG("[ReconnectChallenge] Account %s is locked to another ip, reconnect from %s refused!", self->_login.c_str(), self->GetRemoteAddress().c_str());
+                self->Close();
+                return;
+            }
+
+            self->srp.SetStrongSessionKey(fields[2].GetString());
 
             ///- All good, await client's proof
             self->_status = STATUS_RECON_PROOF;
