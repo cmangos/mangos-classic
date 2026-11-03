@@ -58,10 +58,15 @@ void SRP6::CalculateProof(std::string username)
     uint8 t4[Sha1Hash::GetLength()];
     memcpy(t4, sha.GetDigest(), Sha1Hash::GetLength());
 
+    // The client hashes s, A and B on 32 bytes and K on 40 bytes, whatever their value: a number with leading zero
+    // bytes must not be hashed shorter (it made the proof fail one time out of a few dozen)
     sha.Initialize();
     sha.UpdateData(hash, 20);
     sha.UpdateData(t4, Sha1Hash::GetLength());
-    sha.UpdateBigNumbers(&s, &A, &B, &K, nullptr);
+    sha.UpdateData(s.AsByteArray(32));
+    sha.UpdateData(A.AsByteArray(32));
+    sha.UpdateData(B.AsByteArray(32));
+    sha.UpdateData(K.AsByteArray(40));
     sha.Finalize();
     M.SetBinary(sha.GetDigest(), 20);
 }
@@ -78,7 +83,8 @@ bool SRP6::CalculateSessionKey(uint8* lp_A, int l)
         return false;
 
     Sha1Hash sha;
-    sha.UpdateBigNumbers(&A, &B, nullptr);
+    sha.UpdateData(A.AsByteArray(32));
+    sha.UpdateData(B.AsByteArray(32));
     sha.Finalize();
     u.SetBinary(sha.GetDigest(), 20);
     S = (A * (v.ModExp(u, N))).ModExp(b, N);
@@ -128,33 +134,37 @@ bool SRP6::CalculateVerifier(const std::string& rI, const char* salt)
 
 void SRP6::HashSessionKey(void)
 {
-    uint8 t[32];
-    uint8 t1[16];
-    uint8 vK[40];
-    memcpy(t, S.AsByteArray(32).data(), 32);
-    for (int i = 0; i < 16; ++i)
+    // Same interleave as the client: S as 32 little-endian bytes, without its leading zero bytes, and without one more
+    // byte if the remaining length is odd. The even and odd bytes are hashed apart and interleaved back into K (40 bytes).
+    const std::vector<uint8> t = S.AsByteArray(32);
+    size_t skip = 0;
+    while (skip < t.size() && t[skip] == 0)
+        ++skip;
+    if ((t.size() - skip) % 2)
+        ++skip;
+
+    const size_t half = (t.size() - skip) / 2;
+    std::vector<uint8> even(half), odd(half);
+    for (size_t i = 0; i < half; ++i)
     {
-        t1[i] = t[i * 2];
+        even[i] = t[skip + i * 2];
+        odd[i] = t[skip + i * 2 + 1];
     }
+
+    uint8 vK[40];
     Sha1Hash sha;
     sha.Initialize();
-    sha.UpdateData(t1, 16);
+    sha.UpdateData(even);
     sha.Finalize();
     for (int i = 0; i < 20; ++i)
-    {
         vK[i * 2] = sha.GetDigest()[i];
-    }
-    for (int i = 0; i < 16; ++i)
-    {
-        t1[i] = t[i * 2 + 1];
-    }
+
     sha.Initialize();
-    sha.UpdateData(t1, 16);
+    sha.UpdateData(odd);
     sha.Finalize();
     for (int i = 0; i < 20; ++i)
-    {
         vK[i * 2 + 1] = sha.GetDigest()[i];
-    }
+
     K.SetBinary(vK, 40);
 }
 
@@ -185,8 +195,11 @@ bool SRP6::ProofVerifier(std::string vC)
 
 void SRP6::Finalize(Sha1Hash& sha)
 {
+    // A on 32 bytes, M on 20, K on 40: the sizes the client uses
     sha.Initialize();
-    sha.UpdateBigNumbers(&A, &M, &K, nullptr);
+    sha.UpdateData(A.AsByteArray(32));
+    sha.UpdateData(M.AsByteArray(20));
+    sha.UpdateData(K.AsByteArray(40));
     sha.Finalize();
 }
 
