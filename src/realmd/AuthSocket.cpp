@@ -419,21 +419,32 @@ bool AuthSocket::_HandleLogonChallenge()
             *pkt << uint8(CMD_AUTH_LOGON_CHALLENGE);
             *pkt << uint8(0x00);
 
-            ///- Verify that this IP is not in the ip_banned table
-            // No SQL injection possible (paste the IP address as passed by the socket)
-            std::unique_ptr<QueryResult> ip_banned_result(LoginDatabase.PQuery("SELECT expires_at FROM ip_banned "
-                "WHERE (expires_at = banned_at OR expires_at > " _UNIXTIME_ ") AND ip = '%s'", self->GetRemoteAddress().c_str()));
+            ///- Get the account details and its ban state in one query (a round trip to the database costs far more than a few extra columns)
+            // No SQL injection (escaped user name, IP address as passed by the socket)
+            auto queryResult = LoginDatabase.PQuery("SELECT a.id,a.locked,a.lockedIp,a.gmlevel,a.v,a.s,a.token,"
+                "(SELECT COUNT(*) FROM ip_banned WHERE (expires_at = banned_at OR expires_at > " _UNIXTIME_ ") AND ip = '%s'),"
+                "(SELECT COUNT(*) FROM account_banned WHERE account_id = a.id AND active = 1 AND expires_at = banned_at),"
+                "(SELECT COUNT(*) FROM account_banned WHERE account_id = a.id AND active = 1 AND expires_at <> banned_at AND expires_at > " _UNIXTIME_ ") "
+                "FROM account a WHERE a.username = '%s'", self->GetRemoteAddress().c_str(), self->_safelogin.c_str());
 
-            if (ip_banned_result)
+            ///- Verify that this IP is not in the ip_banned table
+            bool ipBanned;
+            if (queryResult)
+                ipBanned = (*queryResult)[7].GetUInt32() != 0;
+            else    // unknown account: the IP ban must still be reported first
+            {
+                std::unique_ptr<QueryResult> ip_banned_result(LoginDatabase.PQuery("SELECT expires_at FROM ip_banned "
+                    "WHERE (expires_at = banned_at OR expires_at > " _UNIXTIME_ ") AND ip = '%s'", self->GetRemoteAddress().c_str()));
+                ipBanned = ip_banned_result != nullptr;
+            }
+
+            if (ipBanned)
             {
                 *pkt << uint8(AUTH_LOGON_FAILED_FAIL_NOACCESS);
                 BASIC_LOG("[AuthChallenge] Banned ip %s tries to login!", self->GetRemoteAddress().c_str());
             }
             else
             {
-                ///- Get the account details from the account table
-                // No SQL injection (escaped user name)
-                auto queryResult = LoginDatabase.PQuery("SELECT id,locked,lockedIp,gmlevel,v,s,token FROM account WHERE username = '%s'", self->_safelogin.c_str());
                 if (queryResult)
                 {
                     Field* fields = queryResult->Fetch();
@@ -471,11 +482,10 @@ bool AuthSocket::_HandleLogonChallenge()
                     if (!locked && !broken)
                     {
                         ///- If the account is banned, reject the logon attempt
-                        auto banresult = LoginDatabase.PQuery("SELECT banned_at,expires_at FROM account_banned WHERE "
-                            "account_id = %u AND active = 1 AND (expires_at > " _UNIXTIME_ " OR expires_at = banned_at)", fields[0].GetUInt32());
-                        if (banresult)
+                        const bool permanentBan = fields[8].GetUInt32() != 0;
+                        if (permanentBan || fields[9].GetUInt32() != 0)
                         {
-                            if ((*banresult)[0].GetUInt64() == (*banresult)[1].GetUInt64())
+                            if (permanentBan)
                             {
                                 *pkt << uint8(AUTH_LOGON_FAILED_BANNED);
                                 BASIC_LOG("[AuthChallenge] Banned account %s tries to login!", self->_login.c_str());
