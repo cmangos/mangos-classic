@@ -460,7 +460,8 @@ bool AuthSocket::_HandleLogonChallenge()
                     std::string databaseS = fields[5].GetCppString();
                     bool broken = false;
 
-                    if (!self->srp.SetVerifier(databaseV.c_str()) || !self->srp.SetSalt(databaseS.c_str()))
+                    // A locked account already got its reply above: never write a second result code
+                    if (!locked && (!self->srp.SetVerifier(databaseV.c_str()) || !self->srp.SetSalt(databaseS.c_str())))
                     {
                         *pkt << uint8(AUTH_LOGON_FAILED_FAIL_NOACCESS);
                         DEBUG_LOG("[AuthChallenge] Broken v/s values in database for account %s!", self->_login.c_str());
