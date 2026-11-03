@@ -464,7 +464,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     sha.UpdateData((uint8*) & t, 4);
     sha.UpdateData((uint8*) & clientSeed, 4);
     sha.UpdateData((uint8*) & m_seed, 4);
-    sha.UpdateBigNumbers(&K, nullptr);
+    sha.UpdateData(K.AsByteArray(40));                  // the client hashes the 40 bytes of K
     sha.Finalize();
 
     if (memcmp(sha.GetDigest(), digest, 20))

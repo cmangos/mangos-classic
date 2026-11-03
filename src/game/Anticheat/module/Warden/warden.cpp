@@ -53,7 +53,7 @@ Warden::Warden(WorldSession *session, const WardenModule *module, const BigNumbe
     MANGOS_ASSERT(!!_module || session->GetPlatform() != CLIENT_PLATFORM_X86);
     MANGOS_ASSERT(!!_anticheat);
 
-    auto const kBytes = K.AsByteArray(0);
+    auto const kBytes = K.AsByteArray(40);
 
     SHA1Randx WK(kBytes.data(), kBytes.size());
 
