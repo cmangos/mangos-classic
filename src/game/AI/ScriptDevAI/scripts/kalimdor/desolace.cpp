@@ -86,7 +86,8 @@ struct npc_aged_dying_ancient_kodoAI : public ScriptedAI
                     case 2: DoScriptText(SAY_SMEED_HOME_3, pWho); break;
                 }
 
-                m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                // spell have no implemented effect (dummy), so useful to notify spellHit
+                m_creature->CastSpell(m_creature, SPELL_KODO_KOMBO_GOSSIP, TRIGGERED_OLD_TRIGGERED);
             }
         }
     }
@@ -156,7 +157,6 @@ struct KodoKombobulator : public SpellScript
             target->GetMotionMaster()->MoveIdle();
 
         target->GetMotionMaster()->MoveFollow(caster, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE, true);
-        target->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
     }
 };
 
