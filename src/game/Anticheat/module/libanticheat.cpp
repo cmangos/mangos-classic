@@ -222,11 +222,21 @@ void AnticheatLib::Reload()
     // will affect how the database data is interpreted (i.e. normalization of antispam blacklist entries)
     sAnticheatConfig.loadConfigSettings();
 
-    sLog.outString("Loading antispam system...");
-    sAntispamMgr.LoadFromDB();
+    // Also gates ValidateGuildName (guild/petition name blacklist check, Guild.cpp / PetitionsHandler.cpp):
+    // added in the same commit as the rest of antispam ([s2433]), never behind its own switch.
+    if (sAnticheatConfig.EnableAntispam())
+    {
+        sLog.outString("Loading antispam system...");
+        sAntispamMgr.LoadFromDB();
+    }
 
-    sLog.outString("Loading Warden scan database...");
-    sWardenScanMgr.loadFromDB();
+    // No real Warden object is ever created per session when anticheat is disabled (NewSession returns
+    // NullSessionAnticheat), so there is nothing to use these scan definitions for.
+    if (sAnticheatConfig.EnableAnticheat())
+    {
+        sLog.outString("Loading Warden scan database...");
+        sWardenScanMgr.loadFromDB();
+    }
 }
 
 void AnticheatLib::Initialize()
