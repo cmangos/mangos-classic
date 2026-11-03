@@ -30,13 +30,16 @@ class BigNumber;
 class HMACSHA1
 {
     public:
+        // len can be more than SEED_KEY_SIZE (m_key only ever holds the first SEED_KEY_SIZE bytes of it, for
+        // Initialize() below); do not call Initialize() afterwards on such an instance, it would re-key with those
+        // truncated bytes instead of the original, longer key.
         HMACSHA1(uint32 len, const uint8* seed);
         HMACSHA1(uint32 len, const uint8* seed, bool);
         ~HMACSHA1();
         void UpdateBigNumber(BigNumber* bn);
         void UpdateData(const uint8* data, int length);
         void UpdateData(const std::string& str);
-        void Initialize();
+        void Initialize();           // re-keys with the first SEED_KEY_SIZE bytes of the constructor's key, see above
         void Finalize();
         uint8* ComputeHash(BigNumber* bn);
         uint8* GetDigest() { return m_digest; }
