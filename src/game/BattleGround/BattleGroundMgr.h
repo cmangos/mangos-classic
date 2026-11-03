@@ -26,6 +26,7 @@
 #include "BattleGround/BattleGroundDefines.h"
 
 #include <mutex>
+#include <atomic>
 
 typedef std::map<uint32, MaNGOS::unique_trackable_ptr<BattleGround>> BattleGroundSet;
 
@@ -109,6 +110,10 @@ class BattleGroundMgr
 
         bool IsTesting() const { return m_testing; }
 
+        // Id of the next row of pvpstats_battlegrounds: unique even when several battlegrounds end at the same time
+        uint64 GeneratePvpStatsBattleGroundId() { return m_nextPvpStatsBattleGroundId.fetch_add(1); }
+        void LoadPvpStatsBattleGroundId();
+
         static BattleGroundQueueTypeId BgQueueTypeId(BattleGroundTypeId /*bgTypeId*/);
         static BattleGroundTypeId BgTemplateId(BattleGroundQueueTypeId /*bgQueueTypeId*/);
 
@@ -132,6 +137,7 @@ class BattleGroundMgr
         /* Battlegrounds */
         BattleGroundSet m_battleGrounds[MAX_BATTLEGROUND_TYPE_ID];
         bool m_testing;
+        std::atomic<uint64> m_nextPvpStatsBattleGroundId;
         std::set<uint32> m_usedRefloot;
 
         Messager<BattleGroundMgr> m_messager;

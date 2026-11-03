@@ -739,13 +739,8 @@ void BattleGround::EndBattleGround(Team winner)
         uint8 battleground_bracket = GetMinLevel() / 10;
         uint8 battleground_type = (uint8)GetTypeId();
 
-        // query next id
-        auto queryResult = CharacterDatabase.Query("SELECT MAX(id) FROM pvpstats_battlegrounds");
-        if (queryResult)
-        {
-            Field* fields = queryResult->Fetch();
-            battleground_id = fields[0].GetUInt64() + 1;
-        }
+        // the id comes from a counter: reading MAX(id) here gave the same id to two battlegrounds ending before the first insert ran
+        battleground_id = sBattleGroundMgr.GeneratePvpStatsBattleGroundId();
 
         stmt.PExecute(battleground_id, bgScoresWinner, battleground_bracket, battleground_type);
     }

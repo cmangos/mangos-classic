@@ -1392,6 +1392,7 @@ void World::SetInitialWorldSettings()
     ///- Initialize Battlegrounds
     sLog.outString("Starting BattleGround System");
     sBattleGroundMgr.CreateInitialBattleGrounds();
+    sBattleGroundMgr.LoadPvpStatsBattleGroundId();
     CheckLootTemplates_Reference(ids_set);
 
     sLog.outString("Deleting expired bans...");

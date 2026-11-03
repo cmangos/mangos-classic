@@ -41,7 +41,7 @@ INSTANTIATE_SINGLETON_1(BattleGroundMgr);
 /***            BATTLEGROUND MANAGER                   ***/
 /*********************************************************/
 
-BattleGroundMgr::BattleGroundMgr() : m_testing(false)
+BattleGroundMgr::BattleGroundMgr() : m_testing(false), m_nextPvpStatsBattleGroundId(1)
 {
     for (uint8 i = BATTLEGROUND_TYPE_NONE; i < MAX_BATTLEGROUND_TYPE_ID; ++i)
         m_battleGrounds[i].clear();
@@ -425,6 +425,16 @@ void BattleGroundMgr::AddBattleGround(uint32 instanceId, BattleGroundTypeId bgTy
     MaNGOS::unique_trackable_ptr<BattleGround>& ptr = m_battleGrounds[bgTypeId][instanceId];
     ptr.reset(bg);
     bg->SetWeakPtr(ptr);
+}
+
+/**
+  Method that gets the first free id of pvpstats_battlegrounds, once at startup
+*/
+void BattleGroundMgr::LoadPvpStatsBattleGroundId()
+{
+    auto queryResult = CharacterDatabase.Query("SELECT MAX(id) FROM pvpstats_battlegrounds");
+    if (queryResult)
+        m_nextPvpStatsBattleGroundId = (*queryResult)[0].GetUInt64() + 1;
 }
 
 /**
