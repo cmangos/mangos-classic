@@ -864,7 +864,10 @@ bool AuthSocket::_HandleReconnectProof()
         Sha1Hash sha;
         sha.Initialize();
         sha.UpdateData(self->_login);
-        sha.UpdateBigNumbers(&t1, &self->_reconnectProof, &K, nullptr);
+        // Fixed widths, as the client: R1 and the challenge on 16 bytes, K on 40
+        sha.UpdateData(t1.AsByteArray(16));
+        sha.UpdateData(self->_reconnectProof.AsByteArray(16));
+        sha.UpdateData(K.AsByteArray(40));
         sha.Finalize();
 
         if (!memcmp(sha.GetDigest(), lp->R2, Sha1Hash::GetLength()))
