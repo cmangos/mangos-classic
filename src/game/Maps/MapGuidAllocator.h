@@ -34,10 +34,10 @@
  * range and from then on skips every counter still used by an object of the same entry. The entry (the
  * pet number for pets) is part of the guid, so objects of different entries never share a guid, even
  * with the same counter. A counter thus comes back only after a full round of the cursor, which every
- * entry shares; a round lasts weeks on a busy continent.
+ * entry shares.
  *
  * If every counter of the range is in use for the entry, this is itself a sign something else is
- * wrong: Generate() stops the server the same way the old generator did on overflow, instead of
+ * wrong: Generate() stops the server, as ObjectGuidGenerator does on overflow, instead of
  * silently refusing object creations one by one.
  */
 class MapGuidAllocator

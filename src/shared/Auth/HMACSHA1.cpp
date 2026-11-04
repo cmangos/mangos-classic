@@ -23,11 +23,10 @@
 
 HMACSHA1::HMACSHA1(uint32 len, uint8 const* seed)
 {
-    // m_key only holds SEED_KEY_SIZE (16) bytes, kept for a later Initialize() call, which always re-keys with that
-    // many bytes from m_key. A longer key (len > SEED_KEY_SIZE; today only WorldSession::SendRedirectClient in
-    // wotlk, dead code, passes 40 for the session key K) used to overflow m_key on both the memcpy below and the
-    // EVP_MAC_init call that used to read it back out. Key the MAC from the caller's own buffer instead, which is
-    // already exactly len bytes long; do not call Initialize() again on an object constructed with len > SEED_KEY_SIZE.
+    // m_key only holds SEED_KEY_SIZE (16) bytes, kept for a later Initialize() call, which re-keys with that many
+    // bytes from m_key. A longer key (len > SEED_KEY_SIZE) is therefore not copied past it: the MAC is keyed from the
+    // caller's own buffer, which is already len bytes long. Do not call Initialize() again on an object constructed
+    // with len > SEED_KEY_SIZE.
     memcpy(m_key, seed, std::min<uint32>(len, SEED_KEY_SIZE));
     m_mac = EVP_MAC_fetch(nullptr, "HMAC", nullptr);
     m_ctx = EVP_MAC_CTX_new(m_mac);

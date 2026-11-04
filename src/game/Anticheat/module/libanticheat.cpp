@@ -223,7 +223,7 @@ void AnticheatLib::Reload()
     sAnticheatConfig.loadConfigSettings();
 
     // Also gates ValidateGuildName (guild/petition name blacklist check, Guild.cpp / PetitionsHandler.cpp):
-    // added in the same commit as the rest of antispam ([s2433]), never behind its own switch.
+    // it has no switch of its own.
     if (sAnticheatConfig.EnableAntispam())
     {
         sLog.outString("Loading antispam system...");

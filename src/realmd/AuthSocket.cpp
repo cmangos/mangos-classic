@@ -284,9 +284,8 @@ bool AuthSocket::ProcessIncomingData()
         }
 
         // if we reach here, it means that a valid opcode was found and the handler completed successfully;
-        // re-arm the timeout instead of just cancelling it, so a client that goes on to send a command out of
-        // order or with an unknown opcode (which are otherwise ignored without closing the socket) still gets
-        // disconnected eventually instead of holding the connection open forever
+        // re-arm the timeout: a client that goes on to send a command out of order or with an unknown opcode (which
+        // are otherwise ignored without closing the socket) still gets disconnected eventually
         self->ArmTimeoutTimer();
     });
 
@@ -512,8 +511,7 @@ bool AuthSocket::_HandleLogonChallenge()
                 {
                     // Unknown account: a fake, but stable (same username -> same challenge every time) and
                     // never-matchable challenge, so the client cannot tell this apart from a real but wrong password.
-                    // Sending AUTH_LOGON_FAILED_UNKNOWN_ACCOUNT here let an attacker enumerate valid account names
-                    // (see BUGS-INTERNES.md C8).
+                    // Answering AUTH_LOGON_FAILED_UNKNOWN_ACCOUNT here would let an attacker enumerate valid account names.
                     // Case-fold the name first: the account lookup above is case-insensitive (DB default collation), so a
                     // real account gives the same v/s for any casing of its name. Hashing the raw, unfolded name here
                     // would make two casings of the same unknown name look like two different accounts, and (since a
@@ -630,8 +628,8 @@ bool AuthSocket::_HandleLogonProof()
                 return;
             }
 
-            // m_promptPin is server-side state set during the challenge (token present, build <= 6141): the client cannot
-            // skip this check by replying with securityFlags = 0, unlike checking lp->securityFlags here instead
+            // m_promptPin is server-side state set during the challenge (token present, build <= 6141): it does not
+            // depend on what the client sends in securityFlags
             if (self->m_promptPin)
             {
                 int32 serverToken = self->generateToken(self->_token.c_str());
@@ -1156,9 +1154,9 @@ static const std::vector<uint8>& GetFakeAccountSecret()
 }
 
 // Expands a tagged hash of (secret, login) into 32 pseudorandom bytes, with the same high bit always set as
-// BigNumber::SetRand(256) forces on a real salt (BN_rand top=0): a single SHA1 digest is only 20 bytes, so stuffing
-// it into a 32-byte BigNumber left its 12 high-order bytes always zero -- a one-request fingerprint that told an
-// attacker apart a fake challenge from a real one, defeating the whole point of this function.
+// BigNumber::SetRand(256) forces on a real salt (BN_rand top=0): a single SHA1 digest is only 20 bytes, so stuffed
+// into a 32-byte BigNumber its 12 high-order bytes would always be zero, a fingerprint that tells a fake challenge
+// from a real one.
 static std::vector<uint8> ExpandFakeSecret(const std::vector<uint8>& secret, const std::string& login, const char* tag, bool matchSaltShape)
 {
     std::vector<uint8> out;

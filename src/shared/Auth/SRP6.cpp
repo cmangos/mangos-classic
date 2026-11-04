@@ -59,7 +59,7 @@ void SRP6::CalculateProof(std::string username)
     memcpy(t4, sha.GetDigest(), Sha1Hash::GetLength());
 
     // The client hashes s, A and B on 32 bytes and K on 40 bytes, whatever their value: a number with leading zero
-    // bytes must not be hashed shorter (it made the proof fail one time out of a few dozen)
+    // bytes must not be hashed shorter
     sha.Initialize();
     sha.UpdateData(hash, 20);
     sha.UpdateData(t4, Sha1Hash::GetLength());

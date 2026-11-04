@@ -63,7 +63,7 @@ uint32 MapGuidAllocator::Generate(uint32 entry)
 
     // A full round with nothing free for this entry only happens if something else is already
     // wrong (e.g. objects that should have been removed are still referenced): stop the server the
-    // same way the old generator did on overflow, instead of silently refusing object creations one
+    // same way ObjectGuidGenerator does on overflow, instead of silently refusing object creations one
     // by one while whatever is holding onto them keeps doing so.
     sLog.outError("Map %u (instance %u): no free %s guid for entry %u among %u counters. Can't continue, shutting down server.",
                   m_mapId, m_instanceId, ObjectGuid::GetTypeName(m_high), entry, size);

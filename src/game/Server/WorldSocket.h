@@ -107,7 +107,7 @@ class WorldSocket : public MaNGOS::AsyncSocket<WorldSocket>
 
         const uint32 m_seed;
 
-        BigNumber m_sessionKey;      // the real SRP6 session key K, not the account's salt (see GetSessionKey below)
+        BigNumber m_sessionKey;      // the SRP6 session key K (see GetSessionKey below)
 
         /// process one incoming packet.
         virtual bool ProcessIncomingData() override;
@@ -135,7 +135,7 @@ class WorldSocket : public MaNGOS::AsyncSocket<WorldSocket>
 
         bool OnOpen() override;
 
-        /// Return the session key (K, 40 bytes once authenticated -- this used to wrongly return the account's salt)
+        /// Return the session key (K, 40 bytes once authenticated)
         BigNumber& GetSessionKey() { return m_sessionKey; }
 
         std::deque<uint32> GetOutOpcodeHistory();
