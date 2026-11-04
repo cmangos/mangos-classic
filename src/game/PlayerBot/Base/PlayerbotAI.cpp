@@ -41,6 +41,7 @@
 #include "../../Spells/Spell.h"
 #include "../../Spells/SpellAuras.h"
 #include "../../Spells/SpellMgr.h"
+#include "../../Spells/SpellStacking.h"
 #include "../../Tools/Language.h"
 #include "../../World/World.h"
 
@@ -3998,53 +3999,6 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
         return;
     }
 
-<<<<<<< HEAD
-=======
-    if (m_botState == BOTSTATE_TAME)
-    {
-        Unit* pTarget = ObjectAccessor::GetUnit(*m_bot, m_targetGuidCommand);
-        if (!pTarget)
-            return;
-
-        m_bot->SetSelectionGuid(m_targetGuidCommand);
-
-        if (!In_Range(pTarget, TAME_BEAST_1))
-            m_bot->clearUnitState(UNIT_STAT_CHASE);
-
-        if (!m_bot->hasUnitState(UNIT_STAT_CHASE))
-        {
-            m_bot->GetMotionMaster()->MoveChase(pTarget);
-            return;
-        }
-
-        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(TAME_BEAST_1);
-        if (!spellInfo)
-            return;
-
-        Spell* spell = new Spell(m_bot, spellInfo, false);
-        if (!spell)
-            return;
-
-        if (m_bot->GetPetGuid() || spell->CheckCast(true) != SPELL_CAST_OK || !pTarget ||
-                pTarget->IsDead() || !m_bot->IsInMap(pTarget) || !(((Creature*) pTarget)->GetCreatureInfo()->HasFlag(CreatureTypeFlags::TAMEABLE)))
-        {
-            MovementReset();
-            m_bot->SetSelectionGuid(ObjectGuid());
-            SetState(BOTSTATE_NORMAL);
-            SetIgnoreUpdateTime(0);
-        }
-        else if (!m_bot->HasAura(TAME_BEAST_1, EFFECT_INDEX_1))
-        {
-            m_bot->SetFacingTo(m_bot->GetAngle(pTarget));
-            SpellCastTargets targets;
-            targets.setUnitTarget(pTarget);
-            spell->SpellStart(&targets);
-            SetIgnoreUpdateTime(10);
-        }
-        return;
-    }
-
->>>>>>> 9a3287fd794 (StaticFlags: Implement CreatureTypeFlags from StaticFlags)
     // direct cast command from master
     if (m_spellIdCommand != 0)
     {
@@ -4064,8 +4018,11 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
     //if master is unmounted, unmount the bot
     if (!GetMaster()->IsMounted() && m_bot->IsMounted())
     {
-        WorldPacket emptyPacket;
-        m_bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);  //updated code
+        if (!m_bot->IsTaxiFlying())
+        {
+            m_bot->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+            m_bot->Unmount();
+        }
 
         return;
     }
@@ -4515,15 +4472,20 @@ SpellCastResult PlayerbotAI::SelfBuff(uint32 spellId)
 }
 
 // Checks if spell is single per target per caster and will make any effect on target
-bool PlayerbotAI::CanReceiveSpecificSpell(uint8 spec, Unit* target) const
+bool PlayerbotAI::CanReceiveSpecificSpell(uint32 spellId, Unit* target) const
 {
-    if (IsSpellSpecificUniquePerCaster(SpellSpecific(spec)))
+    SpellGroupSpellData const* data = sSpellStacker.GetSpellGroupDataForSpell(spellId);
+    if (!data || data->rule != SpellGroupRule::UNIQUE_PER_CASTER)
+        return true;
+
+    for (auto const& holder : target->GetSpellAuraHolderMap())
     {
-        Unit::SpellAuraHolderMap holders = target->GetSpellAuraHolderMap();
-        Unit::SpellAuraHolderMap::iterator it;
-        for (it = holders.begin(); it != holders.end(); ++it)
-            if ((*it).second->GetCasterGuid() == m_bot->GetObjectGuid() && IsSpellSpecificIdentical(GetSpellSpecific((*it).second->GetId()), SpellSpecific(spec)))
-                return false;
+        if (holder.second->GetCasterGuid() != m_bot->GetObjectGuid())
+            continue;
+
+        SpellGroupSpellData const* existingData = sSpellStacker.GetSpellGroupDataForSpell(holder.second->GetId());
+        if (existingData && (data->mask & existingData->mask) != 0)
+            return false;
     }
     return true;
 }
@@ -5733,13 +5695,14 @@ void PlayerbotAI::EquipItem(Item* src_Item)
 
         // check dest->src move possibility
         ItemPosCountVec sSrc;
+        uint8 bagSlot = 0;
         if (m_bot->IsInventoryPos(src))
         {
-            msg = m_bot->CanStoreItem(src_bagIndex, src_slot, sSrc, dest_Item, true);
+            msg = m_bot->CanStoreItem(src_bagIndex, src_slot, sSrc, dest_Item, bagSlot, true);
             if (msg != EQUIP_ERR_OK)
-                msg = m_bot->CanStoreItem(src_bagIndex, NULL_SLOT, sSrc, dest_Item, true);
+                msg = m_bot->CanStoreItem(src_bagIndex, NULL_SLOT, sSrc, dest_Item, bagSlot, true);
             if (msg != EQUIP_ERR_OK)
-                msg = m_bot->CanStoreItem(NULL_BAG, NULL_SLOT, sSrc, dest_Item, true);
+                msg = m_bot->CanStoreItem(NULL_BAG, NULL_SLOT, sSrc, dest_Item, bagSlot, true);
         }
 
         if (msg != EQUIP_ERR_OK)
@@ -5944,7 +5907,8 @@ bool PlayerbotAI::Withdraw(const uint32 itemid)
         std::ostringstream report;
 
         ItemPosCountVec dest;
-        InventoryResult msg = m_bot->CanStoreItem(NULL_BAG, NULL_SLOT, dest, pItem, false);
+        uint8 bagSlot = 0;
+        InventoryResult msg = m_bot->CanStoreItem(NULL_BAG, NULL_SLOT, dest, pItem, bagSlot, false);
         if (msg != EQUIP_ERR_OK)
         {
             m_bot->SendEquipError(msg, pItem, nullptr);
@@ -5970,7 +5934,8 @@ bool PlayerbotAI::Deposit(const uint32 itemid)
         std::ostringstream report;
 
         ItemPosCountVec dest;
-        InventoryResult msg = m_bot->CanBankItem(NULL_BAG, NULL_SLOT, dest, pItem, false);
+        uint8 bagSlot = 0;
+        InventoryResult msg = m_bot->CanBankItem(NULL_BAG, NULL_SLOT, dest, pItem, false, bagSlot);
         if (msg != EQUIP_ERR_OK)
         {
             m_bot->SendEquipError(msg, pItem, nullptr);

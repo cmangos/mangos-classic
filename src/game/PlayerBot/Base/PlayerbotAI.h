@@ -419,7 +419,7 @@ class PlayerbotAI
         bool HasAura(const char* spellName, const Unit& player) const;
         bool HasAura(const char* spellName) const;
 
-        bool CanReceiveSpecificSpell(uint8 spec, Unit* target) const;
+        bool CanReceiveSpecificSpell(uint32 spellId, Unit* target) const;
 
         bool PickPocket(Unit* pTarget);
         bool HasTool(uint32 TC);        // TODO implement this for opening lock

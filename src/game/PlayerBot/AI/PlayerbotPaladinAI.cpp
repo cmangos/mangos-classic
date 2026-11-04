@@ -661,7 +661,7 @@ bool PlayerbotPaladinAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* targe
             }
             break;
         case CLASS_HUNTER:
-            if (pet && ai->CanReceiveSpecificSpell(SPELL_BLESSING, pet) && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE))
+            if (pet && ai->CanReceiveSpecificSpell(BLESSING_OF_MIGHT_1, pet) && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE))
             {
                 petSpellId = c->BLESSING_OF_MIGHT;
                 if (!petSpellId)
@@ -686,7 +686,7 @@ bool PlayerbotPaladinAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* targe
             }
             break;
         case CLASS_WARLOCK:
-            if (pet && ai->CanReceiveSpecificSpell(SPELL_BLESSING, pet) && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE))
+            if (pet && ai->CanReceiveSpecificSpell(BLESSING_OF_MIGHT_1, pet) && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE))
             {
                 if (pet->GetPowerType() == POWER_MANA)
                     petSpellId = c->BLESSING_OF_WISDOM;
