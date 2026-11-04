@@ -1067,6 +1067,46 @@ bool ItemRequiredTarget::IsFitToRequirements(Unit* pUnitTarget) const
     }
 }
 
+uint32 Item::CalculateDurabilityRepairCost(float discountMod) const
+{
+    uint32 maxDurability = GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+    if (!maxDurability)
+        return 0;
+
+    uint32 curDurability = GetUInt32Value(ITEM_FIELD_DURABILITY);
+
+    uint32 lostDurability = maxDurability - curDurability;
+    if (lostDurability <= 0)
+        return 0;
+
+    ItemPrototype const* ditemProto = GetProto();
+
+    DurabilityCostsEntry const* dcost = sDurabilityCostsStore.LookupEntry(ditemProto->ItemLevel);
+    if (!dcost)
+    {
+        sLog.outError("RepairDurability: Wrong item lvl %u", ditemProto->ItemLevel);
+        return 0;
+    }
+
+    uint32 dQualitymodEntryId = (ditemProto->Quality + 1) * 2;
+    DurabilityQualityEntry const* dQualitymodEntry = sDurabilityQualityStore.LookupEntry(dQualitymodEntryId);
+    if (!dQualitymodEntry)
+    {
+        sLog.outError("RepairDurability: Wrong dQualityModEntry %u", dQualitymodEntryId);
+        return 0;
+    }
+
+    uint32 dmultiplier = dcost->multiplier[ItemSubClassToDurabilityMultiplierId(ditemProto->Class, ditemProto->SubClass)];
+    uint32 costs = uint32(lostDurability * dmultiplier * double(dQualitymodEntry->quality_mod));
+
+    costs = uint32(costs * discountMod);
+
+    if (costs == 0) // fix for ITEM_QUALITY_ARTIFACT
+        costs = 1;
+
+    return costs;
+}
+
 void Item::SetLootState(ItemLootUpdateState state)
 {
     // ITEM_LOOT_NONE -> ITEM_LOOT_TEMPORARY -> ITEM_LOOT_NONE

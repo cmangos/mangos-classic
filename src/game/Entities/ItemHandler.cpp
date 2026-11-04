@@ -564,6 +564,12 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recv_data)
         }
     }
 
+    uint32 durabilityRepairCosts = pItem->CalculateDurabilityRepairCost(1.f);
+    if (durabilityRepairCosts < money)
+        money -= durabilityRepairCosts;
+    else
+        money = 1;
+
     if (count < pItem->GetCount())              // need split items
     {
         Item* pNewItem = pItem->CloneItem(count, _player);

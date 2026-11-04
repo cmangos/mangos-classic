@@ -4687,34 +4687,9 @@ uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod)
 
     if (cost)
     {
-        uint32 LostDurability = maxDurability - curDurability;
-        if (LostDurability > 0)
+        uint32 costs = item->CalculateDurabilityRepairCost(discountMod);
+        if (costs > 0)
         {
-            ItemPrototype const* ditemProto = item->GetProto();
-
-            DurabilityCostsEntry const* dcost = sDurabilityCostsStore.LookupEntry(ditemProto->ItemLevel);
-            if (!dcost)
-            {
-                sLog.outError("RepairDurability: Wrong item lvl %u", ditemProto->ItemLevel);
-                return TotalCost;
-            }
-
-            uint32 dQualitymodEntryId = (ditemProto->Quality + 1) * 2;
-            DurabilityQualityEntry const* dQualitymodEntry = sDurabilityQualityStore.LookupEntry(dQualitymodEntryId);
-            if (!dQualitymodEntry)
-            {
-                sLog.outError("RepairDurability: Wrong dQualityModEntry %u", dQualitymodEntryId);
-                return TotalCost;
-            }
-
-            uint32 dmultiplier = dcost->multiplier[ItemSubClassToDurabilityMultiplierId(ditemProto->Class, ditemProto->SubClass)];
-            uint32 costs = uint32(LostDurability * dmultiplier * double(dQualitymodEntry->quality_mod));
-
-            costs = uint32(costs * discountMod);
-
-            if (costs == 0)                                 // fix for ITEM_QUALITY_ARTIFACT
-                costs = 1;
-
             if (GetMoney() < costs)
             {
                 DEBUG_LOG("You do not have enough money");
