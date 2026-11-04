@@ -1246,6 +1246,22 @@ GMTicketMgr::CommandResult GMTicketMgr::CanWhisper(const GMTicket* ticket, World
     return COMMAND_RESULT_SUCCESS;
 }
 
+void GMTicketMgr::RemovePlayerReferences(ObjectGuid playerGuid)
+{
+    std::vector<GMTicket*> authored;
+    for (auto& entry : m_tickets)
+    {
+        GMTicket* ticket = entry.second;
+        if (ticket->GetAuthorGuid() == playerGuid)
+            authored.push_back(ticket);
+        else if (ticket->GetAssigneeGuid() == playerGuid)
+            ticket->ClearAssignee();
+    }
+
+    for (GMTicket* ticket : authored)
+        Remove(*ticket);
+}
+
 bool GMTicketMgr::Remove(GMTicket& ticket)
 {
     m_list.remove(&ticket);

@@ -417,6 +417,48 @@ void AuctionHouseMgr::LoadAuctions()
     sLog.outString();
 }
 
+void AuctionHouseMgr::RemovePlayerAuctions(ObjectGuid playerGuid)
+{
+    uint32 const lowGuid = playerGuid.GetCounter();
+
+    for (AuctionHouseObject& house : mAuctions)
+    {
+        std::vector<AuctionEntry*> owned;
+        for (auto const& entry : house.GetAuctions())
+        {
+            AuctionEntry* auction = entry.second;
+            if (auction->owner == lowGuid)
+            {
+                owned.push_back(auction);
+            }
+            else if (auction->bidder == lowGuid)
+            {
+                // the bid goes with the character: the auction goes on as if nobody had bid
+                auction->bidder = 0;
+                auction->bid = 0;
+                CharacterDatabase.PExecute("UPDATE auction SET buyguid = '0', lastbid = '0' WHERE id = '%u'", auction->Id);
+            }
+        }
+
+        for (AuctionEntry* auction : owned)
+        {
+            if (auction->bidder)                            // the last bidder gets the bid back
+                WorldSession::SendAuctionCancelledToBidderMail(auction);
+
+            if (Item* item = GetAItem(auction->itemGuidLow))
+            {
+                RemoveAItem(auction->itemGuidLow);
+                item->FSetState(ITEM_REMOVED);
+                item->SaveToDB();                           // deletes the item and its database rows
+            }
+
+            auction->DeleteFromDB();
+            house.RemoveAuction(auction->Id);
+            delete auction;
+        }
+    }
+}
+
 void AuctionHouseMgr::AddAItem(Item* it)
 {
     MANGOS_ASSERT(it);

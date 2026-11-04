@@ -371,7 +371,7 @@ class WorldSession
         void SendAuctionOwnerNotification(AuctionEntry* auction, bool sold) const;
         void SendAuctionRemovedNotification(AuctionEntry* auction) const;
         static void SendAuctionOutbiddedMail(AuctionEntry* auction);
-        void SendAuctionCancelledToBidderMail(AuctionEntry* auction) const;
+        static void SendAuctionCancelledToBidderMail(AuctionEntry* auction);
         AuctionHouseEntry const* GetCheckedAuctionHouseForAuctioneer(ObjectGuid guid) const;
 
         // Item Enchantment

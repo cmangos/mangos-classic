@@ -19,6 +19,7 @@
 #ifndef _AUCTION_HOUSE_MGR_H
 #define _AUCTION_HOUSE_MGR_H
 
+#include "Entities/ObjectGuid.h"
 #include "Common.h"
 #include "Server/DBCStructure.h"
 
@@ -141,6 +142,10 @@ class AuctionHouseMgr
         ~AuctionHouseMgr();
 
         typedef std::unordered_map<uint32, Item*> ItemMap;
+
+        // Removes the auctions of a character that is being deleted and takes back its bids. Sends mail, so it must
+        // not run inside an open database transaction.
+        void RemovePlayerAuctions(ObjectGuid playerGuid);
 
         AuctionHouseObject* GetAuctionsMap(AuctionHouseType houseType) { return &mAuctions[houseType]; }
         AuctionHouseObject* GetAuctionsMap(AuctionHouseEntry const* house);

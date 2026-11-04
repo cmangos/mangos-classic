@@ -164,7 +164,7 @@ void WorldSession::SendAuctionOutbiddedMail(AuctionEntry* auction)
 }
 
 // this function sends mail, when auction is cancelled to old bidder
-void WorldSession::SendAuctionCancelledToBidderMail(AuctionEntry* auction) const
+void WorldSession::SendAuctionCancelledToBidderMail(AuctionEntry* auction)
 {
     ObjectGuid bidder_guid = ObjectGuid(HIGHGUID_PLAYER, auction->bidder);
     Player* bidder = sObjectMgr.GetPlayer(bidder_guid);

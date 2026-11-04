@@ -128,6 +128,13 @@ class GMTicket
         inline time_t                   GetClosedAt()       const { return m_closed; }
         inline ObjectGuid const&        GetAssigneeGuid()   const { return m_assigneeGuid; }
         inline const char*              GetAssigneeName()   const { return m_assigneeName.c_str(); }
+        inline void                     ClearAssignee()
+        {
+            m_assigneeGuid.Clear();
+            m_assigneeName.clear();
+            if (m_status == GMTICKET_ASSIGNEDTOGM_STATUS_ASSIGNED)
+                m_status = GMTICKET_ASSIGNEDTOGM_STATUS_NOT_ASSIGNED;
+        }
         inline std::string const&       GetConclusion()     const { return m_conclusion; }
         inline std::string const&       GetNotes()          const { return m_notes; }
 
@@ -260,6 +267,9 @@ class GMTicketMgr
         bool Recycle(GMTicket* ticket);
 
         void Survey(GMTicket* ticket, const GMSurveyResult* result = nullptr);
+
+        // The tickets written by this character are removed, the ones it handled as a GM go back to unassigned
+        void RemovePlayerReferences(ObjectGuid playerGuid);
 
         CommandResult Abandon(GMTicket* ticket);
         inline CommandResult Discard(GMTicket* ticket, const std::string& reason, WorldSession* session = nullptr) { return Close(ticket, reason, false, session); }
