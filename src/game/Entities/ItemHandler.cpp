@@ -501,14 +501,14 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recv_data)
     // prevent sell not owner item
     if (_player->GetObjectGuid() != pItem->GetOwnerGuid())
     {
-        _player->SendSellError(SellResult::CANT_SELL_ITEM, pCreature, itemGuid);
+        _player->SendSellError(SellResult::YOU_DONT_OWN_THAT_ITEM, pCreature, itemGuid);
         return;
     }
 
     // prevent sell non empty bag by drag-and-drop at vendor's item list
     if (pItem->IsBag() && !((Bag*)pItem)->IsEmpty())
     {
-        _player->SendSellError(SellResult::CANT_SELL_ITEM, pCreature, itemGuid);
+        _player->SendSellError(SellResult::ONLY_EMPTY_BAG, pCreature, itemGuid);
         return;
     }
 
