@@ -17709,7 +17709,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
     data << pCreature->GetObjectGuid();
     data << uint32(vendorslot + 1);                 // numbered from 1 at client
     data << uint32(crItem->maxcount > 0 ? new_count : 0xFFFFFFFF);
-    data << uint32(count);
+    data << uint32(totalCount);
     GetSession()->SendPacket(data);
 
     SendNewItem(pItem, totalCount, true, false);
