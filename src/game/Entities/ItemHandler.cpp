@@ -548,27 +548,7 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recv_data)
         return;
     }
 
-    uint32 money = pProto->SellPrice * count;
-
-    for (auto i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
-    {
-        auto const& spell = pProto->Spells[i];
-
-        // if spell charges for this item are negative, it means that the item should be destroyed once the charges are consumed.
-        // it also means that the value of this item is relative to how many charges are remaining.
-        if (spell.SpellId != 0 && spell.SpellCharges < 0)
-        {
-            auto const multiplier = static_cast<float>(pItem->GetSpellCharges(i)) / spell.SpellCharges;
-            money *= multiplier;
-            break;
-        }
-    }
-
-    uint32 durabilityRepairCosts = pItem->CalculateDurabilityRepairCost(1.f);
-    if (durabilityRepairCosts < money)
-        money -= durabilityRepairCosts;
-    else
-        money = 1;
+    uint32 money = pItem->GetSellPrice() * count;
 
     if (count < pItem->GetCount())              // need split items
     {

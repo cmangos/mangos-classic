@@ -4679,6 +4679,10 @@ uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod)
     if (!item)
         return TotalCost;
 
+    // a wrapped item shows no durability
+    if (item->HasFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_WRAPPED))
+        return TotalCost;
+
     uint32 maxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
     if (!maxDurability)
         return TotalCost;
@@ -18428,6 +18432,25 @@ float Player::GetReputationPriceDiscount(FactionTemplateEntry const* vendor_fact
         }
     }
     return float (discount / 100.0f);
+}
+
+float Player::GetRepairPriceMultiplier(Creature const* vendor) const
+{
+    double discount = 0.0;
+    if (vendor->GetReactionTo(this) >= REP_HONORED)
+        discount = double(0.1f);
+
+    if (vendor->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP))
+    {
+        uint8 honorRank = GetByteValue(PLAYER_BYTES_3, 3);
+        if (honorRank >= 6)
+        {
+            discount += double(0.05f);
+            if (honorRank >= 8)
+                discount += double(0.05f);
+        }
+    }
+    return float(1.0 - discount);
 }
 
 /**

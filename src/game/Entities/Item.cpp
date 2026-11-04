@@ -26,6 +26,8 @@
 #include "Loot/LootMgr.h"
 #include "Spells/SpellTargetDefines.h"
 
+#include <cmath>
+
 void AddItemsSetItem(Player* player, Item* item)
 {
     ItemPrototype const* proto = item->GetProto();
@@ -1067,44 +1069,64 @@ bool ItemRequiredTarget::IsFitToRequirements(Unit* pUnitTarget) const
     }
 }
 
+uint32 Item::GetBaseRepairCost() const
+{
+    if (HasFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_WRAPPED))
+        return 0;
+
+    uint32 maxDurability = GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+    uint32 curDurability = GetUInt32Value(ITEM_FIELD_DURABILITY);
+    if (!maxDurability || curDurability >= maxDurability)
+        return 0;
+
+    ItemPrototype const* proto = GetProto();
+
+    // only weapons, and armor up to the last armor column, have a repair cost
+    if (!(proto->Class == ITEM_CLASS_WEAPON && proto->SubClass <= 21) && !(proto->Class == ITEM_CLASS_ARMOR && proto->SubClass <= 7))
+        return 0;
+
+    DurabilityCostsEntry const* dcost = sDurabilityCostsStore.LookupEntry(proto->ItemLevel);
+    if (!dcost)
+        return 0;
+
+    DurabilityQualityEntry const* dQualitymodEntry = sDurabilityQualityStore.LookupEntry((proto->Quality + 1) * 2);
+    if (!dQualitymodEntry)
+        return 0;
+
+    double lost = double(maxDurability - curDurability);
+    double qualityMod = double(dQualitymodEntry->quality_mod);
+    double multiplier = double(dcost->multiplier[ItemSubClassToDurabilityMultiplierId(proto->Class, proto->SubClass)]);
+
+    // keep these operations, their order and this rounding (half away from zero, at least 1): the prices shown to the player depend on them
+    double cost = lost * qualityMod * multiplier;
+    uint32 costs = uint32(cost + 0.5);
+    return costs ? costs : 1;
+}
+
 uint32 Item::CalculateDurabilityRepairCost(float discountMod) const
 {
-    uint32 maxDurability = GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
-    if (!maxDurability)
+    // the discounted price is rounded to float, then to the nearest integer, ties to even
+    float costs = float(GetBaseRepairCost()) * discountMod;
+    return uint32(std::lrintf(costs));
+}
+
+uint32 Item::GetSellPrice() const
+{
+    ItemPrototype const* proto = GetProto();
+    int32 price = int32(proto->SellPrice);
+    if (!price)
         return 0;
 
-    uint32 curDurability = GetUInt32Value(ITEM_FIELD_DURABILITY);
+    // the value of an item destroyed when its charges are consumed follows the remaining charges
+    int32 baseCharges = proto->Spells[0].SpellCharges;
+    if (baseCharges < -1)
+        price = GetSpellCharges(0) * price / baseCharges;
 
-    uint32 lostDurability = maxDurability - curDurability;
-    if (lostDurability <= 0)
-        return 0;
+    int32 repairCost = int32(GetBaseRepairCost());
+    if (repairCost >= price)
+        return 1;
 
-    ItemPrototype const* ditemProto = GetProto();
-
-    DurabilityCostsEntry const* dcost = sDurabilityCostsStore.LookupEntry(ditemProto->ItemLevel);
-    if (!dcost)
-    {
-        sLog.outError("RepairDurability: Wrong item lvl %u", ditemProto->ItemLevel);
-        return 0;
-    }
-
-    uint32 dQualitymodEntryId = (ditemProto->Quality + 1) * 2;
-    DurabilityQualityEntry const* dQualitymodEntry = sDurabilityQualityStore.LookupEntry(dQualitymodEntryId);
-    if (!dQualitymodEntry)
-    {
-        sLog.outError("RepairDurability: Wrong dQualityModEntry %u", dQualitymodEntryId);
-        return 0;
-    }
-
-    uint32 dmultiplier = dcost->multiplier[ItemSubClassToDurabilityMultiplierId(ditemProto->Class, ditemProto->SubClass)];
-    uint32 costs = uint32(lostDurability * dmultiplier * double(dQualitymodEntry->quality_mod));
-
-    costs = uint32(costs * discountMod);
-
-    if (costs == 0) // fix for ITEM_QUALITY_ARTIFACT
-        costs = 1;
-
-    return costs;
+    return uint32(price - repairCost);
 }
 
 void Item::SetLootState(ItemLootUpdateState state)
