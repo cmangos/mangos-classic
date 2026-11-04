@@ -566,7 +566,7 @@ void SendActionMenu_npc_prof_leather(Player* pPlayer, Creature* pCreature, uint3
                     pPlayer->ModifyMoney(-GetUnlearnCostMedium(pPlayer));
                 }
                 else
-                    pPlayer->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, 0, 0);
+                    pPlayer->SendBuyError(BuyResult::NOT_ENOUGHT_MONEY, pCreature, 0);
             }
             else
                 pPlayer->SendEquipError(EQUIP_ERR_CANT_DO_RIGHT_NOW, nullptr, nullptr);
@@ -586,7 +586,7 @@ void SendActionMenu_npc_prof_leather(Player* pPlayer, Creature* pCreature, uint3
                     pPlayer->ModifyMoney(-GetUnlearnCostMedium(pPlayer));
                 }
                 else
-                    pPlayer->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, 0, 0);
+                    pPlayer->SendBuyError(BuyResult::NOT_ENOUGHT_MONEY, pCreature, 0);
             }
             else
                 pPlayer->SendEquipError(EQUIP_ERR_CANT_DO_RIGHT_NOW, nullptr, nullptr);
@@ -606,7 +606,7 @@ void SendActionMenu_npc_prof_leather(Player* pPlayer, Creature* pCreature, uint3
                     pPlayer->ModifyMoney(-GetUnlearnCostMedium(pPlayer));
                 }
                 else
-                    pPlayer->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, 0, 0);
+                    pPlayer->SendBuyError(BuyResult::NOT_ENOUGHT_MONEY, pCreature, 0);
             }
             else
                 pPlayer->SendEquipError(EQUIP_ERR_CANT_DO_RIGHT_NOW, nullptr, nullptr);

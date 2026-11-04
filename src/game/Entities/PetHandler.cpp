@@ -685,7 +685,7 @@ void WorldSession::HandlePetUnlearnOpcode(WorldPacket& recvPacket)
 
     if (_player->GetMoney() < cost)
     {
-        _player->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0, 0);
+        _player->SendBuyError(BuyResult::NOT_ENOUGHT_MONEY, nullptr, 0);
         return;
     }
 

@@ -108,7 +108,7 @@ bool ChatHandler::HandleDebugSendSellErrorCommand(char* args)
         return false;
 
     uint8 msg = atoi(args);
-    m_session->GetPlayer()->SendSellError(SellResult(msg), nullptr, ObjectGuid(), 0);
+    m_session->GetPlayer()->SendSellError(SellResult(msg), nullptr, ObjectGuid());
     return true;
 }
 
@@ -118,7 +118,7 @@ bool ChatHandler::HandleDebugSendBuyErrorCommand(char* args)
         return false;
 
     uint8 msg = atoi(args);
-    m_session->GetPlayer()->SendBuyError(BuyResult(msg), nullptr, 0, 0);
+    m_session->GetPlayer()->SendBuyError(BuyResult(msg), nullptr, 0);
     return true;
 }
 

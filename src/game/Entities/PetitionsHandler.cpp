@@ -114,14 +114,14 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recv_data)
     ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(charterid);
     if (!pProto)
     {
-        _player->SendBuyError(BUY_ERR_CANT_FIND_ITEM, nullptr, charterid, 0);
+        _player->SendBuyError(BuyResult::CANT_FIND_ITEM, nullptr, 0);
         return;
     }
 
     if (_player->GetMoney() < cost)
     {
         // player hasn't got enough money
-        _player->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, charterid, 0);
+        _player->SendBuyError(BuyResult::NOT_ENOUGHT_MONEY, pCreature, 0);
         return;
     }
 

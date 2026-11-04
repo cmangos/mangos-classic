@@ -110,27 +110,28 @@ enum InventoryResult
     // any greater values show as "bag full"
 };
 
-enum BuyResult
+enum class BuyResult
 {
-    BUY_ERR_CANT_FIND_ITEM                      = 0,
-    BUY_ERR_ITEM_ALREADY_SOLD                   = 1,
-    BUY_ERR_NOT_ENOUGHT_MONEY                   = 2,
-    BUY_ERR_SELLER_DONT_LIKE_YOU                = 4,
-    BUY_ERR_DISTANCE_TOO_FAR                    = 5,
-    BUY_ERR_ITEM_SOLD_OUT                       = 7,
-    BUY_ERR_CANT_CARRY_MORE                     = 8,
-    BUY_ERR_RANK_REQUIRE                        = 11,
-    BUY_ERR_REPUTATION_REQUIRE                  = 12
+    CANT_FIND_ITEM                      = 0,
+    ITEM_ALREADY_SOLD                   = 1,
+    NOT_ENOUGHT_MONEY                   = 2,
+    SELLER_DONT_LIKE_YOU                = 4,
+    DISTANCE_TOO_FAR                    = 5,
+    SILENT_ERROR                        = 6,
+    ITEM_SOLD_OUT                       = 7,
+    CANT_CARRY_MORE                     = 8,
+    RANK_REQUIRE                        = 11,
+    REPUTATION_REQUIRE                  = 12
 };
 
-enum SellResult
+enum class SellResult
 {
-    SELL_ERR_CANT_FIND_ITEM                      = 1,
-    SELL_ERR_CANT_SELL_ITEM                      = 2,       // merchant doesn't like that item
-    SELL_ERR_CANT_FIND_VENDOR                    = 3,       // merchant doesn't like you
-    SELL_ERR_YOU_DONT_OWN_THAT_ITEM              = 4,       // you don't own that item
-    SELL_ERR_UNK                                 = 5,       // nothing appears...
-    SELL_ERR_ONLY_EMPTY_BAG                      = 6        // can only do with empty bags
+    CANT_FIND_ITEM                      = 1,
+    CANT_SELL_ITEM                      = 2,       // merchant doesn't like that item
+    CANT_FIND_VENDOR                    = 3,       // merchant doesn't like you
+    YOU_DONT_OWN_THAT_ITEM              = 4,       // you don't own that item
+    NONE                                = 5,       // nothing appears...
+    ONLY_EMPTY_BAG                      = 6,       // can only do with empty bags
 };
 
 // -1 from client enchantment slot number
