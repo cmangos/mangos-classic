@@ -41,7 +41,8 @@ void WorldSession::SendTradeStatus(TradeStatusInfo const& info) const
             break;
         case TRADE_STATUS_CLOSE_WINDOW:
             data << uint32(info.Result);                    // InventoryResult
-            data << uint8(info.IsTargetResult);             // bool isTargetError; used for: EQUIP_ERR_BAG_FULL, EQUIP_ERR_CANT_CARRY_MORE_OF_THIS, EQUIP_ERR_MISSING_REAGENT, EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_COUNT_EXCEEDED
+            // the client reads this flag as "you" for EQUIP_ERR_BAG_FULL, but as "your trade partner" for EQUIP_ERR_CANT_CARRY_MORE_OF_THIS
+            data << uint8(info.Result == EQUIP_ERR_BAG_FULL ? !info.IsTargetResult : info.IsTargetResult);
             data << uint32(info.ItemLimitCategoryId);       // ItemLimitCategory.dbc entry
             break;
         case TRADE_STATUS_WRONG_REALM:
@@ -411,9 +412,9 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
             clearAcceptTradeMode(my_trade, his_trade);
 
             myCanCompleteInfo.Status = TRADE_STATUS_CLOSE_WINDOW;
-            trader->GetSession()->SendTradeStatus(myCanCompleteInfo);
-            myCanCompleteInfo.IsTargetResult = true;
             SendTradeStatus(myCanCompleteInfo);
+            myCanCompleteInfo.IsTargetResult = true;
+            trader->GetSession()->SendTradeStatus(myCanCompleteInfo);
             my_trade->SetAccepted(false);
             his_trade->SetAccepted(false);
             return;
@@ -423,9 +424,9 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
             clearAcceptTradeMode(my_trade, his_trade);
 
             hisCanCompleteInfo.Status = TRADE_STATUS_CLOSE_WINDOW;
-            SendTradeStatus(hisCanCompleteInfo);
-            hisCanCompleteInfo.IsTargetResult = true;
             trader->GetSession()->SendTradeStatus(hisCanCompleteInfo);
+            hisCanCompleteInfo.IsTargetResult = true;
+            SendTradeStatus(hisCanCompleteInfo);
             my_trade->SetAccepted(false);
             his_trade->SetAccepted(false);
             return;
