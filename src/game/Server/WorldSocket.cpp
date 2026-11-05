@@ -35,8 +35,12 @@
 #include "Anticheat/Anticheat.hpp"
 #include "Config/Config.h"
 
+#include <algorithm>
+#include <cctype>
 #include <chrono>
+#include <cstdlib>
 #include <functional>
+#include <limits>
 #include <memory>
 
 #include <boost/asio.hpp>
@@ -67,18 +71,39 @@ struct ServerPktHeader
 #pragma pack(pop)
 #endif
 
-std::vector<uint32> InitOpcodeCooldowns()
+std::vector<uint32> WorldSocket::m_packetCooldowns(NUM_MSG_TYPES, 0);
+
+void WorldSocket::LoadPacketCooldowns()
 {
-    std::vector<uint32> data(NUM_MSG_TYPES, 0);
+    std::fill(m_packetCooldowns.begin(), m_packetCooldowns.end(), 0);
 
-    data[CMSG_WHO] = 5000;
-    data[CMSG_WHOIS] = 5000;
-    data[CMSG_INSPECT] = 5000;
+    std::string const list = sConfig.GetStringDefault("Network.PacketCooldowns", "CMSG_WHO:5000 CMSG_WHOIS:5000");
+    for (std::string const& entry : StrSplit(list, " "))
+    {
+        std::string::size_type const colon = entry.find(':');
+        char* end = nullptr;
+        unsigned long long const cooldown = colon == std::string::npos ? 0 : std::strtoull(entry.c_str() + colon + 1, &end, 10);
+        if (colon == std::string::npos || !std::isdigit(static_cast<unsigned char>(entry[colon + 1])) || *end != '\0'
+            || cooldown > std::numeric_limits<uint32>::max())
+        {
+            sLog.outError("Network.PacketCooldowns: '%s' is not OPCODE_NAME:milliseconds, ignored.", entry.c_str());
+            continue;
+        }
 
-    return data;
+        std::string const name = entry.substr(0, colon);
+        uint32 opcode = 0;
+        while (opcode < NUM_MSG_TYPES && name != opcodeTable[opcode].name)
+            ++opcode;
+
+        if (opcode == NUM_MSG_TYPES || opcodeTable[opcode].status == STATUS_NEVER)
+        {
+            sLog.outError("Network.PacketCooldowns: '%s' is not an opcode the server handles, ignored.", name.c_str());
+            continue;
+        }
+
+        m_packetCooldowns[opcode] = uint32(cooldown);
+    }
 }
-
-std::vector<uint32> WorldSocket::m_packetCooldowns = InitOpcodeCooldowns();
 
 std::deque<uint32> WorldSocket::GetOutOpcodeHistory()
 {

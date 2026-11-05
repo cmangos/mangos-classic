@@ -227,6 +227,7 @@ int Master::Run()
         }
         std::string bindIp = sConfig.GetStringDefault("BindIP", "0.0.0.0");
         int32 port = int32(sWorld.getConfig(CONFIG_UINT32_PORT_WORLD));
+        WorldSocket::LoadPacketCooldowns();
         MaNGOS::AsyncListener<WorldSocket> listener(m_context, bindIp, port);
 
         std::vector<std::thread> threads;

@@ -141,6 +141,8 @@ class WorldSocket : public MaNGOS::AsyncSocket<WorldSocket>
         std::deque<uint32> GetOutOpcodeHistory();
         std::deque<uint32> GetIncOpcodeHistory();
 
+        /// Reads Network.PacketCooldowns into m_packetCooldowns; must run before any socket is accepted
+        static void LoadPacketCooldowns();
         static std::vector<uint32> m_packetCooldowns;
         std::map<uint32, TimePoint> m_lastPacket;
 

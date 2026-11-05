@@ -1668,6 +1668,14 @@ LFG.MatchmakingTimer = 600
 #        Default: 0 - do not kick
 #                 1 - kick
 #
+#    Network.PacketCooldowns
+#        Client opcodes dropped without answer when they come again before the given delay since the
+#        last accepted one, as OPCODE_NAME:milliseconds separated by spaces. Read at startup only.
+#        Names are case-sensitive; an empty value limits nothing.
+#        Retail answers a /who (CMSG_WHO) at most once every 5 seconds.
+#        Default: "CMSG_WHO:5000 CMSG_WHOIS:5000"
+#        Example: "CMSG_WHO:5000 CMSG_WHOIS:5000 CMSG_INSPECT:5000" (also limits inspection)
+#
 ###################################################################################################################
 
 Network.Threads = 1
@@ -1675,6 +1683,7 @@ Network.OutKBuff = -1
 Network.OutUBuff = 65536
 Network.TcpNodelay = 1
 Network.KickOnBadPacket = 0
+Network.PacketCooldowns = "CMSG_WHO:5000 CMSG_WHOIS:5000"
 
 ###################################################################################################################
 # CONSOLE, REMOTE ACCESS AND SOAP
