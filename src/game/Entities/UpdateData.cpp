@@ -28,7 +28,7 @@
 #include "Entities/ObjectGuid.h"
 #include "Server/WorldSession.h"
 
-UpdateData::UpdateData() : m_data(1, {ByteBuffer(0), 0}), m_currentIndex(0)
+UpdateData::UpdateData() : m_data(1, {ByteBuffer(0), 0, false}), m_currentIndex(0)
 {
 }
 
