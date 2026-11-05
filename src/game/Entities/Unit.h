@@ -1069,6 +1069,15 @@ struct SelectAttackingTargetParams
 
 struct SpellProcEventEntry;                                 // used only privately
 
+enum SwingErrors
+{
+    SWING_ERROR_NONE,
+    SWING_ERROR_NOT_IN_RANGE,
+    SWING_ERROR_TARGET_NOT_ALIVE,
+    SWING_ERROR_BAD_FACING,
+    SWING_ERROR_CANT_ATTACK_TARGET,
+};
+
 class Unit : public WorldObject
 {
     public:

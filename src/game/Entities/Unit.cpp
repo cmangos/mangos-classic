@@ -640,14 +640,6 @@ void Unit::EvadeTimerExpired()
     getThreatManager().SetTargetSuppressed(GetVictim());
 }
 
-enum SwingErrors
-{
-    SWING_ERROR_NOT_IN_RANGE,
-    SWING_ERROR_TARGET_NOT_ALIVE,
-    SWING_ERROR_BAD_FACING,
-    SWING_ERROR_CANT_ATTACK_TARGET,
-};
-
 bool Unit::UpdateMeleeAttackingState()
 {
     Unit* victim = GetVictim();
@@ -665,7 +657,7 @@ bool Unit::UpdateMeleeAttackingState()
     if (!isAttackReady(BASE_ATTACK) && !(isAttackReady(OFF_ATTACK) && hasOffhandWeaponForAttack()))
         return false;
 
-    uint8 swingError = 0;
+    uint8 swingError = SWING_ERROR_NONE;
     if (!CanReachWithMeleeAttack(victim))
         swingError = SWING_ERROR_NOT_IN_RANGE;
     else if (!HasInArc(victim, 2 * M_PI_F / 3))
