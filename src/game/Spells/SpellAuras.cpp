@@ -2233,7 +2233,7 @@ void Aura::HandleModPossess(bool apply, bool Real)
             target->BuildValuesUpdateBlockForPlayerWithFlags(newData, playerCaster, UF_FLAG_OWNER_ONLY);
             if (newData.HasData())
             {
-                WorldPacket newDataPacket = newData.BuildPacket(0, false);
+                WorldPacket newDataPacket = newData.BuildPacket(0);
                 playerCaster->SendDirectMessage(newDataPacket);
             }
         }
@@ -2324,7 +2324,7 @@ void Aura::HandleModCharm(bool apply, bool Real)
 
                 if (newData.HasData())
                 {
-                    WorldPacket newDataPacket = newData.BuildPacket(0, false);
+                    WorldPacket newDataPacket = newData.BuildPacket(0);
                     playerCaster->SendDirectMessage(newDataPacket);
                 }
             }

@@ -595,7 +595,7 @@ class Object
         MaNGOS::unique_weak_ptr<Object> GetWeakPtr() const { return m_scriptRef; }
 
         static void BuildOutOfRangeDataForPlayer(Player* pl, UpdateDataMapType& update_players, ObjectGuid oorObject);
-        void BuildCreateDataForPlayer(Player* pl, UpdateDataMapType& update_players, bool auras = true) const;
+        void BuildCreateDataForPlayer(Player* player, UpdateDataMapType& update_players, bool auras = true) const;
 
     protected:
         Object();

@@ -28,7 +28,7 @@
 #include "Entities/ObjectGuid.h"
 #include "Server/WorldSession.h"
 
-UpdateData::UpdateData() : m_data(1, {ByteBuffer(0), 0}), m_currentIndex(0), m_hasTransport(false)
+UpdateData::UpdateData() : m_data(1, {ByteBuffer(0), 0}), m_currentIndex(0)
 {
 }
 
@@ -42,7 +42,7 @@ void UpdateData::AddOutOfRangeGUID(ObjectGuid const& guid)
     m_outOfRangeGUIDs.insert(guid);
 }
 
-void UpdateData::AddUpdateBlock(const ByteBuffer& block)
+void UpdateData::AddUpdateBlock(const ByteBuffer& block, bool transport)
 {
     const size_t existing = (128 + (9 * m_outOfRangeGUIDs.size()) + m_data[m_currentIndex].m_buffer.size());
 
@@ -50,6 +50,8 @@ void UpdateData::AddUpdateBlock(const ByteBuffer& block)
     {
         m_data[m_currentIndex].m_buffer.append(block);
         ++m_data[m_currentIndex].m_blockCount;
+        if (transport)
+            m_data[m_currentIndex].m_hasTransport = true;
     }
     else
     {
@@ -57,6 +59,7 @@ void UpdateData::AddUpdateBlock(const ByteBuffer& block)
         m_data.emplace_back();
         m_data[m_currentIndex].m_buffer.append(block);
         m_data[m_currentIndex].m_blockCount = 1;
+        m_data[m_currentIndex].m_hasTransport = transport;
     }
 }
 
@@ -121,7 +124,7 @@ void UpdateData::Compress(void* dst, uint32* dst_size, void* src, int src_size)
     *dst_size = c_stream.total_out;
 }
 
-WorldPacket UpdateData::BuildPacket(size_t index, bool hasTransport)
+WorldPacket UpdateData::BuildPacket(size_t index)
 {
     WorldPacket packet;
     MANGOS_ASSERT(packet.empty());                         // shouldn't happen
@@ -129,7 +132,7 @@ WorldPacket UpdateData::BuildPacket(size_t index, bool hasTransport)
     ByteBuffer buf(4 + 1 + (m_outOfRangeGUIDs.empty() ? 0 : 1 + 4 + 9 * m_outOfRangeGUIDs.size()) + m_data[index].m_buffer.wpos());
 
     buf << (uint32)(!m_outOfRangeGUIDs.empty() ? m_data[index].m_blockCount + 1 : m_data[index].m_blockCount);
-    buf << (uint8)(hasTransport ? 1 : 0);
+    buf << (uint8)(m_data[index].m_hasTransport);
 
     if (!m_outOfRangeGUIDs.empty())
     {
@@ -172,17 +175,17 @@ void UpdateData::Clear()
     m_outOfRangeGUIDs.clear();
 }
 
-void UpdateData::SendData(WorldSession& session)
+void UpdateData::SendData(WorldSession& session, bool forceSend/*= false*/)
 {
     if (!HasData())
         return;
 
     for (size_t i = 0; i < GetPacketCount(); ++i)
     {
-        WorldPacket packet = BuildPacket(i, m_hasTransport);
+        WorldPacket packet = BuildPacket(i);
         session.SendPacket(packet);
     }
 
     for (auto& packet : m_afterCreatePacket)
-        session.SendPacket(packet);
+        session.SendPacket(packet, forceSend);
 }

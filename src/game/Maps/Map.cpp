@@ -486,7 +486,7 @@ void Map::CreatePlayerOnClient(Player* player)
     AddUpdateCreateObject(player);
 
     SendInitSelf(player, updateData);
-    updateData.SendData(*player->GetSession());
+    updateData.SendData(*player->GetSession(), true);
 }
 
 bool Map::Add(Player* player)

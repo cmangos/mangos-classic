@@ -52,6 +52,7 @@ struct BufferPair
 {
     ByteBuffer m_buffer;
     uint32 m_blockCount;
+    bool m_hasTransport;
 };
 
 class UpdateData
@@ -61,22 +62,21 @@ class UpdateData
 
         void AddOutOfRangeGUID(GuidSet& guids);
         void AddOutOfRangeGUID(ObjectGuid const& guid);
-        void AddUpdateBlock(const ByteBuffer& block);
+        void AddUpdateBlock(const ByteBuffer& block, bool transport);
         void AddAfterCreatePacket(const WorldPacket& data);
-        WorldPacket BuildPacket(size_t index, bool hasTransport); // Copy Elision is a thing
+        WorldPacket BuildPacket(size_t index); // Copy Elision is a thing
         bool HasData() const { return m_data[0].m_buffer.size() > 0 || !m_outOfRangeGUIDs.empty(); }
         size_t GetPacketCount() const { return m_data.size(); }
         void Clear();
 
         GuidSet const& GetOutOfRangeGUIDs() const { return m_outOfRangeGUIDs; }
 
-        void SendData(WorldSession& session);
+        void SendData(WorldSession& session, bool forceSend = false);
 
     protected:
         GuidSet m_outOfRangeGUIDs;
         std::vector<BufferPair> m_data;
         uint32 m_currentIndex;
-        bool m_hasTransport;
 
         std::vector<WorldPacket> m_afterCreatePacket;
 
