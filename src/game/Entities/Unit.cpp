@@ -701,8 +701,11 @@ bool Unit::UpdateMeleeAttackingState()
 
     if (swingError)
     {
-        setAttackTimer(BASE_ATTACK, 100);
-        setAttackTimer(OFF_ATTACK, 100);
+        // delaying a weapon that is not ready would make it ready sooner
+        if (isAttackReady(BASE_ATTACK))
+            setAttackTimer(BASE_ATTACK, 100);
+        if (hasOffhandWeaponForAttack() && isAttackReady(OFF_ATTACK))
+            setAttackTimer(OFF_ATTACK, 100);
     }
 
     Player* player = IsClientControlled() ? const_cast<Player*>(GetClientControlling()) : nullptr;
