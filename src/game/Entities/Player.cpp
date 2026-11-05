@@ -13441,7 +13441,7 @@ void Player::RewardPlayerAndGroupAtEventExplored(uint32 questId, WorldObject con
         AreaExploredOrEventHappens(questId);
 }
 
-void Player::ItemAddedQuestCheck(uint32 entry, uint32 count)
+void Player::ItemAddedQuestCheck(uint32 entry, uint32 count, bool sendQuestUpdate)
 {
     for (int i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
     {
@@ -13473,7 +13473,8 @@ void Player::ItemAddedQuestCheck(uint32 entry, uint32 count)
                     if (q_status.uState != QUEST_NEW)
                         q_status.uState = QUEST_CHANGED;
 
-                    SendQuestUpdateAddItem(qInfo, j, curitemcount, additemcount);
+                    if (sendQuestUpdate)
+                        SendQuestUpdateAddItem(qInfo, j, curitemcount, additemcount);
                 }
 
                 if (CanCompleteQuest(questid))
@@ -17669,7 +17670,12 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
 
         ModifyMoney(-int32(price));
 
-        pItem = StoreNewItem(dest, item, true);
+        // the client shows the quest item progress from SMSG_BUY_ITEM
+        if (Item* newItem = Item::CreateItem(item, totalCount, this))
+        {
+            ItemAddedQuestCheck(item, totalCount, false);
+            pItem = StoreItem(dest, newItem, true);
+        }
     }
     else if (IsEquipmentPos(bag, slot))
     {
@@ -17689,7 +17695,12 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
 
         ModifyMoney(-int32(price));
 
-        pItem = EquipNewItem(dest, item, true);
+        // the client shows the quest item progress from SMSG_BUY_ITEM
+        if (Item* newItem = Item::CreateItem(item, 1, this))
+        {
+            ItemAddedQuestCheck(item, 1, false);
+            pItem = EquipItem(dest, newItem, true);
+        }
 
         if (pItem)
             AutoUnequipOffhandIfNeed();
