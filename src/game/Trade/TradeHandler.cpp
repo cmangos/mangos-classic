@@ -241,7 +241,8 @@ static void clearAcceptTradeMode(Item** myItems, Item** hisItems)
 
 void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
 {
-    recvPacket.read_skip<uint32>();
+    uint32 stateIndex;
+    recvPacket >> stateIndex;                               // the version of the trader's offer that the player accepts
 
     TradeData* my_trade = _player->m_trade;
     if (!my_trade)
@@ -258,6 +259,13 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
 
     // set before checks to properly undo at problems (it already set in to client)
     my_trade->SetAccepted(true);
+
+    // the trader changed the offer after the player's client last received it
+    if (stateIndex != his_trade->GetServerStateIndex())
+    {
+        my_trade->SetAccepted(false);
+        return;
+    }
 
     TradeStatusInfo info;
     if (!_player->IsWithinDistInMap(trader, TRADE_DISTANCE, false))

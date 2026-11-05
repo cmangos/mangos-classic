@@ -1170,7 +1170,9 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             //4 == TRADE_STATUS_TRADE_ACCEPT
             if (status == 4)
             {
-                m_bot->GetSession()->HandleAcceptTradeOpcode(p);  // packet not used
+                WorldPacket accept(CMSG_ACCEPT_TRADE, 4);
+                accept << uint32(m_bot->GetTradeData()->GetTraderData()->GetServerStateIndex());
+                m_bot->GetSession()->HandleAcceptTradeOpcode(accept);
                 SetQuestNeedItems();
             }
 
