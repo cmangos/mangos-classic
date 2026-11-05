@@ -144,6 +144,8 @@ void Transport::LoadTransport(TransportTemplate const& transportTemplate, Map* m
         return;
     }
 
+    t->Object::AddToWorld();
+
     map->AddTransport(t);
 }
 
@@ -192,6 +194,8 @@ bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, 
     SetGoAnimProgress(animprogress);
 
     SetName(goinfo->name);
+
+    GetVisibilityData().SetVisibilityDistanceOverride(VisibilityDistanceType::Infinite);
 
     return true;
 }
@@ -598,19 +602,21 @@ void Transport::UpdateForMap(Map const* targetMap, bool newMap)
     {
         for (const auto& itr : pl)
         {
+            Player* player = itr.getSource();
             if (this != itr.getSource()->GetTransport())
             {
                 UpdateData updateData;
-                BuildCreateUpdateBlockForPlayer(&updateData, itr.getSource());
+                BuildCreateUpdateBlockForPlayer(updateData, player);
                 WorldPacket packet = updateData.BuildPacket(0, true); // always only one packet
-                itr.getSource()->SendDirectMessage(packet);
+                player->SendDirectMessage(packet);
+                player->AddAtClient(this);
             }
         }
     }
     else
     {
         UpdateData updateData;
-        BuildOutOfRangeUpdateBlock(&updateData);
+        BuildOutOfRangeUpdateBlock(updateData);
         WorldPacket packet = updateData.BuildPacket(0, true); // always only one packet
         for (const auto& itr : pl)
             if (this != itr.getSource()->GetTransport())

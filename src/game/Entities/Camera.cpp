@@ -49,7 +49,7 @@ void Camera::UpdateForCurrentViewPoint()
     if (GridType* grid = m_source->GetViewPoint().m_grid)
         grid->AddWorldObject(this);
 
-    UpdateVisibilityForOwner();
+    m_source->GetMap()->AddUpdateCreateObject(m_source);
 }
 
 void Camera::SetView(WorldObject* obj, bool update_far_sight_field /*= true*/)
@@ -101,13 +101,14 @@ void Camera::ResetView(bool update_far_sight_field /*= true*/)
     SetView(&m_owner, update_far_sight_field);
 }
 
-void Camera::Event_AddedToWorld(UpdateData& data)
+void Camera::Event_AddedToWorld(UpdateData* data)
 {
     GridType* grid = m_source->GetViewPoint().m_grid;
     MANGOS_ASSERT(grid);
     grid->AddWorldObject(this);
 
-    UpdateVisibilityForOwner(true, data);
+    if (data)
+        UpdateVisibilityForOwner(true, *data);
 }
 
 void Camera::Event_RemovedFromWorld()
@@ -144,10 +145,17 @@ template void Camera::UpdateVisibilityOf(Corpse*, UpdateData&, WorldObjectSet&);
 template void Camera::UpdateVisibilityOf(GameObject*, UpdateData&, WorldObjectSet&);
 template void Camera::UpdateVisibilityOf(DynamicObject*, UpdateData&, WorldObjectSet&);
 
-void Camera::UpdateVisibilityForOwner()
+void Camera::UpdateVisibilityForOwner(UpdateDataMapType& update_players)
 {
-    UpdateData data;
-    UpdateVisibilityForOwner(false, data);
+    UpdateDataMapType::iterator iter = update_players.find(GetOwner());
+
+    if (iter == update_players.end())
+    {
+        std::pair<UpdateDataMapType::iterator, bool> p = update_players.insert(UpdateDataMapType::value_type(GetOwner(), UpdateData()));
+        MANGOS_ASSERT(p.second);
+        iter = p.first;
+    }
+    UpdateVisibilityForOwner(true, iter->second);
 }
 
 void Camera::UpdateVisibilityForOwner(bool addToWorld, UpdateData& data)

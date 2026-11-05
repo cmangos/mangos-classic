@@ -412,7 +412,7 @@ void SpawnGroup::Spawn(bool forced, bool ignoreRespawntime)
             m_map.GetPersistentState()->AddGameobjectToGrid(dbGuid, data);
         }
         AddObject(dbGuid, entry);
-        if (forced || m_entry.Active || m_map.IsLoaded(x, y))
+        if (forced || m_entry.Active || m_entry.Large || m_map.IsLoaded(x, y))
         {
             if (GetObjectTypeId() == TYPEID_UNIT)
                 WorldObject::SpawnCreature(dbGuid, &m_map, entry);
@@ -872,14 +872,14 @@ void FormationData::ClearMoveGen()
 
 Unit* FormationData::GetMaster()
 {
-    if (m_slotsMap.begin() != m_slotsMap.end() && m_slotsMap.begin()->first == 0)
+    if (!m_slotsMap.empty() && m_slotsMap.begin()->first == 0)
         return m_slotsMap.begin()->second->GetOwner();
     return nullptr;
 }
 
 void FormationData::SetMasterMovement()
 {
-    auto newMaster = m_slotsMap.at(0)->GetOwner();
+    auto newMaster = GetMaster();
 
     if (!newMaster)
         return;

@@ -71,6 +71,7 @@ class EventProcessor
         void ModifyEventTime(BasicEvent* event, uint64 msTime);
         uint64 CalculateTime(uint64 t_offset) const;
         EventList& GetEvents() { return m_events; }
+        bool IsEmpty() const { return m_events.empty(); }
 
     protected:
 

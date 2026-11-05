@@ -85,6 +85,16 @@ void VisibleNotifier::Notify()
         }
     }
 
+    for (GuidSet::iterator itr = i_clientGUIDs.begin(); itr != i_clientGUIDs.end();)
+    {
+        if ((*itr).IsMOTransport())
+        {
+            itr = i_clientGUIDs.erase(itr);
+            continue;
+        }
+        ++itr;
+    }
+
     // generate outOfRange for not iterate objects
     i_data.AddOutOfRangeGUID(i_clientGUIDs);
     for (GuidSet::iterator itr = i_clientGUIDs.begin(); itr != i_clientGUIDs.end(); ++itr)
@@ -108,21 +118,6 @@ void VisibleNotifier::Notify()
         // send create/outofrange packet to player (except player create updates that already sent using SendUpdateToPlayer)
         if (i_processSend)
             i_data.SendData(*player.GetSession());
-
-        // send out of range to other players if need
-        GuidSet const& oor = i_data.GetOutOfRangeGUIDs();
-        for (auto iter : oor)
-        {
-            if (!iter.IsPlayer())
-                continue;
-
-            if (Player* plr = ObjectAccessor::FindPlayer(iter))
-            {
-                UpdateData data;
-                plr->UpdateVisibilityOf(plr->GetCamera().GetBody(), &player, data);
-                data.SendData(*plr->GetSession()); // TODO: This has to be aggregated elsewhere
-            }
-        }
     }
 }
 

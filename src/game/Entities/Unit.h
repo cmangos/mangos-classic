@@ -1649,6 +1649,7 @@ class Unit : public WorldObject
             return m_spellAuraHolders.find(spellId) != m_spellAuraHolders.end();
         }
         bool HasAuraTypeWithCaster(AuraType auratype, ObjectGuid caster) const;
+        bool HasPeriodicAura() const;
         bool HasMechanicMaskOrDispelMaskAura(uint32 dispelMask, uint32 mechanicMask, Unit const* caster) const;
         bool HasNegativeAuraWithInterruptFlag(SpellAuraInterruptFlags flag) const;
         template<typename Func>
@@ -2430,6 +2431,9 @@ class Unit : public WorldObject
         uint32 GetDamageDoneByOthers() { return m_damageByOthers; }
         uint32 GetModifierXpBasedOnDamageReceived(uint32 xp);
 
+        void UpdateNextUpdateTime() override;
+        uint32 ShouldPerformObjectUpdate(uint32 const diff) override;
+
         void UpdateSplinePosition(bool relocateOnly = false);
         void SendFlightSplineSyncIfNeeded();
 
@@ -2609,6 +2613,7 @@ class Unit : public WorldObject
         Position m_last_notified_position;
         BasicEvent* m_AINotifyEvent;
         ShortTimeTracker m_movesplineTimer;
+        bool m_hasPeriodicAura;
 
         Diminishing m_Diminishing;
 

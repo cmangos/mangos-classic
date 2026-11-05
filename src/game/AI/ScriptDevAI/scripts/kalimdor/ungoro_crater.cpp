@@ -571,12 +571,10 @@ struct npc_simone_seductressAI : public ScriptedAI
         {
             pPrecious->SetVisibility(VISIBILITY_OFF);
             pPrecious->ForcedDespawn();
-            pPrecious->RemoveFromWorld();
         }
 
         m_creature->SetVisibility(VISIBILITY_OFF);
         m_creature->ForcedDespawn();
-        m_creature->RemoveFromWorld();
     }
 
     void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override

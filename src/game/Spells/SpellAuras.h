@@ -196,6 +196,8 @@ class SpellAuraHolder
         void SetAuraFlag(uint32 slot, bool add);
         void SetAuraLevel(uint32 slot, uint32 level);
 
+        bool HasPeriodicAura() const;
+
         void SetCreationDelayFlag();
 
         bool IsProcReady(TimePoint const& now) const;

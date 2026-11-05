@@ -49,6 +49,7 @@
 #include "Loot/LootMgr.h"
 #include "AI/ScriptDevAI/include/sc_grid_searchers.h"
 #include "Spells/SpellStacking.h"
+#include "SpellAuras.h"
 
 #define NULL_AURA_SLOT 0xFF
 
@@ -2717,8 +2718,8 @@ void Aura::HandleInvisibilityDetect(bool apply, bool Real)
         }
     }
 
-    if (Real && target->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)target)->GetCamera().UpdateVisibilityForOwner();
+    if (Real && target->IsClientControlled())
+        target->GetMap()->AddUpdateCreateObject(const_cast<Player*>(target->GetClientControlling()));
 }
 
 void Aura::HandleDetectAmore(bool apply, bool /*real*/)
@@ -5827,6 +5828,15 @@ bool SpellAuraHolder::IsDispellableByMask(uint32 dispelMask, Unit const* caster,
         }
         return true;
     }
+    return false;
+}
+
+bool SpellAuraHolder::HasPeriodicAura() const
+{
+    for (Aura* aura : m_auras)
+        if (aura && aura->IsPeriodic())
+            return true;
+
     return false;
 }
 

@@ -231,6 +231,15 @@ bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
     return true;
 }
 
+void Item::RemoveFromWorld()
+{
+    if (Player* owner = GetOwner())
+        if (owner->IsInWorld())
+            owner->GetMap()->RemoveUpdateCreateObject(this); // in case we are in the pipeline
+
+    Object::RemoveFromWorld();
+}
+
 void Item::UpdateDuration(Player* owner, uint32 diff)
 {
     if (!GetUInt32Value(ITEM_FIELD_DURATION))
@@ -1031,6 +1040,15 @@ void Item::BuildUpdateData(UpdateDataMapType& update_players)
         BuildUpdateDataForPlayer(pl, update_players);
 
     ClearUpdateMask(false);
+}
+
+void Item::UpdateVisibility(UpdateDataMapType& /*update_players*/)
+{
+    if (Player* pl = GetOwner())
+        pl->GetMap()->AddCreateAtClientObject(pl, this);
+
+    if (ItsNewObject())
+        SetItsNewObject(false);
 }
 
 InventoryResult Item::CanBeMergedPartlyWith(ItemPrototype const* proto) const

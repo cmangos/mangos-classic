@@ -77,6 +77,8 @@ void MotionMaster::Initialize()
         auto creature = static_cast<Creature*>(m_owner);
         m_currentPathId = m_defaultPathId;
         MovementGenerator* movement = FactorySelector::selectMovementGenerator(creature);
+        // Initialize update timers
+        InitializeObjectUpdateTimer(movement ? movement->GetMovementGeneratorType() : IDLE_MOTION_TYPE);
         push(movement == nullptr ? &si_idleMovement : movement);
         top()->Initialize(*m_owner);
 
@@ -748,4 +750,29 @@ bool MotionMaster::GetDestination(float& x, float& y, float& z) const
     y = dest.y;
     z = dest.z;
     return true;
+}
+
+void MotionMaster::InitializeObjectUpdateTimer(const MovementGeneratorType type)
+{
+    if (m_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+    {
+        if (m_owner->GetNextUpdateTime())
+            m_owner->SetNextUpdateTime(0);
+
+        return;
+    }
+
+    switch (type)
+    {
+        case IDLE_MOTION_TYPE:
+            m_owner->SetNextUpdateTime(urand(500, 1000));
+            return;
+        case RANDOM_MOTION_TYPE:
+            m_owner->SetNextUpdateTime(urand(250, 500));
+            return;
+        default:
+            if (m_owner->GetNextUpdateTime())
+                m_owner->SetNextUpdateTime(0);
+            return;
+    }
 }

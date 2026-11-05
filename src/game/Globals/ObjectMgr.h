@@ -780,6 +780,7 @@ class ObjectMgr
 
         /// @param _map Map* of the map for which to load active entities. If nullptr active entities on continents are loaded
         void LoadActiveEntities(Map* _map);
+        void LoadLargeEntities(Map* _map);
 
         std::string GeneratePetName(uint32 entry);
         uint32 GetBaseXP(uint32 level) const;
@@ -1356,6 +1357,8 @@ class ObjectMgr
         MapObjectGuids mMapObjectGuids;
         ActiveObjectGuidsOnMap m_activeCreatures;
         ActiveObjectGuidsOnMap m_activeGameObjects;
+        ActiveObjectGuidsOnMap m_largeCreatures;
+        ActiveObjectGuidsOnMap m_largeGameObjects;
         CreatureSpawnTemplateMap m_creatureSpawnTemplateMap;
         CreatureDataMap mCreatureDataMap;
         CreatureLocaleMap mCreatureLocaleMap;

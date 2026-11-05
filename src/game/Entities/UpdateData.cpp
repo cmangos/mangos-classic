@@ -28,7 +28,7 @@
 #include "Entities/ObjectGuid.h"
 #include "Server/WorldSession.h"
 
-UpdateData::UpdateData() : m_data(1, {ByteBuffer(0), 0}), m_currentIndex(0)
+UpdateData::UpdateData() : m_data(1, {ByteBuffer(0), 0}), m_currentIndex(0), m_hasTransport(false)
 {
 }
 
@@ -58,6 +58,11 @@ void UpdateData::AddUpdateBlock(const ByteBuffer& block)
         m_data[m_currentIndex].m_buffer.append(block);
         m_data[m_currentIndex].m_blockCount = 1;
     }
+}
+
+void UpdateData::AddAfterCreatePacket(const WorldPacket& data)
+{
+    m_afterCreatePacket.emplace_back(data);
 }
 
 void UpdateData::Compress(void* dst, uint32* dst_size, void* src, int src_size)
@@ -169,9 +174,15 @@ void UpdateData::Clear()
 
 void UpdateData::SendData(WorldSession& session)
 {
+    if (!HasData())
+        return;
+
     for (size_t i = 0; i < GetPacketCount(); ++i)
     {
-        WorldPacket packet = BuildPacket(i);
+        WorldPacket packet = BuildPacket(i, m_hasTransport);
         session.SendPacket(packet);
     }
+
+    for (auto& packet : m_afterCreatePacket)
+        session.SendPacket(packet);
 }

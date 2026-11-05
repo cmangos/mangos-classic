@@ -54,14 +54,14 @@ class Camera
         void ReceivePacket(WorldPacket& data);
 
         // updates visibility of worldobjects around viewpoint for camera's owner
-        void UpdateVisibilityForOwner();
+        void UpdateVisibilityForOwner(UpdateDataMapType& update_players);
         void UpdateVisibilityForOwner(bool addToWorld, UpdateData& data);
 
         bool IsSendInProgress() const { return m_sendInProgress; }
 
     private:
         // called when viewpoint changes visibility state
-        void Event_AddedToWorld(UpdateData& data);
+        void Event_AddedToWorld(UpdateData* data);
         void Event_RemovedFromWorld();
         void Event_Moved();
         void Event_ViewPointVisibilityChanged();
@@ -113,7 +113,7 @@ class ViewPoint
         bool hasViewers() const { return !m_cameras.empty(); }
 
         // these events are called when viewpoint changes visibility state
-        void Event_AddedToWorld(GridType* grid, UpdateData& data)
+        void Event_AddedToWorld(GridType* grid, UpdateData* data)
         {
             m_grid = grid;
             CameraCall([&](Camera* c) { c->Event_AddedToWorld(data); });
@@ -136,9 +136,9 @@ class ViewPoint
             CameraCall([&](Camera* c) { c->Event_ViewPointVisibilityChanged(); });
         }
 
-        void Call_UpdateVisibilityForOwner()
+        void Call_UpdateVisibilityForOwner(UpdateDataMapType& update_players)
         {
-            CameraCall([&](Camera* c) { c->UpdateVisibilityForOwner(); });
+            CameraCall([&](Camera* c) { c->UpdateVisibilityForOwner(update_players); });
         }
 };
 

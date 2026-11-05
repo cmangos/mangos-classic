@@ -181,6 +181,7 @@ class MotionMaster : private std::stack<MovementGenerator*>
 
     private:
         void Mutate(MovementGenerator* m);                  // use Move* functions instead
+        void InitializeObjectUpdateTimer(const MovementGeneratorType type);
 
         void DirectClean(bool reset, bool all);
         void DelayedClean(bool reset, bool all);

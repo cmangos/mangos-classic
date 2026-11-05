@@ -58,6 +58,8 @@ class VisibilityData
         // visibility
         bool IsVisibilityOverridden() const { return m_visibilityDistanceOverride != 0.f; }
         void SetVisibilityDistanceOverride(VisibilityDistanceType type);
+        bool IsInfiniteVisibility() const;
+        bool IsLargeVisibility() const;
 
         float GetVisibilityDistance() const;
         float GetVisibilityDistanceFor(WorldObject* obj) const;

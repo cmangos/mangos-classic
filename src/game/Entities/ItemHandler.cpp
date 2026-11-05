@@ -565,15 +565,12 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recv_data)
         _player->ItemRemovedQuestCheck(pItem->GetEntry(), count);
         UpdateData data;
         if (_player->IsInWorld())
-            pItem->SendCreateUpdateToPlayer(_player, data);
+            _player->GetMap()->AddUpdateObject(pItem);
         pItem->SetState(ITEM_CHANGED, _player);
 
         _player->AddItemToBuyBackSlot(pNewItem, money);
         if (_player->IsInWorld())
-            pNewItem->SendCreateUpdateToPlayer(_player, data);
-
-        if (_player->IsInWorld())
-            data.SendData(*_player->GetSession());
+            _player->GetMap()->AddUpdateCreateObject(pNewItem);
     }
     else
     {

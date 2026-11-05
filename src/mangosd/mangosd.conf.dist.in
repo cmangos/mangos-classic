@@ -146,6 +146,11 @@ Spawns.ZoneArea = 0
 #        This will allow creatures having these conditions to update their grid without any player around. Useful for running in debug mode.
 #        Default: True
 #
+#    Specials.Active
+#        Load specials - large, gigantic, infinite npcs, and update them and waypointing at all times even when no active object is near.
+#        Only loads the one grid they are in, unlike active, which loads visibility grid around them. Default should be true, but due to performance is opt-in.
+#        Default: False
+#
 #    GridCleanUpDelay
 #        Grid clean up delay (in milliseconds)
 #        Default: 300000 (5 min)
@@ -256,6 +261,7 @@ MaxOverspeedPings = 2
 GridUnload = 1
 LoadAllGridsOnMaps = ""
 Autoload.Active = 1
+Specials.Active = 0
 GridCleanUpDelay = 300000
 MapUpdateInterval = 100
 ChangeWeatherInterval = 600000

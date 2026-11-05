@@ -87,6 +87,8 @@ void WaypointMovementGenerator<Creature>::Initialize(Creature& creature)
 {
     creature.addUnitState(UNIT_STAT_ROAMING);
     creature.clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
+
+    creature.GetMap()->AddWaypointingNpc(&creature);
 }
 
 void WaypointMovementGenerator<Creature>::InitializeWaypointPath(Creature& u, int32 pathId, WaypointPathOrigin wpSource, uint32 initialDelay, uint32 overwriteEntry/* = 0*/)
@@ -136,6 +138,8 @@ void WaypointMovementGenerator<Creature>::Finalize(Creature& creature)
 {
     creature.clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
     creature.SetWalk(!creature.hasUnitState(UNIT_STAT_RUNNING_STATE), false);
+
+    creature.GetMap()->RemoveWaypointingNpc(&creature);
 }
 
 void WaypointMovementGenerator<Creature>::Interrupt(Creature& creature)

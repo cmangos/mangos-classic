@@ -80,7 +80,12 @@ void Pet::RemoveFromWorld()
 {
     ///- Remove the pet from the accessor
     if (IsInWorld())
+    {
+        if (!m_removed && !IsPlayerControlled())
+            Unsummon(PET_SAVE_NOT_IN_SLOT, nullptr, false);
+
         GetMap()->GetObjectsStore().erase<Pet>(GetObjectGuid(), (Pet*)nullptr);
+    }
 
     ///- Don't call the function for Creature, normal mobs + totems go in a different storage
     Unit::RemoveFromWorld();
@@ -989,9 +994,11 @@ int32 Pet::GetDispTP() const
         return -(m_TrainingPoints + 1);
 }
 
-void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= nullptr*/)
+void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= nullptr*/, bool removeList /*= true*/)
 {
     MANGOS_ASSERT(!m_removed);
+
+    m_removed = true;
 
     if (!owner)
         owner = GetOwner();
@@ -1080,8 +1087,8 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= nullptr*/)
             SavePetToDB(mode, p_owner);
     }
 
-    AddObjectToRemoveList();
-    m_removed = true;
+    if (removeList)
+        AddObjectToRemoveList();
 }
 
 void Pet::GivePetXP(uint32 xp)

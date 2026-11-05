@@ -57,7 +57,7 @@ ObjectGridRespawnMover::Visit(CreatureMapType& m)
 
         Creature* c = iter->getSource();
 
-        MANGOS_ASSERT(!c->IsPet() && "ObjectGridRespawnMover don't must be called for pets");
+        MANGOS_ASSERT((!c->IsPet() || !c->IsPlayerControlled()) && "ObjectGridRespawnMover don't must be called for player pets");
 
         Cell const& cur_cell  = c->GetCurrentCell();
 
@@ -150,9 +150,6 @@ void LoadHelper(CellGuidSet const& guid_set, CellPair& cell, GridRefManager<T>& 
 
         // if this assert is hit we have a problem somewhere because LoadFromDb should already add to map due to AI
         MANGOS_ASSERT(obj->IsInWorld());
-
-        UpdateData data;
-        obj->GetViewPoint().Event_AddedToWorld(&grid, data);
 
         if (bg)
             bg->OnObjectDBLoad(obj);
@@ -284,20 +281,18 @@ ObjectGridUnloader::Unload(GridType& grid)
     grid.Visit(unloader);
 }
 
-template<class T>
-void
-ObjectGridUnloader::Visit(GridRefManager<T>& m)
+template <class T>
+void ObjectGridUnloader::Visit(GridRefManager<T>& m)
 {
     while (!m.isEmpty())
     {
         T* obj = m.getFirst()->getSource();
+        obj->GetMap()->RemoveObjectFromRemoveList(obj);
         // if option set then object already saved at this moment
         if (!sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY))
             obj->SaveRespawnTime();
-        ///- object must be out of world before delete
-        obj->RemoveFromWorld();
-        ///- object will get delinked from the manager when deleted
-        delete obj;
+        // object must be out of world before delete
+        obj->GetMap()->Remove(obj, true);
     }
 }
 

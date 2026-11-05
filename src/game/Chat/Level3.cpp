@@ -3580,6 +3580,7 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     PSendSysMessage("Spell Lists %s ID %u", spellList.Disabled ? "disabled" : "enabled", spellList.Id);
 
     PSendSysMessage("Combat Timer: %u Leashing disabled: %s", target->GetCombatManager().GetCombatTimer(), target->GetCombatManager().IsLeashingDisabled() ? "true" : "false");
+    PSendSysMessage("Accumulated diff: %u NextUpdateTime: %u", target->GetAccumulatedUpdateDiff(), target->GetNextUpdateTime());
 
     PSendSysMessage("Combat Script: %s", target->AI()->GetCombatScriptStatus() ? "true" : "false");
     PSendSysMessage("Movementflags: %u", target->m_movementInfo.moveFlags);

@@ -44,10 +44,23 @@ VisibilityData::VisibilityData(WorldObject* owner) : m_visibilityDistanceOverrid
 void VisibilityData::SetVisibilityDistanceOverride(VisibilityDistanceType type)
 {
     MANGOS_ASSERT(type < VisibilityDistanceType::Max);
-    if (m_owner->GetTypeId() == TYPEID_PLAYER)
+    if (m_owner->IsPlayer())
         return;
 
+    float oldVisiblity = m_visibilityDistanceOverride;
     m_visibilityDistanceOverride = VisibilityDistances[AsUnderlyingType(type)];
+    if (m_owner->IsInWorld() && m_visibilityDistanceOverride != oldVisiblity)
+        m_owner->GetMap()->VisiblityDistanceChanged(m_owner, oldVisiblity, type);
+}
+
+bool VisibilityData::IsInfiniteVisibility() const
+{
+    return m_visibilityDistanceOverride > VISIBILITY_DISTANCE_GIGANTIC;
+}
+
+bool VisibilityData::IsLargeVisibility() const
+{
+    return m_visibilityDistanceOverride >= VISIBILITY_DISTANCE_LARGE;
 }
 
 float VisibilityData::GetVisibilityDistance() const

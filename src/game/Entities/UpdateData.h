@@ -62,7 +62,8 @@ class UpdateData
         void AddOutOfRangeGUID(GuidSet& guids);
         void AddOutOfRangeGUID(ObjectGuid const& guid);
         void AddUpdateBlock(const ByteBuffer& block);
-        WorldPacket BuildPacket(size_t index, bool hasTransport = false); // Copy Elision is a thing
+        void AddAfterCreatePacket(const WorldPacket& data);
+        WorldPacket BuildPacket(size_t index, bool hasTransport); // Copy Elision is a thing
         bool HasData() const { return m_data[0].m_buffer.size() > 0 || !m_outOfRangeGUIDs.empty(); }
         size_t GetPacketCount() const { return m_data.size(); }
         void Clear();
@@ -75,6 +76,9 @@ class UpdateData
         GuidSet m_outOfRangeGUIDs;
         std::vector<BufferPair> m_data;
         uint32 m_currentIndex;
+        bool m_hasTransport;
+
+        std::vector<WorldPacket> m_afterCreatePacket;
 
         static void Compress(void* dst, uint32* dst_size, void* src, int src_size);
 };

@@ -1177,6 +1177,7 @@ void ObjectMgr::LoadSpawnGroups()
             }
 
             entry.Active = false;
+            entry.Large = false;
             entry.EnabledByDefault = true;
             entry.formationEntry = nullptr;
             entry.HasChancedSpawns = false;
@@ -1500,15 +1501,22 @@ void ObjectMgr::LoadSpawnGroups()
                 auto& creatureDynguidsForMap = m_dynguidCreatureDbGuids[data->mapid];
                 creatureDynguidsForMap.erase(std::remove(creatureDynguidsForMap.begin(), creatureDynguidsForMap.end(), guidData.DbGuid), creatureDynguidsForMap.end());
                 newContainer->spawnGroupByGuidMap.emplace(std::make_pair(guidData.DbGuid, uint32(TYPEID_UNIT)), &entry);
-                if (sWorld.getConfig(CONFIG_BOOL_AUTOLOAD_ACTIVE))
+                bool actives = sWorld.getConfig(CONFIG_BOOL_AUTOLOAD_ACTIVE);
+                bool specials = sWorld.getConfig(CONFIG_BOOL_SPECIALS_ACTIVE);
+                if (actives || specials)
                 {
                     for (auto& data : entry.RandomEntries)
                     {
                         if (CreatureInfo const* cinfo = GetCreatureTemplate(data.Entry))
                         {
-                            if ((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_ACTIVE) != 0)
+                            if (actives && (cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_ACTIVE) != 0)
                             {
                                 entry.Active = true;
+                                break;
+                            }
+                            else if (specials && cinfo->IsLargeOrBiggerCreature())
+                            {
+                                entry.Large = true;
                                 break;
                             }
                         }
@@ -1528,15 +1536,22 @@ void ObjectMgr::LoadSpawnGroups()
                 auto& goDynguidsForMap = m_dynguidGameobjectDbGuids[data->mapid];
                 goDynguidsForMap.erase(std::remove(goDynguidsForMap.begin(), goDynguidsForMap.end(), guidData.DbGuid), goDynguidsForMap.end());
                 newContainer->spawnGroupByGuidMap.emplace(std::make_pair(guidData.DbGuid, uint32(TYPEID_GAMEOBJECT)), &entry);
-                if (sWorld.getConfig(CONFIG_BOOL_AUTOLOAD_ACTIVE))
+                bool actives = sWorld.getConfig(CONFIG_BOOL_AUTOLOAD_ACTIVE);
+                bool specials = sWorld.getConfig(CONFIG_BOOL_SPECIALS_ACTIVE);
+                if (actives || specials)
                 {
                     for (auto& data : entry.RandomEntries)
                     {
-                        if (CreatureInfo const* cinfo = GetCreatureTemplate(data.Entry))
+                        if (GameObjectInfo const* goInfo = GetGameObjectInfo(data.Entry))
                         {
-                            if ((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_ACTIVE) != 0)
+                            if (actives && (goInfo->ExtraFlags & GAMEOBJECT_EXTRA_FLAG_ACTIVE) != 0)
                             {
                                 entry.Active = true;
+                                break;
+                            }
+                            else if (specials && goInfo->IsLargeGameObject())
+                            {
+                                entry.Large = true;
                                 break;
                             }
                         }
@@ -2042,6 +2057,8 @@ void ObjectMgr::LoadCreatures()
 
             if (sWorld.getConfig(CONFIG_BOOL_AUTOLOAD_ACTIVE) && cInfo && cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_ACTIVE)
                 m_activeCreatures.emplace(data.mapid, guid);
+            else if (sWorld.getConfig(CONFIG_BOOL_SPECIALS_ACTIVE) && cInfo && cInfo->IsLargeOrBiggerCreature())
+                m_largeCreatures.emplace(data.mapid, guid);
         }
 
         // reset the entry to 0; this will be processed by Creature::GetCreatureConditionalSpawnEntry
@@ -2239,6 +2256,8 @@ void ObjectMgr::LoadGameObjects()
 
             if (sWorld.getConfig(CONFIG_BOOL_AUTOLOAD_ACTIVE) && gInfo && gInfo->ExtraFlags & GAMEOBJECT_EXTRA_FLAG_ACTIVE)
                 m_activeGameObjects.emplace(data.mapid, guid);
+            else if (sWorld.getConfig(CONFIG_BOOL_SPECIALS_ACTIVE) && gInfo && gInfo->IsLargeGameObject())
+                m_largeGameObjects.emplace(data.mapid, guid);
         }
 
         ++count;
@@ -9157,6 +9176,26 @@ void ObjectMgr::LoadActiveEntities(Map* _map)
     }
 
     // Load Transports on Map _map
+}
+
+void ObjectMgr::LoadLargeEntities(Map* _map)
+{
+    if (sWorld.isForceLoadMap(_map->GetId())) // handled by active
+        return;
+
+    auto bounds = m_largeCreatures.equal_range(_map->GetId());
+    for (auto itr = bounds.first; itr != bounds.second; ++itr)
+    {
+        CreatureData const& data = mCreatureDataMap[itr->second];
+        _map->ForceLoadGrid(data.posX, data.posY);
+    }
+
+    bounds = m_largeGameObjects.equal_range(_map->GetId());
+    for (auto itr = bounds.first; itr != bounds.second; ++itr)
+    {
+        GameObjectData const& data = mGameObjectDataMap[itr->second];
+        _map->ForceLoadGrid(data.posX, data.posY);
+    }
 }
 
 void ObjectMgr::LoadNpcGossips()

@@ -907,6 +907,8 @@ class Creature : public Unit
         void RegisterHitBySpell(uint32 spellId);
         void ResetSpellHitCounter();
 
+        uint32 GetNextUpdateTime() override;
+
         HighGuid GetParentHigh() const override { return HIGHGUID_UNIT; }
 
         void Heartbeat() override;
@@ -938,6 +940,9 @@ class Creature : public Unit
         void SetMountInfo(CreatureInfo const* info) override;
 
         void SetModelRunSpeed(float runSpeed) override { m_modelRunSpeed = runSpeed; }
+
+        void SetDelayedPetSpells() { m_delayedPetSpells = true; }
+        void TriggerDelayedPetSpells();
 
         bool IsCombatOnlyStealth() const { return m_combatOnlyStealth; }
         void SetCombatOnlyStealth(bool state) { m_combatOnlyStealth = state; }
@@ -1018,6 +1023,8 @@ class Creature : public Unit
         ObjectGuid m_killer;
 
         bool m_imposedCooldown;
+
+        bool m_delayedPetSpells;
 
         float m_healthMultiplier;
         float m_damageMultiplier;

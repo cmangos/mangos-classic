@@ -723,7 +723,18 @@ void GameObject::Update(const uint32 diff)
 
             // can be not in world at pool despawn
             if (IsInWorld())
-                UpdateObjectVisibility();
+            {
+                if (!IsUsingNewSpawningSystem()) // schedule out of range
+                {
+                    auto& clientGuids = GetClientGuidsIAmAt();
+                    for (auto& clientGuid : clientGuids)
+                        if (Player* client = GetMap()->GetPlayer(clientGuid))
+                            client->RemoveAtClient(this, true);
+                    GetMap()->AddUpdateRemoveObject(GetClientGuidsIAmAt(), GetObjectGuid());
+                    clientGuids.clear();
+                    GetClientGuidsIAmAt().clear();
+                }
+            }
 
             m_forcedDespawn = false;
 
@@ -1082,9 +1093,9 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
     if (!IsInWorld() || !u->IsInWorld())
         return false;
 
-    // Transport always visible at this step implementation
-    if (IsMoTransport() && IsInMap(u))
-        return true;
+    // invisible at client always
+    if (!GetGOInfo()->displayId)
+        return false;
 
     // quick check visibility false cases for non-GM-mode
     if (!u->IsGameMaster())
@@ -1155,6 +1166,9 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
         if (GetEntry() == 187039 && ((u->GetVisibilityData().GetInvisibilityDetectMask() | u->GetVisibilityData().GetInvisibilityMask()) & (1 << 10)) == 0)
             return false;
     }
+
+    if (GetVisibilityData().IsInfiniteVisibility())
+        return true;
 
     // check distance
     return IsWithinDistInMap(viewPoint, GetVisibilityData().GetVisibilityDistance(), false);
@@ -2688,6 +2702,23 @@ void GameObject::ClearGameObjectGroup()
     if (m_goGroup)
         m_goGroup->RemoveObject(this);
     m_goGroup = nullptr;
+}
+
+void GameObject::UpdateNextUpdateTime()
+{
+    // If we already have next update time don't reset it (movement mutation should do it)
+    if (m_nextUpdateTime)
+        return;
+
+    if (!m_events.IsEmpty() || m_AI)
+        SetNextUpdateTime(1);
+    else if (GetGOInfo()->IsSlowUpdateObject())
+        SetNextUpdateTime(urand(500, 1000));
+}
+
+uint32 GameObject::ShouldPerformObjectUpdate(uint32 const diff)
+{
+    return WorldObject::ShouldPerformObjectUpdate(diff);
 }
 
 QuaternionData GameObject::GetWorldRotation() const

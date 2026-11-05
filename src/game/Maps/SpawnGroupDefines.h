@@ -102,6 +102,7 @@ struct SpawnGroupEntry
     std::optional<uint32> RespawnOverrideMin;
     std::optional<uint32> RespawnOverrideMax;
     bool Active;
+    bool Large;
     bool EnabledByDefault;
     bool HasChancedSpawns;
     std::vector<SpawnGroupDbGuids> DbGuids;

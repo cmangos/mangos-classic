@@ -438,15 +438,13 @@ void WorldSession::SendSpiritResurrect() const
         // or update at original position
         else
         {
-            _player->GetCamera().UpdateVisibilityForOwner();
-            _player->UpdateObjectVisibility();
+            _player->GetMap()->AddUpdateCreateObject(_player);
         }
     }
     // or update at original position
     else
     {
-        _player->GetCamera().UpdateVisibilityForOwner();
-        _player->UpdateObjectVisibility();
+        _player->GetMap()->AddUpdateCreateObject(_player);
     }
 }
 
