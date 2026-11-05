@@ -825,6 +825,9 @@ bool AuctionEntry::UpdateBid(uint32 newbid, Player* newbidder /*=nullptr*/)
     if (buyout && newbid > buyout)
         newbid = buyout;
 
+    uint32 oldBidder = 0;
+    uint32 oldBid = 0;
+
     if (newbidder && newbidder->GetGUIDLow() == bidder)
     {
         newbidder->ModifyMoney(-int32(newbid - bid));
@@ -834,12 +837,15 @@ bool AuctionEntry::UpdateBid(uint32 newbid, Player* newbidder /*=nullptr*/)
         if (newbidder)
             newbidder->ModifyMoney(-int32(newbid));
 
-        if (bidder)                                     // return money to old bidder if present
-            WorldSession::SendAuctionOutbiddedMail(this);
+        oldBidder = bidder;
+        oldBid = bid;
     }
 
     bidder = newbidder ? newbidder->GetGUIDLow() : 0;
     bid = newbid;
+
+    if (oldBidder)                                          // return money to old bidder if present, and tell him the new bid
+        WorldSession::SendAuctionOutbiddedMail(this, oldBidder, oldBid);
 
     if ((newbid < buyout) || (buyout == 0))                 // bid
     {

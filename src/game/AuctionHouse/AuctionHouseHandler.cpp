@@ -138,10 +138,10 @@ void WorldSession::SendAuctionRemovedNotification(AuctionEntry* auction) const
     SendPacket(data);
 }
 
-// this function sends mail to old bidder
-void WorldSession::SendAuctionOutbiddedMail(AuctionEntry* auction)
+// this function sends mail to old bidder, with his bid; the auction already holds the new bid
+void WorldSession::SendAuctionOutbiddedMail(AuctionEntry* auction, uint32 oldBidderLowGuid, uint32 oldBid)
 {
-    ObjectGuid oldBidder_guid = ObjectGuid(HIGHGUID_PLAYER, auction->bidder);
+    ObjectGuid oldBidder_guid = ObjectGuid(HIGHGUID_PLAYER, oldBidderLowGuid);
     Player* oldBidder = sObjectMgr.GetPlayer(oldBidder_guid);
 
     uint32 oldBidder_accId = 0;
@@ -158,7 +158,7 @@ void WorldSession::SendAuctionOutbiddedMail(AuctionEntry* auction)
             oldBidder->GetSession()->SendAuctionBidderNotification(auction, false);
 
         MailDraft(msgAuctionOutbiddedSubject.str())
-        .SetMoney(auction->bid)
+        .SetMoney(oldBid)
         .SendMailTo(MailReceiver(oldBidder, oldBidder_guid), auction, MAIL_CHECK_MASK_COPIED);
     }
 }

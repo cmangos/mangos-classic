@@ -370,7 +370,7 @@ class WorldSession
         void SendAuctionBidderNotification(AuctionEntry* auction, bool won) const;
         void SendAuctionOwnerNotification(AuctionEntry* auction, bool sold) const;
         void SendAuctionRemovedNotification(AuctionEntry* auction) const;
-        static void SendAuctionOutbiddedMail(AuctionEntry* auction);
+        static void SendAuctionOutbiddedMail(AuctionEntry* auction, uint32 oldBidderLowGuid, uint32 oldBid);
         static void SendAuctionCancelledToBidderMail(AuctionEntry* auction);
         AuctionHouseEntry const* GetCheckedAuctionHouseForAuctioneer(ObjectGuid guid) const;
 
