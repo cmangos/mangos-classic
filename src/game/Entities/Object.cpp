@@ -1185,10 +1185,10 @@ bool WorldObject::HasStringId(uint32 stringId) const
 }
 
 WorldObject::WorldObject() :
-    m_transport(nullptr), m_isOnEventNotified(false),
+    m_inRemoveList(false), m_transport(nullptr), m_isOnEventNotified(false),
     m_visibilityData(this), m_nextUpdateTime(0), m_accumulatedUpdateDiff(0), m_currMap(nullptr),
     m_mapId(0), m_InstanceId(0),
-    m_isActiveObject(false), m_debugFlags(0), m_castCounter(0), m_inRemoveList(false)
+    m_isActiveObject(false), m_debugFlags(0), m_castCounter(0)
 {
 }
 

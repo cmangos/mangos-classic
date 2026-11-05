@@ -69,7 +69,7 @@ enum AnubRekhanActions
 struct boss_anubrekhanAI : public BossAI
 {
     boss_anubrekhanAI(Creature* creature) : BossAI(creature, ANUBREKHAN_ACTIONS_MAX),
-        m_introDialogue(introDialogue), m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData())), m_hasDoneIntro(false)
+        m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData())), m_introDialogue(introDialogue), m_hasDoneIntro(false)
     {
         SetDataType(TYPE_ANUB_REKHAN);
         AddOnAggroText(SAY_AGGRO1, SAY_AGGRO2, SAY_AGGRO3);

@@ -146,8 +146,8 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_isInvisible(false), m_ignoreMMAP(false), m_forceAttackingCapability(false),
     m_settings(this),
     m_countSpawns(false),
-    m_creatureGroup(nullptr), m_imposedCooldown(false), m_healthMultiplier(1.f), m_damageMultiplier(1.f), m_baseAP(0), m_baseRAP(0),
-    m_creatureInfo(nullptr), m_mountInfo(nullptr), m_delayedPetSpells(false),
+    m_creatureGroup(nullptr), m_imposedCooldown(false), m_delayedPetSpells(false), m_healthMultiplier(1.f), m_damageMultiplier(1.f), m_baseAP(0), m_baseRAP(0),
+    m_creatureInfo(nullptr), m_mountInfo(nullptr),
     m_combatOnlyStealth(false)
 {
     m_valuesCount = UNIT_END;
