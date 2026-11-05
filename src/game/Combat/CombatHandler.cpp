@@ -54,6 +54,9 @@ void WorldSession::HandleAttackSwingOpcode(WorldPacket& recv_data)
     }
 
     mover->Attack(enemy, true);
+
+    // each new attack shows its swing error again, even the one last sent
+    _player->SwingErrorMsg(SWING_ERROR_NONE);
 }
 
 void WorldSession::HandleAttackStopOpcode(WorldPacket& /*recv_data*/)
