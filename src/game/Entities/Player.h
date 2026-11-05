@@ -825,7 +825,7 @@ class TradeData
     public:                                                 // constructors
         TradeData(Player* player, Player* trader) :
             m_player(player),  m_trader(trader), m_accepted(false), m_acceptProccess(false),
-            m_money(0), m_spell(0) {}
+            m_money(0), m_spell(0), m_clientStateIndex(1), m_serverStateIndex(1) {}
 
         Player* GetTrader() const { return m_trader; }
         TradeData* GetTraderData() const;
@@ -841,6 +841,11 @@ class TradeData
 
         bool IsAccepted() const { return m_accepted; }
         bool IsInAcceptProcess() const { return m_acceptProccess; }
+
+        uint32 GetClientStateIndex() const { return m_clientStateIndex; }
+        void UpdateClientStateIndex() { ++m_clientStateIndex; }
+        void ResetClientStateIndex() { m_clientStateIndex = 1; }
+        uint32 GetServerStateIndex() const { return m_serverStateIndex; }
 
         void SetItem(TradeSlots slot, Item* item);
         void SetSpell(uint32 spell_id, Item* castItem = nullptr);
@@ -867,6 +872,10 @@ class TradeData
         ObjectGuid m_spellCastItem;                         // applied spell casted by item use
 
         ObjectGuid m_items[TRADE_SLOT_COUNT];               // traded itmes from m_player side including non-traded slot
+
+        // Both start at 1, like the client's counters when the trade window opens
+        uint32     m_clientStateIndex;                      // requests from m_player's client to change its offer, refused or not; it ignores an update of its own offer with a lower index
+        uint32     m_serverStateIndex;                      // version of m_player's offer, raised by every change; the trader's client sends it back in CMSG_ACCEPT_TRADE
 };
 
 class Player : public Unit
