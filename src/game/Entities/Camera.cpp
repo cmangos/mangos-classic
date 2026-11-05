@@ -23,7 +23,7 @@
 #include "Util/Errors.h"
 #include "Entities/Player.h"
 
-Camera::Camera(Player* pl) : m_owner(*pl), m_source(pl)
+Camera::Camera(Player* pl) : m_owner(*pl), m_source(pl), m_sendInProgress(false)
 {
     m_source->GetViewPoint().Attach(this);
 }
@@ -101,13 +101,13 @@ void Camera::ResetView(bool update_far_sight_field /*= true*/)
     SetView(&m_owner, update_far_sight_field);
 }
 
-void Camera::Event_AddedToWorld()
+void Camera::Event_AddedToWorld(UpdateData& data)
 {
     GridType* grid = m_source->GetViewPoint().m_grid;
     MANGOS_ASSERT(grid);
     grid->AddWorldObject(this);
 
-    UpdateVisibilityForOwner(true);
+    UpdateVisibilityForOwner(true, data);
 }
 
 void Camera::Event_RemovedFromWorld()
@@ -127,9 +127,9 @@ void Camera::Event_Moved()
     m_source->GetViewPoint().m_grid->AddWorldObject(this);
 }
 
-void Camera::UpdateVisibilityOf(WorldObject* target) const
+void Camera::UpdateVisibilityOf(WorldObject* target, UpdateData& data) const
 {
-    m_owner.UpdateVisibilityOf(m_source, target);
+    m_owner.UpdateVisibilityOf(m_source, target, data);
 }
 
 template<class T>
@@ -144,11 +144,19 @@ template void Camera::UpdateVisibilityOf(Corpse*, UpdateData&, WorldObjectSet&);
 template void Camera::UpdateVisibilityOf(GameObject*, UpdateData&, WorldObjectSet&);
 template void Camera::UpdateVisibilityOf(DynamicObject*, UpdateData&, WorldObjectSet&);
 
-void Camera::UpdateVisibilityForOwner(bool addToWorld)
+void Camera::UpdateVisibilityForOwner()
 {
-    MaNGOS::VisibleNotifier notifier(*this);
+    UpdateData data;
+    UpdateVisibilityForOwner(false, data);
+}
+
+void Camera::UpdateVisibilityForOwner(bool addToWorld, UpdateData& data)
+{
+    m_sendInProgress = true;
+    MaNGOS::VisibleNotifier notifier(*this, data, !addToWorld);
     Cell::VisitAllObjects(m_source, notifier, addToWorld ? MAX_VISIBILITY_DISTANCE : m_source->GetVisibilityData().GetVisibilityDistance(), false);
     notifier.Notify();
+    m_sendInProgress = false;
 }
 
 //////////////////

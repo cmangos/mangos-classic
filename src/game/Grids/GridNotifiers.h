@@ -35,11 +35,12 @@ namespace MaNGOS
     struct VisibleNotifier
     {
         Camera& i_camera;
-        UpdateData i_data;
+        UpdateData& i_data;
         GuidSet i_clientGUIDs;
         WorldObjectSet i_visibleNow;
+        bool i_processSend;
 
-        explicit VisibleNotifier(Camera& c) : i_camera(c), i_clientGUIDs(c.GetOwner()->GetClientGuids()) {}
+        explicit VisibleNotifier(Camera& c, UpdateData& data, bool processSend) : i_camera(c), i_clientGUIDs(c.GetOwner()->GetClientGuids()), i_data(data), i_processSend(processSend) {}
         template<class T> void Visit(GridRefManager<T>& m);
         void Visit(CameraMapType& /*m*/) {}
         void Notify(void);

@@ -33,8 +33,12 @@ void VisibleChangesNotifier::Visit(CameraMapType& m)
 {
     for (auto& iter : m)
     {
-        iter.getSource()->UpdateVisibilityOf(&i_object);
+        if (iter.getSource()->IsSendInProgress() || iter.getSource()->GetOwner()->HasAtClient(&i_object))
+            continue;
+        UpdateData data;
+        iter.getSource()->UpdateVisibilityOf(&i_object, data);
         m_unvisitedGuids.erase(iter.getSource()->GetOwner()->GetObjectGuid());
+        data.SendData(*iter.getSource()->GetOwner()->GetSession());
     }
 }
 
@@ -56,7 +60,11 @@ void VisibleNotifier::Notify()
             {
                 // ignore far sight case
                 if (itr->IsPlayer())
-                    static_cast<Player*>(itr)->UpdateVisibilityOf(static_cast<Player*>(itr), &player);
+                {
+                    UpdateData data;
+                    static_cast<Player*>(itr)->UpdateVisibilityOf(static_cast<Player*>(itr), &player, data);
+                    data.SendData(*static_cast<Player*>(itr)->GetSession());
+                }
                 player.UpdateVisibilityOf(&player, itr, i_data, i_visibleNow);
                 i_clientGUIDs.erase(itr->GetObjectGuid());
             }
@@ -72,7 +80,7 @@ void VisibleNotifier::Notify()
             if (!obj->GetVisibilityData().IsVisibilityOverridden())
                 continue;
 
-            player.UpdateVisibilityOf(&player, obj);
+            player.UpdateVisibilityOf(&player, obj, i_data);
             i_clientGUIDs.erase(current);
         }
     }
@@ -98,11 +106,8 @@ void VisibleNotifier::Notify()
     if (i_data.HasData())
     {
         // send create/outofrange packet to player (except player create updates that already sent using SendUpdateToPlayer)
-        for (size_t i = 0; i < i_data.GetPacketCount(); ++i)
-        {
-            WorldPacket packet = i_data.BuildPacket(i);
-            player.GetSession()->SendPacket(packet);
-        }
+        if (i_processSend)
+            i_data.SendData(*player.GetSession());
 
         // send out of range to other players if need
         GuidSet const& oor = i_data.GetOutOfRangeGUIDs();
@@ -112,7 +117,11 @@ void VisibleNotifier::Notify()
                 continue;
 
             if (Player* plr = ObjectAccessor::FindPlayer(iter))
-                plr->UpdateVisibilityOf(plr->GetCamera().GetBody(), &player);
+            {
+                UpdateData data;
+                plr->UpdateVisibilityOf(plr->GetCamera().GetBody(), &player, data);
+                data.SendData(*plr->GetSession()); // TODO: This has to be aggregated elsewhere
+            }
         }
     }
 }

@@ -393,9 +393,10 @@ class Map : public GridRefManager<NGridType>
 
         void SetTimer(uint32 t) { i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t; }
 
-        void SendInitSelf(Player* player) const;
+        void SendInitBeforeGrid(Player* player, UpdateData& updateData) const;
+        void SendInitSelf(Player* player, UpdateData& updateData) const;
 
-        void SendInitTransports(Player* player) const;
+        void SendInitTransports(Player* player, UpdateData& updateData) const;
         void SendRemoveTransports(Player* player) const;
         void LoadTransports();
 
