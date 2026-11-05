@@ -22,6 +22,7 @@ jobs:
       contents: read
 
     strategy:
+      fail-fast: false
       matrix:
        include:
           - os: ubuntu-22.04
@@ -44,6 +45,7 @@ jobs:
 
       - name: Setup sccache
         uses: mozilla-actions/sccache-action@v0.0.11
+        continue-on-error: true
 
       - name: Create Build Environment
         run: |
@@ -75,7 +77,10 @@ jobs:
           USE_PCH: ${{ matrix.USE_PCH }}
           EXTRA_BUILD: ${{ matrix.EXTRA_BUILD }}
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
-        run: cmake -DBoost_ARCHITECTURE=-x64 -DPCH=${{env.USE_PCH}} -DCMAKE_INSTALL_PREFIX=/home/runner/work ${{env.EXTRA_BUILD}}-DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
+        run: |
+          LAUNCHER=""
+          if command -v sccache >/dev/null; then LAUNCHER="-DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache"; fi
+          cmake -DBoost_ARCHITECTURE=-x64 -DPCH=${{env.USE_PCH}} -DCMAKE_INSTALL_PREFIX=/home/runner/work ${{env.EXTRA_BUILD}}$LAUNCHER -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
 
 
       - name: Build
@@ -87,7 +92,7 @@ jobs:
 
       - name: sccache stats
         if: always()
-        run: sccache --show-stats
+        run: if command -v sccache >/dev/null; then sccache --show-stats; fi
 
   notify:
     name: Send Notification to Discord on Failure
