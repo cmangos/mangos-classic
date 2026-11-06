@@ -544,6 +544,7 @@ class Spell
         // void HandleAddAura(Unit* Target);
 
         void SetCastItem(Item* item);
+        static void ReleaseCastItemRef(Item* item);
         Item* GetCastItem() { return m_CastItem; }
 
         SpellEntry const* m_spellInfo;

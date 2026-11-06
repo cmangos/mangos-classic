@@ -667,9 +667,10 @@ Player::~Player()
     // m_social = nullptr;
 
     // Note: buy back item already deleted from DB when player was saved
+    // a spell event that could not be killed in CleanupsBeforeDelete may still hold an item
     for (auto& m_item : m_items)
     {
-        delete m_item;
+        Item::DeleteUnlessUsedInSpell(m_item);
     }
     CleanupChannels();
 
@@ -678,7 +679,7 @@ Player::~Player()
         delete *itr;
 
     for (ItemMap::const_iterator iter = mMitems.begin(); iter != mMitems.end(); ++iter)
-        delete iter->second;                                // if item is duplicated... then server may crash ... but that item should be deallocated
+        Item::DeleteUnlessUsedInSpell(iter->second);        // if item is duplicated... then server may crash ... but that item should be deallocated
 
     if (m_transport)
     {
@@ -7501,7 +7502,6 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets& targets, uint8 spell
 
         Spell* spell = new Spell(this, spellInfo, (count > 0) ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE);
         spell->SetCastItem(item);
-        item->SetUsedInSpell(true);
         spell->m_clientCast = true;
         spell->SpellStart(&targets);
 

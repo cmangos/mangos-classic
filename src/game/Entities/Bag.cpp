@@ -34,7 +34,7 @@ Bag::Bag(): Item()
 Bag::~Bag()
 {
     for (auto& i : m_bagslot)
-        delete i;
+        Item::DeleteUnlessUsedInSpell(i);
 }
 
 void Bag::AddToWorld()

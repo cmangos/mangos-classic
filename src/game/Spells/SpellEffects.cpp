@@ -2290,9 +2290,6 @@ void Spell::EffectSummonChangeItem(SpellEffectIndex eff_idx)
 
     Item* oldItem = m_CastItem;
 
-    if (m_CastItem)
-        m_CastItem->SetUsedInSpell(false);
-
     // prevent crash at access and unexpected charges counting with item update queue corrupt
     ClearCastItem();
 
@@ -2305,6 +2302,9 @@ void Spell::EffectSummonChangeItem(SpellEffectIndex eff_idx)
         // Push packet to client so it knows we've created an item and quest can show objective update
         player->SendNewItem(newItem, newItem->GetCount() - curItemCount, true, false);
     }
+
+    // released only now, the converted item may be deleted with it
+    ReleaseCastItemRef(oldItem);
 }
 
 void Spell::EffectProficiency(SpellEffectIndex /*eff_idx*/)
