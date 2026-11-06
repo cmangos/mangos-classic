@@ -423,8 +423,12 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
             SendTradeStatus(myCanCompleteInfo);
             myCanCompleteInfo.IsTargetResult = true;
             trader->GetSession()->SendTradeStatus(myCanCompleteInfo);
-            my_trade->SetAccepted(false);
-            his_trade->SetAccepted(false);
+
+            // the client closes both windows on this status, so the trade ends here
+            delete _player->m_trade;
+            _player->m_trade = nullptr;
+            delete trader->m_trade;
+            trader->m_trade = nullptr;
             return;
         }
         if (hisCanCompleteInfo.Result != EQUIP_ERR_OK)
@@ -435,8 +439,12 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
             trader->GetSession()->SendTradeStatus(hisCanCompleteInfo);
             hisCanCompleteInfo.IsTargetResult = true;
             SendTradeStatus(hisCanCompleteInfo);
-            my_trade->SetAccepted(false);
-            his_trade->SetAccepted(false);
+
+            // the client closes both windows on this status, so the trade ends here
+            delete _player->m_trade;
+            _player->m_trade = nullptr;
+            delete trader->m_trade;
+            trader->m_trade = nullptr;
             return;
         }
 
