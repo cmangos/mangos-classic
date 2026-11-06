@@ -62,7 +62,7 @@ enum HighGuid
     HIGHGUID_CONTAINER      = 0x4000,                       // blizz 4000
     HIGHGUID_PLAYER         = 0x0000,                       // blizz 0000
     HIGHGUID_GAMEOBJECT     = 0xF110,                       // blizz F110
-    HIGHGUID_TRANSPORT      = 0xF120,                       // blizz F120 (for GAMEOBJECT_TYPE_TRANSPORT)
+    HIGHGUID_TRANSPORT      = 0x6000,                       // blizz 6000 (for GAMEOBJECT_TYPE_TRANSPORT)
     HIGHGUID_UNIT           = 0xF130,                       // blizz F130
     HIGHGUID_PET            = 0xF140,                       // blizz F140
     HIGHGUID_DYNAMICOBJECT  = 0xF100,                       // blizz F100
@@ -144,6 +144,7 @@ class ObjectGuid
                 case HIGHGUID_PET:          return TYPEID_UNIT;
                 case HIGHGUID_PLAYER:       return TYPEID_PLAYER;
                 case HIGHGUID_GAMEOBJECT:   return TYPEID_GAMEOBJECT;
+                case HIGHGUID_TRANSPORT:    return TYPEID_GAMEOBJECT;
                 case HIGHGUID_DYNAMICOBJECT: return TYPEID_DYNAMICOBJECT;
                 case HIGHGUID_CORPSE:       return TYPEID_CORPSE;
                 case HIGHGUID_MO_TRANSPORT: return TYPEID_GAMEOBJECT;

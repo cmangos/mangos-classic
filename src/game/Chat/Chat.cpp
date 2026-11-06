@@ -2867,7 +2867,8 @@ GameObject* ChatHandler::GetGameObjectWithGuid(uint32 lowguid, uint32 entry) con
 
     Player* pl = m_session->GetPlayer();
 
-    return pl->GetMap()->GetGameObject(ObjectGuid(HIGHGUID_GAMEOBJECT, entry, lowguid));
+    GameObjectInfo const* goInfo = ObjectMgr::GetGameObjectInfo(entry);
+    return pl->GetMap()->GetGameObject(ObjectGuid(goInfo ? goInfo->GetHighGuid() : HIGHGUID_GAMEOBJECT, entry, lowguid));
 }
 
 enum SpellLinkType
@@ -3001,7 +3002,10 @@ ObjectGuid ChatHandler::ExtractGuidFromLink(char** text)
                 return ObjectGuid();
 
             if (GameObjectData const* data = sObjectMgr.GetGOData(lowguid))
-                return ObjectGuid(HIGHGUID_GAMEOBJECT, data->id, lowguid);
+            {
+                GameObjectInfo const* goInfo = ObjectMgr::GetGameObjectInfo(data->id);
+                return ObjectGuid(goInfo ? goInfo->GetHighGuid() : HIGHGUID_GAMEOBJECT, data->id, lowguid);
+            }
             return ObjectGuid();
         }
     }

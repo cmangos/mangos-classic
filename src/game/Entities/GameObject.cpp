@@ -199,7 +199,7 @@ bool GameObject::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map,
     if (!guidlow)                                           // no free map guid counter, already logged
         return false;
 
-    Object::_Create(dbGuid, guidlow, goinfo->id, HIGHGUID_GAMEOBJECT);
+    Object::_Create(dbGuid, guidlow, goinfo->id, goinfo->GetHighGuid());
 
     m_goInfo = goinfo;
 

@@ -187,7 +187,11 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId)
       i_gridExpiry(expiry), m_TerrainData(sTerrainMgr.LoadTerrain(id)),
       i_data(nullptr), i_script_id(0),
       m_CreatureGuids(HIGHGUID_UNIT, id, InstanceId, [this](ObjectGuid const& guid) { return GetCreature(guid) != nullptr; }),
-      m_GameObjectGuids(HIGHGUID_GAMEOBJECT, id, InstanceId, [this](ObjectGuid const& guid) { return GetGameObject(guid) != nullptr; }),
+      m_GameObjectGuids(HIGHGUID_GAMEOBJECT, id, InstanceId, [this](ObjectGuid const& guid)
+      {
+          GameObjectInfo const* goInfo = ObjectMgr::GetGameObjectInfo(guid.GetEntry());
+          return GetGameObject(goInfo ? ObjectGuid(goInfo->GetHighGuid(), guid.GetEntry(), guid.GetCounter()) : guid) != nullptr;
+      }),
       m_DynObjectGuids(HIGHGUID_DYNAMICOBJECT, id, InstanceId, [this](ObjectGuid const& guid) { return GetDynamicObject(guid) != nullptr; }),
       m_PetGuids(HIGHGUID_PET, id, InstanceId, [this](ObjectGuid const& guid) { return GetPet(guid) != nullptr; }),
       m_transportsIterator(m_transports.begin()), m_spawnManager(*this),

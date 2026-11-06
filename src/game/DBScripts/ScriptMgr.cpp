@@ -1324,6 +1324,7 @@ bool ScriptAction::GetScriptCommandObject(const ObjectGuid guid, bool includeIte
         case HIGHGUID_PLAYER:
             resultObject = m_map->GetPlayer(guid);
             break;
+        case HIGHGUID_TRANSPORT:
         case HIGHGUID_GAMEOBJECT:
             resultObject = m_map->GetGameObject(guid);
             break;

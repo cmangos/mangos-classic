@@ -565,6 +565,11 @@ struct GameObjectInfo
             default: return false;
         }
     }
+
+    HighGuid GetHighGuid() const
+    {
+        return type == GAMEOBJECT_TYPE_TRANSPORT ? HIGHGUID_TRANSPORT : HIGHGUID_GAMEOBJECT;
+    }
 };
 
 // GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some platform
