@@ -56,7 +56,7 @@ bool CheckPathToTarget(Unit* pet, Unit* target)
 
 void SendNoPathToOwner(Unit* pet)
 {
-    pet->SendPetActionFeedback(FEEDBACK_CANT_ATT_TARGET); // in wotlk need to end actual error
+    pet->SendPetActionFeedback(FEEDBACK_NO_PATH);
 }
 
 void WorldSession::HandlePetAction(WorldPacket& recv_data)
