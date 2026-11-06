@@ -1257,7 +1257,7 @@ void Map::Remove(T* obj, bool remove)
     m_objectsToClientMovementUpdate.erase(obj);
     m_visibilityAdded.erase(obj);
 
-    if constexpr (std::is_same_v<T, Unit>)
+    if constexpr (std::is_base_of_v<Unit, T>)
         m_waypointingNpcs.erase(obj);
 
     if (gridLoaded)
