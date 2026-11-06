@@ -501,6 +501,7 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
     m_session = session;
 
     m_ExtraFlags = 0;
+    m_flyMode = false;
     if (GetSession()->GetSecurity() >= SEC_GAMEMASTER)
         SetAcceptTicket(true);
 

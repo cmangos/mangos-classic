@@ -2052,6 +2052,8 @@ class Player : public Unit
         bool CanWalk() const override { return true; }
         bool IsFlying() const override { return false; }
         bool IsFreeFlying() const { return false; }
+        bool IsInFlyMode() const { return m_flyMode; }
+        void SetFlyMode(bool on) { m_flyMode = on; }
         bool IsSwimming() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_SWIMMING); }
 
         void UpdateClientControl(Unit const* target, bool enabled, bool forced = false) const;
@@ -2382,6 +2384,7 @@ class Player : public Unit
         bool m_itemUpdateQueueBlocked;
 
         uint32 m_ExtraFlags;
+        bool m_flyMode;                                     // set by SetCanFly, given back when the client loses it
         ObjectGuid m_curSelectionGuid;
 
         QuestStatusMap mQuestStatus;

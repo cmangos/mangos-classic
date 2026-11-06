@@ -12455,6 +12455,9 @@ void Unit::SetCanFly(bool enable)
     if (!IsClientControlled())
         return;
 
+    if (IsPlayer())
+        static_cast<Player*>(this)->SetFlyMode(enable);
+
     MovementFlags const flyFlags = MovementFlags(MOVEFLAG_SWIMMING | MOVEFLAG_KEEP_SWIM_STATE | MOVEFLAG_LEVITATING);
 
     // The client does not answer: the flags it is given become the server copy of its movement right away
