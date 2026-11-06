@@ -21,6 +21,7 @@
 #include "Globals/ObjectMgr.h"
 #include "World/World.h"
 
+#include <cmath>
 #include <sstream>
 
 /////////////////////////////////////////////////
@@ -133,7 +134,7 @@ bool Tracker::AddRoute(const TaxiPathEntry *entry, float discountMulti /*= 0.0f*
 
     uint32 cost = entry->price;
 
-    const bool commercial = int32(discountMulti) != 0;
+    const bool commercial = discountMulti > 0.0f;
 
     // Can't add taxi path without mount display id unless specified otherwise
     uint32 displayId = sObjectMgr.GetTaxiMountDisplayId(entry->from, m_owner.GetTeam());
@@ -146,7 +147,8 @@ bool Tracker::AddRoute(const TaxiPathEntry *entry, float discountMulti /*= 0.0f*
 
     if (commercial)
     {
-        cost = uint32(cost * discountMulti);
+        // Rounded to the nearest copper
+        cost = uint32(std::lrintf(float(cost) * discountMulti));
         m_cost += cost;
         // If global preference is set, do not record individual flight costs
         if (sWorld.getConfig(CONFIG_BOOL_LONG_TAXI_PATHS_PERSISTENCE))
