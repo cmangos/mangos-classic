@@ -1731,7 +1731,12 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket& p_data)
     uint32 playerBytes2 = fields[6].GetUInt32();
     p_data << uint8(playerBytes2 & 0xFF);                  // facial hair
 
-    p_data << uint8(fields[7].GetUInt8());                 // level
+    uint32 atLoginFlags = fields[15].GetUInt32();
+
+    // a character that has never entered the world is sent at level 0, which shows as level 1;
+    // one created above level 1 keeps its level
+    uint8 level = fields[7].GetUInt8();
+    p_data << uint8((atLoginFlags & AT_LOGIN_FIRST) && level == 1 ? 0 : level); // level
     p_data << uint32(fields[8].GetUInt32());               // zone
     p_data << uint32(fields[9].GetUInt32());               // map
 
@@ -1743,7 +1748,6 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket& p_data)
 
     uint32 char_flags = 0;
     uint32 playerFlags = fields[14].GetUInt32();
-    uint32 atLoginFlags = fields[15].GetUInt32();
     if (playerFlags & PLAYER_FLAGS_HIDE_HELM)
         char_flags |= CHARACTER_FLAG_HIDE_HELM;
     if (playerFlags & PLAYER_FLAGS_HIDE_CLOAK)
