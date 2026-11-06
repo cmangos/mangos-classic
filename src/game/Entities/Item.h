@@ -23,8 +23,6 @@
 #include "Entities/Object.h"
 #include "Entities/ItemPrototype.h"
 
-#include <atomic>
-
 struct SpellEntry;
 class Bag;
 class Field;
@@ -334,31 +332,16 @@ class Item : public Object
         void RemoveFromClientUpdateList() override;
         void BuildUpdateData(UpdateDataMapType& update_players) override;
 
-        // Every spell holding this item as its cast item keeps a reference (Spell::SetCastItem). While any is held,
-        // deleting the item is deferred and the spell releasing the last reference deletes it. Spells release on the
-        // map thread while the world thread may save the item, hence the atomic.
-        bool IsUsedInSpell() const { return (m_spellRefs.load(std::memory_order_acquire) & ~SPELL_REF_DELETE_PENDING) != 0; }
-        void AddSpellRef() { m_spellRefs.fetch_add(1, std::memory_order_acq_rel); }
-        // true when this released the last reference of an item whose deletion was deferred: the caller deletes it
-        bool ReleaseSpellRef() { return m_spellRefs.fetch_sub(1, std::memory_order_acq_rel) == (SPELL_REF_DELETE_PENDING | 1); }
-        // deletes the item, or leaves that to the last spell still holding it
-        static void DeleteUnlessUsedInSpell(Item* item) { if (item && !item->DeferDeleteToSpells()) delete item; }
-        // no-op: spells take their own reference in Spell::SetCastItem; kept so existing callers still compile
-        void SetUsedInSpell(bool /*state*/) {}
+        bool IsUsedInSpell() const { return m_usedInSpell; }
+        void SetUsedInSpell(bool state) { m_usedInSpell = state; }
     private:
-        // marks the item for deletion; true when spells still hold it and the last one will delete it instead
-        bool DeferDeleteToSpells() { return (m_spellRefs.fetch_or(SPELL_REF_DELETE_PENDING, std::memory_order_acq_rel) & ~SPELL_REF_DELETE_PENDING) != 0; }
-        bool IsDeletePending() const { return (m_spellRefs.load(std::memory_order_acquire) & SPELL_REF_DELETE_PENDING) != 0; }
-
-        static constexpr uint32 SPELL_REF_DELETE_PENDING = 0x80000000;
-
         uint8 m_slot;
         Bag* m_container;
         ItemUpdateState uState;
         int16 uQueuePos;
         bool mb_in_trade;                                   // true if item is currently in trade-window
         ItemLootUpdateState m_lootState;
-        std::atomic<uint32> m_spellRefs;
+        bool m_usedInSpell;
         uint32 m_enchantmentModifier; // used by one script and removed in wotlk
 };
 

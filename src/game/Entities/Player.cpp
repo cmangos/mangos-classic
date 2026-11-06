@@ -656,10 +656,9 @@ Player::~Player()
     // m_social = nullptr;
 
     // Note: buy back item already deleted from DB when player was saved
-    // a spell event that could not be killed in CleanupsBeforeDelete may still hold an item
     for (auto& m_item : m_items)
     {
-        Item::DeleteUnlessUsedInSpell(m_item);
+        delete m_item;
     }
     CleanupChannels();
 
@@ -668,7 +667,7 @@ Player::~Player()
         delete *itr;
 
     for (ItemMap::const_iterator iter = mMitems.begin(); iter != mMitems.end(); ++iter)
-        Item::DeleteUnlessUsedInSpell(iter->second);        // if item is duplicated... then server may crash ... but that item should be deallocated
+        delete iter->second;                                // if item is duplicated... then server may crash ... but that item should be deallocated
 
     if (m_transport)
     {
@@ -7495,6 +7494,7 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets& targets, uint8 spell
 
         Spell* spell = new Spell(this, spellInfo, (count > 0) ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE);
         spell->SetCastItem(item);
+        item->SetUsedInSpell(true);
         spell->m_clientCast = true;
         spell->SpellStart(&targets);
 
@@ -10299,6 +10299,7 @@ void Player::MoveItemFromInventory(uint8 bag, uint8 slot, bool update)
 {
     if (Item* it = GetItemByPos(bag, slot))
     {
+        InterruptSpellsWithCastItem(it);
         ItemRemovedQuestCheck(it->GetEntry(), it->GetCount());
         RemoveItem(bag, slot, update);
         it->RemoveFromUpdateQueueOf(this);
@@ -10337,6 +10338,8 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
     Item* pItem = GetItemByPos(bag, slot);
     if (pItem)
     {
+        InterruptSpellsWithCastItem(pItem);
+
         DEBUG_LOG("STORAGE: DestroyItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
 
         // start from destroy contained items (only equipped bag can have its)
@@ -18741,6 +18744,22 @@ void Player::RemoveItemDependentAurasAndCasts(Item* pItem)
         if (Spell* spell = GetCurrentSpell(CurrentSpellTypes(i)))
             if (!HasItemFitToSpellReqirements(spell->m_spellInfo, pItem))
                 InterruptSpell(CurrentSpellTypes(i));
+}
+
+void Player::InterruptSpellsWithCastItem(Item* item)
+{
+    // the item is leaving the player, so no spell may keep using it as its cast item
+    for (uint32 i = 0; i < CURRENT_MAX_SPELL; ++i)
+        if (Spell* spell = GetCurrentSpell(CurrentSpellTypes(i)))
+            if (spell->GetCastItem() == item)
+                InterruptSpell(CurrentSpellTypes(i), true);
+
+    // spells past the cast (travelling, or finished and not yet deleted) cannot be interrupted, they only drop the item
+    for (auto& eventPair : m_events.GetEvents())
+        if (SpellEvent* spellEvent = dynamic_cast<SpellEvent*>(eventPair.second))
+            if (Spell* spell = spellEvent->GetSpell())
+                if (spell->GetCastItem() == item)
+                    spell->ClearCastItem();
 }
 
 uint32 Player::GetResurrectionSpellId() const
