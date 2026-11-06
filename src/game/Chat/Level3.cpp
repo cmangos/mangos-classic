@@ -5474,11 +5474,14 @@ bool ChatHandler::HandleGMFlyCommand(char* args)
     if (!target)
         target = m_session->GetPlayer();
 
-    // [-ZERO] Need reimplement in another way
+    // only game master accounts may fly: the anticheat strips these movement flags from player accounts
+    if (target->GetSession()->GetSecurity() == SEC_PLAYER)
     {
-        SendSysMessage(LANG_USE_BOL);
+        PSendSysMessage("%s is not a game master.", GetNameLink(target).c_str());
+        SetSentErrorMessage(true);
         return false;
     }
+
     target->SetCanFly(value);
     PSendSysMessage(LANG_COMMAND_FLYMODE_STATUS, GetNameLink(target).c_str(), args);
     return true;
