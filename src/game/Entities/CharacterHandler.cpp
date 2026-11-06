@@ -298,6 +298,13 @@ void WorldSession::HandleCharEnum(QueryResult* result)
     {
         do
         {
+            // the client rejects the whole list beyond 10 characters
+            if (num == 10)
+            {
+                sLog.outError("Account %u has more than 10 characters, only the first 10 are listed.", GetAccountId());
+                break;
+            }
+
             uint32 guidlow = (*result)[0].GetUInt32();
             DETAIL_LOG("Build enum data for char guid %u from account %u.", guidlow, GetAccountId());
             if (Player::BuildEnumData(result, data))
