@@ -60,6 +60,7 @@ void SpellStacker::LoadSpellGroups()
             }
 
             m_spellGroups.emplace(group.Id, group);
+            ++count;
         }
         while (queryResult->NextRow());
     }
@@ -98,6 +99,7 @@ void SpellStacker::LoadSpellGroups()
             }
 
             existingItr->second.spellIds.push_back(spellId);
+            ++count;
         }
         while (queryResult->NextRow());
     }
