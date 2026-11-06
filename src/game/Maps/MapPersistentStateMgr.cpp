@@ -818,23 +818,36 @@ void MapPersistentStateManager::PackInstances() const
     BarGoLink bar(InstanceSet.size() + 1);
     bar.step();
 
+    auto remapInstance = [](uint32 newId, uint32 oldId)
+    {
+        CharacterDatabase.BeginTransaction();
+        CharacterDatabase.PExecute("UPDATE creature_respawn SET instance = '%u' WHERE instance = '%u'", newId, oldId);
+        CharacterDatabase.PExecute("UPDATE gameobject_respawn SET instance = '%u' WHERE instance = '%u'", newId, oldId);
+        CharacterDatabase.PExecute("UPDATE corpse SET instance = '%u' WHERE instance = '%u'", newId, oldId);
+        CharacterDatabase.PExecute("UPDATE character_instance SET instance = '%u' WHERE instance = '%u'", newId, oldId);
+        CharacterDatabase.PExecute("UPDATE instance SET id = '%u' WHERE id = '%u'", newId, oldId);
+        CharacterDatabase.PExecute("UPDATE group_instance SET instance = '%u' WHERE instance = '%u'", newId, oldId);
+        // execute transaction synchronously
+        CharacterDatabase.CommitTransaction();
+    };
+
+    // Instance id 1 is reserved, but an empty instance table used to make it the first generated id.
+    // Move such an instance past the highest id first: remapping it onto an existing id 2 fails on
+    // the instance table only, and would merge its respawns and binds into the other instance.
+    if (!InstanceSet.empty() && *InstanceSet.begin() == 1)
+    {
+        uint32 newId = *InstanceSet.rbegin() + 1;
+        remapInstance(newId, 1);
+        InstanceSet.erase(1);
+        InstanceSet.insert(newId);
+    }
+
     uint32 InstanceNumber = 2; //Reserve instance id 1 for ebonhold GetTeam() == ALLIANCE.
-    // we do assume std::set is sorted properly on integer value
+    // we do assume std::set is sorted properly on integer value; ids are now >= 2, so InstanceNumber never passes i
     for (uint32 i : InstanceSet)
     {
         if (i != InstanceNumber)
-        {
-            CharacterDatabase.BeginTransaction();
-            // remap instance id
-            CharacterDatabase.PExecute("UPDATE creature_respawn SET instance = '%u' WHERE instance = '%u'", InstanceNumber, i);
-            CharacterDatabase.PExecute("UPDATE gameobject_respawn SET instance = '%u' WHERE instance = '%u'", InstanceNumber, i);
-            CharacterDatabase.PExecute("UPDATE corpse SET instance = '%u' WHERE instance = '%u'", InstanceNumber, i);
-            CharacterDatabase.PExecute("UPDATE character_instance SET instance = '%u' WHERE instance = '%u'", InstanceNumber, i);
-            CharacterDatabase.PExecute("UPDATE instance SET id = '%u' WHERE id = '%u'", InstanceNumber, i);
-            CharacterDatabase.PExecute("UPDATE group_instance SET instance = '%u' WHERE instance = '%u'", InstanceNumber, i);
-            // execute transaction synchronously
-            CharacterDatabase.CommitTransaction();
-        }
+            remapInstance(InstanceNumber, i);
 
         ++InstanceNumber;
         bar.step();
