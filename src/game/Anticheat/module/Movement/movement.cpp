@@ -133,8 +133,8 @@ void Movement::VerifyMovementFlags(uint32 flags, uint32 &removeFlags, bool stric
 
     if (sAnticheatConfig.IsEnabled(CHEAT_TYPE_FLY_HACK))
     {
-        static constexpr uint32 flyHackFlags1 = (MOVEFLAG_WALK_MODE | MOVEFLAG_SWIMMING | MOVEFLAG_HOVER | MOVEFLAG_FALLINGFAR | MOVEFLAG_FLYING | MOVEFLAG_ONTRANSPORT);
-        static constexpr uint32 flyHackFlags2 = (MOVEFLAG_SWIMMING | MOVEFLAG_FLYING);
+        static constexpr uint32 flyHackFlags1 = (MOVEFLAG_WALK_MODE | MOVEFLAG_SWIMMING | MOVEFLAG_HOVER | MOVEFLAG_FALLINGFAR | MOVEFLAG_LEVITATING | MOVEFLAG_ONTRANSPORT);
+        static constexpr uint32 flyHackFlags2 = (MOVEFLAG_SWIMMING | MOVEFLAG_LEVITATING);
 
         if ((flags & flyHackFlags1) == flyHackFlags1)
         {

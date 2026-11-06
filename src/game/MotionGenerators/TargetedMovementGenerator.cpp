@@ -801,7 +801,7 @@ bool FollowMovementGenerator::IsUnstuckAllowed(Unit& owner) const
         return false;
 
     // Do not try to unstuck while target has not landed or stabilized on terrain in some way
-    if (i_target->m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_JUMPING | MOVEFLAG_FALLINGFAR | MOVEFLAG_FLYING)))
+    if (i_target->m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_JUMPING | MOVEFLAG_FALLINGFAR | MOVEFLAG_LEVITATING)))
         return false;
 
     // Do not try to unstuck if not too far behind:

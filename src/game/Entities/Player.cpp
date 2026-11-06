@@ -6830,7 +6830,7 @@ bool Player::CanUseCapturePoint() const
            !HasStealthAura() &&                             // not stealthed
            !HasInvisibilityAura() &&                        // visible
            (IsPvP() || sWorld.IsPvPRealm()) &&
-           !HasMovementFlag(MOVEFLAG_FLYING) &&
+           !HasMovementFlag(MOVEFLAG_LEVITATING) &&
            !IsTaxiFlying() &&
            !IsGameMaster();
 }

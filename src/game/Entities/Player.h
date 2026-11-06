@@ -2043,7 +2043,7 @@ class Player : public Unit
         bool isMovingOrTurning() const { return m_movementInfo.HasMovementFlag(movementOrTurningFlagsMask); }
 
         bool CanSwim() const override { return true; }
-        bool CanFly() const override { return m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING); }
+        bool CanFly() const override { return m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING); }
         bool CanWalk() const override { return true; }
         bool IsFlying() const override { return false; }
         bool IsFreeFlying() const { return false; }
