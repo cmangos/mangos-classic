@@ -2202,7 +2202,9 @@ void Creature::CallAssistance(Unit* enemy)
 
 std::pair<bool, GuidVector> Creature::MarkCallAssistanceOnPull(Unit* enemy)
 {
-    bool stored = m_AlreadyCallAssistance;
+    if (m_AlreadyCallAssistance)
+        return {false, GuidVector()};
+
     SetNoCallAssistance(true);
 
     if (!CanCallForAssistance())
@@ -2219,7 +2221,7 @@ std::pair<bool, GuidVector> Creature::MarkCallAssistanceOnPull(Unit* enemy)
     GuidVector guids;
     for (Creature* creature : receiverList)
         guids.push_back(creature->GetObjectGuid());
-    return {stored, guids};
+    return {true, guids};
 }
 
 void Creature::CallAssistanceOnPull(Unit* enemy, GuidVector const& receiverList)
