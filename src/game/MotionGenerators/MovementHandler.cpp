@@ -700,8 +700,7 @@ bool WorldSession::VerifyMovementInfo(MovementInfo const& movementInfo, Unit* mo
     if (movementInfo.HasMovementFlag(MOVEFLAG_ONTRANSPORT))
     {
         // transports size limited
-        // (also received at zeppelin/lift leave by some reason with t_* as absolute in continent coordinates, can be safely skipped)
-        if (movementInfo.GetTransportPos().x > 50 || movementInfo.GetTransportPos().y > 50 || movementInfo.GetTransportPos().z > 100)
+        if (std::fabs(movementInfo.GetTransportPos().x) > 100.0f || std::fabs(movementInfo.GetTransportPos().y) > 100.0f || std::fabs(movementInfo.GetTransportPos().z) > 100.0f)
             return false;
 
         if (!MaNGOS::IsValidMapCoord(movementInfo.GetPos().x + movementInfo.GetTransportPos().x, movementInfo.GetPos().y + movementInfo.GetTransportPos().y,
