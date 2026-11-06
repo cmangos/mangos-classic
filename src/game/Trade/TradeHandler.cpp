@@ -525,8 +525,12 @@ void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& /*recvPacket*/)
 void WorldSession::HandleBeginTradeOpcode(WorldPacket& /*recvPacket*/)
 {
     TradeData* my_trade = _player->m_trade;
-    if (!my_trade)
+    // opening an already open trade window makes the client close it and clear its offer, which leaves the offered items locked
+    if (!my_trade || my_trade->IsWindowOpen())
         return;
+
+    my_trade->SetWindowOpen();
+    my_trade->GetTraderData()->SetWindowOpen();
 
     TradeStatusInfo info;
     info.Status = TRADE_STATUS_OPEN_WINDOW;
