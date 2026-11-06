@@ -67,7 +67,7 @@ enum HighGuid
     HIGHGUID_PET            = 0xF140,                       // blizz F140
     HIGHGUID_DYNAMICOBJECT  = 0xF100,                       // blizz F100
     HIGHGUID_CORPSE         = 0xF101,                       // blizz F100
-    HIGHGUID_MO_TRANSPORT   = 0x1FC0,                       // blizz 1FC0 (for GAMEOBJECT_TYPE_MO_TRANSPORT)
+    HIGHGUID_MO_TRANSPORT   = 0x8000,                       // blizz 8000 (for GAMEOBJECT_TYPE_MO_TRANSPORT)
 };
 
 class ObjectGuid;
