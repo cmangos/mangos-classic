@@ -17198,7 +17198,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     // stop trade (client cancel trade at taxi map open but cheating tools can be used for reopen it)
     TradeCancel(true);
 
-    if (!m_taxiTracker.AddRoutes(nodes, (npc ? GetReputationPriceDiscount(npc) : 0.0f), !spellid))
+    if (!m_taxiTracker.AddRoutes(nodes, (npc ? GetRepairPriceMultiplier(npc) : 0.0f), !spellid))
     {
         GetSession()->SendActivateTaxiReply(ERR_TAXIUNSPECIFIEDSERVERERROR);
         return false;
