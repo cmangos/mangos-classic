@@ -513,6 +513,19 @@ void WorldSession::HandlePetCancelAuraOpcode(WorldPacket& recvPacket)
         return;
     }
 
+    if (spellInfo->HasAttribute(SPELL_ATTR_NO_AURA_CANCEL))
+        return;
+
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX_NO_AURA_ICON) && !IsSpellHaveAura(spellInfo, SPELL_AURA_TRACK_RESOURCES))
+        return;
+
+    if (IsPassiveSpell(spellInfo))
+        return;
+
+    SpellAuraHolder* holder = pet->GetSpellAuraHolder(spellId);
+    if (!holder || !holder->IsPositive())
+        return;
+
     pet->RemoveAurasDueToSpell(spellId);
 }
 
