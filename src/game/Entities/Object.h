@@ -714,7 +714,7 @@ enum MovementFlags
     MOVEFLAG_PITCH_DOWN         = 0x00000080,
     MOVEFLAG_WALK_MODE          = 0x00000100,               // Walking
 
-    MOVEFLAG_LEVITATING         = 0x00000400,
+    MOVEFLAG_LEVITATING         = 0x00000800,
     MOVEFLAG_FLYING             = 0x00000800,               // [-ZERO] is it really need and correct value
     MOVEFLAG_ROOT               = 0x00001000,
     MOVEFLAG_JUMPING            = 0x00002000,
