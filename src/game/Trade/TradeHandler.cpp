@@ -532,14 +532,6 @@ void WorldSession::HandleBeginTradeOpcode(WorldPacket& /*recvPacket*/)
     info.Status = TRADE_STATUS_OPEN_WINDOW;
     my_trade->GetTrader()->GetSession()->SendTradeStatus(info);
     SendTradeStatus(info);
-
-    // the clients reset their counters and clear both offers when the window opens
-    my_trade->ResetClientStateIndex();
-    my_trade->GetTraderData()->ResetClientStateIndex();
-    SendUpdateTrade(true);
-    SendUpdateTrade(false);
-    my_trade->GetTrader()->GetSession()->SendUpdateTrade(true);
-    my_trade->GetTrader()->GetSession()->SendUpdateTrade(false);
 }
 
 void WorldSession::SendCancelTrade(TradeStatus status) const
