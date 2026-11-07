@@ -4498,7 +4498,9 @@ Corpse* Player::CreateCorpse()
     corpse->SetByteValue(CORPSE_FIELD_BYTES_2, 2, haircolor);
     corpse->SetByteValue(CORPSE_FIELD_BYTES_2, 3, facialhair);
 
-    uint32 flags = CORPSE_FLAG_UNK2;
+    uint32 flags = 0;
+    if (IsPvP())
+        flags |= CORPSE_FLAG_PVP;
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM))
         flags |= CORPSE_FLAG_HIDE_HELM;
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))

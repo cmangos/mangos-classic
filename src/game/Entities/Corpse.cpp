@@ -226,7 +226,7 @@ bool Corpse::LoadFromDB(uint32 lowguid, Field* fields)
 
     SetUInt32Value(CORPSE_FIELD_GUILD, guildId);
 
-    uint32 flags = CORPSE_FLAG_UNK2;
+    uint32 flags = 0;
     if (playerFlags & PLAYER_FLAGS_HIDE_HELM)
         flags |= CORPSE_FLAG_HIDE_HELM;
     if (playerFlags & PLAYER_FLAGS_HIDE_CLOAK)
