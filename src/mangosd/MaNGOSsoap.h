@@ -27,6 +27,7 @@
 #include "soapH.h"
 #include "soapStub.h"
 
+#include <memory>
 #include <string>
 #include <thread>
 
@@ -41,16 +42,22 @@ class SOAPThread
         const std::string m_host;
         const int m_port;
 
+        soap m_soap;
         std::thread m_workerThread;
 
+        SOAPThread(const std::string& host, int port);
         void Work();
 
     public:
         static const AccountTypes MinLevel = AccountTypes::SEC_ADMINISTRATOR;
         static const int CommandOutputBufferSize = 256;
 
-        SOAPThread(const std::string& host, int port);
+        // nullptr, with the reason in the error log, when the address cannot be bound
+        static std::unique_ptr<SOAPThread> Create(const std::string& host, int port);
         ~SOAPThread();
+
+        // serves the requests in a worker thread until the world stops
+        void Start();
 };
 
 #endif

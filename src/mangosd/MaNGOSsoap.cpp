@@ -20,53 +20,63 @@
 
 #include <string>
 
-SOAPThread::SOAPThread(const std::string& host, int port) : m_host(host), m_port(port), m_workerThread(&SOAPThread::Work, this) {}
+SOAPThread::SOAPThread(const std::string& host, int port) : m_host(host), m_port(port)
+{
+    soap_init(&m_soap);
+    soap_set_imode(&m_soap, SOAP_C_UTFSTRING);
+    soap_set_omode(&m_soap, SOAP_C_UTFSTRING);
+
+    m_soap.accept_timeout = AcceptTimeout;
+    m_soap.recv_timeout = DataTimeout;
+    m_soap.send_timeout = DataTimeout;
+}
+
+std::unique_ptr<SOAPThread> SOAPThread::Create(const std::string& host, int port)
+{
+    std::unique_ptr<SOAPThread> soapThread(new SOAPThread(host, port));
+    if (soap_bind(&soapThread->m_soap, host.c_str(), port, BackLogSize) < 0)
+    {
+        sLog.outError("MaNGOSsoap: couldn't bind to %s:%d", host.c_str(), port);
+        return nullptr;
+    }
+
+    sLog.outString("MaNGOSsoap: bound to http://%s:%d", host.c_str(), port);
+    return soapThread;
+}
+
+void SOAPThread::Start()
+{
+    m_workerThread = std::thread(&SOAPThread::Work, this);
+}
 
 SOAPThread::~SOAPThread()
 {
     sLog.outError("SOAP shutting down");
-    m_workerThread.join();
+    if (m_workerThread.joinable())
+        m_workerThread.join();
+
+    soap_end(&m_soap);
+    soap_done(&m_soap);
 }
 
 void SOAPThread::Work()
 {
-    soap soap;
-
-    soap_init(&soap);
-    soap_set_imode(&soap, SOAP_C_UTFSTRING);
-    soap_set_omode(&soap, SOAP_C_UTFSTRING);
-
-    soap.accept_timeout = AcceptTimeout;
-    soap.recv_timeout = DataTimeout;
-    soap.send_timeout = DataTimeout;
-
-    if (soap_bind(&soap, m_host.c_str(), m_port, BackLogSize) < 0)
-    {
-        sLog.outError("MaNGOSsoap: couldn't bind to %s:%d", m_host.c_str(), m_port);
-        exit(-1);
-    }
-
-    sLog.outString("MaNGOSsoap: bound to http://%s:%d", m_host.c_str(), m_port);
-
     while (!World::IsStopped())
     {
-        auto s = soap_accept(&soap);
+        auto s = soap_accept(&m_soap);
 
         // timeout?
         if (s == SOAP_INVALID_SOCKET)
             continue;
 
-        DEBUG_LOG("MaNGOSsoap: accepted connection from IP=%d.%d.%d.%d", (int)(soap.ip >> 24) & 0xFF, (int)(soap.ip >> 16) & 0xFF, (int)(soap.ip >> 8) & 0xFF, (int)soap.ip & 0xFF);
+        DEBUG_LOG("MaNGOSsoap: accepted connection from IP=%d.%d.%d.%d", (int)(m_soap.ip >> 24) & 0xFF, (int)(m_soap.ip >> 16) & 0xFF, (int)(m_soap.ip >> 8) & 0xFF, (int)m_soap.ip & 0xFF);
 
-        auto copy = soap_copy(&soap);
+        auto copy = soap_copy(&m_soap);
         soap_serve(copy);
         soap_destroy(copy); // deserialized C++ objects
         soap_end(copy);     // temporary data
         soap_free(copy);    // the copied context itself (allocated by soap_copy)
     }
-
-    soap_end(&soap);
-    soap_done(&soap);
 }
 
 /*

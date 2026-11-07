@@ -23,7 +23,11 @@
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
 #include "AsyncSocket.hpp"
+#include "Log/Log.h"
 #include <boost/bind/placeholders.hpp>
+
+#include <memory>
+#include <string>
 
 using namespace boost::placeholders;
 
@@ -33,11 +37,24 @@ namespace MaNGOS
     class AsyncListener
     {
         public:
-            // constructor for accepting connection from client
+            // binds and listens on the address; connections are accepted only once Start() is called
             AsyncListener(boost::asio::io_context& io_context, std::string const& bindIp, unsigned short port) : m_context(io_context), m_acceptor(io_context, boost::asio::ip::tcp::endpoint(boost::asio::ip::make_address(bindIp), port))
             {
-                startAccept();
             }
+            // nullptr, with the reason in the error log, when the address cannot be listened on (port in use, wrong address...)
+            static std::unique_ptr<AsyncListener> Create(boost::asio::io_context& io_context, std::string const& bindIp, unsigned short port)
+            {
+                try
+                {
+                    return std::make_unique<AsyncListener>(io_context, bindIp, port);
+                }
+                catch (boost::system::system_error const& e)
+                {
+                    sLog.outError("Cannot listen on %s:%u: %s", bindIp.c_str(), port, e.code().message().c_str());
+                    return nullptr;
+                }
+            }
+            void Start() { startAccept(); }
             void HandleAccept(std::shared_ptr<SocketType> connection, const boost::system::error_code& err)
             {
                 if (!err)

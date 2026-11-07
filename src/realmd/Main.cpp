@@ -200,6 +200,17 @@ int main(int argc, char* argv[])
     sLog.outString();
     sLog.outString("<Ctrl-C> to stop.");
 
+    // Reserve the listening port first, so that an instance which cannot open it stops before touching the PID file and the database
+    auto const listener = MaNGOS::AsyncListener<AuthSocket>::Create(context,
+            sConfig.GetStringDefault("BindIP", "0.0.0.0"),
+            sConfig.GetIntDefault("RealmServerPort", DEFAULT_REALMSERVER_PORT)
+    );
+    if (!listener)
+    {
+        Log::WaitBeforeContinueIfNeed();
+        return 1;
+    }
+
     // realmd PID file creation
     std::string pidfile = sConfig.GetStringDefault("PidFile");
     if (!pidfile.empty())
@@ -239,10 +250,7 @@ int main(int argc, char* argv[])
     LoginDatabase.CommitTransaction();
 
     uint32 networkThreadCount = sConfig.GetIntDefault("ListenerThreads", 1);
-    MaNGOS::AsyncListener<AuthSocket> listener(context,
-            sConfig.GetStringDefault("BindIP", "0.0.0.0"),
-            sConfig.GetIntDefault("RealmServerPort", DEFAULT_REALMSERVER_PORT)
-    );
+    listener->Start();
 
     std::vector<std::thread> threads;
     for (uint32 i = 0; i < networkThreadCount; ++i)

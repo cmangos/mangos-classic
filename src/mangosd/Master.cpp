@@ -100,6 +100,37 @@ class FreezeDetectorRunnable : public MaNGOS::Runnable
 /// Main function
 int Master::Run()
 {
+    ///- Reserve the listening ports first, so that an instance which cannot open them stops before touching the PID file and the databases
+    std::unique_ptr<MaNGOS::AsyncListener<WorldSocket>> listener = MaNGOS::AsyncListener<WorldSocket>::Create(m_context,
+            sConfig.GetStringDefault("BindIP", "0.0.0.0"), sConfig.GetIntDefault("WorldServerPort", DEFAULT_WORLDSERVER_PORT));
+    if (!listener)
+    {
+        Log::WaitBeforeContinueIfNeed();
+        return 1;
+    }
+
+    std::unique_ptr<MaNGOS::AsyncListener<RASocket>> raListener;
+    if (sConfig.GetBoolDefault("Ra.Enable", false))
+    {
+        raListener = MaNGOS::AsyncListener<RASocket>::Create(m_raContext, sConfig.GetStringDefault("Ra.IP", "0.0.0.0"), sConfig.GetIntDefault("Ra.Port", 3443));
+        if (!raListener)
+        {
+            Log::WaitBeforeContinueIfNeed();
+            return 1;
+        }
+    }
+
+    std::unique_ptr<SOAPThread> soapThread;
+    if (sConfig.GetBoolDefault("SOAP.Enabled", false))
+    {
+        soapThread = SOAPThread::Create(sConfig.GetStringDefault("SOAP.IP", "127.0.0.1"), sConfig.GetIntDefault("SOAP.Port", 7878));
+        if (!soapThread)
+        {
+            Log::WaitBeforeContinueIfNeed();
+            return 1;
+        }
+    }
+
     /// worldd PID file creation
     std::string pidfile = sConfig.GetStringDefault("PidFile");
     if (!pidfile.empty())
@@ -225,29 +256,22 @@ int Master::Run()
             sLog.outError("Invalid network thread workers setting in mangosd.conf. (%d) should be > 0", networkThreadCount);
             networkThreadCount = 1;
         }
-        std::string bindIp = sConfig.GetStringDefault("BindIP", "0.0.0.0");
-        int32 port = int32(sWorld.getConfig(CONFIG_UINT32_PORT_WORLD));
         WorldSocket::LoadPacketCooldowns();
-        MaNGOS::AsyncListener<WorldSocket> listener(m_context, bindIp, port);
+        listener->Start();
 
         std::vector<std::thread> threads;
         for (int32 i = 0; i < networkThreadCount; ++i)
             threads.emplace_back([&]() { m_context.run(); });
 
-        std::unique_ptr<MaNGOS::AsyncListener<RASocket>> raListener;
-        std::string raBindIp = sConfig.GetStringDefault("Ra.IP", "0.0.0.0");
-        int32 raPort = sConfig.GetIntDefault("Ra.Port", 3443);
         std::thread m_raThread;
-        bool raEnable = sConfig.GetBoolDefault("Ra.Enable", false);
-        if (raEnable)
+        if (raListener)
         {
-            raListener.reset(new MaNGOS::AsyncListener<RASocket>(m_raContext, raBindIp, raPort));
+            raListener->Start();
             m_raThread = std::thread([this]() { m_raContext.run(); });
         }
 
-        std::unique_ptr<SOAPThread> soapThread;
-        if (sConfig.GetBoolDefault("SOAP.Enabled", false))
-            soapThread.reset(new SOAPThread(sConfig.GetStringDefault("SOAP.IP", "127.0.0.1"), sConfig.GetIntDefault("SOAP.Port", 7878)));
+        if (soapThread)
+            soapThread->Start();
 
         // wait for shut down and then let things go out of scope to close them down
         while (!World::IsStopped())
@@ -257,7 +281,7 @@ int Master::Run()
 
         m_context.stop();
 
-        if (raEnable)
+        if (m_raThread.joinable())
         {
             m_raContext.stop();
             m_raThread.join();
@@ -265,6 +289,10 @@ int Master::Run()
 
         for (int32 i = 0; i < networkThreadCount; ++i)
             threads[i].join();
+
+        soapThread.reset();
+        raListener.reset();
+        listener.reset();
     }
 
     ///- Stop freeze protection before shutdown tasks
