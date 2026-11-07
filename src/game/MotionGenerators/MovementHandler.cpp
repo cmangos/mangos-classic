@@ -108,11 +108,20 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
         if (!map)
         {
-            DETAIL_LOG("WorldSession::HandleMoveWorldportAckOpcode: %s was teleported far to nonexisten battleground instance "
-                       " (map:%u, x:%f, y:%f, z:%f) Trying to port him to his previous place..",
-                       GetPlayer()->GetGuidStr().c_str(), loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z);
-
-            returnHomeFunc();
+            // returnHomeFunc would call sMapMgr.CreateMap on a BG map id, and
+            // MapManager::CreateInstance asserts when the player's BG instance is
+            // already gone. Drop the stale BG state and send the player to its
+            // homebind instead.
+            sLog.outError("WorldSession::HandleMoveWorldportAckOpcode: %s teleported far to nonexistent BG instance "
+                          "(map:%u, x:%f, y:%f, z:%f); clearing BG state, sending to homebind.",
+                          GetPlayer()->GetGuidStr().c_str(), loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z);
+            GetPlayer()->SetBattleGroundId(0, BATTLEGROUND_TYPE_NONE);
+            GetPlayer()->SetBGTeam(TEAM_NONE);
+            // The player is already off its old map, so TeleportTo takes the far
+            // path and the next worldport ack lands it at homebind.
+            GetPlayer()->SetSemaphoreTeleportFar(false);
+            if (!GetPlayer()->TeleportToHomebind())
+                KickPlayer();
             return;
         }
     }
