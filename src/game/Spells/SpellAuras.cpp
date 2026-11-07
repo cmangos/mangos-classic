@@ -4696,9 +4696,22 @@ void Aura::PeriodicTick()
             if (!pCaster)
                 break;
 
-            // don't heal target if max health or if not alive, mostly death persistent effects from items
-            if (!target->IsAlive() || (target->GetHealth() == target->GetMaxHealth()))
+            // don't heal target if not alive, mostly death persistent effects from items
+            if (!target->IsAlive())
                 break;
+
+            // A full-health target still ticks: it heals nothing, but effects keyed off the tick
+            // (Improved Mend Pet's cleanse) must still get their proc chance.
+            // Same proc flags as the normal heal tick below: HoT ticks are filed under the
+            // *_HARMFUL_PERIODIC flags and marked with PROC_EX_INTERNAL_HOT.
+            if (target->GetHealth() == target->GetMaxHealth())
+            {
+                Unit::ProcDamageAndSpell(ProcSystemArguments(pCaster, target,
+                    PROC_FLAG_DEAL_HARMFUL_PERIODIC, PROC_FLAG_TAKE_HARMFUL_PERIODIC,
+                    PROC_EX_NORMAL_HIT | PROC_EX_INTERNAL_HOT, 0, 0, BASE_ATTACK,
+                    spellProto, nullptr, 0, true));
+                break;
+            }
 
             // heal for caster damage (must be alive)
             if (target != pCaster && spellProto->SpellVisual == 163 && !pCaster->IsAlive())
