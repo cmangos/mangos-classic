@@ -624,10 +624,10 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
         data << uint16(player->GetLevel());
 
     if (mask & GROUP_UPDATE_FLAG_ZONE)
-        data << uint16(player->GetZoneId());
+        data << uint16(player->GetAreaId());
 
     if (mask & GROUP_UPDATE_FLAG_POSITION)
-        data << uint16(player->GetPositionX()) << uint16(player->GetPositionY());
+        data << int16(player->GetPositionX()) << int16(player->GetPositionY());
 
     if (mask & GROUP_UPDATE_FLAG_AURAS)
     {
@@ -792,21 +792,21 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
     data << uint16(player->GetMaxPower(powerType));         // GROUP_UPDATE_FLAG_MAX_POWER
     data << uint16(player->GetLevel());                     // GROUP_UPDATE_FLAG_LEVEL
 
-    // verify player coordinates and zoneid to send to teammates
-    uint16 iZoneId = 0;
-    uint16 iCoordX = 0;
-    uint16 iCoordY = 0;
+    // verify player coordinates and area id to send to teammates
+    uint16 iAreaId = 0;
+    int16 iCoordX = 0;
+    int16 iCoordY = 0;
 
     if (player->IsInWorld())
     {
-        iZoneId = player->GetZoneId();
+        iAreaId = player->GetAreaId();
         iCoordX = player->GetPositionX();
         iCoordY = player->GetPositionY();
     }
     else if (player->IsBeingTeleported())               // Player is in teleportation
     {
         WorldLocation& loc = player->GetTeleportDest(); // So take teleportation destination
-        iZoneId = sTerrainMgr.GetZoneId(loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z);
+        iAreaId = sTerrainMgr.GetAreaId(loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z);
         iCoordX = loc.coord_x;
         iCoordY = loc.coord_y;
     }
@@ -815,9 +815,9 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
         // unknown player status.
     }
 
-    data << uint16(iZoneId);                              // GROUP_UPDATE_FLAG_ZONE
-    data << uint16(iCoordX);                              // GROUP_UPDATE_FLAG_POSITION
-    data << uint16(iCoordY);                              // GROUP_UPDATE_FLAG_POSITION
+    data << uint16(iAreaId);                              // GROUP_UPDATE_FLAG_ZONE
+    data << int16(iCoordX);                               // GROUP_UPDATE_FLAG_POSITION
+    data << int16(iCoordY);                               // GROUP_UPDATE_FLAG_POSITION
 
     uint32 auramask = 0;
     size_t maskPos = data.wpos();
