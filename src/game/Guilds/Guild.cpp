@@ -83,11 +83,11 @@ Guild::Guild()
     m_Name.clear();
     GINFO.clear();
     MOTD.clear();
-    m_EmblemStyle = 0;
-    m_EmblemColor = 0;
-    m_BorderStyle = 0;
-    m_BorderColor = 0;
-    m_BackgroundColor = 0;
+    m_EmblemStyle = GUILD_EMBLEM_NONE;
+    m_EmblemColor = GUILD_EMBLEM_NONE;
+    m_BorderStyle = GUILD_EMBLEM_NONE;
+    m_BorderColor = GUILD_EMBLEM_NONE;
+    m_BackgroundColor = GUILD_EMBLEM_NONE;
     m_accountsNumber = 0;
 
     m_CreatedYear = 0;
@@ -144,8 +144,9 @@ bool Guild::Create(Player* leader, std::string gname)
     // CharacterDatabase.PExecute("DELETE FROM guild WHERE guildid='%u'", Id); - MAX(guildid)+1 not exist
     CharacterDatabase.PExecute("DELETE FROM guild_member WHERE guildid='%u'", m_Id);
     CharacterDatabase.PExecute("INSERT INTO guild (guildid,name,leaderguid,info,motd,createdate,EmblemStyle,EmblemColor,BorderStyle,BorderColor,BackgroundColor) "
-                               "VALUES('%u','%s','%u', '%s', '%s','" UI64FMTD "','%u','%u','%u','%u','%u')",
-                               m_Id, gname.c_str(), m_LeaderGuid.GetCounter(), dbGINFO.c_str(), dbMOTD.c_str(), uint64(now), m_EmblemStyle, m_EmblemColor, m_BorderStyle, m_BorderColor, m_BackgroundColor);
+                               "VALUES('%u','%s','%u', '%s', '%s','" UI64FMTD "','%i','%i','%i','%i','%i')",
+                               m_Id, gname.c_str(), m_LeaderGuid.GetCounter(), dbGINFO.c_str(), dbMOTD.c_str(), uint64(now),
+                               int32(m_EmblemStyle), int32(m_EmblemColor), int32(m_BorderStyle), int32(m_BorderColor), int32(m_BackgroundColor));
     CharacterDatabase.CommitTransaction();
 
     CreateDefaultGuildRanks(lSession->GetSessionDbLocaleIndex());

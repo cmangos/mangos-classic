@@ -30,6 +30,9 @@ class Item;
 #define GUILD_RANKS_MIN_COUNT   5
 #define GUILD_RANKS_MAX_COUNT   10
 
+// emblem value of a guild without a tabard design: the client draws the plain tabard while one of the five is -1
+#define GUILD_EMBLEM_NONE       uint32(-1)
+
 enum GuildDefaultRanks
 {
     // these ranks can be modified, but they cannot be deleted
