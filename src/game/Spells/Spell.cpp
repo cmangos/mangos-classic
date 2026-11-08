@@ -4685,6 +4685,9 @@ SpellCastResult Spell::CheckCast(bool strict)
     {
         if (m_triggeredByAuraSpell)
             return SPELL_FAILED_DONT_REPORT;
+        // only SPELL_FAILED_NOT_READY lets the client release a cooldown it holds until an event
+        else if (m_CastItem && !m_spellInfo->HasAttribute(SPELL_ATTR_COOLDOWN_ON_EVENT))
+            return SPELL_FAILED_ITEM_NOT_READY;
         else
             return SPELL_FAILED_NOT_READY;
     }
