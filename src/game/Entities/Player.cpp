@@ -14317,6 +14317,9 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
             {
                 guid = ObjectGuid(transportInfo->GetHighGuid(), data->id, transGUID);
                 m_movementInfo.t_guid = guid;
+                // an elevator only exists while its grid is loaded
+                if (data->mapid == GetMapId())
+                    GetMap()->LoadGrid(data->posX, data->posY);
             }
         }
         GenericTransport* transport = GetMap()->GetTransport(guid);

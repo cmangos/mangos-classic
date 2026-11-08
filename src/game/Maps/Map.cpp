@@ -479,6 +479,11 @@ void Map::ForceLoadGrid(float x, float y)
     }
 }
 
+void Map::LoadGrid(float x, float y)
+{
+    EnsureGridLoadedAtEnter(Cell(MaNGOS::ComputeCellPair(x, y)));
+}
+
 void Map::CreatePlayerOnClient(Player* player)
 {
     // update player state for other player and visa-versa
