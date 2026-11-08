@@ -49,7 +49,7 @@ void WorldSession::HandleAttackSwingOpcode(WorldPacket& recv_data)
     if (!mover->CanAttackNow(enemy))
     {
         // stop attack state at client
-        mover->SendMeleeAttackStop(*enemy);
+        mover->SendMeleeAttackStop(enemy);
         return;
     }
 
@@ -61,7 +61,12 @@ void WorldSession::HandleAttackSwingOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleAttackStopOpcode(WorldPacket& /*recv_data*/)
 {
-    GetPlayer()->AttackStop(false, false, false, true);
+    Player* player = GetPlayer();
+    // the client keeps its swing until an SMSG_ATTACKSTOP names it as attacker, so a stop without melee is answered with no victim
+    bool const meleeOn = player->hasUnitState(UNIT_STAT_MELEE_ATTACKING) && player->GetVictim();
+    player->AttackStop(false, false, false, true);
+    if (!meleeOn)
+        player->SendMeleeAttackStop(nullptr);
 }
 
 void WorldSession::HandleSetSheathedOpcode(WorldPacket& recv_data)
