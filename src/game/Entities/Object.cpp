@@ -30,6 +30,7 @@
 #include "Entities/UpdateData.h"
 #include "Entities/UpdateMask.h"
 #include "Entities/Transports.h"
+#include "Maps/TransportMgr.h"
 #include "Util/Util.h"
 #include "Grids/CellImpl.h"
 #include "Grids/GridNotifiers.h"
@@ -195,6 +196,17 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData& data, Player* target) c
     _SetCreateBits(updateMask, target);
     BuildValuesUpdate(updatetype, &buf, &updateMask, target);
     data.AddUpdateBlock(buf, GetObjectGuid().IsTransport() || GetObjectGuid().IsMOTransport());
+
+    // the movement block of an elevator is off its position (see GetElevatorCreateOffset): restore the exact one right after
+    if (m_objectTypeId == TYPEID_GAMEOBJECT && static_cast<GameObject const*>(this)->GetGOInfo()->type == GAMEOBJECT_TYPE_TRANSPORT)
+    {
+        UpdateMask posMask;
+        posMask.SetCount(m_valuesCount);
+        posMask.SetBit(GAMEOBJECT_POS_X);
+        posMask.SetBit(GAMEOBJECT_POS_Y);
+        posMask.SetBit(GAMEOBJECT_POS_Z);
+        BuildValuesUpdateBlockForPlayer(data, posMask, target);
+    }
 }
 
 void Object::BuildValuesUpdateBlockForPlayer(UpdateData& data, Player* target) const
@@ -258,6 +270,28 @@ void Object::DestroyForPlayer(Player* target) const
     target->GetSession()->SendPacket(data);
 }
 
+// The client places the collision of an elevator only at a tick where the elevator is away from the position it got at creation,
+// so a stopped elevator would stay without collision and its passengers would fall through it. Its create block puts it 1 cm off,
+// on an axis its path never uses, and a values block right after gives back the exact position: the first tick places it.
+static void GetElevatorCreateOffset(GameObject const* go, float& dx, float& dz)
+{
+    dx = 0.0f;
+    dz = 0.0f;
+    if (go->GetGOInfo()->type != GAMEOBJECT_TYPE_TRANSPORT)
+        return;
+    TransportAnimation const* anim = sTransportMgr.GetTransportAnimInfo(go->GetGOInfo()->id);
+    if (!anim)
+        return;
+    bool movesZ = false;
+    for (auto const& node : anim->Path)
+        if (node.second->Z != 0.0f)
+            movesZ = true;
+    if (movesZ)
+        dx = 0.01f;
+    else
+        dz = 0.01f;
+}
+
 void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
 {
     Unit const* unit = nullptr;
@@ -319,9 +353,11 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
         if (updateFlags & UPDATEFLAG_TRANSPORT)
         {
             GameObject const* go = static_cast<GameObject const*>(this);
-            *data << float(go->GetStationaryX());
+            float dx, dz;
+            GetElevatorCreateOffset(go, dx, dz);
+            *data << float(go->GetStationaryX() + dx);
             *data << float(go->GetStationaryY());
-            *data << float(go->GetStationaryZ());
+            *data << float(go->GetStationaryZ() + dz);
             *data << float(go->GetStationaryO());
         }
         else
