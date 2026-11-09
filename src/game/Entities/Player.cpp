@@ -1997,7 +1997,14 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         }
     }
 
-    if ((GetMapId() == mapid) && (!m_transport))            // TODO the !m_transport might have unexpected effects when teleporting from transport to other place on same map
+    // the client takes only the world position of a near teleport of its own player and leaves any transport: onto a transport,
+    // whose deck may be moving, the world is reloaded instead and the player created aboard
+    GenericTransport* destTransport = transport;
+    if (!destTransport && m_teleportTransport && GetMapId() == mapid)
+        destTransport = GetMap()->GetTransport(m_teleportTransport);
+    bool const nearOntoTransport = destTransport != nullptr;
+
+    if ((GetMapId() == mapid) && (!m_transport) && !nearOntoTransport) // TODO the !m_transport might have unexpected effects when teleporting from transport to other place on same map
     {
         // lets reset far teleport flag if it wasn't reset during chained teleports
         SetSemaphoreTeleportFar(false);
@@ -2061,7 +2068,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         // It will be created in the WorldPortAck.
         DungeonPersistentState* state = GetBoundInstanceSaveForSelfOrGroup(mapid);
         Map* map = sMapMgr.FindMap(mapid, state ? state->GetInstanceId() : 0);
-        if (!map || map->CanEnter(this))
+        if (!map || (nearOntoTransport && map == GetMap()) || map->CanEnter(this)) // the world reload onto a transport stays on the current map
         {
             // lets reset near teleport flag if it wasn't reset during chained teleports
             SetSemaphoreTeleportNear(false);
