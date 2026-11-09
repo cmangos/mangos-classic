@@ -860,7 +860,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
         uint32 petauramask = 0;
         size_t petMaskPos = data.wpos();
         data << uint32(petauramask);                        // placeholder
-        for (uint8 i = 0; i < MAX_AURAS; ++i)
+        for (uint8 i = 0; i < MAX_POSITIVE_AURAS; ++i)
         {
             if (uint32 petaura = charm->GetUInt32Value(UNIT_FIELD_AURA + i))
             {
