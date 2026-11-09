@@ -18268,6 +18268,14 @@ void Player::SendInitialPacketsAfterAddToMap(bool reconnect)
     SendItemDurations();                                    // must be after add to map
 }
 
+Unit* Player::GetGroupUpdatePet() const
+{
+    // An active charm takes the place of the pet in the pet fields of group member stats
+    if (Unit* charm = GetCharm())
+        return charm;
+    return GetPet();
+}
+
 void Player::SendUpdateToOutOfRangeGroupMembers()
 {
     if (m_groupUpdateMask == GROUP_UPDATE_FLAG_NONE)
@@ -18277,8 +18285,8 @@ void Player::SendUpdateToOutOfRangeGroupMembers()
 
     m_groupUpdateMask = GROUP_UPDATE_FLAG_NONE;
     ResetAuraUpdateMask();
-    if (Unit* charm = GetCharm())
-        charm->ResetAuraUpdateMask();
+    if (Unit* pet = GetGroupUpdatePet())
+        pet->ResetAuraUpdateMask();
 }
 
 void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaTrigger const* at, AreaLockStatus lockStatus, uint32 miscRequirement) const

@@ -2334,6 +2334,7 @@ class Unit : public WorldObject
 
         // group updates
         void UpdateAuraForGroup(uint8 slot);
+        Player* GetGroupUpdatePetMaster() const;
 
         // pet auras
         typedef std::set<PetAura const*> PetAuraSet;
