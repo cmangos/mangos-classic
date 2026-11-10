@@ -2548,6 +2548,7 @@ class Player : public Unit
         WorldLocation m_teleport_dest;
         uint32 m_teleport_options;
         ObjectGuid m_teleportTransport;
+        Position m_teleportWorldDest;                       // world position of a delayed teleport onto a transport
         bool m_semaphoreTeleport_Near;
         bool m_semaphoreTeleport_Far;
 

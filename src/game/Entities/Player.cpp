@@ -2073,6 +2073,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         {
             // lets reset near teleport flag if it wasn't reset during chained teleports
             SetSemaphoreTeleportNear(false);
+            // set when this call carries out a teleport delayed by an earlier call
+            bool const delayedTeleport = m_bHasDelayedTeleport;
             // setup delayed teleport flag
             // if teleport spell is casted in Unit::Update() func
             // then we need to delay it until update process will be finished
@@ -2083,6 +2085,13 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 m_teleport_dest = WorldLocation(mapid, x, y, z, orientation);
                 m_teleport_options = options;
                 m_teleportTransport = transport ? transport->GetObjectGuid() : ObjectGuid();
+                // the delayed teleport may be done in the thread of another map: the world position is taken here, where the
+                // caller can read the transport
+                if (transport)
+                {
+                    m_teleportWorldDest = Position(x, y, z, orientation);
+                    transport->CalculatePassengerPosition(m_teleportWorldDest.x, m_teleportWorldDest.y, m_teleportWorldDest.z, &m_teleportWorldDest.o);
+                }
                 return true;
             }
 
@@ -2114,13 +2123,25 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             // remove auras before removing from map...
             RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_LEAVE_WORLD | AURA_INTERRUPT_FLAG_MOVING | AURA_INTERRUPT_FLAG_TURNING);
 
-            GenericTransport* targetTransport = transport ? transport : GetTransport();
-            // a delayed teleport keeps the destination transport by guid only
-            if (!transport && m_teleportTransport && map)
-                targetTransport = map->GetTransport(m_teleportTransport);
+            // x, y, z are offsets on the given transport. A delayed teleport is done without the transport, which may be on another
+            // map updated by another thread: the guid and the world position taken when the teleport was asked are used instead
+            ObjectGuid targetTransportGuid;
+            Position worldDest(x, y, z, orientation);
+            if (transport)
+            {
+                targetTransportGuid = transport->GetObjectGuid();
+                transport->CalculatePassengerPosition(worldDest.x, worldDest.y, worldDest.z, &worldDest.o);
+            }
+            else if (delayedTeleport && m_teleportTransport)
+            {
+                targetTransportGuid = m_teleportTransport;
+                worldDest = m_teleportWorldDest;
+            }
+            else if (m_transport)
+                targetTransportGuid = m_transport->GetObjectGuid();
             // only a passenger crossing to another map with the transport is sent transport offsets: a player joining a transport
             // is told the world position, as for a teleport without transport
-            bool const withTransport = targetTransport && m_transport == targetTransport;
+            bool const withTransport = m_transport && m_transport->GetObjectGuid() == targetTransportGuid;
             if (!GetSession()->PlayerLogout())
             {
                 // send transfer packet to display load screen
@@ -2128,7 +2149,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 data << uint32(mapid);
                 if (withTransport)
                 {
-                    data << uint32(targetTransport->GetEntry());
+                    data << uint32(m_transport->GetEntry());
                     data << uint32(GetMapId());
                 }
                 GetSession()->SendPacket(data);
@@ -2149,15 +2170,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
             Position const& transportPosition = m_movementInfo.GetTransportPos();
 
-            // destination in world coordinates (x, y, z are transport offsets when going onto a transport)
-            float world_x = final_x, world_y = final_y, world_z = final_z, world_o = final_o;
-            if (targetTransport)
-                targetTransport->CalculatePassengerPosition(world_x, world_y, world_z, &world_o);
-
             m_teleport_dest = WorldLocation(mapid, final_x, final_y, final_z, final_o);
-            if (targetTransport)
-                m_teleportTransport = targetTransport->GetObjectGuid();
-            SetFallInformation(0, world_z);
+            m_teleportTransport = targetTransportGuid;
+            SetFallInformation(0, worldDest.z);
             // if the player is saved before worldport ack (at logout for example)
             // this will be used instead of the current location in SaveToDB
 
@@ -2179,10 +2194,10 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 }
                 else
                 {
-                    data << float(world_x);
-                    data << float(world_y);
-                    data << float(world_z);
-                    data << float(world_o);
+                    data << float(worldDest.x);
+                    data << float(worldDest.y);
+                    data << float(worldDest.z);
+                    data << float(worldDest.o);
                 }
 
                 GetSession()->SendPacket(data);
