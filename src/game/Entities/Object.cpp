@@ -190,7 +190,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData& data, Player* target) c
     buf << GetPackGUID();
     buf << uint8(m_objectTypeId);
 
-    BuildMovementUpdate(&buf, updateFlags);
+    BuildMovementUpdate(&buf, updateFlags, target);
     UpdateMask updateMask;
     updateMask.SetCount(m_valuesCount);
     _SetCreateBits(updateMask, target);
@@ -292,7 +292,7 @@ static void GetElevatorCreateOffset(GameObject const* go, float& dx, float& dz)
         dz = 0.01f;
 }
 
-void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
+void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags, Player const* target) const
 {
     Unit const* unit = nullptr;
     uint32 highGuid = 0;
@@ -386,8 +386,13 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
 
     if (updateFlags & UPDATEFLAG_TRANSPORT)
     {
+        // the client takes this time as the transport time at the moment it gets the packet: it is given the time the
+        // packet arrives at this client
         WorldObject const* wo = static_cast<WorldObject const*>(this);
-        *data << uint32(wo->GetMap()->GetCurrentMSTime());
+        uint32 transportTime = wo->GetMap()->GetCurrentMSTime();
+        if (target)
+            transportTime += target->GetSession()->GetOneWayDelay();
+        *data << uint32(transportTime);
     }
 }
 

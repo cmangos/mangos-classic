@@ -402,6 +402,7 @@ class WorldSession
         const char* GetMangosString(int32 entry) const;
 
         uint32 GetLatency() const { return m_latency; }
+        uint32 GetOneWayDelay() const;
         void SetLatency(uint32 latency) { m_latency = latency; }
         void ResetClientTimeDelay() { m_clientTimeDelay = 0; }
         uint32 getDialogStatus(const Player* pPlayer, const Object* questgiver, uint32 defstatus) const;

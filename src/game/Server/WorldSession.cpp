@@ -1230,6 +1230,12 @@ void WorldSession::SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit) cons
     SendPacket(data);
 }
 
+// Time a packet takes to reach the client: half the round trip of the ping, at most one second
+uint32 WorldSession::GetOneWayDelay() const
+{
+    return std::min(m_latency.load() / 2, uint32(1000));
+}
+
 void WorldSession::SynchronizeMovement(MovementInfo& movementInfo)
 {
     if (m_clientTimeDelay == 0)
