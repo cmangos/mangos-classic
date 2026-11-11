@@ -158,6 +158,17 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         if (GenericTransport* transport = map->GetTransport(GetPlayer()->m_teleportTransport))
             if (transport->GetMapId() == loc.mapid)
                 found = true;
+
+        // a player joining a transport on another map was sent where the transport stood when the teleport began: if it has
+        // left the map during the loading, the player goes back to the previous place. A passenger crossing with its transport
+        // keeps it, and the transport reaches the map through the map messages before the end of the arrival
+        if (!found && !GetPlayer()->GetTransport() && old_loc.mapid != loc.mapid)
+        {
+            GetPlayer()->m_teleportTransport = ObjectGuid();
+            GetPlayer()->m_movementInfo.ClearTransportData();
+            returnHomeFunc();
+            return;
+        }
     }
     else
         GetPlayer()->Relocate(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
