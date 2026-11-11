@@ -15125,12 +15125,16 @@ void Player::_LoadQuestStatus(std::unique_ptr<QueryResult> queryResult)
 
                 if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAG_TIMED) && !GetQuestRewardStatus(quest_id) && questStatusData.m_status != QUEST_STATUS_NONE)
                 {
-                    AddTimedQuest(quest_id);
+                    // A failed quest keeps its time in the quest log, but its timer does not run any more
+                    if (questStatusData.m_status != QUEST_STATUS_FAILED)
+                    {
+                        AddTimedQuest(quest_id);
 
-                    if (quest_time <= sWorld.GetGameTime())
-                        questStatusData.m_timer = 1;
-                    else
-                        questStatusData.m_timer = uint32(quest_time - sWorld.GetGameTime()) * IN_MILLISECONDS;
+                        if (quest_time <= sWorld.GetGameTime())
+                            questStatusData.m_timer = 1;
+                        else
+                            questStatusData.m_timer = uint32(quest_time - sWorld.GetGameTime()) * IN_MILLISECONDS;
+                    }
                 }
                 else
                     quest_time = 0;
