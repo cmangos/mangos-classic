@@ -1,0 +1,3 @@
+ALTER TABLE character_db_version CHANGE COLUMN required_z2819_01_characters_item_instance_text_id_fix required_z2838_01_characters_playerbot_saved_data_drop bit;
+
+DROP TABLE IF EXISTS `playerbot_saved_data`;
