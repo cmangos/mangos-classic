@@ -10872,11 +10872,22 @@ void Player::SwapItem(uint16 src, uint16 dst)
     // attempt merge to / fill target item
     if (!pSrcItem->IsBag() && !pDstItem->IsBag())
     {
+        ItemPrototype const* itemProto = pSrcItem->GetProto();
         InventoryResult msg;
         ItemPosCountVec sDest;
         uint16 eDest = 0;
         uint8 bagSlot;
-        if (IsInventoryPos(dst))
+        // only fill the target stack: the rest stays in the source slot, so no free slot is needed elsewhere
+        if ((IsInventoryPos(dst) || IsBankPos(dst)) && pSrcItem->GetCount() + pDstItem->GetCount() > itemProto->GetMaxStackSize())
+        {
+            if (pSrcItem->HasTemporaryLoot())
+                msg = EQUIP_ERR_ALREADY_LOOTED;
+            else if (pSrcItem->IsBindedNotWith(this))
+                msg = EQUIP_ERR_DONT_OWN_THAT_ITEM;
+            else
+                msg = pDstItem->CanBeMergedPartlyWith(itemProto);
+        }
+        else if (IsInventoryPos(dst))
             msg = CanStoreItem(dstbag, dstslot, sDest, pSrcItem, bagSlot, false);
         else if (IsBankPos(dst))
             msg = CanBankItem(dstbag, dstslot, sDest, pSrcItem, false, bagSlot);
@@ -10888,7 +10899,6 @@ void Player::SwapItem(uint16 src, uint16 dst)
         // can be merge/fill
         if (msg == EQUIP_ERR_OK)
         {
-            ItemPrototype const* itemProto = pSrcItem->GetProto();
             if (pSrcItem->GetCount() + pDstItem->GetCount() <= itemProto->GetMaxStackSize())
             {
                 RemoveItem(srcbag, srcslot, true);
