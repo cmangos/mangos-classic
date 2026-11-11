@@ -674,8 +674,8 @@ uint32 WorldSession::getDialogStatus(const Player* pPlayer, const Object* questg
 
         QuestStatus status = pPlayer->GetQuestStatus(quest_id);
 
-        // For all other cases the mark is handled either at some place else, or with involved-relations already
-        if (status == QUEST_STATUS_NONE && pPlayer->CanSeeStartQuest(pQuest))
+        // A failed quest is offered again. For all other cases the mark is handled either at some place else, or with involved-relations already
+        if ((status == QUEST_STATUS_NONE || status == QUEST_STATUS_FAILED) && pPlayer->CanSeeStartQuest(pQuest))
         {
             if (pPlayer->SatisfyQuestLevel(pQuest, false))
             {
