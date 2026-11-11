@@ -13571,9 +13571,10 @@ void Player::ItemRemovedQuestCheck(uint32 entry, uint32 count)
                 uint32 reqItemCount = qInfo->ReqItemCount[j];
                 uint32 curItemCount = q_status.m_itemcount[j];
 
-                // With items you can have more than the required by the quest.
+                // With items you can have more than the required by the quest. The bank counts as in
+                // AdjustQuestReqItemCount; only the reward needs the items in the bags.
                 if (curItemCount >= reqItemCount)
-                    curItemCount = GetItemCount(entry, false);
+                    curItemCount = GetItemCount(entry, true);
 
                 // The counter is capped at the required count, so it only drops once fewer items than that are left.
                 if (curItemCount >= count && q_status.m_itemcount[j] > curItemCount - count)
