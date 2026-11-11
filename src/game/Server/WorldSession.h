@@ -403,7 +403,7 @@ class WorldSession
 
         uint32 GetLatency() const { return m_latency; }
         uint32 GetOneWayDelay() const;
-        void SetLatency(uint32 latency) { m_latency = latency; }
+        void SetLatency(uint32 latency) { m_latency = latency; if (latency) m_pingRoundTrip = latency; }
         void ResetClientTimeDelay() { m_clientTimeDelay = 0; }
         uint32 getDialogStatus(const Player* pPlayer, const Object* questgiver, uint32 defstatus) const;
         ClientOSType GetOS() const { return m_clientOS; }
@@ -856,6 +856,7 @@ class WorldSession
         LocaleConstant m_sessionDbcLocale;
         int m_sessionDbLocaleIndex;
         std::atomic<uint32> m_latency;
+        std::atomic<uint32> m_pingRoundTrip;                // last latency reported by the client, which sends 0 in some pings
         AccountData m_accountData[NUM_ACCOUNT_DATA_TYPES];
         uint32 m_clientTimeDelay;
         uint32 m_Tutorials[8];

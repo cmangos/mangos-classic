@@ -104,7 +104,7 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, time_
     m_clientOS(CLIENT_OS_UNKNOWN), m_clientPlatform(CLIENT_PLATFORM_UNKNOWN), m_orderCounter(0),
     _logoutTime(0), m_afkTime(0), m_playerSave(true), m_inQueue(false), m_playerLoading(false), m_kickSession(false), m_playerLogout(false), m_playerRecentlyLogout(false),
     m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetStorageLocaleIndexFor(locale)),
-    m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED)
+    m_latency(0), m_pingRoundTrip(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED)
     {}
 
 /// WorldSession destructor
@@ -1230,10 +1230,10 @@ void WorldSession::SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit) cons
     SendPacket(data);
 }
 
-// Time a packet takes to reach the client: half the round trip of the ping, at most one second
+// Time a packet takes to reach the client: half the last round trip the client measured, at most one second
 uint32 WorldSession::GetOneWayDelay() const
 {
-    return std::min(m_latency.load() / 2, uint32(1000));
+    return std::min(m_pingRoundTrip.load() / 2, uint32(1000));
 }
 
 void WorldSession::SynchronizeMovement(MovementInfo& movementInfo)
