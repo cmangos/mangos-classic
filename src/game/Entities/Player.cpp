@@ -13575,10 +13575,10 @@ void Player::ItemRemovedQuestCheck(uint32 entry, uint32 count)
                 if (curItemCount >= reqItemCount)
                     curItemCount = GetItemCount(entry, false);
 
-                if (q_status.m_itemcount[j] > curItemCount - count)
+                // The counter is capped at the required count, so it only drops once fewer items than that are left.
+                if (curItemCount >= count && q_status.m_itemcount[j] > curItemCount - count)
                 {
-                    uint32 remitemcount = (curItemCount <= reqItemCount ? count : count + reqItemCount - curItemCount);
-                    q_status.m_itemcount[j] = curItemCount - remitemcount;
+                    q_status.m_itemcount[j] = curItemCount - count;
                     if (q_status.uState != QUEST_NEW)
                         q_status.uState = QUEST_CHANGED;
 
