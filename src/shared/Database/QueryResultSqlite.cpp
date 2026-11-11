@@ -23,28 +23,51 @@
 #include "sqlite3.h"
 #include "QueryResultSqlite.h"
 
-QueryResultSqlite::QueryResultSqlite(sqlite3_stmt** stmt) :
-    QueryResult(0, 0), mStmt(stmt)
+QueryResultSqlite::QueryResultSqlite(sqlite3_stmt* stmt) :
+    QueryResult(0, 0), mNextRow(0)
 {
-    if (mStmt && *mStmt)
-    {
-        while (sqlite3_step(*mStmt) == SQLITE_ROW)
-        {
-            // Process each row's data here
-            mRowCount++;
-        }
-        sqlite3_reset(*mStmt);
-        mFieldCount = sqlite3_column_count(*mStmt);
-        mCurrentRow = new Field[mFieldCount];
-        MANGOS_ASSERT(mCurrentRow);
+    if (!stmt)
+        return;
 
-        for (int i = 0; i < mFieldCount; ++i)
+    mFieldCount = sqlite3_column_count(stmt);
+
+    // The whole result is read before it is used: a statement still running keeps a read transaction open on its
+    // connection, and a write on that connection then fails at once when another connection has written meanwhile.
+    int result;
+    while ((result = sqlite3_step(stmt)) == SQLITE_ROW)
+    {
+        for (int i = 0; i < int(mFieldCount); ++i)
         {
-            const unsigned char* value = sqlite3_column_text(*mStmt, i);
-            mCurrentRow[i].SetValue(value ? reinterpret_cast<const char*>(value) : "");
-            mCurrentRow[i].SetType(ConvertNativeType(sqlite3_column_type(*mStmt, i)));
+            // the type is read first, reading the text can convert the value
+            mValueTypes.push_back(uint8(ConvertNativeType(sqlite3_column_type(stmt, i))));
+
+            const unsigned char* value = sqlite3_column_text(stmt, i);
+            if (!value)
+            {
+                mValueOffsets.push_back(NULL_VALUE);
+                continue;
+            }
+
+            mValueOffsets.push_back(mValues.size());
+            mValues.append(reinterpret_cast<const char*>(value), size_t(sqlite3_column_bytes(stmt, i)));
+            mValues.push_back('\0');
         }
+        ++mRowCount;
     }
+
+    if (result != SQLITE_DONE)
+    {
+        sLog.outErrorDb("SQL: %s", sqlite3_sql(stmt));
+        sLog.outErrorDb("query ERROR: %s", sqlite3_errmsg(sqlite3_db_handle(stmt)));
+        mRowCount = 0;
+        mValues.clear();
+        mValueOffsets.clear();
+        mValueTypes.clear();
+    }
+
+    sqlite3_finalize(stmt);
+
+    mCurrentRow = new Field[mFieldCount];
 }
 
 QueryResultSqlite::~QueryResultSqlite()
@@ -54,36 +77,29 @@ QueryResultSqlite::~QueryResultSqlite()
 
 bool QueryResultSqlite::NextRow()
 {
-    if (!mStmt || !(*mStmt))
+    if (!mCurrentRow)
         return false;
 
-    int rc = sqlite3_step(*mStmt);
-    if (rc != SQLITE_ROW)
+    if (mNextRow >= mRowCount)
     {
         EndQuery();
         return false;
     }
 
-    for (int i = 0; i < mFieldCount; ++i)
+    size_t const firstValue = size_t(mNextRow) * mFieldCount;
+    for (uint32 i = 0; i < mFieldCount; ++i)
     {
-        const unsigned char* value = sqlite3_column_text(*mStmt, i);
-
-        mCurrentRow[i].SetValue(value ? reinterpret_cast<const char*>(value) : nullptr);
-        mCurrentRow[i].SetType(ConvertNativeType(sqlite3_column_type(*mStmt, i)));
+        size_t const offset = mValueOffsets[firstValue + i];
+        mCurrentRow[i].SetValue(offset == NULL_VALUE ? nullptr : mValues.c_str() + offset);
+        mCurrentRow[i].SetType(Field::DataTypes(mValueTypes[firstValue + i]));
     }
 
+    ++mNextRow;
     return true;
 }
 
 void QueryResultSqlite::EndQuery()
 {
-    if (mStmt && *mStmt)
-    {
-        sqlite3_finalize(*mStmt);
-        *mStmt = nullptr;
-        //mStmt = nullptr;
-    }
-
     delete[] mCurrentRow;
     mCurrentRow = nullptr;
 }

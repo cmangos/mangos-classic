@@ -83,11 +83,11 @@ bool SQLiteConnection::_Query(const char* sql, sqlite3_stmt** pStmt)
 
 std::unique_ptr<QueryResult> SQLiteConnection::Query(const char* sql)
 {
-    sqlite3_stmt** pStmt = new(sqlite3_stmt*);
-    if (!_Query(sql, pStmt))
+    sqlite3_stmt* stmt = nullptr;
+    if (!_Query(sql, &stmt))
         return nullptr;
 
-    auto queryResult = std::make_unique<QueryResultSqlite>(pStmt);
+    auto queryResult = std::make_unique<QueryResultSqlite>(stmt);
 
     if (queryResult->NextRow())
         return queryResult;
@@ -99,18 +99,18 @@ QueryNamedResult* SQLiteConnection::QueryNamed(const char* sql)
     uint64 rowCount = 0;
     uint32 fieldCount = 0;
 
-    sqlite3_stmt** pStmt = new(sqlite3_stmt*);
+    sqlite3_stmt* stmt = nullptr;
 
-    if (!_Query(sql, pStmt))
+    if (!_Query(sql, &stmt))
         return nullptr;
 
-    fieldCount = sqlite3_column_count(*pStmt);
+    fieldCount = sqlite3_column_count(stmt);
 
     QueryFieldNames names(fieldCount);
     for (uint32 i = 0; i < fieldCount; ++i)
-        names[i] = sqlite3_column_name(*pStmt, i);
+        names[i] = sqlite3_column_name(stmt, i);
 
-    QueryResultSqlite* queryResult = new QueryResultSqlite(pStmt);
+    QueryResultSqlite* queryResult = new QueryResultSqlite(stmt);
 
     queryResult->NextRow();
     return new QueryNamedResult(queryResult, names);

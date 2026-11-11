@@ -33,7 +33,8 @@
 class QueryResultSqlite : public QueryResult
 {
     public:
-        QueryResultSqlite(sqlite3_stmt** stmt);
+        // Reads all the rows of the statement, then finalizes it
+        QueryResultSqlite(sqlite3_stmt* stmt);
 
         ~QueryResultSqlite();
 
@@ -49,7 +50,12 @@ class QueryResultSqlite : public QueryResult
         //enum Field::DataTypes ConvertNativeType(enum_field_types mysqlType) const;
         void EndQuery();
 
-        sqlite3_stmt** mStmt;
+        static constexpr size_t NULL_VALUE = static_cast<size_t>(-1);
+
+        std::string mValues;                                // text of all the values of the result, each one ended by '\0'
+        std::vector<size_t> mValueOffsets;                  // offset of each value in mValues, NULL_VALUE for NULL
+        std::vector<uint8> mValueTypes;                     // Field::DataTypes of each value
+        uint64 mNextRow;
 };
 #endif
 #endif
