@@ -10837,10 +10837,10 @@ void Player::SwapItem(uint16 src, uint16 dst)
         ItemPrototype const* itemProto = pSrcItem->GetProto();
         InventoryResult msg;
         ItemPosCountVec sDest;
-        uint16 eDest = 0;
         uint8 bagSlot;
-        // only fill the target stack: the rest stays in the source slot, so no free slot is needed elsewhere
-        if ((IsInventoryPos(dst) || IsBankPos(dst)) && pSrcItem->GetCount() + pDstItem->GetCount() > itemProto->GetMaxStackSize())
+        // only fill the target stack: the rest stays in the source slot, so no free slot is needed elsewhere. An equipped stack
+        // is always filled this way: it stays in its slot and only its count changes
+        if (IsEquipmentPos(dst) || ((IsInventoryPos(dst) || IsBankPos(dst)) && pSrcItem->GetCount() + pDstItem->GetCount() > itemProto->GetMaxStackSize()))
         {
             if (pSrcItem->HasTemporaryLoot())
                 msg = EQUIP_ERR_ALREADY_LOOTED;
@@ -10848,13 +10848,15 @@ void Player::SwapItem(uint16 src, uint16 dst)
                 msg = EQUIP_ERR_DONT_OWN_THAT_ITEM;
             else
                 msg = pDstItem->CanBeMergedPartlyWith(itemProto);
+
+            // the whole source joins the equipped stack when it fits
+            if (IsEquipmentPos(dst))
+                sDest.push_back(ItemPosCount(dst, pSrcItem->GetCount()));
         }
         else if (IsInventoryPos(dst))
             msg = CanStoreItem(dstbag, dstslot, sDest, pSrcItem, bagSlot, false);
         else if (IsBankPos(dst))
             msg = CanBankItem(dstbag, dstslot, sDest, pSrcItem, false, bagSlot);
-        else if (IsEquipmentPos(dst))
-            msg = CanEquipItem(dstslot, eDest, pSrcItem, false);
         else
             return;
 
@@ -10865,15 +10867,10 @@ void Player::SwapItem(uint16 src, uint16 dst)
             {
                 RemoveItem(srcbag, srcslot, true);
 
-                if (IsInventoryPos(dst))
-                    StoreItem(sDest, pSrcItem, true);
-                else if (IsBankPos(dst))
+                if (IsBankPos(dst))
                     BankItem(sDest, pSrcItem, true);
-                else if (IsEquipmentPos(dst))
-                {
-                    EquipItem(eDest, pSrcItem, true);
-                    AutoUnequipOffhandIfNeed();
-                }
+                else
+                    StoreItem(sDest, pSrcItem, true);
             }
             else
             {
