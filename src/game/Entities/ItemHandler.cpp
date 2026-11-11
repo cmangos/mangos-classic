@@ -561,8 +561,8 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recv_data)
         }
 
         _player->InterruptNonMeleeSpells(false);
-        pItem->SetCount(pItem->GetCount() - count);
         _player->ItemRemovedQuestCheck(pItem->GetEntry(), count);
+        pItem->SetCount(pItem->GetCount() - count);
         UpdateData data;
         if (_player->IsInWorld())
             _player->GetMap()->AddUpdateObject(pItem);
