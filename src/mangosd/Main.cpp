@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
 
 #ifdef ENABLE_PLAYERBOTS
     if (vm.count("aiplayerbot"))
-        _PLAYERBOT_CONFIG = aiPlayerBotConfig;
+        _D_AIPLAYERBOT_CONFIG = aiPlayerBotConfig;
 #endif
 
 #ifdef _WIN32                                                // windows service command need execute before config read
