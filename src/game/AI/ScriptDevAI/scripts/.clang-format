@@ -1,0 +1,3 @@
+# Script AIs are structs without access specifiers: keep their members one level deep.
+BasedOnStyle: InheritParentConfig
+IndentAccessModifiers: false
