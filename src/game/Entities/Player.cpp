@@ -13371,7 +13371,8 @@ void Player::AreaExploredOrEventHappens(uint32 questId)
         {
             QuestStatusData& q_status = mQuestStatus[questId];
 
-            if (!q_status.m_explored)
+            // a failed quest does not progress any more
+            if (!q_status.m_explored && q_status.m_status != QUEST_STATUS_FAILED)
             {
                 SetQuestSlotState(log_slot, QUEST_STATE_COMPLETE);
                 SendQuestCompleteEvent(questId);
