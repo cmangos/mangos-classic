@@ -61,12 +61,6 @@ else()
   message(STATUS "Build METRICs         : No  (default)")
 endif()
 
-if(BUILD_DEPRECATED_PLAYERBOT)
-  message(STATUS "Build OLD Playerbot   : Yes")
-else()
-  message(STATUS "Build OLD Playerbot   : No  (default)")
-endif()
-
 if(BUILD_PLAYERBOTS)
   message(STATUS "Build Playerbots      : Yes")
 else()

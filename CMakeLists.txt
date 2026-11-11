@@ -325,17 +325,14 @@ if(NOT BUILD_GAME_SERVER AND BUILD_SCRIPTDEV)
   message(STATUS "BUILD_SCRIPTDEV forced to OFF due to BUILD_GAME_SERVER is not set")
 endif()
 
-if(NOT BUILD_GAME_SERVER AND BUILD_DEPRECATED_PLAYERBOT)
-  set(BUILD_DEPRECATED_PLAYERBOT OFF)
-  message(STATUS "BUILD_DEPRECATED_PLAYERBOT forced to OFF due to BUILD_GAME_SERVER is not set")
+if(BUILD_DEPRECATED_PLAYERBOT)
+  message(FATAL_ERROR "BUILD_DEPRECATED_PLAYERBOT is no longer available: the old built-in playerbot has been removed.\n"
+    "Build the playerbots module instead (-DBUILD_PLAYERBOTS=ON) and set AiPlayerbot.PartyBotOnly = 1 in aiplayerbot.conf "
+    "to keep only player-controlled party bots (see docs/OldPartyBot.md in the module).\n"
+    "Configure again with -DBUILD_DEPRECATED_PLAYERBOT=OFF to go on.")
 endif()
 
 if(BUILD_PLAYERBOTS)
-  if(BUILD_DEPRECATED_PLAYERBOT)
-    set(BUILD_DEPRECATED_PLAYERBOT OFF)
-    message(STATUS "BUILD_DEPRECATED_PLAYERBOT forced to OFF because BUILD_PLAYERBOTS is set")
-  endif()
-
   if(NOT BUILD_GAME_SERVER)
     set(BUILD_PLAYERBOTS OFF)
     message(STATUS "BUILD_PLAYERBOTS forced to OFF due to BUILD_GAME_SERVER is not set")

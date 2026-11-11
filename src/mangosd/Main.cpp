@@ -28,7 +28,6 @@
 #include "Master.h"
 #include "SystemConfig.h"
 #include "AuctionHouseBot/AuctionHouseBot.h"
-#include "PlayerBot/config.h"
 
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
@@ -72,15 +71,12 @@ uint32 realmID;                                             ///< Id of the realm
 /// Launch the mangos server
 int main(int argc, char* argv[])
 {
-    std::string auctionBotConfig, configFile, playerBotConfig, aiPlayerBotConfig, serviceParameter;
+    std::string auctionBotConfig, configFile, aiPlayerBotConfig, serviceParameter;
 
     boost::program_options::options_description desc("Allowed options");
     desc.add_options()
     ("ahbot,a", boost::program_options::value<std::string>(&auctionBotConfig), "ahbot configuration file")
     ("config,c", boost::program_options::value<std::string>(&configFile)->default_value(_MANGOSD_CONFIG), "configuration file")
-#ifdef BUILD_DEPRECATED_PLAYERBOT
-    ("playerbot,p", boost::program_options::value<std::string>(&playerBotConfig)->default_value(_D_PLAYERBOT_CONFIG), "playerbot configuration file")
-#endif
 #ifdef ENABLE_PLAYERBOTS
     ("aiplayerbot,p", boost::program_options::value<std::string>(&aiPlayerBotConfig)->default_value(_D_AIPLAYERBOT_CONFIG), "aiplayerbot configuration file")
 #endif
@@ -122,11 +118,6 @@ int main(int argc, char* argv[])
 
     if (vm.count("ahbot"))
         sAuctionHouseBot.SetConfigFileName(auctionBotConfig);
-
-#ifdef BUILD_DEPRECATED_PLAYERBOT
-    if (vm.count("playerbot"))
-        _PLAYERBOT_CONFIG = playerBotConfig;
-#endif
 
 #ifdef ENABLE_PLAYERBOTS
     if (vm.count("aiplayerbot"))

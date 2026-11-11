@@ -1440,10 +1440,6 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_METRICS].SetInterval(1 * IN_MILLISECONDS);
 #endif // BUILD_METRICS
 
-#ifdef BUILD_DEPRECATED_PLAYERBOT
-    PlayerbotMgr::SetInitialWorldSettings();
-#endif
-
 #ifdef ENABLE_PLAYERBOTS
     sPlayerbotAIConfig.Initialize();
 #ifndef BUILD_AHBOT

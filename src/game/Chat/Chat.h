@@ -753,9 +753,6 @@ class ChatHandler
         bool HandleStableCommand(char* args);
         bool HandleWaterwalkCommand(char* args);
         bool HandleQuitCommand(char* args);
-#ifdef BUILD_DEPRECATED_PLAYERBOT
-        bool HandlePlayerbotCommand(char* args);
-#endif
 
 #ifdef ENABLE_PLAYERBOTS
         bool HandlePlayerbotCommand(char* args);

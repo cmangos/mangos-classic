@@ -40,17 +40,6 @@ if(NOT BUILD_SCRIPTDEV)
   endforeach()
 endif()
 
-if(NOT BUILD_DEPRECATED_PLAYERBOT)
-  # exclude Playerbot folder
-  set (EXCLUDE_DIR "PlayerBot/")
-  foreach (TMP_PATH ${LIBRARY_SRCS})
-      string (FIND ${TMP_PATH} ${EXCLUDE_DIR} EXCLUDE_DIR_FOUND)
-      if (NOT ${EXCLUDE_DIR_FOUND} EQUAL -1)
-          list(REMOVE_ITEM LIBRARY_SRCS ${TMP_PATH})
-      endif ()
-  endforeach()
-endif()
-
 if(NOT BUILD_PLAYERBOTS)
   # exclude Playerbots folder
   set (EXCLUDE_DIR "Bots/")
@@ -96,27 +85,14 @@ target_link_libraries(${LIBRARY_NAME}
 )
 
 # include additionals headers
-# TO DO: Remove this if when old playerbots get removed
-if(NOT BUILD_PLAYERBOTS)
-  set(ADDITIONAL_INCLUDE_DIRS
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/vmap
-    ${CMAKE_CURRENT_SOURCE_DIR}/AuctionHouseBot
-    ${CMAKE_CURRENT_SOURCE_DIR}/BattleGround
-    ${CMAKE_CURRENT_SOURCE_DIR}/OutdoorPvP
-    ${CMAKE_CURRENT_SOURCE_DIR}/PlayerBot
-    ${CMAKE_BINARY_DIR}
-  )
-else()
-  set(ADDITIONAL_INCLUDE_DIRS
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/vmap
-    ${CMAKE_CURRENT_SOURCE_DIR}/AuctionHouseBot
-    ${CMAKE_CURRENT_SOURCE_DIR}/BattleGround
-    ${CMAKE_CURRENT_SOURCE_DIR}/OutdoorPvP
-    ${CMAKE_BINARY_DIR}
-  )
-endif()
+set(ADDITIONAL_INCLUDE_DIRS
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/vmap
+  ${CMAKE_CURRENT_SOURCE_DIR}/AuctionHouseBot
+  ${CMAKE_CURRENT_SOURCE_DIR}/BattleGround
+  ${CMAKE_CURRENT_SOURCE_DIR}/OutdoorPvP
+  ${CMAKE_BINARY_DIR}
+)
 
 target_include_directories(${LIBRARY_NAME}
   INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
@@ -150,11 +126,6 @@ endif()
 # Define BUILD_METRICS if need
 if (BUILD_METRICS)
   add_definitions(-DBUILD_METRICS)
-endif()
-
-# Define BUILD_DEPRECATED_PLAYERBOT if need
-if (BUILD_DEPRECATED_PLAYERBOT)
-  add_definitions(-DBUILD_DEPRECATED_PLAYERBOT)
 endif()
 
 # Define ENABLE_PLAYERBOTS if need

@@ -460,7 +460,7 @@ bool Database::CheckRequiredField(char const* table_name, char const* required_n
     const char* db_name;
     if (!strcmp(table_name, "db_version"))
         db_name = "WORLD";
-    else if (!strcmp(table_name, "character_db_version") || !strcmp(table_name, "playerbot_db_version"))
+    else if (!strcmp(table_name, "character_db_version"))
         db_name = "CHARACTER";
     else if (!strcmp(table_name, "realmd_db_version"))
         db_name = "REALMD";
@@ -496,22 +496,8 @@ bool Database::CheckRequiredField(char const* table_name, char const* required_n
             sLog.outErrorDb("  [B] You need: --> `%s.sql`", req_sql_update_name);
             sLog.outErrorDb();
             sLog.outErrorDb("You must apply all updates after [A] to [B] to use mangos with this database.");
-#ifdef BUILD_DEPRECATED_PLAYERBOT
-            if (reqName.find("playerbot") != std::string::npos)
-            {
-                sLog.outErrorDb("These updates are included in the [sql/PlayerBot] folder.");
-                sLog.outErrorDb("Please read the [doc/README.Playerbot] file for instructions on updating.");
-            }
-            else
-            {
-                // Unmodded core code below
-                sLog.outErrorDb("These updates are included in the sql/updates folder.");
-                sLog.outErrorDb("Please read the included [README] in sql/updates for instructions on updating.");
-            }
-#else
             sLog.outErrorDb("These updates are included in the sql/updates folder.");
             sLog.outErrorDb("Please read the included [README] in sql/updates for instructions on updating.");
-#endif
         }
         else
         {
