@@ -2565,6 +2565,10 @@ void Player::SetGameMaster(bool on)
         UpdateArea(m_areaUpdateId);
     }
 
+    // a player not in the world yet gets everything when it enters the map
+    if (!IsInWorld())
+        return;
+
     // update dead corpse sparkles
     UnitList deadUnits;
     MaNGOS::AnyDeadUnitCheck u_check(this);
