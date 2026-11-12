@@ -23,7 +23,7 @@
 #include "Util/Errors.h"
 #include "Entities/Player.h"
 
-Camera::Camera(Player* pl) : m_owner(*pl), m_source(pl), m_sendInProgress(false)
+Camera::Camera(Player* pl) : m_owner(*pl), m_source(pl)
 {
     m_source->GetViewPoint().Attach(this);
 }
@@ -108,7 +108,7 @@ void Camera::Event_AddedToWorld(UpdateData* data)
     grid->AddWorldObject(this);
 
     if (data)
-        UpdateVisibilityForOwner(true, *data);
+        UpdateVisibilityForOwner(*data);
 }
 
 void Camera::Event_RemovedFromWorld()
@@ -126,11 +126,6 @@ void Camera::Event_Moved()
 {
     m_gridRef.unlink();
     m_source->GetViewPoint().m_grid->AddWorldObject(this);
-}
-
-void Camera::UpdateVisibilityOf(WorldObject* target, UpdateData& data) const
-{
-    m_owner.UpdateVisibilityOf(m_source, target, data);
 }
 
 template<class T>
@@ -155,16 +150,14 @@ void Camera::UpdateVisibilityForOwner(UpdateDataMapType& update_players)
         MANGOS_ASSERT(p.second);
         iter = p.first;
     }
-    UpdateVisibilityForOwner(true, iter->second);
+    UpdateVisibilityForOwner(iter->second);
 }
 
-void Camera::UpdateVisibilityForOwner(bool addToWorld, UpdateData& data)
+void Camera::UpdateVisibilityForOwner(UpdateData& data)
 {
-    m_sendInProgress = true;
-    MaNGOS::VisibleNotifier notifier(*this, data, !addToWorld);
-    Cell::VisitAllObjects(m_source, notifier, addToWorld ? MAX_VISIBILITY_DISTANCE : m_source->GetVisibilityData().GetVisibilityDistance(), false);
+    MaNGOS::VisibleNotifier notifier(*this, data);
+    Cell::VisitAllObjects(m_source, notifier, MAX_VISIBILITY_DISTANCE, false);
     notifier.Notify();
-    m_sendInProgress = false;
 }
 
 //////////////////

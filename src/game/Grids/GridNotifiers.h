@@ -38,25 +38,11 @@ namespace MaNGOS
         UpdateData& i_data;
         GuidSet i_clientGUIDs;
         WorldObjectSet i_visibleNow;
-        bool i_processSend;
 
-        explicit VisibleNotifier(Camera& c, UpdateData& data, bool processSend) : i_camera(c), i_data(data), i_clientGUIDs(c.GetOwner()->GetClientGuids()), i_processSend(processSend) {}
+        explicit VisibleNotifier(Camera& c, UpdateData& data) : i_camera(c), i_data(data), i_clientGUIDs(c.GetOwner()->GetClientGuids()) {}
         template<class T> void Visit(GridRefManager<T>& m);
         void Visit(CameraMapType& /*m*/) {}
         void Notify(void);
-    };
-
-    struct VisibleChangesNotifier
-    {
-        WorldObject& i_object;
-
-        explicit VisibleChangesNotifier(WorldObject& object) : i_object(object), m_unvisitedGuids(i_object.GetClientGuidsIAmAt()) {}
-        template<class T> void Visit(GridRefManager<T>&) {}
-        void Visit(CameraMapType&);
-
-        GuidSet& GetUnvisitedGuids() { return m_unvisitedGuids; }
-
-        GuidSet m_unvisitedGuids;
     };
 
     struct MessageDeliverer

@@ -2579,7 +2579,7 @@ void Player::SetGameMaster(bool on)
     }
 
     UpdateData data;
-    m_camera.UpdateVisibilityForOwner(true, data);
+    m_camera.UpdateVisibilityForOwner(data);
     data.SendData(*GetSession());
     GetMap()->AddUpdateMovementObject(this);
     UpdateEverything();

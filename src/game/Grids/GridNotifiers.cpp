@@ -29,19 +29,6 @@
 
 using namespace MaNGOS;
 
-void VisibleChangesNotifier::Visit(CameraMapType& m)
-{
-    for (auto& iter : m)
-    {
-        if (iter.getSource()->IsSendInProgress() || iter.getSource()->GetOwner()->HasAtClient(&i_object))
-            continue;
-        UpdateData data;
-        iter.getSource()->UpdateVisibilityOf(&i_object, data);
-        m_unvisitedGuids.erase(iter.getSource()->GetOwner()->GetObjectGuid());
-        data.SendData(*iter.getSource()->GetOwner()->GetSession());
-    }
-}
-
 void VisibleNotifier::Notify()
 {
     Player& player = *i_camera.GetOwner();
@@ -111,13 +98,6 @@ void VisibleNotifier::Notify()
 
         DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "%s is out of range (no in active cells set) now for %s",
                          itr->GetString().c_str(), player.GetGuidStr().c_str());
-    }
-
-    if (i_data.HasData())
-    {
-        // send create/outofrange packet to player (except player create updates that already sent using SendUpdateToPlayer)
-        if (i_processSend)
-            i_data.SendData(*player.GetSession());
     }
 }
 

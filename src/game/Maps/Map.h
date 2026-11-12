@@ -219,8 +219,6 @@ class Map : public GridRefManager<NGridType>
         void RemoveObjectFromRemoveList(WorldObject* obj);
         bool IsInRemoveList(WorldObject* obj) const;
 
-        void UpdateObjectVisibility(WorldObject* obj, Cell cell, const CellPair& cellpair);
-
         void resetMarkedCells() { marked_cells.reset(); }
         bool isCellMarked(uint32 pCellId) const { return marked_cells.test(pCellId); }
         void markCell(uint32 pCellId) { marked_cells.set(pCellId); }

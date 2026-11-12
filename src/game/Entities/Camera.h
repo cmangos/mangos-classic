@@ -49,15 +49,12 @@ class Camera
 
         template<class T>
         void UpdateVisibilityOf(T* target, UpdateData& data, WorldObjectSet& vis);
-        void UpdateVisibilityOf(WorldObject* target, UpdateData& data) const;
 
         void ReceivePacket(WorldPacket& data);
 
         // updates visibility of worldobjects around viewpoint for camera's owner
         void UpdateVisibilityForOwner(UpdateDataMapType& update_players);
-        void UpdateVisibilityForOwner(bool addToWorld, UpdateData& data);
-
-        bool IsSendInProgress() const { return m_sendInProgress; }
+        void UpdateVisibilityForOwner(UpdateData& data);
 
     private:
         // called when viewpoint changes visibility state
@@ -76,7 +73,6 @@ class Camera
         bool isActiveObject() const { return false; }
     private:
         GridReference<Camera> m_gridRef;
-        bool m_sendInProgress;
 };
 
 /// Object-observer, notifies farsight object state to cameras that attached to it

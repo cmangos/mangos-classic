@@ -1489,32 +1489,6 @@ const char* Map::GetMapName() const
     return i_mapEntry ? i_mapEntry->name[sWorld.GetDefaultDbcLocale()] : "UNNAMEDMAP\x0";
 }
 
-void Map::UpdateObjectVisibility(WorldObject* obj, Cell cell, const CellPair& cellpair)
-{
-    cell.SetNoCreate();
-    MaNGOS::VisibleChangesNotifier notifier(*obj);
-    TypeContainerVisitor<MaNGOS::VisibleChangesNotifier, WorldTypeMapContainer > player_notifier(notifier);
-    cell.Visit(cellpair, player_notifier, *this, *obj, obj->GetVisibilityData().GetVisibilityDistance());
-    for (auto guid : notifier.GetUnvisitedGuids())
-    {
-        if (Player* player = GetPlayer(guid))
-        {
-#ifdef ENABLE_PLAYERBOTS
-            if (sPlayerbotAIConfig.disableBotOptimizations || player->isRealPlayer())
-            {
-                UpdateData data;
-                player->UpdateVisibilityOf(player->GetCamera().GetBody(), obj, data);
-                data.SendData(*player->GetSession()); // TODO: This is meant to be done in next broadcast, not immediately
-            }
-#else
-            UpdateData data;
-            player->UpdateVisibilityOf(player->GetCamera().GetBody(), obj, data);
-            data.SendData(*player->GetSession()); // TODO: This is meant to be done in next broadcast, not immediately
-#endif
-        }
-    }
-}
-
 void Map::SendInitBeforeGrid(Player* player, UpdateData& updateData) const
 {
     // attach to player data current transport data
