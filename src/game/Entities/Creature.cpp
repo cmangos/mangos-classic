@@ -305,15 +305,7 @@ void Creature::RemoveCorpse(bool inPlace)
     GetMap()->CreatureRelocation(this, x, y, z, o);
 
     if (!IsUsingNewSpawningSystem()) // schedule out of range
-    {
-        auto& clientGuids = GetClientGuidsIAmAt();
-        for (auto& clientGuid : clientGuids)
-            if (Player* client = GetMap()->GetPlayer(clientGuid))
-                client->RemoveAtClient(this, true);
-        GetMap()->AddUpdateRemoveObject(GetClientGuidsIAmAt(), GetObjectGuid());
-        clientGuids.clear();
-        GetClientGuidsIAmAt().clear();
-    }
+        ScheduleOutOfRangeOnClientsIAmAt();
     else
         AddObjectToRemoveList();
 }

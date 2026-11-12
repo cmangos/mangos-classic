@@ -56,6 +56,4 @@ typedef std::map<uint32, GameObject*> GameObjectsMap;
 typedef std::map<uint32, DynamicObject*> DynamicObjectsMap;
 typedef std::map<uint32, Corpse*> PlayerCorpsesMap;
 
-typedef std::unordered_map<Player*, UpdateData> UpdateDataMapType;
-
 #endif

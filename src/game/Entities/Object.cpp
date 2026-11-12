@@ -131,23 +131,6 @@ void Object::SetObjectScale(float newScale)
     SetFloatValue(OBJECT_FIELD_SCALE_X, newScale);
 }
 
-void Object::SendForcedObjectUpdate()
-{
-    if (!m_inWorld || !m_objectUpdated)
-        return;
-
-    UpdateDataMapType update_players;
-
-    BuildUpdateData(update_players);
-    RemoveFromClientUpdateList();
-
-    // here we allocate a std::vector with a size of 0x10000
-    for (auto& update_player : update_players)
-    {
-        update_player.second.SendData(*update_player.first->GetSession());
-    }
-}
-
 void Object::BuildCreateUpdateBlockForPlayer(UpdateData& data, Player* target) const
 {
     if (!target)
@@ -254,11 +237,6 @@ void Object::BuildForcedValuesUpdateBlockForPlayer(UpdateData& data, Player* tar
     BuildValuesUpdate(UPDATETYPE_VALUES, &buf, &updateMask, target);
 
     data.AddUpdateBlock(buf, GetObjectGuid().IsTransport() || GetObjectGuid().IsMOTransport());
-}
-
-void Object::BuildOutOfRangeUpdateBlock(UpdateData& data) const
-{
-    data.AddOutOfRangeGUID(GetObjectGuid());
 }
 
 void Object::DestroyForPlayer(Player* target) const
@@ -1093,48 +1071,6 @@ bool Object::PrintEntryError(char const* descr) const
     return false;
 }
 
-
-void Object::BuildUpdateDataForPlayer(Player* pl, UpdateDataMapType& update_players) const
-{
-    UpdateDataMapType::iterator iter = update_players.find(pl);
-
-    if (iter == update_players.end())
-    {
-        std::pair<UpdateDataMapType::iterator, bool> p = update_players.insert(UpdateDataMapType::value_type(pl, UpdateData()));
-        MANGOS_ASSERT(p.second);
-        iter = p.first;
-    }
-
-    BuildValuesUpdateBlockForPlayer(iter->second, iter->first);
-}
-
-void Object::BuildCreateDataForPlayer(Player* player, UpdateDataMapType& update_players, bool /*auras*/) const
-{
-    UpdateDataMapType::iterator iter = update_players.find(player);
-
-    if (iter == update_players.end())
-    {
-        std::pair<UpdateDataMapType::iterator, bool> p = update_players.insert(UpdateDataMapType::value_type(player, UpdateData()));
-        MANGOS_ASSERT(p.second);
-        iter = p.first;
-    }
-
-    BuildCreateUpdateBlockForPlayer(iter->second, iter->first);
-}
-
-void Object::BuildOutOfRangeDataForPlayer(Player* pl, UpdateDataMapType& update_players, ObjectGuid oorObject)
-{
-    UpdateDataMapType::iterator iter = update_players.find(pl);
-
-    if (iter == update_players.end())
-    {
-        std::pair<UpdateDataMapType::iterator, bool> p = update_players.insert(UpdateDataMapType::value_type(pl, UpdateData()));
-        MANGOS_ASSERT(p.second);
-        iter = p.first;
-    }
-
-    iter->second.AddOutOfRangeGUID(oorObject);
-}
 
 void Object::AddToClientUpdateList()
 {
@@ -2544,14 +2480,11 @@ void WorldObject::RemoveFromClientUpdateList()
     GetMap()->RemoveUpdateObject(this);
 }
 
+// Clients around an object that start seeing it
 struct WorldObjectCreateAccumulator
 {
     WorldObject& i_object;
-    PlayerSet i_playerSet;
-    WorldObjectCreateAccumulator(WorldObject& obj) : i_object(obj)
-    {
-
-    }
+    explicit WorldObjectCreateAccumulator(WorldObject& obj) : i_object(obj) {}
 
     void Visit(CameraMapType& m)
     {
@@ -2559,43 +2492,29 @@ struct WorldObjectCreateAccumulator
         {
             Player* owner = iter.getSource()->GetOwner();
 #ifdef ENABLE_PLAYERBOTS
-            if (owner->isRealPlayer())
-            {
+            if (!owner->isRealPlayer())
+                continue;
 #endif
-                if (owner != &i_object)
-                {
-                    if (!owner->HasAtClient(&i_object))
-                    {
-                        if (i_object.isVisibleForInState(owner, owner->GetCamera().GetBody(), false))
-                        {
-                            owner->AddAtClient(&i_object);
-                            i_playerSet.insert(owner);
-                        }
-                    }
-                }
-#ifdef ENABLE_PLAYERBOTS
-            }
-#endif
+            if (owner != &i_object && !owner->HasAtClient(&i_object) && i_object.isVisibleForInState(owner, owner->GetCamera().GetBody(), false))
+                owner->ScheduleCreate(&i_object);
         }
     }
 
     template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
 };
 
-void WorldObject::BuildUpdateData(UpdateDataMapType& update_players)
+void WorldObject::BuildUpdateData()
 {
     if (ItsNewObject())
         GetMap()->AddCameraToWorld(this);
 
     if (IsPlayer())
-        BuildUpdateDataForPlayer((Player*)this, update_players);
+        BuildValuesUpdateBlockForPlayer(static_cast<Player*>(this)->GetClientUpdate(), static_cast<Player*>(this));
 
-    for (auto& iter : m_clientGUIDsIAmAt)
-    {
-        if (Player* player = GetMap()->GetPlayer(iter))
-            if (player != this && player->HasAtClient(this))
-                BuildUpdateDataForPlayer(player, update_players);
-    }
+    for (ObjectGuid const& guid : m_clientGUIDsIAmAt)
+        if (Player* client = GetMap()->GetPlayer(guid))
+            if (client != this && !client->IsCreationPending(this)) // a creation not written yet carries all the values
+                BuildValuesUpdateBlockForPlayer(client->GetClientUpdate(), client);
 
     ClearUpdateMask(false);
 
@@ -2603,37 +2522,57 @@ void WorldObject::BuildUpdateData(UpdateDataMapType& update_players)
         SetItsNewObject(false);
 }
 
-void WorldObject::UpdateVisibility(UpdateDataMapType& update_players)
+void WorldObject::SendForcedObjectUpdate()
+{
+    if (!IsInWorld() || !m_objectUpdated)
+        return;
+
+    BuildUpdateData();
+    RemoveFromClientUpdateList();
+
+    if (IsPlayer())
+        static_cast<Player*>(this)->SendClientUpdate();
+
+    for (ObjectGuid const& guid : m_clientGUIDsIAmAt)
+        if (Player* client = GetMap()->GetPlayer(guid))
+            client->SendClientUpdate();
+}
+
+void WorldObject::UpdateVisibility()
 {
     if (ItsNewObject())
         GetMap()->AddCameraToWorld(this);
 
-    GetViewPoint().Call_UpdateVisibilityForOwner(update_players);
+    // what the players looking through this object see
+    GetViewPoint().Call_UpdateVisibilityForOwner();
 
-    GuidSet oor;
-    for (auto itr = m_clientGUIDsIAmAt.begin(); itr != m_clientGUIDsIAmAt.end(); )
+    // the clients that stop seeing this object, then the ones that start
+    for (auto itr = m_clientGUIDsIAmAt.begin(); itr != m_clientGUIDsIAmAt.end();)
     {
-        if (Player* client = GetMap()->GetPlayer(*itr))
-        {
-            if (!this->isVisibleForInState(client, client->GetCamera().GetBody(), false))
-            {
-                client->RemoveAtClient(this, true);
-                oor.insert(*itr);
-                itr = m_clientGUIDsIAmAt.erase(itr);
-                continue;
-            }
-        }
-
-        ++itr;
+        Player* client = GetMap()->GetPlayer(*itr);
+        ++itr;                                              // ScheduleOutOfRange takes the client off the list
+        if (client && !isVisibleForInState(client, client->GetCamera().GetBody(), true))
+            client->ScheduleOutOfRange(this);
     }
-
-    if (!oor.empty())
-        GetMap()->AddUpdateRemoveObject(oor, this->GetObjectGuid());
 
     WorldObjectCreateAccumulator notifier(*this);
     Cell::VisitWorldObjects(this, notifier, GetVisibilityData().GetVisibilityDistance());
-    GetMap()->AddCreateAtClientObjects(notifier.i_playerSet, this);
-    ClearUpdateMask(false);
+}
+
+uint32 WorldObject::GetCarrierDepth() const
+{
+    uint32 const maxDepth = 8;                              // carriers never loop, the bound only protects the server
+    uint32 depth = 0;
+    WorldObject const* passenger = this;
+    while (depth < maxDepth)
+    {
+        WorldObject const* carrier = passenger->GetTransport();
+        if (!carrier)
+            break;
+        passenger = carrier;
+        ++depth;
+    }
+    return depth;
 }
 
 bool WorldObject::IsControlledByPlayer() const
@@ -3204,11 +3143,21 @@ void WorldObject::DestroyOnClientsIAmAt()
 {
     if (IsInWorld())
     {
-        for (ObjectGuid guid : m_clientGUIDsIAmAt)
+        GuidSet clients;
+        std::swap(clients, m_clientGUIDsIAmAt);             // DestroyAtClient takes each client off the list
+        for (ObjectGuid const& guid : clients)
             if (Player* player = GetMap()->GetPlayer(guid))
-                player->DestroyAtClient(this, true);
-        m_clientGUIDsIAmAt.clear();
+                player->DestroyAtClient(this);
     }
+}
+
+void WorldObject::ScheduleOutOfRangeOnClientsIAmAt()
+{
+    GuidSet clients;
+    std::swap(clients, m_clientGUIDsIAmAt);                 // ScheduleOutOfRange takes each client off the list
+    for (ObjectGuid const& guid : clients)
+        if (Player* client = GetMap()->GetPlayer(guid))
+            client->ScheduleOutOfRange(this);
 }
 
 bool WorldObject::CheckAndIncreaseCastCounter()

@@ -2069,20 +2069,40 @@ class Player : public Unit
 
         Object* GetObjectByTypeMask(ObjectGuid guid, TypeMask typemask);
 
-        // currently visible objects at player client
-        bool HasAtClient(WorldObject const* u) { return u == this || m_clientGUIDs.find(u->GetObjectGuid()) != m_clientGUIDs.end(); }
-        void AddAtClient(WorldObject* target);
-        void RemoveAtClient(WorldObject* target, bool skipRemovalOfAt = false);
-        void DestroyAtClient(WorldObject* target, bool skipRemovalOfAt = false);
-        GuidSet& GetClientGuids() { return m_clientGUIDs; }
+        // What the client has of each world object, the player itself apart. A visibility decision changes it at once, so
+        // that every later check agrees; the creation or the out of range block is written into the next update packet of
+        // the client (WriteViewChanges). All changes go through SetClientState.
+        bool HasAtClient(WorldObject const* u) const { return u == this || HasAtClient(u->GetObjectGuid()); } // seen
+        bool HasAtClient(ObjectGuid const& guid) const;
+        bool IsCreatedAtClient(WorldObject const* u) const;         // seen and its creation written
+        bool IsCreationPending(WorldObject const* u) const;
+        void ScheduleCreate(WorldObject* target);
+        void ScheduleOutOfRange(WorldObject* target);
+        void ScheduleOutOfRange(ObjectGuid const& guid);            // an object at the client no longer in the map
+        void CreateAtClient(WorldObject* target, UpdateData& data); // the creation is written into data now
+        void RemoveAtClient(WorldObject* target, UpdateData& data); // the out of range block is written into data now
+        void DestroyAtClient(WorldObject* target);                  // SMSG_DESTROY_OBJECT now
+        void ForgetClientObjects();                                 // the client starts again from nothing
+        // the out of range block, then the creations, a transport before its passengers
+        void WriteViewChanges(UpdateData& data);
+
+        // items of the player: their creation and out of range block go into the next update packet of the client
+        void ScheduleItemCreate(Item* item) { m_pendingItemCreations.push_back(item); }
+        void ScheduleItemOutOfRange(ObjectGuid const& itemGuid) { m_clientUpdate.AddOutOfRangeGUID(itemGuid); }
+        bool IsItemCreationPending(Item const* item) const;
+
+        // update packet of the client, sent at the client update tick of the map (Map::SendObjectUpdates)
+        UpdateData& GetClientUpdate() { return m_clientUpdate; }
+        void SendClientUpdate();
 
         bool IsVisibleInGridForPlayer(Player* pl) const override;
         bool IsVisibleGloballyFor(Player* u) const;
 
-        void UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* target, UpdateData& updateData);
-
-        template<class T>
-        void UpdateVisibilityOf(WorldObject const* viewPoint, T* target, UpdateData& data, WorldObjectSet& visibleNow);
+        // decides whether target enters or leaves the view of the client, as seen from viewPoint
+        void UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* target);
+        // visibility updates of the camera: an object seen at the client and not met by the last one is out of view
+        void StartCameraVisit() { ++m_cameraVisit; }
+        void GetObjectsNotMetByCameraVisit(GuidVector& guids) const;
 
         void BeforeVisibilityDestroy(Creature* creature);
 
@@ -2546,7 +2566,30 @@ class Player : public Unit
         Spell* m_modsSpell;
         std::set<SpellModifierPair>* m_consumedMods;
 
-        GuidSet m_clientGUIDs;
+        enum class ClientObjectState : uint8
+        {
+            None,                                           // unknown to the client, never stored
+            CreationPending,                                // seen, its creation not written yet
+            Created,                                        // at the client
+            OutOfRangePending,                              // no longer seen, at the client until the out of range block
+        };
+        struct ClientObject
+        {
+            ClientObjectState state;
+            uint32 cameraVisit;                             // last camera visit that met the object
+            WorldObject* pendingObject;                     // set while the creation is pending
+        };
+        void SetClientState(ObjectGuid const& guid, WorldObject* target, ClientObject* clientObject, ClientObjectState state);
+        ClientObject* FindClientObject(ObjectGuid const& guid);
+        void SeeAtClient(WorldObject* target, ClientObject* clientObject);
+        void LoseAtClient(ObjectGuid const& guid, WorldObject* target, ClientObject* clientObject);
+
+        std::unordered_map<ObjectGuid, ClientObject> m_clientObjects;
+        GuidVector m_pendingCreations;                      // may hold stale guids, checked against m_clientObjects
+        GuidVector m_pendingOutOfRange;                     // same
+        std::vector<Item*> m_pendingItemCreations;
+        uint32 m_cameraVisit;
+        UpdateData m_clientUpdate;
 
         std::unordered_map<uint32, TimePoint> m_enteredInstances;
         uint32 m_createdInstanceClearTimer;

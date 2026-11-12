@@ -337,8 +337,8 @@ class Item : public Object
 
         void AddToClientUpdateList() override;
         void RemoveFromClientUpdateList() override;
-        void BuildUpdateData(UpdateDataMapType& update_players) override;
-        void UpdateVisibility(UpdateDataMapType& update_players) override;
+        void BuildUpdateData() override;
+        void UpdateVisibility() override;
 
         bool IsUsedInSpell() const { return m_usedInSpell; }
         void SetUsedInSpell(bool state) { m_usedInSpell = state; }

@@ -1170,7 +1170,6 @@ void Map::Remove(Player* player, bool remove)
     m_objectsToClientUpdate.erase(player);
     m_objectsToClientCreateUpdate.erase({ player , player->GetObjectGuid() });
     m_objectsToClientMovementUpdate.erase(player);
-    m_visibilityAdded.erase(player);
 
     // this may be called during Map::Update
     // after decrement+unlink, ++m_mapRefIter will continue correctly
@@ -1207,11 +1206,7 @@ void Map::Remove(Player* player, bool remove)
     RemoveFromGrid(player, grid, cell);
 
     SendRemoveInfinite(player); // TODO: Shouldnt send?
-    AddUpdateRemoveObject(player->GetClientGuidsIAmAt(), player->GetObjectGuid());
-    for (auto& clientGuid : player->GetClientGuidsIAmAt())
-        if (Player* client = GetPlayer(clientGuid))
-            client->RemoveAtClient(player, true);
-    player->GetClientGuidsIAmAt().clear();
+    player->ScheduleOutOfRangeOnClientsIAmAt();
 
     player->ResetMap();
 
@@ -1255,7 +1250,6 @@ void Map::Remove(T* obj, bool remove)
     m_objectsToClientUpdate.erase(obj);
     m_objectsToClientCreateUpdate.erase({ obj, obj->GetObjectGuid() });
     m_objectsToClientMovementUpdate.erase(obj);
-    m_visibilityAdded.erase(obj);
 
     if constexpr (std::is_base_of_v<Unit, T>)
         m_waypointingNpcs.erase(obj);
@@ -1263,11 +1257,7 @@ void Map::Remove(T* obj, bool remove)
     if (gridLoaded)
         RemoveFromGrid(obj, grid, cell);
 
-    AddUpdateRemoveObject(obj->GetClientGuidsIAmAt(), obj->GetObjectGuid());
-    for (auto& clientGuid : obj->GetClientGuidsIAmAt())
-        if (Player* client = GetPlayer(clientGuid))
-            client->RemoveAtClient(obj, true);
-    obj->GetClientGuidsIAmAt().clear();
+    obj->ScheduleOutOfRangeOnClientsIAmAt();
 
     m_objRemoveList.insert(obj->GetObjectGuid());
 
@@ -1493,10 +1483,7 @@ void Map::SendInitBeforeGrid(Player* player, UpdateData& updateData) const
 {
     // attach to player data current transport data
     if (GenericTransport* transport = player->GetTransport())
-    {
-        player->AddAtClient(transport);
-        transport->BuildCreateUpdateBlockForPlayer(updateData, player);
-    }
+        player->CreateAtClient(transport, updateData);
 }
 
 void Map::SendInitSelf(Player* player, UpdateData& updateData) const
@@ -1511,10 +1498,7 @@ void Map::SendInitSelf(Player* player, UpdateData& updateData) const
             if (player != passenger)
             {
                 if (!player->HasAtClient(passenger) && passenger->isVisibleForInState(player, player, false))
-                {
-                    player->AddAtClient(passenger);
-                    passenger->BuildCreateUpdateBlockForPlayer(updateData, player);
-                }
+                    player->CreateAtClient(passenger, updateData);
             }
         }
     }
@@ -1532,10 +1516,7 @@ void Map::SendInitInfiniteObjects(Player* player, UpdateData& updateData) const
     {
         // send data for current transport in other place - if player is on transport, already sent in init self
         if (i->GetMapId() == i_id && !player->HasAtClient(i))
-        {
-            player->AddAtClient(i);
-            i->BuildCreateUpdateBlockForPlayer(updateData, player);
-        }
+            player->CreateAtClient(i, updateData);
     }
 }
 
@@ -1550,10 +1531,7 @@ void Map::SendRemoveInfinite(Player* player) const
     for (auto i : m_infiniteObjects)
     {
         if (i->GetMapId() != i_id && player->HasAtClient(i))
-        {
-            i->BuildOutOfRangeUpdateBlock(updateData);
-            player->RemoveAtClient(i);
-        }
+            player->RemoveAtClient(i, updateData);
     }
 
     updateData.SendData(*player->GetSession());
@@ -2532,45 +2510,37 @@ WorldObject* Map::GetWorldObject(ObjectGuid guid)
     return nullptr;
 }
 
-void Map::UpdateVisibility(UpdateDataMapType& update_players)
+void Map::UpdateVisibility()
 {
-    // newly created npcs are done every tick
-    std::unordered_set<Object*> visited;
+    // objects added or changed in a way that matters for visibility are checked at every tick,
+    // moved objects every 1200 ms, large and gigantic objects every 2400 ms
+    m_visibilityCheckedObjects.clear();
+    auto check = [this](Object* obj)
     {
-        std::set<std::pair<Object*, ObjectGuid>> createObjects;
-        std::swap(createObjects, m_objectsToClientCreateUpdate);
-        for (auto& createObj : createObjects)
-        {
-            createObj.first->UpdateVisibility(update_players);
-            visited.insert(createObj.first);
-        }
+        m_visibilityCheckedObjects.emplace_back(obj->isType(TYPEMASK_WORLDOBJECT) ? static_cast<WorldObject*>(obj)->GetCarrierDepth() : 0, obj);
+    };
+
+    for (auto& createObj : m_objectsToClientCreateUpdate)
+        check(createObj.first);
+    m_objectsToClientCreateUpdate.clear();
+
+    if (m_clientUpdateTick % 3 == 0)
+    {
+        for (Object* movedObj : m_objectsToClientMovementUpdate)
+            check(movedObj);
+        m_objectsToClientMovementUpdate.clear();
     }
 
-    if (m_clientUpdateTick % 3 == 0) // every 1200ms update vis on moved objects
-    {
-        std::set<Object*> movementObjects;
-        std::swap(movementObjects, m_objectsToClientMovementUpdate);
-        for (auto& movObj : movementObjects)
-        {
-            if (visited.find(movObj) == visited.end())
-            {
-                movObj->UpdateVisibility(update_players);
-                visited.insert(movObj);
-            }
-        }
-    }
-
-    if (m_clientUpdateTick % 6 == 0) // every 2400ms update vis on large and gigantic objects
-    {
+    if (m_clientUpdateTick % 6 == 0)
         for (WorldObject* largeObj : m_largeObjects)
-        {
-            if (visited.find(largeObj) == visited.end())
-            {
-                largeObj->UpdateVisibility(update_players);
-                visited.insert(largeObj);
-            }
-        }
-    }
+            check(largeObj);
+
+    // each object once, a transport before its passengers
+    std::sort(m_visibilityCheckedObjects.begin(), m_visibilityCheckedObjects.end());
+    m_visibilityCheckedObjects.erase(std::unique(m_visibilityCheckedObjects.begin(), m_visibilityCheckedObjects.end()), m_visibilityCheckedObjects.end());
+
+    for (auto const& checked : m_visibilityCheckedObjects)
+        checked.second->UpdateVisibility();
 
     // every 400ms vs every 2000ms
     if (IsBattleGround() ? IsUpdateObjectTick() : IsStealthTick())
@@ -2587,48 +2557,33 @@ void Map::UpdateVisibility(UpdateDataMapType& update_players)
     }
 }
 
+// Client update tick: the visibility of all the clients is decided first, then the values and the view changes are
+// written, one SMSG_UPDATE_OBJECT per client, split only when too large
 void Map::SendObjectUpdates()
 {
-    UpdateDataMapType update_players;
+    // 1. Which objects enter and leave the view of each client. What the clients have changes, nothing is written yet.
+    UpdateVisibility();
 
-    while (!m_objectsToClientUpdate.empty()) // do it first to avoid sending update and create to same obj
+    // 2. The changed values of each object, for the clients that have it: neither those that lost it nor those it is
+    //    created at, whose creation carries all the values. The field marks are cleared.
+    std::set<Object*> changedObjects;
+    std::swap(changedObjects, m_objectsToClientUpdate);
+    for (Object* obj : changedObjects)
+        obj->BuildUpdateData();
+
+    // 3. For each client the out of range block, at the head of its packet, and the creations; then the packet is sent
+    for (MapRefManager::iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
     {
-        Object* obj = *m_objectsToClientUpdate.begin();
-        m_objectsToClientUpdate.erase(m_objectsToClientUpdate.begin());
-        obj->BuildUpdateData(update_players);
+        Player* player = itr->getSource();
+        player->WriteViewChanges(player->GetClientUpdate());
+        player->SendClientUpdate();
     }
 
-    UpdateVisibility(update_players);
-
-    {
-        std::unordered_map<Object*, PlayerSet> visibilityAdded;
-        std::swap(visibilityAdded, m_visibilityAdded);
-        for (auto& visData : visibilityAdded)
-        {               
-            for (Player* player : visData.second)
-                visData.first->BuildCreateDataForPlayer(player, update_players, false);
-
-            visData.first->SetItsNewObject(false);
-        }
-    }
-
-    {
-        std::vector<std::pair<GuidSet, ObjectGuid>> removeObjects;
-        std::swap(removeObjects, m_objectsToClientRemove);
-        for (auto& removeObj : removeObjects)
-        {
-            for (ObjectGuid clientImAt : removeObj.first)
-            {
-                if (Player* player = GetPlayer(clientImAt))
-                    Object::BuildOutOfRangeDataForPlayer(player, update_players, removeObj.second);
-            }
-        }
-    }
-
-    for (auto& update_player : update_players)
-    {
-        update_player.second.SendData(*update_player.first->GetSession());
-    }
+    // an object added to the map stays new until the end of its first visibility check or until its values are written:
+    // the clients it is created at meanwhile get UPDATETYPE_CREATE_OBJECT2, the creation of an object that appears
+    for (auto const& checked : m_visibilityCheckedObjects)
+        checked.second->SetItsNewObject(false);
+    m_visibilityCheckedObjects.clear();
 }
 
 Creature* Map::GetCreature(uint32 dbguid) const
@@ -2749,26 +2704,6 @@ void Map::RemoveStringIdObject(uint32 stringId, WorldObject* obj)
         data.creatures.erase(std::remove(data.creatures.begin(), data.creatures.end(), static_cast<Creature*>(obj)), data.creatures.end());
     else if (obj->IsGameObject())
         data.gameobjects.erase(std::remove(data.gameobjects.begin(), data.gameobjects.end(), static_cast<GameObject*>(obj)), data.gameobjects.end());
-}
-
-void Map::AddUpdateRemoveObject(GuidSet& visible, ObjectGuid guid)
-{
-    m_objectsToClientRemove.emplace_back(visible, guid);
-}
-
-void Map::AddUpdateRemoveObject(GuidSet&& visible, ObjectGuid guid)
-{
-    m_objectsToClientRemove.emplace_back(visible, guid);
-}
-
-void Map::AddCreateAtClientObject(Player* player, Object* obj)
-{
-    m_visibilityAdded[obj].insert(player);
-}
-
-void Map::AddCreateAtClientObjects(PlayerSet const& players, Object* obj)
-{
-    m_visibilityAdded[obj].insert(players.begin(), players.end());
 }
 
 void Map::AddCameraToWorld(WorldObject* obj)

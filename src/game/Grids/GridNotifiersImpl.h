@@ -34,10 +34,7 @@ template<class T>
 inline void MaNGOS::VisibleNotifier::Visit(GridRefManager<T>& m)
 {
     for (typename GridRefManager<T>::iterator iter = m.begin(); iter != m.end(); ++iter)
-    {
-        i_camera.UpdateVisibilityOf(iter->getSource(), i_data, i_visibleNow);
-        i_clientGUIDs.erase(iter->getSource()->GetObjectGuid());
-    }
+        i_camera.UpdateVisibilityOf(iter->getSource());
 }
 
 inline void MaNGOS::ObjectUpdater::Visit(CreatureMapType& m)

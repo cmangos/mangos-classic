@@ -1034,18 +1034,19 @@ void Item::RemoveFromClientUpdateList()
         pl->GetMap()->RemoveUpdateObject(this);
 }
 
-void Item::BuildUpdateData(UpdateDataMapType& update_players)
+void Item::BuildUpdateData()
 {
     if (Player* pl = GetOwner())
-        BuildUpdateDataForPlayer(pl, update_players);
+        if (!pl->IsItemCreationPending(this))               // a creation not written yet carries all the values
+            BuildValuesUpdateBlockForPlayer(pl->GetClientUpdate(), pl);
 
     ClearUpdateMask(false);
 }
 
-void Item::UpdateVisibility(UpdateDataMapType& /*update_players*/)
+void Item::UpdateVisibility()
 {
     if (Player* pl = GetOwner())
-        pl->GetMap()->AddCreateAtClientObject(pl, this);
+        pl->ScheduleItemCreate(this);
 
     if (ItsNewObject())
         SetItsNewObject(false);

@@ -187,11 +187,29 @@ WorldPacket UpdateData::BuildPacketOfBlocks(size_t firstBlock, size_t endBlock) 
 
 void UpdateData::Clear()
 {
+    // the buffers are kept for the next packets, unless a large update made them grow beyond what the usual ones need
+    size_t const keptBlocksSize = 16 * 1024;
+    size_t const keptBlockCount = 512;
+
     m_outOfRangeGUIDs.clear();
-    m_blocks.clear();
-    m_blockEnds.clear();
-    m_transportBlocks.clear();
-    m_afterCreatePacket.clear();
+    if (m_blocks.wpos() > keptBlocksSize)
+        m_blocks = ByteBuffer(0);
+    else
+        m_blocks.clear();
+    if (m_blockEnds.size() > keptBlockCount)
+    {
+        std::vector<size_t>().swap(m_blockEnds);
+        std::vector<bool>().swap(m_transportBlocks);
+    }
+    else
+    {
+        m_blockEnds.clear();
+        m_transportBlocks.clear();
+    }
+    if (m_afterCreatePacket.size() > keptBlockCount)
+        std::vector<WorldPacket>().swap(m_afterCreatePacket);
+    else
+        m_afterCreatePacket.clear();
 }
 
 void UpdateData::SendData(WorldSession& session, bool forceSend/*= false*/) const

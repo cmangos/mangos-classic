@@ -108,7 +108,12 @@ void Camera::Event_AddedToWorld(UpdateData* data)
     grid->AddWorldObject(this);
 
     if (data)
-        UpdateVisibilityForOwner(*data);
+    {
+        if (m_source == &m_owner)
+            UpdateVisibilityForOwner(*data);
+        else
+            UpdateVisibilityForOwner();                     // data is the packet of the viewpoint, not of this camera's owner
+    }
 }
 
 void Camera::Event_RemovedFromWorld()
@@ -128,36 +133,22 @@ void Camera::Event_Moved()
     m_source->GetViewPoint().m_grid->AddWorldObject(this);
 }
 
-template<class T>
-void Camera::UpdateVisibilityOf(T* target, UpdateData& data, WorldObjectSet& vis)
+void Camera::UpdateVisibilityOf(WorldObject* target) const
 {
-    m_owner.UpdateVisibilityOf<T>(m_source, target, data, vis);
+    m_owner.UpdateVisibilityOf(m_source, target);
 }
 
-template void Camera::UpdateVisibilityOf(Player*, UpdateData&, WorldObjectSet&);
-template void Camera::UpdateVisibilityOf(Creature*, UpdateData&, WorldObjectSet&);
-template void Camera::UpdateVisibilityOf(Corpse*, UpdateData&, WorldObjectSet&);
-template void Camera::UpdateVisibilityOf(GameObject*, UpdateData&, WorldObjectSet&);
-template void Camera::UpdateVisibilityOf(DynamicObject*, UpdateData&, WorldObjectSet&);
-
-void Camera::UpdateVisibilityForOwner(UpdateDataMapType& update_players)
+void Camera::UpdateVisibilityForOwner()
 {
-    UpdateDataMapType::iterator iter = update_players.find(GetOwner());
-
-    if (iter == update_players.end())
-    {
-        std::pair<UpdateDataMapType::iterator, bool> p = update_players.insert(UpdateDataMapType::value_type(GetOwner(), UpdateData()));
-        MANGOS_ASSERT(p.second);
-        iter = p.first;
-    }
-    UpdateVisibilityForOwner(iter->second);
+    MaNGOS::VisibleNotifier notifier(*this);
+    Cell::VisitAllObjects(m_source, notifier, MAX_VISIBILITY_DISTANCE, false);
+    notifier.Notify();
 }
 
 void Camera::UpdateVisibilityForOwner(UpdateData& data)
 {
-    MaNGOS::VisibleNotifier notifier(*this, data);
-    Cell::VisitAllObjects(m_source, notifier, MAX_VISIBILITY_DISTANCE, false);
-    notifier.Notify();
+    UpdateVisibilityForOwner();
+    m_owner.WriteViewChanges(data);
 }
 
 //////////////////

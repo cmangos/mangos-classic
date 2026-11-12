@@ -598,29 +598,18 @@ void Transport::UpdateForMap(Map const* targetMap, bool newMap)
     if (pl.isEmpty())
         return;
 
-    if (newMap)
+    for (const auto& itr : pl)
     {
-        for (const auto& itr : pl)
+        Player* player = itr.getSource();
+        if (this != player->GetTransport())
         {
-            Player* player = itr.getSource();
-            if (this != itr.getSource()->GetTransport())
-            {
-                UpdateData updateData;
-                BuildCreateUpdateBlockForPlayer(updateData, player);
-                WorldPacket packet = updateData.BuildPacket(0); // always only one packet
-                player->SendDirectMessage(packet);
-                player->AddAtClient(this);
-            }
+            UpdateData updateData;
+            if (newMap)
+                player->CreateAtClient(this, updateData);
+            else
+                player->RemoveAtClient(this, updateData);
+            updateData.SendData(*player->GetSession());
         }
-    }
-    else
-    {
-        UpdateData updateData;
-        BuildOutOfRangeUpdateBlock(updateData);
-        WorldPacket packet = updateData.BuildPacket(0); // always only one packet
-        for (const auto& itr : pl)
-            if (this != itr.getSource()->GetTransport())
-                itr.getSource()->SendDirectMessage(packet);
     }
 }
 

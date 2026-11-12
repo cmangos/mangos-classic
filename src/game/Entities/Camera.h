@@ -47,13 +47,13 @@ class Camera
         // set view to camera's owner
         void ResetView(bool update_far_sight_field = true);
 
-        template<class T>
-        void UpdateVisibilityOf(T* target, UpdateData& data, WorldObjectSet& vis);
+        void UpdateVisibilityOf(WorldObject* target) const;
 
         void ReceivePacket(WorldPacket& data);
 
-        // updates visibility of worldobjects around viewpoint for camera's owner
-        void UpdateVisibilityForOwner(UpdateDataMapType& update_players);
+        // decides which worldobjects around the viewpoint enter and leave the view of the camera's owner
+        void UpdateVisibilityForOwner();
+        // same, and writes the changes of the owner's view into data at once
         void UpdateVisibilityForOwner(UpdateData& data);
 
     private:
@@ -132,9 +132,9 @@ class ViewPoint
             CameraCall([&](Camera* c) { c->Event_ViewPointVisibilityChanged(); });
         }
 
-        void Call_UpdateVisibilityForOwner(UpdateDataMapType& update_players)
+        void Call_UpdateVisibilityForOwner()
         {
-            CameraCall([&](Camera* c) { c->UpdateVisibilityForOwner(update_players); });
+            CameraCall([&](Camera* c) { c->UpdateVisibilityForOwner(); });
         }
 };
 

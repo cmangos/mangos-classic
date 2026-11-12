@@ -32,14 +32,12 @@
 
 namespace MaNGOS
 {
+    // Objects around a camera that enter and leave the view of its owner
     struct VisibleNotifier
     {
         Camera& i_camera;
-        UpdateData& i_data;
-        GuidSet i_clientGUIDs;
-        WorldObjectSet i_visibleNow;
 
-        explicit VisibleNotifier(Camera& c, UpdateData& data) : i_camera(c), i_data(data), i_clientGUIDs(c.GetOwner()->GetClientGuids()) {}
+        explicit VisibleNotifier(Camera& c) : i_camera(c) { c.GetOwner()->StartCameraVisit(); }
         template<class T> void Visit(GridRefManager<T>& m);
         void Visit(CameraMapType& /*m*/) {}
         void Notify(void);
