@@ -48,13 +48,9 @@ enum ObjectUpdateFlags
     UPDATEFLAG_HAS_POSITION = 0x0040
 };
 
-struct BufferPair
-{
-    ByteBuffer m_buffer;
-    uint32 m_blockCount;
-    bool m_hasTransport;
-};
-
+// Blocks of SMSG_UPDATE_OBJECT for one client. The packets are cut when they are built: the out of range block goes once,
+// at the head of the first packet, the other blocks follow in the order they were added, and a block that does not fit
+// starts a new packet.
 class UpdateData
 {
     public:
@@ -64,19 +60,20 @@ class UpdateData
         void AddOutOfRangeGUID(ObjectGuid const& guid);
         void AddUpdateBlock(const ByteBuffer& block, bool transport);
         void AddAfterCreatePacket(const WorldPacket& data);
-        WorldPacket BuildPacket(size_t index); // Copy Elision is a thing
-        bool HasData() const { return m_data[0].m_buffer.size() > 0 || !m_outOfRangeGUIDs.empty(); }
-        size_t GetPacketCount() const { return m_data.size(); }
+        WorldPacket BuildPacket(size_t index) const; // Copy Elision is a thing
+        bool HasData() const { return !m_blockEnds.empty() || !m_outOfRangeGUIDs.empty(); }
         void Clear();
 
-        GuidSet const& GetOutOfRangeGUIDs() const { return m_outOfRangeGUIDs; }
-
-        void SendData(WorldSession& session, bool forceSend = false);
+        void SendData(WorldSession& session, bool forceSend = false) const;
 
     protected:
+        size_t GetPacketEnd(size_t firstBlock) const;
+        WorldPacket BuildPacketOfBlocks(size_t firstBlock, size_t endBlock) const;
+
         GuidSet m_outOfRangeGUIDs;
-        std::vector<BufferPair> m_data;
-        uint32 m_currentIndex;
+        ByteBuffer m_blocks;
+        std::vector<size_t> m_blockEnds;                    // end of each block in m_blocks
+        std::vector<bool> m_transportBlocks;                // whether each block is a transport's
 
         std::vector<WorldPacket> m_afterCreatePacket;
 
