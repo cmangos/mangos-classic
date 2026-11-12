@@ -240,6 +240,10 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
             }
             case TYPEID_PLAYER:
             {
+                // a path that goes on in the same map keeps its passengers aboard, as the client does
+                if (!mapChange)
+                    break;
+
                 Player* player = static_cast<Player*>(obj);
                 if (player->IsDead() && !player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
                     player->ResurrectPlayer(1.0);
@@ -269,7 +273,10 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
         });
     }
     else
+    {
         UpdateModelPosition();
+        UpdatePassengerPositions(m_passengers);
+    }
 }
 
 bool GenericTransport::AddPassenger(Unit* passenger, bool adjustCoords)
