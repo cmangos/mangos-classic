@@ -10097,87 +10097,56 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
     AddEnchantmentDurations(pItem);
     AddItemDurations(pItem);
 
-    uint8 bag = pos >> 8;
     uint8 slot = pos & 255;
 
-    Item* pItem2 = GetItemByPos(bag, slot);
+    VisualizeItem(slot, pItem);
 
-    if (!pItem2)
+    if (IsAlive())
     {
-        VisualizeItem(slot, pItem);
+        ItemPrototype const* pProto = pItem->GetProto();
 
-        if (IsAlive())
+        // item set bonuses applied only at equip and removed at unequip, and still active for broken items
+        if (pProto && pProto->ItemSet)
+            AddItemsSetItem(this, pItem);
+
+        _ApplyItemMods(pItem, slot, true);
+
+        // Weapons and also Totem/Relic/Sigil/etc
+        if (pProto && IsInCombat() && (pProto->Class == ITEM_CLASS_WEAPON || pProto->InventoryType == INVTYPE_RELIC))
         {
-            ItemPrototype const* pProto = pItem->GetProto();
+            if (slot == SLOT_MAIN_HAND)
+                resetAttackTimer(BASE_ATTACK);
+            else if (slot == SLOT_OFF_HAND)
+                resetAttackTimer(OFF_ATTACK);
 
-            // item set bonuses applied only at equip and removed at unequip, and still active for broken items
-            if (pProto && pProto->ItemSet)
-                AddItemsSetItem(this, pItem);
+            uint32 cooldownSpell = SPELL_ID_WEAPON_SWITCH_COOLDOWN_1_5s;
 
-            _ApplyItemMods(pItem, slot, true);
+            if (getClass() == CLASS_ROGUE)
+                cooldownSpell = SPELL_ID_WEAPON_SWITCH_COOLDOWN_1_0s;
 
-            // Weapons and also Totem/Relic/Sigil/etc
-            if (pProto && IsInCombat() && (pProto->Class == ITEM_CLASS_WEAPON || pProto->InventoryType == INVTYPE_RELIC))
-            {
-                if (slot == SLOT_MAIN_HAND)
-                    resetAttackTimer(BASE_ATTACK);
-                else if (slot == SLOT_OFF_HAND)
-                    resetAttackTimer(OFF_ATTACK);
+            SpellEntry const* spellProto = sSpellTemplate.LookupEntry<SpellEntry>(cooldownSpell);
 
-                uint32 cooldownSpell = SPELL_ID_WEAPON_SWITCH_COOLDOWN_1_5s;
-
-                if (getClass() == CLASS_ROGUE)
-                    cooldownSpell = SPELL_ID_WEAPON_SWITCH_COOLDOWN_1_0s;
-
-                SpellEntry const* spellProto = sSpellTemplate.LookupEntry<SpellEntry>(cooldownSpell);
-
-                if (!spellProto)
-                    sLog.outError("Weapon switch cooldown spell %u couldn't be found in Spell.dbc", cooldownSpell);
-                else
-                    AddGCD(*spellProto, 0, true);
-            }
+            if (!spellProto)
+                sLog.outError("Weapon switch cooldown spell %u couldn't be found in Spell.dbc", cooldownSpell);
+            else
+                AddGCD(*spellProto, 0, true);
         }
-
-        if (IsInWorld() && update)
-        {
-            pItem->AddToWorld();
-            GetMap()->AddUpdateCreateObject(pItem);
-        }
-
-        ApplyEquipCooldown(pItem);
-
-        if (slot == EQUIPMENT_SLOT_MAINHAND)
-            UpdateWeaponDependantStats(BASE_ATTACK);
-        else if (slot == EQUIPMENT_SLOT_OFFHAND)
-            UpdateWeaponDependantStats(OFF_ATTACK);
-        else if (slot == EQUIPMENT_SLOT_RANGED)
-            UpdateWeaponDependantStats(RANGED_ATTACK);
     }
-    else
+
+    if (IsInWorld() && update)
     {
-        pItem2->SetCount(pItem2->GetCount() + pItem->GetCount());
-        if (IsInWorld() && update)
-        {
-            GetMap()->AddUpdateCreateObject(pItem2);
-        }
-
-        if (IsInWorld() && update)
-        {
-            pItem->RemoveFromWorld();
-            ScheduleItemOutOfRange(pItem->GetObjectGuid());
-        }
-
-        RemoveEnchantmentDurations(pItem);
-        RemoveItemDurations(pItem);
-
-        pItem->SetOwnerGuid(GetObjectGuid());               // prevent error at next SetState in case trade/mail/buy from vendor
-        pItem->SetState(ITEM_REMOVED, this);
-        pItem2->SetState(ITEM_CHANGED, this);
-
-        ApplyEquipCooldown(pItem2);
-
-        return pItem2;
+        pItem->AddToWorld();
+        GetMap()->AddUpdateCreateObject(pItem);
     }
+
+    ApplyEquipCooldown(pItem);
+
+    if (slot == EQUIPMENT_SLOT_MAINHAND)
+        UpdateWeaponDependantStats(BASE_ATTACK);
+    else if (slot == EQUIPMENT_SLOT_OFFHAND)
+        UpdateWeaponDependantStats(OFF_ATTACK);
+    else if (slot == EQUIPMENT_SLOT_RANGED)
+        UpdateWeaponDependantStats(RANGED_ATTACK);
 
     return pItem;
 }
