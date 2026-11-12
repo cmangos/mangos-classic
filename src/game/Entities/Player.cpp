@@ -1477,7 +1477,8 @@ void Player::Update(const uint32 diff)
             m_positionStatusUpdateTimer -= diff;
     }
 
-    if (m_zoneUpdateTimer > 0)
+    // the zone of a near teleport changes at its acknowledgement, though the position is the destination since the order
+    if (m_zoneUpdateTimer > 0 && !IsBeingTeleportedNear())
     {
         if (diff >= m_zoneUpdateTimer)
         {
@@ -2023,7 +2024,18 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         SetSemaphoreTeleportNear(true);
         // near teleport, triggering send MSG_MOVE_TELEPORT_ACK from client at landing
         if (!GetSession()->PlayerLogout())
+        {
             SendTeleportPacket(x, y, z, orientation, currentTransport);
+
+            // the player is at the destination from the order on: the next visibility update sends the objects around it
+            // and removes those of the old place
+            if (IsInWorld())
+            {
+                SetDelayedZoneUpdate(false, 0);
+                SetPosition(x, y, z, orientation, true);
+                GetMap()->AddUpdateCreateObject(this);
+            }
+        }
 
         if (Loot* loot = sLootMgr.GetLoot(this))
             loot->Release(this);

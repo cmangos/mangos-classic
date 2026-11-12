@@ -306,14 +306,12 @@ void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)
 
     plMover->SetSemaphoreTeleportNear(false);
 
-    uint32 old_zone = plMover->GetZoneId();
+    // the position is the destination since the order, the zone still the one before the teleport
+    uint32 old_zone = plMover->GetCachedZoneId();
 
     WorldLocation const& dest = plMover->GetTeleportDest();
 
 #ifdef ENABLE_PLAYERBOTS
-    // send MSG_MOVE_TELEPORT to observers around old position
-    SendTeleportToObservers(dest.coord_x, dest.coord_y, dest.coord_z, dest.orientation);
-
     // interrupt moving for bot if any
     if (plMover->GetPlayerbotAI() && !plMover->GetMotionMaster()->empty())
     {
