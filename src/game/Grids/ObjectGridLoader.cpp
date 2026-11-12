@@ -141,6 +141,10 @@ void LoadHelper(CellGuidSet const& guid_set, CellPair& cell, GridRefManager<T>& 
             continue;
         }
 
+        // on a continent the objects of a loaded grid are already there for the players around: not created as new objects
+        if (!map->Instanceable())
+            obj->SetItsNewObject(false);
+
         if (!obj->IsCreature())
         {
             grid.AddGridObject(obj);
