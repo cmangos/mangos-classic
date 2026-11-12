@@ -48,6 +48,23 @@ class UpdateMask
             return (((uint8*)mUpdateMask)[ index >> 3 ] & (1 << (index & 0x7))) != 0;
         }
 
+        // first set bit at or after index, GetCount() if there is none: empty blocks and bytes are skipped whole
+        uint32 GetNextSetBit(uint32 index) const
+        {
+            while (index < mCount)
+            {
+                if ((index & 0x1F) == 0 && mUpdateMask[index >> 5] == 0)
+                    index += 32;
+                else if ((((uint8*)mUpdateMask)[index >> 3] >> (index & 0x7)) == 0)
+                    index = (index | 0x7) + 1;
+                else if (GetBit(index))
+                    return index;
+                else
+                    ++index;
+            }
+            return mCount;
+        }
+
         uint32 GetBlockCount() const { return mBlocks; }
         uint32 GetLength() const { return mBlocks << 2; }
         uint32 GetCount() const { return mCount; }

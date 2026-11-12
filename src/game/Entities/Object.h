@@ -24,6 +24,7 @@
 #include "Util/ByteBuffer.h"
 #include "Entities/UpdateFields.h"
 #include "Entities/UpdateData.h"
+#include "Entities/UpdateMask.h"
 #include "Entities/ObjectGuid.h"
 #include "Entities/EntitiesMgr.h"
 #include "Globals/SharedDefines.h"
@@ -382,7 +383,21 @@ class Object
         virtual void BuildUpdateData() = 0;
         void MarkForClientUpdate();
 
-        void BuildValuesUpdateBlockForPlayer(UpdateData& data, Player* target) const;
+        // Values block of this object for each of its clients: the changed fields are listed once, at the first client,
+        // then each client gets those its update field flags let it see, with the values computed for it
+        class ChangedValuesWriter
+        {
+            public:
+                explicit ChangedValuesWriter(Object const& object) : m_object(object), m_fieldsListed(false) {}
+                void WriteFor(Player* client);              // into the client's update packet
+
+            private:
+                Object const& m_object;
+                bool m_fieldsListed;
+                std::vector<uint16> m_changedFields;
+                UpdateMask m_visibleFields;
+        };
+
         void BuildValuesUpdateBlockForPlayerWithFlags(UpdateData& data, Player* target, UpdateFieldFlags flags) const;
         void BuildValuesUpdateBlockForPlayer(UpdateData& data, UpdateMask& updateMask, Player* target) const;
         void BuildForcedValuesUpdateBlockForPlayer(UpdateData& data, Player* target) const;
@@ -601,7 +616,6 @@ class Object
         void _Create(uint32 dbGuid, uint32 guidlow, uint32 entry, HighGuid guidhigh);
 
         uint16 GetUpdateFieldFlagsForTarget(Player const* target, uint16 const*& flags) const;
-        void _SetUpdateBits(UpdateMask& updateMask, Player* target) const;
         void _SetCreateBits(UpdateMask& updateMask, Player* target) const;
 
         void BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags, Player const* target) const;

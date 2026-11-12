@@ -192,14 +192,32 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData& data, Player* target) c
     }
 }
 
-void Object::BuildValuesUpdateBlockForPlayer(UpdateData& data, Player* target) const
+void Object::ChangedValuesWriter::WriteFor(Player* client)
 {
-    UpdateMask updateMask;
-    updateMask.SetCount(m_valuesCount);
+    if (!m_fieldsListed)
+    {
+        m_fieldsListed = true;
+        for (uint16 index = 0; index < m_object.m_valuesCount; ++index)
+            if (m_object.m_changedValues[index])
+                m_changedFields.push_back(index);
+        if (!m_changedFields.empty())
+            m_visibleFields.SetCount(m_object.m_valuesCount);
+    }
 
-    _SetUpdateBits(updateMask, target);
-    if (updateMask.HasData())
-        BuildValuesUpdateBlockForPlayer(data, updateMask, target);
+    if (m_changedFields.empty())
+        return;
+
+    uint16 const* flags = nullptr;
+    uint16 const visibleFlag = m_object.GetUpdateFieldFlagsForTarget(client, flags);
+    MANGOS_ASSERT(flags);
+
+    m_visibleFields.Clear();
+    for (uint16 index : m_changedFields)
+        if (flags[index] & visibleFlag)
+            m_visibleFields.SetBit(index);
+
+    if (m_visibleFields.HasData())
+        m_object.BuildValuesUpdateBlockForPlayer(client->GetClientUpdate(), m_visibleFields, client);
 }
 
 void Object::BuildValuesUpdateBlockForPlayerWithFlags(UpdateData& data, Player* target, UpdateFieldFlags flags) const
@@ -412,7 +430,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
     // 2 specialized loops for speed optimization in non-unit case
     if (isType(TYPEMASK_UNIT))                              // unit (creature/player) case
     {
-        for (uint16 index = 0; index < m_valuesCount; ++index)
+        for (uint32 index = updateMask->GetNextSetBit(0); index < updateMask->GetCount(); index = updateMask->GetNextSetBit(index + 1))
         {
             if (updateMask->GetBit(index))
             {
@@ -631,7 +649,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
     }
     else if (isType(TYPEMASK_CORPSE))                       // corpse case
     {
-        for (uint16 index = 0; index < m_valuesCount; ++index)
+        for (uint32 index = updateMask->GetNextSetBit(0); index < updateMask->GetCount(); index = updateMask->GetNextSetBit(index + 1))
         {
             if (updateMask->GetBit(index))
             {
@@ -664,7 +682,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
     }
     else if (isType(TYPEMASK_GAMEOBJECT))                   // gameobject case
     {
-        for (uint16 index = 0; index < m_valuesCount; ++index)
+        for (uint32 index = updateMask->GetNextSetBit(0); index < updateMask->GetCount(); index = updateMask->GetNextSetBit(index + 1))
         {
             if (updateMask->GetBit(index))
             {
@@ -705,7 +723,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
     }
     else                                                    // other objects case (no special index checks)
     {
-        for (uint16 index = 0; index < m_valuesCount; ++index)
+        for (uint32 index = updateMask->GetNextSetBit(0); index < updateMask->GetCount(); index = updateMask->GetNextSetBit(index + 1))
         {
             if (updateMask->GetBit(index))
             {
@@ -719,10 +737,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
 void Object::ClearUpdateMask(bool remove)
 {
     if (m_uint32Values)
-    {
-        for (uint16 index = 0; index < m_valuesCount; ++index)
-            m_changedValues[index] = false;
-    }
+        std::fill(m_changedValues.begin(), m_changedValues.end(), false);
 
     if (m_objectUpdated)
     {
@@ -808,17 +823,6 @@ void Object::MarkUpdateFieldsWithFlagForUpdate(UpdateMask& updateMask, uint16 fl
         if (GetUInt32Value(index) != 0 && (flags[index] & flag))
             updateMask.SetBit(index);
     }
-}
-
-void Object::_SetUpdateBits(UpdateMask& updateMask, Player* target) const
-{
-    uint16 const* flags = nullptr;
-    uint16 visibleFlag = GetUpdateFieldFlagsForTarget(target, flags);
-    MANGOS_ASSERT(flags);
-
-    for (uint16 index = 0; index < m_valuesCount; ++index)
-        if (m_changedValues[index] && (flags[index] & visibleFlag))
-            updateMask.SetBit(index);
 }
 
 void Object::_SetCreateBits(UpdateMask& updateMask, Player* target) const
@@ -2508,13 +2512,15 @@ void WorldObject::BuildUpdateData()
     if (ItsNewObject())
         GetMap()->AddCameraToWorld(this);
 
+    ChangedValuesWriter values(*this);
+
     if (IsPlayer())
-        BuildValuesUpdateBlockForPlayer(static_cast<Player*>(this)->GetClientUpdate(), static_cast<Player*>(this));
+        values.WriteFor(static_cast<Player*>(this));
 
     for (ObjectGuid const& guid : m_clientGUIDsIAmAt)
         if (Player* client = GetMap()->GetPlayer(guid))
             if (client != this && !client->IsCreationPending(this)) // a creation not written yet carries all the values
-                BuildValuesUpdateBlockForPlayer(client->GetClientUpdate(), client);
+                values.WriteFor(client);
 
     ClearUpdateMask(false);
 
