@@ -93,8 +93,11 @@ void VisibleNotifier::Notify()
             player.RemoveAtClient(target);
         }
         else
+        {
             sLog.outCustomLog("Object was %s in current map.", player.GetMap()->m_objRemoveList.find(*itr) == player.GetMap()->m_objRemoveList.end() ? "not found" : "found");
-        
+            // the out of range block removes it from the client
+            player.GetClientGuids().erase(*itr);
+        }
 
         DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "%s is out of range (no in active cells set) now for %s",
                          itr->GetString().c_str(), player.GetGuidStr().c_str());
