@@ -597,14 +597,16 @@ void WorldSession::SendKnockBack(Unit* who, float angle, float horizontalSpeed, 
     float vsin = sin(angle);
     float vcos = cos(angle);
 
+    uint32 const counter = GetOrderCounter();
     WorldPacket data(SMSG_MOVE_KNOCK_BACK, 9 + 4 + 4 + 4 + 4 + 4);
     data << who->GetPackGUID();
-    data << GetOrderCounter();
+    data << counter;
     data << float(vcos);                                // x direction
     data << float(vsin);                                // y direction
     data << float(horizontalSpeed);                     // Horizontal speed
     data << float(-verticalSpeed);                      // Z Movement speed (vertical)
     SendPacket(data);
+    m_anticheat->OrderSent(data.GetOpcode(), counter);
     IncrementOrderCounter();
 
     m_anticheat->KnockBack(horizontalSpeed, -verticalSpeed, vcos, vsin);
