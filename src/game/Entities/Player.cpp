@@ -1573,6 +1573,14 @@ void Player::Update(const uint32 diff)
 
     if (IsHasDelayedTeleport() && !m_semaphoreTeleport_Near)
         TeleportTo(m_teleport_dest, m_teleport_options);
+    // a teleport delayed by a living player is not done once it died: it is dropped with its transport
+    else if (m_bHasDelayedTeleport && !IsHasDelayedTeleport())
+    {
+        m_bHasDelayedTeleport = false;
+        m_teleportTransport = ObjectGuid();
+        SetSemaphoreTeleportNear(false);
+        SetSemaphoreTeleportFar(false);
+    }
 }
 
 void Player::Heartbeat()
