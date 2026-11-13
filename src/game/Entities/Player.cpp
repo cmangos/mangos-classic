@@ -14199,6 +14199,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
             const WorldLocation& _loc = GetBattleGroundEntryPoint();
             SetLocationMapId(_loc.mapid);
             Relocate(_loc.coord_x, _loc.coord_y, _loc.coord_z, _loc.orientation);
+            transGUID = 0;                                  // the saved transport is in the battleground
 
             // We are not in BG anymore
             SetBattleGroundId(0, BATTLEGROUND_TYPE_NONE);
@@ -14216,6 +14217,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
             const WorldLocation& _loc = GetBattleGroundEntryPoint();
             SetLocationMapId(_loc.mapid);
             Relocate(_loc.coord_x, _loc.coord_y, _loc.coord_z, _loc.orientation);
+            transGUID = 0;                                  // the saved transport is in the battleground
 
             // We are not in BG anymore
             SetBattleGroundId(0, BATTLEGROUND_TYPE_NONE);
