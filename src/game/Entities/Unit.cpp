@@ -649,6 +649,11 @@ bool Unit::UpdateMeleeAttackingState()
     if (GetTypeId() != TYPEID_PLAYER && (!static_cast<Creature*>(this)->CanInitiateAttack()))
         return false;
 
+    // a creature draws its sheathed weapon when it fights in melee
+    // a caster holding its range keeps it sheathed until its victim is within melee reach
+    if (IsCreature() && GetSheath() == SHEATH_STATE_UNARMED && !(AI() && AI()->GetCurrentRangedMode() && !CanReachWithMeleeAttack(victim)))
+        SetSheath(SHEATH_STATE_MELEE);
+
     if (m_extraAttacks)
     {
         DoExtraAttacks(victim);
