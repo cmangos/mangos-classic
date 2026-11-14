@@ -4370,13 +4370,15 @@ void Spell::TakeCastItem()
 
     if (expendable && withoutCharges)
     {
-        if (m_CastItem)
-            m_CastItem->SetUsedInSpell(false);
-        uint32 count = 1;
-        static_cast<Player*>(m_caster)->DestroyItemCount(*m_CastItem, count, true);
+        Item* castItem = m_CastItem;
+        castItem->SetUsedInSpell(false);
 
         // prevent crash at access to deleted m_targets.getItemTarget
+        // cleared before the destroy, so destroying the item does not interrupt this spell
         ClearCastItem();
+
+        uint32 count = 1;
+        static_cast<Player*>(m_caster)->DestroyItemCount(*castItem, count, true);
     }
 }
 

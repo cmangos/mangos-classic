@@ -10308,6 +10308,7 @@ void Player::MoveItemFromInventory(uint8 bag, uint8 slot, bool update)
 {
     if (Item* it = GetItemByPos(bag, slot))
     {
+        InterruptSpellsWithCastItem(it);
         ItemRemovedQuestCheck(it->GetEntry(), it->GetCount());
         RemoveItem(bag, slot, update);
         it->RemoveFromUpdateQueueOf(this);
@@ -10346,6 +10347,8 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
     Item* pItem = GetItemByPos(bag, slot);
     if (pItem)
     {
+        InterruptSpellsWithCastItem(pItem);
+
         DEBUG_LOG("STORAGE: DestroyItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
 
         // start from destroy contained items (only equipped bag can have its)
@@ -18915,6 +18918,22 @@ void Player::RemoveItemDependentAurasAndCasts(Item* pItem)
         if (Spell* spell = GetCurrentSpell(CurrentSpellTypes(i)))
             if (!HasItemFitToSpellReqirements(spell->m_spellInfo, pItem))
                 InterruptSpell(CurrentSpellTypes(i));
+}
+
+void Player::InterruptSpellsWithCastItem(Item* item)
+{
+    // the item is leaving the player, so no spell may keep using it as its cast item
+    for (uint32 i = 0; i < CURRENT_MAX_SPELL; ++i)
+        if (Spell* spell = GetCurrentSpell(CurrentSpellTypes(i)))
+            if (spell->GetCastItem() == item)
+                InterruptSpell(CurrentSpellTypes(i), true);
+
+    // spells past the cast (travelling, or finished and not yet deleted) cannot be interrupted, they only drop the item
+    for (auto& eventPair : m_events.GetEvents())
+        if (SpellEvent* spellEvent = dynamic_cast<SpellEvent*>(eventPair.second))
+            if (Spell* spell = spellEvent->GetSpell())
+                if (spell->GetCastItem() == item)
+                    spell->ClearCastItem();
 }
 
 uint32 Player::GetResurrectionSpellId() const
