@@ -227,6 +227,7 @@ class FormationData
         void SetMovementInfo(MovementGeneratorType moveType, uint32 pahtId);
 
         void ResetLastWP() { m_lastWP = 0; }
+        FormationSlotMap const& GetSlots() const { return m_slotsMap; }
 
     private:
         void SetMasterMovement();

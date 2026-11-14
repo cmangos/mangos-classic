@@ -40,6 +40,7 @@
 #include "Weather/Weather.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "BattleGround/BattleGroundMgr.h"
+#include "Maps/SpawnGroup.h"
 
 #ifdef BUILD_METRICS
  #include "Metric/Metric.h"
@@ -1096,6 +1097,23 @@ void Map::Update(const uint32& t_diff)
             for (auto& waypointNpc : m_waypointingNpcs)
             {
                 visitHomeCell(waypointNpc);
+
+                // A formation master walks its path here even with no player near, but its
+                // followers only update when their own cell is visited. Once the master
+                // leaves their cell they freeze and it walks the path alone.
+                if (FormationSlotDataSPtr slot = waypointNpc->GetFormationSlot())
+                {
+                    FormationData* formation = slot->GetFormationData();
+                    if (formation && slot->IsFormationMaster())
+                    {
+                        for (auto const& slotItr : formation->GetSlots())
+                        {
+                            Unit* follower = slotItr.second->GetOwner();
+                            if (follower && follower != waypointNpc && follower->IsInWorld() && follower->GetMap() == this)
+                                visitHomeCell(follower);
+                        }
+                    }
+                }
             }
         }
     }
