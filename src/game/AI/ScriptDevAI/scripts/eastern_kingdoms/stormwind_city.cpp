@@ -184,6 +184,10 @@ struct npc_dashel_stonefistAI : public CombatAI
         m_thugsAlive = false;
         // restore some flags
         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+        // Clear the death-prevention enabled in HandleStartEvent(). Without this
+        // Dashel stays permanently unkillable (CreatureStaticFlags::UNKILLABLE)
+        // after the encounter completes or is failed.
+        SetDeathPrevention(false);
         // reset player guid
         m_playerGuid.Clear();
 
@@ -273,59 +277,63 @@ struct npc_dashel_stonefistAI : public CombatAI
 
     void HandleEndEvent()
     {
-        // Occurs only if thugs are alive
-        if (m_thugsAlive)
+        // NB: do not gate this whole method on m_thugsAlive. When both thugs are
+        // already dead at surrender time, JustReachedHome() jumps straight to
+        // stage 5 to award the quest - gating on m_thugsAlive would skip that and
+        // the quest would never complete. The thug-dialog stages below null-check each thug,
+        // and ResetThug looks the creature up and checks IsAlive itself, so they are safe to
+        // evaluate either way.
+        uint32 timer = 0;
+        switch (m_phaseThugEventStage)
         {
-            uint32 timer = 0;
-            switch (m_phaseThugEventStage)
+            case 1:
             {
-                case 1:
-                {
-                    if (Creature* thug = m_creature->GetMap()->GetCreature(m_thugs[0]))
-                        if (thug->IsAlive())
-                            DoBroadcastText(SAY_PROGRESS_4_THU, thug);
+                if (Creature* thug = m_creature->GetMap()->GetCreature(m_thugs[0]))
+                    if (thug->IsAlive())
+                        DoBroadcastText(SAY_PROGRESS_4_THU, thug);
 
-                    timer = 1500;
-                    break;
-                }
-                case 2:
-                {
-                    if (Creature* thug = m_creature->GetMap()->GetCreature(m_thugs[1]))
-                        if (thug->IsAlive())
-                            DoBroadcastText(SAY_PROGRESS_5_THU, thug);
-
-                    // switch phase
-                    timer = 1000;
-                    break;
-                }
-                case 3:
-                {
-                    ResetThug(0);
-                    timer = 1500;
-                    break;
-                }
-                case 4:
-                {
-                    ResetThug(1);
-                    timer = 1000;
-                    break;
-                }
-                case 5:
-                {
-                    // Set quest completed
-                    if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
-                        player->AreaExploredOrEventHappens(QUEST_MISSING_DIPLO_PT8);
-
-                    Reset();
-                    break;
-                }
-                default: 
-                    break;
+                timer = 1500;
+                break;
             }
-            ++m_phaseThugEventStage;
-            if (timer)
-                ResetTimer(DASHEL_END_EVENT, timer);
+            case 2:
+            {
+                if (Creature* thug = m_creature->GetMap()->GetCreature(m_thugs[1]))
+                    if (thug->IsAlive())
+                        DoBroadcastText(SAY_PROGRESS_5_THU, thug);
+
+                // switch phase
+                timer = 1000;
+                break;
+            }
+            case 3:
+            {
+                ResetThug(0);
+                timer = 1500;
+                break;
+            }
+            case 4:
+            {
+                ResetThug(1);
+                timer = 1000;
+                break;
+            }
+            case 5:
+            {
+                // Set quest completed
+                if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                    player->AreaExploredOrEventHappens(QUEST_MISSING_DIPLO_PT8);
+
+                // Terminal stage: Reset() has already zeroed the event state, so
+                // return before the trailing stage increment / reschedule.
+                Reset();
+                return;
+            }
+            default:
+                break;
         }
+        ++m_phaseThugEventStage;
+        if (timer)
+            ResetTimer(DASHEL_END_EVENT, timer);
     }
     void JustDied(Unit* /*pUnit*/) override
     {
