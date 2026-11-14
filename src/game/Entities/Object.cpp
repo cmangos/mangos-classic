@@ -1644,6 +1644,14 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap 
 
 void WorldObject::MovePositionToFirstCollision(Position& pos, float dist, float angle)
 {
+    // A stale or uninitialised source position must not reach the collision query.
+    if (!MaNGOS::IsValidMapCoord(pos.x, pos.y, pos.z))
+    {
+        sLog.outError("MovePositionToFirstCollision: invalid src (%.2f, %.2f, %.2f) for %s; skipping",
+                      pos.x, pos.y, pos.z, GetGuidStr().c_str());
+        return;
+    }
+
     float destX = pos.x + dist * cos(angle);
     float destY = pos.y + dist * sin(angle);
     float destZ = pos.z;

@@ -2825,6 +2825,8 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL) // no bounding radius
                 {
                     pTarget->GetNearPoint2dAt(pTarget->GetPositionX(), pTarget->GetPositionY(), x, y, m_script->moveDynamic.fixedDist, pTarget->GetAngle(source));
+                    // The 2D helper does not set z; seed the height search from the target.
+                    z = pTarget->GetPositionZ();
                     if (source)
                         source->UpdateAllowedPositionZ(x, y, z, pTarget->GetMap()); // update to LOS height if available
                 }
@@ -2843,6 +2845,11 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                                         m_script->moveDynamic.minDist, (orientation == 0.0f ? nullptr : &orientation));
                 z = std::max(z, pTarget->GetPositionZ());
                 source->UpdateAllowedPositionZ(x, y, z);
+            }
+            if (!MaNGOS::IsValidMapCoord(x, y, z))
+            {
+                sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, SCRIPT_COMMAND_MOVE_DYNAMIC produced invalid destination (%f, %f, %f), skipping.", m_table, m_script->id, x, y, z);
+                return false;
             }
             if ((m_script->textId[2] & 0x1) != 0) // make it main movegen
                 source->GetMotionMaster()->Clear(false, true);

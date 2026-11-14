@@ -26,6 +26,7 @@
 #include <sstream>
 #include <iomanip>
 #include <limits>
+#include <cmath>
 
 using G3D::Vector3;
 
@@ -212,6 +213,10 @@ namespace VMAP
 
     float StaticMapTree::getHeight(const Vector3& pPos, float maxSearchDist) const
     {
+        // A non-finite ray origin can prevent the BIH traversal from making progress.
+        if (!pPos.isFinite() || std::isnan(maxSearchDist))
+            return G3D::inf();
+
         float height = G3D::inf();
         Vector3 dir;
         if (maxSearchDist >= 0.f)

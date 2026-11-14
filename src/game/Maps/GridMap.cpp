@@ -30,6 +30,7 @@
 #include "Util/Util.h"
 
 #include <mutex>
+#include <cmath>
 
 char const* MAP_MAGIC         = "MAPS";
 char const* MAP_VERSION_MAGIC = "z1.4";
@@ -827,6 +828,10 @@ int TerrainInfo::UnrefGrid(const uint32& x, const uint32& y)
 
 float TerrainInfo::GetHeightStatic(float x, float y, float z, bool useVmaps/*=true*/, float maxSearchDist/*=DEFAULT_HEIGHT_SEARCH*/) const
 {
+    // Invalid coordinates must not reach grid indexing or collision traversal.
+    if (!MaNGOS::IsValidMapCoord(x, y, z) || std::isnan(maxSearchDist))
+        return VMAP_INVALID_HEIGHT_VALUE;
+
     float mapHeight = VMAP_INVALID_HEIGHT_VALUE;            // Store Height obtained by maps
     float vmapHeight = VMAP_INVALID_HEIGHT_VALUE;           // Store Height obtained by vmaps (in "corridor" of z (or slightly above z)
 
@@ -1221,9 +1226,18 @@ float TerrainInfo::GetWaterOrGroundLevel(float x, float y, float z, float& groun
 
 GridMap* TerrainInfo::GetGrid(const float x, const float y, bool loadOnlyMap /*= false*/)
 {
+    // Range-check as floats before the int cast: casting NaN, inf or a huge
+    // value is undefined behaviour, and the negated comparison rejects NaN.
+    // An index outside the array would return a garbage pointer; callers
+    // already treat a null grid as "no data".
+    const float fx = 32 - x / SIZE_OF_GRIDS;
+    const float fy = 32 - y / SIZE_OF_GRIDS;
+    if (!(fx > -1.0f && fx < MAX_NUMBER_OF_GRIDS) || !(fy > -1.0f && fy < MAX_NUMBER_OF_GRIDS))
+        return nullptr;
+
     // half opt method
-    int gx = (int)(32 - x / SIZE_OF_GRIDS);                 // grid x
-    int gy = (int)(32 - y / SIZE_OF_GRIDS);                 // grid y
+    int gx = (int)fx;                                       // grid x
+    int gy = (int)fy;                                       // grid y
 
     // quick check if GridMap already loaded
     GridMap* pMap = m_GridMaps[gx][gy];

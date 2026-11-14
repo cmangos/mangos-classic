@@ -2928,6 +2928,10 @@ bool Map::GetHeightInRange(float x, float y, float& z, float maxSearchDist /*= 4
 
 float Map::GetHeight(float x, float y, float z, bool swim) const
 {
+    // Protect both static terrain and dynamic-object collision queries.
+    if (!MaNGOS::IsValidMapCoord(x, y, z))
+        return INVALID_HEIGHT;
+
     float staticHeight = m_TerrainData->GetHeightStatic(x, y, z, true, (swim ? DEFAULT_WATER_SEARCH : DEFAULT_HEIGHT_SEARCH));
 
     // Get Dynamic Height around static Height (if valid)
