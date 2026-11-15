@@ -776,8 +776,8 @@ bool GroupLootRoll::TryToStart(Loot& loot, uint32 itemSlot)
             ++playerCount;
         }
 
-        // initialize item prototype
-        m_voteMask = ROLL_VOTE_MASK_ALL;
+        // the client offers pass, need and greed, whatever vote mask it is sent
+        m_voteMask = RollVoteMask(ROLL_VOTE_MASK_PASS | ROLL_VOTE_MASK_NEED | ROLL_VOTE_MASK_GREED);
 
         if (playerCount > 1)                                    // check if more than one player can loot this item
         {
@@ -799,7 +799,11 @@ bool GroupLootRoll::PlayerVote(Player* player, RollVote vote)
 {
     ObjectGuid const& playerGuid = player->GetObjectGuid();
     RollVoteMap::iterator voterItr = m_rollVoteMap.find(playerGuid);
-    if (voterItr == m_rollVoteMap.end())
+    // only a player offered the roll may vote, once, and for one of the offered choices
+    if (voterItr == m_rollVoteMap.end() || voterItr->second.vote != ROLL_NOT_EMITED_YET)
+        return false;
+
+    if (!(m_voteMask & (1 << vote)))
         return false;
 
     voterItr->second.vote = vote;
