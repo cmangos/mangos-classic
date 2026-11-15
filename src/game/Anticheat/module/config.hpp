@@ -122,6 +122,7 @@ class AnticheatConfig : public Config
         uint32 GetFingerprintHistory()                  const { return getConfig(CONFIG_UINT32_AC_FINGERPRINT_HISTORY);                     }
         uint32 GetFingerprintLevel()                    const { return getConfig(CONFIG_UINT32_AC_FINGERPRINT_LEVEL);                       }
 
+        bool EnableWarden()                             const { return getConfig(CONFIG_BOOL_AC_WARDEN_ENABLED);                            }
         uint32 GetWardenTimeout()                       const { return getConfig(CONFIG_UINT32_AC_WARDEN_TIMEOUT);                          }
         uint32 GetWardenScanFrequency()                 const { return getConfig(CONFIG_UINT32_AC_WARDEN_SCAN_FREQUENCY);                   }
         uint32 GetWardenScanCount()                     const { return getConfig(CONFIG_UINT32_AC_WARDEN_SCAN_COUNT);                       }

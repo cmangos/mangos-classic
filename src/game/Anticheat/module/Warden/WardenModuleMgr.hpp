@@ -21,8 +21,16 @@ private:
     std::vector<WardenModule> _winModules;
     std::vector<WardenModule> _macModules;
 
+    bool _loaded;
+
 public:
-    WardenModuleMgr();
+    WardenModuleMgr() : _loaded(false) {}
+
+    // reads the modules from Warden.ModuleDir, only the first time it is called: each Warden keeps a pointer to its module
+    void Load();
+
+    bool HasWindowsModule() const { return !_winModules.empty(); }
+    bool HasMacModule() const { return !_macModules.empty(); }
 
     const WardenModule *GetWindowsModule() const;
     const WardenModule *GetMacModule() const;

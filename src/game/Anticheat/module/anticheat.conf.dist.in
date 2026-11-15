@@ -355,11 +355,14 @@ Antispam.RepetitionMovementTimeout = 60
 #
 ################################
 
-# Similar to the overall anticheat, if Warden is disabled, it will not be initialized when a world session is created.
+# Similar to the overall anticheat, if Warden is disabled, it will not be initialized when a world session is created,
+# and the character list is sent to the client without waiting for Warden.
 # Changing this setting will have no effect on pre-existing world sessions.
+# Windows and Mac x86 clients also run without Warden when no module for their system can be loaded from
+# Warden.ModuleDir (an error is logged on startup).
 Warden.Enable = 1
 
-# Directory where Warden modules can be found
+# Directory where Warden modules can be found.  They are read once, on startup.
 Warden.ModuleDir = "warden_modules"
 
 # Time, in seconds, to wait for the client to reply to a Warden request

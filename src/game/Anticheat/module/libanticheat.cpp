@@ -30,6 +30,7 @@
 #include "Warden/WardenWin.hpp"
 #include "Warden/WardenMac.hpp"
 #include "Warden/WardenScanMgr.hpp"
+#include "Warden/WardenModuleMgr.hpp"
 
 #include <memory>
 #include <sstream>
@@ -43,15 +44,30 @@
 
 namespace
 {
+// returns nullptr when this session runs without Warden
 Warden *CreateWarden(WorldSession *session, const BigNumber &K, NamreebAnticheat::SessionAnticheat *anticheat)
 {
+    if (!sAnticheatConfig.EnableWarden())
+        return nullptr;
+
     Warden* warden;
     ClientOSType os = session->GetOS();
 
     if (os == CLIENT_OS_MAC)
+    {
+        // a PPC client runs Warden without a module
+        if (session->GetPlatform() == CLIENT_PLATFORM_X86 && !sWardenModuleMgr.HasMacModule())
+            return nullptr;
+
         warden = new WardenMac(session, K, anticheat);
+    }
     else if (os == CLIENT_OS_WIN)
+    {
+        if (!sWardenModuleMgr.HasWindowsModule())
+            return nullptr;
+
         warden = new WardenWin(session, K, anticheat);
+    }
     else
     {
         anticheat->RecordCheatInternal(NamreebAnticheat::CheatType::CHEAT_TYPE_WARDEN, "Unknown client operating system");
@@ -230,9 +246,10 @@ void AnticheatLib::Reload()
         sAntispamMgr.LoadFromDB();
     }
 
-    // No real Warden object is ever created per session when anticheat is disabled (NewSession returns
-    // NullSessionAnticheat), so there is nothing to use these scan definitions for.
-    if (sAnticheatConfig.EnableAnticheat())
+    // No Warden object is created per session when anticheat is disabled (NewSession returns
+    // NullSessionAnticheat) or when Warden is disabled (CreateWarden returns nullptr), so there is
+    // nothing to use these scan definitions for.
+    if (sAnticheatConfig.EnableAnticheat() && sAnticheatConfig.EnableWarden())
     {
         sLog.outString("Loading Warden scan database...");
         sWardenScanMgr.loadFromDB();
@@ -246,6 +263,10 @@ void AnticheatLib::Initialize()
     // these should be loaded only on startup since they wont change without a recompile anyway
     sLog.outString("Loading scripted Warden scans...");
     Warden::LoadScriptedScans();
+
+    // loaded only on startup, before any session exists: each Warden keeps a pointer to its module
+    if (sAnticheatConfig.EnableAnticheat() && sAnticheatConfig.EnableWarden())
+        sWardenModuleMgr.Load();
 }
 
 std::unique_ptr<SessionAnticheatInterface> AnticheatLib::NewSession(WorldSession *session, const BigNumber &K)
@@ -777,7 +798,8 @@ void SessionAnticheat::Update(uint32 diff)
     if (!sAnticheatConfig.EnableAnticheat())
         return;
 
-    _warden->Update(diff);
+    if (_warden)
+        _warden->Update(diff);
 
     if (_tickTimer > diff)
         _tickTimer -= diff;
@@ -798,7 +820,10 @@ void SessionAnticheat::Update(uint32 diff)
 
 void SessionAnticheat::SendCharEnum(WorldPacket &&packet)
 {
-    _warden->SetCharEnumPacket(std::move(packet));
+    if (_warden)
+        _warden->SetCharEnumPacket(std::move(packet));
+    else
+        _session->SendPacket(packet, true);
 }
 
 bool SessionAnticheat::IsSilenced() const
@@ -848,7 +873,8 @@ void SessionAnticheat::SendPlayerInfo(ChatHandler *handler) const
         handler->PSendSysMessage("OS: %s Build: %u Fingerprint: 0x%x Local IP: %s",
             _session->GetOS() == CLIENT_OS_WIN ? "Win" : "Mac", _session->GetGameBuild(), _fingerprint, _session->GetLocalAddress().c_str());
 
-    _warden->SendPlayerInfo(handler, includeFingerprint);
+    if (_warden)
+        _warden->SendPlayerInfo(handler, includeFingerprint);
 }
 
 void SessionAnticheat::SendCheatInfo(ChatHandler *handler) const
@@ -1027,7 +1053,8 @@ void SessionAnticheat::CharmedAction(uint16 opcode)
 
 void SessionAnticheat::WardenPacket(WorldPacket &packet)
 {
-    _warden->HandlePacket(packet);
+    if (_warden)
+        _warden->HandlePacket(packet);
 }
 
 void SessionAnticheat::AutoReply(const std::string &msg)

@@ -39,10 +39,26 @@ namespace
     }
 }
 
-WardenModuleMgr::WardenModuleMgr()
+void WardenModuleMgr::Load()
 {
+    if (_loaded)
+        return;
+
+    _loaded = true;
+
+    sLog.outString("Loading Warden modules...");
+
     auto const moduleDir = sAnticheatConfig.GetWardenModuleDirectory();
-    auto const modules = GetModuleNames(moduleDir);
+    std::vector<std::string> modules;
+
+    try
+    {
+        modules = GetModuleNames(moduleDir);
+    }
+    catch (const std::runtime_error &e)
+    {
+        sLog.outError("[Anticheat] Cannot read Warden module directory '%s' (Warden.ModuleDir): %s", moduleDir.c_str(), e.what());
+    }
 
     for (auto const &mod : modules)
     {
@@ -58,16 +74,20 @@ WardenModuleMgr::WardenModuleMgr()
             else
                 _macModules.emplace_back(std::move(newMod));
         }
-        catch (const std::runtime_error &)
+        catch (const std::runtime_error &e)
         {
+            sLog.outError("[Anticheat] Skipping Warden module %s: %s", mod.c_str(), e.what());
             continue;
         }
     }
 
     sLog.outBasic(">> %lu Windows Warden modules and %lu Mac Warden modules loaded", uint64(_winModules.size()), uint64(_macModules.size()));
 
-    if (_winModules.empty() && _macModules.empty())
-        throw std::runtime_error("Failed to locate Warden modules");
+    if (_winModules.empty())
+        sLog.outError("[Anticheat] No Windows Warden module in '%s' (Warden.ModuleDir).  Windows clients run without Warden.", moduleDir.c_str());
+
+    if (_macModules.empty())
+        sLog.outError("[Anticheat] No Mac Warden module in '%s' (Warden.ModuleDir).  Mac x86 clients run without Warden.", moduleDir.c_str());
 }
 
 const WardenModule *WardenModuleMgr::GetWindowsModule() const
