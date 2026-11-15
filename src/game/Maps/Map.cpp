@@ -1061,9 +1061,9 @@ void Map::Update(const uint32& t_diff)
 
     auto visitHomeCell = [&](WorldObject const* largeObj)
     {
-        CellPair p = MaNGOS::ComputeCellPair(largeObj->GetPositionX(), largeObj->GetPositionY());
+        CellPair p = MaNGOS::ComputeCellPair(largeObj->GetPositionX(), largeObj->GetPositionY()).normalize();
         Cell cell(p);
-        uint32 cell_id = (cell.GridY() * TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell.GridX();
+        uint32 cell_id = (p.y_coord * TOTAL_NUMBER_OF_CELLS_PER_MAP) + p.x_coord;
         if (!isCellMarked(cell_id))
         {
             markCell(cell_id);
