@@ -1228,9 +1228,13 @@ void Loot::SetPlayerIsLooting(Player* player)
 
 void Loot::SetPlayerIsNotLooting(Player* player)
 {
-    m_playersLooting.erase(player->GetObjectGuid());
-    player->SetLootGuid(ObjectGuid());
-    if (m_lootType == LOOT_CORPSE || m_isChest)
+    bool const wasLooting = m_playersLooting.erase(player->GetObjectGuid()) != 0;
+
+    // the player may be looting another object
+    if (player->GetLootGuid() == m_guidTarget)
+        player->SetLootGuid(ObjectGuid());
+
+    if (wasLooting && (m_lootType == LOOT_CORPSE || m_isChest))
     {
         player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_LOOTING);
         if (m_guidTarget.IsGameObject())
@@ -2074,8 +2078,8 @@ InventoryResult Loot::SendItem(Player* target, LootItem* lootItem, bool sendErro
     }
     else
     {
-        if (!ReleaseIfLootedForAll() && IsLootedFor(target))
-            SendReleaseFor(target);
+        if (!ReleaseIfLootedForAll() && IsLootedFor(target) && m_playersLooting.find(target->GetObjectGuid()) != m_playersLooting.end())
+            SendReleaseFor(target);                                   // a roll winner or a master loot receiver may not be looting this
         ForceLootAnimationClientUpdate();
     }
     return msg;
