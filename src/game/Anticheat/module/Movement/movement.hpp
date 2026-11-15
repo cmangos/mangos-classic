@@ -131,7 +131,7 @@ class Movement
 
         void OrderSent(uint16 opcode, uint32 counter);
         void OrderAck(uint16 opcode, uint32 counter);
-        void CheckExpiredOrders(uint32 latency);
+        void CheckExpiredOrders(uint32 latency, uint32 minDelay);
 
         bool ExtrapolateMovement(MovementInfo const& mi, uint32 diffMs, Position &pos) const;
         bool GetMaxAllowedDist(MovementInfo const& mi, uint32 diffMs, float &dxy, float &dz) const;

@@ -786,7 +786,7 @@ void SessionAnticheat::Update(uint32 diff)
         // reset per-tick values
         if (_movementData)
         {
-            _movementData->CheckExpiredOrders(_session->GetLatency());
+            _movementData->CheckExpiredOrders(_session->GetLatency(), AnticheatUpdateInterval);
             _movementData->overSpeedDistanceTick = 0.f;
         }
 

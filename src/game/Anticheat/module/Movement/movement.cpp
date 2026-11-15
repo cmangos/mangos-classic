@@ -289,24 +289,20 @@ void Movement::OrderAck(uint16 opcode, uint32 counter)
         LookupOpcodeName(opcode), opcode, counter);
 }
 
-void Movement::CheckExpiredOrders(uint32 latency)
+void Movement::CheckExpiredOrders(uint32 latency, uint32 minDelay)
 {
     auto const now = WorldTimer::getMSTime();
-    const uint32 expirationDelay = 2.5 * latency;
 
-    for (auto i = _orders.begin(); i != _orders.end(); ++i)
+    // an acknowledgement waits in the session queue until the next world update, where it is handled after this check,
+    // so the latency reported by the client is not enough: each order is kept for at least minDelay
+    const uint32 expirationDelay = std::max(uint32(2.5 * latency), minDelay);
+
+    for (auto i = _orders.begin(); i != _orders.end();)
     {
-        auto const expected = i->time + expirationDelay;
-
-        if (expected < now)
-        {
-            //m_anticheat->RecordCheatInternal(CHEAT_TYPE_BAD_ORDER_ACK, "Expired order received no ACK for %s (%u) counter %u sent %u expected %u latency %u now %u",
-            //    LookupOpcodeName(i->opcode), i->opcode, i->counter, i->time, expected, latency, now);
+        if (WorldTimer::getMSTimeDiff(i->time, now) > expirationDelay)
             i = _orders.erase(i);
-
-            if (i == _orders.end())
-                break;
-        }
+        else
+            ++i;
     }
 }
 
