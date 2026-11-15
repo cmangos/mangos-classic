@@ -58,6 +58,7 @@ enum CheatType
     CHEAT_TYPE_FIXED_Z,
     CHEAT_TYPE_BAD_ORDER_ACK,
     CHEAT_TYPE_WARDEN,
+    CHEAT_TYPE_CHARMED_ACTION,
     CHEATS_COUNT
 };
 
@@ -99,6 +100,7 @@ class SessionAnticheat final : public SessionAnticheatInterface
 
         virtual void OrderSent(uint16 opcode, uint32 counter) override;
         virtual void OrderAck(uint16 opcode, uint32 counter) override;
+        virtual void CharmedAction(uint16 opcode) override;
 
         // warden
         virtual void WardenPacket(WorldPacket &packet) override;

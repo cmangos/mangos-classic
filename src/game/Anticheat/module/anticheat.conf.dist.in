@@ -261,6 +261,13 @@ Movement.BadOrderAck.TickAction = 1
 Movement.BadOrderAck.TotalCount = 0
 Movement.BadOrderAck.TotalAction = 0
 
+# Watch for a client acting with its character while another unit controls it (charm, mind control); the server drops
+# these actions
+Movement.CharmedAction.TickCount = 1
+Movement.CharmedAction.TickAction = 1
+Movement.CharmedAction.TotalCount = 5
+Movement.CharmedAction.TotalAction = 4
+
 ################################
 #
 # Anti spam system

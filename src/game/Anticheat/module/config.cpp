@@ -32,7 +32,8 @@ static const char *sCheatTypeNames[] =
     "TeleportFar",
     "FixedZ",
     "BadOrderAck",
-    "Warden"
+    "Warden",
+    "CharmedAction"
 };
 
 static_assert(sizeof(sCheatTypeNames) / sizeof(sCheatTypeNames[0]) == NamreebAnticheat::CheatType::CHEATS_COUNT,

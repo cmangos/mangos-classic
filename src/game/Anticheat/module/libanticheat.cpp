@@ -1019,6 +1019,12 @@ void SessionAnticheat::OrderAck(uint16 opcode, uint32 counter)
         _movementData->OrderAck(opcode, counter);
 }
 
+void SessionAnticheat::CharmedAction(uint16 opcode)
+{
+    if (sAnticheatConfig.IsEnabled(CHEAT_TYPE_CHARMED_ACTION))
+        RecordCheatInternal(CHEAT_TYPE_CHARMED_ACTION, "%s while charmed", LookupOpcodeName(opcode));
+}
+
 void SessionAnticheat::WardenPacket(WorldPacket &packet)
 {
     _warden->HandlePacket(packet);
