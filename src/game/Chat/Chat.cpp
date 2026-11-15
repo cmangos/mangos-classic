@@ -440,6 +440,7 @@ ChatCommand* ChatHandler::getCommandTable()
     {
         { "stats",          SEC_GAMEMASTER,     true,  &ChatHandler::HandleLootStatsCommand,           "", nullptr },
         { "fullstats",      SEC_GAMEMASTER,     true,  &ChatHandler::HandleLootFullStatsCommand,       "", nullptr },
+        { "show",           SEC_GAMEMASTER,     false, &ChatHandler::HandleLootShowCommand,            "", nullptr },
 
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
@@ -554,7 +555,6 @@ ChatCommand* ChatHandler::getCommandTable()
         { "whisper",        SEC_MODERATOR,      false, &ChatHandler::HandleNpcWhisperCommand,          "", nullptr },
         { "yell",           SEC_MODERATOR,      false, &ChatHandler::HandleNpcYellCommand,             "", nullptr },
         { "tame",           SEC_GAMEMASTER,     false, &ChatHandler::HandleNpcTameCommand,             "", nullptr },
-        { "showloot",       SEC_GAMEMASTER,     false, &ChatHandler::HandleNpcShowLootCommand,         "", nullptr },
         { "tempspawn",      SEC_GAMEMASTER,     false, &ChatHandler::HandleNpcTempSpawn,               "", nullptr },
         { "evade",          SEC_GAMEMASTER,     false, &ChatHandler::HandleNpcEvade,                   "", nullptr },
         { "despawn",        SEC_GAMEMASTER,     false, &ChatHandler::HandleNpcDespawn,                 "", nullptr },

@@ -2375,6 +2375,82 @@ bool Loot::IsItemAlreadyIn(uint32 itemId) const
     return false;
 }
 
+static std::string GetLootTypeName(LootType lootType)
+{
+    switch (lootType)
+    {
+        case LOOT_CORPSE:        return "corpse";
+        case LOOT_PICKPOCKETING: return "pickpocketing";
+        case LOOT_SKINNING:      return "skinning";
+        case LOOT_FISHING:       return "fishing";
+        default:                 return "type " + std::to_string(uint32(lootType));
+    }
+}
+
+static char const* GetLootMethodName(LootMethod lootMethod)
+{
+    switch (lootMethod)
+    {
+        case FREE_FOR_ALL:        return "free for all";
+        case ROUND_ROBIN:         return "round robin";
+        case MASTER_LOOT:         return "master loot";
+        case GROUP_LOOT:          return "group loot";
+        case NEED_BEFORE_GREED:   return "need before greed";
+        case NOT_GROUP_TYPE_LOOT: return "single owner";
+        default:                  return "unknown";
+    }
+}
+
+static char const* GetItemQualityName(ItemQualities quality)
+{
+    switch (quality)
+    {
+        case ITEM_QUALITY_POOR:      return "poor";
+        case ITEM_QUALITY_NORMAL:    return "normal";
+        case ITEM_QUALITY_UNCOMMON:  return "uncommon";
+        case ITEM_QUALITY_RARE:      return "rare";
+        case ITEM_QUALITY_EPIC:      return "epic";
+        case ITEM_QUALITY_LEGENDARY: return "legendary";
+        case ITEM_QUALITY_ARTIFACT:  return "artifact";
+        default:                     return "unknown";
+    }
+}
+
+static char const* GetLootSlotTypeName(LootSlotType slotType)
+{
+    switch (slotType)
+    {
+        case LOOT_SLOT_NORMAL: return "normal";
+        case LOOT_SLOT_VIEW:   return "view";
+        case LOOT_SLOT_MASTER: return "master";
+        case LOOT_SLOT_REQS:   return "reqs";
+        default:               return "hidden";
+    }
+}
+
+// Name of a player in world, or the counter of his guid when he is not
+static std::string GetLootPlayerName(ObjectGuid const& guid)
+{
+    if (Player const* player = ObjectAccessor::FindPlayer(guid))
+        return player->GetName();
+    return "#" + std::to_string(guid.GetCounter());
+}
+
+// Appends an entry to a list, going to a new chat line when the current one gets long
+static void AppendLootListEntry(std::string& list, std::string const& entry, char separator = ',')
+{
+    if (!list.empty())
+    {
+        size_t const lineStart = list.rfind('\n');
+        size_t const lineLength = lineStart == std::string::npos ? list.size() : list.size() - lineStart - 1;
+        list += separator;
+        list += lineLength + entry.size() > 200 ? "\n    " : " ";
+    }
+    list += entry;
+}
+
+// Shows the content of a creature loot, who may still loot what, and who keeps it from being looted for all.
+// Players are looked up by guid where they are used, no pointer to them is kept.
 void Loot::PrintLootList(ChatHandler& chat, WorldSession* session) const
 {
     if (!session)
@@ -2383,31 +2459,164 @@ void Loot::PrintLootList(ChatHandler& chat, WorldSession* session) const
         return;
     }
 
-    if (m_gold == 0)
-        chat.PSendSysMessage("Loot have no money");
-    else
-        chat.PSendSysMessage("Loot have (%u)coppers", m_gold);
+    chat.PSendSysMessage("Loot: %s, %s, threshold %s%s", GetLootTypeName(m_lootType).c_str(), GetLootMethodName(m_lootMethod),
+                         GetItemQualityName(m_threshold), m_isFakeLoot ? ", shows an empty window" : "");
+    chat.PSendSysMessage("Master looter: %s, current looter: %s, gold: %u copper",
+                         m_masterOwnerGuid.IsEmpty() ? "none" : GetLootPlayerName(m_masterOwnerGuid).c_str(),
+                         m_currentLooterGuid.IsEmpty() ? "none" : GetLootPlayerName(m_currentLooterGuid).c_str(), m_gold);
 
-    if (m_lootItems.empty())
+    uint32 ownersInWorld = 0;
+    for (ObjectGuid const& guid : m_ownerSet)
+        if (ObjectAccessor::FindPlayer(guid))
+            ++ownersInWorld;
+
+    chat.PSendSysMessage("Items: %u", uint32(m_lootItems.size()));
+    int const localeIndex = session->GetSessionDbLocaleIndex();
+    for (LootItem const* lootItem : m_lootItems)
     {
-        chat.PSendSysMessage("Loot have no item.");
+        uint32 const itemId = lootItem->itemId;
+        ItemPrototype const* proto = sItemStorage.LookupEntry<ItemPrototype>(itemId);
+        std::string name = proto ? proto->Name1 : "unknown item";
+        sObjectMgr.GetItemLocaleStrings(itemId, localeIndex, &name);
+
+        // allowedGuid holds who may still loot the item
+        bool const isStillToLoot = !lootItem->allowedGuid.empty();
+
+        std::string flags;
+        if (isStillToLoot)
+        {
+            if (lootItem->lootItemType == LOOTITEM_TYPE_QUEST)
+                AppendLootListEntry(flags, "quest");
+            else if (lootItem->lootItemType == LOOTITEM_TYPE_CONDITIONNAL)
+                AppendLootListEntry(flags, "condition " + std::to_string(lootItem->conditionId));
+            if (lootItem->freeForAll)
+                AppendLootListEntry(flags, "free for all");
+            if (lootItem->isUnderThreshold)
+                AppendLootListEntry(flags, "under threshold");
+            if (lootItem->isBlocked)
+                AppendLootListEntry(flags, m_roll.find(lootItem->lootSlot) != m_roll.end() ? "rolling" : "roll pending");
+            if (lootItem->isReleased)
+                AppendLootListEntry(flags, "released");
+            if (lootItem->currentLooterPass)
+                AppendLootListEntry(flags, "not for current looter");
+        }
+
+        std::string rights;
+        if (!isStillToLoot)
+            rights = "taken or allowed to nobody";
+        else if (lootItem->allowedGuid == m_ownerSet)
+            rights = "allowed to all owners";
+        else
+        {
+            for (ObjectGuid const& guid : lootItem->allowedGuid)
+                AppendLootListEntry(rights, GetLootPlayerName(guid));
+            rights = "allowed to " + rights;
+        }
+
+        // what the loot window of each owner in world shows for this item
+        std::string shownTo;
+        if (isStillToLoot)
+        {
+            uint32 shownCount = 0;
+            LootSlotType firstSlotType = MAX_LOOT_SLOT_TYPE;
+            bool isSameSlotType = true;
+            for (ObjectGuid const& guid : m_ownerSet)
+            {
+                if (Player const* player = ObjectAccessor::FindPlayer(guid))
+                {
+                    LootSlotType const slotType = lootItem->GetSlotTypeForSharedLoot(player, this);
+                    if (slotType == MAX_LOOT_SLOT_TYPE)
+                        continue;
+
+                    if (shownCount++ == 0)
+                        firstSlotType = slotType;
+                    else if (slotType != firstSlotType)
+                        isSameSlotType = false;
+                    AppendLootListEntry(shownTo, std::string(player->GetName()) + " (" + GetLootSlotTypeName(slotType) + ")");
+                }
+            }
+
+            if (shownCount == 0)
+                shownTo = "shown to nobody";
+            else if (shownCount > 1 && shownCount == ownersInWorld && isSameSlotType)
+                shownTo = std::string("shown to all owners (") + GetLootSlotTypeName(firstSlotType) + ")";
+            else
+                shownTo = "shown to " + shownTo;
+        }
+
+        std::string details;
+        for (std::string const& part : { flags, rights, shownTo })
+            if (!part.empty())
+                AppendLootListEntry(details, part, ';');
+        details = "x" + std::to_string(lootItem->count) + " slot " + std::to_string(lootItem->lootSlot) +
+                  (details.empty() ? std::string() : ": " + details);
+        chat.PSendSysMessage(LANG_ITEM_LIST_CHAT, itemId, itemId, name.c_str(), details.c_str());
+    }
+
+    // the loot is looted for all once no owner in world has anything left in it
+    std::string noItemLeft, itemsLeft, blockers, notInWorld;
+    uint32 lootingCount = 0;
+    uint32 blockingCount = 0;
+    for (ObjectGuid const& guid : m_ownerSet)
+    {
+        if (Player const* player = ObjectAccessor::FindPlayer(guid))
+        {
+            uint32 const lootStatus = GetLootStatusFor(player);
+            std::string slots;
+            for (LootItem const* lootItem : m_lootItems)
+                if (lootItem->GetSlotTypeForSharedLoot(player, this) != MAX_LOOT_SLOT_TYPE)
+                    slots += " " + std::to_string(lootItem->lootSlot);
+
+            std::string entry = player->GetName();
+            if (m_playersLooting.find(guid) != m_playersLooting.end())
+            {
+                entry += " [looting]";
+                ++lootingCount;
+            }
+            else if (lootStatus)
+                entry += m_playersOpened.find(guid) != m_playersOpened.end() ? " [opened]" : " [never opened]";
+            if (m_lootTarget && !player->IsInMap(m_lootTarget))
+                entry += " [away]";
+
+            if (lootStatus)
+                ++blockingCount;
+
+            if (slots.empty())
+                AppendLootListEntry(noItemLeft, entry);
+            else
+            {
+                AppendLootListEntry(itemsLeft, entry + " slots" + slots, ';');
+                AppendLootListEntry(blockers, player->GetName());
+            }
+        }
+        else
+            AppendLootListEntry(notInWorld, guid.GetString());
+    }
+
+    chat.PSendSysMessage("Owners: %u, in world %u, looting %u", uint32(m_ownerSet.size()), ownersInWorld, lootingCount);
+    if (!noItemLeft.empty())
+        chat.SendSysMessage((" No item left: " + noItemLeft).c_str());
+    if (!itemsLeft.empty())
+        chat.SendSysMessage((" Items left: " + itemsLeft).c_str());
+    if (!notInWorld.empty())
+        chat.SendSysMessage((" Not in world, not counted: " + notInWorld).c_str());
+
+    if (!blockingCount)
+    {
+        bool const isCorpseNotLooted = m_lootType == LOOT_CORPSE && m_lootTarget && m_lootTarget->GetTypeId() == TYPEID_UNIT &&
+                                       static_cast<Creature const*>(m_lootTarget)->GetLootStatus() < CREATURE_LOOT_STATUS_LOOTED;
+        chat.PSendSysMessage("Looted for all: yes%s", isCorpseNotLooted ? ", but the corpse is not marked looted" : "");
         return;
     }
 
-    for (auto lootItem : m_lootItems)
-    {
-        uint32 itemId = lootItem->itemId;
-        ItemPrototype const* pProto = sItemStorage.LookupEntry<ItemPrototype >(itemId);
-        if (!pProto)
-            continue;
-
-        int loc_idx = session->GetSessionDbLocaleIndex();
-
-        std::string name = pProto->Name1;
-        sObjectMgr.GetItemLocaleStrings(itemId, loc_idx, &name);
-        std::string count = "x" + std::to_string(lootItem->count);
-        chat.PSendSysMessage(LANG_ITEM_LIST_CHAT, itemId, itemId, name.c_str(), count.c_str());
-    }
+    std::string reasons;
+    if (m_isFakeLoot && m_playersOpened.empty())
+        AppendLootListEntry(reasons, "empty window not opened yet");
+    if (m_gold)
+        AppendLootListEntry(reasons, "gold left for every owner");
+    if (!blockers.empty())
+        AppendLootListEntry(reasons, "items left for " + blockers);
+    chat.SendSysMessage(("Looted for all: no, " + reasons).c_str());
 }
 
 // fill in the bytebuffer with loot content for specified player

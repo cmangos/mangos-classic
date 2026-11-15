@@ -2319,8 +2319,21 @@ bool ChatHandler::HandleNpcTameCommand(char* /*args*/)
     return true;
 }
 
-// set model of creature
-bool ChatHandler::HandleNpcShowLootCommand(char* /*args*/)
+static char const* GetCreatureLootStatusName(CreatureLootStatus lootStatus)
+{
+    switch (lootStatus)
+    {
+        case CREATURE_LOOT_STATUS_NONE:           return "none";
+        case CREATURE_LOOT_STATUS_PICKPOCKETED:   return "pickpocketed";
+        case CREATURE_LOOT_STATUS_LOOTED:         return "looted";
+        case CREATURE_LOOT_STATUS_SKIN_AVAILABLE: return "skin available";
+        case CREATURE_LOOT_STATUS_SKINNED:        return "skinned";
+        default:                                  return "unknown";
+    }
+}
+
+// show the loot of the selected creature, who may still loot what and what keeps it from being looted
+bool ChatHandler::HandleLootShowCommand(char* /*args*/)
 {
     Creature* creature = getSelectedCreature();
 
@@ -2330,6 +2343,12 @@ bool ChatHandler::HandleNpcShowLootCommand(char* /*args*/)
         SetSentErrorMessage(true);
         return false;
     }
+
+    PSendSysMessage("%s (entry %u): %s, loot status %s, %s, %s", creature->GetName(), creature->GetEntry(),
+                    creature->IsAlive() ? "alive" : "dead", GetCreatureLootStatusName(creature->GetLootStatus()),
+                    creature->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE) ? "lootable" : "not lootable",
+                    creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE) ? "skinnable" :
+                    creature->GetCreatureInfo()->SkinningLootId ? "not skinnable" : "no skinning loot");
 
     if (!creature->m_loot)
     {
