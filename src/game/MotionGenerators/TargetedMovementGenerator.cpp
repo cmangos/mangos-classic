@@ -921,13 +921,7 @@ bool FollowMovementGenerator::Move(Unit& owner, float x, float y, float z)
             if (!i_target->IsWithinLOS(x, y, (z + owner.GetCollisionHeight()), true))
                 i_target->GetPosition(x, y, z);
 
-        if (owner.GetTypeId() == TYPEID_PLAYER)
-            owner.NearTeleportTo(x, y, z, o);
-        else
-        {
-            owner.GetMap()->CreatureRelocation(static_cast<Creature*>(&owner), x, y, z, o);
-            owner.SendHeartBeat();
-        }
+        owner.NearTeleportTo(x, y, z, o);
 
         return false;
     }
