@@ -2569,10 +2569,10 @@ class Player : public Unit
 
         enum class ClientObjectState : uint8
         {
-            None,                                           // unknown to the client, never stored
-            CreationPending,                                // seen, its creation not written yet
-            Created,                                        // at the client
-            OutOfRangePending,                              // no longer seen, at the client until the out of range block
+            NONE,                                           // unknown to the client, never stored
+            CREATION_PENDING,                               // seen, its creation not written yet
+            CREATED,                                        // at the client
+            OUT_OF_RANGE_PENDING,                           // no longer seen, at the client until the out of range block
         };
         struct ClientObject
         {

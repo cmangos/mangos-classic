@@ -17855,25 +17855,25 @@ bool Player::CanJoinToBattleground() const
 // the map.
 void Player::SetClientState(ObjectGuid const& guid, WorldObject* target, ClientObject* clientObject, ClientObjectState state)
 {
-    if (state == ClientObjectState::None)
+    if (state == ClientObjectState::NONE)
         m_clientObjects.erase(guid);
     else
     {
         if (!clientObject)
             clientObject = &m_clientObjects.emplace(guid, ClientObject{state, m_cameraVisit, nullptr}).first->second;
         clientObject->state = state;
-        clientObject->pendingObject = state == ClientObjectState::CreationPending ? target : nullptr;
+        clientObject->pendingObject = state == ClientObjectState::CREATION_PENDING ? target : nullptr;
 
-        if (state == ClientObjectState::CreationPending)
+        if (state == ClientObjectState::CREATION_PENDING)
             m_pendingCreations.push_back(guid);
-        else if (state == ClientObjectState::OutOfRangePending)
+        else if (state == ClientObjectState::OUT_OF_RANGE_PENDING)
             m_pendingOutOfRange.push_back(guid);
     }
 
     if (!target)
         return;
 
-    if (state == ClientObjectState::CreationPending || state == ClientObjectState::Created)
+    if (state == ClientObjectState::CREATION_PENDING || state == ClientObjectState::CREATED)
         target->AddClientIAmAt(this);
     else
         target->RemoveClientIAmAt(this);
@@ -17891,7 +17891,7 @@ bool Player::HasAtClient(ObjectGuid const& guid) const
         return true;
 
     auto itr = m_clientObjects.find(guid);
-    return itr != m_clientObjects.end() && itr->second.state != ClientObjectState::OutOfRangePending;
+    return itr != m_clientObjects.end() && itr->second.state != ClientObjectState::OUT_OF_RANGE_PENDING;
 }
 
 bool Player::IsCreatedAtClient(WorldObject const* u) const
@@ -17900,7 +17900,7 @@ bool Player::IsCreatedAtClient(WorldObject const* u) const
         return true;
 
     auto itr = m_clientObjects.find(u->GetObjectGuid());
-    return itr != m_clientObjects.end() && itr->second.state == ClientObjectState::Created;
+    return itr != m_clientObjects.end() && itr->second.state == ClientObjectState::CREATED;
 }
 
 bool Player::IsCreationPending(WorldObject const* u) const
@@ -17909,7 +17909,7 @@ bool Player::IsCreationPending(WorldObject const* u) const
         return false;
 
     auto itr = m_clientObjects.find(u->GetObjectGuid());
-    return itr != m_clientObjects.end() && itr->second.state == ClientObjectState::CreationPending;
+    return itr != m_clientObjects.end() && itr->second.state == ClientObjectState::CREATION_PENDING;
 }
 
 bool Player::IsItemCreationPending(Item const* item) const
@@ -17920,9 +17920,9 @@ bool Player::IsItemCreationPending(Item const* item) const
 void Player::SeeAtClient(WorldObject* target, ClientObject* clientObject)
 {
     if (!clientObject)
-        SetClientState(target->GetObjectGuid(), target, nullptr, ClientObjectState::CreationPending);
+        SetClientState(target->GetObjectGuid(), target, nullptr, ClientObjectState::CREATION_PENDING);
     // one block per object and packet: an object put out of range in the next packet comes back in the packet after
-    else if (clientObject->state == ClientObjectState::OutOfRangePending)
+    else if (clientObject->state == ClientObjectState::OUT_OF_RANGE_PENDING)
         GetMap()->AddUpdateCreateObject(target);
 }
 
@@ -17932,10 +17932,10 @@ void Player::LoseAtClient(ObjectGuid const& guid, WorldObject* target, ClientObj
         return;
 
     // a creation not written yet is dropped: the client never gets the object
-    if (clientObject->state == ClientObjectState::CreationPending)
-        SetClientState(guid, target, clientObject, ClientObjectState::None);
-    else if (clientObject->state == ClientObjectState::Created)
-        SetClientState(guid, target, clientObject, ClientObjectState::OutOfRangePending);
+    if (clientObject->state == ClientObjectState::CREATION_PENDING)
+        SetClientState(guid, target, clientObject, ClientObjectState::NONE);
+    else if (clientObject->state == ClientObjectState::CREATED)
+        SetClientState(guid, target, clientObject, ClientObjectState::OUT_OF_RANGE_PENDING);
 }
 
 void Player::ScheduleCreate(WorldObject* target)
@@ -17958,13 +17958,13 @@ void Player::CreateAtClient(WorldObject* target, UpdateData& data)
 {
     ObjectGuid const& guid = target->GetObjectGuid();
     ClientObject* clientObject = FindClientObject(guid);
-    if (clientObject && clientObject->state == ClientObjectState::Created)
+    if (clientObject && clientObject->state == ClientObjectState::CREATED)
         return;
 
     // an object whose out of range block is not written yet is still at the client
-    if (!clientObject || clientObject->state == ClientObjectState::CreationPending)
+    if (!clientObject || clientObject->state == ClientObjectState::CREATION_PENDING)
         target->BuildCreateUpdateBlockForPlayer(data, this);
-    SetClientState(guid, target, clientObject, ClientObjectState::Created);
+    SetClientState(guid, target, clientObject, ClientObjectState::CREATED);
 }
 
 void Player::RemoveAtClient(WorldObject* target, UpdateData& data)
@@ -17974,9 +17974,9 @@ void Player::RemoveAtClient(WorldObject* target, UpdateData& data)
     if (!clientObject)
         return;
 
-    if (clientObject->state != ClientObjectState::CreationPending)
+    if (clientObject->state != ClientObjectState::CREATION_PENDING)
         data.AddOutOfRangeGUID(guid);
-    SetClientState(guid, target, clientObject, ClientObjectState::None);
+    SetClientState(guid, target, clientObject, ClientObjectState::NONE);
 }
 
 void Player::DestroyAtClient(WorldObject* target)
@@ -17986,9 +17986,9 @@ void Player::DestroyAtClient(WorldObject* target)
     if (!clientObject)
         return;
 
-    if (clientObject->state != ClientObjectState::CreationPending)
+    if (clientObject->state != ClientObjectState::CREATION_PENDING)
         target->DestroyForPlayer(this);
-    SetClientState(guid, target, clientObject, ClientObjectState::None);
+    SetClientState(guid, target, clientObject, ClientObjectState::NONE);
 }
 
 void Player::ForgetClientObjects()
@@ -18011,7 +18011,7 @@ void Player::ForgetClientObjects()
 void Player::GetObjectsNotMetByCameraVisit(GuidVector& guids) const
 {
     for (auto const& clientObject : m_clientObjects)
-        if (clientObject.second.cameraVisit != m_cameraVisit && clientObject.second.state != ClientObjectState::OutOfRangePending)
+        if (clientObject.second.cameraVisit != m_cameraVisit && clientObject.second.state != ClientObjectState::OUT_OF_RANGE_PENDING)
             guids.push_back(clientObject.first);
 }
 
@@ -18020,7 +18020,7 @@ void Player::WriteViewChanges(UpdateData& data)
     for (ObjectGuid const& guid : m_pendingOutOfRange)
     {
         auto itr = m_clientObjects.find(guid);
-        if (itr != m_clientObjects.end() && itr->second.state == ClientObjectState::OutOfRangePending)
+        if (itr != m_clientObjects.end() && itr->second.state == ClientObjectState::OUT_OF_RANGE_PENDING)
         {
             data.AddOutOfRangeGUID(guid);
             m_clientObjects.erase(itr);
@@ -18036,12 +18036,12 @@ void Player::WriteViewChanges(UpdateData& data)
         for (ObjectGuid const& guid : m_pendingCreations)
         {
             ClientObject* clientObject = FindClientObject(guid);
-            if (!clientObject || clientObject->state != ClientObjectState::CreationPending)
+            if (!clientObject || clientObject->state != ClientObjectState::CREATION_PENDING)
                 continue;                                   // dropped, or already met in this list
 
             WorldObject* object = clientObject->pendingObject;
             creations.emplace_back(object->GetCarrierDepth(), object);
-            SetClientState(guid, object, clientObject, ClientObjectState::Created);
+            SetClientState(guid, object, clientObject, ClientObjectState::CREATED);
         }
         m_pendingCreations.clear();
 
@@ -18143,7 +18143,7 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* targe
     if (clientObject)
         clientObject->cameraVisit = m_cameraVisit;
 
-    if (clientObject && clientObject->state != ClientObjectState::OutOfRangePending)
+    if (clientObject && clientObject->state != ClientObjectState::OUT_OF_RANGE_PENDING)
     {
         if (!target->isVisibleForInState(this, viewPoint, true))
         {
@@ -18704,7 +18704,7 @@ void Player::UpdateForQuestWorldObjects()
     for (auto const& clientObject : m_clientObjects)
     {
         // a creation not written yet carries the values
-        if (clientObject.second.state != ClientObjectState::Created)
+        if (clientObject.second.state != ClientObjectState::CREATED)
             continue;
 
         ObjectGuid const& m_clientGUID = clientObject.first;
@@ -18725,7 +18725,7 @@ void Player::UpdateEverything()
 
     UpdateData updateData;
     for (auto const& clientObject : m_clientObjects)
-        if (clientObject.second.state == ClientObjectState::Created) // a creation not written yet carries the values
+        if (clientObject.second.state == ClientObjectState::CREATED) // a creation not written yet carries the values
             if (WorldObject* obj = GetMap()->GetWorldObject(clientObject.first))
                 obj->BuildForcedValuesUpdateBlockForPlayer(updateData, this);
 
@@ -20313,7 +20313,7 @@ void Player::ForceHealAndPowerUpdateInZone()
     for (auto const& clientObject : m_clientObjects)
     {
         ObjectGuid const& guid = clientObject.first;
-        if (clientObject.second.state == ClientObjectState::OutOfRangePending)
+        if (clientObject.second.state == ClientObjectState::OUT_OF_RANGE_PENDING)
             continue;
 
         if (guid.IsUnit())
