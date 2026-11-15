@@ -36,6 +36,7 @@
 #include "Server/DBCEnums.h"
 #include "VMapFactory.h"
 #include "MotionGenerators/MoveMap.h"
+#include "MotionGenerators/TargetedMovementGenerator.h"
 #include "Chat/Chat.h"
 #include "Weather/Weather.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
@@ -1073,6 +1074,32 @@ void Map::Update(const uint32& t_diff)
         }
     };
 
+    // a creature that follows, chases or keeps formation with a unit is only updated through its own cell,
+    // so visit the cells of the creatures moving after a special unit, then of those moving after them
+    std::vector<Unit const*> leaders;
+    auto visitFollowerCells = [&](WorldObject const* obj)
+    {
+        if (!obj->IsUnit() || static_cast<Unit const*>(obj)->GetFollowers().isEmpty())
+            return;
+
+        leaders.assign(1, static_cast<Unit const*>(obj));
+        for (size_t i = 0; i < leaders.size(); ++i)
+        {
+            for (auto const& ref : leaders[i]->GetFollowers())
+            {
+                Unit const* follower = &ref.getSource()->GetOwner();
+                if (!follower->IsCreature() || !follower->IsInWorld() || follower->GetMap() != this)
+                    continue;
+
+                if (std::find(leaders.begin(), leaders.end(), follower) != leaders.end())
+                    continue;
+
+                visitHomeCell(follower);
+                leaders.push_back(follower);
+            }
+        }
+    };
+
     if (sWorld.getConfig(CONFIG_BOOL_SPECIALS_ACTIVE))
     {
         if (!m_infiniteObjects.empty())
@@ -1080,6 +1107,7 @@ void Map::Update(const uint32& t_diff)
             for (WorldObject const* infiniteObject : m_infiniteObjects)
             {
                 visitHomeCell(infiniteObject);
+                visitFollowerCells(infiniteObject);
             }
         }
 
@@ -1088,6 +1116,7 @@ void Map::Update(const uint32& t_diff)
             for (WorldObject const* largeObj : m_largeObjects)
             {
                 visitHomeCell(largeObj);
+                visitFollowerCells(largeObj);
             }
         }
 
@@ -1096,6 +1125,7 @@ void Map::Update(const uint32& t_diff)
             for (auto& waypointNpc : m_waypointingNpcs)
             {
                 visitHomeCell(waypointNpc);
+                visitFollowerCells(waypointNpc);
             }
         }
     }

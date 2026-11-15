@@ -2273,6 +2273,7 @@ class Unit : public WorldObject
 
         void addFollower(FollowerReference* pRef) { m_FollowingRefManager.insertFirst(pRef); }
         void removeFollower(FollowerReference* /*pRef*/) { /* nothing to do yet */ }
+        FollowerRefManager const& GetFollowers() const { return m_FollowingRefManager; }
 
         MotionMaster* GetMotionMaster() { return &i_motionMaster; }
         MotionMaster const* GetMotionMaster() const { return &i_motionMaster; }

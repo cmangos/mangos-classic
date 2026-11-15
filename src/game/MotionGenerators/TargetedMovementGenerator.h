@@ -31,10 +31,12 @@ class PathFinder;
 class TargetedMovementGeneratorBase
 {
     public:
-        TargetedMovementGeneratorBase(Unit& target) { i_target.link(&target, this); }
+        TargetedMovementGeneratorBase(Unit& owner, Unit& target) : i_owner(owner) { i_target.link(&target, this); }
         void stopFollowing() { }
         void SetNewTarget(Unit& target) { i_target.link(&target, this); }
+        Unit& GetOwner() const { return i_owner; }
     protected:
+        Unit& i_owner;
         FollowerReference i_target;
 };
 
@@ -43,8 +45,8 @@ class TargetedMovementGeneratorMedium
     : public MovementGeneratorMedium< T, D >, public TargetedMovementGeneratorBase
 {
     protected:
-        TargetedMovementGeneratorMedium(Unit& target, float offset, float angle) :
-            TargetedMovementGeneratorBase(target),
+        TargetedMovementGeneratorMedium(Unit& owner, Unit& target, float offset, float angle) :
+            TargetedMovementGeneratorBase(owner, target),
             i_recheckDistance(0),
             i_offset(offset), i_angle(angle),
             i_speedChanged(false), i_targetReached(false),
@@ -111,8 +113,8 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Chas
     using TargetedMovementGeneratorMedium<Unit, ChaseMovementGenerator>::i_offset;
     using TargetedMovementGeneratorMedium<Unit, ChaseMovementGenerator>::i_angle;
     public:
-        ChaseMovementGenerator(Unit& target, float offset, float angle, bool moveFurther = true, bool walk = false, bool combat = true)
-            : TargetedMovementGeneratorMedium<Unit, ChaseMovementGenerator >(target, offset, angle),
+        ChaseMovementGenerator(Unit& owner, Unit& target, float offset, float angle, bool moveFurther = true, bool walk = false, bool combat = true)
+            : TargetedMovementGeneratorMedium<Unit, ChaseMovementGenerator >(owner, target, offset, angle),
             m_moveFurther(moveFurther), m_walk(walk), m_combat(combat), m_reachable(true),
             m_fanningEnabled(true), m_backpedalEnabled(true), m_currentMode(CHASE_MODE_NORMAL), m_closenessAndFanningTimer(0), m_closenessExpired(false) {}
         ~ChaseMovementGenerator() {}
@@ -181,8 +183,8 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Chas
 class FollowMovementGenerator : public TargetedMovementGeneratorMedium<Unit, FollowMovementGenerator>
 {
     public:
-        FollowMovementGenerator(Unit& target, float offset, float angle, bool main, bool possess, bool alwaysBoost = false)
-            : TargetedMovementGeneratorMedium<Unit, FollowMovementGenerator>(target, offset, angle),
+        FollowMovementGenerator(Unit& owner, Unit& target, float offset, float angle, bool main, bool possess, bool alwaysBoost = false)
+            : TargetedMovementGeneratorMedium<Unit, FollowMovementGenerator>(owner, target, offset, angle),
               m_main(main), m_possess(possess), m_boost(alwaysBoost), m_targetMoving(false), m_targetFaced(false)
         {
             i_faceTarget = (angle == 0.0f);
@@ -250,7 +252,7 @@ class FollowMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Fol
 class FormationMovementGenerator : public FollowMovementGenerator
 {
     public:
-        FormationMovementGenerator(FormationSlotDataSPtr& sData, bool main);
+        FormationMovementGenerator(Unit& owner, FormationSlotDataSPtr& sData, bool main);
         ~FormationMovementGenerator();
 
         MovementGeneratorType GetMovementGeneratorType() const override { return FORMATION_MOTION_TYPE; }

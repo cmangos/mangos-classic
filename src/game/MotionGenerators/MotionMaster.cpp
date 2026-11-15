@@ -335,7 +335,7 @@ void MotionMaster::MoveChase(Unit* target, float dist, float angle, bool moveFur
 
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s chase to %s", m_owner->GetGuidStr().c_str(), target->GetGuidStr().c_str());
 
-    Mutate(new ChaseMovementGenerator(*target, dist, angle, moveFurther, walk, combat));
+    Mutate(new ChaseMovementGenerator(*m_owner, *target, dist, angle, moveFurther, walk, combat));
 }
 
 void MotionMaster::DistanceYourself(float dist)
@@ -364,7 +364,7 @@ void MotionMaster::MoveFollow(Unit* target, float dist, float angle, bool asMain
 
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s follow to %s", m_owner->GetGuidStr().c_str(), target->GetGuidStr().c_str());
 
-    Mutate(new FollowMovementGenerator(*target, dist, angle, asMain, (m_owner->IsPlayer() && !m_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED)), alwaysBoost));
+    Mutate(new FollowMovementGenerator(*m_owner, *target, dist, angle, asMain, (m_owner->IsPlayer() && !m_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED)), alwaysBoost));
 }
 
 void MotionMaster::MoveInFormation(FormationSlotDataSPtr& sData, bool asMain /*= false*/)
@@ -385,7 +385,7 @@ void MotionMaster::MoveInFormation(FormationSlotDataSPtr& sData, bool asMain /*=
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s is in formation with %s", m_owner->GetGuidStr().c_str(), master->GetGuidStr().c_str());
     //sLog.outString("%s is in formation with %s", m_owner->GetGuidStr().c_str(), master->GetGuidStr().c_str());
 
-    Mutate(new FormationMovementGenerator(sData, asMain));
+    Mutate(new FormationMovementGenerator(*m_owner, sData, asMain));
 }
 
 void MotionMaster::MoveStay(float x, float y, float z, float o, bool asMain)
