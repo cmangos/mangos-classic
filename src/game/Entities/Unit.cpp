@@ -2826,7 +2826,7 @@ void Unit::SendMeleeAttackStop(Unit const* victim) const
         data << victim->GetPackGUID();
     else
         data << PackedGuid();
-    data << uint32(IsDead() ? 1 : 0);
+    data << uint32(victim && IsDead() ? 1 : 0);             // the client uses it only with a victim
     SendMessageToSet(data, true);
     DETAIL_FILTER_LOG(LOG_FILTER_COMBAT, "%s stopped attacking %s", GetGuidStr().c_str(), victim ? victim->GetGuidStr().c_str() : "nothing");
 }
