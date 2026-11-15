@@ -1649,6 +1649,8 @@ void Loot::SetGroupLootRight(Player* player)
         }
 
         // if more than one player have right to loot than we have to handle group method, round robin, roll, etc..
+        // Items under the threshold are reserved to the current looter until he releases the loot. As on retail,
+        // they stay reserved to him even if he logs out without looting.
         if (m_ownerSet.size() > 1 && m_lootMethod != FREE_FOR_ALL)
         {
             // is current looter have right for this loot?
@@ -2072,28 +2074,38 @@ InventoryResult Loot::SendItem(Player* target, LootItem* lootItem, bool sendErro
     }
     else
     {
-        if (IsLootedForAll())
-        {
-            SendReleaseForAll();
-            if (m_isChest)
-            {
-                GameObject* go = (GameObject*)m_lootTarget;
-                uint32 go_min = go->GetGOInfo()->chest.minSuccessOpens;
-                uint32 go_max = go->GetGOInfo()->chest.maxSuccessOpens;
-                // only vein pass this check
-                if (go_min != 0 && go_max > go_min)
-                {
-                    // nothing to do refill is handled in Loot::Release()
-                }
-                else
-                    go->SetLootState(GO_JUST_DEACTIVATED);
-            }
-        }
-        else if (IsLootedFor(target))
+        if (!ReleaseIfLootedForAll() && IsLootedFor(target))
             SendReleaseFor(target);
         ForceLootAnimationClientUpdate();
     }
     return msg;
+}
+
+// Closes every loot window and finishes the loot target once nobody has anything left to loot.
+// It cannot wait for a CMSG_LOOT_RELEASE: the client does not send one on SMSG_LOOT_RELEASE_RESPONSE,
+// nor at all when the last item is won by roll while nobody is looting.
+bool Loot::ReleaseIfLootedForAll()
+{
+    if (!IsLootedForAll())
+        return false;
+
+    SendReleaseForAll();
+    if (m_isChest)
+    {
+        GameObject* go = (GameObject*)m_lootTarget;
+        uint32 go_min = go->GetGOInfo()->chest.minSuccessOpens;
+        uint32 go_max = go->GetGOInfo()->chest.maxSuccessOpens;
+        // only vein pass this check
+        if (go_min != 0 && go_max > go_min)
+        {
+            // nothing to do refill is handled in Loot::Release()
+        }
+        else
+            go->SetLootState(GO_JUST_DEACTIVATED);
+    }
+    else if (m_lootType == LOOT_CORPSE && m_lootTarget && m_lootTarget->GetTypeId() == TYPEID_UNIT)
+        static_cast<Creature*>(m_lootTarget)->SetLootStatus(CREATURE_LOOT_STATUS_LOOTED);
+    return true;
 }
 
 std::tuple<uint32, uint32, uint32> Loot::GetQualifiedWeapons()
