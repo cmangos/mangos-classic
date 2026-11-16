@@ -1202,6 +1202,15 @@ void Map::UpdateRollingLoots()
     }
 }
 
+// the client drops its group loot rolls when it leaves a map or the world
+void Map::ResendLootRollsTo(Player const* player)
+{
+    for (ObjectGuid const& lootTargetGuid : m_rollingLoots)
+        if (WorldObject* lootTarget = GetWorldObject(lootTargetGuid))
+            if (lootTarget->m_loot)
+                lootTarget->m_loot->ResendStartRollsTo(player);
+}
+
 void Map::Remove(Player* player, bool remove)
 {
     if (i_data)

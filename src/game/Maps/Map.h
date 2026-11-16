@@ -403,6 +403,7 @@ class Map : public GridRefManager<NGridType>
 
         // the group loot rolls of this loot target are updated by the map until they end
         void AddRollingLoot(ObjectGuid const& lootTargetGuid) { m_rollingLoots.insert(lootTargetGuid); }
+        void ResendLootRollsTo(Player const* player);
     private:
         void LoadMapAndVMap(int gx, int gy);
 

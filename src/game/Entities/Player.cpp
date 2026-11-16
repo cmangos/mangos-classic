@@ -18279,6 +18279,10 @@ void Player::SendInitialPacketsAfterAddToMap(bool reconnect)
 
     SendEnchantmentDurations();                             // must be after add to map
     SendItemDurations();                                    // must be after add to map
+
+    // a voter arriving on the map during a group loot roll gets it again
+    if (IsInWorld())
+        GetMap()->ResendLootRollsTo(this);
 }
 
 Unit* Player::GetGroupUpdatePet() const

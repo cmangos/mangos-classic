@@ -182,9 +182,11 @@ class GroupLootRoll
         bool TryToStart(Loot& loot, uint32 itemSlot);
         bool PlayerVote(Player* player, RollVote vote);
         bool UpdateRoll();
+        void ResendStartRollTo(Player const* player) const;
 
     private:
         void SendStartRoll();
+        void SendStartRollTo(Player const* player, uint32 countdown) const;
         void SendAllPassed();
         void SendRoll(ObjectGuid const& targetGuid, uint32 rollNumber, uint32 rollType);
         void SendLootRollWon(ObjectGuid const& targetGuid, uint32 rollNumber, RollVote rollType);
@@ -388,6 +390,7 @@ class Loot
         LootType GetLootType() const { return m_lootType; }
         LootItem* GetLootItemInSlot(uint32 itemSlot);
         GroupLootRoll* GetRollForSlot(uint32 itemSlot);
+        void ResendStartRollsTo(Player const* player) const;  // to a voter arriving on the map of the loot
         InventoryResult SendItem(Player* target, uint32 itemSlot);
         InventoryResult SendItem(Player* target, LootItem* lootItem, bool sendError = true);
         WorldObject const* GetLootTarget() const { return m_lootTarget; }

@@ -620,34 +620,46 @@ bool LootItem::IsAllowed(Player const* player, Loot const* loot) const
 // Send the roll to the voters on the map of the loot
 void GroupLootRoll::SendStartRoll()
 {
+    for (RollVoteMap::const_iterator itr = m_rollVoteMap.begin(); itr != m_rollVoteMap.end(); ++itr)
+    {
+        if (itr->second.vote == ROLL_NOT_VALID)
+            continue;
+
+        if (Player* plr = GetPlayerOnLootMap(itr->first))
+            SendStartRollTo(plr, LOOT_ROLL_TIMEOUT);
+    }
+}
+
+// A voter who arrives on the map of the loot during the roll gets it with the time left, unless he already voted
+void GroupLootRoll::ResendStartRollTo(Player const* player) const
+{
+    RollVoteMap::const_iterator voterItr = m_rollVoteMap.find(player->GetObjectGuid());
+    if (!m_isStarted || voterItr == m_rollVoteMap.end() || voterItr->second.vote != ROLL_NOT_EMITED_YET)
+        return;
+
+    time_t const now = time(nullptr);
+    if (m_endTime > now)
+        SendStartRollTo(player, uint32(m_endTime - now) * IN_MILLISECONDS);
+}
+
+void GroupLootRoll::SendStartRollTo(Player const* player, uint32 countdown) const
+{
     WorldPacket data(SMSG_LOOT_START_ROLL, (8 + 4 + 4 + 4 + 4 + 4 + 1));
     data << m_loot->GetLootGuid();                          // creature guid what we're looting
     data << uint32(m_itemSlot);                             // item slot in loot
     data << uint32(m_lootItem->itemId);                     // the itemEntryId for the item that shall be rolled for
     data << uint32(m_lootItem->randomSuffix);               // randomSuffix
     data << uint32(m_lootItem->randomPropertyId);           // item random property ID
-    data << uint32(LOOT_ROLL_TIMEOUT);                      // the countdown time to choose "need" or "greed"
+    data << uint32(countdown);                              // the countdown time to choose "need" or "greed"
 
-    size_t voteMaskPos = data.wpos();
-    data << uint8(0);
+    // dependent from player
+    RollVoteMask mask = m_voteMask;
+    // In NEED_BEFORE_GREED need disabled for non-usable item for player
+    if (m_loot->m_lootMethod == NEED_BEFORE_GREED && player->CanUseItem(m_lootItem->itemProto) != EQUIP_ERR_OK)
+        mask = RollVoteMask(mask & ~ROLL_VOTE_MASK_NEED);
+    data << uint8(mask);
 
-    for (RollVoteMap::const_iterator itr = m_rollVoteMap.begin(); itr != m_rollVoteMap.end(); ++itr)
-    {
-        if (itr->second.vote == ROLL_NOT_VALID)
-            continue;
-
-        Player* plr = GetPlayerOnLootMap(itr->first);
-        if (!plr)
-            continue;
-        // dependent from player
-        RollVoteMask mask = m_voteMask;
-        // In NEED_BEFORE_GREED need disabled for non-usable item for player
-        if (m_loot->m_lootMethod == NEED_BEFORE_GREED && plr->CanUseItem(m_lootItem->itemProto) != EQUIP_ERR_OK)
-            mask = RollVoteMask(mask & ~ROLL_VOTE_MASK_NEED);
-        data.put<uint8>(voteMaskPos, uint8(mask));
-
-        plr->GetSession()->SendPacket(data);
-    }
+    player->GetSession()->SendPacket(data);
 }
 
 // Send all passed message
@@ -941,6 +953,12 @@ GroupLootRoll* Loot::GetRollForSlot(uint32 itemSlot)
     if (rollItr == m_roll.end())
         return nullptr;
     return &rollItr->second;
+}
+
+void Loot::ResendStartRollsTo(Player const* player) const
+{
+    for (auto const& itr : m_roll)
+        itr.second.ResendStartRollTo(player);
 }
 
 //
