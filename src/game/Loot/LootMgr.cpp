@@ -3290,24 +3290,13 @@ void LootMgr::PlayerVote(Player* player, ObjectGuid const& lootTargetGuid, uint3
 }
 
 // Get loot by object guid
-// If target guid is not provided, try to find it by recipient or current player target
+// If target guid is not provided, get the loot the player has open
 Loot* LootMgr::GetLoot(Player* player, ObjectGuid const& targetGuid) const
 {
     Loot* loot = nullptr;
-    ObjectGuid lguid;
-    if (targetGuid.IsEmpty())
-    {
-        lguid = player->GetLootGuid();
-
-        if (lguid.IsEmpty())
-        {
-            lguid = player->GetSelectionGuid();
-            if (lguid.IsEmpty())
-                return nullptr;
-        }
-    }
-    else
-        lguid = targetGuid;
+    ObjectGuid const lguid = targetGuid.IsEmpty() ? player->GetLootGuid() : targetGuid;
+    if (lguid.IsEmpty())
+        return nullptr;
 
     switch (lguid.GetHigh())
     {
