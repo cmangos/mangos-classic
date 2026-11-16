@@ -1130,6 +1130,8 @@ void Map::Update(const uint32& t_diff)
         }
     }
 
+    UpdateRollingLoots();
+
     uint64 count = PerformObjectUpdate(t_diff, objToUpdate);
 
 #ifdef BUILD_METRICS
@@ -1185,6 +1187,19 @@ uint64 Map::PerformObjectUpdate(uint32 t_diff, WorldObjectUnSet& objToUpdate)
         }
     }
     return count;
+}
+
+// a group loot roll has to end on time, even when no player is near enough to update its loot target
+void Map::UpdateRollingLoots()
+{
+    for (auto itr = m_rollingLoots.begin(); itr != m_rollingLoots.end();)
+    {
+        WorldObject* lootTarget = GetWorldObject(*itr);
+        if (lootTarget && lootTarget->m_loot && lootTarget->m_loot->Update())
+            ++itr;
+        else
+            itr = m_rollingLoots.erase(itr);
+    }
 }
 
 void Map::Remove(Player* player, bool remove)

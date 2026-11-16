@@ -751,9 +751,6 @@ void Creature::Update(const uint32 diff)
         {
             Unit::Update(diff);
 
-            if (m_loot)
-                m_loot->Update();
-
             if (IsCorpseExpired())
                 RemoveCorpse();
 

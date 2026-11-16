@@ -531,8 +531,6 @@ void GameObject::Update(const uint32 diff)
                     {
                         if (m_despawnTimer <= GetMap()->GetCurrentClockTime())
                             m_lootState = GO_JUST_DEACTIVATED;
-
-                        m_loot->Update();
                     }
                     break;
                 case GAMEOBJECT_TYPE_TRAP:

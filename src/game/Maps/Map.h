@@ -400,6 +400,9 @@ class Map : public GridRefManager<NGridType>
 
         void AddWaypointingNpc(Unit* npc);
         void RemoveWaypointingNpc(Unit* npc);
+
+        // the group loot rolls of this loot target are updated by the map until they end
+        void AddRollingLoot(ObjectGuid const& lootTargetGuid) { m_rollingLoots.insert(lootTargetGuid); }
     private:
         void LoadMapAndVMap(int gx, int gy);
 
@@ -435,6 +438,7 @@ class Map : public GridRefManager<NGridType>
         void ScriptsProcess();
 
         void UpdateVisibility();
+        void UpdateRollingLoots();
         void SendObjectUpdates();
         std::set<Object*> m_objectsToClientUpdate;
         std::set<std::pair<Object*, ObjectGuid>> m_objectsToClientCreateUpdate;
@@ -444,6 +448,7 @@ class Map : public GridRefManager<NGridType>
         std::set<WorldObject*> m_largeObjects;
         std::set<WorldObject*> m_infiniteObjects;
         std::set<Unit*> m_waypointingNpcs;
+        GuidSet m_rollingLoots;                             // loot targets with a group loot roll running
 
     protected:
         MapEntry const* i_mapEntry;

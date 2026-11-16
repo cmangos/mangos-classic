@@ -228,6 +228,7 @@ struct LootItem
     uint32       displayID;
     LootItemType lootItemType;
     GuidSet      allowedGuid;                                       // player's that have right to loot this item
+    ObjectGuid   rollWinnerGuid;                                    // a roll winner who could not receive the item, the only one who may take it
     uint32       lootSlot;                                          // the slot number will be send to client
     uint16       conditionId       : 16;                            // allow compiler pack structure
     uint8        count             : 8;
@@ -371,7 +372,7 @@ class Loot
         bool AutoStore(Player* player, bool broadcast = false, uint32 bag = NULL_BAG, uint32 slot = NULL_SLOT);
         bool CanLoot(Player const* player);
         void ShowContentTo(Player* plr);
-        void Update();
+        bool Update();                                      // returns true while a group roll is running
         bool IsChanged() const { return m_isChanged; }
         void Release(Player* player);
         void GetLootItemsListFor(Player* player, LootItemList& lootList);
