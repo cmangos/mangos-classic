@@ -58,7 +58,10 @@ enum LootSlotType
     LOOT_SLOT_VIEW    = 1,                                  // can be only view (ignore any loot attempts)
     LOOT_SLOT_MASTER  = 2,                                  // can be looted only master (error message)
     LOOT_SLOT_REQS    = 3,                                  // can't be looted (error message about missing reqs)
-    MAX_LOOT_SLOT_TYPE                                      // custom, use for mark skipped from show items
+    MAX_LOOT_SLOT_TYPE,                                     // custom, use for mark skipped from show items
+
+    // item seen by a player who may not take it: the client has no locked slot type, the item shows as being rolled for
+    LOOT_SLOT_LOCKED = LOOT_SLOT_VIEW
 };
 
 enum RollVote

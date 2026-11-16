@@ -1001,10 +1001,10 @@ TalentsInspecting = 1
 #                 0 (not show)
 #
 #    Corpse.AllowAllItemsShowInMasterLoot
-#        In master loot mode every one can see the loot content under or over treshold
-#        Only the master loot can still distrube it
-#                 1 (show)
-#        Default: 0 (not show)
+#        In master loot mode the other group members can see the items over the loot threshold
+#        Only the master looter can distribute them
+#        Default: 1 (show)
+#                 0 (not show)
 #
 #    Corpse.Decay.NORMAL
 #    Corpse.Decay.RARE

@@ -579,9 +579,12 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const
             if (player->GetObjectGuid() == loot->m_masterOwnerGuid)
                 return LOOT_SLOT_MASTER;
 
-            // give a chance to let others just see the content of the loot
-            if (isBlocked || sWorld.getConfig(CONFIG_BOOL_CORPSE_ALLOW_ALL_ITEMS_SHOW_IN_MASTER_LOOT))
+            if (isBlocked)
                 return LOOT_SLOT_VIEW;
+
+            // the other members see the item, but only the master looter can distribute it
+            if (sWorld.getConfig(CONFIG_BOOL_CORPSE_ALLOW_ALL_ITEMS_SHOW_IN_MASTER_LOOT))
+                return LOOT_SLOT_LOCKED;
 
             return MAX_LOOT_SLOT_TYPE;
         }
