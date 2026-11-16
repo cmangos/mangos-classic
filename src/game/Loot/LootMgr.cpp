@@ -1150,16 +1150,10 @@ bool Loot::CanLoot(Player const* player)
     if (m_lootType == LOOT_FISHINGHOLE)
         return true;
 
-    if (m_haveItemOverThreshold)
-    {
-        // master loot have always loot right when the loot contain over threshold item
-        if (m_lootMethod == MASTER_LOOT && player->GetObjectGuid() == m_masterOwnerGuid)
-            return true;
-
-        // player can all loot on 'group loot' or 'need before greed' loot type
-        if (m_lootMethod != MASTER_LOOT && m_lootMethod != ROUND_ROBIN)
-            return true;
-    }
+    // over threshold items are rolled on 'group loot' and 'need before greed', and given by the master looter on
+    // 'master loot': any player can open the loot as long as he still sees something in it
+    if (m_haveItemOverThreshold && m_lootMethod != ROUND_ROBIN)
+        return true;
 
     // if the player is the current looter (his turn to loot under threshold item) or the current looter released the loot then the player can loot
     if ((lootStatus & LOOT_STATUS_CONTAIN_RELEASED_ITEMS) != 0 || player->GetObjectGuid() == m_currentLooterGuid)
