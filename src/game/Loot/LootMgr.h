@@ -30,6 +30,7 @@
 
 class Player;
 class Group;
+class Map;
 class LootStore;
 class WorldObject;
 class LootTemplate;
@@ -174,7 +175,7 @@ class GroupLootRoll
     public:
         typedef std::unordered_map<ObjectGuid, PlayerRollVote> RollVoteMap;
 
-        GroupLootRoll() : m_rollVoteMap(ROLL_VOTE_MASK_ALL), m_isStarted(false), m_lootItem(nullptr), m_loot(nullptr), m_itemSlot(0), m_voteMask(), m_endTime(0)
+        GroupLootRoll() : m_rollVoteMap(ROLL_VOTE_MASK_ALL), m_isStarted(false), m_lootItem(nullptr), m_loot(nullptr), m_lootMap(nullptr), m_itemSlot(0), m_voteMask(), m_endTime(0)
         {}
         ~GroupLootRoll();
 
@@ -189,10 +190,12 @@ class GroupLootRoll
         void SendLootRollWon(ObjectGuid const& targetGuid, uint32 rollNumber, RollVote rollType);
         void Finish(RollVoteMap::const_iterator& winnerItr);
         bool AllPlayerVoted(RollVoteMap::const_iterator& winnerItr);
+        Player* GetPlayerOnLootMap(ObjectGuid const& playerGuid) const;
         RollVoteMap           m_rollVoteMap;
         bool                  m_isStarted;
         LootItem*             m_lootItem;
         Loot*                 m_loot;
+        Map*                  m_lootMap;                    // the loot target may have left its map when the roll ends with it
         uint32                m_itemSlot;
         RollVoteMask          m_voteMask;
         time_t                m_endTime;
