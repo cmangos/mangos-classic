@@ -1507,8 +1507,9 @@ void Loot::ShowContentTo(Player* plr)
 {
     if (!m_isChest)
     {
-        // for item loot that might be empty we should not display error but instead send empty loot window
-        if (!m_lootItems.empty() && !CanLoot(plr))
+        // a loot holding items or money, or the empty window some corpses with nothing to loot show before anyone
+        // opens them, opens only for the players allowed to loot it; any other loot is empty and opens on an empty window
+        if ((!m_lootItems.empty() || m_gold != 0 || (m_isFakeLoot && m_playersOpened.empty())) && !CanLoot(plr))
         {
             SendReleaseFor(plr);
             sLog.outError("Loot::ShowContentTo()> %s is trying to open a loot without credential", plr->GetGuidStr().c_str());
@@ -2316,6 +2317,10 @@ void Loot::SetGoldAmount(uint32 _gold)
 
 void Loot::SendGold(Player* player)
 {
+    // money is taken from a loot window the player has open
+    if (m_playersLooting.find(player->GetObjectGuid()) == m_playersLooting.end())
+        return;
+
     NotifyMoneyRemoved();
 
     if (m_lootMethod != NOT_GROUP_TYPE_LOOT)           // item can be looted only single player
