@@ -1356,7 +1356,9 @@ void Loot::Release(Player* player)
 
                     if (refill)
                     {
-                        // this vein have can be now refilled, as this is a vein no other player are looting it so no need to send them release
+                        // another player may have opened the emptied vein before this release; Clear() drops the looters
+                        // without ending their looting, so release them first
+                        SendReleaseForAll();
                         Clear();                // clear the content and reset some values
                         FillLoot(go->GetGOInfo()->GetLootId(), LootTemplates_Gameobject, player, false); // refill the loot with new items
                         go->SetLootState(GO_READY);
