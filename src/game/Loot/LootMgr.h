@@ -455,7 +455,7 @@ class Loot
         bool             m_isFakeLoot;                    // nothing to loot but will sparkle for empty windows
         GroupLootRollMap m_roll;                          // used if an item is under rolling
         GuidSet          m_playersLooting;                // player who opened loot windows
-        GuidSet          m_playersOpened;                 // players that have released the corpse
+        GuidSet          m_playersOpened;                 // players who opened this loot, still looting it or not
         TimePoint        m_createTime;                    // create time (used to refill loot if need)
 };
 

@@ -1272,6 +1272,14 @@ void Loot::SetPlayerIsNotLooting(Player* player)
 
 void Loot::Release(Player* player)
 {
+    // a loot is released only by a player who opened it, who may no longer be looting it: the client releases
+    // a loot it emptied even after the server closed its window
+    if (!IsLootOpenedBy(player->GetObjectGuid()))
+    {
+        SetPlayerIsNotLooting(player);
+        return;
+    }
+
     bool updateClients = false;
     if (player->GetObjectGuid() == m_currentLooterGuid)
     {
@@ -1515,9 +1523,6 @@ void Loot::ShowContentTo(Player* plr)
             sLog.outError("Loot::ShowContentTo()> %s is trying to open a loot without credential", plr->GetGuidStr().c_str());
             return;
         }
-
-        // add this player to the the openers list of this loot
-        m_playersOpened.emplace(plr->GetObjectGuid());
     }
     else
     {
@@ -1530,6 +1535,9 @@ void Loot::ShowContentTo(Player* plr)
         if (m_ownerSet.find(plr->GetObjectGuid()) == m_ownerSet.end())
             SetGroupLootRight(plr);
     }
+
+    // add this player to the openers list of this loot
+    m_playersOpened.emplace(plr->GetObjectGuid());
 
     if (m_lootMethod != NOT_GROUP_TYPE_LOOT && !m_isChecked)
         GroupCheck();
@@ -2298,6 +2306,7 @@ void Loot::Clear()
         delete m_lootItem;
     m_lootItems.clear();
     m_playersLooting.clear();
+    m_playersOpened.clear();
     m_gold = 0;
     m_ownerSet.clear();
     m_masterOwnerGuid.Clear();
