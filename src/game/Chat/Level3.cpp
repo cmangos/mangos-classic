@@ -6880,12 +6880,12 @@ bool ChatHandler::HandleLinkEditCommand(char* args)
     {
         if (flags)
         {
-            WorldDatabase.PExecute("UPDATE creature_linking SET flags = flags | '%u' WHERE guid = '%u' AND master_guid = '%u'", flags, player->GetSelectionGuid().GetCounter(), masterCounter);
+            WorldDatabase.PExecute("UPDATE creature_linking SET flag = flag | '%u' WHERE guid = '%u' AND master_guid = '%u'", flags, player->GetSelectionGuid().GetCounter(), masterCounter);
             SendSysMessage("Flag added to link.");
         }
         else
         {
-            WorldDatabase.PExecute("DELETE FROM creature_linking WHERE guid = '%u' AND master_guid = '%u')", player->GetSelectionGuid().GetCounter(), masterCounter);
+            WorldDatabase.PExecute("DELETE FROM creature_linking WHERE guid = '%u' AND master_guid = '%u'", player->GetSelectionGuid().GetCounter(), masterCounter);
             SendSysMessage("Link removed.");
         }
     }
@@ -6893,7 +6893,7 @@ bool ChatHandler::HandleLinkEditCommand(char* args)
     {
         if (flags)
         {
-            WorldDatabase.PExecute("INSERT INTO creature_linking(guid,master_guid,flags) VALUES('%u','%u','%u')", player->GetSelectionGuid().GetCounter(), masterCounter, flags);
+            WorldDatabase.PExecute("INSERT INTO creature_linking(guid,master_guid,flag) VALUES('%u','%u','%u')", player->GetSelectionGuid().GetCounter(), masterCounter, flags);
             SendSysMessage("Link did not exist. Inserted link");
         }
         else
@@ -6930,12 +6930,12 @@ bool ChatHandler::HandleLinkToggleCommand(char* args)
     {
         if (toggle)
         {
-            WorldDatabase.PExecute("UPDATE creature_linking SET flags = flags &~ '%u' WHERE guid = '%u' AND master_guid = '%u'", flags, player->GetSelectionGuid().GetCounter(), masterCounter);
+            WorldDatabase.PExecute("UPDATE creature_linking SET flag = flag &~ '%u' WHERE guid = '%u' AND master_guid = '%u'", flags, player->GetSelectionGuid().GetCounter(), masterCounter);
             SendSysMessage("Flag removed from link.");
         }
         else
         {
-            WorldDatabase.PExecute("UPDATE creature_linking SET flags = flags | '%u' WHERE guid = '%u' AND master_guid = '%u'", flags, player->GetSelectionGuid().GetCounter(), masterCounter);
+            WorldDatabase.PExecute("UPDATE creature_linking SET flag = flag | '%u' WHERE guid = '%u' AND master_guid = '%u'", flags, player->GetSelectionGuid().GetCounter(), masterCounter);
             SendSysMessage("Flag added to link.");
         }
     }
@@ -6945,7 +6945,7 @@ bool ChatHandler::HandleLinkToggleCommand(char* args)
             SendSysMessage("Link does not exist. No changes done.");
         else
         {
-            WorldDatabase.PExecute("INSERT INTO creature_linking(guid,master_guid,flags) VALUES('%u','%u','%u')", player->GetSelectionGuid().GetCounter(), masterCounter, flags);
+            WorldDatabase.PExecute("INSERT INTO creature_linking(guid,master_guid,flag) VALUES('%u','%u','%u')", player->GetSelectionGuid().GetCounter(), masterCounter, flags);
             SendSysMessage("Link did not exist, added.");
         }
     }
