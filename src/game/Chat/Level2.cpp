@@ -1853,9 +1853,24 @@ bool ChatHandler::HandleNpcFlagCommand(char* args)
         return false;
     }
 
+    if (pCreature->IsPet())
+    {
+        SendSysMessage("A pet can use the template of a wild creature, this command can't change it.");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
     pCreature->SetUInt32Value(UNIT_NPC_FLAGS, npcFlags);
 
-    WorldDatabase.PExecuteLog("UPDATE creature_template SET NpcFlags = '%u' WHERE entry = '%u'", npcFlags, pCreature->GetEntry());
+    // saved on the normal template and on its difficulty templates, which must have the same flags
+    if (CreatureInfo const* normalInfo = ObjectMgr::GetCreatureTemplate(pCreature->GetEntry()))
+    {
+        std::string entries = std::to_string(normalInfo->Entry);
+        for (uint32 difficultyEntry : normalInfo->GetDifficultyEntries())
+            entries += ", " + std::to_string(difficultyEntry);
+
+        WorldDatabase.PExecuteLog("UPDATE creature_template SET NpcFlags = '%u' WHERE entry IN (%s)", npcFlags, entries.c_str());
+    }
 
     SendSysMessage(LANG_VALUE_SAVED_REJOIN);
 
