@@ -937,8 +937,8 @@ void MapPersistentStateManager::_ResetOrWarnAll(uint32 mapid, bool warn, uint32 
 
         // delete them from the DB, even if not loaded
         CharacterDatabase.BeginTransaction();
-        CharacterDatabase.PExecute("DELETE FROM character_instance USING character_instance LEFT JOIN instance ON character_instance.instance = id WHERE map = '%u'", mapid);
-        CharacterDatabase.PExecute("DELETE FROM group_instance USING group_instance LEFT JOIN instance ON group_instance.instance = id WHERE map = '%u'", mapid);
+        CharacterDatabase.PExecute("DELETE FROM character_instance WHERE instance IN (SELECT id FROM instance WHERE map = '%u')", mapid);
+        CharacterDatabase.PExecute("DELETE FROM group_instance WHERE instance IN (SELECT id FROM instance WHERE map = '%u')", mapid);
         CharacterDatabase.PExecute("DELETE FROM instance WHERE map = '%u'", mapid);
         CharacterDatabase.CommitTransaction();
 
