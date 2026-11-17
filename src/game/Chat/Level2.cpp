@@ -2143,16 +2143,23 @@ bool ChatHandler::HandleNpcFactionIdCommand(char* args)
         return false;
     }
 
+    if (pCreature->IsPet() || pCreature->IsTotem())
+    {
+        SendSysMessage("A pet or a totem takes the faction of its owner, this command can't change it.");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
     pCreature->setFaction(factionId);
 
     // faction is set in creature_template - not inside creature
 
-    // update in memory
+    // update in memory and DB, on the template the creature uses
     if (CreatureInfo const* cinfo = pCreature->GetCreatureInfo())
+    {
         const_cast<CreatureInfo*>(cinfo)->Faction = factionId;
-
-    // and DB
-    WorldDatabase.PExecuteLog("UPDATE creature_template SET Faction = '%u' WHERE entry = '%u'", factionId, pCreature->GetEntry());
+        WorldDatabase.PExecuteLog("UPDATE creature_template SET Faction = '%u' WHERE entry = '%u'", factionId, cinfo->Entry);
+    }
 
     return true;
 }
