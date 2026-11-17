@@ -1641,16 +1641,20 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
             return false;
     }
 
-    uint32 entry = forcedEntry ? forcedEntry : data->id;
+    uint32 entry = forcedEntry;
 
     SpawnGroupEntry* groupEntry = map->GetMapDataContainer().GetSpawnGroupByGuid(dbGuid, TYPEID_UNIT); // use dynguid by default \o/
     CreatureGroup* group = nullptr;
     if (groupEntry)
     {
         group = static_cast<CreatureGroup*>(map->GetSpawnManager().GetSpawnGroup(groupEntry->Id));
+        // a member loaded with its grid takes the entry its group chose for it, as when the group spawns it
         if (!entry)
             entry = group->GetGuidEntry(dbGuid);
     }
+
+    if (!entry)
+        entry = data->id;
 
     // get data for dual spawn instances - spawn group precedes it because
     if (entry == 0)
