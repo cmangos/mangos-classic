@@ -70,23 +70,9 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     // get the destination map entry, not the current one, this will fix homebind and reset greeting
     MapEntry const* mEntry = sMapStore.LookupEntry(loc.mapid);
     
-    auto returnHomeFunc = [this, player = GetPlayer(), old_loc, loc]()
+    // the player is outside the world: sending it back is a far teleport, which needs no map
+    auto returnHomeFunc = [player = GetPlayer(), old_loc]()
     {
-        Map* map = nullptr;
-        // must have map in teleport
-        if (!map)
-            map = sMapMgr.CreateMap(loc.mapid, player);
-        if (!map)
-            map = sMapMgr.CreateMap(old_loc.mapid, player);
-
-        if (!map)
-        {
-            KickPlayer();
-            return;
-        }
-
-        player->SetMap(map);
-
         player->SetSemaphoreTeleportFar(false);
 
         // Teleport to previous place, if cannot be ported back TP to homebind place
@@ -111,6 +97,10 @@ void WorldSession::HandleMoveWorldportAckOpcode()
             DETAIL_LOG("WorldSession::HandleMoveWorldportAckOpcode: %s was teleported far to nonexisten battleground instance "
                        " (map:%u, x:%f, y:%f, z:%f) Trying to port him to his previous place..",
                        GetPlayer()->GetGuidStr().c_str(), loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z);
+
+            // without the id of a battleground that is gone, the player cannot be sent back onto a battleground map
+            GetPlayer()->SetBattleGroundId(0, BATTLEGROUND_TYPE_NONE);
+            GetPlayer()->SetBGTeam(TEAM_NONE);
 
             returnHomeFunc();
             return;
