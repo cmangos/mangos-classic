@@ -5,8 +5,6 @@
 #ifndef SC_SYSTEM_H
 #define SC_SYSTEM_H
 
-extern std::string  strSD2Version;                          // version info: database entry and revision
-
 #define TEXT_SOURCE_RANGE -1000000                          // the amount of entries each text source has available
 
 #define TEXT_SOURCE_TEXT_START      TEXT_SOURCE_RANGE
@@ -36,7 +34,6 @@ class SystemMgr
         typedef std::map < uint32 /*entry*/, std::map < int32 /*pathId*/, PathInformation > > EntryPathInfo;
 
         // Database
-        void LoadVersion();
         void LoadScriptTexts();
         void LoadScriptTextsCustom();
         void LoadScriptGossipTexts();

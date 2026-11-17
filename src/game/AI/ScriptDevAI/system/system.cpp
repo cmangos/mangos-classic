@@ -9,8 +9,6 @@
 #include "Database/DatabaseEnv.h"
 #include "MotionGenerators/WaypointManager.h"
 
-std::string strSD2Version;
-
 SystemMgr::SystemMgr()
 {
 }
@@ -19,27 +17,6 @@ SystemMgr& SystemMgr::Instance()
 {
     static SystemMgr pSysMgr;
     return pSysMgr;
-}
-
-void SystemMgr::LoadVersion()
-{
-    // Get Version information
-    auto queryResult = WorldDatabase.PQuery("SELECT version FROM sd2_db_version LIMIT 1");
-
-    if (queryResult)
-    {
-        Field* fields = queryResult->Fetch();
-
-        strSD2Version = fields[0].GetCppString();
-    }
-    else
-        script_error_log("Missing `sd2_db_version` information.");
-
-    // Setup version info and display it
-    if (strSD2Version.empty())
-        strSD2Version.append("ScriptDev2 ");
-
-    outstring_log("Loading %s\n", strSD2Version.c_str());
 }
 
 void SystemMgr::LoadScriptTexts()

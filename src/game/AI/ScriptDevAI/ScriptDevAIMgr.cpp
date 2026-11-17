@@ -25,7 +25,6 @@ void FillSpellSummary();
 void LoadDatabase()
 {
     // Load content
-    // pSystemMgr.LoadVersion(); // currently we are not checking for version; function to be completely removed in the future
     pSystemMgr.LoadScriptTexts();
     pSystemMgr.LoadScriptTextsCustom();
     pSystemMgr.LoadScriptGossipTexts();
