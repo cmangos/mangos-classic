@@ -1302,6 +1302,10 @@ void Loot::Release(Player* player)
             GameObject* go = (GameObject*) m_lootTarget;
             SetPlayerIsNotLooting(player);
 
+            // a deactivated object is done with its loot, which it drops at its next update or when it restocks
+            if (go->GetLootState() == GO_JUST_DEACTIVATED || go->GetLootState() == GO_NOT_READY)
+                break;
+
             // GO is mineral vein? so it is not removed after its looted
             switch (go->GetGoType())
             {
@@ -1363,6 +1367,10 @@ void Loot::Release(Player* player)
                     break;
                 }
                 case GAMEOBJECT_TYPE_FISHINGHOLE:
+                    // a catch activates the fishing hole, which counts one use at the first release of that catch
+                    if (go->GetLootState() != GO_ACTIVATED)
+                        break;
+
                     // The fishing hole used once more
                     go->AddUse();                           // if the max usage is reached, will be despawned at next tick
                     if (go->GetUseCount() >= urand(go->GetGOInfo()->fishinghole.minSuccessOpens, go->GetGOInfo()->fishinghole.maxSuccessOpens))
