@@ -461,7 +461,7 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket& recv_data)
     // Now remove the auction
     CharacterDatabase.BeginTransaction();
     auction->DeleteFromDB();
-    pl->SaveInventoryAndGoldToDB();
+    pl->SaveGoldToDB();                                     // only the money changes: the auction row must not depend on the rest of the save
     CharacterDatabase.CommitTransaction();
     sAuctionMgr.RemoveAItem(auction->itemGuidLow);
     auctionHouse->RemoveAuction(auction->Id);
