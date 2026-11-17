@@ -94,7 +94,7 @@ enum SpellAuraHolderState
 class SpellAuraHolder
 {
     public:
-        SpellAuraHolder(SpellEntry const* spellproto, Unit* target, WorldObject* caster, Item* castItem, SpellEntry const* triggeredBy);
+        SpellAuraHolder(SpellEntry const* spellproto, Unit* target, WorldObject* caster, ObjectGuid castItemGuid, SpellEntry const* triggeredBy);
         ~SpellAuraHolder();
         Aura* m_auras[MAX_EFFECT_INDEX];
 
@@ -605,5 +605,5 @@ class SingleEnemyTargetAura : public Aura
 };
 
 Aura* CreateAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = nullptr, Item* castItem = nullptr, uint64 scriptValue = 0);
-SpellAuraHolder* CreateSpellAuraHolder(SpellEntry const* spellproto, Unit* target, WorldObject* caster, Item* castItem = nullptr, SpellEntry const* triggeredBy = nullptr);
+SpellAuraHolder* CreateSpellAuraHolder(SpellEntry const* spellproto, Unit* target, WorldObject* caster, ObjectGuid castItemGuid = ObjectGuid(), SpellEntry const* triggeredBy = nullptr);
 #endif
