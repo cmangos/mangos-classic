@@ -264,12 +264,13 @@ void MapManager::UnloadAll()
 
 void MapManager::InitMaxInstanceId()
 {
-    i_MaxInstanceId = 0;
+    // ids are handed out from FIRST_INSTANCE_ID up, as PackInstances numbers the stored instances
+    i_MaxInstanceId = FIRST_INSTANCE_ID - 1;
 
     auto queryResult = CharacterDatabase.Query("SELECT MAX(id) FROM instance");
     if (queryResult)
     {
-        i_MaxInstanceId = queryResult->Fetch()[0].GetUInt32();
+        i_MaxInstanceId = std::max(i_MaxInstanceId.load(), queryResult->Fetch()[0].GetUInt32());
     }
 }
 

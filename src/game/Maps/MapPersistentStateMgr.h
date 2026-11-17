@@ -40,6 +40,9 @@ class Map;
 
 #define NORMAL_INSTANCE_RESET_TIME 30 * MINUTE
 
+// lowest id handed out to a dungeon or battleground instance
+#define FIRST_INSTANCE_ID 2
+
 typedef std::set<uint32> CellGuidSet;
 
 struct MapCellObjectGuids
