@@ -94,6 +94,11 @@ void WorldSession::HandleLootOpcode(WorldPacket& recv_data)
     ObjectGuid lguid;
     recv_data >> lguid;
 
+    // the client sends this packet only for a unit or a player corpse: a gameobject or an item is opened by using
+    // it or by a spell
+    if (!lguid.IsUnit() && !lguid.IsCorpse())
+        return;
+
     // Check possible cheat
     if (!_player->IsAlive())
         return;
@@ -113,43 +118,25 @@ void WorldSession::HandleLootOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if (!lguid.IsItem())
+    if (lguid.IsUnit())
     {
-        if (lguid.IsUnit())
+        if (Unit* unit = _player->GetMap()->GetUnit(lguid))
         {
-            if (Unit* unit = _player->GetMap()->GetUnit(lguid))
+            float range = std::max(5.f, unit->GetCombatReach() + (4.f / 3.f) + _player->GetCombatReach());
+            if (range * range < _player->GetDistance(unit, true, DIST_CALC_NONE))
             {
-                float range = std::max(5.f, unit->GetCombatReach() + (4.f / 3.f) + _player->GetCombatReach());
-                if (range * range < _player->GetDistance(unit, true, DIST_CALC_NONE))
-                {
-                    _player->SendLootError(lguid, LOOT_ERROR_TOO_FAR);
-                    return;
-                }
+                _player->SendLootError(lguid, LOOT_ERROR_TOO_FAR);
+                return;
             }
         }
-        else if (lguid.IsGameObject())
+    }
+    else if (Corpse* corpse = _player->GetMap()->GetCorpse(lguid))
+    {
+        float range = 5.f;
+        if (range * range < _player->GetDistance(corpse, true, DIST_CALC_NONE))
         {
-            if (GameObject* go = _player->GetMap()->GetGameObject(lguid))
-            {
-                float range = std::max(5.f, go->GetCombatReach() + (4.f / 3.f) + _player->GetCombatReach());
-                if (range * range < _player->GetDistance(go, true, DIST_CALC_NONE))
-                {
-                    _player->SendLootError(lguid, LOOT_ERROR_TOO_FAR);
-                    return;
-                }
-            }
-        }
-        else if (lguid.IsCorpse())
-        {
-            if (Corpse* corpse = _player->GetMap()->GetCorpse(lguid))
-            {
-                float range = 5.f;
-                if (range * range < _player->GetDistance(corpse, true, DIST_CALC_NONE))
-                {
-                    _player->SendLootError(lguid, LOOT_ERROR_TOO_FAR);
-                    return;
-                }
-            }
+            _player->SendLootError(lguid, LOOT_ERROR_TOO_FAR);
+            return;
         }
     }
 
