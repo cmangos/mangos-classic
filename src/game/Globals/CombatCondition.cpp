@@ -115,6 +115,7 @@ std::shared_ptr<std::map<int32, CombatConditionEntry>> CombatConditionMgr::Load(
             conditionEntry.EnemyConditionCount[i] = fields[16 + i].GetUInt32();
 
         combatConditions->emplace(conditionEntry.Id, conditionEntry);
+        ++Count;
     }
     while (result->NextRow());
 

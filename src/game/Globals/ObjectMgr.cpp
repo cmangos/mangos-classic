@@ -1106,6 +1106,7 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
 
             spell.DisabledForAI = !spellInfo || spellInfo->HasAttribute(SPELL_ATTR_EX_NO_AUTOCAST_AI);
             newContainer->spellLists[spell.Id].Spells.emplace(spell.Position, spell);
+            ++count;
         } while (result->NextRow());
     }
 
@@ -9852,10 +9853,12 @@ void ObjectMgr::LoadCreatureTemplateSpells(std::shared_ptr<CreatureSpellListCont
                 spell.DisabledForAI = !spellInfo || spellInfo->HasAttribute(SPELL_ATTR_EX_NO_AUTOCAST_AI);
                 spells.emplace(i, spell);
             }
+
+            ++count;
         } while (result->NextRow());
     }
 
-    sLog.outString(">> Loaded %u creature_cooldowns definitions", count);
+    sLog.outString(">> Loaded %u creature_template_spells definitions", count);
     sLog.outString();
 }
 
@@ -9891,6 +9894,7 @@ void ObjectMgr::LoadCreatureCooldowns()
                 continue;
             }
             m_creatureCooldownMap[entry][spellId] = std::make_pair(cooldownMin, cooldownMax);
+            ++count;
         } while (queryResult->NextRow());
     }
 

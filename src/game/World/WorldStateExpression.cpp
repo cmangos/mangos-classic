@@ -408,10 +408,11 @@ std::shared_ptr<std::map<int32, WorldStateExpressionEntry>> WorldStateExpression
         conditionEntry.Expression = fields[1].GetCppString();
 
         expressions->emplace(conditionEntry.Id, conditionEntry);
+        ++Count;
     }
     while (result->NextRow());
 
-    sLog.outString(">> Loaded %u UnitCondition definitions", Count);
+    sLog.outString(">> Loaded %u worldstate_expression definitions", Count);
     sLog.outString();
 
     m_expressions = expressions;
