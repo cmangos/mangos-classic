@@ -32,6 +32,8 @@ struct npc_escortAI : public ScriptedAI
 
         void CorpseRemoved(uint32& /*respawnDelay*/) override;
 
+        bool CanUseFastEvade() const override { return !HasEscortState(STATE_ESCORT_ESCORTING); }
+
         void UpdateAI(const uint32 diff) override;               // the "internal" update, calls UpdateEscortAI()
         virtual void UpdateEscortAI(const uint32 diff);          // used when it's needed to add code in update (abilities, scripted events, etc)
 
