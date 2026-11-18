@@ -148,7 +148,7 @@ struct KodoKombobulator : public SpellScript
     {
         Unit* caster = spell->GetCaster();
         Unit* target = spell->GetUnitTarget();
-        target->CastSpell(caster, SPELL_KODO_KOMBO_PLAYER_BUFF, TRIGGERED_OLD_TRIGGERED);
+        caster->CastSpell(caster, SPELL_KODO_KOMBO_PLAYER_BUFF, TRIGGERED_OLD_TRIGGERED);
 
         static_cast<Creature*>(target)->UpdateEntry(NPC_TAMED_KODO);
         target->CastSpell(nullptr, SPELL_KODO_KOMBO_DESPAWN_BUFF, TRIGGERED_NONE);
