@@ -18,6 +18,8 @@
 
 #include "MaNGOSsoap.h"
 
+#include <atomic>
+#include <memory>
 #include <string>
 
 SOAPThread::SOAPThread(const std::string& host, int port) : m_host(host), m_port(port)
@@ -84,6 +86,9 @@ Code used for generating stubs:
 
 int ns1__executeCommand(char* command, char** result);
 */
+// 50 ms waits for a queued command once the world has stopped, before the request gives up
+static const int StoppedGraceWaits = 20;
+
 int ns1__executeCommand(soap* soap, char* command, char** result)
 {
     // security check
@@ -117,32 +122,47 @@ int ns1__executeCommand(soap* soap, char* command, char** result)
 
     DEBUG_LOG("MaNGOSsoap: got command '%s'", command);
 
-    bool commandExecuted = false, commandSucceeded = false;
-    std::vector<char> buffer;
-    buffer.reserve(SOAPThread::CommandOutputBufferSize);
+    // shared with the callbacks: the world thread can still run the command after this request gave up waiting
+    struct CommandState
+    {
+        std::vector<char> buffer;
+        std::atomic<bool> executed{false};
+        bool succeeded = false;
+    };
+    auto const state = std::make_shared<CommandState>();
+    state->buffer.reserve(SOAPThread::CommandOutputBufferSize);
 
     // commands are executed in the world thread. We have to wait for them to be completed
     sWorld.QueueCliCommand(new CliCommandHolder(accountId, SEC_CONSOLE, command,
-                           [&buffer](const char* output)
+                           [state](const char* output)
     {
         assert(output);
 
         for (auto p = output; *p; ++p)
-            buffer.push_back(*p);
+            state->buffer.push_back(*p);
     },
-    [soap, &commandExecuted, &commandSucceeded](bool success)
+    [state](bool success)
     {
-        commandExecuted = true;
-        commandSucceeded = success;
+        state->succeeded = success;
+        state->executed = true;
     }));
 
-    while (!commandExecuted)
+    // the world thread runs queued commands only until the world stops. A request accepted around
+    // the stop would otherwise wait forever, and the shutdown would hang joining this thread.
+    // The grace lets a command that stops the world itself (server exit) still send its reply
+    int stoppedWaits = 0;
+    while (!state->executed)
+    {
+        if (World::IsStopped() && ++stoppedWaits > StoppedGraceWaits)
+            return soap_sender_fault(soap, "Server is shutting down", "The command was not run, or ran without a reply, because the server is shutting down");
+
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    }
 
-    buffer.push_back(0);
-    auto const printBuffer = soap_strdup(soap, &buffer[0]);
+    state->buffer.push_back(0);
+    auto const printBuffer = soap_strdup(soap, &state->buffer[0]);
 
-    if (!commandSucceeded)
+    if (!state->succeeded)
     {
         auto ret = soap_sender_fault(soap, printBuffer, printBuffer);
 
