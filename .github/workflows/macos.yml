@@ -12,7 +12,7 @@ env:
   REPO_DIR: ${{github.workspace}}
   BUILD_DIR: ${{github.workspace}}/bin/builddir
   BOOST_VERSION: "1.87.0"
-  BOOST_PLATFORM_VERSION: "14"
+  BOOST_PLATFORM_VERSION: "15"
   HOMEBREW_NO_AUTO_UPDATE: 1
   HOMEBREW_NO_INSTALL_CLEANUP: 1
   SCCACHE_GHA_ENABLED: "true"
@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-15
     permissions:
       contents: read
 
