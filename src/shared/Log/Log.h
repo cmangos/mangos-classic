@@ -59,6 +59,7 @@ enum LogFilters
     LOG_FILTER_EVENT_AI_DEV       = 0x040000,               // 18 Event AI actions
     // reserved for future version
     LOG_FILTER_DB_SCRIPT          = 0x100000,               // 20 Db scripts
+    LOG_FILTER_CONDITIONS         = 0x200000,               // 21 Conditions
 };
 
 #define LOG_FILTER_COUNT            21
