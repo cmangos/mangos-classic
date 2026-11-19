@@ -263,6 +263,7 @@ CanCastResult UnitAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 cast
                     case SPELL_FAILED_BAD_TARGETS:
                     case SPELL_FAILED_DONT_REPORT:
                     case SPELL_FAILED_NOT_BEHIND:
+                    case SPELL_FAILED_ALREADY_HAVE_SUMMON:
                         canCastResult = CAST_FAIL_MISCELLANEOUS;
                         break;
                     default: break;
