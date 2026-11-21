@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2836_01_mangos_cls_rework` bit(1) DEFAULT NULL
+  `required_z2839_01_mangos_creature_immunity_flags` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1295,6 +1295,7 @@ CREATE TABLE `creature_template` (
   `KillCredit2` int(11) unsigned NOT NULL DEFAULT '0',
   `MechanicImmuneMask` int(10) unsigned NOT NULL DEFAULT '0',
   `SchoolImmuneMask` int(10) unsigned NOT NULL DEFAULT '0',
+  `ImmunityFlags` int(10) unsigned NOT NULL DEFAULT '0',
   `ResistanceHoly` smallint(5) NOT NULL DEFAULT '0',
   `ResistanceFire` smallint(5) NOT NULL DEFAULT '0',
   `ResistanceNature` smallint(5) NOT NULL DEFAULT '0',
@@ -1332,7 +1333,7 @@ CREATE TABLE `creature_template` (
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
 INSERT INTO `creature_template` VALUES
-(1,'Waypoint (Only GM can see it)','Visual',63,63,10045,0,0,0,100,0,0,0,35,0,8,8,7,1,0,0,4096,0,130,5242886,0,0,0,0,0.91,1.14286,20,0,0,0,0,0,3,1,1,1,1,1,1,1,1,1,1,1,9999,9999,0,0,7,7,1.76,2.42,0,3,100,2000,2200,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,'','',1,1);
+(1,'Waypoint (Only GM can see it)','Visual',63,63,10045,0,0,0,100,0,0,0,35,0,8,8,7,1,0,0,4096,0,130,5242886,0,0,0,0,0.91,1.14286,20,0,0,0,0,0,3,1,1,1,1,1,1,1,1,1,1,1,9999,9999,0,0,7,7,1.76,2.42,0,3,100,2000,2200,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,'','',1,1);
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
 

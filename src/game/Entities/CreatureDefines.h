@@ -317,4 +317,13 @@ enum class CreatureTypeFlags : uint32
 
 DEFINE_ENUM_FLAG(CreatureTypeFlags);
 
+enum class CreatureImmunityFlags
+{
+    AREA_EFFECT_IMMUNE  = 0x1,
+    CHAIN_EFFECT_IMMUNE = 0x2,
+    AVAILABLE_ON_CLIENT = 0x4
+};
+
+DEFINE_ENUM_FLAG(CreatureImmunityFlags);
+
 #endif

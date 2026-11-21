@@ -152,6 +152,7 @@ struct CreatureInfo
     uint32  KillCredit[MAX_KILL_CREDIT];
     uint32  MechanicImmuneMask;
     uint32  SchoolImmuneMask;
+    uint32  ImmunityFlags;
     int32   ResistanceHoly;
     int32   ResistanceFire;
     int32   ResistanceNature;

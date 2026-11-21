@@ -3,5 +3,5 @@
  #define REVISION_DB_REALMD "required_z2820_01_realmd_joindate_datetime"
  #define REVISION_DB_LOGS "required_z2778_01_logs_anticheat"
  #define REVISION_DB_CHARACTERS "required_z2838_01_characters_playerbot_saved_data_drop"
- #define REVISION_DB_MANGOS "required_z2837_01_mangos_gobject_near_link"
+ #define REVISION_DB_MANGOS "required_z2839_01_mangos_creature_immunity_flags"
 #endif // __REVISION_SQL_H__
