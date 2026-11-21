@@ -810,7 +810,9 @@ bool FollowMovementGenerator::IsUnstuckAllowed(Unit& owner) const
 
 void FollowMovementGenerator::Initialize(Unit& owner)
 {
-    if (!i_target.isValid() || !i_target->IsInWorld())
+    // A teleport can detach the owner before retained follow motion is reset.
+    // GetMap() requires an attached world object; wait until both are in-world.
+    if (!owner.IsInWorld() || !i_target.isValid() || !i_target->IsInWorld())
         return;
 
     if (i_target->GetMap() != owner.GetMap())
