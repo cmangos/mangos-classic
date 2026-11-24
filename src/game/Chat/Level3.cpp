@@ -3559,7 +3559,7 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     PSendSysMessage(LANG_NPCINFO_LEVEL, target->GetLevel());
     PSendSysMessage(LANG_NPCINFO_HEALTH, target->GetCreateHealth(), target->GetMaxHealth(), target->GetHealth());
     PSendSysMessage("DamageMultiplier: %.15f", target->GetCreatureInfo()->DamageMultiplier);
-    PSendSysMessage("DamageVariance: %.15", target->GetCreatureInfo()->DamageVariance);
+    PSendSysMessage("DamageVariance: %.15f", target->GetCreatureInfo()->DamageVariance);
     PSendSysMessage("MinDMG: %.15f", target->GetFloatValue(UNIT_FIELD_MINDAMAGE));
     PSendSysMessage("MaxDMG: %.15f", target->GetFloatValue(UNIT_FIELD_MAXDAMAGE));
 
