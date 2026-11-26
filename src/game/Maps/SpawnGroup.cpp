@@ -568,11 +568,13 @@ void CreatureGroup::TriggerLinkingEvent(uint32 event, Unit* target)
                 m_evading = true;
 
                 // target is the member whose evade raised this event
-                for (auto& data : m_objects)
+                // a member that dies or despawns during an evade leaves m_objects, so iterate over a copy
+                auto objects = m_objects;
+                for (auto& data : objects)
                 {
                     uint32 dbGuid = data.first;
                     if (Creature* creature = m_map.GetCreature(dbGuid))
-                        if (creature != target && !creature->GetCombatManager().IsEvadingHome())
+                        if (creature != target && HasGroupMember(creature) && !creature->GetCombatManager().IsEvadingHome())
                             creature->AI()->EnterEvadeMode();
                 }
 
