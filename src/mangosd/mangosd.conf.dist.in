@@ -343,7 +343,7 @@ MaxWhoListReturns = 49
 #    LogFilter_DbStrictedCheck
 #    LogFilter_SQLText
 #    LogFilter_Pathfinding
-#    LogFilter_MapsLoading
+#    LogFilter_MapLoading
 #    LogFilter_EventAiDev
 #    LogFilter_DbScriptDev
 #    LogFilter_Conditions
@@ -441,7 +441,7 @@ LogFilter_VisibilityChanges = 1
 LogFilter_Weather = 1
 LogFilter_DbStrictedCheck = 1
 LogFilter_Pathfinding = 1
-LogFilter_MapsLoading = 1
+LogFilter_MapLoading = 1
 LogFilter_EventAiDev = 1
 LogFilter_DbScriptDev = 1
 LogFilter_Conditions = 1
