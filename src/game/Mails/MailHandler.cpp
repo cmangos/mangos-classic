@@ -142,12 +142,17 @@ void WorldSession::HandleSendMail(WorldPacket& recv_data)
     Player* receive = sObjectMgr.GetPlayer(rc);
 
     Team rc_team;
-    uint8 mails_count = 0;                                  // do not allow to send to one player more than 100 mails
+    uint32 mails_count = 0;                                 // do not allow to send to one player more than 100 mails
 
     if (receive)
     {
         rc_team = receive->GetTeam();
-        mails_count = receive->GetMailSize();
+        for (PlayerMails::iterator itr = receive->GetMailBegin(); itr != receive->GetMailEnd(); ++itr)
+        {
+            // deleted mails stay in the list until the next save
+            if ((*itr)->state != MAIL_STATE_DELETED)
+                ++mails_count;
+        }
     }
     else
     {
