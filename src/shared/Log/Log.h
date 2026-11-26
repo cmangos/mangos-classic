@@ -62,7 +62,7 @@ enum LogFilters
     LOG_FILTER_CONDITIONS         = 0x200000,               // 21 Conditions
 };
 
-#define LOG_FILTER_COUNT            21
+#define LOG_FILTER_COUNT            22
 
 struct LogFilterData
 {
