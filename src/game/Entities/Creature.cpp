@@ -501,6 +501,9 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
 
 bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, GameEventCreatureData const* eventData /*=nullptr*/, bool preserveHPAndPower /*=true*/)
 {
+    // the immunity set belongs to the current template
+    ClearImmunitiesSet();
+
     if (!InitEntry(Entry, data, eventData))
         return false;
 
@@ -589,8 +592,7 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
     m_ignoreMMAP = (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_MMAP_FORCE_DISABLE) != 0;
     m_countSpawns = (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_COUNT_SPAWNS) != 0;
 
-    if (IsWorldBoss())
-        ApplySpellImmune(nullptr, IMMUNITY_STATE, SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, true);
+    ApplySpellImmune(nullptr, IMMUNITY_STATE, SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, IsWorldBoss());
 
     SetCanModifyStats(true);
     UpdateAllStats();
@@ -607,6 +609,8 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
     else // legacy compatibility
         SetSpellList(Entry * 100 + 0);
     UpdateImmunitiesSet(0);
+    SetAOEImmune(false);
+    SetChainImmune(false);
     if (IsCritter()) // meant to be also settable per creature immunity set
         SetChainImmune(true);
 
@@ -2494,16 +2498,26 @@ void Creature::UpdateImmunitiesSet(uint32 immunitySet)
     if (!set)
         return;
 
-    if (auto oldSet = sObjectMgr.GetCreatureImmunitySet(GetCreatureInfo()->Entry, m_immunitySet))
-    {
-        for (auto& data : *oldSet)
-            ApplySpellImmune(nullptr, data.type, data.value, false);
-    }
+    ClearImmunitiesSet();
 
     for (auto& data : *set)
         ApplySpellImmune(nullptr, data.type, data.value, true);
 
     m_immunitySet = immunitySet;
+}
+
+void Creature::ClearImmunitiesSet()
+{
+    if (m_immunitySet == UINT32_MAX)
+        return;
+
+    if (auto set = sObjectMgr.GetCreatureImmunitySet(GetCreatureInfo()->Entry, m_immunitySet))
+    {
+        for (auto& data : *set)
+            ApplySpellImmune(nullptr, data.type, data.value, false);
+    }
+
+    m_immunitySet = UINT32_MAX;
 }
 
 time_t Creature::GetRespawnTimeEx() const
