@@ -11575,7 +11575,6 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
     {
         charmed->clearUnitState(UNIT_STAT_POSSESSED);
         charmed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
-            player->ForceHealAndPowerUpdateInZone();
     }
     charmed->SetCharmerGuid(ObjectGuid());
     if (advertised)
