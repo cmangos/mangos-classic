@@ -532,6 +532,7 @@ class Spell
         void SendSpellGo();
         void SendSpellCooldown();
         void SendInterrupted(SpellCastResult result) const;
+        void SendSpellFailedOther(SpellCastResult result) const;
         void SendChannelUpdate(uint32 time, uint32 lastTick = 0) const;
         void SendChannelStart(uint32 duration);
 
