@@ -6195,7 +6195,7 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
 
         Player* pl = nullptr;
         if (serverUp)
-            pl = GetPlayer(m->receiverGuid);
+            pl = GetPlayer(m->receiverGuid, false);
         if (pl)
         {
             // this code will run very improbably (the time is between 4 and 5 am, in game is online a player, who has old mail
