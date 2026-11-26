@@ -1696,10 +1696,13 @@ void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)
     float orientation = m_targets.m_destPos.o;
     if (orientation == 0.f) // not filled in spell targeting
     {
-        if (m_caster != unitTarget)
-            orientation = position.GetAngle(m_caster->GetPositionX(), m_caster->GetPositionY());
-        else
+        // another unit faces the caster, or takes its facing when put on its very spot (no angle from there)
+        if (m_caster == unitTarget)
             orientation = unitTarget->GetOrientation();
+        else if (position.x == m_caster->GetPositionX() && position.y == m_caster->GetPositionY())
+            orientation = m_caster->GetOrientation();
+        else
+            orientation = position.GetAngle(m_caster->GetPositionX(), m_caster->GetPositionY());
     }
 
     // Teleport
