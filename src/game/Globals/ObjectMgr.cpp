@@ -7094,10 +7094,9 @@ std::vector<uint32> ObjectMgr::LoadGameobjectInfo()
             {
                 if (goInfo->trap.lockId)
                     CheckGOLockId(goInfo, goInfo->trap.lockId, 0);
-                /* disable check for while, too many nonexistent spells
+
                 if (goInfo->trap.spellId)                   // spell
-                    CheckGOSpellId(goInfo,goInfo->trap.spellId,3);
-                */
+                    CheckGOSpellId(goInfo, goInfo->trap.spellId, 3);
                 break;
             }
             case GAMEOBJECT_TYPE_CHAIR:                     // 7
