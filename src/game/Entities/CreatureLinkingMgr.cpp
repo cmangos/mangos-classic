@@ -578,7 +578,7 @@ void CreatureLinkingHolder::ProcessSlave(CreatureLinkingEvent eventType, Creatur
                 pSlave->ForcedDespawn();
             if (flag & FLAG_RESPAWN_ON_EVADE && !pSlave->IsAlive())
                 pSlave->Respawn();
-            if (flag & FLAG_EVADE_ON_EVADE && pSlave->IsAlive())
+            if (flag & FLAG_EVADE_ON_EVADE && pSlave->IsAlive() && !pSlave->GetCombatManager().IsEvadingHome())
                 pSlave->AI()->EnterEvadeMode();
             break;
         case LINKING_EVENT_DIE:

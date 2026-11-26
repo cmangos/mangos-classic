@@ -567,11 +567,12 @@ void CreatureGroup::TriggerLinkingEvent(uint32 event, Unit* target)
 
                 m_evading = true;
 
+                // target is the member whose evade raised this event
                 for (auto& data : m_objects)
                 {
                     uint32 dbGuid = data.first;
                     if (Creature* creature = m_map.GetCreature(dbGuid))
-                        if (!creature->GetCombatManager().IsEvadingHome())
+                        if (creature != target && !creature->GetCombatManager().IsEvadingHome())
                             creature->AI()->EnterEvadeMode();
                 }
 
