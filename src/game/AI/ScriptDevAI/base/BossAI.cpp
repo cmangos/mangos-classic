@@ -88,6 +88,9 @@ void BossAI::AddExitObject(uint32 value)
 
 void BossAI::EnterEvadeMode()
 {
+    if (IsReturningHome())
+        return;
+
     if (m_instanceDataType == -1)
         return;
     if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))

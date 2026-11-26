@@ -95,6 +95,9 @@ void GuardianAI::OnUnsummon()
 
 void GuardianAI::EnterEvadeMode()
 {
+    if (IsReturningHome())
+        return;
+
     UnitAI::EnterEvadeMode();
 
     // Handle Evade events

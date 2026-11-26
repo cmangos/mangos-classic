@@ -65,6 +65,9 @@ void CreatureAI::EnterCombat(Unit* enemy)
 
 void CreatureAI::EnterEvadeMode()
 {
+    if (IsReturningHome())
+        return;
+
     UnitAI::EnterEvadeMode();
     ResetTimersOnEvade();
     Reset();

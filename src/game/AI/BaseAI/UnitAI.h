@@ -149,8 +149,17 @@ class UnitAI : public CombatActions
         /**
          * Called for reaction at stopping attack at no attackers or targets
          * This is called usually in Unit::SelectHostileTarget, if no more target exists
+         * Does nothing while IsReturningHome: the evade is already done
          */
         virtual void EnterEvadeMode();
+
+        /**
+         * True while the unit is out of combat and its current movement is the return home of its own evade
+         * A return home started by a script does not count (MoveTargetedHome without evade)
+         * Not the same as CombatManager::IsEvadingHome: a master that starts its return sets EVADE_HOME on its pets
+         * and guardians before it tells them to evade
+         */
+        bool IsReturningHome() const;
 
         /**
          * Called at reaching home after MoveTargetedHome

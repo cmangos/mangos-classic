@@ -109,6 +109,9 @@ void FollowerAI::CorpseRemoved(uint32& /*respawnDelay*/)
 
 void FollowerAI::EnterEvadeMode()
 {
+    if (IsReturningHome())
+        return;
+
     ResetTimersOnEvade();
     m_creature->RemoveAllAurasOnEvade();
     m_creature->CombatStopWithPets(true);
@@ -127,7 +130,7 @@ void FollowerAI::EnterEvadeMode()
     else
     {
         if (m_creature->IsAlive())
-            m_creature->GetMotionMaster()->MoveTargetedHome();
+            m_creature->GetMotionMaster()->MoveTargetedHome(true, true);
     }
 
     m_creature->SetLootRecipient(nullptr);

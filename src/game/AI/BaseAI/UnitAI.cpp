@@ -27,6 +27,7 @@
 #include "Spells/SpellMgr.h"
 #include "World/World.h"
 #include "MotionGenerators/MovementGenerator.h"
+#include "MotionGenerators/HomeMovementGenerator.h"
 #include "Globals/ObjectMgr.h"
 #include <limits>
 
@@ -110,8 +111,20 @@ void UnitAI::EnterCombat(Unit*)
     }
 }
 
+bool UnitAI::IsReturningHome() const
+{
+    if (m_unit->IsInCombat() || m_unit->GetMotionMaster()->GetCurrentMovementGeneratorType() != HOME_MOTION_TYPE)
+        return false;
+
+    return static_cast<HomeMovementGenerator<Creature> const*>(m_unit->GetMotionMaster()->GetCurrent())->IsEvadeReturn();
+}
+
 void UnitAI::EnterEvadeMode()
 {
+    // evade requested again while running home: nothing left to do
+    if (IsReturningHome())
+        return;
+
     ClearCombatOnlyRoot();
     m_unit->RemoveAllAurasOnEvade();
     m_unit->CombatStopWithPets(true);
@@ -120,7 +133,7 @@ void UnitAI::EnterEvadeMode()
     if (GetReactState() != REACT_PASSIVE && m_unit->IsAlive())
     {
         if (!m_unit->IsImmobilizedState()) // if still rooted after aura removal - permarooted
-            m_unit->GetMotionMaster()->MoveTargetedHome();
+            m_unit->GetMotionMaster()->MoveTargetedHome(true, true);
         else
             m_unit->TriggerHomeEvents();
     }

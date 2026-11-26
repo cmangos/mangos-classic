@@ -32,7 +32,7 @@ class HomeMovementGenerator<Creature>
 {
     public:
 
-        HomeMovementGenerator(bool _runHome = true) : arrived(false), runHome(_runHome), wasActive(false)
+        HomeMovementGenerator(bool _runHome = true, bool _evade = false) : arrived(false), runHome(_runHome), evade(_evade), wasActive(false)
         {
         }
 
@@ -45,10 +45,14 @@ class HomeMovementGenerator<Creature>
         bool Update(Creature&, const uint32&);
         MovementGeneratorType GetMovementGeneratorType() const override { return HOME_MOTION_TYPE; }
 
+        // return home of an evade, not one started by a script
+        bool IsEvadeReturn() const { return evade; }
+
     private:
         void _setTargetLocation(Creature&);
         bool arrived;
         bool runHome;
+        bool evade;
         bool wasActive;
 };
 #endif
