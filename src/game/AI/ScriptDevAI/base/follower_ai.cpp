@@ -197,12 +197,9 @@ void FollowerAI::UpdateAI(const uint32 diff)
     UpdateFollowerAI(diff);
 }
 
-void FollowerAI::UpdateFollowerAI(const uint32 /*diff*/)
+void FollowerAI::UpdateFollowerAI(const uint32 diff)
 {
-    if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-        return;
-
-    DoMeleeAttackIfReady();
+    ScriptedAI::UpdateAI(diff);
 }
 
 void FollowerAI::MovementInform(uint32 motionType, uint32 pointId)
