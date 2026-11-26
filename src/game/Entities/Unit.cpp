@@ -11668,6 +11668,8 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
 
         const bool panic = charmed->IsInPanic(), fleeing = charmed->IsFleeing(), confused = charmed->IsConfused();
 
+        // A client takes no control of its character while a server spline still moves it
+        charmed->InterruptMoving();
         charmed->GetMotionMaster()->Clear(false, true);
         charmed->GetMotionMaster()->MoveIdle();
 
