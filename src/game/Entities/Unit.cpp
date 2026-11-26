@@ -6306,6 +6306,10 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
             return false;
     }
 
+    // a unit driven by its AI for a player does not attack what that player cannot see
+    if (!CanControllingPlayerSee(victim))
+        return false;
+
     // remove SPELL_AURA_MOD_UNATTACKABLE at attack (in case non-interruptible spells stun aura applied also that not let attack)
     if (HasAuraType(SPELL_AURA_MOD_UNATTACKABLE))
         RemoveSpellsCausingAura(SPELL_AURA_MOD_UNATTACKABLE);
@@ -8314,6 +8318,19 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     float ox, oy, oz;
     viewPoint->GetPosition(ox, oy, oz);
     return IsWithinLOS(ox, oy, oz);
+}
+
+bool Unit::CanControllingPlayerSee(Unit const* target) const
+{
+    // players and the units their client drives are left to that client
+    if (GetTypeId() == TYPEID_PLAYER || IsClientControlled())
+        return true;
+
+    Player const* controller = GetControllingPlayer();
+    if (!controller)
+        return true;
+
+    return target->IsVisibleForOrDetect(controller, controller, false, false, false);
 }
 
 void Unit::UpdateVisibilityAndView()

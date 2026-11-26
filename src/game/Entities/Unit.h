@@ -2067,6 +2067,8 @@ class Unit : public WorldObject
 
         // common function for visibility checks for player/creatures with detection code
         bool IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList = false, bool is3dDistance = true, bool spell = false) const;     
+        // a unit driven by its AI for a player only acts against what that player sees
+        bool CanControllingPlayerSee(Unit const* target) const;
 
         // virtual functions for all world objects types
         bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const override;

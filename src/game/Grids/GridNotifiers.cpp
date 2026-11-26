@@ -77,6 +77,7 @@ void VisibleNotifier::Notify()
         if (target->GetTypeId() == TYPEID_UNIT)
             player.BeforeVisibilityDestroy(static_cast<Creature*>(target));
         player.ScheduleOutOfRange(target);
+        player.AfterVisibilityDestroy(target);
 
         DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "%s is out of range (no in active cells set) now for %s",
                          guid.GetString().c_str(), player.GetGuidStr().c_str());

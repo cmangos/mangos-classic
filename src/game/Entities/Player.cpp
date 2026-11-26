@@ -17056,6 +17056,7 @@ void Player::HandleStealthedUnitsDetection()
                 if (target->GetTypeId() == TYPEID_UNIT)
                     BeforeVisibilityDestroy(static_cast<Creature*>(target));
                 ScheduleOutOfRange(target);
+                AfterVisibilityDestroy(target);
             }
         }
     }
@@ -18137,12 +18138,49 @@ void Player::BeforeVisibilityDestroy(Creature* creature)
     {
         if (!creature->GetMap()->IsDungeon() && !creature->IsCombatOnlyStealth() && creature->getThreatManager().HasThreat(this, true))
             getHostileRefManager().deleteReference(creature);
-        if (Pet* pet = GetPet())
-            if (pet->GetVictim() == creature)
-                pet->AttackStop();
     }
     if (GetPetGuid() == creature->GetObjectGuid() && static_cast<Creature*>(creature)->IsPet())
         static_cast<Pet*>(creature)->Unsummon(PET_SAVE_REAGENTS);
+}
+
+void Player::AfterVisibilityDestroy(WorldObject* target)
+{
+    if (!target->IsUnit())
+        return;
+
+    Unit* unit = static_cast<Unit*>(target);
+
+    // the units an AI drives for this player stop attacking and casting at a unit this player cannot see; called once
+    // the client has lost the unit, as CanControllingPlayerSee reads the client for a unit in stealth
+    auto stopActingOn = [unit](Unit* controlled)
+    {
+        if (controlled->GetVictim() != unit && !controlled->IsNonMeleeSpellCasted(false))
+            return;
+
+        if (controlled->CanControllingPlayerSee(unit))
+            return;
+
+        if (controlled->GetVictim() == unit)
+            controlled->AttackStop(true);
+
+        for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
+            if (Spell* spell = controlled->GetCurrentSpell(CurrentSpellTypes(i)))
+                if (spell->m_targets.getUnitTargetGuid() == unit->GetObjectGuid())
+                    controlled->InterruptSpell(CurrentSpellTypes(i), false);
+    };
+
+    // its pet, guardians and charmed units, and theirs
+    CallForAllControlledUnits([&stopActingOn](Unit* controlled)
+    {
+        stopActingOn(controlled);
+        controlled->CallForAllControlledUnits(stopActingOn, CONTROLLED_PET | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
+    }, CONTROLLED_PET | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
+
+    // the guardians of its totems, the totems themselves being left to their own AI
+    CallForAllControlledUnits([&stopActingOn](Unit* totem)
+    {
+        totem->CallForAllControlledUnits(stopActingOn, CONTROLLED_GUARDIANS);
+    }, CONTROLLED_TOTEMS);
 }
 
 void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* target)
@@ -18163,6 +18201,8 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* targe
                 BeforeVisibilityDestroy(static_cast<Creature*>(target));
 
             LoseAtClient(guid, target, FindClientObject(guid));
+
+            AfterVisibilityDestroy(target);
 
             DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "UpdateVisibilityOf: %s out of range for player %u. Distance = %f", guid.GetString().c_str(), GetGUIDLow(), GetDistance(target));
         }
