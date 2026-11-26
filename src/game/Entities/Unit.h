@@ -2562,6 +2562,7 @@ class Unit : public WorldObject
         void EndSpline();
         bool m_isCreatureLinkingTrigger;
         bool m_isSpawningLinked;
+        bool m_exitingCombat; // inside HandleExitCombat, which tells the controlled units itself after the evade
 
         CombatData* m_combatData;
         CombatManager m_combatManager;
