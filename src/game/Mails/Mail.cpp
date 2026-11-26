@@ -275,6 +275,16 @@ void MailDraft::SendMailTo(MailReceiver const& receiver, MailSender const& sende
 {
     Player* pReceiver = receiver.GetPlayer();               // can be nullptr
 
+    // a receiver given by guid only is looked up, also out of the world (loading screen): their mail list stays
+    // loaded until logout. Mail template items need the world, so out of it they are made at mail load.
+    // Only the world thread may send a mail by guid only.
+    if (!pReceiver)
+    {
+        pReceiver = sObjectMgr.GetPlayer(receiver.GetPlayerGuid(), false);
+        if (pReceiver && !pReceiver->IsInWorld() && m_mailTemplateItemsNeed)
+            pReceiver = nullptr;
+    }
+
     uint32 pReceiverAccount = 0;
     if (!pReceiver)
         pReceiverAccount = sObjectMgr.GetPlayerAccountIdByGUID(receiver.GetPlayerGuid());

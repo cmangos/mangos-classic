@@ -139,7 +139,7 @@ void WorldSession::HandleSendMail(WorldPacket& recv_data)
         return;
     }
 
-    Player* receive = sObjectMgr.GetPlayer(rc);
+    Player* receive = sObjectMgr.GetPlayer(rc, false);
 
     Team rc_team;
     uint32 mails_count = 0;                                 // do not allow to send to one player more than 100 mails
