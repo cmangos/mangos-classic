@@ -4915,7 +4915,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     
                     // Do not allow spells to complete which are targeting units that are invisible to the caster since the time of cast start:
                     // any unit for a cast sent by the client, a player-controlled unit for any cast
-                    if (!m_trueCaster->IsGameObject() && (m_clientCast || target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED)) && !IsPositiveEffectMask(m_spellInfo, affectedMask, m_trueCaster, target) && !target->IsVisibleForOrDetect(m_caster, m_trueCaster, false))
+                    if (!m_trueCaster->IsGameObject() && (m_clientCast || target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED)) && !IsPositiveEffectMask(m_spellInfo, affectedMask, m_trueCaster, target) && !target->IsVisibleForOrDetect(m_caster, m_trueCaster, false, false, false))
                         return SPELL_FAILED_BAD_TARGETS;
                 }
 
