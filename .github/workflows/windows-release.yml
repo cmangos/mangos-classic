@@ -1,9 +1,8 @@
 name: Windows Release Build
 
 on:
-  schedule:
-    # every day at 6am
-    - cron:  '0 6 * * *'
+  # started from outside the repository: scheduled runs start hours late
+  workflow_dispatch:
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
