@@ -263,6 +263,16 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         // notify group after successful teleport
         if (player->GetGroup())
             player->SetGroupUpdateFlag(GROUP_UPDATE_FULL);
+
+        // the group rejoined during the teleport sends its list to all members now that the player is in the world,
+        // unless the player has just joined a battleground raid, which sends its own
+        if (player->IsGroupListPending())
+        {
+            player->SetGroupListPending(false);
+            if (Group* group = player->GetGroup())
+                if (!group->IsBattleGroup())
+                    group->SendUpdate();
+        }
     };
     if (found)
         lambda(map);

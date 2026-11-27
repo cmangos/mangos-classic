@@ -529,6 +529,7 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
     // group is initialized in the reference constructor
     SetGroupInvite(nullptr);
     m_groupUpdateMask = 0;
+    m_groupListPending = false;
 
     ClearHonorInfo();
 
@@ -19321,12 +19322,31 @@ void Player::RemoveFromBattleGroundRaid()
 {
     // remove existing reference
     m_group.unlink();
-    if (Group* group = GetOriginalGroup())
+
+    if (!GetOriginalGroup())
+        return;
+
+    // the other members walk the original group from their own map threads: the player rejoins it in the world thread
+    sWorld.GetMessager().AddMessage([playerGuid = GetObjectGuid()](World* /*world*/)
     {
-        m_group.link(group, this);
-        m_group.setSubGroup(GetOriginalSubGroup());
-    }
-    SetOriginalGroup(nullptr);
+        Player* player = sObjectMgr.GetPlayer(playerGuid, false); // can be between two maps
+        if (!player || player->GetGroup())
+            return;
+
+        Group* group = player->GetOriginalGroup();
+        if (!group)
+            return;
+
+        player->m_group.link(group, player);
+        player->m_group.setSubGroup(player->GetOriginalSubGroup());
+        player->SetOriginalGroup(nullptr);
+        player->UpdateGroupLeaderFlag();
+        // a player between two maps, the usual case, gets the list with the other members on arrival
+        if (player->IsInWorld())
+            group->SendUpdate();
+        else
+            player->SetGroupListPending(true);
+    });
 }
 
 void Player::SetOriginalGroup(Group* group, int8 subgroup)
