@@ -153,6 +153,9 @@ class UnitAI : public CombatActions
          */
         virtual void EnterEvadeMode();
 
+        // Active escorts must not outrun their players during pathfinding recovery.
+        virtual bool CanUseFastEvade() const { return true; }
+
         /**
          * True while the unit is out of combat and its current movement is the return home of its own evade
          * A return home started by a script does not count (MoveTargetedHome without evade)

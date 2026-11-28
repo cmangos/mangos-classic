@@ -71,7 +71,8 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature& owner)
     init.MovebyPath(path.getPath());
     init.SetWalk(!runHome);
     init.SetFacing(pos.GetPositionO());
-    if (path.getPathType() & (PATHFIND_NOPATH | PATHFIND_SHORTCUT))
+    if ((path.getPathType() & (PATHFIND_NOPATH | PATHFIND_SHORTCUT)) &&
+        (!owner.AI() || owner.AI()->CanUseFastEvade()))
         init.SetVelocity(400.f);
     init.Launch();
 

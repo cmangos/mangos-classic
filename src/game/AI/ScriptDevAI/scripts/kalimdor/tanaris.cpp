@@ -32,6 +32,7 @@ EndContentData */
 
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "AI/ScriptDevAI/base/follower_ai.h"
+#include <algorithm>
 
 /*######
 ## mob_aquementas
@@ -157,6 +158,7 @@ struct npc_oox17tnAI : public npc_escortAI
     npc_oox17tnAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
     GuidList m_lSummonsList;
+    GuidList m_activeAmbushers;
 
     void WaypointReached(uint32 i) override
     {
@@ -196,7 +198,11 @@ struct npc_oox17tnAI : public npc_escortAI
     void Reset() override
     {
         if (!HasEscortState(STATE_ESCORT_ESCORTING))
+        {
+            m_lSummonsList.clear();
+            m_activeAmbushers.clear();
             m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+        }
     }
 
     void Aggro(Unit* /*who*/) override
@@ -211,12 +217,30 @@ struct npc_oox17tnAI : public npc_escortAI
 
     void JustSummoned(Creature* summoned) override
     {
-        summoned->AI()->AttackStart(m_creature);
         m_lSummonsList.push_back(summoned->GetObjectGuid());
+        m_activeAmbushers.push_back(summoned->GetObjectGuid());
+        SetEscortPaused(true);
+        summoned->AI()->AttackStart(m_creature);
     }
+
+    void AmbusherRemoved(Creature* summoned)
+    {
+        // Death is followed by despawn; only the first notification releases it.
+        auto itr = std::find(m_activeAmbushers.begin(), m_activeAmbushers.end(), summoned->GetObjectGuid());
+        if (itr == m_activeAmbushers.end())
+            return;
+
+        m_activeAmbushers.erase(itr);
+        if (m_activeAmbushers.empty() && m_creature->IsAlive())
+            SetEscortPaused(false);
+    }
+
+    void SummonedCreatureJustDied(Creature* summoned) override { AmbusherRemoved(summoned); }
+    void SummonedCreatureDespawn(Creature* summoned) override { AmbusherRemoved(summoned); }
 
     void JustDied(Unit* pKiller) override
     {
+        m_activeAmbushers.clear();
         for (GuidList::const_iterator itr = m_lSummonsList.begin(); itr != m_lSummonsList.end(); ++itr)
         {
             if (Creature* pSummoned = m_creature->GetMap()->GetCreature(*itr))
