@@ -307,8 +307,8 @@ void instance_ruins_of_ahnqiraj::Update(uint32 diff)
         {
             if (m_armyDelayTimer <= diff)
             {
+                // DoSendNextArmyWave sets the next delay itself (0 after the Rajaxx wave)
                 DoSendNextArmyWave();
-                m_armyDelayTimer = 3 * MINUTE * IN_MILLISECONDS;
             }
             else
                 m_armyDelayTimer -= diff;
@@ -342,7 +342,8 @@ void instance_ruins_of_ahnqiraj::DoSendNextArmyWave()
     }
     else
     {
-        if (m_currentArmyWave == MAX_ARMY_WAVES)
+        // aArmySortingParameters has MAX_ARMY_WAVES entries and wave MAX_ARMY_WAVES is handled above
+        if (m_currentArmyWave >= MAX_ARMY_WAVES)
         {
             script_error_log("Instance Ruins of Ahn'Qiraj: ERROR Something unexpected happened. Please report to SD2 team.");
             return;
