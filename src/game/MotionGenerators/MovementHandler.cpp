@@ -343,11 +343,13 @@ void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)
 #ifdef ENABLE_PLAYERBOTS
     // new zone
     if (old_zone != newzone)
+    {
         plMover->UpdateZone(newzone, newarea);
 
-    // honorless target
-    if (plMover->pvpInfo.inPvPEnforcedArea)
-        plMover->CastSpell(plMover, 2479, TRIGGERED_OLD_TRIGGERED);
+        // honorless target
+        if (plMover->pvpInfo.inPvPEnforcedArea)
+            plMover->CastSpell(plMover, 2479, TRIGGERED_OLD_TRIGGERED);
+    }
 
     // reset moving for bot if any
     if (plMover->GetPlayerbotAI() && !plMover->GetMotionMaster()->empty())
