@@ -92,7 +92,8 @@ struct Blizzard : public AuraScript
                 spellId = 12485;
             if (caster->HasOverrideScript(989)) // Improved Blizzard (Rank 3)
                 spellId = 12486;
-            caster->CastSpell(aura->GetTarget(), spellId, TRIGGERED_OLD_TRIGGERED);
+            if (spellId)
+                caster->CastSpell(aura->GetTarget(), spellId, TRIGGERED_OLD_TRIGGERED);
         }
     }
 };

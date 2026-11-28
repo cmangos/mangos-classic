@@ -103,7 +103,7 @@ struct spell_judgement : public SpellScript
             // must be calculated base at raw base points in spell proto, GetModifier()->m_value for S.Righteousness modified by SPELLMOD_DAMAGE
             spellId2 = (*itr)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2);
 
-            if (spellId2 <= 1)
+            if (spellId2 <= 1 || !sSpellTemplate.LookupEntry<SpellEntry>(spellId2))
                 continue;
 
             // found, remove seal
@@ -111,6 +111,9 @@ struct spell_judgement : public SpellScript
 
             break;
         }
+
+        if (spellId2 <= 1 || !sSpellTemplate.LookupEntry<SpellEntry>(spellId2))
+            return;
 
         caster->CastSpell(unitTarget, spellId2, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_HIT_CALCULATION);
     }
